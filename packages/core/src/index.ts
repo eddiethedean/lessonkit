@@ -74,17 +74,23 @@ export function createTrackingClient(opts?: {
     if (!buffer.length) return;
 
     const events = buffer.splice(0, buffer.length);
+    let sent = 0;
     flushInFlight = Promise.resolve()
       .then(async () => {
         if (batchSink) {
           await batchSink(events);
           return;
         }
-        for (const e of events) await sink?.(e);
+        // If per-event sink throws partway through, only re-queue the unsent tail.
+        for (const e of events) {
+          await sink?.(e);
+          sent += 1;
+        }
       })
       .catch(() => {
         // Re-queue on any error so events aren't silently dropped.
-        buffer.unshift(...events);
+        // If failure occurred after some per-event sends, only re-queue what wasn't sent yet.
+        buffer.unshift(...events.slice(sent));
       })
       .finally(() => {
         flushInFlight = null;

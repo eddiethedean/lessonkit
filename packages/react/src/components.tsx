@@ -22,7 +22,9 @@ export function Course(props: {
 export function Lesson(props: { title: string; lessonId?: LessonId; children: React.ReactNode }) {
   const { setActiveLesson } = useLessonkit();
   const { completeLesson } = useCompletion();
-  const generatedId = useMemo(() => `lesson-${cryptoRandomId()}`, []);
+  // `useId()` is SSR/hydration-stable; avoid randomness for implicit IDs.
+  const reactId = useId();
+  const generatedId = useMemo(() => `lesson-${sanitizeId(reactId)}`, [reactId]);
   const id = props.lessonId ?? generatedId;
 
   useEffect(() => {
@@ -111,10 +113,9 @@ export function ProgressTracker() {
   );
 }
 
-function cryptoRandomId(): string {
-  // Avoid importing heavy deps; fallback to Math.random for non-secure uniqueness.
-  const g = globalThis as unknown as { crypto?: Crypto };
-  if (g.crypto?.randomUUID) return g.crypto.randomUUID();
-  return Math.random().toString(16).slice(2);
+function sanitizeId(id: string): string {
+  // React's `useId()` can include characters like ':'; keep IDs URL/attr-friendly.
+  const s = id.replace(/[^a-zA-Z0-9_-]/g, "");
+  return s.length ? s : "id";
 }
 

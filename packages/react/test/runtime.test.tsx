@@ -212,8 +212,7 @@ describe("@lessonkit/react runtime", () => {
     await waitFor(() => expect(events.some((e) => e.name === "quiz_answered")).toBe(true));
   });
 
-  it("uses crypto.randomUUID when available for generated lesson ids", async () => {
-    vi.stubGlobal("crypto", { randomUUID: () => "uuid-lesson" });
+  it("auto-generates a stable lesson id when lessonId is omitted", async () => {
     const events: TelemetryEvent[] = [];
     render(
       <Course title="Course" config={{ tracking: { sink: (e: TelemetryEvent) => void events.push(e) } }}>
@@ -222,22 +221,7 @@ describe("@lessonkit/react runtime", () => {
     );
     await waitFor(() => expect(events.some((e) => e.name === "lesson_started")).toBe(true));
     const started = events.find((e) => e.name === "lesson_started");
-    expect(started?.lessonId).toBe("lesson-uuid-lesson");
-    vi.unstubAllGlobals();
-  });
-
-  it("falls back when crypto.randomUUID is unavailable for generated lesson ids", async () => {
-    vi.stubGlobal("crypto", {});
-    const events: TelemetryEvent[] = [];
-    render(
-      <Course title="Course" config={{ tracking: { sink: (e: TelemetryEvent) => void events.push(e) } }}>
-        <Lesson title="Lesson">{null}</Lesson>
-      </Course>,
-    );
-    await waitFor(() => expect(events.some((e) => e.name === "lesson_started")).toBe(true));
-    const started = events.find((e) => e.name === "lesson_started");
-    expect(started?.lessonId).toMatch(/^lesson-/);
-    vi.unstubAllGlobals();
+    expect(started?.lessonId).toMatch(/^lesson-[a-zA-Z0-9_-]+$/);
   });
 
   it("completeCourse marks progress and tracks course_completed", async () => {

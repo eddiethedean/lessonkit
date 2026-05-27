@@ -82,6 +82,8 @@ export function LessonkitProvider(props: { config?: LessonkitConfig; children: R
   const [completedLessonIds, setCompletedLessonIds] = useState<Set<LessonId>>(() => new Set());
   const [activeLessonId, setActiveLessonId] = useState<LessonId | undefined>(undefined);
   const [courseCompleted, setCourseCompleted] = useState(false);
+  const activeLessonIdRef = useRef<LessonId | undefined>(undefined);
+  activeLessonIdRef.current = activeLessonId;
   const courseIdRef = useRef<CourseId | undefined>(config.courseId);
   courseIdRef.current = config.courseId;
   const lessonStartTimesRef = useRef<Map<LessonId, number>>(new Map());
@@ -92,14 +94,14 @@ export function LessonkitProvider(props: { config?: LessonkitConfig; children: R
         name,
         timestamp: nowIso(),
         courseId: courseIdRef.current,
-        lessonId: opts?.lessonId ?? activeLessonId,
+        lessonId: opts?.lessonId ?? activeLessonIdRef.current,
         sessionId: sessionIdRef.current,
         attemptId: attemptIdRef.current,
         user: userRef.current,
         data,
       });
     },
-    [tracking, activeLessonId],
+    [tracking],
   );
 
   const didStartCourseRef = useRef(false);
@@ -113,6 +115,7 @@ export function LessonkitProvider(props: { config?: LessonkitConfig; children: R
 
   const setActiveLesson = useCallback(
     (lessonId: LessonId) => {
+      activeLessonIdRef.current = lessonId;
       setActiveLessonId(lessonId);
       lessonStartTimesRef.current.set(lessonId, Date.now());
       track("lesson_started", { lessonId }, { lessonId });
