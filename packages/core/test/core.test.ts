@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
+import type { TelemetryEvent, TelemetryBatchSink } from "../src";
 import { createSessionId, createTrackingClient, nowIso } from "../src";
 
 describe("@lessonkit/core", () => {
@@ -60,9 +61,12 @@ describe("@lessonkit/core", () => {
 
   it("re-queues events if batchSink throws and succeeds on later flush", async () => {
     const batchSink = vi
-      .fn<[], Promise<void>>()
+      .fn(async (_events: TelemetryEvent[]) => {})
       .mockRejectedValueOnce(new Error("nope"))
-      .mockResolvedValueOnce(undefined);
+      .mockResolvedValueOnce(undefined) as unknown as TelemetryBatchSink & {
+      mockRejectedValueOnce: (err: unknown) => unknown;
+      mockResolvedValueOnce: (val: unknown) => unknown;
+    };
 
     const client = createTrackingClient({
       batchSink,

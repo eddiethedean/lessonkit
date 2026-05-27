@@ -64,7 +64,7 @@ describe("@lessonkit/react runtime", () => {
     }
 
     render(
-      <LessonkitProvider config={{ tracking: { sink: (e) => events.push(e) } }}>
+      <LessonkitProvider config={{ tracking: { sink: (e: TelemetryEvent) => void events.push(e) } }}>
         <Driver />
       </LessonkitProvider>,
     );
@@ -150,7 +150,7 @@ describe("@lessonkit/react runtime", () => {
     }
 
     const { getByText } = render(
-      <LessonkitProvider config={{ tracking: { sink: (e) => events.push(e) } }}>
+      <LessonkitProvider config={{ tracking: { sink: (e: TelemetryEvent) => void events.push(e) } }}>
         <Driver />
       </LessonkitProvider>,
     );
@@ -158,7 +158,7 @@ describe("@lessonkit/react runtime", () => {
     await waitFor(() => expect(getByText(/Lessons completed:/).textContent).toContain("1"));
 
     // Defensive copy: mutating returned set shouldn't affect provider state.
-    runtime.progress.completedLessonIds.add("lesson-2");
+    (runtime.progress.completedLessonIds as unknown as Set<string>).add("lesson-2");
     expect(getByText(/Lessons completed:/).textContent).toContain("1");
   });
 
@@ -173,10 +173,10 @@ describe("@lessonkit/react runtime", () => {
       );
     }
 
-    const { rerender } = render(<Wrapper sink={(e) => events.push(e)} />);
+    const { rerender } = render(<Wrapper sink={(e: TelemetryEvent) => void events.push(e)} />);
 
     // Changing sink causes a new tracking client to be created.
-    rerender(<Wrapper sink={(e) => events.push(e)} />);
+    rerender(<Wrapper sink={(e: TelemetryEvent) => void events.push(e)} />);
 
     await waitFor(() => expect(events.some((e) => e.name === "course_started")).toBe(true));
     expect(events.filter((e) => e.name === "course_started")).toHaveLength(1);
@@ -185,7 +185,7 @@ describe("@lessonkit/react runtime", () => {
   it("Lesson auto-generates an id when lessonId is omitted", async () => {
     const events: TelemetryEvent[] = [];
     render(
-      <Course title="Course" config={{ tracking: { sink: (e) => events.push(e) } }}>
+      <Course title="Course" config={{ tracking: { sink: (e: TelemetryEvent) => void events.push(e) } }}>
         <Lesson title="Lesson">{null}</Lesson>
       </Course>,
     );
@@ -198,7 +198,7 @@ describe("@lessonkit/react runtime", () => {
   it("covers Scenario and KnowledgeCheck components", async () => {
     const events: TelemetryEvent[] = [];
     const { getAllByLabelText } = render(
-      <Course title="Course" config={{ tracking: { sink: (e) => events.push(e) } }}>
+      <Course title="Course" config={{ tracking: { sink: (e: TelemetryEvent) => void events.push(e) } }}>
         <Lesson title="Lesson" lessonId="lesson-1">
           <Scenario>
             <p>scenario</p>
@@ -216,7 +216,7 @@ describe("@lessonkit/react runtime", () => {
     vi.stubGlobal("crypto", { randomUUID: () => "uuid-lesson" });
     const events: TelemetryEvent[] = [];
     render(
-      <Course title="Course" config={{ tracking: { sink: (e) => events.push(e) } }}>
+      <Course title="Course" config={{ tracking: { sink: (e: TelemetryEvent) => void events.push(e) } }}>
         <Lesson title="Lesson">{null}</Lesson>
       </Course>,
     );
@@ -230,7 +230,7 @@ describe("@lessonkit/react runtime", () => {
     vi.stubGlobal("crypto", {});
     const events: TelemetryEvent[] = [];
     render(
-      <Course title="Course" config={{ tracking: { sink: (e) => events.push(e) } }}>
+      <Course title="Course" config={{ tracking: { sink: (e: TelemetryEvent) => void events.push(e) } }}>
         <Lesson title="Lesson">{null}</Lesson>
       </Course>,
     );
@@ -252,7 +252,7 @@ describe("@lessonkit/react runtime", () => {
     }
 
     const { findByText } = render(
-      <LessonkitProvider config={{ tracking: { sink: (e) => events.push(e) } }}>
+      <LessonkitProvider config={{ tracking: { sink: (e: TelemetryEvent) => void events.push(e) } }}>
         <Driver />
       </LessonkitProvider>,
     );
@@ -269,7 +269,7 @@ describe("@lessonkit/react runtime", () => {
       <Course
         title="Course"
         config={{
-          tracking: { sink: (e) => events.push(e) },
+          tracking: { sink: (e: TelemetryEvent) => void events.push(e) },
           xapi: { enabled: false, client: { send: () => {}, flush: async () => {}, queueSize: () => 0, startedLesson: () => {}, completeLesson: () => {}, completeCourse: () => {} } },
         }}
       >
@@ -285,7 +285,7 @@ describe("@lessonkit/react runtime", () => {
 
   it("xAPI client injection is used (startedLesson transport invoked)", async () => {
     const statements: XAPIStatement[] = [];
-    const transport: XAPITransport = async (s) => {
+    const transport: XAPITransport = async (s: XAPIStatement) => {
       statements.push(s);
     };
 
@@ -296,10 +296,10 @@ describe("@lessonkit/react runtime", () => {
         config={{
           xapi: {
             client: {
-              send: (s) => void transport(s),
+              send: (s: XAPIStatement) => void transport(s),
               flush: async () => {},
               queueSize: () => 0,
-              startedLesson: ({ lessonId }) =>
+              startedLesson: ({ lessonId }: { lessonId: string }) =>
                 void transport({ id: "1", timestamp: "t", verb: "v", object: { id: `lesson:${lessonId}` } }),
               completeLesson: () => {},
               completeCourse: () => {},

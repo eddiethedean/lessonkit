@@ -79,9 +79,12 @@ describe("@lessonkit/xapi", () => {
     queue.enqueue({ id: "2", timestamp: "t", verb: "v", object: { id: "o" } });
 
     const transport = vi
-      .fn<[], Promise<void>>()
+      .fn(async (_statement: unknown) => {})
       .mockRejectedValueOnce(new Error("fail"))
-      .mockResolvedValueOnce(undefined);
+      .mockResolvedValueOnce(undefined) as unknown as ((statement: unknown) => Promise<void>) & {
+      mockRejectedValueOnce: (err: unknown) => unknown;
+      mockResolvedValueOnce: (val: unknown) => unknown;
+    };
 
     await queue.flush(transport as unknown as any);
     expect(queue.size()).toBe(2);
