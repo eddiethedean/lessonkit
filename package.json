@@ -1,0 +1,25 @@
+{
+  "name": "lessonkit",
+  "private": true,
+  "packageManager": "npm@10.9.0",
+  "workspaces": [
+    "packages/*",
+    "examples/*",
+    "templates/*"
+  ],
+  "scripts": {
+    "build": "npm run -ws build",
+    "dev": "npm run -ws dev",
+    "test": "npm run -ws test",
+    "lint": "npm run -ws lint",
+    "typecheck": "npm run -ws typecheck",
+    "changeset": "changeset",
+    "version-packages": "changeset version",
+    "release": "changeset publish"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.27.7",
+    "prettier": "^3.6.2",
+    "typescript": "^5.8.3"
+  }
+}
