@@ -8,7 +8,7 @@ Theme primitives for LessonKit.
 npm install @lessonkit/themes
 ```
 
-## Included (MVP)
+## Included (0.1.x)
 
 - `defaultTheme`
 - `LessonkitTheme` type

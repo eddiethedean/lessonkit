@@ -8,7 +8,7 @@ Small accessibility utilities used by LessonKit packages and apps.
 npm install @lessonkit/accessibility
 ```
 
-## Included (MVP)
+## Included (0.1.x)
 
 - `prefersReducedMotion()`
 - `focusFirst(container)`

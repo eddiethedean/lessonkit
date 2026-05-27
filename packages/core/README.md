@@ -8,7 +8,7 @@ Core types and runtime primitives shared across LessonKit packages.
 npm install @lessonkit/core
 ```
 
-## What’s inside (MVP)
+## What’s inside (0.1.x)
 
 - Telemetry event types (`TelemetryEvent`)
 - A minimal tracking client (`createTrackingClient`)

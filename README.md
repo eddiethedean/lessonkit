@@ -1,7 +1,14 @@
 # LessonKit
 
-LessonKit is a React-first learning experience development framework for building accessible,
-trackable learning experiences with modern frontend tooling.
+LessonKit is a React-first framework for building accessible, trackable learning experiences with
+modern frontend tooling.
+
+## What you get (MVP)
+
+- **Composable React primitives** for courses, lessons, scenarios, and checks
+- **Accessibility-first defaults** (semantic structure, keyboard-friendly patterns)
+- **Telemetry and xAPI foundations** for analytics and LMS interoperability
+- **Developer-friendly workflow** using TypeScript, Vite, and workspace tooling
 
 ## Repository layout
 
@@ -20,7 +27,7 @@ lessonkit/
 └── templates/
 ```
 
-## Quick start (workspace)
+## Quick start
 
 ```bash
 npm install
@@ -33,7 +40,14 @@ npm run build
 npm -w lessonkit-example-react-vite run dev
 ```
 
-## Spec example (React)
+## Key docs
+
+- [`PLAN.md`](https://github.com/eddiethedean/lessonkit/blob/main/PLAN.md): product vision and MVP scope
+- [`SPEC.md`](https://github.com/eddiethedean/lessonkit/blob/main/SPEC.md): technical spec and requirements
+- [`ROADMAP.md`](https://github.com/eddiethedean/lessonkit/blob/main/ROADMAP.md): phased delivery plan
+- [`docs/LXPACK_UPGRADES_FOR_LESSONKIT.md`](https://github.com/eddiethedean/lessonkit/blob/main/docs/LXPACK_UPGRADES_FOR_LESSONKIT.md): proposed LXPack improvements for interoperability
+
+## Example (React)
 
 ```tsx
 import { Course, Lesson, Quiz, Scenario } from "@lessonkit/react";
@@ -59,10 +73,15 @@ export default function SecurityTraining() {
 
 ## Packages
 
-- `@lessonkit/core` (0.1.0): shared types + telemetry primitives
-- `@lessonkit/react` (0.1.0): React components + hooks (MVP)
-- `@lessonkit/xapi` (0.1.0): xAPI statement generation (MVP)
-- `@lessonkit/accessibility` (0.1.0): accessibility helpers (stub)
-- `@lessonkit/themes` (0.1.0): theming primitives (stub)
-- `@lessonkit/cli` (0.1.0): `lessonkit` commands (stub)
+- `@lessonkit/react`: authoring primitives (components + hooks)
+- `@lessonkit/core`: shared types and telemetry primitives
+- `@lessonkit/xapi`: xAPI statement generation and transports
+- `@lessonkit/accessibility`: accessibility utilities (growing)
+- `@lessonkit/themes`: theming primitives (growing)
+- `@lessonkit/cli`: `lessonkit` commands (stub)
+
+## Versioning
+
+LessonKit follows semver. The **0.x** series is expected to evolve quickly; breaking changes may
+still happen between minor releases.
 

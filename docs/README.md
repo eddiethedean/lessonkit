@@ -1,14 +1,20 @@
-# Docs
+# Documentation
 
-This repo plans to include:
+This folder contains documentation for LessonKit.
 
-- Storybook for component documentation
-- Docusaurus for framework documentation
+## Planned documentation sites
 
-Placeholder configs are in:
+- **Storybook**: component documentation for `@lessonkit/react`
+- **Docusaurus**: framework documentation (guides, concepts, API reference)
 
-- `docs/storybook/`
-- `docs/site/`
+Placeholders live here until the full docs stack is scaffolded:
+
+- [`docs/storybook/`](https://github.com/eddiethedean/lessonkit/tree/main/docs/storybook)
+- [`docs/site/`](https://github.com/eddiethedean/lessonkit/tree/main/docs/site)
+
+## Integration
+
+- [`LXPACK_UPGRADES_FOR_LESSONKIT.md`](https://github.com/eddiethedean/lessonkit/blob/main/docs/LXPACK_UPGRADES_FOR_LESSONKIT.md) — proposed LXPack changes to support LessonKit packaging
 
 ## Current status
 

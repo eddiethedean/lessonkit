@@ -8,14 +8,14 @@ xAPI statement generation primitives.
 npm install @lessonkit/xapi
 ```
 
-## Example
+## Quick example
 
 ```ts
 import { createXAPIClient } from "@lessonkit/xapi";
 
 const xapi = createXAPIClient({
   transport: (statement) => {
-    // send to your LRS (or queue offline)
+    // Send to your LRS (or queue offline).
     console.log(statement);
   },
 });

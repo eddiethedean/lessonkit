@@ -1,6 +1,6 @@
 # `@lessonkit/react`
 
-React components and hooks for building learning experiences.
+React components and hooks for building learning experiences in LessonKit.
 
 ## Install
 
@@ -8,7 +8,7 @@ React components and hooks for building learning experiences.
 npm install @lessonkit/react react react-dom
 ```
 
-## Example
+## Quick example
 
 ```tsx
 import { Course, Lesson, Quiz, Scenario, ProgressTracker } from "@lessonkit/react";
@@ -34,9 +34,9 @@ export default function App() {
 }
 ```
 
-## API (MVP)
+## API (0.1.x)
 
-Components:
+### Components
 
 - `Course`
 - `Lesson`
@@ -46,10 +46,15 @@ Components:
 - `KnowledgeCheck`
 - `ProgressTracker`
 
-Hooks:
+### Hooks
 
 - `useProgress`
 - `useTracking`
 - `useQuizState`
 - `useCompletion`
+
+## Notes
+
+- `@lessonkit/react` ships **framework primitives**, not content. You bring your own layout/content
+  and compose interactions as React components.
 

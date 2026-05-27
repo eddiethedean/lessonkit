@@ -122,3 +122,4 @@ LessonKit aims to modernize learning experience development using:
 - content-as-code workflows
 - modern frontend engineering
 - analytics-first learning systems
+
