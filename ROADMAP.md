@@ -141,7 +141,7 @@ Key references:
   reinventing packaging from scratch.
   - Reference: [`eddiethedean/lxpack`](https://github.com/eddiethedean/lxpack) (exports SCORM 1.2,
     SCORM 2004, xAPI, cmi5, and standalone via `@lxpack/scorm`, `@lxpack/xapi`, `@lxpack/cmi5`)
-  - Proposed LXPack improvements: [`docs/LXPACK_UPGRADES_FOR_LESSONKIT.md`](https://github.com/eddiethedean/lessonkit/blob/main/docs/LXPACK_UPGRADES_FOR_LESSONKIT.md)
+  - LXPack interoperability notes: [`docs/LXPACK_UPGRADES_FOR_LESSONKIT.md`](https://github.com/eddiethedean/lessonkit/blob/main/docs/LXPACK_UPGRADES_FOR_LESSONKIT.md) (implemented in LXPack 0.4.0; focus is now adapter + examples)
   - Adopt *one* of the strategies below (start with Strategy A).
 
 #### Strategy A — LessonKit → LXPack export adapter (preferred)

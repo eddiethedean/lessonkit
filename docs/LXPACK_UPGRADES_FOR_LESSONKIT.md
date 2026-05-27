@@ -1,8 +1,13 @@
 # LXPack upgrades for LessonKit interoperability
 
-This document proposes improvements to [LXPack](https://github.com/eddiethedean/lxpack) so it works
-better as the **packaging and LMS export layer** for
-[LessonKit](https://github.com/eddiethedean/lessonkit).
+This document captures the improvements we wanted in [LXPack](https://github.com/eddiethedean/lxpack)
+so it works better as the **packaging and LMS export layer** for
+[LessonKit](https://github.com/eddiethedean/lessonkit), plus what LessonKit should do next.
+
+## Status
+
+Per project update: **LXPack v0.4.0 implements the suggested features in this document**. That
+shifts this doc from “proposal” to “integration checklist”.
 
 LessonKit is React-first authoring (`@lessonkit/react`). LXPack is a manifest-driven compiler and
 runtime (`course.yaml`, markdown/HTML/component lessons, SCORM/xAPI/cmi5 export). The two projects
@@ -28,6 +33,24 @@ LessonKit’s preferred path is **Strategy A** from the roadmap:
 Today that adapter must **translate** LessonKit’s component tree into LXPack’s `course.yaml` +
 markdown/HTML/component lessons. That translation is lossy and expensive without LXPack support
 for React-authored content.
+
+---
+
+## What changed in LXPack v0.4.0 (impact on LessonKit)
+
+Because LXPack now implements the features we previously asked for, LessonKit should treat LXPack
+as the **default packaging toolchain** and focus on building a thin, well-tested adapter.
+
+Recommended LessonKit next steps:
+
+1. Create `@lessonkit/lxpack` (new package) to export LessonKit courses to an LXPack project.
+2. Decide a stable mapping for identities:
+   - `courseId` ↔ LXPack course/activity id
+   - `lessonId` ↔ LXPack lesson id / SCO id
+   - quiz ids ↔ LXPack assessment ids
+3. Add at least one end-to-end example:
+   - LessonKit authored course → LXPack build → SCORM 1.2 ZIP importable into an LMS
+4. Add a CI smoke test that runs LXPack packaging for that example.
 
 ---
 
@@ -102,13 +125,15 @@ runtime uses markdown sanitization, HTML interactions, and `runtime.theme` CSS c
 
 ---
 
-## Recommended LXPack upgrades
+## Recommended (now implemented) LXPack capabilities
 
-Prioritized from **highest leverage for LessonKit** to **nice-to-have**.
+These were originally prioritized upgrade requests. With LXPack v0.4.0 implementing them, they are
+now the capabilities LessonKit should lean on.
 
 ### P0 — React / SPA lesson type
 
-**Proposal:** Add a lesson type (working name: `react` or `spa`) to `course.yaml`:
+**Now:** Use the SPA/React lesson type to package LessonKit’s built output without rewriting lessons
+as markdown.
 
 ```yaml
 lessons:
@@ -130,17 +155,17 @@ lessons:
 
 **Why:** Lets LessonKit ship `vite build` output per lesson without converting UI to markdown.
 
-**Acceptance criteria:**
+**LessonKit integration notes:**
 
-- Example course in LXPack repo: one `spa` lesson + one markdown lesson in the same package.
-- SCORM 2004 multi-SCO export launches each SPA in an iframe with correct sequencing.
-- Documented bridge API versioned (`lxpackBridge.v1`).
+- Prefer a stable bridge surface (for completion, scoring, and optional statement passthrough).
+- Keep LessonKit as the “authoring runtime”; let LXPack own LMS packaging and launch surfaces.
 
 ---
 
 ### P0 — Programmatic build and validate API
 
-**Proposal:** Export stable functions from `@lxpack/cli` or a new `@lxpack/api` package:
+**Now:** Prefer importing validate/build APIs from LXPack in `@lessonkit/lxpack` instead of shelling
+out to `lxpack` via subprocess.
 
 ```ts
 import { validateCourse, buildCourse } from "@lxpack/api";
@@ -155,13 +180,14 @@ const artifact = await buildCourse({ courseDir, target: "scorm2004", output: "./
 - No global process cwd assumptions; all paths explicit
 - Works when imported from npm (LessonKit) without pnpm
 
-**Why:** Enables `@lessonkit/lxpack` to run in CI and tests without shelling out.
+**Why:** This keeps LessonKit packaging deterministic, testable, and easy to integrate into CI.
 
 ---
 
 ### P1 — Import / interchange schema (`lessonkit.json` or `lxpack.import`)
 
-**Proposal:** Support an optional interchange file at course root:
+**Now:** Use the interchange format (if provided by LXPack) to avoid duplicating metadata between
+LessonKit and `course.yaml`.
 
 ```json
 {
@@ -192,7 +218,7 @@ const artifact = await buildCourse({ courseDir, target: "scorm2004", output: "./
 
 ### P1 — Shared tracking event catalog
 
-**Proposal:** Document and export a shared enum / JSON schema for learning events:
+**Now:** Align LessonKit telemetry and xAPI verbs with LXPack’s shared event catalog/schema.
 
 | Event | xAPI verb (suggested) | SCORM mapping |
 |-------|----------------------|---------------|
@@ -210,7 +236,8 @@ Publish as `@lxpack/tracking-schema` (or extend `@lessonkit/core` with LXPack-co
 
 ### P1 — Assessment interchange from structured data
 
-**Proposal:** Allow assessments to be defined in JSON/YAML **or** supplied at build time:
+**Now:** Prefer structured assessment interchange/build-time injection so LessonKit can export quiz
+metadata without writing author-only files into the learner artifact.
 
 ```ts
 buildCourse({
@@ -227,7 +254,8 @@ buildCourse({
 
 ### P2 — Plugin slot for custom lesson runtimes
 
-**Proposal:** Formal plugin API in `@lxpack/cli` / `@lxpack/runtime`:
+**Now:** Use LXPack’s plugin/runtime extension points (if shipped) to avoid forking LXPack lesson
+types just to support LessonKit.
 
 ```ts
 registerLessonRuntime("lessonkit-react", {
@@ -243,8 +271,8 @@ registerLessonRuntime("lessonkit-react", {
 
 ### P2 — Theme token bridge
 
-**Proposal:** Accept external design tokens (CSS variables) from a `theme/tokens.json` or
-`@lessonkit/themes` export:
+**Now:** Use LXPack’s theme bridge (if shipped) so LessonKit themes carry through to packaged
+artifacts.
 
 ```yaml
 runtime:
@@ -259,7 +287,7 @@ runtime:
 
 ### P3 — Documentation and examples
 
-Add to LXPack docs (Read the Docs):
+If not already present in LXPack docs, add:
 
 - **Guide:** “Package a React (LessonKit) course”
 - **Example repo:** `examples/lessonkit-spa/` with Vite build + `lxpack build`
@@ -337,12 +365,12 @@ flowchart TB
 
 ## Summary
 
-LXPack already solves problems LessonKit should not rebuild (SCORM manifests, ZIP packaging, xAPI/cmi5,
-validation, preview). The highest-value upgrades for LessonKit interoperability are:
+LXPack already solves problems LessonKit should not rebuild (SCORM manifests, ZIP packaging,
+xAPI/cmi5, validation, preview). With LXPack v0.4.0 implementing the suggested features, the
+highest-value work for LessonKit is now:
 
-1. **SPA/React lesson type** with a stable LMS bridge API  
-2. **Programmatic validate/build APIs** for tooling and CI  
-3. **Shared tracking and assessment interchange** so React authoring maps cleanly to exports  
+1. **Build `@lessonkit/lxpack`** as the packaging adapter  
+2. **Ship one end-to-end SCORM export example**  
+3. **Lock down identity + tracking mappings** (course/lesson/assessment ids)  
 
-Implementing P0 items unblocks `@lessonkit/lxpack` and delivers LMS-ready packages without forcing
-authors out of React.
+That delivers LMS-ready packages without forcing authors out of React.
