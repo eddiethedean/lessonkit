@@ -2,6 +2,22 @@
   "name": "@lessonkit/themes",
   "version": "0.1.0",
   "private": false,
+  "description": "Theme primitives and tokens for LessonKit.",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eddiethedean/lessonkit.git",
+    "directory": "packages/themes"
+  },
+  "homepage": "https://github.com/eddiethedean/lessonkit",
+  "bugs": {
+    "url": "https://github.com/eddiethedean/lessonkit/issues"
+  },
+  "keywords": [
+    "lessonkit",
+    "theme",
+    "design-tokens"
+  ],
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
@@ -19,6 +35,7 @@
   "scripts": {
     "build": "tsup src/index.ts --format esm,cjs --dts",
     "dev": "tsup src/index.ts --format esm,cjs --dts --watch",
+    "prepublishOnly": "npm run build",
     "typecheck": "tsc -p tsconfig.json",
     "test": "vitest run --passWithNoTests",
     "lint": "echo \"(no lint configured yet)\""

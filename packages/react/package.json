@@ -2,6 +2,26 @@
   "name": "@lessonkit/react",
   "version": "0.1.0",
   "private": false,
+  "description": "React components and hooks for building learning experiences with LessonKit.",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eddiethedean/lessonkit.git",
+    "directory": "packages/react"
+  },
+  "homepage": "https://github.com/eddiethedean/lessonkit",
+  "bugs": {
+    "url": "https://github.com/eddiethedean/lessonkit/issues"
+  },
+  "keywords": [
+    "lessonkit",
+    "react",
+    "learning",
+    "training",
+    "lms",
+    "scorm",
+    "xapi"
+  ],
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
@@ -19,6 +39,7 @@
   "scripts": {
     "build": "tsup src/index.tsx --format esm,cjs --dts --external react --external react-dom",
     "dev": "tsup src/index.tsx --format esm,cjs --dts --watch --external react --external react-dom",
+    "prepublishOnly": "npm run build",
     "typecheck": "tsc -p tsconfig.json",
     "test": "vitest run --passWithNoTests",
     "lint": "echo \"(no lint configured yet)\""
@@ -28,8 +49,8 @@
     "react-dom": ">=18"
   },
   "dependencies": {
-    "@lessonkit/core": "file:../core",
-    "@lessonkit/xapi": "file:../xapi"
+    "@lessonkit/core": "0.1.0",
+    "@lessonkit/xapi": "0.1.0"
   },
   "devDependencies": {
     "@testing-library/react": "^16.3.0",

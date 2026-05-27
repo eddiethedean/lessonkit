@@ -2,6 +2,24 @@
   "name": "@lessonkit/core",
   "version": "0.1.0",
   "private": false,
+  "description": "Shared types and telemetry primitives for LessonKit.",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eddiethedean/lessonkit.git",
+    "directory": "packages/core"
+  },
+  "homepage": "https://github.com/eddiethedean/lessonkit",
+  "bugs": {
+    "url": "https://github.com/eddiethedean/lessonkit/issues"
+  },
+  "keywords": [
+    "lessonkit",
+    "telemetry",
+    "analytics",
+    "learning",
+    "training"
+  ],
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
@@ -19,6 +37,7 @@
   "scripts": {
     "build": "tsup src/index.ts --format esm,cjs --dts",
     "dev": "tsup src/index.ts --format esm,cjs --dts --watch",
+    "prepublishOnly": "npm run build",
     "typecheck": "tsc -p tsconfig.json",
     "test": "vitest run --passWithNoTests",
     "lint": "echo \"(no lint configured yet)\""

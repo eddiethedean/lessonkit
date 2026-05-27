@@ -2,6 +2,24 @@
   "name": "@lessonkit/cli",
   "version": "0.1.0",
   "private": false,
+  "description": "LessonKit CLI (early stub).",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eddiethedean/lessonkit.git",
+    "directory": "packages/cli"
+  },
+  "homepage": "https://github.com/eddiethedean/lessonkit",
+  "bugs": {
+    "url": "https://github.com/eddiethedean/lessonkit/issues"
+  },
+  "keywords": [
+    "lessonkit",
+    "cli",
+    "learning",
+    "scorm",
+    "xapi"
+  ],
   "type": "module",
   "bin": {
     "lessonkit": "./dist/index.js"
@@ -15,6 +33,7 @@
   "scripts": {
     "build": "tsup src/index.ts --format esm --splitting=false --platform node --target node18",
     "dev": "tsup src/index.ts --format esm --watch --splitting=false --platform node --target node18",
+    "prepublishOnly": "npm run build",
     "typecheck": "tsc -p tsconfig.json",
     "test": "vitest run --passWithNoTests",
     "lint": "echo \"(no lint configured yet)\""
