@@ -1,10 +1,29 @@
 import React from "react";
 import { Course, Lesson, ProgressTracker, Quiz, Scenario } from "@lessonkit/react";
+import { createXAPIClient } from "@lessonkit/xapi";
+import type { TelemetryEvent } from "@lessonkit/core";
 
 export default function App() {
   return (
     <div className="app-shell">
-      <Course title="Cybersecurity Basics" courseId="cyber-basics">
+      <Course
+        title="Cybersecurity Basics"
+        courseId="cyber-basics"
+        config={{
+          tracking: {
+            sink: (event: TelemetryEvent) => {
+              console.log("[telemetry]", event);
+            },
+          },
+          xapi: {
+            client: createXAPIClient({
+              transport: (statement) => {
+                console.log("[xapi]", statement);
+              },
+            }),
+          },
+        }}
+      >
         <ProgressTracker />
 
         <Lesson title="Phishing Awareness" lessonId="phishing-101">

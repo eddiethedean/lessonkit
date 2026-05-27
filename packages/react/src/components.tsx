@@ -6,10 +6,11 @@ import { useCompletion, useLessonkit, useQuizState } from "./hooks";
 export function Course(props: {
   title: string;
   courseId?: string;
+  config?: Omit<React.ComponentProps<typeof LessonkitProvider>["config"], "courseId">;
   children: React.ReactNode;
 }) {
   return (
-    <LessonkitProvider config={{ courseId: props.courseId }}>
+    <LessonkitProvider config={{ ...props.config, courseId: props.courseId }}>
       <section aria-label={props.title}>
         <h1>{props.title}</h1>
         <div>{props.children}</div>

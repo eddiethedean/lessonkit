@@ -50,11 +50,30 @@ npm -w lessonkit-example-react-vite run dev
 ## Example (React)
 
 ```tsx
+import type { TelemetryEvent } from "@lessonkit/core";
 import { Course, Lesson, Quiz, Scenario } from "@lessonkit/react";
+import { createXAPIClient } from "@lessonkit/xapi";
 
 export default function SecurityTraining() {
   return (
-    <Course title="Cybersecurity Basics" courseId="cyber-basics">
+    <Course
+      title="Cybersecurity Basics"
+      courseId="cyber-basics"
+      config={{
+        tracking: {
+          sink: (event: TelemetryEvent) => {
+            console.log("[telemetry]", event);
+          },
+        },
+        xapi: {
+          client: createXAPIClient({
+            transport: (statement) => {
+              console.log("[xapi]", statement);
+            },
+          }),
+        },
+      }}
+    >
       <Lesson title="Phishing Awareness" lessonId="phishing-101">
         <Scenario>
           <p>You receive a suspicious email.</p>
