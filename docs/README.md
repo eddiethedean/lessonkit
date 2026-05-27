@@ -10,3 +10,8 @@ Placeholder configs are in:
 - `docs/storybook/`
 - `docs/site/`
 
+## Current status
+
+The folders above are placeholders so the repo structure matches the spec while the main MVP is
+being built out in `packages/` and `examples/`.
+

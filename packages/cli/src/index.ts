@@ -3,7 +3,7 @@ import { Command } from "commander";
 
 const program = new Command();
 
-program.name("lessonkit").description("LessonKit CLI").version("0.0.0");
+program.name("lessonkit").description("LessonKit CLI").version("0.1.0");
 
 program
   .command("init")

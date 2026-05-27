@@ -9,3 +9,8 @@ npm install
 npm run dev
 ```
 
+## Notes
+
+- This template depends on `@lessonkit/react`.
+- It’s intended to be copied by the CLI in a future iteration.
+
