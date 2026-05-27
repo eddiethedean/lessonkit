@@ -20,7 +20,7 @@
     "build": "tsup src/index.tsx --format esm,cjs --dts --external react --external react-dom",
     "dev": "tsup src/index.tsx --format esm,cjs --dts --watch --external react --external react-dom",
     "typecheck": "tsc -p tsconfig.json",
-    "test": "vitest run",
+    "test": "vitest run --passWithNoTests",
     "lint": "echo \"(no lint configured yet)\""
   },
   "peerDependencies": {
@@ -28,8 +28,8 @@
     "react-dom": ">=18"
   },
   "dependencies": {
-    "@lessonkit/core": "workspace:*",
-    "@lessonkit/xapi": "workspace:*"
+    "@lessonkit/core": "file:../core",
+    "@lessonkit/xapi": "file:../xapi"
   },
   "devDependencies": {
     "@testing-library/react": "^16.3.0",

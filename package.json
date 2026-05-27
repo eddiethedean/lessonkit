@@ -8,11 +8,13 @@
     "templates/*"
   ],
   "scripts": {
-    "build": "npm run -ws build",
-    "dev": "npm run -ws dev",
-    "test": "npm run -ws test",
-    "lint": "npm run -ws lint",
-    "typecheck": "npm run -ws typecheck",
+    "build": "npm run build:packages && npm run build:apps",
+    "build:packages": "npm run -w @lessonkit/core build && npm run -w @lessonkit/xapi build && npm run -w @lessonkit/react build && npm run -w @lessonkit/accessibility build && npm run -w @lessonkit/themes build && npm run -w @lessonkit/cli build",
+    "build:apps": "npm run -w lessonkit-example-react-vite build && npm run -w lessonkit-template-vite-react build",
+    "dev": "npm run --workspaces --if-present dev",
+    "test": "npm run --workspaces --if-present test",
+    "lint": "npm run --workspaces --if-present lint",
+    "typecheck": "npm run --workspaces --if-present typecheck",
     "changeset": "changeset",
     "version-packages": "changeset version",
     "release": "changeset publish"

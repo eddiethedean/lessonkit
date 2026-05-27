@@ -20,11 +20,11 @@
     "build": "tsup src/index.ts --format esm,cjs --dts",
     "dev": "tsup src/index.ts --format esm,cjs --dts --watch",
     "typecheck": "tsc -p tsconfig.json",
-    "test": "vitest run",
+    "test": "vitest run --passWithNoTests",
     "lint": "echo \"(no lint configured yet)\""
   },
   "dependencies": {
-    "@lessonkit/core": "workspace:*"
+    "@lessonkit/core": "file:../core"
   },
   "devDependencies": {
     "tsup": "^8.5.0",

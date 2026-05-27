@@ -1,0 +1,36 @@
+.app-shell {
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial,
+    "Apple Color Emoji", "Segoe UI Emoji";
+  margin: 0 auto;
+  padding: 32px 20px;
+  max-width: 760px;
+  color: #111827;
+}
+
+section,
+article,
+aside {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 16px;
+  margin: 12px 0;
+  background: #fff;
+}
+
+h1,
+h2 {
+  margin: 0 0 12px 0;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
