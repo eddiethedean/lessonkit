@@ -1,4 +1,8 @@
-export type Focusable = HTMLElement & { focus: () => void };
+export type Focusable = { focus: () => void };
+
+export type FocusContainer = {
+  querySelector<T>(selectors: string): T | null;
+};
 
 export function prefersReducedMotion(): boolean {
   return (
@@ -8,7 +12,7 @@ export function prefersReducedMotion(): boolean {
   );
 }
 
-export function focusFirst(container: HTMLElement | null): boolean {
+export function focusFirst(container: FocusContainer | null): boolean {
   if (!container) return false;
   const el = container.querySelector<Focusable>(
     [

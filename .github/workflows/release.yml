@@ -53,6 +53,40 @@ jobs:
           for pkg in packages/*/package.json; do
             npm pkg set "version=${VERSION}" --prefix "$(dirname "$pkg")"
           done
+          node <<'NODE'
+          const fs = require("node:fs");
+          const path = require("node:path");
+          const versionRaw = process.env.VERSION;
+          const version =
+            typeof versionRaw === "string" && versionRaw.startsWith("v") ? versionRaw.slice(1) : versionRaw;
+          const root = process.cwd();
+          const packagesDir = path.join(root, "packages");
+          const packageDirs = fs
+            .readdirSync(packagesDir, { withFileTypes: true })
+            .filter((d) => d.isDirectory())
+            .map((d) => path.join(packagesDir, d.name));
+
+          for (const dir of packageDirs) {
+            const pkgPath = path.join(dir, "package.json");
+            const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf8"));
+            let changed = false;
+            for (const field of ["dependencies", "devDependencies", "peerDependencies", "optionalDependencies"]) {
+              const deps = pkg[field];
+              if (!deps) continue;
+              for (const [name, val] of Object.entries(deps)) {
+                if (name.startsWith("@lessonkit/") && typeof val === "string") {
+                  deps[name] = version;
+                  changed = true;
+                }
+              }
+            }
+            if (changed) {
+              fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + "\\n");
+            }
+          }
+          NODE
+        env:
+          VERSION: ${{ github.ref_name }}
 
       - name: Build
         run: npm run build

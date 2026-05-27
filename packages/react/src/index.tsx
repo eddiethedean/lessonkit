@@ -16,3 +16,6 @@ export {
   useTracking,
 } from "./hooks";
 
+export type { LessonkitConfig, LessonkitRuntime } from "./context";
+export { LessonkitProvider } from "./context";
+

@@ -30,7 +30,11 @@ export type LessonkitRuntime = {
   setActiveLesson: (lessonId: LessonId) => void;
   completeLesson: (lessonId: LessonId) => void;
   completeCourse: () => void;
-  track: (name: TelemetryEvent["name"], data?: TelemetryEvent["data"]) => void;
+  track: (
+    name: TelemetryEvent["name"],
+    data?: TelemetryEvent["data"],
+    opts?: { lessonId?: LessonId },
+  ) => void;
 };
 
 export const LessonkitContext = createContext<LessonkitRuntime | null>(null);
@@ -45,8 +49,9 @@ export function LessonkitProvider(props: { config?: LessonkitConfig; children: R
 
   const xapi = useMemo(() => {
     if (config.xapi?.enabled === false) return null;
-    return config.xapi?.client ?? createXAPIClient();
-  }, [config.xapi?.enabled, config.xapi?.client]);
+    const baseId = config.courseId ? `urn:lessonkit:course:${config.courseId}` : undefined;
+    return config.xapi?.client ?? createXAPIClient({ baseId });
+  }, [config.xapi?.enabled, config.xapi?.client, config.courseId]);
 
   const [completedLessonIds, setCompletedLessonIds] = useState<Set<LessonId>>(() => new Set());
   const [activeLessonId, setActiveLessonId] = useState<LessonId | undefined>(undefined);
@@ -55,12 +60,12 @@ export function LessonkitProvider(props: { config?: LessonkitConfig; children: R
   courseIdRef.current = config.courseId;
 
   const track = useCallback(
-    (name: TelemetryEvent["name"], data?: TelemetryEvent["data"]) => {
+    (name: TelemetryEvent["name"], data?: TelemetryEvent["data"], opts?: { lessonId?: LessonId }) => {
       tracking.track({
         name,
         timestamp: nowIso(),
         courseId: courseIdRef.current,
-        lessonId: activeLessonId,
+        lessonId: opts?.lessonId ?? activeLessonId,
         data,
       });
     },
@@ -70,7 +75,7 @@ export function LessonkitProvider(props: { config?: LessonkitConfig; children: R
   const setActiveLesson = useCallback(
     (lessonId: LessonId) => {
       setActiveLessonId(lessonId);
-      track("lesson_started", { lessonId });
+      track("lesson_started", { lessonId }, { lessonId });
       xapi?.startedLesson({ lessonId });
     },
     [track, xapi],
@@ -79,7 +84,7 @@ export function LessonkitProvider(props: { config?: LessonkitConfig; children: R
   const completeLesson = useCallback(
     (lessonId: LessonId) => {
       setCompletedLessonIds((prev) => new Set(prev).add(lessonId));
-      track("lesson_completed", { lessonId });
+      track("lesson_completed", { lessonId }, { lessonId });
       xapi?.completeLesson({ lessonId });
     },
     [track, xapi],
