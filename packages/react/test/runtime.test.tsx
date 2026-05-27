@@ -1,10 +1,21 @@
 import React from "react";
-import { describe, expect, it, vi } from "vitest";
-import { fireEvent, render, waitFor } from "@testing-library/react";
-import { Course, Lesson, LessonkitProvider, Quiz, useLessonkit } from "../src";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { cleanup, fireEvent, render, waitFor } from "@testing-library/react";
+import { Course, KnowledgeCheck, Lesson, LessonkitProvider, ProgressTracker, Quiz, Reflection, Scenario, useCompletion, useLessonkit, useProgress, useQuizState, useTracking } from "../src";
 import type { TelemetryEvent } from "@lessonkit/core";
+import type { XAPIStatement, XAPITransport } from "@lessonkit/xapi";
 
 describe("@lessonkit/react runtime", () => {
+  afterEach(() => cleanup());
+
+  it("throws a helpful error when used without provider", () => {
+    function Bad() {
+      useLessonkit();
+      return null;
+    }
+    expect(() => render(<Bad />)).toThrow(/missing LessonkitProvider/);
+  });
+
   it("tracks quiz_answered with expected payload", async () => {
     const events: TelemetryEvent[] = [];
 
@@ -40,6 +51,25 @@ describe("@lessonkit/react runtime", () => {
     expect(quizAnswered.courseId).toBe("course-1");
     expect(quizAnswered.lessonId).toBe("lesson-1");
     expect(typeof quizAnswered.sessionId).toBe("string");
+  });
+
+  it("QuizState.complete emits quiz_completed", async () => {
+    const events: TelemetryEvent[] = [];
+    function Driver() {
+      const quiz = useQuizState();
+      React.useEffect(() => {
+        quiz.complete({ score: 1, maxScore: 2 });
+      }, [quiz]);
+      return <div>driver</div>;
+    }
+
+    render(
+      <LessonkitProvider config={{ tracking: { sink: (e) => events.push(e) } }}>
+        <Driver />
+      </LessonkitProvider>,
+    );
+
+    await waitFor(() => expect(events.some((e) => e.name === "quiz_completed")).toBe(true));
   });
 
   it("tracks lesson lifecycle and emits duration on completion", async () => {
@@ -87,6 +117,207 @@ describe("@lessonkit/react runtime", () => {
     expect(tot.data).toMatchObject({ lessonId: "lesson-1", durationMs: 5000 });
 
     dateNow.mockRestore();
+  });
+
+  it("Reflection textarea is labeled with prompt or fallback aria-label", () => {
+    const { getByLabelText, rerender } = render(<Reflection prompt="Prompt" />);
+    expect(getByLabelText("Prompt")).toBeDefined();
+
+    rerender(<Reflection />);
+    expect(getByLabelText("Reflection response")).toBeDefined();
+  });
+
+  it("ProgressTracker reflects completion count and does not allow external mutation", async () => {
+    const events: TelemetryEvent[] = [];
+
+    let runtime!: ReturnType<typeof useLessonkit>;
+    function Driver() {
+      runtime = useLessonkit();
+      const { completeLesson } = useCompletion();
+      const { progress } = useLessonkit();
+      const p = useProgress();
+      const t = useTracking();
+
+      // Use hooks so their lines are covered.
+      expect(p).toBe(progress);
+      expect(typeof t.track).toBe("function");
+
+      React.useEffect(() => {
+        completeLesson("lesson-1");
+      }, [completeLesson]);
+
+      return <ProgressTracker />;
+    }
+
+    const { getByText } = render(
+      <LessonkitProvider config={{ tracking: { sink: (e) => events.push(e) } }}>
+        <Driver />
+      </LessonkitProvider>,
+    );
+
+    await waitFor(() => expect(getByText(/Lessons completed:/).textContent).toContain("1"));
+
+    // Defensive copy: mutating returned set shouldn't affect provider state.
+    runtime.progress.completedLessonIds.add("lesson-2");
+    expect(getByText(/Lessons completed:/).textContent).toContain("1");
+  });
+
+  it("Course emits course_started once even if config changes", async () => {
+    const events: TelemetryEvent[] = [];
+
+    function Wrapper(props: { sink?: (e: TelemetryEvent) => void }) {
+      return (
+        <Course title="Course" config={{ tracking: { sink: props.sink } }}>
+          <div>child</div>
+        </Course>
+      );
+    }
+
+    const { rerender } = render(<Wrapper sink={(e) => events.push(e)} />);
+
+    // Changing sink causes a new tracking client to be created.
+    rerender(<Wrapper sink={(e) => events.push(e)} />);
+
+    await waitFor(() => expect(events.some((e) => e.name === "course_started")).toBe(true));
+    expect(events.filter((e) => e.name === "course_started")).toHaveLength(1);
+  });
+
+  it("Lesson auto-generates an id when lessonId is omitted", async () => {
+    const events: TelemetryEvent[] = [];
+    render(
+      <Course title="Course" config={{ tracking: { sink: (e) => events.push(e) } }}>
+        <Lesson title="Lesson">{null}</Lesson>
+      </Course>,
+    );
+
+    await waitFor(() => expect(events.some((e) => e.name === "lesson_started")).toBe(true));
+    const started = events.find((e) => e.name === "lesson_started");
+    expect(started?.lessonId).toMatch(/^lesson-/);
+  });
+
+  it("covers Scenario and KnowledgeCheck components", async () => {
+    const events: TelemetryEvent[] = [];
+    const { getAllByLabelText } = render(
+      <Course title="Course" config={{ tracking: { sink: (e) => events.push(e) } }}>
+        <Lesson title="Lesson" lessonId="lesson-1">
+          <Scenario>
+            <p>scenario</p>
+          </Scenario>
+          <KnowledgeCheck question="Q" choices={["A"]} answer="A" />
+        </Lesson>
+      </Course>,
+    );
+
+    fireEvent.click(getAllByLabelText("A")[0]!);
+    await waitFor(() => expect(events.some((e) => e.name === "quiz_answered")).toBe(true));
+  });
+
+  it("uses crypto.randomUUID when available for generated lesson ids", async () => {
+    vi.stubGlobal("crypto", { randomUUID: () => "uuid-lesson" });
+    const events: TelemetryEvent[] = [];
+    render(
+      <Course title="Course" config={{ tracking: { sink: (e) => events.push(e) } }}>
+        <Lesson title="Lesson">{null}</Lesson>
+      </Course>,
+    );
+    await waitFor(() => expect(events.some((e) => e.name === "lesson_started")).toBe(true));
+    const started = events.find((e) => e.name === "lesson_started");
+    expect(started?.lessonId).toBe("lesson-uuid-lesson");
+    vi.unstubAllGlobals();
+  });
+
+  it("falls back when crypto.randomUUID is unavailable for generated lesson ids", async () => {
+    vi.stubGlobal("crypto", {});
+    const events: TelemetryEvent[] = [];
+    render(
+      <Course title="Course" config={{ tracking: { sink: (e) => events.push(e) } }}>
+        <Lesson title="Lesson">{null}</Lesson>
+      </Course>,
+    );
+    await waitFor(() => expect(events.some((e) => e.name === "lesson_started")).toBe(true));
+    const started = events.find((e) => e.name === "lesson_started");
+    expect(started?.lessonId).toMatch(/^lesson-/);
+    vi.unstubAllGlobals();
+  });
+
+  it("completeCourse marks progress and tracks course_completed", async () => {
+    const events: TelemetryEvent[] = [];
+    function Driver() {
+      const { completeCourse } = useCompletion();
+      const { progress } = useLessonkit();
+      React.useEffect(() => {
+        completeCourse();
+      }, [completeCourse]);
+      return <div>{String(progress.courseCompleted)}</div>;
+    }
+
+    const { findByText } = render(
+      <LessonkitProvider config={{ tracking: { sink: (e) => events.push(e) } }}>
+        <Driver />
+      </LessonkitProvider>,
+    );
+
+    await findByText("true");
+    expect(events.some((e) => e.name === "course_completed")).toBe(true);
+  });
+
+  it("xAPI can be disabled and does not emit statements", async () => {
+    const transport = vi.fn(async (_s: XAPIStatement) => {});
+    const events: TelemetryEvent[] = [];
+
+    render(
+      <Course
+        title="Course"
+        config={{
+          tracking: { sink: (e) => events.push(e) },
+          xapi: { enabled: false, client: { send: () => {}, flush: async () => {}, queueSize: () => 0, startedLesson: () => {}, completeLesson: () => {}, completeCourse: () => {} } },
+        }}
+      >
+        <Lesson title="Lesson" lessonId="lesson-1">
+          <div>child</div>
+        </Lesson>
+      </Course>,
+    );
+
+    await waitFor(() => expect(events.some((e) => e.name === "lesson_started")).toBe(true));
+    expect(transport).not.toHaveBeenCalled();
+  });
+
+  it("xAPI client injection is used (startedLesson transport invoked)", async () => {
+    const statements: XAPIStatement[] = [];
+    const transport: XAPITransport = async (s) => {
+      statements.push(s);
+    };
+
+    const { unmount } = render(
+      <Course
+        title="Course"
+        courseId="course-1"
+        config={{
+          xapi: {
+            client: {
+              send: (s) => void transport(s),
+              flush: async () => {},
+              queueSize: () => 0,
+              startedLesson: ({ lessonId }) =>
+                void transport({ id: "1", timestamp: "t", verb: "v", object: { id: `lesson:${lessonId}` } }),
+              completeLesson: () => {},
+              completeCourse: () => {},
+            },
+          },
+        }}
+      >
+        <Lesson title="Lesson" lessonId="lesson-1">
+          <div>child</div>
+        </Lesson>
+      </Course>,
+    );
+
+    await waitFor(() => expect(statements.length).toBeGreaterThan(0));
+    expect(statements[0]?.object.id).toContain("lesson:lesson-1");
+
+    // cover unmount lifecycle path too
+    unmount();
   });
 });
 

@@ -1,6 +1,6 @@
 {
   "name": "@lessonkit/xapi",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "private": false,
   "description": "xAPI statement generation primitives for LessonKit.",
   "license": "Apache-2.0",
@@ -41,10 +41,11 @@
     "prepublishOnly": "npm run build",
     "typecheck": "tsc -p tsconfig.json",
     "test": "vitest run --passWithNoTests",
+    "test:coverage": "vitest run --coverage --passWithNoTests=false",
     "lint": "echo \"(no lint configured yet)\""
   },
   "dependencies": {
-    "@lessonkit/core": "0.1.1"
+    "@lessonkit/core": "0.2.0"
   },
   "devDependencies": {
     "tsup": "^8.5.0",

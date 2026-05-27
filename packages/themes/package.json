@@ -1,6 +1,6 @@
 {
   "name": "@lessonkit/themes",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "private": false,
   "description": "Theme primitives and tokens for LessonKit.",
   "license": "Apache-2.0",
@@ -38,6 +38,7 @@
     "prepublishOnly": "npm run build",
     "typecheck": "tsc -p tsconfig.json",
     "test": "vitest run --passWithNoTests",
+    "test:coverage": "vitest run --coverage --passWithNoTests=false",
     "lint": "echo \"(no lint configured yet)\""
   },
   "devDependencies": {

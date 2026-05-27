@@ -29,7 +29,7 @@ export type LessonkitConfig = {
 
 export type ProgressState = {
   activeLessonId?: LessonId;
-  completedLessonIds: Set<LessonId>;
+  completedLessonIds: ReadonlySet<LessonId>;
   courseCompleted: boolean;
 };
 
@@ -102,11 +102,14 @@ export function LessonkitProvider(props: { config?: LessonkitConfig; children: R
     [tracking, activeLessonId],
   );
 
+  const didStartCourseRef = useRef(false);
   useEffect(() => {
-    track("course_started");
+    if (!didStartCourseRef.current) {
+      didStartCourseRef.current = true;
+      track("course_started");
+    }
     return () => tracking.dispose?.();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [track, tracking]);
 
   const setActiveLesson = useCallback(
     (lessonId: LessonId) => {
@@ -135,8 +138,17 @@ export function LessonkitProvider(props: { config?: LessonkitConfig; children: R
   const completeCourse = useCallback(() => {
     setCourseCompleted(true);
     track("course_completed");
-    xapi?.completeCourse({});
+    xapi?.completeCourse();
   }, [track, xapi]);
+
+  const progress = useMemo<ProgressState>(
+    () => ({
+      activeLessonId,
+      completedLessonIds: new Set(completedLessonIds),
+      courseCompleted,
+    }),
+    [activeLessonId, completedLessonIds, courseCompleted],
+  );
 
   const runtime = useMemo<LessonkitRuntime>(
     () => ({
@@ -144,7 +156,7 @@ export function LessonkitProvider(props: { config?: LessonkitConfig; children: R
       tracking,
       xapi,
       session: { sessionId: sessionIdRef.current, attemptId: attemptIdRef.current, user: userRef.current },
-      progress: { activeLessonId, completedLessonIds, courseCompleted },
+      progress,
       setActiveLesson,
       completeLesson,
       completeCourse,
@@ -154,9 +166,7 @@ export function LessonkitProvider(props: { config?: LessonkitConfig; children: R
       config,
       tracking,
       xapi,
-      activeLessonId,
-      completedLessonIds,
-      courseCompleted,
+      progress,
       setActiveLesson,
       completeLesson,
       completeCourse,

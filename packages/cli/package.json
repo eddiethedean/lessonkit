@@ -1,6 +1,6 @@
 {
   "name": "@lessonkit/cli",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "private": false,
   "description": "LessonKit CLI (early stub).",
   "license": "Apache-2.0",
@@ -22,7 +22,7 @@
   ],
   "type": "module",
   "bin": {
-    "lessonkit": "./dist/index.js"
+    "lessonkit": "./dist/bin.js"
   },
   "exports": {
     ".": "./dist/index.js"
@@ -31,11 +31,12 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsup src/index.ts --format esm --splitting=false --platform node --target node18",
-    "dev": "tsup src/index.ts --format esm --watch --splitting=false --platform node --target node18",
+    "build": "tsup src/index.ts src/bin.ts --format esm --splitting=false --platform node --target node18",
+    "dev": "tsup src/index.ts src/bin.ts --format esm --watch --splitting=false --platform node --target node18",
     "prepublishOnly": "npm run build",
     "typecheck": "tsc -p tsconfig.json",
     "test": "vitest run --passWithNoTests",
+    "test:coverage": "vitest run --coverage --passWithNoTests=false",
     "lint": "echo \"(no lint configured yet)\""
   },
   "dependencies": {

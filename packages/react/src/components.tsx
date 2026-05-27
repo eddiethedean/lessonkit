@@ -1,11 +1,11 @@
 import React, { useEffect, useId, useMemo, useState } from "react";
-import type { LessonId } from "@lessonkit/core";
+import type { CourseId, LessonId } from "@lessonkit/core";
 import { LessonkitProvider } from "./context";
 import { useCompletion, useLessonkit, useQuizState } from "./hooks";
 
 export function Course(props: {
   title: string;
-  courseId?: string;
+  courseId?: CourseId;
   config?: Omit<React.ComponentProps<typeof LessonkitProvider>["config"], "courseId">;
   children: React.ReactNode;
 }) {
@@ -22,7 +22,8 @@ export function Course(props: {
 export function Lesson(props: { title: string; lessonId?: LessonId; children: React.ReactNode }) {
   const { setActiveLesson } = useLessonkit();
   const { completeLesson } = useCompletion();
-  const id = props.lessonId ?? useMemo(() => `lesson-${cryptoRandomId()}`, []);
+  const generatedId = useMemo(() => `lesson-${cryptoRandomId()}`, []);
+  const id = props.lessonId ?? generatedId;
 
   useEffect(() => {
     setActiveLesson(id);
@@ -49,7 +50,10 @@ export function Reflection(props: { prompt?: string; children?: React.ReactNode 
     <section aria-label="Reflection">
       {props.prompt ? <p id={promptId}>{props.prompt}</p> : null}
       {props.children}
-      <textarea aria-labelledby={props.prompt ? promptId : undefined} />
+      <textarea
+        aria-labelledby={props.prompt ? promptId : undefined}
+        aria-label={props.prompt ? undefined : "Reflection response"}
+      />
     </section>
   );
 }

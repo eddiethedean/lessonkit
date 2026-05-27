@@ -61,16 +61,34 @@ export function createTrackingClient(opts?: {
     };
   }
 
-  const buffer: TelemetryEvent[] = [];
+  if (!sink && !batchSink) {
+    // Batching with no sink is a black hole; default to a safe no-op.
+    return { track: () => {} };
+  }
 
-  const flush = () => {
+  const buffer: TelemetryEvent[] = [];
+  let flushInFlight: Promise<void> | null = null;
+
+  const flush = (): void => {
+    if (flushInFlight) return;
     if (!buffer.length) return;
+
     const events = buffer.splice(0, buffer.length);
-    if (batchSink) {
-      void batchSink(events);
-      return;
-    }
-    for (const e of events) void sink?.(e);
+    flushInFlight = Promise.resolve()
+      .then(async () => {
+        if (batchSink) {
+          await batchSink(events);
+          return;
+        }
+        for (const e of events) await sink?.(e);
+      })
+      .catch(() => {
+        // Re-queue on any error so events aren't silently dropped.
+        buffer.unshift(...events);
+      })
+      .finally(() => {
+        flushInFlight = null;
+      });
   };
 
   const intervalId =

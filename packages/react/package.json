@@ -1,6 +1,6 @@
 {
   "name": "@lessonkit/react",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "private": false,
   "description": "React components and hooks for building learning experiences with LessonKit.",
   "license": "Apache-2.0",
@@ -42,6 +42,7 @@
     "prepublishOnly": "npm run build",
     "typecheck": "tsc -p tsconfig.json",
     "test": "vitest run --passWithNoTests",
+    "test:coverage": "vitest run --coverage --passWithNoTests=false",
     "lint": "echo \"(no lint configured yet)\""
   },
   "peerDependencies": {
@@ -49,8 +50,8 @@
     "react-dom": ">=18"
   },
   "dependencies": {
-    "@lessonkit/core": "0.1.1",
-    "@lessonkit/xapi": "0.1.1"
+    "@lessonkit/core": "0.2.0",
+    "@lessonkit/xapi": "0.2.0"
   },
   "devDependencies": {
     "@testing-library/react": "^16.3.0",

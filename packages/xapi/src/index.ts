@@ -56,7 +56,7 @@ export type XAPIClient = {
     score?: number;
     maxScore?: number;
   }) => void;
-  completeCourse: (opts: {}) => void;
+  completeCourse: () => void;
 };
 
 const XAPIVerbs = {
