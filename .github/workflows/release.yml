@@ -81,7 +81,7 @@ jobs:
               }
             }
             if (changed) {
-              fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + "\\n");
+              fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + "\n");
             }
           }
           NODE
