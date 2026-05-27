@@ -1,5 +1,8 @@
 # LessonKit Vite + React template
 
+[![CI](https://github.com/eddiethedean/lessonkit/actions/workflows/checks.yml/badge.svg)](https://github.com/eddiethedean/lessonkit/actions/workflows/checks.yml)
+[![License](https://img.shields.io/github/license/eddiethedean/lessonkit)](../../LICENSE)
+
 This is a starter template intended to be used by the `lessonkit init` command later.
 
 ## Run

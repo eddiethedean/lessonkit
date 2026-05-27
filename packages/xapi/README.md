@@ -1,5 +1,9 @@
 # `@lessonkit/xapi`
 
+[![CI](https://github.com/eddiethedean/lessonkit/actions/workflows/checks.yml/badge.svg)](https://github.com/eddiethedean/lessonkit/actions/workflows/checks.yml)
+[![npm](https://img.shields.io/npm/v/@lessonkit/xapi.svg)](https://www.npmjs.com/package/@lessonkit/xapi)
+[![License](https://img.shields.io/github/license/eddiethedean/lessonkit)](../../LICENSE)
+
 xAPI statement generation primitives.
 
 ## Install

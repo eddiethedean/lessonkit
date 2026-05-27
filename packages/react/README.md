@@ -1,5 +1,9 @@
 # `@lessonkit/react`
 
+[![CI](https://github.com/eddiethedean/lessonkit/actions/workflows/checks.yml/badge.svg)](https://github.com/eddiethedean/lessonkit/actions/workflows/checks.yml)
+[![npm](https://img.shields.io/npm/v/@lessonkit/react.svg)](https://www.npmjs.com/package/@lessonkit/react)
+[![License](https://img.shields.io/github/license/eddiethedean/lessonkit)](../../LICENSE)
+
 React components and hooks for building learning experiences in LessonKit.
 
 ## Install

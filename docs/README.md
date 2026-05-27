@@ -1,5 +1,8 @@
 # Documentation
 
+[![CI](https://github.com/eddiethedean/lessonkit/actions/workflows/checks.yml/badge.svg)](https://github.com/eddiethedean/lessonkit/actions/workflows/checks.yml)
+[![License](https://img.shields.io/github/license/eddiethedean/lessonkit)](../LICENSE)
+
 This folder contains documentation for LessonKit.
 
 ## Planned documentation sites

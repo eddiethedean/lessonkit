@@ -1,5 +1,15 @@
 # LessonKit
 
+[![CI](https://github.com/eddiethedean/lessonkit/actions/workflows/checks.yml/badge.svg)](https://github.com/eddiethedean/lessonkit/actions/workflows/checks.yml)
+[![License](https://img.shields.io/github/license/eddiethedean/lessonkit)](LICENSE)
+
+[![npm](https://img.shields.io/npm/v/@lessonkit/react.svg?label=@lessonkit/react)](https://www.npmjs.com/package/@lessonkit/react)
+[![npm](https://img.shields.io/npm/v/@lessonkit/core.svg?label=@lessonkit/core)](https://www.npmjs.com/package/@lessonkit/core)
+[![npm](https://img.shields.io/npm/v/@lessonkit/xapi.svg?label=@lessonkit/xapi)](https://www.npmjs.com/package/@lessonkit/xapi)
+[![npm](https://img.shields.io/npm/v/@lessonkit/cli.svg?label=@lessonkit/cli)](https://www.npmjs.com/package/@lessonkit/cli)
+[![npm](https://img.shields.io/npm/v/@lessonkit/accessibility.svg?label=@lessonkit/accessibility)](https://www.npmjs.com/package/@lessonkit/accessibility)
+[![npm](https://img.shields.io/npm/v/@lessonkit/themes.svg?label=@lessonkit/themes)](https://www.npmjs.com/package/@lessonkit/themes)
+
 LessonKit is a React-first framework for building accessible, trackable learning experiences with
 modern frontend tooling.
 
