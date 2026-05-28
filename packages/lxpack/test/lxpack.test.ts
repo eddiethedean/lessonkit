@@ -84,6 +84,8 @@ describe("interchange", () => {
     expect(lessons).toEqual([
       { id: "phishing-101", title: "Phishing Awareness", path: "dist" },
     ]);
+    const custom = resolveSpaLessons({ ...baseDescriptor, spaLessonId: "quiz-101" });
+    expect(custom[0]?.id).toBe("quiz-101");
     const interchange = descriptorToInterchange(baseDescriptor);
     expect(interchange.format).toBe("lessonkit");
     expect(interchange.lessons).toHaveLength(1);
@@ -118,6 +120,8 @@ describe("themeToLxpackRuntime", () => {
     const runtime = themeToLxpackRuntime({ preset: "default" });
     expect(runtime.theme).toBe("default");
     expect(runtime.cssVariables["--lk-color-primary"]).toBeTruthy();
+    const brand = themeToLxpackRuntime({ preset: "brand" });
+    expect(brand.theme).toBe("brand");
   });
 });
 
@@ -143,6 +147,22 @@ describe("writeLxpackProject", () => {
     expect(interchange.course.id).toBe("cyber-basics");
     const index = await readFile(join(outDir, "dist", "index.html"), "utf-8");
     expect(index).toContain("html");
+  });
+
+  it("throws when per-lesson-spa is missing lessonSpaDirs entry", async () => {
+    const root = await makeTempDir();
+    await expect(
+      writeLxpackProject({
+        descriptor: {
+          ...baseDescriptor,
+          layout: "per-lesson-spa",
+          lessons: [{ id: "a", title: "A", spaPath: "dist/a" }],
+          assessments: [],
+        },
+        outDir: join(root, "out"),
+        lessonSpaDirs: {},
+      }),
+    ).rejects.toThrow(/missing build output/);
   });
 
   it("per-lesson-spa copies each lesson folder", async () => {
@@ -172,6 +192,31 @@ describe("writeLxpackProject", () => {
 
     expect(await readFile(join(outDir, "dist/lessons/a/index.html"), "utf-8")).toBe("a");
     expect(await readFile(join(outDir, "dist/lessons/b/index.html"), "utf-8")).toBe("b");
+  });
+});
+
+describe("writeLxpackProject errors", () => {
+  it("throws when descriptor is invalid", async () => {
+    const root = await makeTempDir();
+    await expect(
+      writeLxpackProject({
+        descriptor: { ...baseDescriptor, courseId: "" } as typeof baseDescriptor,
+        outDir: join(root, "out"),
+        spaDistDir: join(root, "dist"),
+      }),
+    ).rejects.toThrow(/courseId/);
+  });
+});
+
+describe("validateDescriptor edge cases", () => {
+  it("rejects empty title and mismatched answer", () => {
+    expect(validateDescriptor({ ...baseDescriptor, title: "  " }).ok).toBe(false);
+    expect(
+      validateDescriptor({
+        ...baseDescriptor,
+        assessments: [{ ...baseDescriptor.assessments![0]!, answer: "wrong" }],
+      }).ok,
+    ).toBe(false);
   });
 });
 

@@ -58,7 +58,7 @@ jobs:
           npm run -w lessonkit-example-lxpack-golden build
 
       - name: Package SCORM 1.2 artifact
-        run: npm run -w lessonkit-example-lxpack-golden run package:scorm12
+        run: npm run package:scorm12 -w lessonkit-example-lxpack-golden
 
       - name: Verify SCORM ZIP exists
         run: test -f examples/lxpack-golden/.lxpack/course/.lxpack/out/course-scorm12.zip
