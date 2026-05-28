@@ -133,9 +133,18 @@ Import `examples/lxpack-golden/.lxpack/course/.lxpack/out/course-scorm12.zip` in
 
 LessonKit ids are used as-is in LXPack (`courseId`, `lessonId`, `checkId`). See [`IDENTITY.md`](IDENTITY.md).
 
-## CLI (0.7)
+## CLI (0.7+)
 
-`lessonkit package --target scorm12` will wrap this adapter in **0.7.x**. Until then, use `@lessonkit/lxpack` programmatically or the golden example scripts.
+Use `lessonkit package` as the canonical dual-export entrypoint:
+
+```bash
+lessonkit build
+lessonkit package --target react-vite
+lessonkit package --target scorm12
+lessonkit package --target standalone --json
+```
+
+See [`docs/CLI.md`](CLI.md) for the full command reference and `lessonkit.json` schema.
 
 ## Related
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { run } from "./index";
+import { run } from "./index.js";
 
-void run(process.argv);
-
+await run(process.argv);
+process.exit(process.exitCode ?? 0);

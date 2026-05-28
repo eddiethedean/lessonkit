@@ -1,0 +1,59 @@
+/*
+  Template styling uses LessonKit design tokens (--lk-*).
+  ThemeProvider injects values; override via theme prop or your own CSS.
+*/
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--lk-color-background);
+  color: var(--lk-color-foreground);
+  font-family: var(--lk-font-family);
+  font-size: var(--lk-font-size-base);
+  line-height: var(--lk-line-height-base);
+}
+
+.app-shell {
+  margin: 0 auto;
+  padding: var(--lk-space-xl) var(--lk-space-lg);
+  max-width: 720px;
+}
+
+section,
+article {
+  border: 1px solid var(--lk-color-border);
+  border-radius: var(--lk-radius-lg);
+  padding: var(--lk-space-lg);
+  margin: var(--lk-space-md) 0;
+  background: var(--lk-color-panel);
+  box-shadow: var(--lk-shadow-md);
+}
+
+h1,
+h2 {
+  margin: 0 0 var(--lk-space-sm);
+  font-weight: var(--lk-font-weight-strong);
+}
+
+button {
+  border: 1px solid var(--lk-color-border);
+  background: var(--lk-color-panel);
+  color: var(--lk-color-foreground);
+  border-radius: var(--lk-radius-md);
+  padding: var(--lk-space-sm) var(--lk-space-md);
+  font-weight: var(--lk-font-weight-strong);
+  cursor: pointer;
+}
+
+input[type="radio"] {
+  accent-color: var(--lk-color-primary);
+}
+
+label {
+  display: block;
+  margin: var(--lk-space-xs) 0;
+}

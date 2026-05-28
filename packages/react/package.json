@@ -1,6 +1,6 @@
 {
   "name": "@lessonkit/react",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "private": false,
   "description": "React components and hooks for building learning experiences with LessonKit.",
   "license": "Apache-2.0",
@@ -50,11 +50,11 @@
     "react-dom": ">=18"
   },
   "dependencies": {
-    "@lessonkit/accessibility": "0.6.0",
-    "@lessonkit/core": "0.6.0",
-    "@lessonkit/lxpack": "0.6.0",
-    "@lessonkit/themes": "0.6.0",
-    "@lessonkit/xapi": "0.6.0"
+    "@lessonkit/accessibility": "0.7.0",
+    "@lessonkit/core": "0.7.0",
+    "@lessonkit/lxpack": "0.7.0",
+    "@lessonkit/themes": "0.7.0",
+    "@lessonkit/xapi": "0.7.0"
   },
   "devDependencies": {
     "@testing-library/react": "^16.3.0",

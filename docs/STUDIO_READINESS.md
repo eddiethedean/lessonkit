@@ -52,12 +52,12 @@ for:
 
 ## 0.7.x — CLI workflow (developer + AI friendly)
 
-- [ ] `lessonkit init/dev/build` are real and documented
-- [ ] `lessonkit package` supports dual export targets:
-  - [ ] `react-vite`
-  - [ ] `lxpack|scorm12|scorm2004|xapi|cmi5` (via adapter)
-- [ ] CLI errors are structured and actionable (good messages, stable exit codes)
-- [ ] The CLI is safe for automation (CI-friendly, no interactive prompts by default)
+- [x] `lessonkit init/dev/build` are real and documented
+- [x] `lessonkit package` supports dual export targets:
+  - [x] `react-vite`
+  - [x] `lxpack|scorm12|scorm2004|xapi|cmi5` (via adapter)
+- [x] CLI errors are structured and actionable (good messages, stable exit codes)
+- [x] The CLI is safe for automation (CI-friendly, no interactive prompts by default)
 
 ## 0.8.x — Runtime block catalog (machine-readable)
 

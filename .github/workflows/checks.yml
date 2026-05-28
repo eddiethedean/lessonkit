@@ -72,6 +72,12 @@ jobs:
       - name: Verify standalone directory exists
         run: test -d examples/lxpack-golden/.lxpack/course/.lxpack/out/standalone
 
+      - name: CLI package smoke (JSON)
+        run: |
+          cd examples/lxpack-golden
+          node ../../packages/cli/dist/bin.js package --target scorm12 --json --no-build | tee /tmp/lk-cli-package.json
+          node -e "const r=JSON.parse(require('fs').readFileSync('/tmp/lk-cli-package.json','utf8')); if(!r.ok) { console.error(r); process.exit(1); }"
+
   security-audit:
     name: Security (npm audit)
     runs-on: ubuntu-latest

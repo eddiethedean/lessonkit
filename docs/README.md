@@ -17,6 +17,7 @@ Placeholders live here until the full docs stack is scaffolded:
 
 ## Guides
 
+- [`CLI.md`](CLI.md) — `lessonkit` commands, `lessonkit.json` schema, exit codes
 - [`THEMING.md`](THEMING.md) — design tokens, `--lk-*` CSS variables, and `ThemeProvider`
 - [`IDENTITY.md`](IDENTITY.md) — required IDs, URN contract, codegen guidance
 - [`TELEMETRY.md`](TELEMETRY.md) — event catalog and xAPI mapping
@@ -29,8 +30,8 @@ Placeholders live here until the full docs stack is scaffolded:
 
 ## Current status
 
-Framework **0.6.0** adds `@lessonkit/lxpack` (LXPack export adapter), packaging docs, and a golden
-SCORM example. Identity, telemetry, themes, and lesson lifecycle from **0.5.0** are documented in
+Framework **0.7.0** adds `@lessonkit/cli` (init/dev/build/package), `lessonkit.json` manifest, and CLI docs.
+Identity, telemetry, themes, LXPack packaging, and lesson lifecycle from prior releases are documented in
 the guides above. Storybook and Docusaurus folders remain placeholders until the docs stack is
 scaffolded.
 

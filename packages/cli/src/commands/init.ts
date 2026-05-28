@@ -1,0 +1,125 @@
+import { cp, mkdir, readdir, readFile, writeFile } from "node:fs/promises";
+import { existsSync } from "node:fs";
+import { dirname, join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+import type { CliLogger } from "../lib/logger.js";
+import { CliError, EXIT_INVALID_PROJECT, type CliJsonResult } from "../lib/errors.js";
+import { runNpmInstall } from "../lib/exec.js";
+
+const SKIP_DIRS = new Set(["node_modules", "dist", ".lxpack", ".git"]);
+const SKIP_FILES = new Set([".DS_Store"]);
+
+export type InitOptions = {
+  name?: string;
+  here?: boolean;
+  skipInstall?: boolean;
+  force?: boolean;
+  json?: boolean;
+};
+
+function getTemplateDir(): string {
+  const thisDir = dirname(fileURLToPath(import.meta.url));
+  return resolve(thisDir, "../../template/vite-react");
+}
+
+function slugifyName(name: string): string {
+  return name
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 64) || "my-course";
+}
+
+async function isDirEmpty(dir: string): Promise<boolean> {
+  if (!existsSync(dir)) return true;
+  const entries = await readdir(dir);
+  return entries.length === 0;
+}
+
+async function copyTemplate(src: string, dest: string): Promise<void> {
+  await mkdir(dest, { recursive: true });
+  const entries = await readdir(src, { withFileTypes: true });
+
+  for (const entry of entries) {
+    if (SKIP_DIRS.has(entry.name) || SKIP_FILES.has(entry.name)) continue;
+
+    const srcPath = join(src, entry.name);
+    const destPath = join(dest, entry.name);
+
+    if (entry.isDirectory()) {
+      await copyTemplate(srcPath, destPath);
+    } else if (entry.isFile()) {
+      await cp(srcPath, destPath);
+    }
+  }
+}
+
+async function applyTemplateSubstitutions(projectDir: string, projectName: string, slug: string): Promise<void> {
+  const pkgPath = join(projectDir, "package.json");
+  const lessonkitPath = join(projectDir, "lessonkit.json");
+
+  const pkg = JSON.parse(await readFile(pkgPath, "utf8")) as Record<string, unknown>;
+  pkg.name = projectName;
+  await writeFile(pkgPath, `${JSON.stringify(pkg, null, 2)}\n`, "utf8");
+
+  const lessonkit = JSON.parse(await readFile(lessonkitPath, "utf8")) as Record<string, unknown>;
+  lessonkit.name = slug;
+  const course = lessonkit.course as Record<string, unknown>;
+  course.courseId = slug;
+  course.title = projectName;
+  await writeFile(lessonkitPath, `${JSON.stringify(lessonkit, null, 2)}\n`, "utf8");
+}
+
+export async function runInit(opts: InitOptions, logger: CliLogger): Promise<CliJsonResult> {
+  const cwd = process.cwd();
+  const rawName = opts.name ?? (opts.here ? slugifyName(process.cwd().split("/").pop() ?? "my-course") : undefined);
+
+  if (!rawName && !opts.here) {
+    throw new CliError("Project name is required. Usage: lessonkit init <name> or lessonkit init --here", {
+      code: "INVALID_PROJECT",
+      exitCode: EXIT_INVALID_PROJECT,
+    });
+  }
+
+  const slug = slugifyName(rawName ?? "my-course");
+  const projectName = rawName ?? slug;
+  const projectDir = opts.here ? cwd : resolve(cwd, slug);
+
+  if (!opts.here && existsSync(projectDir)) {
+    throw new CliError(`Directory already exists: ${projectDir}. Use --force to initialize anyway.`, {
+      code: "INVALID_PROJECT",
+      exitCode: EXIT_INVALID_PROJECT,
+    });
+  }
+
+  if (opts.here && !(await isDirEmpty(projectDir)) && !opts.force) {
+    throw new CliError(`Directory is not empty: ${projectDir}. Use --force to initialize anyway.`, {
+      code: "INVALID_PROJECT",
+      exitCode: EXIT_INVALID_PROJECT,
+    });
+  }
+
+  const templateDir = getTemplateDir();
+  if (!existsSync(templateDir)) {
+    throw new CliError(`Bundled template not found at ${templateDir}. Reinstall @lessonkit/cli.`, {
+      code: "RUNTIME",
+      exitCode: EXIT_INVALID_PROJECT,
+    });
+  }
+
+  await copyTemplate(templateDir, projectDir);
+  await applyTemplateSubstitutions(projectDir, projectName, slug);
+
+  if (!opts.skipInstall) {
+    if (!opts.json) logger.log(`Installing dependencies in ${projectDir}…`);
+    await runNpmInstall(projectDir);
+  }
+
+  if (!opts.json) {
+    logger.log(`Created LessonKit project at ${projectDir}`);
+    logger.log(`Next: cd ${opts.here ? "." : slug} && lessonkit dev`);
+  }
+
+  return { ok: true, command: "init", projectRoot: projectDir };
+}

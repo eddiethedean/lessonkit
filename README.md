@@ -41,6 +41,14 @@ lessonkit/
 ## Quick start
 
 ```bash
+npx @lessonkit/cli init my-course
+cd my-course
+lessonkit dev
+```
+
+Or work from the monorepo:
+
+```bash
 npm install
 npm run build
 ```
@@ -54,12 +62,20 @@ npm -w lessonkit-example-react-vite run dev
 Package for LMS delivery (Node 20+):
 
 ```bash
+lessonkit build
+lessonkit package --target scorm12
+```
+
+Or from the monorepo golden example:
+
+```bash
 npm -w lessonkit-example-lxpack-golden run build
 npm -w lessonkit-example-lxpack-golden run package:scorm12
 ```
 
 ## Key docs
 
+- [`docs/CLI.md`](docs/CLI.md): `lessonkit` commands, `lessonkit.json` schema, exit codes
 - [`SECURITY.md`](SECURITY.md): reporting vulnerabilities and supported versions
 - [`CHANGELOG.md`](CHANGELOG.md): release history
 - [`RELEASING.md`](RELEASING.md): how to publish `@lessonkit/*` to npm
@@ -129,11 +145,11 @@ export default function SecurityTraining() {
 - `@lessonkit/accessibility`: accessibility utilities (growing)
 - `@lessonkit/themes`: theming primitives (growing)
 - `@lessonkit/lxpack`: LXPack export adapter (SCORM, standalone, xAPI, cmi5)
-- `@lessonkit/cli`: `lessonkit` commands (stub; packaging in 0.7)
+- `@lessonkit/cli`: `lessonkit init`, `dev`, `build`, `package` (dual export)
 
 ## Versioning
 
-Current monorepo release: **0.6.0** (see [CHANGELOG.md](CHANGELOG.md)).
+Current monorepo release: **0.7.0** (see [CHANGELOG.md](CHANGELOG.md)).
 
 LessonKit follows semver. The **0.x** series is expected to evolve quickly; breaking changes may
 still happen between minor releases.

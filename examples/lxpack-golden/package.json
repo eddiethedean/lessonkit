@@ -11,8 +11,8 @@
     "preview": "vite preview",
     "typecheck": "tsc -p tsconfig.json",
     "test": "vitest run --passWithNoTests",
-    "package:scorm12": "tsx ./scripts/package.ts scorm12",
-    "package:standalone": "tsx ./scripts/package.ts standalone"
+    "package:scorm12": "lessonkit package --target scorm12",
+    "package:standalone": "lessonkit package --target standalone"
   },
   "dependencies": {
     "@lessonkit/core": "file:../../packages/core",
@@ -24,12 +24,12 @@
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
+    "@lessonkit/cli": "file:../../packages/cli",
     "@types/react": "^18.3.23",
     "@types/react-dom": "^18.3.7",
     "@vitejs/plugin-react": "^4.6.0",
     "typescript": "^5.8.3",
     "vite": "^7.1.3",
-    "tsx": "^4.20.3",
     "vitest": "^3.2.4"
   }
 }

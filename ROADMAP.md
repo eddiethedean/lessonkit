@@ -28,9 +28,9 @@ this repo until that gate is met.
 
 ## Status
 
-- **Framework:** **0.6.0** — `@lessonkit/lxpack` export adapter, golden SCORM example, CI packaging smoke
+- **Framework:** **0.7.0** — `@lessonkit/cli` init/dev/build/package (dual export), `lessonkit.json` manifest
 - **Studio:** **blocked** — no implementation work until **[1.0.0 — Stable public API (framework)](#100--stable-public-api-framework)** is shipped (see [Studio development gate](#studio-development-gate))
-- **Focus (now):** CLI (0.7.x), block catalog (0.8.x), conformance (0.9.x), then 1.0.0
+- **Focus (now):** block catalog (0.8.x), conformance (0.9.x), then 1.0.0
 
 ## Guiding principles
 

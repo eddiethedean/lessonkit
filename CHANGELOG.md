@@ -3,6 +3,23 @@
 All notable changes to the LessonKit monorepo are documented here. Published packages use the
 [`@lessonkit/*`](https://www.npmjs.com/org/lessonkit) scope.
 
+## [0.7.0] - 2026-05-28
+
+### Added
+
+- **@lessonkit/cli**: Real `init`, `dev`, `build`, and `package` commands with dual export (`react-vite` + LMS targets via `@lessonkit/lxpack`).
+- **`lessonkit.json` v1**: Canonical project manifest for packaging and future Studio alignment.
+- **CLI**: Structured errors, stable exit codes, `--json` output mode, `--skip-install` / `--force` for automation.
+- **Template bundling**: Vite + React starter copied into `@lessonkit/cli` for `lessonkit init`.
+- **Docs**: [`docs/CLI.md`](docs/CLI.md).
+- **CI**: CLI packaging smoke step on golden example.
+
+### Changed
+
+- Monorepo packages bumped to **0.7.0**.
+- **`examples/lxpack-golden`**: Packaging scripts use `lessonkit package` instead of custom `tsx` script.
+- **`templates/vite-react`** and golden example include `lessonkit.json`.
+
 ## [0.6.0] - 2026-05-28
 
 ### Added
