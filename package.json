@@ -15,6 +15,7 @@
     "dev": "npm run --workspaces --if-present dev",
     "test": "npm run --workspaces --if-present test",
     "coverage": "npm run --workspaces --if-present test:coverage",
+    "audit:ci": "npm audit --omit=dev --audit-level=high && npm audit --audit-level=high",
     "lint": "npm run --workspaces --if-present lint",
     "typecheck": "npm run build:packages && npm run --workspaces --if-present typecheck",
     "changeset": "changeset",

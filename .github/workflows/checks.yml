@@ -3,6 +3,9 @@ name: Checks
 on:
   workflow_call:
 
+permissions:
+  contents: read
+
 jobs:
   checks:
     name: Checks (Node ${{ matrix.node-version }})
@@ -68,4 +71,50 @@ jobs:
 
       - name: Verify standalone directory exists
         run: test -d examples/lxpack-golden/.lxpack/course/.lxpack/out/standalone
+
+  security-audit:
+    name: Security (npm audit)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Audit production dependencies
+        run: npm audit --omit=dev --audit-level=high
+
+      - name: Audit all dependencies
+        run: npm audit --audit-level=high
+
+  codeql:
+    name: Security (CodeQL)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+      actions: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript-typescript
+
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v3
+
+      - name: Perform CodeQL analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:javascript-typescript"
 

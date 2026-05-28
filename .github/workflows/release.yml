@@ -9,9 +9,18 @@ concurrency:
   group: release-${{ github.ref }}
   cancel-in-progress: false
 
+permissions:
+  contents: read
+  security-events: write
+  actions: read
+
 jobs:
   checks:
     uses: ./.github/workflows/checks.yml
+    permissions:
+      contents: read
+      security-events: write
+      actions: read
 
   publish:
     name: Publish to npm

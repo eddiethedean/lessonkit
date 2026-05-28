@@ -60,6 +60,7 @@ npm -w lessonkit-example-lxpack-golden run package:scorm12
 
 ## Key docs
 
+- [`SECURITY.md`](SECURITY.md): reporting vulnerabilities and supported versions
 - [`CHANGELOG.md`](CHANGELOG.md): release history
 - [`RELEASING.md`](RELEASING.md): how to publish `@lessonkit/*` to npm
 - [`docs/THEMING.md`](docs/THEMING.md): design tokens, `--lk-*` CSS variables, and `ThemeProvider`
