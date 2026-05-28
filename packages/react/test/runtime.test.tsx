@@ -736,6 +736,11 @@ describe("@lessonkit/react runtime", () => {
       expect(events.filter((e) => e.name === "course_started").length).toBeGreaterThan(startedA),
     );
     expect(events.some((e) => e.name === "course_started" && e.courseId === "course-b")).toBe(true);
+    await waitFor(() =>
+      expect(events.filter((e) => e.name === "lesson_started" && e.courseId === "course-b").length).toBe(
+        1,
+      ),
+    );
   });
 
   it("Quiz legend uses visually hidden styles without sr-only class", () => {

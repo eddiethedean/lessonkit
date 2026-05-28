@@ -31,25 +31,22 @@ export function Course(props: {
 export function Lesson(props: { title: string; lessonId: LessonId; children: React.ReactNode }) {
   warnInvalidComponentId(props.lessonId, "lessonId");
 
-  const { setActiveLesson } = useLessonkit();
+  const { setActiveLesson, config } = useLessonkit();
   const { completeLesson } = useCompletion();
   const id = props.lessonId;
-  const pendingCompleteRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lessonMountGenerationRef = useRef(0);
 
   useEffect(() => {
-    if (pendingCompleteRef.current !== null) {
-      clearTimeout(pendingCompleteRef.current);
-      pendingCompleteRef.current = null;
-    }
+    const generation = ++lessonMountGenerationRef.current;
     setActiveLesson(id);
     return () => {
       const lessonId = id;
-      pendingCompleteRef.current = setTimeout(() => {
-        pendingCompleteRef.current = null;
+      queueMicrotask(() => {
+        if (lessonMountGenerationRef.current !== generation) return;
         completeLesson(lessonId);
-      }, 0);
+      });
     };
-  }, [id, setActiveLesson, completeLesson]);
+  }, [id, config.courseId, setActiveLesson, completeLesson]);
 
   return (
     <article aria-label={props.title}>

@@ -68,6 +68,7 @@ describe("@lessonkit/react runtime modules", () => {
     expect(completed.didComplete).toBe(true);
     expect(completed.durationMs).toBe(500);
     expect(progress.getState().completedLessonIds.has("lesson-1")).toBe(true);
+    expect(progress.getState().activeLessonId).toBeUndefined();
 
     // idempotent
     expect(progress.completeLesson("lesson-1", 2000).didComplete).toBe(false);

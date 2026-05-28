@@ -204,7 +204,9 @@ export function LessonkitProvider(props: { config: LessonkitConfig; children: Re
     }
 
     return () => {
-      disposeTrackingClient(prev);
+      if (prev !== trackingRef.current) {
+        disposeTrackingClient(prev);
+      }
     };
   }, [
     trackingEnabled,
@@ -244,10 +246,17 @@ export function LessonkitProvider(props: { config: LessonkitConfig; children: Re
   const prevCourseIdRef = useRef(config.courseId);
   useEffect(() => {
     if (prevCourseIdRef.current === config.courseId) return;
+    const previousActiveLesson = progressRef.current.getState().activeLessonId;
     prevCourseIdRef.current = config.courseId;
 
     progressRef.current = createProgressController();
     syncProgress();
+
+    if (previousActiveLesson) {
+      progressRef.current.setActiveLesson(previousActiveLesson, Date.now());
+      syncProgress();
+      track("lesson_started", { lessonId: previousActiveLesson }, { lessonId: previousActiveLesson });
+    }
 
     const sessionId = sessionIdRef.current;
     const cid = config.courseId;
@@ -266,14 +275,7 @@ export function LessonkitProvider(props: { config: LessonkitConfig; children: Re
         { lxpackBridge: lxpackBridgeModeRef.current },
       );
     }
-  }, [config.courseId, syncProgress]);
-
-  useEffect(() => {
-    return () => {
-      trackingRef.current?.flush?.();
-      void xapiRef.current?.flush();
-    };
-  }, []);
+  }, [config.courseId, syncProgress, track]);
 
   const emitLessonCompleted = useCallback(
     (lessonId: LessonId, durationMs?: number) => {
@@ -291,9 +293,23 @@ export function LessonkitProvider(props: { config: LessonkitConfig; children: Re
       if (!result.didComplete) return;
       syncProgress();
       emitLessonCompleted(lessonId, result.durationMs);
+      void trackingRef.current?.flush?.();
     },
     [syncProgress, emitLessonCompleted],
   );
+
+  useEffect(() => {
+    return () => {
+      const client = trackingRef.current;
+      void xapiRef.current?.flush();
+      setTimeout(() => {
+        client?.flush?.();
+        setTimeout(() => {
+          client?.dispose?.();
+        }, 0);
+      }, 0);
+    };
+  }, []);
 
   const setActiveLesson = useCallback(
     (lessonId: LessonId) => {

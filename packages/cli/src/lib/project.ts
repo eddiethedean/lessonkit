@@ -1,6 +1,6 @@
+import { readFileSync, existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
-import { existsSync } from "node:fs";
-import { dirname, join, resolve } from "node:path";
+import { dirname, join, parse, resolve } from "node:path";
 import type { LessonkitCourseDescriptor } from "@lessonkit/lxpack";
 import { validateDescriptor } from "@lessonkit/lxpack";
 import { CliError, EXIT_INVALID_PROJECT } from "./errors.js";
@@ -35,15 +35,25 @@ const DEFAULT_PATHS: LessonkitPaths = {
   outputBaseDir: ".lxpack/out",
 };
 
+function isProjectManifest(configPath: string): boolean {
+  try {
+    const raw = JSON.parse(readFileSync(configPath, "utf8")) as Record<string, unknown>;
+    return raw.schemaVersion === 1 && typeof raw.name === "string" && raw.course !== null && typeof raw.course === "object";
+  } catch {
+    return false;
+  }
+}
+
 export function findProjectRoot(startDir: string = process.cwd()): string {
   let dir = resolve(startDir);
-  const root = resolve("/");
+  const fsRoot = parse(dir).root;
 
   while (true) {
-    if (existsSync(join(dir, LESSONKIT_JSON))) {
+    const configPath = join(dir, LESSONKIT_JSON);
+    if (existsSync(configPath) && isProjectManifest(configPath)) {
       return dir;
     }
-    if (dir === root) {
+    if (dir === fsRoot) {
       throw new CliError(`Could not find ${LESSONKIT_JSON} in ${startDir} or any parent directory.`, {
         code: "INVALID_PROJECT",
         exitCode: EXIT_INVALID_PROJECT,
@@ -109,6 +119,13 @@ export async function loadLessonkitJson(projectRoot: string): Promise<LessonkitP
     });
   }
 
+  if (validation.descriptor.layout === "per-lesson-spa") {
+    throw new CliError(
+      `${configPath}: per-lesson-spa layout is not supported by lessonkit package yet. Use single-spa or package via @lessonkit/lxpack directly.`,
+      { code: "INVALID_PROJECT", exitCode: EXIT_INVALID_PROJECT },
+    );
+  }
+
   const pathsRaw = config.paths;
   const paths: LessonkitPaths = { ...DEFAULT_PATHS };
   if (pathsRaw && typeof pathsRaw === "object") {
@@ -148,7 +165,10 @@ export function assertViteProject(pkg: PackageJson, projectRoot: string): void {
   const vite =
     pkg.devDependencies?.vite ??
     pkg.dependencies?.vite ??
-    (existsSync(join(projectRoot, "node_modules", ".bin", "vite")) ? "present" : undefined);
+    (existsSync(join(projectRoot, "node_modules", ".bin", "vite")) ||
+    existsSync(join(projectRoot, "node_modules", ".bin", "vite.cmd"))
+      ? "present"
+      : undefined);
 
   if (!vite) {
     throw new CliError(
@@ -160,14 +180,15 @@ export function assertViteProject(pkg: PackageJson, projectRoot: string): void {
 
 export function resolveViteBin(projectRoot: string): string {
   let dir = resolve(projectRoot);
-  const root = resolve("/");
+  const fsRoot = parse(dir).root;
 
   while (true) {
-    const bin = join(dir, "node_modules", ".bin", "vite");
-    if (existsSync(bin)) {
-      return bin;
-    }
-    if (dir === root) break;
+    const binDir = join(dir, "node_modules", ".bin");
+    const bin = join(binDir, "vite");
+    if (existsSync(bin)) return bin;
+    const binCmd = join(binDir, "vite.cmd");
+    if (existsSync(binCmd)) return binCmd;
+    if (dir === fsRoot) break;
     dir = dirname(dir);
   }
 

@@ -18,11 +18,7 @@ const courseConfig = {
 
 export default function App() {
   return (
-    <ThemeProvider
-      preset="dark"
-      mode="dark"
-      theme={{ colors: { primary: "#7c3aed" } }}
-    >
+    <ThemeProvider preset="default" mode="light">
       <div className="app-shell">
         <Course title="My LessonKit Course" courseId="my-course" config={courseConfig}>
           <Lesson title="My first lesson" lessonId="lesson-1">

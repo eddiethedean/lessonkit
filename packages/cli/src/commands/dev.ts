@@ -6,6 +6,7 @@ import {
   readPackageJson,
   resolveViteBin,
 } from "../lib/project.js";
+import { resolveViteBuildArgs } from "../lib/paths.js";
 
 export type DevBuildOptions = {
   cwd?: string;
@@ -30,7 +31,8 @@ export async function runBuild(opts: DevBuildOptions): Promise<CliJsonResult> {
   assertViteProject(pkg, project.root);
   const viteBin = resolveViteBin(project.root);
 
-  await runCommand(viteBin, ["build", ...(opts.viteArgs ?? [])], { cwd: project.root });
+  const buildArgs = resolveViteBuildArgs(project);
+  await runCommand(viteBin, [...buildArgs, ...(opts.viteArgs ?? [])], { cwd: project.root });
 
   return { ok: true, command: "build", projectRoot: project.root };
 }

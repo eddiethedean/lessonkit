@@ -53,9 +53,11 @@ Every LessonKit project includes a `lessonkit.json` at the project root. The CLI
 | `course` | [`LessonkitCourseDescriptor`](../packages/lxpack/src/types.ts) passed to `@lessonkit/lxpack` |
 | `paths.spaDistDir` | Vite build output (default `dist`) |
 | `paths.lxpackOutDir` | LXPack project directory (default `.lxpack/course`) |
-| `paths.outputBaseDir` | Packaged artifact base (default `.lxpack/out`) |
+| `paths.outputBaseDir` | Packaged artifact base under the LXPack project dir (default `.lxpack/out`; artifacts are `{outputBaseDir}/course-<target>.zip` or `{outputBaseDir}/standalone`) |
 
-Keep `course.courseId`, `course.lessons[].id`, and `course.assessments[].checkId` aligned with your React component props. See [`IDENTITY.md`](IDENTITY.md).
+Keep `course.courseId`, `course.lessons[].id`, and `course.assessments[].checkId` aligned with your React component props. `lessonkit init` updates `lessonkit.json` and patches `src/App.tsx` `courseId` / course title for you. See [`IDENTITY.md`](IDENTITY.md).
+
+The CLI only recognizes project manifests with `schemaVersion: 1` (not the interchange `lessonkit.json` written under `.lxpack/course`). `per-lesson-spa` layout is not supported by `lessonkit package` in 0.7.0 — use `single-spa`.
 
 ## Commands
 
@@ -88,7 +90,7 @@ lessonkit dev --cwd ./apps/training
 
 ### `lessonkit build`
 
-Production Vite build to `dist/` (or `paths.spaDistDir` from `lessonkit.json`).
+Production Vite build to `dist/` (or `paths.spaDistDir` from `lessonkit.json`; the CLI passes `--outDir` when it differs from `dist`).
 
 ```bash
 lessonkit build

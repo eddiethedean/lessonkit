@@ -79,6 +79,34 @@ describe("validateDescriptor", () => {
     expect(result.ok).toBe(false);
   });
 
+  it("requires layout", () => {
+    const { layout: _layout, ...rest } = baseDescriptor;
+    const result = validateDescriptor(rest as typeof baseDescriptor);
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.issues.some((i) => i.path === "layout")).toBe(true);
+    }
+  });
+
+  it("rejects unknown layout", () => {
+    const result = validateDescriptor({
+      ...baseDescriptor,
+      layout: "multi-spa" as "single-spa",
+    });
+    expect(result.ok).toBe(false);
+  });
+
+  it("rejects unknown theme preset", () => {
+    const result = validateDescriptor({
+      ...baseDescriptor,
+      theme: { preset: "neon" as "default" },
+    });
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.issues.some((i) => i.path === "theme.preset")).toBe(true);
+    }
+  });
+
   it("requires spaPath for per-lesson-spa", () => {
     const result = validateDescriptor({
       ...baseDescriptor,

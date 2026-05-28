@@ -19,6 +19,15 @@ All notable changes to the LessonKit monorepo are documented here. Published pac
 - Monorepo packages bumped to **0.7.0**.
 - **`examples/lxpack-golden`**: Packaging scripts use `lessonkit package` instead of custom `tsx` script.
 - **`templates/vite-react`** and golden example include `lessonkit.json`.
+- **Starter template**: `ThemeProvider` defaults to `preset="default"` / `mode="light"` to match `lessonkit.json`.
+
+### Fixed
+
+- **@lessonkit/cli**: `paths.outputBaseDir` is honored when resolving package artifacts; `lessonkit build` passes Vite `--outDir` when `paths.spaDistDir` is not `dist`.
+- **@lessonkit/cli**: Project discovery requires `schemaVersion: 1` (ignores LXPack interchange `lessonkit.json` under `.lxpack/course`).
+- **@lessonkit/cli**: `lessonkit init` patches `src/App.tsx` `courseId` and course title to match the manifest; rejects `per-lesson-spa` for `lessonkit package`.
+- **@lessonkit/lxpack**: Descriptor validation requires `layout` and validates `theme.preset`.
+- **@lessonkit/react**: `completeLesson` clears `activeLessonId`; provider unmount flushes pending lesson completions before disposing the active tracking client; `courseId` changes re-activate mounted lessons.
 
 ## [0.6.0] - 2026-05-28
 

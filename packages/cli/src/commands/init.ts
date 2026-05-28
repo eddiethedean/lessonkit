@@ -1,6 +1,6 @@
 import { cp, mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
-import { dirname, join, resolve } from "node:path";
+import { basename, dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { CliLogger } from "../lib/logger.js";
 import { CliError, EXIT_INVALID_PROJECT, type CliJsonResult } from "../lib/errors.js";
@@ -69,11 +69,19 @@ async function applyTemplateSubstitutions(projectDir: string, projectName: strin
   course.courseId = slug;
   course.title = projectName;
   await writeFile(lessonkitPath, `${JSON.stringify(lessonkit, null, 2)}\n`, "utf8");
+
+  const appPath = join(projectDir, "src", "App.tsx");
+  let appSource = await readFile(appPath, "utf8");
+  appSource = appSource.replace(/courseId="my-course"/g, `courseId="${slug}"`);
+  appSource = appSource.replace(/title="My LessonKit Course"/g, `title="${projectName.replace(/"/g, '\\"')}"`);
+  appSource = appSource.replace(/preset="dark"/g, 'preset="default"');
+  appSource = appSource.replace(/mode="dark"/g, 'mode="light"');
+  await writeFile(appPath, appSource, "utf8");
 }
 
 export async function runInit(opts: InitOptions, logger: CliLogger): Promise<CliJsonResult> {
   const cwd = process.cwd();
-  const rawName = opts.name ?? (opts.here ? slugifyName(process.cwd().split("/").pop() ?? "my-course") : undefined);
+  const rawName = opts.name ?? (opts.here ? slugifyName(basename(process.cwd()) || "my-course") : undefined);
 
   if (!rawName && !opts.here) {
     throw new CliError("Project name is required. Usage: lessonkit init <name> or lessonkit init --here", {

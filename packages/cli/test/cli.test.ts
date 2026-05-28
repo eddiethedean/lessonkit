@@ -5,7 +5,7 @@ import { tmpdir } from "node:os";
 import { createProgram, run } from "../src/index.js";
 import { formatCliError, CliError, EXIT_INVALID_PROJECT } from "../src/lib/errors.js";
 import { findProjectRoot, loadLessonkitJson } from "../src/lib/project.js";
-import { parsePackageTarget, resolvePackageOutput } from "../src/lib/paths.js";
+import { parsePackageTarget, resolvePackageOutput, resolveViteBuildArgs } from "../src/lib/paths.js";
 import * as exec from "../src/lib/exec.js";
 
 describe("@lessonkit/cli program", () => {
@@ -77,9 +77,31 @@ describe("resolvePackageOutput", () => {
         outputBaseDir: ".lxpack/out",
       },
     };
-    const { output, dir } = resolvePackageOutput(project, "scorm12");
+    const { output, dir, outputBaseDir } = resolvePackageOutput(project, "scorm12");
     expect(output).toBe(".lxpack/out/course-scorm12.zip");
+    expect(outputBaseDir).toBe(".lxpack/out");
     expect(dir).toBe(false);
+  });
+
+  it("uses custom outputBaseDir from project paths", () => {
+    const project = {
+      root: "/proj",
+      schemaVersion: 1,
+      name: "demo",
+      course: {
+        courseId: "demo",
+        title: "Demo",
+        layout: "single-spa" as const,
+        lessons: [{ id: "l1", title: "L1" }],
+      },
+      paths: {
+        spaDistDir: "dist",
+        lxpackOutDir: ".lxpack/course",
+        outputBaseDir: "build/artifacts",
+      },
+    };
+    const { output } = resolvePackageOutput(project, "scorm12");
+    expect(output).toBe("build/artifacts/course-scorm12.zip");
   });
 
   it("resolves standalone directory", () => {
@@ -137,6 +159,27 @@ describe("loadLessonkitJson", () => {
     expect(project.course.courseId).toBe("demo");
   });
 
+  it("rejects per-lesson-spa layout for CLI packaging", async () => {
+    await writeFile(
+      join(dir, "lessonkit.json"),
+      JSON.stringify({
+        schemaVersion: 1,
+        name: "demo",
+        course: {
+          courseId: "demo",
+          title: "Demo",
+          layout: "per-lesson-spa",
+          lessons: [{ id: "lesson-1", title: "Lesson", spaPath: "dist/lesson-1" }],
+        },
+      }),
+      "utf8",
+    );
+    await expect(loadLessonkitJson(dir)).rejects.toMatchObject({
+      exitCode: EXIT_INVALID_PROJECT,
+      message: expect.stringContaining("per-lesson-spa"),
+    });
+  });
+
   it("rejects invalid schemaVersion", async () => {
     await writeFile(
       join(dir, "lessonkit.json"),
@@ -161,6 +204,32 @@ describe("findProjectRoot", () => {
   it("walks up to find lessonkit.json", async () => {
     const nested = join(dir, "apps", "course");
     await mkdir(nested, { recursive: true });
+    await writeFile(
+      join(dir, "lessonkit.json"),
+      JSON.stringify({
+        schemaVersion: 1,
+        name: "demo",
+        course: {
+          courseId: "demo",
+          title: "Demo",
+          layout: "single-spa",
+          lessons: [{ id: "l1", title: "L1" }],
+        },
+      }),
+      "utf8",
+    );
+
+    expect(findProjectRoot(nested)).toBe(dir);
+  });
+
+  it("skips lxpack interchange lessonkit.json without schemaVersion", async () => {
+    const nested = join(dir, ".lxpack", "course");
+    await mkdir(nested, { recursive: true });
+    await writeFile(
+      join(nested, "lessonkit.json"),
+      JSON.stringify({ format: "lessonkit", version: "1", course: { id: "x", title: "X" } }),
+      "utf8",
+    );
     await writeFile(
       join(dir, "lessonkit.json"),
       JSON.stringify({
@@ -205,7 +274,42 @@ describe("runInit", () => {
     expect(pkg.name).toBe("my-demo");
     expect(lessonkit.name).toBe("my-demo");
     expect(lessonkit.course.courseId).toBe("my-demo");
-    expect(await readFile(join(projectDir, "src/App.tsx"), "utf8")).toContain("@lessonkit/react");
+    const appSource = await readFile(join(projectDir, "src/App.tsx"), "utf8");
+    expect(appSource).toContain("@lessonkit/react");
+    expect(appSource).toContain('courseId="my-demo"');
+    expect(appSource).toContain('preset="default"');
+  });
+});
+
+describe("resolveViteBuildArgs", () => {
+  const baseProject = {
+    root: "/proj",
+    schemaVersion: 1,
+    name: "demo",
+    course: {
+      courseId: "demo",
+      title: "Demo",
+      layout: "single-spa" as const,
+      lessons: [{ id: "l1", title: "L1" }],
+    },
+    paths: {
+      spaDistDir: "dist",
+      lxpackOutDir: ".lxpack/course",
+      outputBaseDir: ".lxpack/out",
+    },
+  };
+
+  it("omits --outDir for default dist", () => {
+    expect(resolveViteBuildArgs(baseProject)).toEqual(["build"]);
+  });
+
+  it("passes --outDir when spaDistDir is customized", () => {
+    expect(
+      resolveViteBuildArgs({
+        ...baseProject,
+        paths: { ...baseProject.paths, spaDistDir: "build/spa" },
+      }),
+    ).toEqual(["build", "--outDir", "build/spa"]);
   });
 });
 
@@ -252,7 +356,7 @@ describe("runBuild", () => {
     expect(runCommand).toHaveBeenCalledWith(
       expect.stringContaining("node_modules/.bin/vite"),
       ["build"],
-      expect.objectContaining({ cwd: expect.stringContaining("lk-cli-build") }),
+      expect.objectContaining({ cwd: expect.stringMatching(/lk-cli-build/) }),
     );
   });
 });

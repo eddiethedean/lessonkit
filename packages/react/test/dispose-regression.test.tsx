@@ -8,6 +8,8 @@ describe("@lessonkit/react provider dispose regression", () => {
   afterEach(() => {
     cleanup();
     sessionStorage.clear();
+    vi.unmock("@lessonkit/core");
+    vi.resetModules();
   });
 
   it("does not dispose tracking client on lesson transitions", async () => {
@@ -227,6 +229,37 @@ describe("@lessonkit/react provider dispose regression", () => {
         1,
       );
     });
+  });
+
+  it("flushes lesson_completed on provider unmount with batched tracking", async () => {
+    const events: TelemetryEvent[] = [];
+    const sink = (e: TelemetryEvent) => {
+      events.push(e);
+    };
+
+    const { unmount } = render(
+      <LessonkitProvider
+          config={{
+            courseId: "course-1",
+            tracking: {
+              sink,
+              batch: { enabled: true, flushIntervalMs: 60_000, maxBatchSize: 1 },
+            },
+          }}
+        >
+          <Lesson title="Lesson" lessonId="lesson-1">
+          <div>child</div>
+        </Lesson>
+      </LessonkitProvider>,
+    );
+
+    await waitFor(() => expect(events.some((e) => e.name === "lesson_started")).toBe(true));
+    unmount();
+    await waitFor(() =>
+      expect(events.filter((e) => e.name === "lesson_completed" && e.lessonId === "lesson-1").length).toBe(
+        1,
+      ),
+    );
   });
 
   it("Lesson under StrictMode does not complete until removed from the tree", async () => {

@@ -34,6 +34,9 @@ export function createProgressController(): ProgressController {
     completeLesson: (lessonId, completedAtMs) => {
       if (completedLessonIds.has(lessonId)) return { didComplete: false };
       completedLessonIds = new Set(completedLessonIds).add(lessonId);
+      if (activeLessonId === lessonId) {
+        activeLessonId = undefined;
+      }
       const startedAt = lessonStartTimes.get(lessonId);
       lessonStartTimes.delete(lessonId);
       const durationMs =

@@ -66,7 +66,7 @@ export async function runPackage(opts: PackageOptions): Promise<CliJsonResult> {
   }
 
   const outDir = resolveLxpackOutDir(project);
-  const { output, dir } = resolvePackageOutput(project, target, opts.out);
+  const { output, dir, outputBaseDir } = resolvePackageOutput(project, target, opts.out);
 
   const result = await packageLessonkitCourse({
     descriptor: project.course,
@@ -75,6 +75,7 @@ export async function runPackage(opts: PackageOptions): Promise<CliJsonResult> {
     target,
     output,
     dir,
+    outputBaseDir,
   });
 
   if (!result.ok) {

@@ -14,15 +14,27 @@ export function resolvePackageOutput(
   project: LessonkitProject,
   target: ExportTarget,
   override?: string,
-): { output: string; dir: boolean } {
+): { output: string; dir: boolean; outputBaseDir: string } {
+  const outputBaseDir = project.paths.outputBaseDir;
+
   if (override) {
-    return { output: override, dir: target === "standalone" };
+    return { output: override, dir: target === "standalone", outputBaseDir };
   }
 
   if (target === "standalone") {
-    return { output: ".lxpack/out/standalone", dir: true };
+    return { output: `${outputBaseDir}/standalone`, dir: true, outputBaseDir };
   }
-  return { output: `.lxpack/out/course-${target}.zip`, dir: false };
+  return { output: `${outputBaseDir}/course-${target}.zip`, dir: false, outputBaseDir };
+}
+
+const DEFAULT_SPA_DIST_DIR = "dist";
+
+export function resolveViteBuildArgs(project: LessonkitProject): string[] {
+  const args = ["build"];
+  if (project.paths.spaDistDir !== DEFAULT_SPA_DIST_DIR) {
+    args.push("--outDir", project.paths.spaDistDir);
+  }
+  return args;
 }
 
 export const PACKAGE_TARGETS = [
