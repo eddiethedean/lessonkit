@@ -8,10 +8,12 @@ import React, {
   useState,
 } from "react";
 import type { CourseId, LessonId, TelemetryEvent, TelemetryUser, TrackingClient } from "@lessonkit/core";
-import { createSessionId, createTrackingClient, nowIso } from "@lessonkit/core";
+import { createTrackingClient, nowIso } from "@lessonkit/core";
 import type { XAPIClient, XAPITransport } from "@lessonkit/xapi";
 import { createInMemoryXAPIQueue, createXAPIClient } from "@lessonkit/xapi";
 import type { XAPIQueue } from "@lessonkit/xapi";
+import { createSessionStoragePort } from "./runtime/ports";
+import { hasCourseStarted, markCourseStarted, resolveSessionId } from "./runtime/session";
 
 export type LessonkitConfig = {
   courseId?: CourseId;
@@ -65,9 +67,6 @@ export type LessonkitRuntime = {
 
 export const LessonkitContext = createContext<LessonkitRuntime | null>(null);
 
-const SESSION_STORAGE_KEY = "lessonkit:sessionId";
-const COURSE_STARTED_PREFIX = "lessonkit:course_started:";
-
 const useIsoLayoutEffect = typeof window !== "undefined" ? useLayoutEffect : useEffect;
 
 function disposeTrackingClient(client: TrackingClient | null | undefined): void {
@@ -75,46 +74,7 @@ function disposeTrackingClient(client: TrackingClient | null | undefined): void 
   client?.dispose?.();
 }
 
-function safeSessionStorageGetItem(key: string): string | null {
-  if (typeof sessionStorage === "undefined") return null;
-  try {
-    return sessionStorage.getItem(key);
-  } catch {
-    return null;
-  }
-}
-
-function safeSessionStorageSetItem(key: string, value: string): void {
-  if (typeof sessionStorage === "undefined") return;
-  try {
-    sessionStorage.setItem(key, value);
-  } catch {
-    // Storage can throw (e.g. blocked/disabled storage). Treat as non-fatal.
-  }
-}
-
-function resolveSessionId(provided?: string): string {
-  if (provided) return provided;
-  const existing = safeSessionStorageGetItem(SESSION_STORAGE_KEY);
-  if (existing) return existing;
-  const id = createSessionId();
-  safeSessionStorageSetItem(SESSION_STORAGE_KEY, id);
-  return id;
-}
-
-function courseStartedStorageKey(sessionId: string, courseId?: CourseId): string {
-  return `${COURSE_STARTED_PREFIX}${sessionId}:${courseId ?? ""}`;
-}
-
-function hasCourseStarted(sessionId: string, courseId?: CourseId): boolean {
-  if (!courseId) return false;
-  return safeSessionStorageGetItem(courseStartedStorageKey(sessionId, courseId)) === "1";
-}
-
-function markCourseStarted(sessionId: string, courseId?: CourseId): void {
-  if (!courseId) return;
-  safeSessionStorageSetItem(courseStartedStorageKey(sessionId, courseId), "1");
-}
+const defaultStorage = createSessionStoragePort();
 
 function createTrackingClientFromConfig(config: LessonkitConfig): TrackingClient {
   if (config.tracking?.enabled === false) {
@@ -137,7 +97,7 @@ function createXapiClientFromConfig(config: LessonkitConfig, queue: XAPIQueue): 
 export function LessonkitProvider(props: { config?: LessonkitConfig; children: React.ReactNode }) {
   const config = props.config ?? {};
 
-  const sessionIdRef = useRef<string>(resolveSessionId(config.session?.sessionId));
+  const sessionIdRef = useRef<string>(resolveSessionId(defaultStorage, config.session?.sessionId));
   if (config.session?.sessionId) sessionIdRef.current = config.session.sessionId;
 
   const attemptIdRef = useRef<string | undefined>(config.session?.attemptId);
@@ -167,10 +127,12 @@ export function LessonkitProvider(props: { config?: LessonkitConfig; children: R
 
     const sessionId = sessionIdRef.current;
     const cid = courseIdRef.current;
-    const shouldEmitCourseStarted = cid ? !hasCourseStarted(sessionId, cid) : !courseStartedInProviderRef.current;
+    const shouldEmitCourseStarted = cid
+      ? !hasCourseStarted(defaultStorage, sessionId, cid)
+      : !courseStartedInProviderRef.current;
     if (shouldEmitCourseStarted) {
       if (cid) {
-        markCourseStarted(sessionId, cid);
+        markCourseStarted(defaultStorage, sessionId, cid);
       } else {
         courseStartedInProviderRef.current = true;
       }
