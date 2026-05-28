@@ -28,7 +28,9 @@ Placeholders live here until the full docs stack is scaffolded:
 
 ## Current status
 
-Framework **0.5.0** (identity model, telemetry catalog, canonical xAPI mapper, themes) is implemented
-in `packages/` and documented in the guides above. Storybook and Docusaurus folders remain placeholders
-until the docs stack is scaffolded.
+Framework **0.5.0** (identity model, telemetry catalog, canonical xAPI mapper, lesson lifecycle
+hardening, themes) is implemented in `packages/` and documented in the guides above. Storybook and
+Docusaurus folders remain placeholders until the docs stack is scaffolded.
+
+**Publishing:** npm latest is still **0.4.0** until you push the `v0.5.0` tag (see [RELEASING.md](../RELEASING.md)).
 

@@ -28,7 +28,7 @@ this repo until that gate is met.
 
 ## Status
 
-- **Framework:** **0.5.0** — deterministic identity (required `courseId` / `lessonId` / `checkId`), telemetry catalog, canonical telemetry → xAPI mapper
+- **Framework:** **0.5.0** (ready to tag) — deterministic identity, telemetry catalog, canonical telemetry → xAPI mapper, lesson switch completion + Strict Mode–safe `<Lesson>` lifecycle
 - **Studio:** **blocked** — no implementation work until **[1.0.0 — Stable public API (framework)](#100--stable-public-api-framework)** is shipped (see [Studio development gate](#studio-development-gate))
 - **Focus (now):** LXPack adapter (0.6.x), CLI (0.7.x), block catalog (0.8.x), conformance (0.9.x), then 1.0.0
 

@@ -13,10 +13,15 @@ Published packages: `@lessonkit/core`, `@lessonkit/xapi`, `@lessonkit/accessibil
 
 | Item | Status |
 |------|--------|
+| `main` CI green ([workflow](.github/workflows/ci.yml): build, typecheck, test, coverage on Node 18 + 20) | Required |
 | All six `@lessonkit/*` packages at `0.5.0` in `package.json` | Required |
 | `@lessonkit/react` depends on `@lessonkit/*@0.5.0` | Required |
-| [CHANGELOG.md](CHANGELOG.md) `## [0.5.0]` includes Added / Changed / Breaking / Migration | Required |
+| [CHANGELOG.md](CHANGELOG.md) `## [0.5.0]` includes Added / Changed / Breaking / Fixed / Migration | Required |
 | `docs/IDENTITY.md`, `docs/TELEMETRY.md`, `docs/STUDIO_READINESS.md` 0.5.x items | Done in repo |
+| Examples/templates use required ids (`courseId`, `lessonId`, `checkId`) | Done in repo |
+| No pending `.changeset/*.md` files (would bump versions unexpectedly) | Required |
+| npm latest is `0.4.0` (0.5.0 not published yet) | Expected until tag |
+| Git tag `v0.5.0` does not exist yet | Create on publish |
 | `NPM_TOKEN` secret configured on GitHub | Required for Release workflow |
 
 **Breaking note for consumers:** `courseId`, `lessonId`, and `checkId` are required on core components (see [CHANGELOG.md](CHANGELOG.md) and [`docs/IDENTITY.md`](docs/IDENTITY.md)).

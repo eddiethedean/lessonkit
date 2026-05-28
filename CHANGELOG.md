@@ -24,6 +24,14 @@ All notable changes to the LessonKit monorepo are documented here. Published pac
 - **@lessonkit/core**: All telemetry events require `courseId`; event `data` shapes are discriminated by event name.
 - **@lessonkit/xapi**: Clients without `courseId` no longer emit lifecycle statements; default `urn:lessonkit` base id removed.
 
+### Fixed
+
+- **@lessonkit/react**: `setActiveLesson` completes the previously active lesson when switching ids (tab/programmatic navigation).
+- **@lessonkit/react**: `<Lesson>` defers completion on unmount so React Strict Mode does not emit spurious `lesson_completed` events in development.
+- **@lessonkit/react**: Progress state uses `createProgressController()` (single implementation shared with tests).
+- **@lessonkit/react**: Dev-only warnings for invalid `courseId` / `lessonId` / `checkId`; xAPI mapping skips invalid ids with a dev warning instead of throwing.
+- **@lessonkit/core**: Test asserts `identity-contract.v1.json` `idPattern` matches `ID_PATTERN`.
+
 ### Migration
 
 See [`docs/IDENTITY.md`](docs/IDENTITY.md): add `courseId`, `lessonId`, and `checkId` to your components; preserve IDs in source when regenerating.
