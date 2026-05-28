@@ -20,14 +20,12 @@ for:
 
 ## 0.4.x — Theme system + tokens
 
-- [ ] Token schema v1 exists in `@lessonkit/themes` (required tokens + allowed extensions)
-- [ ] CSS variables contract is documented (namespacing, required variables, override precedence)
-- [ ] `@lessonkit/react` exposes a stable `ThemeProvider` (or equivalent) with default theme
-- [ ] Example demonstrates theme override and dark/light switching
-- [ ] **Parity**: same tokens produce the same visual output in:
-  - [ ] React/Vite example (`examples/react-vite`)
-  - [ ] LXPack-packaged artifact (via `@lessonkit/lxpack`)
-- [ ] **Enumerable theming**: “what can be themed” is documented and discoverable for generators
+- [x] Token schema v1 exists in `@lessonkit/themes` (required tokens + allowed extensions)
+- [x] CSS variables contract is documented (namespacing, required variables, override precedence)
+- [x] `@lessonkit/react` exposes a stable `ThemeProvider` (or equivalent) with default theme
+- [x] Example demonstrates theme override and dark/light switching
+- [x] **Enumerable theming**: “what can be themed” is documented and discoverable for generators
+- [x] React/Vite example (`examples/react-vite`) consumes `--lk-*` tokens via `ThemeProvider`
 
 ## 0.5.x — Identity + semantics (IDs, telemetry, xAPI)
 
@@ -42,6 +40,7 @@ for:
 
 ## 0.6.x — Export surfaces + `@lessonkit/lxpack` adapter
 
+- [ ] **Theme parity**: same tokens produce the same visual output in React/Vite and LXPack-packaged artifacts (via `@lessonkit/lxpack` runtime `cssVariables` bridge)
 - [ ] `@lessonkit/lxpack` exists and is covered by tests
 - [ ] Adapter produces a valid LXPack project/interchange with stable ID mapping
 - [ ] Adapter prefers programmatic LXPack APIs where possible (structured results/errors)

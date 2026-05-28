@@ -54,6 +54,7 @@ npm -w lessonkit-example-react-vite run dev
 
 - [`CHANGELOG.md`](CHANGELOG.md): release history
 - [`RELEASING.md`](RELEASING.md): how to publish `@lessonkit/*` to npm
+- [`docs/THEMING.md`](docs/THEMING.md): design tokens, `--lk-*` CSS variables, and `ThemeProvider`
 - [`docs/ACCESSIBILITY.md`](docs/ACCESSIBILITY.md): keyboard and screen reader standards
 - [`PLAN.md`](https://github.com/eddiethedean/lessonkit/blob/main/PLAN.md): product vision and MVP scope
 - [`SPEC.md`](https://github.com/eddiethedean/lessonkit/blob/main/SPEC.md): technical spec and requirements
@@ -64,11 +65,12 @@ npm -w lessonkit-example-react-vite run dev
 
 ```tsx
 import type { TelemetryEvent } from "@lessonkit/core";
-import { Course, Lesson, Quiz, Scenario } from "@lessonkit/react";
+import { Course, Lesson, Quiz, Scenario, ThemeProvider } from "@lessonkit/react";
 import { createXAPIClient } from "@lessonkit/xapi";
 
 export default function SecurityTraining() {
   return (
+    <ThemeProvider mode="light" preset="default">
     <Course
       title="Cybersecurity Basics"
       courseId="cyber-basics"
@@ -99,6 +101,7 @@ export default function SecurityTraining() {
         />
       </Lesson>
     </Course>
+    </ThemeProvider>
   );
 }
 ```
@@ -114,7 +117,7 @@ export default function SecurityTraining() {
 
 ## Versioning
 
-Current monorepo release: **0.3.1** (see [CHANGELOG.md](CHANGELOG.md)).
+Current monorepo release: **0.4.0** (see [CHANGELOG.md](CHANGELOG.md)).
 
 LessonKit follows semver. The **0.x** series is expected to evolve quickly; breaking changes may
 still happen between minor releases.

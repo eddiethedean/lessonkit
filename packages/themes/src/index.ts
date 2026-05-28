@@ -1,30 +1,51 @@
-export type LessonkitTheme = {
-  name: string;
-  colors?: {
-    background?: string;
-    foreground?: string;
-    primary?: string;
-    muted?: string;
-  };
-  radius?: {
-    sm?: string;
-    md?: string;
-    lg?: string;
-  };
-};
+export type {
+  LessonkitTheme,
+  LessonkitThemeV1,
+  LessonkitThemeColors,
+  LessonkitThemeRadius,
+  LessonkitThemeShadows,
+  LessonkitThemeSpacing,
+  LessonkitThemeTypography,
+  PartialLessonkitThemeV1,
+  ThemeColorKey,
+  ThemeRadiusKey,
+  ThemeShadowKey,
+  ThemeSpacingKey,
+  ThemeTypographyKey,
+  ThemeValidationIssue,
+  ThemeValidationResult,
+} from "./schema";
 
-export const defaultTheme: LessonkitTheme = {
-  name: "default",
-  colors: {
-    background: "#ffffff",
-    foreground: "#111827",
-    primary: "#2563eb",
-    muted: "#6b7280"
-  },
-  radius: {
-    sm: "6px",
-    md: "10px",
-    lg: "14px"
-  }
-};
+export {
+  REQUIRED_COLOR_KEYS,
+  REQUIRED_RADIUS_KEYS,
+  REQUIRED_SHADOW_KEYS,
+  REQUIRED_SPACING_KEYS,
+  REQUIRED_TYPOGRAPHY_KEYS,
+  validateTheme,
+} from "./schema";
 
+export { mergeThemes } from "./merge";
+
+export {
+  colorExtraVarName,
+  colorVarName,
+  radiusVarName,
+  shadowVarName,
+  spacingVarName,
+  themeToCssDeclarationBlock,
+  themeToCssVariables,
+  tokenKeyToKebab,
+  typographyVarName,
+} from "./cssVariables";
+
+export {
+  brandTheme,
+  darkTheme,
+  defaultTheme,
+  getPresetTheme,
+  lightTheme,
+  type ThemePresetName,
+} from "./presets";
+
+export { buildThemeCatalog, type ThemeCatalogEntry } from "./catalog";

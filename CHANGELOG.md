@@ -3,6 +3,19 @@
 All notable changes to the LessonKit monorepo are documented here. Published packages use the
 [`@lessonkit/*`](https://www.npmjs.com/org/lessonkit) scope.
 
+## [0.4.0] - 2026-05-28
+
+### Added
+
+- **@lessonkit/themes**: Token schema v1 (colors, spacing, typography, radius, shadows), `validateTheme`, `mergeThemes`, `themeToCssVariables`, presets (`default`, `light`, `dark`, `brand`), `buildThemeCatalog`, published `theme-contract.v1.json` / `theme-catalog.v1.json`, optional `base.css`.
+- **@lessonkit/react**: `ThemeProvider`, `useTheme`, and theme types; injects `--lk-*` CSS variables on `:root` or a scoped element.
+- **Docs**: [`docs/THEMING.md`](docs/THEMING.md) — CSS variable contract, merge precedence, generator catalog paths.
+- **Examples/templates**: Showcase theme toggle (light / dark / system); styles migrated to `--lk-*` variables.
+
+### Changed
+
+- **@lessonkit/themes**: `LessonkitTheme` is now an alias for the full `LessonkitThemeV1` schema (breaking if you relied on the old partial shape without other token groups).
+
 ## [0.3.1] - 2026-05-28
 
 ### Fixed
@@ -53,5 +66,6 @@ Last version published to npm before 0.2.x.
 - Initial public packages: `@lessonkit/core`, `@lessonkit/react`, `@lessonkit/xapi`, `@lessonkit/accessibility`, `@lessonkit/themes`, `@lessonkit/cli`.
 - Tag-based publish workflow and CI checks (build, typecheck, test, coverage).
 
+[0.4.0]: https://github.com/eddiethedean/lessonkit/compare/v0.3.1...v0.4.0
 [0.3.1]: https://github.com/eddiethedean/lessonkit/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/eddiethedean/lessonkit/compare/v0.1.1...v0.3.0

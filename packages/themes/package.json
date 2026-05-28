@@ -1,6 +1,6 @@
 {
   "name": "@lessonkit/themes",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "private": false,
   "description": "Theme primitives and tokens for LessonKit.",
   "license": "Apache-2.0",
@@ -27,17 +27,23 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
-    }
+    },
+    "./theme-contract.v1.json": "./theme-contract.v1.json",
+    "./theme-catalog.v1.json": "./theme-catalog.v1.json",
+    "./base.css": "./base.css"
   },
   "files": [
-    "dist"
+    "dist",
+    "theme-contract.v1.json",
+    "theme-catalog.v1.json",
+    "base.css"
   ],
   "scripts": {
     "build": "tsup src/index.ts --format esm,cjs --dts",
     "dev": "tsup src/index.ts --format esm,cjs --dts --watch",
     "prepublishOnly": "npm run build",
     "typecheck": "tsc -p tsconfig.json",
-    "test": "vitest run --passWithNoTests",
+    "test": "vitest run",
     "test:coverage": "vitest run --coverage --passWithNoTests=false",
     "lint": "echo \"(no lint configured yet)\""
   },

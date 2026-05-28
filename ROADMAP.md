@@ -28,9 +28,9 @@ this repo until that gate is met.
 
 ## Status
 
-- **Framework:** **0.3.0** — core components, hooks, telemetry batching, xAPI primitives, provider lifecycle hardening, example + template
+- **Framework:** **0.4.0** — theme tokens, CSS variable contract, `ThemeProvider`, generator catalog JSON
 - **Studio:** **blocked** — no implementation work until **[1.0.0 — Stable public API (framework)](#100--stable-public-api-framework)** is shipped (see [Studio development gate](#studio-development-gate))
-- **Focus (now):** complete framework milestones only (`@lessonkit/react`, analytics, a11y, themes, CLI, LXPack adapter, xAPI packaging, plugins as scoped, then 1.0.0)
+- **Focus (now):** complete framework milestones only (identity model 0.5.x, LXPack adapter, CLI, block catalog, conformance, then 1.0.0)
 
 ## Guiding principles
 
@@ -137,7 +137,8 @@ this repo until that gate is met.
 - **AI/dev readiness**:
   - theming surface is **documented and enumerable** (a generator can discover what is themeable without reading source)
 - **Parity requirement**:
-  - exported React/Vite builds and LXPack-packaged artifacts produce the same visual output given the same tokens
+  - React/Vite apps use the `--lk-*` contract via `ThemeProvider` (0.4.0)
+  - LXPack-packaged artifact parity ships with `@lessonkit/lxpack` in **0.6.x**
 
 ---
 

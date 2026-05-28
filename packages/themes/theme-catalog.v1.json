@@ -1,0 +1,187 @@
+{
+  "schemaVersion": 1,
+  "entries": [
+    {
+      "tokenPath": "colors.background",
+      "cssVariable": "--lk-color-background",
+      "type": "color",
+      "required": true,
+      "description": "Page and shell background"
+    },
+    {
+      "tokenPath": "colors.foreground",
+      "cssVariable": "--lk-color-foreground",
+      "type": "color",
+      "required": true,
+      "description": "Primary text color"
+    },
+    {
+      "tokenPath": "colors.primary",
+      "cssVariable": "--lk-color-primary",
+      "type": "color",
+      "required": true,
+      "description": "Brand and interactive accent"
+    },
+    {
+      "tokenPath": "colors.muted",
+      "cssVariable": "--lk-color-muted",
+      "type": "color",
+      "required": true,
+      "description": "Secondary text and hints"
+    },
+    {
+      "tokenPath": "colors.border",
+      "cssVariable": "--lk-color-border",
+      "type": "color",
+      "required": true,
+      "description": "Borders and dividers"
+    },
+    {
+      "tokenPath": "colors.panel",
+      "cssVariable": "--lk-color-panel",
+      "type": "color",
+      "required": true,
+      "description": "Card and panel surfaces"
+    },
+    {
+      "tokenPath": "colors.danger",
+      "cssVariable": "--lk-color-danger",
+      "type": "color",
+      "required": true,
+      "description": "Errors and high-risk states"
+    },
+    {
+      "tokenPath": "colors.success",
+      "cssVariable": "--lk-color-success",
+      "type": "color",
+      "required": true,
+      "description": "Success and positive feedback"
+    },
+    {
+      "tokenPath": "colors.warning",
+      "cssVariable": "--lk-color-warning",
+      "type": "color",
+      "required": true,
+      "description": "Warnings and caution states"
+    },
+    {
+      "tokenPath": "colors.extra.*",
+      "cssVariable": "--lk-color-extra-{key}",
+      "type": "color-extra",
+      "required": false,
+      "description": "Optional extension colors (non-stable until 1.0)"
+    },
+    {
+      "tokenPath": "spacing.xs",
+      "cssVariable": "--lk-space-xs",
+      "type": "spacing",
+      "required": true,
+      "description": "Extra-small spacing"
+    },
+    {
+      "tokenPath": "spacing.sm",
+      "cssVariable": "--lk-space-sm",
+      "type": "spacing",
+      "required": true,
+      "description": "Small spacing"
+    },
+    {
+      "tokenPath": "spacing.md",
+      "cssVariable": "--lk-space-md",
+      "type": "spacing",
+      "required": true,
+      "description": "Medium spacing"
+    },
+    {
+      "tokenPath": "spacing.lg",
+      "cssVariable": "--lk-space-lg",
+      "type": "spacing",
+      "required": true,
+      "description": "Large spacing"
+    },
+    {
+      "tokenPath": "spacing.xl",
+      "cssVariable": "--lk-space-xl",
+      "type": "spacing",
+      "required": true,
+      "description": "Extra-large spacing"
+    },
+    {
+      "tokenPath": "typography.fontFamily",
+      "cssVariable": "--lk-font-family",
+      "type": "typography",
+      "required": true,
+      "description": "Base font stack"
+    },
+    {
+      "tokenPath": "typography.fontSizeBase",
+      "cssVariable": "--lk-font-size-base",
+      "type": "typography",
+      "required": true,
+      "description": "Base font size"
+    },
+    {
+      "tokenPath": "typography.lineHeightBase",
+      "cssVariable": "--lk-line-height-base",
+      "type": "typography",
+      "required": true,
+      "description": "Base line height"
+    },
+    {
+      "tokenPath": "typography.fontWeightNormal",
+      "cssVariable": "--lk-font-weight-normal",
+      "type": "typography",
+      "required": true,
+      "description": "Normal text weight"
+    },
+    {
+      "tokenPath": "typography.fontWeightStrong",
+      "cssVariable": "--lk-font-weight-strong",
+      "type": "typography",
+      "required": true,
+      "description": "Headings and emphasis weight"
+    },
+    {
+      "tokenPath": "radius.sm",
+      "cssVariable": "--lk-radius-sm",
+      "type": "radius",
+      "required": true,
+      "description": "Small corner radius"
+    },
+    {
+      "tokenPath": "radius.md",
+      "cssVariable": "--lk-radius-md",
+      "type": "radius",
+      "required": true,
+      "description": "Medium corner radius"
+    },
+    {
+      "tokenPath": "radius.lg",
+      "cssVariable": "--lk-radius-lg",
+      "type": "radius",
+      "required": true,
+      "description": "Large corner radius"
+    },
+    {
+      "tokenPath": "shadows.sm",
+      "cssVariable": "--lk-shadow-sm",
+      "type": "shadow",
+      "required": true,
+      "description": "Small elevation shadow"
+    },
+    {
+      "tokenPath": "shadows.md",
+      "cssVariable": "--lk-shadow-md",
+      "type": "shadow",
+      "required": true,
+      "description": "Medium elevation shadow"
+    },
+    {
+      "tokenPath": "shadows.lg",
+      "cssVariable": "--lk-shadow-lg",
+      "type": "shadow",
+      "required": true,
+      "description": "Large elevation shadow"
+    }
+  ]
+}

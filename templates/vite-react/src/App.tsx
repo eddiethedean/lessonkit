@@ -1,5 +1,5 @@
 import React from "react";
-import { Course, Lesson, Quiz, Scenario } from "@lessonkit/react";
+import { Course, Lesson, Quiz, Scenario, ThemeProvider } from "@lessonkit/react";
 import type { TelemetryEvent } from "@lessonkit/core";
 import type { XAPIStatement } from "@lessonkit/xapi";
 
@@ -18,18 +18,26 @@ const courseConfig = {
 
 export default function App() {
   return (
-    <Course title="My LessonKit Course" courseId="my-course" config={courseConfig}>
-      <Lesson title="My first lesson" lessonId="lesson-1">
-        <Scenario>
-          <p>Replace this content with your training material.</p>
-        </Scenario>
+    <ThemeProvider
+      preset="dark"
+      mode="dark"
+      theme={{ colors: { primary: "#7c3aed" } }}
+    >
+      <div className="app-shell">
+        <Course title="My LessonKit Course" courseId="my-course" config={courseConfig}>
+          <Lesson title="My first lesson" lessonId="lesson-1">
+            <Scenario>
+              <p>Replace this content with your training material.</p>
+            </Scenario>
 
-        <Quiz
-          question="Ready to build?"
-          choices={["Not yet", "Yes"]}
-          answer="Yes"
-        />
-      </Lesson>
-    </Course>
+            <Quiz
+              question="Ready to build?"
+              choices={["Not yet", "Yes"]}
+              answer="Yes"
+            />
+          </Lesson>
+        </Course>
+      </div>
+    </ThemeProvider>
   );
 }

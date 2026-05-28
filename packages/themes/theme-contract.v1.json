@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lessonkit.dev/schemas/theme-contract.v1.json",
+  "title": "LessonkitThemeV1",
+  "description": "LessonKit design token schema v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["name", "colors", "spacing", "typography", "radius", "shadows"],
+  "properties": {
+    "name": { "type": "string", "minLength": 1 },
+    "colors": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "background",
+        "foreground",
+        "primary",
+        "muted",
+        "border",
+        "panel",
+        "danger",
+        "success",
+        "warning"
+      ],
+      "properties": {
+        "background": { "type": "string", "minLength": 1 },
+        "foreground": { "type": "string", "minLength": 1 },
+        "primary": { "type": "string", "minLength": 1 },
+        "muted": { "type": "string", "minLength": 1 },
+        "border": { "type": "string", "minLength": 1 },
+        "panel": { "type": "string", "minLength": 1 },
+        "danger": { "type": "string", "minLength": 1 },
+        "success": { "type": "string", "minLength": 1 },
+        "warning": { "type": "string", "minLength": 1 },
+        "extra": {
+          "type": "object",
+          "additionalProperties": { "type": "string", "minLength": 1 },
+          "description": "Optional extension colors (non-stable until 1.0)"
+        }
+      }
+    },
+    "spacing": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["xs", "sm", "md", "lg", "xl"],
+      "properties": {
+        "xs": { "type": "string", "minLength": 1 },
+        "sm": { "type": "string", "minLength": 1 },
+        "md": { "type": "string", "minLength": 1 },
+        "lg": { "type": "string", "minLength": 1 },
+        "xl": { "type": "string", "minLength": 1 }
+      }
+    },
+    "typography": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "fontFamily",
+        "fontSizeBase",
+        "lineHeightBase",
+        "fontWeightNormal",
+        "fontWeightStrong"
+      ],
+      "properties": {
+        "fontFamily": { "type": "string", "minLength": 1 },
+        "fontSizeBase": { "type": "string", "minLength": 1 },
+        "lineHeightBase": { "type": "string", "minLength": 1 },
+        "fontWeightNormal": { "type": "string", "minLength": 1 },
+        "fontWeightStrong": { "type": "string", "minLength": 1 }
+      }
+    },
+    "radius": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sm", "md", "lg"],
+      "properties": {
+        "sm": { "type": "string", "minLength": 1 },
+        "md": { "type": "string", "minLength": 1 },
+        "lg": { "type": "string", "minLength": 1 }
+      }
+    },
+    "shadows": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sm", "md", "lg"],
+      "properties": {
+        "sm": { "type": "string", "minLength": 1 },
+        "md": { "type": "string", "minLength": 1 },
+        "lg": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}

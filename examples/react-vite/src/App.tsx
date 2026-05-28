@@ -1,5 +1,16 @@
 import React from "react";
-import { Course, Lesson, ProgressTracker, Quiz, Scenario, useCompletion, useLessonkit, useTracking } from "@lessonkit/react";
+import {
+  Course,
+  Lesson,
+  ProgressTracker,
+  Quiz,
+  Scenario,
+  ThemeProvider,
+  useCompletion,
+  useLessonkit,
+  useTracking,
+  type ThemeMode,
+} from "@lessonkit/react";
 import type { TelemetryEvent } from "@lessonkit/core";
 import type { XAPIStatement } from "@lessonkit/xapi";
 
@@ -7,6 +18,7 @@ const COURSE_ID = "react-showcase-security";
 
 export default function App() {
   const [step, setStep] = React.useState(0);
+  const [themeMode, setThemeMode] = React.useState<ThemeMode>("dark");
 
   const courseConfig = React.useMemo(
     () => ({
@@ -25,11 +37,12 @@ export default function App() {
   );
 
   return (
-    <div className="app-shell">
-      <Course title="React-Native Security Training (Showcase)" courseId={COURSE_ID} config={courseConfig}>
-        <ProgressTracker />
+    <ThemeProvider mode={themeMode} preset="brand">
+      <div className="app-shell">
+        <Course title="React-Native Security Training (Showcase)" courseId={COURSE_ID} config={courseConfig}>
+          <ProgressTracker />
 
-        <CourseNav step={step} setStep={setStep} />
+          <CourseNav step={step} setStep={setStep} themeMode={themeMode} onThemeModeChange={setThemeMode} />
 
         {step === 0 ? (
           <Lesson title="1) Adaptive inbox triage" lessonId="inbox-triage">
@@ -71,12 +84,36 @@ export default function App() {
             <FinishCourse />
           </Lesson>
         ) : null}
-      </Course>
+        </Course>
+      </div>
+    </ThemeProvider>
+  );
+}
+
+function ThemeToggle(props: { mode: ThemeMode; onChange: (mode: ThemeMode) => void }) {
+  return (
+    <div className="theme-toggle" role="group" aria-label="Theme">
+      {(["light", "dark", "system"] as const).map((m) => (
+        <button
+          key={m}
+          type="button"
+          aria-pressed={props.mode === m}
+          className={props.mode === m ? "theme-toggle-active" : undefined}
+          onClick={() => props.onChange(m)}
+        >
+          {m === "system" ? "System" : m === "light" ? "Light" : "Dark"}
+        </button>
+      ))}
     </div>
   );
 }
 
-function CourseNav(props: { step: number; setStep: (n: number) => void }) {
+function CourseNav(props: {
+  step: number;
+  setStep: (n: number) => void;
+  themeMode: ThemeMode;
+  onThemeModeChange: (mode: ThemeMode) => void;
+}) {
   const { progress } = useLessonkit();
   const completed = progress.completedLessonIds.size;
 
@@ -93,9 +130,10 @@ function CourseNav(props: { step: number; setStep: (n: number) => void }) {
           Next
         </button>
       </div>
+      <ThemeToggle mode={props.themeMode} onChange={props.onThemeModeChange} />
       <p className="muted">
         Navigation intentionally unmounts/mounts lessons so you can see lifecycle tracking (start/complete + time
-        on task) working like a real app.
+        on task) working like a real app. Use the theme controls to switch LessonKit tokens (light / dark / system).
       </p>
     </aside>
   );

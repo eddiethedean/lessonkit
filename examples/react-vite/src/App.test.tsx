@@ -13,6 +13,16 @@ describe("example App", () => {
     expect(true).toBe(true);
   });
 
+  it("theme toggle updates data-lk-theme on the document", () => {
+    const spy = vi.spyOn(console, "log").mockImplementation(() => {});
+    const { getByRole } = render(<App />);
+    fireEvent.click(getByRole("button", { name: "Light" }));
+    expect(document.documentElement.getAttribute("data-lk-theme")).toBe("light");
+    fireEvent.click(getByRole("button", { name: "Dark" }));
+    expect(document.documentElement.getAttribute("data-lk-theme")).toBe("dark");
+    spy.mockRestore();
+  });
+
   it(
     "lets you triage inbox, navigate lessons, unlock hints, and complete the course",
     async () => {

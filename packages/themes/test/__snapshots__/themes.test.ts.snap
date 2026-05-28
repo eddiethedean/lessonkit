@@ -1,0 +1,31 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`@lessonkit/themes snapshots > defaultTheme css variables 1`] = `
+{
+  "--lk-color-background": "#ffffff",
+  "--lk-color-border": "rgba(17, 24, 39, 0.12)",
+  "--lk-color-danger": "#dc2626",
+  "--lk-color-foreground": "#111827",
+  "--lk-color-muted": "#6b7280",
+  "--lk-color-panel": "rgba(17, 24, 39, 0.04)",
+  "--lk-color-primary": "#2563eb",
+  "--lk-color-success": "#16a34a",
+  "--lk-color-warning": "#d97706",
+  "--lk-font-family": "ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif",
+  "--lk-font-size-base": "16px",
+  "--lk-font-weight-normal": "400",
+  "--lk-font-weight-strong": "700",
+  "--lk-line-height-base": "1.55",
+  "--lk-radius-lg": "16px",
+  "--lk-radius-md": "10px",
+  "--lk-radius-sm": "6px",
+  "--lk-shadow-lg": "0 18px 50px rgba(17, 24, 39, 0.14)",
+  "--lk-shadow-md": "0 8px 24px rgba(17, 24, 39, 0.12)",
+  "--lk-shadow-sm": "0 1px 2px rgba(0, 0, 0, 0.06)",
+  "--lk-space-lg": "18px",
+  "--lk-space-md": "12px",
+  "--lk-space-sm": "8px",
+  "--lk-space-xl": "24px",
+  "--lk-space-xs": "4px",
+}
+`;

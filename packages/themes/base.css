@@ -1,0 +1,30 @@
+/*
+  Optional LessonKit base styles — uses only --lk-* CSS variables.
+  Import: @import "@lessonkit/themes/base.css";
+*/
+
+.lk-panel {
+  border: 1px solid var(--lk-color-border);
+  border-radius: var(--lk-radius-lg);
+  padding: var(--lk-space-lg);
+  background: var(--lk-color-panel);
+  box-shadow: var(--lk-shadow-lg);
+}
+
+.lk-button {
+  appearance: none;
+  border: 1px solid var(--lk-color-border);
+  background: var(--lk-color-panel);
+  color: var(--lk-color-foreground);
+  border-radius: var(--lk-radius-md);
+  padding: var(--lk-space-sm) var(--lk-space-md);
+  font-family: var(--lk-font-family);
+  font-size: var(--lk-font-size-base);
+  font-weight: var(--lk-font-weight-strong);
+  cursor: pointer;
+}
+
+.lk-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}

@@ -17,7 +17,7 @@ npm install @lessonkit/react react react-dom
 ```tsx
 import { useMemo } from "react";
 import type { TelemetryEvent } from "@lessonkit/core";
-import { Course, Lesson, Quiz, Scenario, ProgressTracker } from "@lessonkit/react";
+import { Course, Lesson, Quiz, Scenario, ProgressTracker, ThemeProvider } from "@lessonkit/react";
 import type { XAPIStatement } from "@lessonkit/xapi";
 
 export default function App() {
@@ -34,6 +34,7 @@ export default function App() {
   );
 
   return (
+    <ThemeProvider mode="light">
     <Course title="Cybersecurity Basics" courseId="cyber-basics" config={config}>
       <ProgressTracker />
 
@@ -49,11 +50,12 @@ export default function App() {
         />
       </Lesson>
     </Course>
+    </ThemeProvider>
   );
 }
 ```
 
-## API (0.3.0)
+## API (0.4.0)
 
 ### Components
 
@@ -71,6 +73,12 @@ export default function App() {
 - `useTracking`
 - `useQuizState`
 - `useCompletion`
+- `useTheme`
+
+### Theming
+
+- `ThemeProvider` — injects `--lk-*` CSS variables (see [`docs/THEMING.md`](../../docs/THEMING.md))
+- Props: `preset`, `mode` (`light` | `dark` | `system`), `theme` (partial override), `target` (`document` | `element`)
 
 ## Notes
 
@@ -84,4 +92,5 @@ export default function App() {
 - If you omit `session.sessionId`, the provider reuses a tab-scoped id via `sessionStorage` so React
   Strict Mode remounts do not split analytics sessions in development.
 - Accessibility guidance lives in [`docs/ACCESSIBILITY.md`](../../docs/ACCESSIBILITY.md).
+- Theming and token catalog: [`docs/THEMING.md`](../../docs/THEMING.md).
 

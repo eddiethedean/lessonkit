@@ -11,9 +11,10 @@
     "test:coverage": "vitest run --coverage --passWithNoTests=false"
   },
   "dependencies": {
-    "@lessonkit/core": "0.3.1",
-    "@lessonkit/react": "0.3.1",
-    "@lessonkit/xapi": "0.3.1",
+    "@lessonkit/core": "file:../../packages/core",
+    "@lessonkit/react": "file:../../packages/react",
+    "@lessonkit/themes": "file:../../packages/themes",
+    "@lessonkit/xapi": "file:../../packages/xapi",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },

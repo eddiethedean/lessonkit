@@ -15,6 +15,11 @@ Placeholders live here until the full docs stack is scaffolded:
 - [`docs/storybook/`](https://github.com/eddiethedean/lessonkit/tree/main/docs/storybook)
 - [`docs/site/`](https://github.com/eddiethedean/lessonkit/tree/main/docs/site)
 
+## Guides
+
+- [`THEMING.md`](THEMING.md) — design tokens, `--lk-*` CSS variables, and `ThemeProvider`
+- [`ACCESSIBILITY.md`](ACCESSIBILITY.md) — keyboard and screen reader standards
+
 ## Integration
 
 - [`LXPACK_UPGRADES_FOR_LESSONKIT.md`](https://github.com/eddiethedean/lessonkit/blob/main/docs/LXPACK_UPGRADES_FOR_LESSONKIT.md) — proposed LXPack changes to support LessonKit packaging
