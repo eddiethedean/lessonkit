@@ -16,6 +16,7 @@ for:
 - **Deterministic outputs**: builds/exports don’t rely on hidden randomness; regeneration yields minimal diffs.
 - **Dual export parity**: React/Vite and LXPack/LMS artifacts match behavior and theme.
 - **Machine-readable surfaces**: generators can discover supported primitives and constraints without scraping source.
+- **Reusable building blocks**: components and themes are designed to be shared across projects (portable defaults, predictable override rules).
 
 ## 0.4.x — Theme system + tokens
 

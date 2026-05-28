@@ -56,6 +56,22 @@ Comparable to:
 
 ---
 
+# Reuse: components and themes
+
+LessonKit should make it easy to **reuse learning interactions** across:
+
+- multiple courses within the same org
+- multiple apps (internal training portals, standalone web delivery, LMS delivery)
+- AI-assisted code generation workflows
+
+This requires:
+
+- **Composable components**: stable `@lessonkit/react` primitives that can be assembled into many course shapes.
+- **Reusable themes**: a token-based theme system (`@lessonkit/themes`) with a documented CSS variables contract and predictable override/merge rules.
+- **Portable defaults**: a default theme and reference examples that can be copied and modified without adopting a complex build system.
+
+---
+
 # Initial MVP
 
 ## Components
