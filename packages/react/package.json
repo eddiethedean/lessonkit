@@ -37,8 +37,8 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsup src/index.tsx --format esm,cjs --dts --external react --external react-dom",
-    "dev": "tsup src/index.tsx --format esm,cjs --dts --watch --external react --external react-dom",
+    "build": "tsup src/index.tsx --format esm,cjs --dts --external react --external react-dom --external @lessonkit/accessibility",
+    "dev": "tsup src/index.tsx --format esm,cjs --dts --watch --external react --external react-dom --external @lessonkit/accessibility",
     "prepublishOnly": "npm run build",
     "typecheck": "tsc -p tsconfig.json",
     "test": "vitest run --passWithNoTests",
@@ -50,6 +50,7 @@
     "react-dom": ">=18"
   },
   "dependencies": {
+    "@lessonkit/accessibility": "0.2.1",
     "@lessonkit/core": "0.2.1",
     "@lessonkit/xapi": "0.2.1"
   },

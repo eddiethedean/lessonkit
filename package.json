@@ -10,7 +10,7 @@
   ],
   "scripts": {
     "build": "npm run build:packages && npm run build:apps",
-    "build:packages": "npm run -w @lessonkit/core build && npm run -w @lessonkit/xapi build && npm run -w @lessonkit/react build && npm run -w @lessonkit/accessibility build && npm run -w @lessonkit/themes build && npm run -w @lessonkit/cli build",
+    "build:packages": "npm run -w @lessonkit/core build && npm run -w @lessonkit/xapi build && npm run -w @lessonkit/accessibility build && npm run -w @lessonkit/react build && npm run -w @lessonkit/themes build && npm run -w @lessonkit/cli build",
     "build:apps": "npm run -w lessonkit-example-react-vite build && npm run -w lessonkit-template-vite-react build",
     "dev": "npm run --workspaces --if-present dev",
     "test": "npm run --workspaces --if-present test",

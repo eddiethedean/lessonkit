@@ -1,4 +1,5 @@
-import React, { useEffect, useId, useMemo, useState } from "react";
+import React, { useEffect, useId, useMemo, useRef, useState } from "react";
+import { visuallyHiddenStyle } from "@lessonkit/accessibility";
 import type { CourseId, LessonId } from "@lessonkit/core";
 import { LessonkitProvider } from "./context";
 import { useCompletion, useLessonkit, useQuizState } from "./hooks";
@@ -29,7 +30,7 @@ export function Lesson(props: { title: string; lessonId?: LessonId; children: Re
   const { completeLesson } = useCompletion();
   // `useId()` is SSR/hydration-stable; avoid randomness for implicit IDs.
   const reactId = useId();
-  const generatedId = useMemo(() => `lesson-${sanitizeId(reactId)}`, [reactId]);
+  const generatedId = useMemo(() => `lesson-${sanitizeLessonId(reactId)}`, [reactId]);
   const id = props.lessonId ?? generatedId;
 
   useEffect(() => {
@@ -76,13 +77,14 @@ export function KnowledgeCheck(props: {
 export function Quiz(props: { question: string; choices: string[]; answer: string }) {
   const quiz = useQuizState();
   const [selected, setSelected] = useState<string | null>(null);
+  const completedRef = useRef(false);
   const questionId = useId();
 
   return (
     <section aria-label="Quiz">
       <p id={questionId}>{props.question}</p>
       <fieldset aria-labelledby={questionId}>
-        <legend className="sr-only">Quiz choices</legend>
+        <legend style={visuallyHiddenStyle}>Quiz choices</legend>
         {props.choices.map((c, i) => (
           <label key={`${questionId}-${i}`} style={{ display: "block" }}>
             <input
@@ -92,7 +94,12 @@ export function Quiz(props: { question: string; choices: string[]; answer: strin
               checked={selected === c}
               onChange={() => {
                 setSelected(c);
-                quiz.answer({ question: props.question, choice: c, correct: c === props.answer });
+                const correct = c === props.answer;
+                quiz.answer({ question: props.question, choice: c, correct });
+                if (correct && !completedRef.current) {
+                  completedRef.current = true;
+                  quiz.complete({ score: 1, maxScore: 1 });
+                }
               }}
             />
             {c}
@@ -118,8 +125,8 @@ export function ProgressTracker() {
   );
 }
 
-function sanitizeId(id: string): string {
-  // React's `useId()` can include characters like ':'; keep IDs URL/attr-friendly.
+/** Sanitize React `useId()` for lesson identifiers (exported for tests). */
+export function sanitizeLessonId(id: string): string {
   const s = id.replace(/[^a-zA-Z0-9_-]/g, "");
   return s.length ? s : "id";
 }

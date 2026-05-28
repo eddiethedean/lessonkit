@@ -53,7 +53,7 @@ export default function App() {
 }
 ```
 
-## API (0.2.0)
+## API (0.2.1)
 
 ### Components
 
@@ -79,4 +79,8 @@ export default function App() {
 - `Course` accepts a `config` prop that is passed through to `LessonkitProvider` (tracking sink,
   optional `xapi.transport` or custom `xapi.client`, session metadata). Hoist `config` with `useMemo`
   so tracking/xAPI clients are not recreated every render.
+- When a `<Lesson>` unmounts (for example, wizard navigation), it automatically calls `completeLesson`
+  for that lesson. Use stable `lessonId` values so completion and time-on-task telemetry stay consistent.
+- If you omit `session.sessionId`, the provider reuses a tab-scoped id via `sessionStorage` so React
+  Strict Mode remounts do not split analytics sessions in development.
 

@@ -5,7 +5,10 @@ import type { TelemetryEvent } from "@lessonkit/core";
 import { LessonkitProvider, useLessonkit } from "../src";
 
 describe("@lessonkit/react provider dispose regression", () => {
-  afterEach(() => cleanup());
+  afterEach(() => {
+    cleanup();
+    sessionStorage.clear();
+  });
 
   it("does not dispose tracking client on lesson transitions", async () => {
     const dispose = vi.fn();
@@ -36,8 +39,9 @@ describe("@lessonkit/react provider dispose regression", () => {
       return <div>driver</div>;
     }
 
+    const sink = vi.fn();
     const { unmount } = render(
-      <Provider config={{ tracking: { sink: () => {} } }}>
+      <Provider config={{ tracking: { sink } }}>
         <Driver />
       </Provider>,
     );
@@ -46,9 +50,11 @@ describe("@lessonkit/react provider dispose regression", () => {
       expect(runtime.progress.activeLessonId).toBe("lesson-2");
     });
 
+    // Allow Strict Mode / initial client swap to settle; lesson transitions must not dispose.
+    dispose.mockClear();
     expect(dispose).not.toHaveBeenCalled();
     unmount();
-    expect(dispose).not.toHaveBeenCalled();
+    expect(dispose).toHaveBeenCalledTimes(1);
 
     vi.unmock("@lessonkit/core");
   });
@@ -93,27 +99,70 @@ describe("@lessonkit/react provider dispose regression", () => {
 
   it("flushes batched events on unmount under StrictMode", async () => {
     const events: TelemetryEvent[] = [];
+    const sink = (e: TelemetryEvent) => {
+      events.push(e);
+    };
+
+    function Driver() {
+      const { track } = useLessonkit();
+      React.useEffect(() => {
+        track("interaction", { kind: "buffered" });
+      }, [track]);
+      return null;
+    }
+
     const { unmount } = render(
       <React.StrictMode>
         <LessonkitProvider
           config={{
             tracking: {
-              sink: (e: TelemetryEvent) => {
-                events.push(e);
-              },
+              sink,
               batch: { enabled: true, flushIntervalMs: 60_000, maxBatchSize: 100 },
             },
           }}
         >
-          <div>child</div>
+          <Driver />
         </LessonkitProvider>
       </React.StrictMode>,
     );
 
     await waitFor(() => expect(events.some((e) => e.name === "course_started")).toBe(true));
+    const interactionsBeforeUnmount = events.filter((e) => e.name === "interaction").length;
 
     unmount();
-    await waitFor(() => expect(events.some((e) => e.name === "course_started")).toBe(true));
+    await waitFor(() =>
+      expect(events.filter((e) => e.name === "interaction").length).toBeGreaterThan(interactionsBeforeUnmount),
+    );
+  });
+
+  it("emits course_started once and keeps sessionId across StrictMode remount", async () => {
+    const events: TelemetryEvent[] = [];
+    const sessionIds = new Set<string>();
+
+    function Spy() {
+      const { session } = useLessonkit();
+      sessionIds.add(session.sessionId);
+      return null;
+    }
+
+    render(
+      <React.StrictMode>
+        <LessonkitProvider
+          config={{
+            courseId: "course-strict",
+            tracking: { sink: (e: TelemetryEvent) => void events.push(e) },
+          }}
+        >
+          <Spy />
+        </LessonkitProvider>
+      </React.StrictMode>,
+    );
+
+    await waitFor(() => expect(events.filter((e) => e.name === "course_started").length).toBe(1));
+    expect(sessionIds.size).toBe(1);
+    const started = events.find((e) => e.name === "course_started");
+    expect(started?.sessionId).toBe([...sessionIds][0]);
+    expect(started?.courseId).toBe("course-strict");
   });
 
   it("completeLesson is idempotent for telemetry", async () => {

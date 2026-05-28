@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { focusFirst, prefersReducedMotion } from "../src";
+import { focusFirst, prefersReducedMotion, visuallyHiddenStyle } from "../src";
 
 describe("@lessonkit/accessibility", () => {
   afterEach(() => {
@@ -20,6 +20,11 @@ describe("@lessonkit/accessibility", () => {
 
   it("focusFirst returns false for null container", () => {
     expect(focusFirst(null)).toBe(false);
+  });
+
+  it("visuallyHiddenStyle clips content for screen readers only", () => {
+    expect(visuallyHiddenStyle.position).toBe("absolute");
+    expect(visuallyHiddenStyle.overflow).toBe("hidden");
   });
 
   it("focusFirst focuses first matching element", () => {

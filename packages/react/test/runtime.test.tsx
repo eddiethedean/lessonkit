@@ -6,7 +6,10 @@ import type { TelemetryEvent } from "@lessonkit/core";
 import type { XAPIStatement, XAPITransport } from "@lessonkit/xapi";
 
 describe("@lessonkit/react runtime", () => {
-  afterEach(() => cleanup());
+  afterEach(() => {
+    cleanup();
+    sessionStorage.clear();
+  });
 
   it("throws a helpful error when used without provider", () => {
     function Bad() {
@@ -37,11 +40,13 @@ describe("@lessonkit/react runtime", () => {
       </Course>,
     );
 
-    // Select A (incorrect)
     fireEvent.click(getByLabelText("A"));
+
+    fireEvent.click(getByLabelText("B"));
 
     await waitFor(() => {
       expect(events.some((e) => e.name === "quiz_answered")).toBe(true);
+      expect(events.some((e) => e.name === "quiz_completed")).toBe(true);
     });
 
     const quizAnswered = events.find((e) => e.name === "quiz_answered");
@@ -211,6 +216,12 @@ describe("@lessonkit/react runtime", () => {
     expect(started?.lessonId).toMatch(/^lesson-[a-zA-Z0-9_-]+$/);
   });
 
+  it("sanitizeLessonId returns fallback for empty input", async () => {
+    const { sanitizeLessonId } = await import("../src/components");
+    expect(sanitizeLessonId("::: ")).toBe("id");
+    expect(sanitizeLessonId("lesson-1")).toBe("lesson-1");
+  });
+
   it("completeCourse is idempotent for telemetry", async () => {
     const events: TelemetryEvent[] = [];
     function Driver() {
@@ -329,6 +340,82 @@ describe("@lessonkit/react runtime", () => {
 
     // cover unmount lifecycle path too
     unmount();
+  });
+
+  it("flushes queued xAPI statements when transport changes", async () => {
+    const statements: XAPIStatement[] = [];
+    const failingTransport = vi.fn(async () => {
+      throw new Error("network");
+    });
+    const okTransport = vi.fn(async (s: XAPIStatement) => {
+      statements.push(s);
+    });
+
+    const { rerender } = render(
+      <Course
+        title="Course"
+        courseId="course-1"
+        config={{ xapi: { transport: failingTransport } }}
+      >
+        <Lesson title="Lesson" lessonId="lesson-1">
+          <div>child</div>
+        </Lesson>
+      </Course>,
+    );
+
+    await waitFor(() => expect(failingTransport).toHaveBeenCalled());
+    expect(statements).toHaveLength(0);
+
+    rerender(
+      <Course
+        title="Course"
+        courseId="course-1"
+        config={{ xapi: { transport: okTransport } }}
+      >
+        <Lesson title="Lesson" lessonId="lesson-1">
+          <div>child</div>
+        </Lesson>
+      </Course>,
+    );
+
+    await waitFor(() => expect(statements.length).toBeGreaterThan(0));
+  });
+
+  it("resolveSessionId falls back when sessionStorage is unavailable", async () => {
+    const events: TelemetryEvent[] = [];
+    const original = globalThis.sessionStorage;
+    Object.defineProperty(globalThis, "sessionStorage", {
+      value: undefined,
+      configurable: true,
+    });
+
+    render(
+      <LessonkitProvider config={{ tracking: { sink: (e: TelemetryEvent) => void events.push(e) } }}>
+        <div>child</div>
+      </LessonkitProvider>,
+    );
+
+    await waitFor(() => expect(events.some((e) => e.name === "course_started")).toBe(true));
+    expect(events[0]?.sessionId).toBeTruthy();
+
+    Object.defineProperty(globalThis, "sessionStorage", {
+      value: original,
+      configurable: true,
+    });
+  });
+
+  it("Quiz legend uses visually hidden styles without sr-only class", () => {
+    const { container } = render(
+      <Course title="Course">
+        <Lesson title="Lesson" lessonId="lesson-1">
+          <Quiz question="Q" choices={["A"]} answer="A" />
+        </Lesson>
+      </Course>,
+    );
+    const legend = container.querySelector("legend");
+    expect(legend).toBeTruthy();
+    expect(legend?.className).not.toContain("sr-only");
+    expect(legend?.getAttribute("style")).toContain("position: absolute");
   });
 });
 

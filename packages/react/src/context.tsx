@@ -1,8 +1,17 @@
-import React, { createContext, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  createContext,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import type { CourseId, LessonId, TelemetryEvent, TelemetryUser, TrackingClient } from "@lessonkit/core";
 import { createSessionId, createTrackingClient, nowIso } from "@lessonkit/core";
 import type { XAPIClient, XAPITransport } from "@lessonkit/xapi";
-import { createXAPIClient } from "@lessonkit/xapi";
+import { createInMemoryXAPIQueue, createXAPIClient } from "@lessonkit/xapi";
+import type { XAPIQueue } from "@lessonkit/xapi";
 
 export type LessonkitConfig = {
   courseId?: CourseId;
@@ -56,50 +65,136 @@ export type LessonkitRuntime = {
 
 export const LessonkitContext = createContext<LessonkitRuntime | null>(null);
 
+const SESSION_STORAGE_KEY = "lessonkit:sessionId";
+const COURSE_STARTED_PREFIX = "lessonkit:course_started:";
+
 function disposeTrackingClient(client: TrackingClient | null | undefined): void {
   client?.flush?.();
   client?.dispose?.();
 }
 
+function resolveSessionId(provided?: string): string {
+  if (provided) return provided;
+  if (typeof sessionStorage !== "undefined") {
+    const existing = sessionStorage.getItem(SESSION_STORAGE_KEY);
+    if (existing) return existing;
+    const id = createSessionId();
+    sessionStorage.setItem(SESSION_STORAGE_KEY, id);
+    return id;
+  }
+  return createSessionId();
+}
+
+function courseStartedStorageKey(sessionId: string, courseId?: CourseId): string {
+  return `${COURSE_STARTED_PREFIX}${sessionId}:${courseId ?? ""}`;
+}
+
+function hasCourseStarted(sessionId: string, courseId?: CourseId): boolean {
+  if (typeof sessionStorage === "undefined") return false;
+  return sessionStorage.getItem(courseStartedStorageKey(sessionId, courseId)) === "1";
+}
+
+function markCourseStarted(sessionId: string, courseId?: CourseId): void {
+  if (typeof sessionStorage === "undefined") return;
+  sessionStorage.setItem(courseStartedStorageKey(sessionId, courseId), "1");
+}
+
+function createTrackingClientFromConfig(config: LessonkitConfig): TrackingClient {
+  if (config.tracking?.enabled === false) {
+    return createTrackingClient();
+  }
+  return createTrackingClient({
+    sink: config.tracking?.sink,
+    batchSink: config.tracking?.batchSink,
+    batch: config.tracking?.batch,
+  });
+}
+
+function createXapiClientFromConfig(config: LessonkitConfig, queue: XAPIQueue): XAPIClient | null {
+  if (config.xapi?.enabled === false) return null;
+  if (config.xapi?.client) return config.xapi.client;
+  const baseId = config.courseId ? `urn:lessonkit:course:${config.courseId}` : undefined;
+  return createXAPIClient({ baseId, transport: config.xapi?.transport, queue });
+}
+
 export function LessonkitProvider(props: { config?: LessonkitConfig; children: React.ReactNode }) {
   const config = props.config ?? {};
 
-  const trackingRef = useRef<TrackingClient | null>(null);
-  const tracking = useMemo(() => {
-    disposeTrackingClient(trackingRef.current);
-    const next =
-      config.tracking?.enabled === false
-        ? createTrackingClient()
-        : createTrackingClient({
-            sink: config.tracking?.sink,
-            batchSink: config.tracking?.batchSink,
-            batch: config.tracking?.batch,
-          });
-    trackingRef.current = next;
-    return next;
-  }, [config.tracking?.enabled, config.tracking?.sink, config.tracking?.batchSink, config.tracking?.batch]);
-
-  const xapiRef = useRef<XAPIClient | null>(null);
-  const xapi = useMemo(() => {
-    if (config.xapi?.enabled === false) {
-      xapiRef.current = null;
-      return null;
-    }
-    const baseId = config.courseId ? `urn:lessonkit:course:${config.courseId}` : undefined;
-    const next =
-      config.xapi?.client ??
-      createXAPIClient({ baseId, transport: config.xapi?.transport });
-    xapiRef.current = next;
-    return next;
-  }, [config.xapi?.enabled, config.xapi?.client, config.xapi?.transport, config.courseId]);
-
-  const sessionIdRef = useRef<string>(config.session?.sessionId ?? createSessionId());
+  const sessionIdRef = useRef<string>(resolveSessionId(config.session?.sessionId));
   if (config.session?.sessionId) sessionIdRef.current = config.session.sessionId;
 
   const attemptIdRef = useRef<string | undefined>(config.session?.attemptId);
   const userRef = useRef<TelemetryUser | undefined>(config.session?.user);
   attemptIdRef.current = config.session?.attemptId;
   userRef.current = config.session?.user;
+
+  const courseIdRef = useRef<CourseId | undefined>(config.courseId);
+  courseIdRef.current = config.courseId;
+
+  const trackingRef = useRef<TrackingClient>(createTrackingClient());
+  const [tracking, setTracking] = useState<TrackingClient>(() => trackingRef.current);
+
+  const trackingEnabled = config.tracking?.enabled;
+  const trackingSink = config.tracking?.sink;
+  const trackingBatchSink = config.tracking?.batchSink;
+  const batchEnabled = config.tracking?.batch?.enabled;
+  const batchFlushIntervalMs = config.tracking?.batch?.flushIntervalMs;
+  const batchMaxBatchSize = config.tracking?.batch?.maxBatchSize;
+
+  useLayoutEffect(() => {
+    const prev = trackingRef.current;
+    const next = createTrackingClientFromConfig(config);
+    trackingRef.current = next;
+    setTracking(next);
+
+    const sessionId = sessionIdRef.current;
+    const cid = courseIdRef.current;
+    if (!hasCourseStarted(sessionId, cid)) {
+      markCourseStarted(sessionId, cid);
+      next.track({
+        name: "course_started",
+        timestamp: nowIso(),
+        courseId: cid,
+        sessionId,
+        attemptId: attemptIdRef.current,
+        user: userRef.current,
+      });
+    }
+
+    return () => {
+      disposeTrackingClient(prev);
+    };
+  }, [
+    trackingEnabled,
+    trackingSink,
+    trackingBatchSink,
+    batchEnabled,
+    batchFlushIntervalMs,
+    batchMaxBatchSize,
+  ]);
+
+  const xapiQueueRef = useRef(createInMemoryXAPIQueue());
+  const xapiRef = useRef<XAPIClient | null>(null);
+  const [xapi, setXapi] = useState<XAPIClient | null>(null);
+
+  const xapiEnabled = config.xapi?.enabled;
+  const xapiClient = config.xapi?.client;
+  const xapiTransport = config.xapi?.transport;
+  const courseId = config.courseId;
+
+  useLayoutEffect(() => {
+    const prev = xapiRef.current;
+    const next = createXapiClientFromConfig(config, xapiQueueRef.current);
+    xapiRef.current = next;
+    setXapi(next);
+    void (async () => {
+      if (prev) await prev.flush();
+      await next?.flush();
+    })();
+    return () => {
+      void prev?.flush();
+    };
+  }, [xapiEnabled, xapiClient, xapiTransport, courseId]);
 
   const [completedLessonIds, setCompletedLessonIds] = useState<Set<LessonId>>(() => new Set());
   const completedLessonIdsRef = useRef<Set<LessonId>>(completedLessonIds);
@@ -112,13 +207,11 @@ export function LessonkitProvider(props: { config?: LessonkitConfig; children: R
 
   const activeLessonIdRef = useRef<LessonId | undefined>(undefined);
   activeLessonIdRef.current = activeLessonId;
-  const courseIdRef = useRef<CourseId | undefined>(config.courseId);
-  courseIdRef.current = config.courseId;
   const lessonStartTimesRef = useRef<Map<LessonId, number>>(new Map());
 
   const track = useCallback(
     (name: TelemetryEvent["name"], data?: TelemetryEvent["data"], opts?: { lessonId?: LessonId }) => {
-      tracking.track({
+      trackingRef.current?.track({
         name,
         timestamp: nowIso(),
         courseId: courseIdRef.current,
@@ -129,16 +222,8 @@ export function LessonkitProvider(props: { config?: LessonkitConfig; children: R
         data,
       });
     },
-    [tracking],
+    [],
   );
-
-  const didStartCourseRef = useRef(false);
-  useEffect(() => {
-    if (!didStartCourseRef.current) {
-      didStartCourseRef.current = true;
-      track("course_started");
-    }
-  }, [track]);
 
   useEffect(() => {
     return () => {
@@ -147,17 +232,14 @@ export function LessonkitProvider(props: { config?: LessonkitConfig; children: R
     };
   }, []);
 
-  const setActiveLesson = useCallback(
-    (lessonId: LessonId) => {
-      if (activeLessonIdRef.current === lessonId) return;
-      activeLessonIdRef.current = lessonId;
-      setActiveLessonId(lessonId);
-      lessonStartTimesRef.current.set(lessonId, Date.now());
-      track("lesson_started", { lessonId }, { lessonId });
-      xapi?.startedLesson({ lessonId });
-    },
-    [track, xapi],
-  );
+  const setActiveLesson = useCallback((lessonId: LessonId) => {
+    if (activeLessonIdRef.current === lessonId) return;
+    activeLessonIdRef.current = lessonId;
+    setActiveLessonId(lessonId);
+    lessonStartTimesRef.current.set(lessonId, Date.now());
+    track("lesson_started", { lessonId }, { lessonId });
+    xapiRef.current?.startedLesson({ lessonId });
+  }, [track]);
 
   const completeLesson = useCallback(
     (lessonId: LessonId) => {
@@ -172,9 +254,9 @@ export function LessonkitProvider(props: { config?: LessonkitConfig; children: R
       if (durationMs !== undefined) {
         track("lesson_time_on_task", { lessonId, durationMs }, { lessonId });
       }
-      xapi?.completeLesson({ lessonId, durationMs });
+      xapiRef.current?.completeLesson({ lessonId, durationMs });
     },
-    [track, xapi],
+    [track],
   );
 
   const completeCourse = useCallback(() => {
@@ -182,8 +264,8 @@ export function LessonkitProvider(props: { config?: LessonkitConfig; children: R
     courseCompletedRef.current = true;
     setCourseCompleted(true);
     track("course_completed");
-    xapi?.completeCourse();
-  }, [track, xapi]);
+    xapiRef.current?.completeCourse();
+  }, [track]);
 
   const progress = useMemo<ProgressState>(
     () => ({
@@ -206,16 +288,7 @@ export function LessonkitProvider(props: { config?: LessonkitConfig; children: R
       completeCourse,
       track,
     }),
-    [
-      config,
-      tracking,
-      xapi,
-      progress,
-      setActiveLesson,
-      completeLesson,
-      completeCourse,
-      track,
-    ],
+    [config, tracking, xapi, progress, setActiveLesson, completeLesson, completeCourse, track],
   );
 
   return <LessonkitContext.Provider value={runtime}>{props.children}</LessonkitContext.Provider>;
