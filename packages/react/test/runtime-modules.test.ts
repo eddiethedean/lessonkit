@@ -1,0 +1,183 @@
+import { describe, expect, it, vi } from "vitest";
+import { createInMemoryXAPIQueue } from "@lessonkit/xapi";
+import type { TelemetryEvent, TrackingClient } from "@lessonkit/core";
+import type { XAPIStatement, XAPITransport } from "@lessonkit/xapi";
+import { createDefaultClock, createGlobalTimer, createNoopStorage, createSessionStoragePort } from "../src/runtime/ports";
+import { createProgressController } from "../src/runtime/progress";
+import { buildTelemetryEvent, createTrackingClientFromConfig, disposeTrackingClient } from "../src/runtime/telemetry";
+import { createXapiClientFromConfig } from "../src/runtime/xapi";
+
+describe("@lessonkit/react runtime modules", () => {
+  it("ports: createDefaultClock returns stable shapes", () => {
+    const clock = createDefaultClock();
+    expect(typeof clock.nowMs()).toBe("number");
+    expect(typeof clock.nowIso()).toBe("string");
+  });
+
+  it("ports: createSessionStoragePort reads/writes when available", () => {
+    const storage = createSessionStoragePort();
+    storage.setItem("k", "v");
+    expect(storage.getItem("k")).toBe("v");
+  });
+
+  it("ports: createSessionStoragePort falls back when unavailable", () => {
+    const original = Object.getOwnPropertyDescriptor(globalThis, "sessionStorage");
+    try {
+      // jsdom defines sessionStorage; force it to appear missing for this test
+      Object.defineProperty(globalThis, "sessionStorage", {
+        value: undefined,
+        configurable: true,
+      });
+
+      const storage = createSessionStoragePort();
+      storage.setItem("k", "v");
+      expect(storage.getItem("k")).toBeNull();
+    } finally {
+      if (original) Object.defineProperty(globalThis, "sessionStorage", original);
+    }
+  });
+
+  it("ports: createNoopStorage never persists", () => {
+    const storage = createNoopStorage();
+    storage.setItem("k", "v");
+    expect(storage.getItem("k")).toBeNull();
+  });
+
+  it("ports: createGlobalTimer can schedule and clear", () => {
+    vi.useFakeTimers();
+    try {
+      const timer = createGlobalTimer();
+      const fn = vi.fn();
+      const id = timer.setInterval(fn, 10);
+      vi.advanceTimersByTime(25);
+      expect(fn).toHaveBeenCalled();
+      timer.clearInterval(id);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("progress: controller tracks active lesson, completion, and duration", () => {
+    const progress = createProgressController();
+    expect(progress.getState().courseCompleted).toBe(false);
+
+    progress.setActiveLesson("lesson-1", 1000);
+    expect(progress.getState().activeLessonId).toBe("lesson-1");
+
+    const completed = progress.completeLesson("lesson-1", 1500);
+    expect(completed.didComplete).toBe(true);
+    expect(completed.durationMs).toBe(500);
+    expect(progress.getState().completedLessonIds.has("lesson-1")).toBe(true);
+
+    // idempotent
+    expect(progress.completeLesson("lesson-1", 2000).didComplete).toBe(false);
+
+    // duration is undefined when we never saw a start time
+    const other = progress.completeLesson("lesson-2", 3000);
+    expect(other.didComplete).toBe(true);
+    expect(other.durationMs).toBeUndefined();
+
+    expect(progress.completeCourse().didComplete).toBe(true);
+    expect(progress.getState().courseCompleted).toBe(true);
+    expect(progress.completeCourse().didComplete).toBe(false);
+  });
+
+  it("telemetry: buildTelemetryEvent uses injected clock", () => {
+    const clock = { nowMs: () => 123, nowIso: () => "T" };
+    const evt = buildTelemetryEvent({
+      clock,
+      name: "lesson_completed",
+      data: { x: 1 },
+      courseId: "c",
+      lessonId: "l",
+      sessionId: "s",
+      attemptId: "a",
+      user: { id: "u" },
+    });
+    expect(evt).toEqual({
+      name: "lesson_completed",
+      timestamp: "T",
+      courseId: "c",
+      lessonId: "l",
+      sessionId: "s",
+      attemptId: "a",
+      user: { id: "u" },
+      data: { x: 1 },
+    });
+  });
+
+  it("telemetry: createTrackingClientFromConfig honors enabled=false", () => {
+    const client = createTrackingClientFromConfig({ tracking: { enabled: false } });
+    expect(typeof client.track).toBe("function");
+  });
+
+  it("telemetry: createTrackingClientFromConfig uses injected createClient", () => {
+    const events: TelemetryEvent[] = [];
+    const injected: TrackingClient = { track: (e) => void events.push(e) };
+    const client = createTrackingClientFromConfig({ tracking: { createClient: () => injected } });
+    client.track({ name: "interaction", timestamp: "t" });
+    expect(events).toHaveLength(1);
+  });
+
+  it("telemetry: createTrackingClientFromConfig builds default client from sinks", () => {
+    const events: TelemetryEvent[] = [];
+    const client = createTrackingClientFromConfig({
+      tracking: {
+        sink: (e) => void events.push(e),
+      },
+    });
+    client.track({ name: "interaction", timestamp: "t" });
+    expect(events).toHaveLength(1);
+  });
+
+  it("telemetry: disposeTrackingClient calls flush+dispose when present", () => {
+    const flush = vi.fn();
+    const dispose = vi.fn();
+    disposeTrackingClient({ track: () => {}, flush, dispose });
+    expect(flush).toHaveBeenCalledTimes(1);
+    expect(dispose).toHaveBeenCalledTimes(1);
+  });
+
+  it("xapi: returns null when enabled=false", () => {
+    const client = createXapiClientFromConfig({ courseId: "c", xapi: { enabled: false } }, createInMemoryXAPIQueue());
+    expect(client).toBeNull();
+  });
+
+  it("xapi: returns provided client when present", () => {
+    const provided = { send: () => {}, flush: async () => {}, queueSize: () => 0, startedLesson: () => {}, completeLesson: () => {}, completeCourse: () => {} };
+    const client = createXapiClientFromConfig({ courseId: "c", xapi: { client: provided } }, createInMemoryXAPIQueue());
+    expect(client).toBe(provided);
+  });
+
+  it("xapi: builds baseId from courseId", async () => {
+    const statements: XAPIStatement[] = [];
+    const transport: XAPITransport = async (s) => void statements.push(s);
+    const queue = createInMemoryXAPIQueue();
+
+    const client = createXapiClientFromConfig({ courseId: "course-1", xapi: { transport } }, queue);
+    if (!client) throw new Error("expected xapi client");
+
+    client.startedLesson({ lessonId: "lesson-1" });
+    // transport is async; allow microtask
+    await Promise.resolve();
+
+    expect(statements).toHaveLength(1);
+    expect(statements[0]!.object.id).toBe("urn:lessonkit:course:course-1:lesson:lesson-1");
+  });
+
+  it("xapi: uses default baseId when courseId is missing", async () => {
+    const statements: XAPIStatement[] = [];
+    const transport: XAPITransport = async (s) => void statements.push(s);
+    const queue = createInMemoryXAPIQueue();
+
+    const client = createXapiClientFromConfig({ xapi: { transport } }, queue);
+    if (!client) throw new Error("expected xapi client");
+
+    client.startedLesson({ lessonId: "lesson-1" });
+    await Promise.resolve();
+
+    expect(statements).toHaveLength(1);
+    expect(statements[0]!.object.id).toBe("urn:lessonkit:lesson:lesson-1");
+  });
+});
+
