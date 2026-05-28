@@ -83,4 +83,5 @@ export default function App() {
   for that lesson. Use stable `lessonId` values so completion and time-on-task telemetry stay consistent.
 - If you omit `session.sessionId`, the provider reuses a tab-scoped id via `sessionStorage` so React
   Strict Mode remounts do not split analytics sessions in development.
+- Accessibility guidance lives in [`docs/ACCESSIBILITY.md`](../../docs/ACCESSIBILITY.md).
 

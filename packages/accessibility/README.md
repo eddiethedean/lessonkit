@@ -15,6 +15,15 @@ npm install @lessonkit/accessibility
 ## Included (0.2.1)
 
 - `prefersReducedMotion()`
+- `getReducedMotionPreference()`
+- `shouldAnimate({ default })`
 - `focusFirst(container)`
+- `getFocusableElements(container)`
+- `trapFocus(container, opts)`
+- `createRovingTabIndex(opts)`
 - `visuallyHiddenStyle` — inline styles for screen-reader-only content (used by `@lessonkit/react` `Quiz`)
+
+## Guidance
+
+- See [`docs/ACCESSIBILITY.md`](../../docs/ACCESSIBILITY.md) for keyboard and screen-reader guidance.
 
