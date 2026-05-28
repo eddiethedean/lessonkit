@@ -26,6 +26,7 @@ Placeholders live here until the full docs stack is scaffolded:
 
 ## Current status
 
-The folders above are placeholders so the repo structure matches the spec while the main MVP is
-being built out in `packages/` and `examples/`.
+Framework **0.4.0** (theme tokens, `ThemeProvider`, generator catalog) is implemented in `packages/`
+and documented in [`THEMING.md`](THEMING.md). Storybook and Docusaurus folders remain placeholders
+until the docs stack is scaffolded.
 

@@ -9,6 +9,20 @@ Published packages: `@lessonkit/core`, `@lessonkit/xapi`, `@lessonkit/accessibil
 - [CHANGELOG.md](CHANGELOG.md) documents the release.
 - No pending files in [`.changeset/`](.changeset/) that would run `changeset version` and bump versions unexpectedly (this repo publishes via **git tags**, not `changeset publish`).
 
+### 0.4.0 checklist (before tagging)
+
+| Item | Status |
+|------|--------|
+| All six `@lessonkit/*` packages at `0.4.0` in `package.json` | Required |
+| `@lessonkit/react` depends on `@lessonkit/themes@0.4.0` | Required |
+| [CHANGELOG.md](CHANGELOG.md) `## [0.4.0]` includes Added / Changed / Fixed | Required |
+| `docs/THEMING.md`, `docs/STUDIO_READINESS.md` 0.4.x items | Done in repo |
+| npm latest is `0.3.1` (0.4.0 not published yet) | Expected until tag |
+| Git tag `v0.4.0` does not exist yet | Create on publish |
+| `NPM_TOKEN` secret configured on GitHub | Required for Release workflow |
+
+**Breaking note for consumers:** `LessonkitTheme` is now the full `LessonkitThemeV1` schema (see CHANGELOG).
+
 ## Publish to npm (tag-based)
 
 1. Confirm locally:
