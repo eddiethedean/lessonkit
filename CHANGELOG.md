@@ -10,6 +10,12 @@ All notable changes to the LessonKit monorepo are documented here. Published pac
 - **@lessonkit/react**: Use an isomorphic layout effect in `LessonkitProvider` to avoid SSR `useLayoutEffect` warnings while preserving client-side lifecycle behavior.
 - **Repo**: Make `npm run typecheck` deterministic by building workspace package declarations first.
 - **@lessonkit/react**: Silence expected React error output in the “missing provider” test while keeping the assertion.
+- **@lessonkit/core**: Call `unref()` on batched telemetry flush timers so Node test runners and CLIs can exit cleanly.
+
+### Changed
+
+- **@lessonkit/core**, **@lessonkit/xapi**, **@lessonkit/react**: Internal module split (types, tracking client, xAPI queue/client, runtime session ports) with no intended public API changes.
+- **@lessonkit/react**: Session and course-started persistence now go through a storage port (`runtime/session`).
 
 ## [0.3.0] - 2026-05-28
 
@@ -47,4 +53,5 @@ Last version published to npm before 0.2.x.
 - Initial public packages: `@lessonkit/core`, `@lessonkit/react`, `@lessonkit/xapi`, `@lessonkit/accessibility`, `@lessonkit/themes`, `@lessonkit/cli`.
 - Tag-based publish workflow and CI checks (build, typecheck, test, coverage).
 
-[0.3.0]: https://github.com/eddiethedean/lessonkit/compare/v0.1.1...main
+[0.3.1]: https://github.com/eddiethedean/lessonkit/compare/v0.3.0...v0.3.1
+[0.3.0]: https://github.com/eddiethedean/lessonkit/compare/v0.1.1...v0.3.0

@@ -114,7 +114,7 @@ export default function SecurityTraining() {
 
 ## Versioning
 
-Current monorepo release: **0.3.0** (see [CHANGELOG.md](CHANGELOG.md)).
+Current monorepo release: **0.3.1** (see [CHANGELOG.md](CHANGELOG.md)).
 
 LessonKit follows semver. The **0.x** series is expected to evolve quickly; breaking changes may
 still happen between minor releases.
