@@ -16,7 +16,12 @@ describe("@lessonkit/react runtime", () => {
       useLessonkit();
       return null;
     }
-    expect(() => render(<Bad />)).toThrow(/missing LessonkitProvider/);
+    const err = vi.spyOn(console, "error").mockImplementation(() => {});
+    try {
+      expect(() => render(<Bad />)).toThrow(/missing LessonkitProvider/);
+    } finally {
+      err.mockRestore();
+    }
   });
 
   it("tracks quiz_answered with expected payload", async () => {

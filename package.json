@@ -1,6 +1,6 @@
 {
   "name": "lessonkit",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "private": true,
   "packageManager": "npm@10.9.0",
   "workspaces": [
@@ -16,7 +16,7 @@
     "test": "npm run --workspaces --if-present test",
     "coverage": "npm run --workspaces --if-present test:coverage",
     "lint": "npm run --workspaces --if-present lint",
-    "typecheck": "npm run --workspaces --if-present typecheck",
+    "typecheck": "npm run build:packages && npm run --workspaces --if-present typecheck",
     "changeset": "changeset",
     "version-packages": "changeset version",
     "release": "changeset publish"

@@ -3,6 +3,14 @@
 All notable changes to the LessonKit monorepo are documented here. Published packages use the
 [`@lessonkit/*`](https://www.npmjs.com/org/lessonkit) scope.
 
+## [0.3.1] - 2026-05-28
+
+### Fixed
+
+- **@lessonkit/react**: Use an isomorphic layout effect in `LessonkitProvider` to avoid SSR `useLayoutEffect` warnings while preserving client-side lifecycle behavior.
+- **Repo**: Make `npm run typecheck` deterministic by building workspace package declarations first.
+- **@lessonkit/react**: Silence expected React error output in the “missing provider” test while keeping the assertion.
+
 ## [0.3.0] - 2026-05-28
 
 ### Fixed

@@ -68,6 +68,8 @@ export const LessonkitContext = createContext<LessonkitRuntime | null>(null);
 const SESSION_STORAGE_KEY = "lessonkit:sessionId";
 const COURSE_STARTED_PREFIX = "lessonkit:course_started:";
 
+const useIsoLayoutEffect = typeof window !== "undefined" ? useLayoutEffect : useEffect;
+
 function disposeTrackingClient(client: TrackingClient | null | undefined): void {
   client?.flush?.();
   client?.dispose?.();
@@ -157,7 +159,7 @@ export function LessonkitProvider(props: { config?: LessonkitConfig; children: R
   const batchFlushIntervalMs = config.tracking?.batch?.flushIntervalMs;
   const batchMaxBatchSize = config.tracking?.batch?.maxBatchSize;
 
-  useLayoutEffect(() => {
+  useIsoLayoutEffect(() => {
     const prev = trackingRef.current;
     const next = createTrackingClientFromConfig(config);
     trackingRef.current = next;
@@ -203,7 +205,7 @@ export function LessonkitProvider(props: { config?: LessonkitConfig; children: R
   const xapiTransport = config.xapi?.transport;
   const courseId = config.courseId;
 
-  useLayoutEffect(() => {
+  useIsoLayoutEffect(() => {
     const prev = xapiRef.current;
     const next = createXapiClientFromConfig(config, xapiQueueRef.current);
     xapiRef.current = next;
