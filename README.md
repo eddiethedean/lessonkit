@@ -52,6 +52,8 @@ npm -w lessonkit-example-react-vite run dev
 
 ## Key docs
 
+- [`CHANGELOG.md`](CHANGELOG.md): release history
+- [`RELEASING.md`](RELEASING.md): how to publish `@lessonkit/*` to npm
 - [`PLAN.md`](https://github.com/eddiethedean/lessonkit/blob/main/PLAN.md): product vision and MVP scope
 - [`SPEC.md`](https://github.com/eddiethedean/lessonkit/blob/main/SPEC.md): technical spec and requirements
 - [`ROADMAP.md`](https://github.com/eddiethedean/lessonkit/blob/main/ROADMAP.md): phased delivery plan
@@ -110,6 +112,8 @@ export default function SecurityTraining() {
 - `@lessonkit/cli`: `lessonkit` commands (stub)
 
 ## Versioning
+
+Current monorepo release: **0.2.1** (see [CHANGELOG.md](CHANGELOG.md)).
 
 LessonKit follows semver. The **0.x** series is expected to evolve quickly; breaking changes may
 still happen between minor releases.

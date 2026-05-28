@@ -12,8 +12,9 @@ Small accessibility utilities used by LessonKit packages and apps.
 npm install @lessonkit/accessibility
 ```
 
-## Included (0.2.0)
+## Included (0.2.1)
 
 - `prefersReducedMotion()`
 - `focusFirst(container)`
+- `visuallyHiddenStyle` — inline styles for screen-reader-only content (used by `@lessonkit/react` `Quiz`)
 
