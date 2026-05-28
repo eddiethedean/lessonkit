@@ -33,7 +33,7 @@ export function buildTelemetryEvent(opts: {
   clock: ClockPort;
   name: TelemetryEvent["name"];
   data?: TelemetryEvent["data"];
-  courseId?: CourseId;
+  courseId: CourseId;
   lessonId?: LessonId;
   sessionId: string;
   attemptId?: string;
@@ -48,6 +48,6 @@ export function buildTelemetryEvent(opts: {
     attemptId: opts.attemptId,
     user: opts.user,
     data: opts.data,
-  };
+  } as TelemetryEvent;
 }
 

@@ -115,7 +115,7 @@ describe("@lessonkit/react runtime modules", () => {
     const events: TelemetryEvent[] = [];
     const injected: TrackingClient = { track: (e) => void events.push(e) };
     const client = createTrackingClientFromConfig({ tracking: { createClient: () => injected } });
-    client.track({ name: "interaction", timestamp: "t" });
+    client.track({ name: "interaction", timestamp: "t", courseId: "c" });
     expect(events).toHaveLength(1);
   });
 
@@ -126,7 +126,7 @@ describe("@lessonkit/react runtime modules", () => {
         sink: (e) => void events.push(e),
       },
     });
-    client.track({ name: "interaction", timestamp: "t" });
+    client.track({ name: "interaction", timestamp: "t", courseId: "c" });
     expect(events).toHaveLength(1);
   });
 
@@ -165,19 +165,10 @@ describe("@lessonkit/react runtime modules", () => {
     expect(statements[0]!.object.id).toBe("urn:lessonkit:course:course-1:lesson:lesson-1");
   });
 
-  it("xapi: uses default baseId when courseId is missing", async () => {
-    const statements: XAPIStatement[] = [];
-    const transport: XAPITransport = async (s) => void statements.push(s);
+  it("xapi: returns null when courseId is missing", () => {
     const queue = createInMemoryXAPIQueue();
-
-    const client = createXapiClientFromConfig({ xapi: { transport } }, queue);
-    if (!client) throw new Error("expected xapi client");
-
-    client.startedLesson({ lessonId: "lesson-1" });
-    await Promise.resolve();
-
-    expect(statements).toHaveLength(1);
-    expect(statements[0]!.object.id).toBe("urn:lessonkit:lesson:lesson-1");
+    const client = createXapiClientFromConfig({ xapi: { transport: async () => {} } }, queue);
+    expect(client).toBeNull();
   });
 });
 

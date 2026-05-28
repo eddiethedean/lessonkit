@@ -1,4 +1,5 @@
 import { useContext, useMemo } from "react";
+import type { CheckId } from "@lessonkit/core";
 import { LessonkitContext } from "./context";
 
 export function useLessonkit() {
@@ -26,14 +27,18 @@ export function useQuizState() {
   const { track } = useLessonkit();
   return useMemo(
     () => ({
-      answer: (opts: { question: string; choice: string; correct: boolean }) => {
+      answer: (opts: {
+        checkId: CheckId;
+        question: string;
+        choice: string;
+        correct: boolean;
+      }) => {
         track("quiz_answered", opts);
       },
-      complete: (opts?: { score?: number; maxScore?: number }) => {
+      complete: (opts: { checkId: CheckId; score?: number; maxScore?: number }) => {
         track("quiz_completed", opts);
       },
     }),
     [track],
   );
 }
-

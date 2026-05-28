@@ -1,12 +1,12 @@
 import React, { useEffect, useId, useMemo, useRef, useState } from "react";
 import { visuallyHiddenStyle } from "@lessonkit/accessibility";
-import type { CourseId, LessonId } from "@lessonkit/core";
+import type { BlockId, CheckId, CourseId, LessonId } from "@lessonkit/core";
 import { LessonkitProvider } from "./context";
 import { useCompletion, useLessonkit, useQuizState } from "./hooks";
 
 export function Course(props: {
   title: string;
-  courseId?: CourseId;
+  courseId: CourseId;
   config?: Omit<React.ComponentProps<typeof LessonkitProvider>["config"], "courseId">;
   children: React.ReactNode;
 }) {
@@ -25,13 +25,10 @@ export function Course(props: {
   );
 }
 
-export function Lesson(props: { title: string; lessonId?: LessonId; children: React.ReactNode }) {
+export function Lesson(props: { title: string; lessonId: LessonId; children: React.ReactNode }) {
   const { setActiveLesson } = useLessonkit();
   const { completeLesson } = useCompletion();
-  // `useId()` is SSR/hydration-stable; avoid randomness for implicit IDs.
-  const reactId = useId();
-  const generatedId = useMemo(() => `lesson-${sanitizeLessonId(reactId)}`, [reactId]);
-  const id = props.lessonId ?? generatedId;
+  const id = props.lessonId;
 
   useEffect(() => {
     setActiveLesson(id);
@@ -48,14 +45,18 @@ export function Lesson(props: { title: string; lessonId?: LessonId; children: Re
   );
 }
 
-export function Scenario(props: { children: React.ReactNode }) {
-  return <section aria-label="Scenario">{props.children}</section>;
+export function Scenario(props: { blockId?: BlockId; children: React.ReactNode }) {
+  return <section aria-label="Scenario" data-lk-block-id={props.blockId}>{props.children}</section>;
 }
 
-export function Reflection(props: { prompt?: string; children?: React.ReactNode }) {
+export function Reflection(props: {
+  blockId?: BlockId;
+  prompt?: string;
+  children?: React.ReactNode;
+}) {
   const promptId = useId();
   return (
-    <section aria-label="Reflection">
+    <section aria-label="Reflection" data-lk-block-id={props.blockId}>
       {props.prompt ? <p id={promptId}>{props.prompt}</p> : null}
       {props.children}
       <textarea
@@ -67,21 +68,34 @@ export function Reflection(props: { prompt?: string; children?: React.ReactNode 
 }
 
 export function KnowledgeCheck(props: {
+  checkId: CheckId;
   question: string;
   choices: string[];
   answer: string;
 }) {
-  return <Quiz question={props.question} choices={props.choices} answer={props.answer} />;
+  return (
+    <Quiz
+      checkId={props.checkId}
+      question={props.question}
+      choices={props.choices}
+      answer={props.answer}
+    />
+  );
 }
 
-export function Quiz(props: { question: string; choices: string[]; answer: string }) {
+export function Quiz(props: {
+  checkId: CheckId;
+  question: string;
+  choices: string[];
+  answer: string;
+}) {
   const quiz = useQuizState();
   const [selected, setSelected] = useState<string | null>(null);
   const completedRef = useRef(false);
   const questionId = useId();
 
   return (
-    <section aria-label="Quiz">
+    <section aria-label="Quiz" data-lk-check-id={props.checkId}>
       <p id={questionId}>{props.question}</p>
       <fieldset aria-labelledby={questionId}>
         <legend style={visuallyHiddenStyle}>Quiz choices</legend>
@@ -95,10 +109,15 @@ export function Quiz(props: { question: string; choices: string[]; answer: strin
               onChange={() => {
                 setSelected(c);
                 const correct = c === props.answer;
-                quiz.answer({ question: props.question, choice: c, correct });
+                quiz.answer({
+                  checkId: props.checkId,
+                  question: props.question,
+                  choice: c,
+                  correct,
+                });
                 if (correct && !completedRef.current) {
                   completedRef.current = true;
-                  quiz.complete({ score: 1, maxScore: 1 });
+                  quiz.complete({ checkId: props.checkId, score: 1, maxScore: 1 });
                 }
               }}
             />
@@ -124,10 +143,3 @@ export function ProgressTracker() {
     </aside>
   );
 }
-
-/** Sanitize React `useId()` for lesson identifiers (exported for tests). */
-export function sanitizeLessonId(id: string): string {
-  const s = id.replace(/[^a-zA-Z0-9_-]/g, "");
-  return s.length ? s : "id";
-}
-

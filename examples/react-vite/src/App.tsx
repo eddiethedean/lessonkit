@@ -77,6 +77,7 @@ export default function App() {
               </p>
             </Scenario>
             <Quiz
+              checkId="email-first-step"
               question="What should you do first when an email feels off?"
               choices={["Click the link quickly", "Verify sender and context"]}
               answer="Verify sender and context"

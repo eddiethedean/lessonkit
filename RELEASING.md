@@ -5,7 +5,7 @@ Published packages: `@lessonkit/core`, `@lessonkit/xapi`, `@lessonkit/accessibil
 ## Prerequisites
 
 - `main` is green (see [CI workflow](.github/workflows/ci.yml)).
-- All `packages/*/package.json` versions match the release (e.g. `0.4.0`).
+- All `packages/*/package.json` versions match the release (e.g. `0.5.0`).
 - [CHANGELOG.md](CHANGELOG.md) documents the release.
 - No pending files in [`.changeset/`](.changeset/) that would run `changeset version` and bump versions unexpectedly (this repo publishes via **git tags**, not `changeset publish`).
 

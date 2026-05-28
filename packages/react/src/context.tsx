@@ -7,16 +7,17 @@ import React, {
   useRef,
   useState,
 } from "react";
-import type { CourseId, LessonId, TelemetryEvent, TelemetryUser, TrackingClient } from "@lessonkit/core";
-import { createTrackingClient, nowIso } from "@lessonkit/core";
+import type { CourseId, LessonId, TelemetryEventName, TelemetryUser, TrackingClient } from "@lessonkit/core";
+import { createTrackingClient } from "@lessonkit/core";
 import type { XAPIClient, XAPITransport } from "@lessonkit/xapi";
 import { createInMemoryXAPIQueue } from "@lessonkit/xapi";
+import { buildTrackEvent, emitTelemetry } from "./runtime/emitTelemetry";
 import { createSessionStoragePort } from "./runtime/ports";
 import { createXapiClientFromConfig } from "./runtime/xapi";
 import { hasCourseStarted, markCourseStarted, resolveSessionId } from "./runtime/session";
 
 export type LessonkitConfig = {
-  courseId?: CourseId;
+  courseId: CourseId;
   session?: {
     sessionId?: string;
     attemptId?: string;
@@ -24,8 +25,8 @@ export type LessonkitConfig = {
   };
   tracking?: {
     enabled?: boolean;
-    sink?: (event: TelemetryEvent) => void | Promise<void>;
-    batchSink?: (events: TelemetryEvent[]) => void | Promise<void>;
+    sink?: (event: Parameters<TrackingClient["track"]>[0]) => void | Promise<void>;
+    batchSink?: (events: Parameters<TrackingClient["track"]>[0][]) => void | Promise<void>;
     batch?: {
       enabled?: boolean;
       flushIntervalMs?: number;
@@ -58,11 +59,7 @@ export type LessonkitRuntime = {
   setActiveLesson: (lessonId: LessonId) => void;
   completeLesson: (lessonId: LessonId) => void;
   completeCourse: () => void;
-  track: (
-    name: TelemetryEvent["name"],
-    data?: TelemetryEvent["data"],
-    opts?: { lessonId?: LessonId },
-  ) => void;
+  track: (name: TelemetryEventName, data?: unknown, opts?: { lessonId?: LessonId }) => void;
 };
 
 export const LessonkitContext = createContext<LessonkitRuntime | null>(null);
@@ -87,8 +84,8 @@ function createTrackingClientFromConfig(config: LessonkitConfig): TrackingClient
   });
 }
 
-export function LessonkitProvider(props: { config?: LessonkitConfig; children: React.ReactNode }) {
-  const config = props.config ?? {};
+export function LessonkitProvider(props: { config: LessonkitConfig; children: React.ReactNode }) {
+  const config = props.config;
 
   const sessionIdRef = useRef<string>(resolveSessionId(defaultStorage, config.session?.sessionId));
   if (config.session?.sessionId) sessionIdRef.current = config.session.sessionId;
@@ -98,12 +95,11 @@ export function LessonkitProvider(props: { config?: LessonkitConfig; children: R
   attemptIdRef.current = config.session?.attemptId;
   userRef.current = config.session?.user;
 
-  const courseIdRef = useRef<CourseId | undefined>(config.courseId);
+  const courseIdRef = useRef<CourseId>(config.courseId);
   courseIdRef.current = config.courseId;
 
   const trackingRef = useRef<TrackingClient>(createTrackingClient());
   const [tracking, setTracking] = useState<TrackingClient>(() => trackingRef.current);
-  const courseStartedInProviderRef = useRef(false);
 
   const trackingEnabled = config.tracking?.enabled;
   const trackingSink = config.tracking?.sink;
@@ -120,23 +116,19 @@ export function LessonkitProvider(props: { config?: LessonkitConfig; children: R
 
     const sessionId = sessionIdRef.current;
     const cid = courseIdRef.current;
-    const shouldEmitCourseStarted = cid
-      ? !hasCourseStarted(defaultStorage, sessionId, cid)
-      : !courseStartedInProviderRef.current;
-    if (shouldEmitCourseStarted) {
-      if (cid) {
-        markCourseStarted(defaultStorage, sessionId, cid);
-      } else {
-        courseStartedInProviderRef.current = true;
-      }
-      next.track({
-        name: "course_started",
-        timestamp: nowIso(),
-        courseId: cid,
-        sessionId,
-        attemptId: attemptIdRef.current,
-        user: userRef.current,
-      });
+    if (!hasCourseStarted(defaultStorage, sessionId, cid)) {
+      markCourseStarted(defaultStorage, sessionId, cid);
+      emitTelemetry(
+        next,
+        xapiRef.current,
+        buildTrackEvent({
+          name: "course_started",
+          courseId: cid,
+          sessionId,
+          attemptId: attemptIdRef.current,
+          user: userRef.current,
+        }),
+      );
     }
 
     return () => {
@@ -198,10 +190,9 @@ export function LessonkitProvider(props: { config?: LessonkitConfig; children: R
   const lessonStartTimesRef = useRef<Map<LessonId, number>>(new Map());
 
   const track = useCallback(
-    (name: TelemetryEvent["name"], data?: TelemetryEvent["data"], opts?: { lessonId?: LessonId }) => {
-      trackingRef.current?.track({
+    (name: TelemetryEventName, data?: unknown, opts?: { lessonId?: LessonId }) => {
+      const event = buildTrackEvent({
         name,
-        timestamp: nowIso(),
         courseId: courseIdRef.current,
         lessonId: opts?.lessonId ?? activeLessonIdRef.current,
         sessionId: sessionIdRef.current,
@@ -209,6 +200,7 @@ export function LessonkitProvider(props: { config?: LessonkitConfig; children: R
         user: userRef.current,
         data,
       });
+      emitTelemetry(trackingRef.current, xapiRef.current, event);
     },
     [],
   );
@@ -220,14 +212,16 @@ export function LessonkitProvider(props: { config?: LessonkitConfig; children: R
     };
   }, []);
 
-  const setActiveLesson = useCallback((lessonId: LessonId) => {
-    if (activeLessonIdRef.current === lessonId) return;
-    activeLessonIdRef.current = lessonId;
-    setActiveLessonId(lessonId);
-    lessonStartTimesRef.current.set(lessonId, Date.now());
-    track("lesson_started", { lessonId }, { lessonId });
-    xapiRef.current?.startedLesson({ lessonId });
-  }, [track]);
+  const setActiveLesson = useCallback(
+    (lessonId: LessonId) => {
+      if (activeLessonIdRef.current === lessonId) return;
+      activeLessonIdRef.current = lessonId;
+      setActiveLessonId(lessonId);
+      lessonStartTimesRef.current.set(lessonId, Date.now());
+      track("lesson_started", { lessonId }, { lessonId });
+    },
+    [track],
+  );
 
   const completeLesson = useCallback(
     (lessonId: LessonId) => {
@@ -242,7 +236,6 @@ export function LessonkitProvider(props: { config?: LessonkitConfig; children: R
       if (durationMs !== undefined) {
         track("lesson_time_on_task", { lessonId, durationMs }, { lessonId });
       }
-      xapiRef.current?.completeLesson({ lessonId, durationMs });
     },
     [track],
   );
@@ -252,7 +245,6 @@ export function LessonkitProvider(props: { config?: LessonkitConfig; children: R
     courseCompletedRef.current = true;
     setCourseCompleted(true);
     track("course_completed");
-    xapiRef.current?.completeCourse();
   }, [track]);
 
   const progress = useMemo<ProgressState>(

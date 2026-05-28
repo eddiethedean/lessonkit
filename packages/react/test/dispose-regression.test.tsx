@@ -41,7 +41,7 @@ describe("@lessonkit/react provider dispose regression", () => {
 
     const sink = vi.fn();
     const { unmount } = render(
-      <Provider config={{ tracking: { sink } }}>
+      <Provider config={{ courseId: "course-1", tracking: { sink } }}>
         <Driver />
       </Provider>,
     );
@@ -82,13 +82,13 @@ describe("@lessonkit/react provider dispose regression", () => {
     const sink2 = vi.fn();
 
     const { rerender } = render(
-      <Provider config={{ tracking: { sink: sink1 } }}>
+      <Provider config={{ courseId: "course-1", tracking: { sink: sink1 } }}>
         <div>child</div>
       </Provider>,
     );
 
     rerender(
-      <Provider config={{ tracking: { sink: sink2 } }}>
+      <Provider config={{ courseId: "course-1", tracking: { sink: sink2 } }}>
         <div>child</div>
       </Provider>,
     );
@@ -115,6 +115,7 @@ describe("@lessonkit/react provider dispose regression", () => {
       <React.StrictMode>
         <LessonkitProvider
           config={{
+            courseId: "course-1",
             tracking: {
               sink,
               batch: { enabled: true, flushIntervalMs: 60_000, maxBatchSize: 100 },
@@ -179,7 +180,9 @@ describe("@lessonkit/react provider dispose regression", () => {
     }
 
     render(
-      <LessonkitProvider config={{ tracking: { sink: (e: TelemetryEvent) => void events.push(e) } }}>
+      <LessonkitProvider
+        config={{ courseId: "course-1", tracking: { sink: (e: TelemetryEvent) => void events.push(e) } }}
+      >
         <Driver />
       </LessonkitProvider>,
     );

@@ -2,11 +2,13 @@ import { describe, expect, it, vi } from "vitest";
 import { createInMemoryXAPIQueue, createXAPIClient } from "../src";
 import type { XAPIStatement } from "../src";
 
+const courseId = "test";
+
 describe("@lessonkit/xapi", () => {
   it("sends a course completion statement", async () => {
     const statements: XAPIStatement[] = [];
     const client = createXAPIClient({
-      baseId: "urn:test",
+      courseId,
       transport: async (s) => {
         statements.push(s);
       },
@@ -18,7 +20,7 @@ describe("@lessonkit/xapi", () => {
     expect(statements).toHaveLength(1);
     expect(statements[0]).toMatchObject({
       verb: "http://adlnet.gov/expapi/verbs/completed",
-      object: { id: "urn:test:course" },
+      object: { id: "urn:lessonkit:course:test" },
     });
   });
 
@@ -28,10 +30,9 @@ describe("@lessonkit/xapi", () => {
       throw new Error("network");
     });
 
-    const client = createXAPIClient({ transport, baseId: "urn:test", queue });
+    const client = createXAPIClient({ transport, courseId, queue });
     client.startedLesson({ lessonId: "lesson-1" });
 
-    // Allow async transport rejection handler to run.
     await new Promise((r) => setTimeout(r, 0));
 
     expect(client.queueSize()).toBe(1);
@@ -45,7 +46,7 @@ describe("@lessonkit/xapi", () => {
 
   it("queues statements when no transport is provided", () => {
     const queue = createInMemoryXAPIQueue();
-    const client = createXAPIClient({ baseId: "urn:test", queue });
+    const client = createXAPIClient({ courseId, queue });
     client.startedLesson({ lessonId: "lesson-1" });
     expect(client.queueSize()).toBe(1);
   });
@@ -53,7 +54,7 @@ describe("@lessonkit/xapi", () => {
   it("uses Math.random fallback when crypto.randomUUID is unavailable", async () => {
     vi.stubGlobal("crypto", {});
     const queue = createInMemoryXAPIQueue();
-    const client = createXAPIClient({ baseId: "urn:test", queue });
+    const client = createXAPIClient({ courseId, queue });
     client.startedLesson({ lessonId: "lesson-1" });
     expect(client.queueSize()).toBe(1);
     vi.unstubAllGlobals();
@@ -62,7 +63,7 @@ describe("@lessonkit/xapi", () => {
   it("send() forwards statements to transport", async () => {
     const statements: XAPIStatement[] = [];
     const client = createXAPIClient({
-      baseId: "urn:test",
+      courseId,
       transport: async (s) => {
         statements.push(s);
       },
@@ -95,7 +96,7 @@ describe("@lessonkit/xapi", () => {
   it("adds duration and score to completion result", async () => {
     const statements: XAPIStatement[] = [];
     const client = createXAPIClient({
-      baseId: "urn:test",
+      courseId,
       transport: async (s) => {
         statements.push(s);
       },
@@ -111,12 +112,13 @@ describe("@lessonkit/xapi", () => {
       success: true,
       score: { raw: 7, max: 10, min: 0, scaled: 0.7 },
     });
+    expect(statements[0].object.id).toBe("urn:lessonkit:course:test:lesson:lesson-1");
   });
 
   it("formats integer seconds without decimals (durationMs=2000 => PT2S)", async () => {
     const statements: XAPIStatement[] = [];
     const client = createXAPIClient({
-      baseId: "urn:test",
+      courseId,
       transport: async (s) => {
         statements.push(s);
       },
@@ -129,10 +131,25 @@ describe("@lessonkit/xapi", () => {
     expect(statements[0].result).toMatchObject({ duration: "PT2S" });
   });
 
+  it("flush is noop without transport", async () => {
+    const client = createXAPIClient({ courseId });
+    await expect(client.flush()).resolves.toBeUndefined();
+  });
+
+  it("lifecycle helpers noop without courseId", async () => {
+    const transport = vi.fn(async () => {});
+    const client = createXAPIClient({ transport });
+    client.startedLesson({ lessonId: "lesson-1" });
+    client.completeLesson({ lessonId: "lesson-1" });
+    client.completeCourse();
+    await Promise.resolve();
+    expect(transport).not.toHaveBeenCalled();
+  });
+
   it("omits result when completion has no extra fields", async () => {
     const statements: XAPIStatement[] = [];
     const client = createXAPIClient({
-      baseId: "urn:test",
+      courseId,
       transport: async (s) => {
         statements.push(s);
       },
@@ -145,4 +162,3 @@ describe("@lessonkit/xapi", () => {
     expect(statements[0].result).toBeUndefined();
   });
 });
-

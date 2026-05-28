@@ -31,6 +31,7 @@ export default function App() {
             </Scenario>
 
             <Quiz
+              checkId="ready-to-build"
               question="Ready to build?"
               choices={["Not yet", "Yes"]}
               answer="Yes"

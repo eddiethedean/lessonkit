@@ -99,6 +99,7 @@ export default function SecurityTraining() {
         </Scenario>
 
         <Quiz
+          checkId="first-step"
           question="What should you do first?"
           choices={["Open attachment", "Verify sender"]}
           answer="Verify sender"

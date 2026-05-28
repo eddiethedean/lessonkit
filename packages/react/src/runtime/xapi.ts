@@ -11,7 +11,11 @@ export type XapiConfig = {
 export function createXapiClientFromConfig(config: { courseId?: CourseId; xapi?: XapiConfig }, queue: XAPIQueue): XAPIClient | null {
   if (config.xapi?.enabled === false) return null;
   if (config.xapi?.client) return config.xapi.client;
-  const baseId = config.courseId ? `urn:lessonkit:course:${config.courseId}` : undefined;
-  return createXAPIClient({ baseId, transport: config.xapi?.transport, queue });
+  if (!config.courseId) return null;
+  return createXAPIClient({
+    courseId: config.courseId,
+    transport: config.xapi?.transport,
+    queue,
+  });
 }
 

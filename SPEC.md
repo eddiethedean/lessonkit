@@ -61,13 +61,14 @@ import {
 
 export default function SecurityTraining() {
   return (
-    <Course title="Cybersecurity Basics">
-      <Lesson title="Phishing Awareness">
+    <Course title="Cybersecurity Basics" courseId="cyber-basics">
+      <Lesson title="Phishing Awareness" lessonId="phishing-101">
         <Scenario>
           <p>You receive a suspicious email.</p>
         </Scenario>
 
         <Quiz
+          checkId="first-step"
           question="What should you do first?"
           choices={[
             "Open attachment",
@@ -80,6 +81,8 @@ export default function SecurityTraining() {
   );
 }
 ```
+
+Identity rules (`courseId`, `lessonId`, `checkId`, URNs): [`docs/IDENTITY.md`](docs/IDENTITY.md).
 
 ---
 

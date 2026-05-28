@@ -44,6 +44,7 @@ export default function App() {
         </Scenario>
 
         <Quiz
+          checkId="first-step"
           question="What should you do first?"
           choices={["Open attachment", "Verify sender"]}
           answer="Verify sender"
@@ -55,16 +56,15 @@ export default function App() {
 }
 ```
 
-## API (0.4.0)
+## API (0.5.0)
 
 ### Components
 
-- `Course`
-- `Lesson`
-- `Scenario`
-- `Quiz`
-- `Reflection`
-- `KnowledgeCheck`
+- `Course` — requires `courseId`
+- `Lesson` — requires `lessonId`
+- `Scenario` — optional `blockId`
+- `Quiz` / `KnowledgeCheck` — require `checkId`
+- `Reflection` — optional `blockId`
 - `ProgressTracker`
 
 ### Hooks
@@ -93,4 +93,5 @@ export default function App() {
   Strict Mode remounts do not split analytics sessions in development.
 - Accessibility guidance lives in [`docs/ACCESSIBILITY.md`](../../docs/ACCESSIBILITY.md).
 - Theming and token catalog: [`docs/THEMING.md`](../../docs/THEMING.md).
+- Identity and telemetry: [`docs/IDENTITY.md`](../../docs/IDENTITY.md), [`docs/TELEMETRY.md`](../../docs/TELEMETRY.md).
 

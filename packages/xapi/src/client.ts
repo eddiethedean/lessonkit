@@ -1,21 +1,16 @@
+import type { CourseId, LessonId } from "@lessonkit/core";
 import { nowIso } from "@lessonkit/core";
 import type { XAPIClient, XAPIQueue, XAPIStatement, XAPITransport } from "./types";
 import { createInMemoryXAPIQueue } from "./queue";
-import { cryptoRandomId } from "./id";
-import { formatDurationMs } from "./duration";
-
-const XAPIVerbs = {
-  started: "http://adlnet.gov/expapi/verbs/initialized",
-  completed: "http://adlnet.gov/expapi/verbs/completed",
-} as const;
+import { telemetryEventToXAPIStatement } from "./telemetryMap";
 
 export function createXAPIClient(opts?: {
   transport?: XAPITransport;
-  baseId?: string;
+  courseId?: CourseId;
   queue?: XAPIQueue;
 }): XAPIClient {
   const transport = opts?.transport;
-  const baseId = opts?.baseId ?? "urn:lessonkit";
+  const courseId = opts?.courseId;
   const queue = opts?.queue ?? createInMemoryXAPIQueue();
 
   const sendOrQueue = (statement: XAPIStatement) => {
@@ -30,6 +25,11 @@ export function createXAPIClient(opts?: {
       });
   };
 
+  const emit = (event: Parameters<typeof telemetryEventToXAPIStatement>[0]) => {
+    const statement = telemetryEventToXAPIStatement(event);
+    if (statement) sendOrQueue(statement);
+  };
+
   return {
     send: (statement) => {
       sendOrQueue(statement);
@@ -39,48 +39,45 @@ export function createXAPIClient(opts?: {
       if (!transport) return;
       await queue.flush(transport);
     },
-    startedLesson: ({ lessonId }) => {
-      const statement = statementFor(`${baseId}:lesson:${lessonId}`, XAPIVerbs.started);
-      sendOrQueue(statement);
-    },
-    completeLesson: ({ lessonId, durationMs, score, maxScore, success }) => {
-      const result: Record<string, unknown> = {};
-      if (typeof durationMs === "number") result.duration = formatDurationMs(durationMs);
-      if (typeof success === "boolean") result.success = success;
-      if (typeof score === "number" || typeof maxScore === "number") {
-        const max = typeof maxScore === "number" ? maxScore : undefined;
-        const raw = typeof score === "number" ? score : undefined;
-        result.score = {
-          raw,
-          max,
-          min: 0,
-          scaled: typeof raw === "number" && typeof max === "number" && max > 0 ? raw / max : undefined,
-        };
-      }
-      const statement = statementFor(`${baseId}:lesson:${lessonId}`, XAPIVerbs.completed, {
-        result: Object.keys(result).length ? result : undefined,
+    startedLesson: ({ lessonId }: { lessonId: LessonId }) => {
+      if (!courseId) return;
+      emit({
+        name: "lesson_started",
+        timestamp: nowIso(),
+        courseId,
+        lessonId,
+        data: { lessonId },
       });
-      sendOrQueue(statement);
+    },
+    completeLesson: ({
+      lessonId,
+      durationMs,
+      score,
+      maxScore,
+      success,
+    }: {
+      lessonId: LessonId;
+      durationMs?: number;
+      score?: number;
+      maxScore?: number;
+      success?: boolean;
+    }) => {
+      if (!courseId) return;
+      emit({
+        name: "lesson_completed",
+        timestamp: nowIso(),
+        courseId,
+        lessonId,
+        data: { lessonId, durationMs, score, maxScore, success },
+      });
     },
     completeCourse: () => {
-      const statement = statementFor(`${baseId}:course`, XAPIVerbs.completed);
-      sendOrQueue(statement);
+      if (!courseId) return;
+      emit({
+        name: "course_completed",
+        timestamp: nowIso(),
+        courseId,
+      });
     },
   };
 }
-
-function statementFor(
-  objectId: string,
-  verb: string,
-  extra?: Pick<XAPIStatement, "result" | "context">,
-): XAPIStatement {
-  return {
-    id: cryptoRandomId(),
-    timestamp: nowIso(),
-    verb,
-    object: { id: objectId },
-    result: extra?.result,
-    context: extra?.context,
-  };
-}
-

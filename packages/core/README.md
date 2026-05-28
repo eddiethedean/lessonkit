@@ -12,9 +12,12 @@ Core types and runtime primitives shared across LessonKit packages.
 npm install @lessonkit/core
 ```
 
-## What’s inside (0.4.0)
+## What’s inside (0.5.0)
 
-- Telemetry event types (`TelemetryEvent`)
-- A minimal tracking client (`createTrackingClient`) with optional batching
+- Identity helpers: `validateId`, `slugifyId`, `deriveId`, `buildLessonkitUrn`
+- Typed telemetry events (`TelemetryEvent`) and `telemetry-catalog.v1.json`
+- Tracking client (`createTrackingClient`) with optional batching
 - Session id helper (`createSessionId`)
+
+See [`docs/IDENTITY.md`](../../docs/IDENTITY.md) and [`docs/TELEMETRY.md`](../../docs/TELEMETRY.md).
 

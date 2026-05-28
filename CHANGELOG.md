@@ -3,6 +3,31 @@
 All notable changes to the LessonKit monorepo are documented here. Published packages use the
 [`@lessonkit/*`](https://www.npmjs.com/org/lessonkit) scope.
 
+## [0.5.0] - 2026-05-28
+
+### Added
+
+- **@lessonkit/core**: Identity v1 — `validateId`, `slugifyId`, `deriveId`, `buildLessonkitUrn`; typed `TelemetryEvent` payloads; `TELEMETRY_EVENT_CATALOG` / `telemetry-catalog.v1.json`; `identity-contract.v1.json`.
+- **@lessonkit/xapi**: `telemetryEventToXAPIStatement()` — canonical mapping from telemetry to xAPI object URNs.
+- **Docs**: [`docs/IDENTITY.md`](docs/IDENTITY.md), [`docs/TELEMETRY.md`](docs/TELEMETRY.md).
+
+### Changed
+
+- **@lessonkit/react**: xAPI emission goes through the telemetry mapper after each `track()` (single path for lifecycle and quiz events).
+- **@lessonkit/xapi**: `createXAPIClient` uses `courseId` and the mapper internally for lifecycle helpers.
+
+### Breaking
+
+- **@lessonkit/react**: `courseId` required on `Course` and `LessonkitProvider`; `lessonId` required on `Lesson` (removed `useId()` lesson fallback); `checkId` required on `Quiz` / `KnowledgeCheck`.
+- **@lessonkit/react**: `useQuizState().answer` / `.complete` require `checkId` in their payloads.
+- **@lessonkit/react**: Removed exported `sanitizeLessonId`.
+- **@lessonkit/core**: All telemetry events require `courseId`; event `data` shapes are discriminated by event name.
+- **@lessonkit/xapi**: Clients without `courseId` no longer emit lifecycle statements; default `urn:lessonkit` base id removed.
+
+### Migration
+
+See [`docs/IDENTITY.md`](docs/IDENTITY.md): add `courseId`, `lessonId`, and `checkId` to your components; preserve IDs in source when regenerating.
+
 ## [0.4.0] - 2026-05-28
 
 ### Added

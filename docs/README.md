@@ -18,6 +18,8 @@ Placeholders live here until the full docs stack is scaffolded:
 ## Guides
 
 - [`THEMING.md`](THEMING.md) — design tokens, `--lk-*` CSS variables, and `ThemeProvider`
+- [`IDENTITY.md`](IDENTITY.md) — required IDs, URN contract, codegen guidance
+- [`TELEMETRY.md`](TELEMETRY.md) — event catalog and xAPI mapping
 - [`ACCESSIBILITY.md`](ACCESSIBILITY.md) — keyboard and screen reader standards
 
 ## Integration
@@ -26,7 +28,7 @@ Placeholders live here until the full docs stack is scaffolded:
 
 ## Current status
 
-Framework **0.4.0** (theme tokens, `ThemeProvider`, generator catalog) is implemented in `packages/`
-and documented in [`THEMING.md`](THEMING.md). Storybook and Docusaurus folders remain placeholders
+Framework **0.5.0** (identity model, telemetry catalog, canonical xAPI mapper, themes) is implemented
+in `packages/` and documented in the guides above. Storybook and Docusaurus folders remain placeholders
 until the docs stack is scaffolded.
 

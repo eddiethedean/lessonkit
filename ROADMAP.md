@@ -28,9 +28,9 @@ this repo until that gate is met.
 
 ## Status
 
-- **Framework:** **0.4.0** — theme tokens, CSS variable contract, `ThemeProvider`, generator catalog JSON
+- **Framework:** **0.5.0** — deterministic identity (required `courseId` / `lessonId` / `checkId`), telemetry catalog, canonical telemetry → xAPI mapper
 - **Studio:** **blocked** — no implementation work until **[1.0.0 — Stable public API (framework)](#100--stable-public-api-framework)** is shipped (see [Studio development gate](#studio-development-gate))
-- **Focus (now):** complete framework milestones only (identity model 0.5.x, LXPack adapter, CLI, block catalog, conformance, then 1.0.0)
+- **Focus (now):** LXPack adapter (0.6.x), CLI (0.7.x), block catalog (0.8.x), conformance (0.9.x), then 1.0.0
 
 ## Guiding principles
 
@@ -142,23 +142,9 @@ this repo until that gate is met.
 
 ---
 
-### 0.5.x — Deterministic identity model (framework contract)
+### 0.5.x — Deterministic identity model (framework contract) — **shipped in 0.5.0**
 
-#### Goals
-
-- Make identities stable for tracking, packaging, diffs, and regeneration.
-- Ensure IDs map cleanly to xAPI/LXPack/LMS concepts without guesswork.
-
-#### Deliverables
-
-- `@lessonkit/react` / `@lessonkit/core`:
-  - identity model v1 (requiredness + propagation rules): `courseId`, `lessonId`, plus stable ids for checks/quizzes/blocks
-  - deterministic ID generation guidance (when IDs are omitted) + collision strategy
-  - explicit invariants: IDs are stable across renders and stable across export targets
-- `@lessonkit/xapi`:
-  - guaranteed mapping from telemetry events → xAPI statements using those stable IDs
-- **AI/dev readiness**:
-  - “regenerate code” workflows produce minimal diffs (no hidden randomness; stable defaults)
+See [`docs/IDENTITY.md`](docs/IDENTITY.md) and [`docs/TELEMETRY.md`](docs/TELEMETRY.md).
 
 ---
 

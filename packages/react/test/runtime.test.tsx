@@ -40,7 +40,7 @@ describe("@lessonkit/react runtime", () => {
         }}
       >
         <Lesson title="Lesson" lessonId="lesson-1">
-          <Quiz question="Q" choices={["A", "B"]} answer="B" />
+          <Quiz checkId="check-1" question="Q" choices={["A", "B"]} answer="B" />
         </Lesson>
       </Course>,
     );
@@ -57,7 +57,12 @@ describe("@lessonkit/react runtime", () => {
     const quizAnswered = events.find((e) => e.name === "quiz_answered");
     expect(quizAnswered).toBeDefined();
     if (!quizAnswered) throw new Error("missing quiz_answered");
-    expect(quizAnswered.data).toMatchObject({ question: "Q", choice: "A", correct: false });
+    expect(quizAnswered.data).toMatchObject({
+      checkId: "check-1",
+      question: "Q",
+      choice: "A",
+      correct: false,
+    });
     expect(quizAnswered.courseId).toBe("course-1");
     expect(quizAnswered.lessonId).toBe("lesson-1");
     expect(typeof quizAnswered.sessionId).toBe("string");
@@ -67,15 +72,21 @@ describe("@lessonkit/react runtime", () => {
     const events: TelemetryEvent[] = [];
     function Driver() {
       const quiz = useQuizState();
+      const { progress } = useLessonkit();
       React.useEffect(() => {
-        quiz.complete({ score: 1, maxScore: 2 });
-      }, [quiz]);
+        if (!progress.activeLessonId) return;
+        quiz.complete({ checkId: "check-1", score: 1, maxScore: 2 });
+      }, [quiz, progress.activeLessonId]);
       return <div>driver</div>;
     }
 
     render(
-      <LessonkitProvider config={{ tracking: { sink: (e: TelemetryEvent) => void events.push(e) } }}>
-        <Driver />
+      <LessonkitProvider
+        config={{ courseId: "course-1", tracking: { sink: (e: TelemetryEvent) => void events.push(e) } }}
+      >
+        <Lesson title="Lesson" lessonId="lesson-1">
+          <Driver />
+        </Lesson>
       </LessonkitProvider>,
     );
 
@@ -160,7 +171,9 @@ describe("@lessonkit/react runtime", () => {
     }
 
     const { getByText } = render(
-      <LessonkitProvider config={{ tracking: { sink: (e: TelemetryEvent) => void events.push(e) } }}>
+      <LessonkitProvider
+        config={{ courseId: "course-1", tracking: { sink: (e: TelemetryEvent) => void events.push(e) } }}
+      >
         <Driver />
       </LessonkitProvider>,
     );
@@ -177,7 +190,7 @@ describe("@lessonkit/react runtime", () => {
 
     function Wrapper(props: { sink?: (e: TelemetryEvent) => void }) {
       return (
-        <Course title="Course" config={{ tracking: { sink: props.sink } }}>
+        <Course title="Course" courseId="course-1" config={{ tracking: { sink: props.sink } }}>
           <div>child</div>
         </Course>
       );
@@ -195,36 +208,22 @@ describe("@lessonkit/react runtime", () => {
   it("covers Scenario and KnowledgeCheck components", async () => {
     const events: TelemetryEvent[] = [];
     const { getAllByLabelText } = render(
-      <Course title="Course" config={{ tracking: { sink: (e: TelemetryEvent) => void events.push(e) } }}>
+      <Course
+        title="Course"
+        courseId="course-1"
+        config={{ tracking: { sink: (e: TelemetryEvent) => void events.push(e) } }}
+      >
         <Lesson title="Lesson" lessonId="lesson-1">
           <Scenario>
             <p>scenario</p>
           </Scenario>
-          <KnowledgeCheck question="Q" choices={["A"]} answer="A" />
+          <KnowledgeCheck checkId="check-1" question="Q" choices={["A"]} answer="A" />
         </Lesson>
       </Course>,
     );
 
     fireEvent.click(getAllByLabelText("A")[0]!);
     await waitFor(() => expect(events.some((e) => e.name === "quiz_answered")).toBe(true));
-  });
-
-  it("auto-generates a stable lesson id when lessonId is omitted", async () => {
-    const events: TelemetryEvent[] = [];
-    render(
-      <Course title="Course" config={{ tracking: { sink: (e: TelemetryEvent) => void events.push(e) } }}>
-        <Lesson title="Lesson">{null}</Lesson>
-      </Course>,
-    );
-    await waitFor(() => expect(events.some((e) => e.name === "lesson_started")).toBe(true));
-    const started = events.find((e) => e.name === "lesson_started");
-    expect(started?.lessonId).toMatch(/^lesson-[a-zA-Z0-9_-]+$/);
-  });
-
-  it("sanitizeLessonId returns fallback for empty input", async () => {
-    const { sanitizeLessonId } = await import("../src/components");
-    expect(sanitizeLessonId("::: ")).toBe("id");
-    expect(sanitizeLessonId("lesson-1")).toBe("lesson-1");
   });
 
   it("completeCourse is idempotent for telemetry", async () => {
@@ -239,7 +238,9 @@ describe("@lessonkit/react runtime", () => {
     }
 
     render(
-      <LessonkitProvider config={{ tracking: { sink: (e: TelemetryEvent) => void events.push(e) } }}>
+      <LessonkitProvider
+        config={{ courseId: "course-1", tracking: { sink: (e: TelemetryEvent) => void events.push(e) } }}
+      >
         <Driver />
       </LessonkitProvider>,
     );
@@ -259,7 +260,9 @@ describe("@lessonkit/react runtime", () => {
     }
 
     const { findByText } = render(
-      <LessonkitProvider config={{ tracking: { sink: (e: TelemetryEvent) => void events.push(e) } }}>
+      <LessonkitProvider
+        config={{ courseId: "course-1", tracking: { sink: (e: TelemetryEvent) => void events.push(e) } }}
+      >
         <Driver />
       </LessonkitProvider>,
     );
@@ -279,7 +282,12 @@ describe("@lessonkit/react runtime", () => {
     }
 
     render(
-      <LessonkitProvider config={{ tracking: { enabled: false, sink: (e: TelemetryEvent) => void events.push(e) } }}>
+      <LessonkitProvider
+        config={{
+          courseId: "course-1",
+          tracking: { enabled: false, sink: (e: TelemetryEvent) => void events.push(e) },
+        }}
+      >
         <Driver />
       </LessonkitProvider>,
     );
@@ -295,6 +303,7 @@ describe("@lessonkit/react runtime", () => {
     render(
       <Course
         title="Course"
+        courseId="course-1"
         config={{
           tracking: { sink: (e: TelemetryEvent) => void events.push(e) },
           xapi: { enabled: false, transport },
@@ -310,11 +319,11 @@ describe("@lessonkit/react runtime", () => {
     expect(transport).not.toHaveBeenCalled();
   });
 
-  it("xAPI client injection is used (startedLesson transport invoked)", async () => {
+  it("xAPI client injection receives statements from telemetry mapper", async () => {
     const statements: XAPIStatement[] = [];
-    const transport: XAPITransport = async (s: XAPIStatement) => {
+    const send = vi.fn((s: XAPIStatement) => {
       statements.push(s);
-    };
+    });
 
     const { unmount } = render(
       <Course
@@ -323,11 +332,10 @@ describe("@lessonkit/react runtime", () => {
         config={{
           xapi: {
             client: {
-              send: (s: XAPIStatement) => void transport(s),
+              send,
               flush: async () => {},
               queueSize: () => 0,
-              startedLesson: ({ lessonId }: { lessonId: string }) =>
-                void transport({ id: "1", timestamp: "t", verb: "v", object: { id: `lesson:${lessonId}` } }),
+              startedLesson: () => {},
               completeLesson: () => {},
               completeCourse: () => {},
             },
@@ -340,10 +348,9 @@ describe("@lessonkit/react runtime", () => {
       </Course>,
     );
 
-    await waitFor(() => expect(statements.length).toBeGreaterThan(0));
-    expect(statements[0]?.object.id).toContain("lesson:lesson-1");
+    await waitFor(() => expect(send).toHaveBeenCalled());
+    expect(statements.some((s) => s.object.id?.includes(":lesson:lesson-1"))).toBe(true);
 
-    // cover unmount lifecycle path too
     unmount();
   });
 
@@ -408,7 +415,7 @@ describe("@lessonkit/react runtime", () => {
     };
 
     const { rerender } = render(
-      <Course title="Course" config={{ xapi: { client: client1 } }}>
+      <Course title="Course" courseId="course-1" config={{ xapi: { client: client1 } }}>
         <Lesson title="Lesson" lessonId="lesson-1">
           <div>child</div>
         </Lesson>
@@ -416,7 +423,7 @@ describe("@lessonkit/react runtime", () => {
     );
 
     rerender(
-      <Course title="Course" config={{ xapi: { client: client2 } }}>
+      <Course title="Course" courseId="course-1" config={{ xapi: { client: client2 } }}>
         <Lesson title="Lesson" lessonId="lesson-1">
           <div>child</div>
         </Lesson>
@@ -435,7 +442,9 @@ describe("@lessonkit/react runtime", () => {
     });
 
     render(
-      <LessonkitProvider config={{ tracking: { sink: (e: TelemetryEvent) => void events.push(e) } }}>
+      <LessonkitProvider
+        config={{ courseId: "course-1", tracking: { sink: (e: TelemetryEvent) => void events.push(e) } }}
+      >
         <div>child</div>
       </LessonkitProvider>,
     );
@@ -466,7 +475,9 @@ describe("@lessonkit/react runtime", () => {
     });
 
     render(
-      <LessonkitProvider config={{ tracking: { sink: (e: TelemetryEvent) => void events.push(e) } }}>
+      <LessonkitProvider
+        config={{ courseId: "course-1", tracking: { sink: (e: TelemetryEvent) => void events.push(e) } }}
+      >
         <div>child</div>
       </LessonkitProvider>,
     );
@@ -480,12 +491,12 @@ describe("@lessonkit/react runtime", () => {
     });
   });
 
-  it("does not dedupe course_started across separate providers when courseId is omitted", async () => {
+  it("dedupes course_started per session and courseId", async () => {
     const events: TelemetryEvent[] = [];
     const sink = (e: TelemetryEvent) => void events.push(e);
 
     const { unmount } = render(
-      <Course title="Course A" config={{ tracking: { sink } }}>
+      <Course title="Course A" courseId="course-a" config={{ tracking: { sink } }}>
         <div>child</div>
       </Course>,
     );
@@ -494,7 +505,7 @@ describe("@lessonkit/react runtime", () => {
     unmount();
 
     render(
-      <Course title="Course B" config={{ tracking: { sink } }}>
+      <Course title="Course B" courseId="course-b" config={{ tracking: { sink } }}>
         <div>child</div>
       </Course>,
     );
@@ -503,9 +514,9 @@ describe("@lessonkit/react runtime", () => {
 
   it("Quiz legend uses visually hidden styles without sr-only class", () => {
     const { container } = render(
-      <Course title="Course">
+      <Course title="Course" courseId="course-1">
         <Lesson title="Lesson" lessonId="lesson-1">
-          <Quiz question="Q" choices={["A"]} answer="A" />
+          <Quiz checkId="check-1" question="Q" choices={["A"]} answer="A" />
         </Lesson>
       </Course>,
     );

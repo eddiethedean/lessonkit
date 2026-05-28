@@ -2,6 +2,12 @@ import { describe, expect, it, vi } from "vitest";
 import type { TelemetryEvent, TelemetryBatchSink } from "../src";
 import { createSessionId, createTrackingClient, nowIso } from "../src";
 
+const baseEvent = { courseId: "test-course", timestamp: "2026-01-01T00:00:00.000Z" } as const;
+
+function interactionEvent(timestamp: string): TelemetryEvent {
+  return { name: "interaction", ...baseEvent, timestamp };
+}
+
 describe("@lessonkit/core", () => {
   it("nowIso returns an ISO string", () => {
     const s = nowIso();
@@ -26,22 +32,22 @@ describe("@lessonkit/core", () => {
   it("tracks via sink when batching is disabled", async () => {
     const sink = vi.fn(async () => {});
     const client = createTrackingClient({ sink, batch: { enabled: false } });
-    client.track({ name: "interaction", timestamp: "t" });
+    client.track(interactionEvent("t"));
     expect(sink).toHaveBeenCalledTimes(1);
   });
 
   it("is a safe no-op when batching enabled but no sinks provided", () => {
     const client = createTrackingClient({ batch: { enabled: true } });
-    expect(() => client.track({ name: "interaction", timestamp: "t" })).not.toThrow();
+    expect(() => client.track(interactionEvent("t"))).not.toThrow();
     expect(() => client.dispose?.()).not.toThrow();
   });
 
   it("non-batched dispose stops further tracking", () => {
     const sink = vi.fn();
     const client = createTrackingClient({ sink, batch: { enabled: false } });
-    client.track({ name: "interaction", timestamp: "t1" });
+    client.track(interactionEvent("t1"));
     client.dispose?.();
-    client.track({ name: "interaction", timestamp: "t2" });
+    client.track(interactionEvent("t2"));
     expect(sink).toHaveBeenCalledTimes(1);
   });
 
@@ -59,7 +65,7 @@ describe("@lessonkit/core", () => {
       batch: { enabled: true, flushIntervalMs: 0, maxBatchSize: 100 },
     });
 
-    client.track({ name: "interaction", timestamp: "t1" });
+    client.track(interactionEvent("t1"));
     client.flush?.();
     client.flush?.();
 
@@ -83,7 +89,7 @@ describe("@lessonkit/core", () => {
       batch: { enabled: true, flushIntervalMs: 0, maxBatchSize: 100 },
     });
 
-    client.track({ name: "interaction", timestamp: "t1" });
+    client.track(interactionEvent("t1"));
 
     client.flush?.();
     await new Promise((r) => setTimeout(r, 0));
@@ -100,7 +106,7 @@ describe("@lessonkit/core", () => {
       sink,
       batch: { enabled: true, flushIntervalMs: 0, maxBatchSize: 100 },
     });
-    client.track({ name: "interaction", timestamp: "t1" });
+    client.track(interactionEvent("t1"));
     client.flush?.();
     await new Promise((r) => setTimeout(r, 0));
     expect(sink).toHaveBeenCalledTimes(1);
@@ -129,8 +135,8 @@ describe("@lessonkit/core", () => {
       batch: { enabled: true, flushIntervalMs: 0, maxBatchSize: 100 },
     });
 
-    client.track({ name: "interaction", timestamp: "t1" });
-    client.track({ name: "interaction", timestamp: "t2" });
+    client.track(interactionEvent("t1"));
+    client.track(interactionEvent("t2"));
     client.dispose?.();
     await new Promise((r) => setTimeout(r, 10));
     expect(sink).toHaveBeenCalledTimes(2);
@@ -144,7 +150,7 @@ describe("@lessonkit/core", () => {
     });
 
     client.dispose?.();
-    client.track({ name: "interaction", timestamp: "t1" });
+    client.track(interactionEvent("t1"));
     await new Promise((r) => setTimeout(r, 0));
     expect(sink).not.toHaveBeenCalled();
   });
@@ -164,12 +170,12 @@ describe("@lessonkit/core", () => {
     });
 
     for (let i = 0; i < 5; i++) {
-      client.track({ name: "interaction", timestamp: `t${i}` });
+      client.track(interactionEvent(`t${i}`));
     }
     client.flush?.();
     await new Promise((r) => setTimeout(r, 0));
-    client.track({ name: "interaction", timestamp: "t5" });
-    client.track({ name: "interaction", timestamp: "t6" });
+    client.track(interactionEvent("t5"));
+    client.track(interactionEvent("t6"));
 
     resolveFlush();
     await new Promise((r) => setTimeout(r, 10));

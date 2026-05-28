@@ -29,14 +29,14 @@ for:
 
 ## 0.5.x — Identity + semantics (IDs, telemetry, xAPI)
 
-- [ ] Identity model v1 is documented:
-  - [ ] `courseId` requiredness + defaults
-  - [ ] `lessonId` requiredness + defaults
-  - [ ] stable IDs for quizzes/checks/blocks (or a clearly scoped subset)
-- [ ] ID generation guidance is deterministic (no hidden randomness) with collision strategy
-- [ ] Telemetry event catalog is documented and versioned (or explicitly references a canonical source)
-- [ ] Telemetry → xAPI statement mapping is documented and stable across exports
-- [ ] “Regenerate code” guidance exists (how to preserve IDs to minimize diffs)
+- [x] Identity model v1 is documented ([`IDENTITY.md`](IDENTITY.md)):
+  - [x] `courseId` required on `Course` / `LessonkitProvider`
+  - [x] `lessonId` required on `Lesson` (no runtime `useId` fallback)
+  - [x] `checkId` required on `Quiz` / `KnowledgeCheck`; optional `blockId` on `Scenario` / `Reflection`
+- [x] ID generation guidance is deterministic (`slugifyId`, `deriveId`, `validateId` in `@lessonkit/core`)
+- [x] Telemetry event catalog is versioned (`telemetry-catalog.v1.json`, [`TELEMETRY.md`](TELEMETRY.md))
+- [x] Telemetry → xAPI mapping is canonical (`telemetryEventToXAPIStatement` in `@lessonkit/xapi`)
+- [x] “Regenerate code” guidance exists in [`IDENTITY.md`](IDENTITY.md)
 
 ## 0.6.x — Export surfaces + `@lessonkit/lxpack` adapter
 
