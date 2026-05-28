@@ -68,6 +68,37 @@ describe("ThemeProvider", () => {
     expect(screen.getByTestId("reader").textContent).toContain("#7c3aed");
   });
 
+  it("preset=brand with mode=light keeps light background and brand primary", () => {
+    render(
+      <ThemeProvider mode="light" preset="brand">
+        <ThemeReader />
+      </ThemeProvider>,
+    );
+    expect(document.documentElement.style.getPropertyValue("--lk-color-background").trim()).toBe(
+      "#f7f8ff",
+    );
+    expect(document.documentElement.style.getPropertyValue("--lk-color-primary").trim()).toBe(
+      "#7c3aed",
+    );
+    expect(document.documentElement.style.getPropertyValue("--lk-color-extra-accent").trim()).toBe(
+      "#22d3ee",
+    );
+  });
+
+  it("preset=brand with mode=dark keeps dark background and brand primary", () => {
+    render(
+      <ThemeProvider mode="dark" preset="brand">
+        <ThemeReader />
+      </ThemeProvider>,
+    );
+    expect(document.documentElement.style.getPropertyValue("--lk-color-background").trim()).toBe(
+      "#0b1020",
+    );
+    expect(document.documentElement.style.getPropertyValue("--lk-color-primary").trim()).toBe(
+      "#7c3aed",
+    );
+  });
+
   it("mode=system follows matchMedia", () => {
     const listeners: Array<() => void> = [];
     vi.stubGlobal(

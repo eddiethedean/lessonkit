@@ -22,8 +22,10 @@ npm install @lessonkit/themes
 
 ### Presets
 
-- `defaultTheme`, `lightTheme`, `darkTheme`, `brandTheme`
-- `getPresetTheme(preset)` — `default` | `light` | `dark` | `brand`
+- `defaultTheme`, `lightTheme`, `darkTheme`, `brandTheme`, `brandThemeOverrides`
+- `getPresetTheme(preset)` — `default` | `light` | `dark` | `brand` (full themes for catalog/validation)
+
+In `ThemeProvider`, `preset="default"` uses the mode palette only; `preset="brand"` merges `brandThemeOverrides` onto the active mode (see [`docs/THEMING.md`](../../docs/THEMING.md)).
 
 ### Utilities
 

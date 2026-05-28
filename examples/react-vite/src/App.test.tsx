@@ -13,13 +13,19 @@ describe("example App", () => {
     expect(true).toBe(true);
   });
 
-  it("theme toggle updates data-lk-theme on the document", () => {
+  it("theme toggle updates data-lk-theme and light background CSS on the document", () => {
     const spy = vi.spyOn(console, "log").mockImplementation(() => {});
     const { getByRole } = render(<App />);
     fireEvent.click(getByRole("button", { name: "Light" }));
     expect(document.documentElement.getAttribute("data-lk-theme")).toBe("light");
+    expect(document.documentElement.style.getPropertyValue("--lk-color-background").trim()).toBe(
+      "#f7f8ff",
+    );
     fireEvent.click(getByRole("button", { name: "Dark" }));
     expect(document.documentElement.getAttribute("data-lk-theme")).toBe("dark");
+    expect(document.documentElement.style.getPropertyValue("--lk-color-background").trim()).toBe(
+      "#0b1020",
+    );
     spy.mockRestore();
   });
 

@@ -35,6 +35,8 @@ The provider sets `data-lk-theme="light"` or `data-lk-theme="dark"` on the docum
 
 1. **Preset base** — `default`, `light`, `dark`, or `brand` from `@lessonkit/themes`
 2. **Mode** — `light` / `dark` / `system` selects a light or dark palette (system follows `prefers-color-scheme`)
+
+`preset="default"` in `ThemeProvider` means **mode palette only** (light or dark tokens). It does not apply the exported `defaultTheme` object (white reference palette); use `defaultTheme` from `@lessonkit/themes` for catalogs, validation, or non-React tooling. The `brand` preset merges only brand deltas (primary, accent) onto the active mode palette so light/dark toggles stay correct.
 3. **`theme` prop** — partial overrides merged last (last writer wins per leaf token)
 4. **Author CSS** — rules on `:root` or `[data-lk-theme]` override injected inline variables
 

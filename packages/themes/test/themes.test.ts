@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   brandTheme,
+  brandThemeOverrides,
   buildThemeCatalog,
   darkTheme,
   defaultTheme,
@@ -61,6 +62,14 @@ describe("@lessonkit/themes", () => {
     expect(getPresetTheme("light").name).toBe("light");
     expect(getPresetTheme("dark").name).toBe("dark");
     expect(getPresetTheme("brand").name).toBe("brand");
+  });
+
+  it("brandTheme merges overrides onto dark; brand+light mode keeps light background", () => {
+    expect(brandTheme.colors.primary).toBe("#7c3aed");
+    expect(brandTheme.colors.background).toBe(darkTheme.colors.background);
+    const lightBrand = mergeThemes(lightTheme, brandThemeOverrides);
+    expect(lightBrand.colors.background).toBe("#f7f8ff");
+    expect(lightBrand.colors.primary).toBe("#7c3aed");
   });
 
   it("mergeThemes applies overrides last", () => {

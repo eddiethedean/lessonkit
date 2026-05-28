@@ -8,6 +8,7 @@ import React, {
   useState,
 } from "react";
 import {
+  brandThemeOverrides,
   darkTheme,
   getPresetTheme,
   lightTheme,
@@ -86,7 +87,11 @@ export function ThemeProvider(props: ThemeProviderProps) {
   const effectiveTheme = useMemo(() => {
     const modeBase = resolveModeBase(mode, dataTheme);
     const base =
-      preset === "default" ? modeBase : mergeThemes(modeBase, getPresetTheme(preset));
+      preset === "default"
+        ? modeBase
+        : preset === "brand"
+          ? mergeThemes(modeBase, brandThemeOverrides)
+          : mergeThemes(modeBase, getPresetTheme(preset));
     return mergeThemes(base, props.theme ?? {});
   }, [preset, mode, dataTheme, props.theme]);
 

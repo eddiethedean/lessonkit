@@ -16,6 +16,12 @@ All notable changes to the LessonKit monorepo are documented here. Published pac
 
 - **@lessonkit/themes**: `LessonkitTheme` is now an alias for the full `LessonkitThemeV1` schema (breaking if you relied on the old partial shape without other token groups).
 
+### Fixed
+
+- **@lessonkit/themes** / **@lessonkit/react**: `preset="brand"` no longer forces dark palette colors when `mode` is `light` or `system` (brand merges `brandThemeOverrides` onto the active mode base).
+- **@lessonkit/react**: `LessonkitProvider` uses shared `createXapiClientFromConfig` from `runtime/xapi` (no duplicate factory logic).
+- **Docs**: Package READMEs and root example updated for 0.4.0; `SPEC.md` imports `@lessonkit/react`; theming docs clarify `preset="default"` vs `defaultTheme`.
+
 ## [0.3.1] - 2026-05-28
 
 ### Fixed

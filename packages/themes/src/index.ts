@@ -41,6 +41,7 @@ export {
 
 export {
   brandTheme,
+  brandThemeOverrides,
   darkTheme,
   defaultTheme,
   getPresetTheme,

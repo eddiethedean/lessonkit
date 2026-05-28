@@ -10,9 +10,9 @@ import React, {
 import type { CourseId, LessonId, TelemetryEvent, TelemetryUser, TrackingClient } from "@lessonkit/core";
 import { createTrackingClient, nowIso } from "@lessonkit/core";
 import type { XAPIClient, XAPITransport } from "@lessonkit/xapi";
-import { createInMemoryXAPIQueue, createXAPIClient } from "@lessonkit/xapi";
-import type { XAPIQueue } from "@lessonkit/xapi";
+import { createInMemoryXAPIQueue } from "@lessonkit/xapi";
 import { createSessionStoragePort } from "./runtime/ports";
+import { createXapiClientFromConfig } from "./runtime/xapi";
 import { hasCourseStarted, markCourseStarted, resolveSessionId } from "./runtime/session";
 
 export type LessonkitConfig = {
@@ -85,13 +85,6 @@ function createTrackingClientFromConfig(config: LessonkitConfig): TrackingClient
     batchSink: config.tracking?.batchSink,
     batch: config.tracking?.batch,
   });
-}
-
-function createXapiClientFromConfig(config: LessonkitConfig, queue: XAPIQueue): XAPIClient | null {
-  if (config.xapi?.enabled === false) return null;
-  if (config.xapi?.client) return config.xapi.client;
-  const baseId = config.courseId ? `urn:lessonkit:course:${config.courseId}` : undefined;
-  return createXAPIClient({ baseId, transport: config.xapi?.transport, queue });
 }
 
 export function LessonkitProvider(props: { config?: LessonkitConfig; children: React.ReactNode }) {

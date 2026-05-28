@@ -1,4 +1,5 @@
-import type { LessonkitThemeV1 } from "./schema";
+import { mergeThemes } from "./merge";
+import type { LessonkitThemeV1, PartialLessonkitThemeV1 } from "./schema";
 
 const sharedTypography = {
   fontFamily:
@@ -100,22 +101,19 @@ export const darkTheme: LessonkitThemeV1 = {
   },
 };
 
-/** Organizational branding variant (purple primary, cyan accent). */
-export const brandTheme: LessonkitThemeV1 = {
+/** Brand deltas merged onto the active mode palette (light/dark). */
+export const brandThemeOverrides: PartialLessonkitThemeV1 = {
   name: "brand",
   colors: {
-    ...darkTheme.colors,
     primary: "#7c3aed",
     extra: {
       accent: "#22d3ee",
-      "panel-strong": "rgba(255, 255, 255, 0.12)",
     },
   },
-  spacing: { ...sharedSpacing },
-  typography: { ...sharedTypography },
-  radius: { ...sharedRadius },
-  shadows: { ...darkTheme.shadows },
 };
+
+/** Full dark reference palette for `getPresetTheme("brand")` and catalog validation. */
+export const brandTheme: LessonkitThemeV1 = mergeThemes(darkTheme, brandThemeOverrides);
 
 export type ThemePresetName = "default" | "light" | "dark" | "brand";
 

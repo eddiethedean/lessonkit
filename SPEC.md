@@ -57,7 +57,7 @@ import {
   Lesson,
   Quiz,
   Scenario,
-} from "lessonkit";
+} from "@lessonkit/react";
 
 export default function SecurityTraining() {
   return (
