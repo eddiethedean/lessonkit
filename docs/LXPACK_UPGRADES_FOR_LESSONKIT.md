@@ -27,12 +27,10 @@ Related LessonKit docs:
 LessonKit’s preferred path is **Strategy A** from the roadmap:
 
 1. Author courses in React with `@lessonkit/react`.
-2. Export to an LXPack project via `@lessonkit/lxpack` (planned).
-3. Run `lxpack validate` and `lxpack build --target …` for LMS delivery.
+2. Export to an LXPack project via **`@lessonkit/lxpack`** (shipped in 0.6.0 — see [`PACKAGING.md`](PACKAGING.md)).
+3. Run `lxpack validate` and `lxpack build --target …` for LMS delivery (via `validateLessonkitProject` / `packageLessonkitCourse` or the golden example scripts).
 
-Today that adapter must **translate** LessonKit’s component tree into LXPack’s `course.yaml` +
-markdown/HTML/component lessons. That translation is lossy and expensive without LXPack support
-for React-authored content.
+The adapter maps a `LessonkitCourseDescriptor` plus built SPA assets into LXPack’s `course.yaml` and `lessonkit.json`; multi-lesson UX stays in your React app for `single-spa` layouts.
 
 ---
 
@@ -43,7 +41,7 @@ as the **default packaging toolchain** and focus on building a thin, well-tested
 
 Recommended LessonKit next steps:
 
-1. Create `@lessonkit/lxpack` (new package) to export LessonKit courses to an LXPack project.
+1. ~~Create `@lessonkit/lxpack`~~ — **done** (0.6.0).
 2. Decide a stable mapping for identities:
    - `courseId` ↔ LXPack course/activity id
    - `lessonId` ↔ LXPack lesson id / SCO id

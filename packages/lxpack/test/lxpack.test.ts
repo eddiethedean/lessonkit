@@ -267,6 +267,83 @@ describe("validateDescriptor edge cases", () => {
       }).ok,
     ).toBe(false);
   });
+
+  it("normalizes trimmed ids and titles on success", () => {
+    const result = validateDescriptor({
+      ...baseDescriptor,
+      courseId: " cyber-basics ",
+      title: "  Cyber  ",
+      lessons: [{ id: " phishing-101 ", title: "  Phish  " }],
+    });
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.descriptor.courseId).toBe("cyber-basics");
+      expect(result.descriptor.title).toBe("Cyber");
+      expect(result.descriptor.lessons[0]?.id).toBe("phishing-101");
+      expect(result.descriptor.lessons[0]?.title).toBe("Phish");
+    }
+  });
+
+  it("rejects unsafe spaPath for per-lesson-spa", () => {
+    const result = validateDescriptor({
+      ...baseDescriptor,
+      layout: "per-lesson-spa",
+      lessons: [{ id: "a", title: "A", spaPath: "../escape" }],
+    });
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.issues.some((i) => i.path.includes("spaPath"))).toBe(true);
+    }
+  });
+
+  it("rejects invalid spaLessonId for single-spa", () => {
+    const result = validateDescriptor({
+      ...baseDescriptor,
+      spaLessonId: "missing-lesson",
+    });
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.issues.some((i) => i.path === "spaLessonId")).toBe(true);
+    }
+  });
+
+  it("rejects duplicate spaPath", () => {
+    const result = validateDescriptor({
+      ...baseDescriptor,
+      layout: "per-lesson-spa",
+      lessons: [
+        { id: "a", title: "A", spaPath: "dist/shared" },
+        { id: "b", title: "B", spaPath: "dist/shared" },
+      ],
+    });
+    expect(result.ok).toBe(false);
+  });
+});
+
+describe("writeLxpackProject with assessments", () => {
+  it("writes assessment yaml and course.yaml entries", async () => {
+    const root = await makeTempDir();
+    const dist = join(root, "dist");
+    await mkdir(dist, { recursive: true });
+    const { writeFile } = await import("node:fs/promises");
+    await writeFile(join(dist, "index.html"), "ok", "utf-8");
+
+    const outDir = join(root, "with-assessments");
+    await writeLxpackProject({
+      descriptor: baseDescriptor,
+      outDir,
+      spaDistDir: dist,
+    });
+
+    const courseYaml = await readFile(join(outDir, "course.yaml"), "utf-8");
+    expect(courseYaml).toContain("assessments:");
+    expect(courseYaml).toContain("email-first-step");
+    const assessmentYaml = await readFile(
+      join(outDir, "assessments/email-first-step.yaml"),
+      "utf-8",
+    );
+    expect(assessmentYaml).toContain("passingScore:");
+  });
 });
 
 describe("packageLessonkitCourse", () => {

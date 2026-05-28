@@ -1,6 +1,7 @@
-import { access, cp, mkdir, writeFile } from "node:fs/promises";
+import { access, cp, mkdir, rm, writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { descriptorToInterchange, resolveSpaLessons } from "./interchange";
+import { assertResolvedPathUnderRoot } from "./spaPath";
 import { themeToLxpackRuntime } from "./theme";
 import type { LessonkitCourseDescriptor } from "./types";
 import { validateDescriptor } from "./validateDescriptor";
@@ -62,6 +63,7 @@ export async function writeLxpackProject(
       throw new Error(`spaDistDir not found: ${srcDist}`);
     }
     const destDist = join(outDir, "dist");
+    await rm(destDist, { recursive: true, force: true });
     await copyDir(srcDist, destDist);
   } else {
     const lessonDirs = options.lessonSpaDirs ?? {};
@@ -71,6 +73,8 @@ export async function writeLxpackProject(
         throw new Error(`lessonSpaDirs missing build output for lesson "${lesson.id}"`);
       }
       const dest = join(outDir, lesson.spaPath!);
+      assertResolvedPathUnderRoot(outDir, dest);
+      await rm(dest, { recursive: true, force: true });
       await copyDir(resolve(src), dest);
     }
   }

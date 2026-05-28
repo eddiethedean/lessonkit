@@ -16,6 +16,26 @@ export type LxpackBridgeHost = {
   lxpack?: LxpackBridgeV1;
 };
 
+/**
+ * Scale a raw quiz score to 0–1 for the LXPack parent bridge.
+ * Returns null when `score` is missing or not finite (caller should skip submit).
+ */
+export function normalizeAssessmentScore(opts: {
+  score?: number;
+  maxScore?: number;
+}): number | null {
+  if (typeof opts.score !== "number" || !Number.isFinite(opts.score)) {
+    return null;
+  }
+  const maxScore = typeof opts.maxScore === "number" && opts.maxScore > 0 ? opts.maxScore : 1;
+  return opts.score / maxScore;
+}
+
+/** Bridge passing threshold (0–1 scale). Defaults to 1 when omitted or invalid. */
+export function normalizeAssessmentPassingScore(passingScore?: number): number {
+  return typeof passingScore === "number" && passingScore > 0 ? passingScore : 1;
+}
+
 function getBridge(): LxpackBridgeV1 | null {
   if (typeof window === "undefined") return null;
   const parent = window.parent as (Window & LxpackBridgeHost) | null;
@@ -41,6 +61,10 @@ export function notifyLxpackCourseComplete(): boolean {
   return true;
 }
 
+/**
+ * Submit assessment results to the parent LXPack bridge.
+ * `score` must already be on a 0–1 scale (use `normalizeAssessmentScore` for raw points).
+ */
 export function notifyLxpackAssessment(payload: {
   id: CheckId;
   score: number;

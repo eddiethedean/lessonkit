@@ -619,6 +619,51 @@ describe("@lessonkit/react runtime", () => {
     expect(getByTestId("user").textContent).toBe("user-b");
   });
 
+  it("resets progress and emits course_started when courseId changes", async () => {
+    const events: TelemetryEvent[] = [];
+    const sink = (e: TelemetryEvent) => {
+      events.push(e);
+    };
+
+    const { rerender } = render(
+      <LessonkitProvider
+        config={{
+          courseId: "course-a",
+          tracking: { sink },
+          xapi: { enabled: false },
+        }}
+      >
+        <Lesson title="L" lessonId="lesson-1">
+          <div>content</div>
+        </Lesson>
+        <ProgressTracker />
+      </LessonkitProvider>,
+    );
+
+    await waitFor(() => expect(events.some((e) => e.name === "course_started")).toBe(true));
+    const startedA = events.filter((e) => e.name === "course_started").length;
+
+    rerender(
+      <LessonkitProvider
+        config={{
+          courseId: "course-b",
+          tracking: { sink },
+          xapi: { enabled: false },
+        }}
+      >
+        <Lesson title="L" lessonId="lesson-1">
+          <div>content</div>
+        </Lesson>
+        <ProgressTracker />
+      </LessonkitProvider>,
+    );
+
+    await waitFor(() =>
+      expect(events.filter((e) => e.name === "course_started").length).toBeGreaterThan(startedA),
+    );
+    expect(events.some((e) => e.name === "course_started" && e.courseId === "course-b")).toBe(true);
+  });
+
   it("Quiz legend uses visually hidden styles without sr-only class", () => {
     const { container } = render(
       <Course title="Course" courseId="course-1">

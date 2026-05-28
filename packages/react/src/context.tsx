@@ -11,6 +11,7 @@ import type { CourseId, LessonId, TelemetryEventName, TelemetryUser, TrackingCli
 import { createTrackingClient } from "@lessonkit/core";
 import type { XAPIClient, XAPITransport } from "@lessonkit/xapi";
 import { createInMemoryXAPIQueue } from "@lessonkit/xapi";
+import { telemetryEventToXAPIStatement } from "@lessonkit/xapi";
 import { buildTrackEvent, emitTelemetry, tryBuildTrackEvent } from "./runtime/emitTelemetry";
 import type { LxpackBridgeMode } from "./runtime/lxpackBridge";
 import { createSessionStoragePort } from "./runtime/ports";
@@ -127,6 +128,28 @@ export function LessonkitProvider(props: { config: LessonkitConfig; children: Re
     const next = createXapiClientFromConfig(config, xapiQueueRef.current);
     xapiRef.current = next;
     setXapi(next);
+
+    if (next && !prev) {
+      const sessionId = sessionIdRef.current;
+      const cid = courseIdRef.current;
+      if (hasCourseStarted(defaultStorage, sessionId, cid)) {
+        try {
+          const statement = telemetryEventToXAPIStatement(
+            buildTrackEvent({
+              name: "course_started",
+              courseId: cid,
+              sessionId,
+              attemptId: attemptIdRef.current,
+              user: userRef.current,
+            }),
+          );
+          if (statement) next.send(statement);
+        } catch {
+          // xAPI mapping may skip invalid ids; ignore
+        }
+      }
+    }
+
     void (async () => {
       if (prev) {
         try {
@@ -217,6 +240,33 @@ export function LessonkitProvider(props: { config: LessonkitConfig; children: Re
     },
     [emitWithBridge],
   );
+
+  const prevCourseIdRef = useRef(config.courseId);
+  useEffect(() => {
+    if (prevCourseIdRef.current === config.courseId) return;
+    prevCourseIdRef.current = config.courseId;
+
+    progressRef.current = createProgressController();
+    syncProgress();
+
+    const sessionId = sessionIdRef.current;
+    const cid = config.courseId;
+    if (!hasCourseStarted(defaultStorage, sessionId, cid)) {
+      markCourseStarted(defaultStorage, sessionId, cid);
+      emitTelemetry(
+        trackingRef.current,
+        xapiRef.current,
+        buildTrackEvent({
+          name: "course_started",
+          courseId: cid,
+          sessionId,
+          attemptId: attemptIdRef.current,
+          user: userRef.current,
+        }),
+        { lxpackBridge: lxpackBridgeModeRef.current },
+      );
+    }
+  }, [config.courseId, syncProgress]);
 
   useEffect(() => {
     return () => {

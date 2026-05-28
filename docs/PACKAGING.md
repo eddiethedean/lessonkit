@@ -47,6 +47,19 @@ One build output per lesson (multi-SCO friendly).
 - Each lesson needs `spaPath` (e.g. `dist/lessons/intro`).
 - Pass `lessonSpaDirs: { intro: "/abs/path/to/build" }` to `writeLxpackProject` / `packageLessonkitCourse`.
 
+### `spaPath` safety
+
+`spaPath` must be a **relative** path under the LXPack project root: no `..` segments, no leading `/` or drive letters. `validateDescriptor` rejects unsafe values; `writeLxpackProject` also verifies the resolved copy destination stays inside `outDir`.
+
+## Assessments and passing scores
+
+- **Packaged YAML** (`assessments/*.yaml`): `passingScore` is an **absolute** point threshold (default `1` for a single-question check).
+- **Embedded SPA bridge** (`window.parent.lxpackBridge.v1.submitAssessment`): `score` is **0–1** (scaled). `@lessonkit/react` divides `score / maxScore` from `quiz_completed` telemetry; use `normalizeAssessmentScore` from `@lessonkit/lxpack/bridge` for custom integrations.
+
+## Packaging failures and stale output
+
+`packageLessonkitCourse` writes to a temporary directory first and only replaces `outDir` after validate + build succeed, so a failed run does not overwrite a previously good project. Re-packaging clears prior SPA output under `dist/` (or each lesson `spaPath`) before copying fresh build artifacts.
+
 ## Output layout (stable)
 
 | Path | Contents |
@@ -97,6 +110,14 @@ notifyLxpackLessonComplete("intro");
 ```
 
 Disable forwarding: `config.lxpack.bridge = "off"` on `LessonkitProvider`.
+
+Direct bridge calls must pass **scaled** `score` (0–1). See `normalizeAssessmentScore` in `@lessonkit/lxpack/bridge`.
+
+## Runtime: changing `courseId`
+
+If you swap courses in one React tree without remounting, `LessonkitProvider` resets progress and emits `course_started` for the new `courseId`. Prefer `<Course key={courseId} …>` when switching courses for predictable unmount behavior.
+
+Configure `config.xapi` before first paint when possible; if xAPI is enabled after mount, `course_started` is sent to the new client when it becomes available.
 
 ## Golden example
 

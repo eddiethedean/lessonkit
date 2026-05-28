@@ -1,4 +1,8 @@
 import type { QuizCompletedData, TelemetryEvent } from "@lessonkit/core";
+import {
+  normalizeAssessmentPassingScore,
+  normalizeAssessmentScore,
+} from "@lessonkit/lxpack/bridge";
 
 export type LxpackBridgeMode = "auto" | "off";
 
@@ -45,14 +49,15 @@ export function forwardTelemetryToLxpack(
     case "quiz_completed": {
       const data = event.data as QuizCompletedData | undefined;
       if (!data?.checkId) return;
-      const maxScore = typeof data.maxScore === "number" && data.maxScore > 0 ? data.maxScore : 1;
-      const raw = typeof data.score === "number" ? data.score : 1;
-      const passingScore =
-        typeof data.passingScore === "number" && data.passingScore > 0 ? data.passingScore : 1;
+      const scaled = normalizeAssessmentScore({
+        score: data.score,
+        maxScore: data.maxScore,
+      });
+      if (scaled === null) return;
       bridge.submitAssessment?.({
         id: data.checkId,
-        score: raw / maxScore,
-        passingScore,
+        score: scaled,
+        passingScore: normalizeAssessmentPassingScore(data.passingScore),
       });
       return;
     }

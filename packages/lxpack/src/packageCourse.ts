@@ -1,5 +1,6 @@
-import { mkdir } from "node:fs/promises";
-import { join, resolve } from "node:path";
+import { mkdir, mkdtemp, rename, rm } from "node:fs/promises";
+import { dirname, join, resolve } from "node:path";
+import { tmpdir } from "node:os";
 import {
   buildCourse,
   validateCourse,
@@ -10,6 +11,7 @@ import {
 } from "@lxpack/api";
 import { extractAssessments } from "./assessments";
 import type { LessonkitCourseDescriptor } from "./types";
+import { validateDescriptor } from "./validateDescriptor";
 import { writeLxpackProject, type WriteLxpackProjectOptions } from "./writeProject";
 
 export type { ExportTarget } from "@lxpack/api";
@@ -82,63 +84,103 @@ export async function packageLessonkitCourse(
   options: PackageLessonkitCourseOptions,
 ): Promise<PackageLessonkitCourseResult> {
   const { target, output, dir, outputBaseDir, ...writeOpts } = options;
-  const written = await writeLxpackProject(writeOpts);
-  const courseDir = written.outDir;
-  const assessments = extractAssessments(writeOpts.descriptor);
+  const outDir = resolve(writeOpts.outDir);
 
-  const validation = await validateLessonkitProject({ courseDir, target });
-  if (!validation.ok) {
+  const descriptorValidation = validateDescriptor(writeOpts.descriptor);
+  if (!descriptorValidation.ok) {
     return {
       ok: false,
-      courseDir,
+      courseDir: outDir,
       target,
-      validation,
-      issues: validation.issues.map((i) => ({
+      issues: descriptorValidation.issues.map((i) => ({
         path: i.path,
         message: i.message,
-        severity: i.severity,
       })),
     };
   }
 
-  const outputBase = outputBaseDir ?? ".lxpack/out";
-  await mkdir(join(courseDir, outputBase), { recursive: true });
+  const descriptor = descriptorValidation.descriptor;
+  const stagingDir = await mkdtemp(join(tmpdir(), "lessonkit-lxpack-"));
+  let promoted = false;
 
-  const defaultOutput =
-    output ??
-    (dir ? join(outputBase, target) : join(outputBase, `course-${target}.zip`));
+  try {
+    const written = await writeLxpackProject({ ...writeOpts, descriptor, outDir: stagingDir });
+    const courseDir = written.outDir;
+    const assessments = extractAssessments(descriptor);
 
-  const build = await buildLessonkitProject({
-    courseDir,
-    target,
-    output: defaultOutput.startsWith("/") ? defaultOutput : join(courseDir, defaultOutput),
-    dir,
-    assessments: assessments.length ? assessments : undefined,
-  });
+    const validation = await validateLessonkitProject({ courseDir, target });
+    if (!validation.ok) {
+      return {
+        ok: false,
+        courseDir: outDir,
+        target,
+        validation,
+        issues: validation.issues.map((i) => ({
+          path: i.path,
+          message: i.message,
+          severity: i.severity,
+        })),
+      };
+    }
 
-  if (!build.ok) {
-    return {
-      ok: false,
+    const outputBase = outputBaseDir ?? ".lxpack/out";
+    await mkdir(join(courseDir, outputBase), { recursive: true });
+
+    const defaultOutput =
+      output ??
+      (dir ? join(outputBase, target) : join(outputBase, `course-${target}.zip`));
+
+    const build = await buildLessonkitProject({
       courseDir,
       target,
+      output: defaultOutput.startsWith("/") ? defaultOutput : join(courseDir, defaultOutput),
+      dir,
+      assessments: assessments.length ? assessments : undefined,
+    });
+
+    if (!build.ok) {
+      return {
+        ok: false,
+        courseDir: outDir,
+        target,
+        validation,
+        build,
+        issues: build.issues.map((i) => ({
+          path: i.path,
+          message: i.message,
+          severity: i.severity,
+        })),
+      };
+    }
+
+    await rm(outDir, { recursive: true, force: true });
+    await mkdir(dirname(outDir), { recursive: true });
+    await rename(stagingDir, outDir);
+    promoted = true;
+
+    const remapArtifactPath = (artifactPath: string | undefined): string | undefined => {
+      if (!artifactPath) return undefined;
+      const resolved = resolve(artifactPath);
+      const stagingResolved = resolve(stagingDir);
+      if (resolved === stagingResolved || resolved.startsWith(stagingResolved + "/")) {
+        return join(outDir, resolved.slice(stagingResolved.length + 1));
+      }
+      return artifactPath;
+    };
+
+    return {
+      ok: true,
+      courseDir: outDir,
+      target,
+      outputPath: remapArtifactPath("outputPath" in build ? build.outputPath : undefined),
+      outputDir: remapArtifactPath("outputDir" in build ? build.outputDir : undefined),
+      fileCount: build.fileCount,
       validation,
       build,
-      issues: build.issues.map((i) => ({
-        path: i.path,
-        message: i.message,
-        severity: i.severity,
-      })),
     };
+  } finally {
+    if (!promoted) {
+      await rm(stagingDir, { recursive: true, force: true }).catch(() => undefined);
+    }
   }
-
-  return {
-    ok: true,
-    courseDir,
-    target,
-    outputPath: "outputPath" in build ? build.outputPath : undefined,
-    outputDir: "outputDir" in build ? build.outputDir : undefined,
-    fileCount: build.fileCount,
-    validation,
-    build,
-  };
 }

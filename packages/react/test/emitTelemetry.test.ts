@@ -43,6 +43,20 @@ describe("emitTelemetry", () => {
     ).toThrow(/lessonId/);
   });
 
+  it("lesson_completed uses opts.lessonId when data.lessonId conflicts", () => {
+    const event = buildTrackEvent({
+      name: "lesson_completed",
+      courseId: "c",
+      lessonId: "canonical",
+      data: { lessonId: "wrong", durationMs: 5 },
+    });
+    expect(event.lessonId).toBe("canonical");
+    if (event.name === "lesson_completed") {
+      expect(event.data.lessonId).toBe("canonical");
+      expect(event.data.durationMs).toBe(5);
+    }
+  });
+
   it("buildTrackEvent supports interaction without lessonId", () => {
     const event = buildTrackEvent({
       name: "interaction",

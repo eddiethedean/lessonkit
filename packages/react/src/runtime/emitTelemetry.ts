@@ -79,7 +79,7 @@ export function buildTrackEvent(opts: {
         name: "lesson_started",
         ...base,
         lessonId,
-        data: { lessonId, ...data },
+        data: { ...data, lessonId },
       };
     }
     case "lesson_completed":
@@ -91,7 +91,7 @@ export function buildTrackEvent(opts: {
         name: opts.name,
         ...base,
         lessonId,
-        data: { lessonId, ...data },
+        data: { ...data, lessonId },
       };
     }
     case "quiz_answered": {

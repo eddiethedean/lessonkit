@@ -18,6 +18,7 @@ export function createXAPIClient(opts?: {
   const courseId = opts?.courseId;
   const queue = opts?.queue ?? createInMemoryXAPIQueue();
   let warnedNoTransport = false;
+  let warnedTransportFailure = false;
 
   const sendOrQueue = (statement: XAPIStatement) => {
     if (!transport) {
@@ -34,6 +35,12 @@ export function createXAPIClient(opts?: {
       .then(() => transport(statement))
       .catch(() => {
         queue.enqueue(statement);
+        if (isDevEnvironment() && !warnedTransportFailure) {
+          warnedTransportFailure = true;
+          console.warn(
+            "[lessonkit] xAPI transport failed; statement re-queued. Check your LRS endpoint or transport implementation.",
+          );
+        }
       });
   };
 

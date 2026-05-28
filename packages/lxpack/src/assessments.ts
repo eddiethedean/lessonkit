@@ -1,5 +1,4 @@
 import type { AssessmentDescriptor, LessonkitCourseDescriptor } from "./types";
-import { mapLessonkitIds } from "./mapIds";
 
 export type LxpackInjectedAssessment = {
   id: string;
@@ -50,6 +49,5 @@ export function assessmentDescriptorToLxpack(
 export function extractAssessments(
   descriptor: LessonkitCourseDescriptor,
 ): LxpackInjectedAssessment[] {
-  mapLessonkitIds(descriptor);
   return (descriptor.assessments ?? []).map(assessmentDescriptorToLxpack);
 }

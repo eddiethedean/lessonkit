@@ -17,6 +17,18 @@ All notable changes to the LessonKit monorepo are documented here. Published pac
 
 - Monorepo packages bumped to **0.6.0**.
 - Root `build:packages` includes `@lessonkit/lxpack` (requires Node 20+ for consumers of the adapter).
+- **@lessonkit/react**: Depends on `@lessonkit/lxpack` for shared LXPack bridge score normalization.
+
+### Fixed
+
+- **@lessonkit/lxpack**: Reject unsafe `spaPath` values and verify copy destinations stay inside the project root.
+- **@lessonkit/lxpack**: Normalize trimmed ids/titles in validated descriptors; validate `spaLessonId`, duplicate `spaPath`, and assessment `passingScore` / choices.
+- **@lessonkit/lxpack**: Clear stale SPA output before re-copy; stage packaging in a temp dir so failed runs do not overwrite a good `outDir`.
+- **@lessonkit/lxpack**: Export `normalizeAssessmentScore` / `normalizeAssessmentPassingScore` from `@lessonkit/lxpack/bridge`.
+- **@lessonkit/react**: LXPack bridge skips `submitAssessment` when `quiz_completed` has no finite score (no longer defaults to 100%).
+- **@lessonkit/react**: Lifecycle telemetry uses canonical `lessonId` when `data.lessonId` conflicts.
+- **@lessonkit/react**: Reset progress and emit `course_started` when `courseId` changes; send `course_started` to xAPI when the client is enabled after mount.
+- **@lessonkit/xapi**: Dev warning when xAPI transport fails and a statement is re-queued.
 
 ## [0.5.0] - 2026-05-28
 
