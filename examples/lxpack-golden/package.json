@@ -11,8 +11,8 @@
     "preview": "vite preview",
     "typecheck": "tsc -p tsconfig.json",
     "test": "vitest run --passWithNoTests",
-    "package:scorm12": "lessonkit package --target scorm12",
-    "package:standalone": "lessonkit package --target standalone"
+    "package:scorm12": "node ../../packages/cli/dist/bin.js package --target scorm12",
+    "package:standalone": "node ../../packages/cli/dist/bin.js package --target standalone"
   },
   "dependencies": {
     "@lessonkit/core": "file:../../packages/core",
