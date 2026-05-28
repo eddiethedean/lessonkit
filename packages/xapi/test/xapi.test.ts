@@ -1,9 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
 import { createInMemoryXAPIQueue, createXAPIClient } from "../src";
+import type { XAPIStatement } from "../src";
 
 describe("@lessonkit/xapi", () => {
   it("sends a course completion statement", async () => {
-    const statements: any[] = [];
+    const statements: XAPIStatement[] = [];
     const client = createXAPIClient({
       baseId: "urn:test",
       transport: async (s) => {
@@ -23,9 +24,9 @@ describe("@lessonkit/xapi", () => {
 
   it("queues when transport fails and flushes later", async () => {
     const queue = createInMemoryXAPIQueue();
-    const transport = vi.fn(async (_statement: unknown) => {
+    const transport = vi.fn<(statement: unknown) => Promise<void>>(async (_statement: unknown) => {
       throw new Error("network");
-    }) as unknown as (statement: unknown) => Promise<void>;
+    });
 
     const client = createXAPIClient({ transport, baseId: "urn:test", queue });
     client.startedLesson({ lessonId: "lesson-1" });
@@ -35,7 +36,7 @@ describe("@lessonkit/xapi", () => {
 
     expect(client.queueSize()).toBe(1);
 
-    (transport as unknown as { mockImplementation: (fn: any) => void }).mockImplementation(async () => {});
+    transport.mockImplementation(async () => {});
     await client.flush();
 
     expect(client.queueSize()).toBe(0);
@@ -59,7 +60,7 @@ describe("@lessonkit/xapi", () => {
   });
 
   it("send() forwards statements to transport", async () => {
-    const statements: any[] = [];
+    const statements: XAPIStatement[] = [];
     const client = createXAPIClient({
       baseId: "urn:test",
       transport: async (s) => {
@@ -79,23 +80,20 @@ describe("@lessonkit/xapi", () => {
     queue.enqueue({ id: "2", timestamp: "t", verb: "v", object: { id: "o" } });
 
     const transport = vi
-      .fn(async (_statement: unknown) => {})
+      .fn<(statement: unknown) => Promise<void>>(async (_statement: unknown) => {})
       .mockRejectedValueOnce(new Error("fail"))
-      .mockResolvedValueOnce(undefined) as unknown as ((statement: unknown) => Promise<void>) & {
-      mockRejectedValueOnce: (err: unknown) => unknown;
-      mockResolvedValueOnce: (val: unknown) => unknown;
-    };
+      .mockResolvedValueOnce(undefined);
 
-    await queue.flush(transport as unknown as any);
+    await queue.flush(transport);
     expect(queue.size()).toBe(2);
     expect(transport).toHaveBeenCalledTimes(1);
 
-    await queue.flush(transport as unknown as any);
+    await queue.flush(transport);
     expect(queue.size()).toBe(0);
   });
 
   it("adds duration and score to completion result", async () => {
-    const statements: any[] = [];
+    const statements: XAPIStatement[] = [];
     const client = createXAPIClient({
       baseId: "urn:test",
       transport: async (s) => {
@@ -116,7 +114,7 @@ describe("@lessonkit/xapi", () => {
   });
 
   it("formats integer seconds without decimals (durationMs=2000 => PT2S)", async () => {
-    const statements: any[] = [];
+    const statements: XAPIStatement[] = [];
     const client = createXAPIClient({
       baseId: "urn:test",
       transport: async (s) => {
@@ -132,7 +130,7 @@ describe("@lessonkit/xapi", () => {
   });
 
   it("omits result when completion has no extra fields", async () => {
-    const statements: any[] = [];
+    const statements: XAPIStatement[] = [];
     const client = createXAPIClient({
       baseId: "urn:test",
       transport: async (s) => {

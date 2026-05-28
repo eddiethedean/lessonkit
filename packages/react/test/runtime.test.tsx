@@ -381,6 +381,46 @@ describe("@lessonkit/react runtime", () => {
     await waitFor(() => expect(statements.length).toBeGreaterThan(0));
   });
 
+  it("does not block next xAPI flush if previous client flush rejects", async () => {
+    const client1 = {
+      send: vi.fn(),
+      flush: vi.fn(async () => {
+        throw new Error("flush failed");
+      }),
+      queueSize: vi.fn(() => 0),
+      startedLesson: vi.fn(),
+      completeLesson: vi.fn(),
+      completeCourse: vi.fn(),
+    };
+
+    const client2 = {
+      send: vi.fn(),
+      flush: vi.fn(async () => {}),
+      queueSize: vi.fn(() => 0),
+      startedLesson: vi.fn(),
+      completeLesson: vi.fn(),
+      completeCourse: vi.fn(),
+    };
+
+    const { rerender } = render(
+      <Course title="Course" config={{ xapi: { client: client1 } }}>
+        <Lesson title="Lesson" lessonId="lesson-1">
+          <div>child</div>
+        </Lesson>
+      </Course>,
+    );
+
+    rerender(
+      <Course title="Course" config={{ xapi: { client: client2 } }}>
+        <Lesson title="Lesson" lessonId="lesson-1">
+          <div>child</div>
+        </Lesson>
+      </Course>,
+    );
+
+    await waitFor(() => expect(client2.flush).toHaveBeenCalled());
+  });
+
   it("resolveSessionId falls back when sessionStorage is unavailable", async () => {
     const events: TelemetryEvent[] = [];
     const original = globalThis.sessionStorage;
@@ -402,6 +442,58 @@ describe("@lessonkit/react runtime", () => {
       value: original,
       configurable: true,
     });
+  });
+
+  it("does not crash if sessionStorage throws and still provides a sessionId", async () => {
+    const events: TelemetryEvent[] = [];
+    const original = globalThis.sessionStorage;
+
+    Object.defineProperty(globalThis, "sessionStorage", {
+      value: {
+        getItem: () => {
+          throw new Error("blocked");
+        },
+        setItem: () => {
+          throw new Error("blocked");
+        },
+      },
+      configurable: true,
+    });
+
+    render(
+      <LessonkitProvider config={{ tracking: { sink: (e: TelemetryEvent) => void events.push(e) } }}>
+        <div>child</div>
+      </LessonkitProvider>,
+    );
+
+    await waitFor(() => expect(events.some((e) => e.name === "course_started")).toBe(true));
+    expect(events[0]?.sessionId).toBeTruthy();
+
+    Object.defineProperty(globalThis, "sessionStorage", {
+      value: original,
+      configurable: true,
+    });
+  });
+
+  it("does not dedupe course_started across separate providers when courseId is omitted", async () => {
+    const events: TelemetryEvent[] = [];
+    const sink = (e: TelemetryEvent) => void events.push(e);
+
+    const { unmount } = render(
+      <Course title="Course A" config={{ tracking: { sink } }}>
+        <div>child</div>
+      </Course>,
+    );
+    await waitFor(() => expect(events.filter((e) => e.name === "course_started").length).toBe(1));
+
+    unmount();
+
+    render(
+      <Course title="Course B" config={{ tracking: { sink } }}>
+        <div>child</div>
+      </Course>,
+    );
+    await waitFor(() => expect(events.filter((e) => e.name === "course_started").length).toBe(2));
   });
 
   it("Quiz legend uses visually hidden styles without sr-only class", () => {

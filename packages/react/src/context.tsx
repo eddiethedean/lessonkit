@@ -73,16 +73,31 @@ function disposeTrackingClient(client: TrackingClient | null | undefined): void 
   client?.dispose?.();
 }
 
+function safeSessionStorageGetItem(key: string): string | null {
+  if (typeof sessionStorage === "undefined") return null;
+  try {
+    return sessionStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
+function safeSessionStorageSetItem(key: string, value: string): void {
+  if (typeof sessionStorage === "undefined") return;
+  try {
+    sessionStorage.setItem(key, value);
+  } catch {
+    // Storage can throw (e.g. blocked/disabled storage). Treat as non-fatal.
+  }
+}
+
 function resolveSessionId(provided?: string): string {
   if (provided) return provided;
-  if (typeof sessionStorage !== "undefined") {
-    const existing = sessionStorage.getItem(SESSION_STORAGE_KEY);
-    if (existing) return existing;
-    const id = createSessionId();
-    sessionStorage.setItem(SESSION_STORAGE_KEY, id);
-    return id;
-  }
-  return createSessionId();
+  const existing = safeSessionStorageGetItem(SESSION_STORAGE_KEY);
+  if (existing) return existing;
+  const id = createSessionId();
+  safeSessionStorageSetItem(SESSION_STORAGE_KEY, id);
+  return id;
 }
 
 function courseStartedStorageKey(sessionId: string, courseId?: CourseId): string {
@@ -90,13 +105,13 @@ function courseStartedStorageKey(sessionId: string, courseId?: CourseId): string
 }
 
 function hasCourseStarted(sessionId: string, courseId?: CourseId): boolean {
-  if (typeof sessionStorage === "undefined") return false;
-  return sessionStorage.getItem(courseStartedStorageKey(sessionId, courseId)) === "1";
+  if (!courseId) return false;
+  return safeSessionStorageGetItem(courseStartedStorageKey(sessionId, courseId)) === "1";
 }
 
 function markCourseStarted(sessionId: string, courseId?: CourseId): void {
-  if (typeof sessionStorage === "undefined") return;
-  sessionStorage.setItem(courseStartedStorageKey(sessionId, courseId), "1");
+  if (!courseId) return;
+  safeSessionStorageSetItem(courseStartedStorageKey(sessionId, courseId), "1");
 }
 
 function createTrackingClientFromConfig(config: LessonkitConfig): TrackingClient {
@@ -133,6 +148,7 @@ export function LessonkitProvider(props: { config?: LessonkitConfig; children: R
 
   const trackingRef = useRef<TrackingClient>(createTrackingClient());
   const [tracking, setTracking] = useState<TrackingClient>(() => trackingRef.current);
+  const courseStartedInProviderRef = useRef(false);
 
   const trackingEnabled = config.tracking?.enabled;
   const trackingSink = config.tracking?.sink;
@@ -149,8 +165,13 @@ export function LessonkitProvider(props: { config?: LessonkitConfig; children: R
 
     const sessionId = sessionIdRef.current;
     const cid = courseIdRef.current;
-    if (!hasCourseStarted(sessionId, cid)) {
-      markCourseStarted(sessionId, cid);
+    const shouldEmitCourseStarted = cid ? !hasCourseStarted(sessionId, cid) : !courseStartedInProviderRef.current;
+    if (shouldEmitCourseStarted) {
+      if (cid) {
+        markCourseStarted(sessionId, cid);
+      } else {
+        courseStartedInProviderRef.current = true;
+      }
       next.track({
         name: "course_started",
         timestamp: nowIso(),
@@ -188,8 +209,18 @@ export function LessonkitProvider(props: { config?: LessonkitConfig; children: R
     xapiRef.current = next;
     setXapi(next);
     void (async () => {
-      if (prev) await prev.flush();
-      await next?.flush();
+      if (prev) {
+        try {
+          await prev.flush();
+        } catch {
+          // Swallow flush errors so a broken previous transport doesn't block the next one.
+        }
+      }
+      try {
+        await next?.flush();
+      } catch {
+        // ignore
+      }
     })();
     return () => {
       void prev?.flush();
