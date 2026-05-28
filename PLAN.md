@@ -35,6 +35,7 @@ The goal is to provide reusable React components, LMS interoperability, accessib
 - Government training teams
 - EdTech startups
 - Higher education teams
+- AI-assisted development workflows (LLM code generation in IDEs)
 
 ---
 
@@ -89,13 +90,13 @@ Comparable to:
 React component library
 
 ## Phase 2
-SCORM + xAPI packaging
+Exports and packaging parity (web + LMS targets)
 
 ## Phase 3
-CLI tooling
+CLI tooling and automation-friendly workflows
 
 ## Phase 4
-AI storyboard generation
+AI-friendly authoring (generator-friendly APIs, machine-readable catalog, deterministic exports)
 
 ## Phase 5
 Enterprise ecosystem

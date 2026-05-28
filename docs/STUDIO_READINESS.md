@@ -1,0 +1,93 @@
+# Framework readiness for LessonKit Studio (and AI/dev workflows)
+
+This checklist is how we decide the LessonKit **framework** is ready to act as the shared runtime
+for:
+
+- **Developers** authoring directly in React
+- **AI code generators** producing LessonKit code (Claude/Cursor-style workflows)
+- **LessonKit Studio** (a non-coder layer built on top, post–framework 1.0.0)
+
+> Studio development gate remains: **no `@lessonkit-studio/*` implementation until framework 1.0.0**
+> is shipped (see [`ROADMAP.md`](../ROADMAP.md)).
+
+## Readiness principles
+
+- **Stable contracts**: API surfaces are documented, versioned, and testable.
+- **Deterministic outputs**: builds/exports don’t rely on hidden randomness; regeneration yields minimal diffs.
+- **Dual export parity**: React/Vite and LXPack/LMS artifacts match behavior and theme.
+- **Machine-readable surfaces**: generators can discover supported primitives and constraints without scraping source.
+
+## 0.4.x — Theme system + tokens
+
+- [ ] Token schema v1 exists in `@lessonkit/themes` (required tokens + allowed extensions)
+- [ ] CSS variables contract is documented (namespacing, required variables, override precedence)
+- [ ] `@lessonkit/react` exposes a stable `ThemeProvider` (or equivalent) with default theme
+- [ ] Example demonstrates theme override and dark/light switching
+- [ ] **Parity**: same tokens produce the same visual output in:
+  - [ ] React/Vite example (`examples/react-vite`)
+  - [ ] LXPack-packaged artifact (via `@lessonkit/lxpack`)
+- [ ] **Enumerable theming**: “what can be themed” is documented and discoverable for generators
+
+## 0.5.x — Identity + semantics (IDs, telemetry, xAPI)
+
+- [ ] Identity model v1 is documented:
+  - [ ] `courseId` requiredness + defaults
+  - [ ] `lessonId` requiredness + defaults
+  - [ ] stable IDs for quizzes/checks/blocks (or a clearly scoped subset)
+- [ ] ID generation guidance is deterministic (no hidden randomness) with collision strategy
+- [ ] Telemetry event catalog is documented and versioned (or explicitly references a canonical source)
+- [ ] Telemetry → xAPI statement mapping is documented and stable across exports
+- [ ] “Regenerate code” guidance exists (how to preserve IDs to minimize diffs)
+
+## 0.6.x — Export surfaces + `@lessonkit/lxpack` adapter
+
+- [ ] `@lessonkit/lxpack` exists and is covered by tests
+- [ ] Adapter produces a valid LXPack project/interchange with stable ID mapping
+- [ ] Adapter prefers programmatic LXPack APIs where possible (structured results/errors)
+- [ ] Golden end-to-end example exists:
+  - [ ] LessonKit course → LXPack build → SCORM ZIP importable into an LMS
+  - [ ] Standalone web artifact runnable locally
+- [ ] CI runs a packaging smoke test on the golden example
+- [ ] Output layout is stable and documented (so generators/CI can rely on it)
+
+## 0.7.x — CLI workflow (developer + AI friendly)
+
+- [ ] `lessonkit init/dev/build` are real and documented
+- [ ] `lessonkit package` supports dual export targets:
+  - [ ] `react-vite`
+  - [ ] `lxpack|scorm12|scorm2004|xapi|cmi5` (via adapter)
+- [ ] CLI errors are structured and actionable (good messages, stable exit codes)
+- [ ] The CLI is safe for automation (CI-friendly, no interactive prompts by default)
+
+## 0.8.x — Runtime block catalog (machine-readable)
+
+- [ ] Block catalog v1 exists (framework-owned)
+- [ ] Catalog includes per-block:
+  - [ ] allowed props/schema
+  - [ ] a11y behavior contract
+  - [ ] theming surface contract
+  - [ ] telemetry semantics
+- [ ] Catalog is exported in machine-readable form (JSON) and documented
+- [ ] `@lessonkit/react` is capable of rendering every catalog block in an example
+
+## 0.9.x — Conformance harness (parity proof)
+
+- [ ] Playwright e2e covers:
+  - [ ] keyboard navigation/focus flows
+  - [ ] telemetry batching + xAPI queue behavior
+  - [ ] packaging artifact smoke (standalone + SCORM launch)
+- [ ] Conformance matrix exists and is enforced in CI:
+  - [ ] React/Vite and LXPack outputs behave equivalently for a reference course
+
+## 1.0.0 — Studio gate checklist (framework)
+
+- [ ] Public APIs for `@lessonkit/react`, `@lessonkit/core`, `@lessonkit/xapi`, `@lessonkit/themes`, `@lessonkit/accessibility` are stable and documented
+- [ ] Storybook + docs site are live and up to date
+- [ ] Accessibility conformance documented (WCAG 2.1 AA target)
+- [ ] Dual export parity is proven (conformance harness is green)
+- [ ] Packaging is documented end-to-end (React/Vite and LXPack/LMS targets)
+- [ ] **Generator-friendly API** checklist is met:
+  - [ ] predictable defaults
+  - [ ] stable prop shapes
+  - [ ] canonical reference example that is easy to scaffold and modify
+

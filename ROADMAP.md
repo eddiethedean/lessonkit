@@ -118,29 +118,77 @@ this repo until that gate is met.
 
 ---
 
-### 0.4.0 — Theme system and design tokens
+### 0.4.x — Theme system + design tokens (framework contract)
 
 #### Goals
 
-- Support organizational branding and consistent UI (Studio global/component themes depend on this).
+- Support organizational branding and consistent UI for **developers**, **AI code generators**, and later **Studio**.
+- Establish a stable theme contract that survives export targets (React/Vite and LXPack artifacts).
 
 #### Deliverables
 
 - `@lessonkit/themes`:
-  - token schema (colors, spacing, typography)
-  - CSS variables output contract
-  - theme merging + overrides
+  - token schema v1 (colors, spacing, typography, radii, shadows)
+  - CSS variables output contract (namespacing + required variables)
+  - theme merging + overrides (predictable precedence rules)
 - `@lessonkit/react`:
-  - `ThemeProvider` (or equivalent) with CSS variables
-  - default theme + examples
+  - `ThemeProvider` (or equivalent) that binds tokens → CSS variables
+  - default theme + example overrides (light/dark, brand variant)
+- **AI/dev readiness**:
+  - theming surface is **documented and enumerable** (a generator can discover what is themeable without reading source)
+- **Parity requirement**:
+  - exported React/Vite builds and LXPack-packaged artifacts produce the same visual output given the same tokens
 
 ---
 
-### 0.5.0 — CLI: real project workflow
+### 0.5.x — Deterministic identity model (framework contract)
 
 #### Goals
 
-- Make the developer workflow frictionless; align with Studio local dev (`npx lessonkit-studio dev` later).
+- Make identities stable for tracking, packaging, diffs, and regeneration.
+- Ensure IDs map cleanly to xAPI/LXPack/LMS concepts without guesswork.
+
+#### Deliverables
+
+- `@lessonkit/react` / `@lessonkit/core`:
+  - identity model v1 (requiredness + propagation rules): `courseId`, `lessonId`, plus stable ids for checks/quizzes/blocks
+  - deterministic ID generation guidance (when IDs are omitted) + collision strategy
+  - explicit invariants: IDs are stable across renders and stable across export targets
+- `@lessonkit/xapi`:
+  - guaranteed mapping from telemetry events → xAPI statements using those stable IDs
+- **AI/dev readiness**:
+  - “regenerate code” workflows produce minimal diffs (no hidden randomness; stable defaults)
+
+---
+
+### 0.6.x — Export surfaces + LXPack adapter (packaging parity)
+
+#### Goals
+
+- Ship LMS-compatible artifacts without forcing authors out of React.
+- Make packaging scriptable and deterministic for CI and future Studio export.
+
+#### Deliverables
+
+- `@lessonkit/lxpack` (new package):
+  - export a LessonKit-authored course into an LXPack project/interchange
+  - invoke LXPack via **programmatic APIs** where possible (avoid subprocess stdout parsing)
+  - codify mapping: `courseId` / `lessonId` / assessment IDs → LXPack ids
+- Golden end-to-end example:
+  - LessonKit course → LXPack build → **importable SCORM ZIP** + runnable standalone build
+- CI smoke test:
+  - builds the golden example and validates artifacts
+- References:
+  - LXPack interoperability checklist: [`docs/LXPACK_UPGRADES_FOR_LESSONKIT.md`](docs/LXPACK_UPGRADES_FOR_LESSONKIT.md)
+
+---
+
+### 0.7.x — CLI workflow for developers and AI (and later Studio)
+
+#### Goals
+
+- Make the developer workflow frictionless, reproducible, and generator-friendly.
+- Provide a stable command surface that Studio can call later (post-1.0) without inventing a parallel toolchain.
 
 #### Deliverables
 
@@ -148,67 +196,51 @@ this repo until that gate is met.
   - `lessonkit init` (copy template, install deps, set up scripts)
   - `lessonkit dev` (runs template dev server)
   - `lessonkit build` (production build)
-  - `lessonkit package` (placeholder until SCORM arrives; maybe zip for hosting)
+  - `lessonkit package` as the canonical **dual export** entrypoint:
+    - `--target react-vite` (build/export web artifact)
+    - `--target lxpack|scorm12|scorm2004|xapi|cmi5` (via `@lessonkit/lxpack`)
+- **AI/dev readiness**:
+  - deterministic output layouts and stable defaults so CI and codegen can rely on them
 
 ---
 
-### 0.6.0 — SCORM (Phase 2 from plan)
+### 0.8.x — Runtime block catalog + renderer parity (framework-side)
 
 #### Goals
 
-- Add LMS compatibility for classic platforms while keeping React-first authoring.
+- Define the set of primitives that are safe to generate (AI) and safe to map (Studio), without building Studio.
+- Ensure each primitive’s behavior is specified for accessibility, theming, and telemetry.
 
 #### Deliverables
 
-- **LXPack integration path (recommended)**: leverage LXPack’s packaging/runtime work rather than reinventing packaging from scratch.
-  - Reference: [`eddiethedean/lxpack`](https://github.com/eddiethedean/lxpack) (exports SCORM 1.2, SCORM 2004, xAPI, cmi5, and standalone via `@lxpack/scorm`, `@lxpack/xapi`, `@lxpack/cmi5`)
-  - LXPack interoperability notes: [`docs/LXPACK_UPGRADES_FOR_LESSONKIT.md`](docs/LXPACK_UPGRADES_FOR_LESSONKIT.md)
-  - Adopt *one* of the strategies below (start with Strategy A).
-
-#### Strategy A — LessonKit → LXPack export adapter (preferred)
-
-Build `@lessonkit/lxpack` to export LessonKit-authored courses into LXPack (`course.yaml` + lesson files) and invoke `lxpack build`.
-
-Deliverables:
-
-- `@lessonkit/lxpack` (new package):
-  - convert a LessonKit course definition into an LXPack `course.yaml` + assets bundle
-  - optional: emit markdown lessons and/or component lessons compatible with `@lxpack/runtime`
-  - wrappers to run `lxpack validate` and `lxpack build --target scorm12|scorm2004`
-- Example: LessonKit course that exports to an **LMS-importable ZIP** using LXPack
-
-**Required before Studio (post–framework 1.0):** `@lessonkit-studio/codegen` will call this adapter (Studio 0.3.0).
-
-#### Strategy B — Share runtime primitives (future)
-
-If the ecosystems converge, consider reusing proven runtime/validation pieces:
-
-- Use `@lxpack/validators` for schema validation and path-containment rules
-- Reuse `@lxpack/xapi` semantics/transport patterns for statements, queueing, retries
-
-Notes:
-
-- LXPack requires **Node 20+** for authors; LessonKit can remain npm-first while interoperating with published `@lxpack/*` packages.
+- `@lessonkit/react`:
+  - runtime block catalog v1 (framework-owned) describing primitives and their supported props/behaviors
+  - each catalog entry includes:
+    - a11y behavior contract
+    - theming surface contract
+    - telemetry semantics
+- **AI/dev readiness**:
+  - catalog is **machine-readable** (JSON export) so generators can validate inputs and avoid unsupported combinations
 
 ---
 
-### 0.7.0 — xAPI packaging + LRS integrations
+### 0.9.x — Conformance harness (export parity + gate hardening)
 
 #### Goals
 
-- Support robust xAPI delivery patterns beyond simple statement generation.
+- Prove that LessonKit behaves the same across export surfaces (React/Vite vs LXPack/LMS artifacts).
+- Make the 1.0.0 Studio gate measurable.
 
 #### Deliverables
 
-- **LXPack-aligned exports**:
-  - produce xAPI and/or cmi5 packages via LXPack targets (`lxpack build --target xapi|cmi5`)
-  - ensure LessonKit completion/quiz semantics map cleanly to xAPI statements
-- `@lessonkit/xapi` (native):
-  - keep a minimal, framework-level xAPI API for in-browser tracking (non-LMS delivery)
-  - optionally adopt transport/queue conventions proven in `@lxpack/xapi`
-- Reference example: hosted LessonKit course that reports to an LRS (direct xAPI)
-
-**Required before Studio (post–framework 1.0):** Studio export will include xAPI/cmi5/standalone via LXPack (Studio 0.3.0).
+- Playwright e2e for:
+  - keyboard navigation + focus flows (a11y)
+  - telemetry batching + xAPI queue behavior
+  - packaging artifact smoke (standalone + SCORM launch)
+- Conformance matrix:
+  - asserts behavioral equivalence across export targets for the same course
+- Link the checklist:
+  - `docs/STUDIO_READINESS.md` (framework readiness checklist for Studio and AI/dev workflows)
 
 ---
 
@@ -237,10 +269,11 @@ are met and 1.0.0 is released.
 
 - Stable component and hook APIs (semver expectations)
 - Storybook + docs site live
-- SCORM and/or xAPI packaging documented end-to-end
+- Packaging documented end-to-end (React/Vite and LXPack targets)
 - Accessibility conformance documented (WCAG 2.1 AA target)
 - CI with tests + basic e2e coverage (Playwright)
-- Framework milestones **0.1.x through 0.7.0** (and scoped **0.8.0+** plugin work planned for 1.0) delivered per this roadmap
+- Framework milestones **0.1.x through 0.9.x** (and scoped **0.8.0+** plugin work planned for 1.0) delivered per this roadmap
+- **AI/dev readiness**: generator-friendly API + machine-readable catalog + deterministic exports (see `docs/STUDIO_READINESS.md`)
 
 #### Gate checklist (framework complete → Studio may start)
 
@@ -249,12 +282,14 @@ are met and 1.0.0 is released.
 | 1 | 0.1.x — MVP hardening | Yes |
 | 2 | 0.2.0 — Analytics and tracking | Yes |
 | 3 | 0.3.0 — Accessibility package | Yes |
-| 4 | 0.4.0 — Theme system | Yes |
-| 5 | 0.5.0 — CLI project workflow | Yes |
-| 6 | 0.6.0 — SCORM / `@lessonkit/lxpack` | Yes |
-| 7 | 0.7.0 — xAPI packaging + LRS patterns | Yes |
-| 8 | 0.8.0+ — Plugin architecture (as scoped for 1.0) | Yes |
-| 9 | **1.0.0 — Stable public API** | **Yes — Studio gate** |
+| 4 | 0.4.x — Theme system + token contract | Yes |
+| 5 | 0.5.x — Deterministic identity model | Yes |
+| 6 | 0.6.x — Export surfaces + `@lessonkit/lxpack` adapter | Yes |
+| 7 | 0.7.x — CLI workflow (dual export) | Yes |
+| 8 | 0.8.x — Runtime block catalog + renderer parity | Yes |
+| 9 | 0.9.x — Conformance harness (export parity) | Yes |
+| 10 | 0.8.0+ — Plugin architecture (as scoped for 1.0) | Yes |
+| 11 | **1.0.0 — Stable public API** | **Yes — Studio gate** |
 
 ---
 

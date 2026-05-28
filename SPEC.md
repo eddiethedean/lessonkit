@@ -8,10 +8,10 @@ lessonkit/
 │   ├── core/
 │   ├── react/
 │   ├── xapi/
-│   ├── scorm/
 │   ├── accessibility/
 │   ├── themes/
-│   └── cli/
+│   ├── cli/
+│   └── lxpack/          (planned adapter for LXPack exports)
 ├── examples/
 ├── docs/
 └── templates/
@@ -43,6 +43,7 @@ lessonkit/
 - tsup
 - npm workspaces
 - Changesets
+- LXPack (for SCORM/xAPI/cmi5/standalone packaging via adapter)
 
 ---
 
@@ -141,8 +142,7 @@ tracking.completeLesson({
 
 ## Features
 
-- imsmanifest.xml generation
-- ZIP packaging
+- packaged via LXPack (preferred) through `@lessonkit/lxpack`
 - bookmarking
 - suspend/resume
 - score reporting
@@ -181,6 +181,19 @@ lessonkit build
 lessonkit package
 lessonkit publish
 ```
+
+---
+
+# Generator-friendly authoring (AI/dev)
+
+LessonKit should be straightforward for software developers and safe for AI code generators to emit.
+
+Key requirements:
+
+- **Stable contracts**: component/hook APIs are documented and versioned.
+- **Deterministic identities**: stable `courseId` / `lessonId` / assessment ids (no hidden randomness) so regeneration yields minimal diffs.
+- **Machine-readable block catalog**: the set of supported runtime primitives is exportable as JSON so generators can validate inputs and avoid unsupported combinations.
+- **Dual export parity**: React/Vite and LXPack-packaged artifacts match behavior and theming for the same course.
 
 ---
 
