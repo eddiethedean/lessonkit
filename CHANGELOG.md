@@ -3,7 +3,7 @@
 All notable changes to the LessonKit monorepo are documented here. Published packages use the
 [`@lessonkit/*`](https://www.npmjs.com/org/lessonkit) scope.
 
-## [0.2.1] - 2026-05-28
+## [0.3.0] - 2026-05-28
 
 ### Fixed
 
@@ -21,11 +21,11 @@ All notable changes to the LessonKit monorepo are documented here. Published pac
 ### Changed
 
 - Root build order builds `@lessonkit/accessibility` before `@lessonkit/react`.
-- Documentation updated for 0.2.1 (ROADMAP status, React README notes on lesson unmount and sessions).
+- Documentation updated for 0.3.0 (ROADMAP status, React README notes on lesson unmount and sessions).
 
-## [0.2.0] - (unreleased on npm; included in 0.2.1)
+## [0.2.0] - (unreleased on npm; included in 0.3.0)
 
-Analytics and tracking milestone (shipped in repo before 0.2.1 hardening):
+Analytics and tracking milestone (shipped in repo before 0.3.0 hardening):
 
 - Session-aware telemetry, optional batching (`@lessonkit/core`, `@lessonkit/react`).
 - `LessonkitProvider` runtime config (tracking sink, `xapi.transport`, session metadata).
@@ -39,4 +39,4 @@ Last version published to npm before 0.2.x.
 - Initial public packages: `@lessonkit/core`, `@lessonkit/react`, `@lessonkit/xapi`, `@lessonkit/accessibility`, `@lessonkit/themes`, `@lessonkit/cli`.
 - Tag-based publish workflow and CI checks (build, typecheck, test, coverage).
 
-[0.2.1]: https://github.com/eddiethedean/lessonkit/compare/v0.1.1...main
+[0.3.0]: https://github.com/eddiethedean/lessonkit/compare/v0.1.1...main

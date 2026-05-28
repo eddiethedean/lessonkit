@@ -53,7 +53,7 @@ export default function App() {
 }
 ```
 
-## API (0.2.1)
+## API (0.3.0)
 
 ### Components
 

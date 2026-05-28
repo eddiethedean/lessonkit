@@ -28,7 +28,7 @@ this repo until that gate is met.
 
 ## Status
 
-- **Framework:** **0.2.1** — core components, hooks, telemetry batching, xAPI primitives, provider lifecycle hardening, example + template
+- **Framework:** **0.3.0** — core components, hooks, telemetry batching, xAPI primitives, provider lifecycle hardening, example + template
 - **Studio:** **blocked** — no implementation work until **[1.0.0 — Stable public API (framework)](#100--stable-public-api-framework)** is shipped (see [Studio development gate](#studio-development-gate))
 - **Focus (now):** complete framework milestones only (`@lessonkit/react`, analytics, a11y, themes, CLI, LXPack adapter, xAPI packaging, plugins as scoped, then 1.0.0)
 

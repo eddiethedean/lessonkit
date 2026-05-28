@@ -12,7 +12,7 @@ Theme primitives for LessonKit.
 npm install @lessonkit/themes
 ```
 
-## Included (0.2.1)
+## Included (0.3.0)
 
 - `defaultTheme`
 - `LessonkitTheme` type
