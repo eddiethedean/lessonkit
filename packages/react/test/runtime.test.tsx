@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, waitFor } from "@testing-library/react";
 import { Course, KnowledgeCheck, Lesson, LessonkitProvider, ProgressTracker, Quiz, Reflection, Scenario, useCompletion, useLessonkit, useProgress, useQuizState, useTracking } from "../src";
 import type { TelemetryEvent } from "@lessonkit/core";
+import * as xapiModule from "@lessonkit/xapi";
 import type { XAPIStatement, XAPITransport } from "@lessonkit/xapi";
 
 describe("@lessonkit/react runtime", () => {
@@ -343,6 +344,79 @@ describe("@lessonkit/react runtime", () => {
       ).toBe(true),
     );
     expect(transport.mock.calls[0]?.[0]?.verb).toContain("initialized");
+  });
+
+  it("emits course_started to xAPI when transport is enabled after mount", async () => {
+    const transport = vi.fn(async (_s: XAPIStatement) => {});
+
+    const { rerender } = render(
+      <LessonkitProvider
+        config={{
+          courseId: "course-1",
+          xapi: { enabled: false },
+        }}
+      >
+        <div>child</div>
+      </LessonkitProvider>,
+    );
+
+    await waitFor(() =>
+      expect(
+        Object.keys(sessionStorage).some((k) => k.startsWith("lessonkit:course_started:")),
+      ).toBe(true),
+    );
+
+    rerender(
+      <LessonkitProvider
+        config={{
+          courseId: "course-1",
+          xapi: { transport },
+        }}
+      >
+        <div>child</div>
+      </LessonkitProvider>,
+    );
+
+    await waitFor(() =>
+      expect(
+        transport.mock.calls.some(
+          (call) =>
+            call[0]?.verb?.includes("initialized") &&
+            call[0]?.object.id?.includes("urn:lessonkit:course:course-1"),
+        ),
+      ).toBe(true),
+    );
+  });
+
+  it("ignores xAPI mapping errors when enabling transport after course_started", async () => {
+    const mapSpy = vi
+      .spyOn(xapiModule, "telemetryEventToXAPIStatement")
+      .mockImplementation(() => {
+        throw new Error("map failed");
+      });
+    const transport = vi.fn(async (_s: XAPIStatement) => {});
+
+    const { rerender } = render(
+      <LessonkitProvider config={{ courseId: "course-1", xapi: { enabled: false } }}>
+        <div>child</div>
+      </LessonkitProvider>,
+    );
+
+    await waitFor(() =>
+      expect(
+        Object.keys(sessionStorage).some((k) => k.startsWith("lessonkit:course_started:")),
+      ).toBe(true),
+    );
+
+    rerender(
+      <LessonkitProvider config={{ courseId: "course-1", xapi: { transport } }}>
+        <div>child</div>
+      </LessonkitProvider>,
+    );
+
+    await waitFor(() => expect(mapSpy).toHaveBeenCalled());
+    expect(transport).not.toHaveBeenCalled();
+    mapSpy.mockRestore();
   });
 
   it("xAPI can be disabled and does not emit statements", async () => {
