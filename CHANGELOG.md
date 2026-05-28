@@ -3,6 +3,21 @@
 All notable changes to the LessonKit monorepo are documented here. Published packages use the
 [`@lessonkit/*`](https://www.npmjs.com/org/lessonkit) scope.
 
+## [0.6.0] - 2026-05-28
+
+### Added
+
+- **@lessonkit/lxpack**: New package — `LessonkitCourseDescriptor`, `writeLxpackProject`, `packageLessonkitCourse`, `validateLessonkitProject`, `buildLessonkitProject`; `themeToLxpackRuntime`; `single-spa` and `per-lesson-spa` layouts; assessment export; browser bridge (`@lessonkit/lxpack/bridge`).
+- **@lessonkit/react**: Forwards `lesson_completed`, `course_completed`, and `quiz_completed` to `window.parent.lxpackBridge.v1` when embedded (`config.lxpack.bridge`, default `auto`).
+- **Examples**: `examples/lxpack-golden` — build + SCORM 1.2 / standalone packaging scripts.
+- **CI**: Node 20 packaging smoke job (golden example → SCORM ZIP).
+- **Docs**: [`docs/PACKAGING.md`](docs/PACKAGING.md); LXPack id mapping in [`docs/IDENTITY.md`](docs/IDENTITY.md); theme parity in [`docs/THEMING.md`](docs/THEMING.md).
+
+### Changed
+
+- Monorepo packages bumped to **0.6.0**.
+- Root `build:packages` includes `@lessonkit/lxpack` (requires Node 20+ for consumers of the adapter).
+
 ## [0.5.0] - 2026-05-28
 
 ### Added

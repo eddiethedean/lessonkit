@@ -13,6 +13,7 @@ import type {
 import { nowIso } from "@lessonkit/core";
 import type { XAPIClient } from "@lessonkit/xapi";
 import { telemetryEventToXAPIStatement } from "@lessonkit/xapi";
+import { forwardTelemetryToLxpack } from "./lxpackBridge";
 
 let warnedMissingCourseId = false;
 
@@ -42,6 +43,8 @@ export function emitTelemetry(
       console.warn("[lessonkit] xAPI mapping skipped:", err instanceof Error ? err.message : err);
     }
   }
+
+  forwardTelemetryToLxpack(event);
 }
 
 export function buildTrackEvent(opts: {

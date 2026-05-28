@@ -36,3 +36,30 @@ jobs:
       - name: Coverage
         run: npm run coverage
 
+  packaging:
+    name: Packaging smoke (Node 20)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build packages and golden example
+        run: |
+          npm run build:packages
+          npm run -w lessonkit-example-lxpack-golden build
+
+      - name: Package SCORM 1.2 artifact
+        run: npm run -w lessonkit-example-lxpack-golden run package:scorm12
+
+      - name: Verify SCORM ZIP exists
+        run: test -f examples/lxpack-golden/.lxpack/course/.lxpack/out/course-scorm12.zip
+

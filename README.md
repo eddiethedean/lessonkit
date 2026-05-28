@@ -31,6 +31,7 @@ lessonkit/
 │   ├── scorm/           (planned)
 │   ├── accessibility/
 │   ├── themes/
+│   ├── lxpack/
 │   └── cli/
 ├── examples/
 ├── docs/
@@ -50,6 +51,13 @@ npm run build
 npm -w lessonkit-example-react-vite run dev
 ```
 
+Package for LMS delivery (Node 20+):
+
+```bash
+npm -w lessonkit-example-lxpack-golden run build
+npm -w lessonkit-example-lxpack-golden run package:scorm12
+```
+
 ## Key docs
 
 - [`CHANGELOG.md`](CHANGELOG.md): release history
@@ -59,7 +67,8 @@ npm -w lessonkit-example-react-vite run dev
 - [`PLAN.md`](https://github.com/eddiethedean/lessonkit/blob/main/PLAN.md): product vision and MVP scope
 - [`SPEC.md`](https://github.com/eddiethedean/lessonkit/blob/main/SPEC.md): technical spec and requirements
 - [`ROADMAP.md`](https://github.com/eddiethedean/lessonkit/blob/main/ROADMAP.md): phased delivery plan
-- [`docs/LXPACK_UPGRADES_FOR_LESSONKIT.md`](https://github.com/eddiethedean/lessonkit/blob/main/docs/LXPACK_UPGRADES_FOR_LESSONKIT.md): proposed LXPack improvements for interoperability
+- [`docs/PACKAGING.md`](docs/PACKAGING.md): export React courses to SCORM / standalone via `@lessonkit/lxpack`
+- [`docs/LXPACK_UPGRADES_FOR_LESSONKIT.md`](https://github.com/eddiethedean/lessonkit/blob/main/docs/LXPACK_UPGRADES_FOR_LESSONKIT.md): LXPack interoperability checklist
 
 ## Example (React)
 
@@ -118,11 +127,12 @@ export default function SecurityTraining() {
 - `@lessonkit/xapi`: xAPI statement generation and transports
 - `@lessonkit/accessibility`: accessibility utilities (growing)
 - `@lessonkit/themes`: theming primitives (growing)
-- `@lessonkit/cli`: `lessonkit` commands (stub)
+- `@lessonkit/lxpack`: LXPack export adapter (SCORM, standalone, xAPI, cmi5)
+- `@lessonkit/cli`: `lessonkit` commands (stub; packaging in 0.7)
 
 ## Versioning
 
-Current monorepo release: **0.5.0** (see [CHANGELOG.md](CHANGELOG.md)).
+Current monorepo release: **0.6.0** (see [CHANGELOG.md](CHANGELOG.md)).
 
 LessonKit follows semver. The **0.x** series is expected to evolve quickly; breaking changes may
 still happen between minor releases.

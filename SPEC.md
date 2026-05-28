@@ -11,7 +11,7 @@ lessonkit/
 │   ├── accessibility/
 │   ├── themes/
 │   ├── cli/
-│   └── lxpack/          (planned adapter for LXPack exports)
+│   └── lxpack/          (@lessonkit/lxpack — LXPack export adapter)
 ├── examples/
 ├── docs/
 └── templates/

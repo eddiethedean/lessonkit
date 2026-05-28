@@ -90,8 +90,14 @@ Programmatic catalog: `buildThemeCatalog()` from `@lessonkit/themes`.
 
 Provides `.lk-panel` and `.lk-button` primitives that consume only `--lk-*` variables.
 
-## LXPack parity (deferred)
+## LXPack parity (0.6+)
 
-Visual parity for LXPack-packaged artifacts is planned for **framework 0.6.x** (`@lessonkit/lxpack`). In 0.4.x, define themes once in React and export the same token object when packaging later.
+Use `themeToLxpackRuntime()` from `@lessonkit/lxpack` to write the same `--lk-*` variables into the LXPack `course.yaml` `runtime.cssVariables` block when packaging.
 
-See [`docs/LXPACK_UPGRADES_FOR_LESSONKIT.md`](LXPACK_UPGRADES_FOR_LESSONKIT.md) (P2 — Theme token bridge).
+```ts
+import { themeToLxpackRuntime } from "@lessonkit/lxpack";
+
+const { theme, cssVariables } = themeToLxpackRuntime({ preset: "brand" });
+```
+
+See [`docs/PACKAGING.md`](PACKAGING.md) and [`docs/LXPACK_UPGRADES_FOR_LESSONKIT.md`](LXPACK_UPGRADES_FOR_LESSONKIT.md).

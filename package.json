@@ -1,6 +1,6 @@
 {
   "name": "lessonkit",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "private": true,
   "packageManager": "npm@10.9.0",
   "workspaces": [
@@ -10,8 +10,8 @@
   ],
   "scripts": {
     "build": "npm run build:packages && npm run build:apps",
-    "build:packages": "npm run -w @lessonkit/core build && npm run -w @lessonkit/xapi build && npm run -w @lessonkit/accessibility build && npm run -w @lessonkit/themes build && npm run -w @lessonkit/react build && npm run -w @lessonkit/cli build",
-    "build:apps": "npm run -w lessonkit-example-react-vite build && npm run -w lessonkit-template-vite-react build",
+    "build:packages": "npm run -w @lessonkit/core build && npm run -w @lessonkit/xapi build && npm run -w @lessonkit/accessibility build && npm run -w @lessonkit/themes build && npm run -w @lessonkit/lxpack build && npm run -w @lessonkit/react build && npm run -w @lessonkit/cli build",
+    "build:apps": "npm run -w lessonkit-example-react-vite build && npm run -w lessonkit-example-lxpack-golden build && npm run -w lessonkit-template-vite-react build",
     "dev": "npm run --workspaces --if-present dev",
     "test": "npm run --workspaces --if-present test",
     "coverage": "npm run --workspaces --if-present test:coverage",

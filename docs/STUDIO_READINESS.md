@@ -40,15 +40,15 @@ for:
 
 ## 0.6.x — Export surfaces + `@lessonkit/lxpack` adapter
 
-- [ ] **Theme parity**: same tokens produce the same visual output in React/Vite and LXPack-packaged artifacts (via `@lessonkit/lxpack` runtime `cssVariables` bridge)
-- [ ] `@lessonkit/lxpack` exists and is covered by tests
-- [ ] Adapter produces a valid LXPack project/interchange with stable ID mapping
-- [ ] Adapter prefers programmatic LXPack APIs where possible (structured results/errors)
-- [ ] Golden end-to-end example exists:
-  - [ ] LessonKit course → LXPack build → SCORM ZIP importable into an LMS
-  - [ ] Standalone web artifact runnable locally
-- [ ] CI runs a packaging smoke test on the golden example
-- [ ] Output layout is stable and documented (so generators/CI can rely on it)
+- [x] **Theme parity**: same tokens produce the same visual output in React/Vite and LXPack-packaged artifacts (via `@lessonkit/lxpack` runtime `cssVariables` bridge)
+- [x] `@lessonkit/lxpack` exists and is covered by tests
+- [x] Adapter produces a valid LXPack project/interchange with stable ID mapping
+- [x] Adapter prefers programmatic LXPack APIs where possible (structured results/errors)
+- [x] Golden end-to-end example exists:
+  - [x] LessonKit course → LXPack build → SCORM ZIP importable into an LMS
+  - [x] Standalone web artifact runnable locally
+- [x] CI runs a packaging smoke test on the golden example
+- [x] Output layout is stable and documented (so generators/CI can rely on it)
 
 ## 0.7.x — CLI workflow (developer + AI friendly)
 

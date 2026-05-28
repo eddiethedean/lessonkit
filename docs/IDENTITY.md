@@ -48,4 +48,18 @@ Machine-readable rules: `@lessonkit/core/identity-contract.v1.json`.
 3. Add `checkId` on every `Quiz` and `KnowledgeCheck`.
 4. Optionally add `blockId` on `Scenario` / `Reflection` when you want block-level xAPI for custom `interaction` events (pass `blockId` in `track("interaction", { …, blockId })`).
 
-See also [`TELEMETRY.md`](TELEMETRY.md) and [`CHANGELOG.md`](../CHANGELOG.md).
+## LXPack export mapping (0.6+)
+
+| LessonKit | LXPack |
+|-----------|--------|
+| `courseId` | Course / activity id in `lessonkit.json` + manifest |
+| `lessonId` | SPA lesson `id` (and `completeLesson(lessonId)` bridge arg) |
+| `checkId` | Assessment `id` in `assessments/*.yaml` and injected build data |
+
+Ids are **not rewritten** — use the same slugs in React props and in your `LessonkitCourseDescriptor`.
+
+See [`PACKAGING.md`](PACKAGING.md).
+
+## See also
+
+[`TELEMETRY.md`](TELEMETRY.md) and [`CHANGELOG.md`](../CHANGELOG.md).

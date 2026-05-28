@@ -1,0 +1,15 @@
+:root {
+  font-family: var(--lk-font-family, system-ui, sans-serif);
+  color: var(--lk-color-foreground, #111);
+  background: var(--lk-color-background, #fff);
+}
+
+.app-shell {
+  max-width: 40rem;
+  margin: 2rem auto;
+  padding: 1rem;
+}
+
+nav button {
+  margin-right: 0.5rem;
+}

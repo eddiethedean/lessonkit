@@ -6,9 +6,7 @@ import { buildTrackEvent, emitTelemetry } from "../src/runtime/emitTelemetry";
 
 describe("emitTelemetry", () => {
   it("warns once in development when courseId is missing", () => {
-    const g = globalThis as typeof globalThis & { process?: { env?: { NODE_ENV?: string } } };
-    const prev = g.process?.env?.NODE_ENV;
-    g.process = { env: { NODE_ENV: "development" } };
+    vi.stubEnv("NODE_ENV", "development");
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
 
     const tracking = createTrackingClient();
@@ -19,11 +17,7 @@ describe("emitTelemetry", () => {
 
     expect(warn).toHaveBeenCalledTimes(1);
     warn.mockRestore();
-    if (prev === undefined) {
-      delete g.process;
-    } else {
-      g.process = { env: { NODE_ENV: prev } };
-    }
+    vi.unstubAllEnvs();
   });
 
   it("tracks and sends xAPI when statement is returned", async () => {
@@ -65,6 +59,27 @@ describe("emitTelemetry", () => {
     });
     expect(event.name).toBe("future_event");
     expect(event.courseId).toBe("c");
+  });
+
+  it("forwards lesson_completed to lxpackBridge when embedded", () => {
+    const completeLesson = vi.fn();
+    const parent = {
+      lxpackBridge: { v1: { completeLesson } },
+    };
+    vi.stubGlobal("window", { parent } as unknown as Window);
+
+    const tracking = createTrackingClient();
+    const event = buildTrackEvent({
+      name: "lesson_completed",
+      courseId: "c",
+      lessonId: "lesson-1",
+      sessionId: "s1",
+      data: { lessonId: "lesson-1" },
+    });
+    emitTelemetry(tracking, null, event);
+
+    expect(completeLesson).toHaveBeenCalledWith("lesson-1");
+    vi.unstubAllGlobals();
   });
 
   it("buildTrackEvent quiz events require active lessonId", () => {

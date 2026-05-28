@@ -16,6 +16,7 @@ import { createSessionStoragePort } from "./runtime/ports";
 import { createProgressController, type ProgressState } from "./runtime/progress";
 import { createXapiClientFromConfig } from "./runtime/xapi";
 import { hasCourseStarted, markCourseStarted, resolveSessionId } from "./runtime/session";
+import { setLxpackBridgeMode } from "./runtime/lxpackBridge";
 
 export type LessonkitConfig = {
   courseId: CourseId;
@@ -38,6 +39,10 @@ export type LessonkitConfig = {
     enabled?: boolean;
     transport?: XAPITransport;
     client?: XAPIClient;
+  };
+  lxpack?: {
+    /** Forward completion events to `window.parent.lxpackBridge.v1` when embedded (default `auto`). */
+    bridge?: "auto" | "off";
   };
 };
 
@@ -83,6 +88,11 @@ function createTrackingClientFromConfig(config: LessonkitConfig): TrackingClient
 
 export function LessonkitProvider(props: { config: LessonkitConfig; children: React.ReactNode }) {
   const config = props.config;
+
+  useIsoLayoutEffect(() => {
+    setLxpackBridgeMode(config.lxpack?.bridge ?? "auto");
+    return () => setLxpackBridgeMode("auto");
+  }, [config.lxpack?.bridge]);
 
   const sessionIdRef = useRef<string>(resolveSessionId(defaultStorage, config.session?.sessionId));
   if (config.session?.sessionId) sessionIdRef.current = config.session.sessionId;

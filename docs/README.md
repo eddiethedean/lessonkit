@@ -21,16 +21,18 @@ Placeholders live here until the full docs stack is scaffolded:
 - [`IDENTITY.md`](IDENTITY.md) — required IDs, URN contract, codegen guidance
 - [`TELEMETRY.md`](TELEMETRY.md) — event catalog and xAPI mapping
 - [`ACCESSIBILITY.md`](ACCESSIBILITY.md) — keyboard and screen reader standards
+- [`PACKAGING.md`](PACKAGING.md) — export to SCORM / standalone via `@lessonkit/lxpack`
 
 ## Integration
 
-- [`LXPACK_UPGRADES_FOR_LESSONKIT.md`](https://github.com/eddiethedean/lessonkit/blob/main/docs/LXPACK_UPGRADES_FOR_LESSONKIT.md) — proposed LXPack changes to support LessonKit packaging
+- [`LXPACK_UPGRADES_FOR_LESSONKIT.md`](LXPACK_UPGRADES_FOR_LESSONKIT.md) — LXPack interoperability checklist
 
 ## Current status
 
-Framework **0.5.0** (identity model, telemetry catalog, canonical xAPI mapper, lesson lifecycle
-hardening, themes) is implemented in `packages/` and documented in the guides above. Storybook and
-Docusaurus folders remain placeholders until the docs stack is scaffolded.
+Framework **0.6.0** adds `@lessonkit/lxpack` (LXPack export adapter), packaging docs, and a golden
+SCORM example. Identity, telemetry, themes, and lesson lifecycle from **0.5.0** are documented in
+the guides above. Storybook and Docusaurus folders remain placeholders until the docs stack is
+scaffolded.
 
-**Publishing:** npm latest is still **0.4.0** until you push the `v0.5.0` tag (see [RELEASING.md](../RELEASING.md)).
+**Publishing:** see [RELEASING.md](../RELEASING.md) for tag-based npm releases.
 

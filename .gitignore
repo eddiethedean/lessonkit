@@ -4,5 +4,6 @@ dist/
 .turbo
 *.log
 coverage/
+.lxpack/
 .env
 .env.*

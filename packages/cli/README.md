@@ -12,13 +12,15 @@ LessonKit CLI (early stub).
 npm install -g @lessonkit/cli
 ```
 
-## Commands (0.5.0 stubs)
+## Commands (0.6.0 stubs)
 
 ```bash
 lessonkit init
 lessonkit dev
 lessonkit build
-lessonkit package
+lessonkit package   # real dual export in 0.7.x
 lessonkit publish
 ```
+
+For LMS packaging today, use [`@lessonkit/lxpack`](../../packages/lxpack/README.md) or [`examples/lxpack-golden`](../../examples/lxpack-golden).
 

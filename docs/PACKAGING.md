@@ -1,0 +1,122 @@
+# Packaging with LXPack (0.6+)
+
+LessonKit authors courses in React (`@lessonkit/react`). **LXPack** validates and packages them for LMS delivery. **`@lessonkit/lxpack`** is the adapter between the two.
+
+Requires **Node.js 20+** (LXPack `@lxpack/api`).
+
+## Workflow
+
+1. **Author** a React app with stable `courseId`, `lessonId`, and `checkId` props.
+2. **Describe** the course in a `LessonkitCourseDescriptor` (see [`examples/lxpack-golden/course.descriptor.ts`](../examples/lxpack-golden/course.descriptor.ts)).
+3. **Build** the Vite app (`npm run build` → `dist/`).
+4. **Package** with `packageLessonkitCourse()` or the golden example scripts.
+
+```ts
+import { packageLessonkitCourse } from "@lessonkit/lxpack";
+import { goldenCourseDescriptor } from "./course.descriptor";
+
+const result = await packageLessonkitCourse({
+  descriptor: goldenCourseDescriptor,
+  outDir: ".lxpack/course",
+  spaDistDir: "dist",
+  target: "scorm12",
+  output: ".lxpack/out/course-scorm12.zip",
+});
+
+if (!result.ok) {
+  console.error(result.issues);
+  process.exit(1);
+}
+```
+
+## SPA layouts
+
+### `single-spa` (recommended default)
+
+One Vite build, one `type: spa` lesson in the LXPack project. Multi-lesson navigation stays inside your React app (step state, router, etc.).
+
+- Set `layout: "single-spa"` on the descriptor.
+- Optional `spaLessonId` (defaults to the first lesson id).
+- Copy source from `spaDistDir` (default `dist`) into `{outDir}/dist`.
+
+### `per-lesson-spa`
+
+One build output per lesson (multi-SCO friendly).
+
+- Set `layout: "per-lesson-spa"`.
+- Each lesson needs `spaPath` (e.g. `dist/lessons/intro`).
+- Pass `lessonSpaDirs: { intro: "/abs/path/to/build" }` to `writeLxpackProject` / `packageLessonkitCourse`.
+
+## Output layout (stable)
+
+| Path | Contents |
+|------|----------|
+| `{outDir}/course.yaml` | LXPack manifest (lessons, runtime theme, assessments) |
+| `{outDir}/lessonkit.json` | LessonKit interchange (merged by `@lxpack/api`) |
+| `{outDir}/dist/` | SPA assets (`single-spa`) |
+| `{outDir}/.lxpack/out/course-{target}.zip` | Packaged SCORM/xAPI/cmi5 ZIP (default) |
+| `{outDir}/.lxpack/out/standalone/` | Unpacked standalone (`dir: true`) |
+
+## Targets
+
+Use any LXPack `ExportTarget`: `scorm12`, `scorm2004`, `standalone`, `xapi`, `cmi5`.
+
+```ts
+import { validateLessonkitProject, buildLessonkitProject } from "@lessonkit/lxpack";
+
+await validateLessonkitProject({ courseDir: ".lxpack/course", target: "scorm2004" });
+await buildLessonkitProject({
+  courseDir: ".lxpack/course",
+  target: "standalone",
+  dir: true,
+  output: ".lxpack/out/standalone",
+});
+```
+
+## Theme parity
+
+Export the same tokens you use in `ThemeProvider`:
+
+```ts
+import { themeToLxpackRuntime } from "@lessonkit/lxpack";
+
+const runtime = themeToLxpackRuntime({ preset: "brand" });
+// → { theme: "brand", cssVariables: { "--lk-color-primary": "...", ... } }
+```
+
+`writeLxpackProject` writes `runtime.cssVariables` into `course.yaml` so packaged shells match your React preview.
+
+## LMS bridge (iframe)
+
+When the SPA runs inside LXPack, call the parent bridge (or rely on `@lessonkit/react`, which forwards completion events when `window.parent.lxpackBridge.v1` exists):
+
+```ts
+import { notifyLxpackLessonComplete } from "@lessonkit/lxpack/bridge";
+
+notifyLxpackLessonComplete("intro");
+```
+
+Disable forwarding: `config.lxpack.bridge = "off"` on `LessonkitProvider`.
+
+## Golden example
+
+```bash
+npm -w lessonkit-example-lxpack-golden run build
+npm -w lessonkit-example-lxpack-golden run package:scorm12
+npm -w lessonkit-example-lxpack-golden run package:standalone
+```
+
+Import `examples/lxpack-golden/.lxpack/course/.lxpack/out/course-scorm12.zip` into your LMS, or open the standalone folder in a browser.
+
+## ID mapping
+
+LessonKit ids are used as-is in LXPack (`courseId`, `lessonId`, `checkId`). See [`IDENTITY.md`](IDENTITY.md).
+
+## CLI (0.7)
+
+`lessonkit package --target scorm12` will wrap this adapter in **0.7.x**. Until then, use `@lessonkit/lxpack` programmatically or the golden example scripts.
+
+## Related
+
+- [`LXPACK_UPGRADES_FOR_LESSONKIT.md`](LXPACK_UPGRADES_FOR_LESSONKIT.md)
+- [LXPack LessonKit interoperability](https://lxpack.readthedocs.io/en/latest/guides/lessonkit-interoperability/)
