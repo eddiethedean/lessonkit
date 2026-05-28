@@ -99,6 +99,31 @@ describe("ThemeProvider", () => {
     );
   });
 
+  it("preset=light merges named light preset onto mode base", () => {
+    render(
+      <ThemeProvider mode="light" preset="light">
+        <ThemeReader />
+      </ThemeProvider>,
+    );
+    expect(document.documentElement.style.getPropertyValue("--lk-color-background").trim()).toBe(
+      "#f7f8ff",
+    );
+    expect(document.documentElement.style.getPropertyValue("--lk-color-extra-accent").trim()).toBe(
+      "#22d3ee",
+    );
+  });
+
+  it("preset=dark merges named dark preset onto mode base", () => {
+    render(
+      <ThemeProvider mode="dark" preset="dark">
+        <ThemeReader />
+      </ThemeProvider>,
+    );
+    expect(document.documentElement.style.getPropertyValue("--lk-color-background").trim()).toBe(
+      "#0b1020",
+    );
+  });
+
   it("mode=system follows matchMedia", () => {
     const listeners: Array<() => void> = [];
     vi.stubGlobal(
