@@ -13,6 +13,7 @@ import type { XAPIClient, XAPITransport } from "@lessonkit/xapi";
 import { createInMemoryXAPIQueue } from "@lessonkit/xapi";
 import { buildTrackEvent, emitTelemetry } from "./runtime/emitTelemetry";
 import { createSessionStoragePort } from "./runtime/ports";
+import { createProgressController, type ProgressState } from "./runtime/progress";
 import { createXapiClientFromConfig } from "./runtime/xapi";
 import { hasCourseStarted, markCourseStarted, resolveSessionId } from "./runtime/session";
 
@@ -40,11 +41,7 @@ export type LessonkitConfig = {
   };
 };
 
-export type ProgressState = {
-  activeLessonId?: LessonId;
-  completedLessonIds: ReadonlySet<LessonId>;
-  courseCompleted: boolean;
-};
+export type { ProgressState };
 
 export type LessonkitRuntime = {
   config: LessonkitConfig;
@@ -97,6 +94,16 @@ export function LessonkitProvider(props: { config: LessonkitConfig; children: Re
 
   const courseIdRef = useRef<CourseId>(config.courseId);
   courseIdRef.current = config.courseId;
+
+  const progressRef = useRef(createProgressController());
+  const [progress, setProgress] = useState<ProgressState>(() => progressRef.current.getState());
+
+  const syncProgress = useCallback(() => {
+    setProgress(progressRef.current.getState());
+  }, []);
+
+  const activeLessonIdRef = useRef<LessonId | undefined>(progress.activeLessonId);
+  activeLessonIdRef.current = progress.activeLessonId;
 
   const trackingRef = useRef<TrackingClient>(createTrackingClient());
   const [tracking, setTracking] = useState<TrackingClient>(() => trackingRef.current);
@@ -176,19 +183,6 @@ export function LessonkitProvider(props: { config: LessonkitConfig; children: Re
     };
   }, [xapiEnabled, xapiClient, xapiTransport, courseId]);
 
-  const [completedLessonIds, setCompletedLessonIds] = useState<Set<LessonId>>(() => new Set());
-  const completedLessonIdsRef = useRef<Set<LessonId>>(completedLessonIds);
-  completedLessonIdsRef.current = completedLessonIds;
-
-  const [activeLessonId, setActiveLessonId] = useState<LessonId | undefined>(undefined);
-  const [courseCompleted, setCourseCompleted] = useState(false);
-  const courseCompletedRef = useRef(false);
-  courseCompletedRef.current = courseCompleted;
-
-  const activeLessonIdRef = useRef<LessonId | undefined>(undefined);
-  activeLessonIdRef.current = activeLessonId;
-  const lessonStartTimesRef = useRef<Map<LessonId, number>>(new Map());
-
   const track = useCallback(
     (name: TelemetryEventName, data?: unknown, opts?: { lessonId?: LessonId }) => {
       const event = buildTrackEvent({
@@ -212,26 +206,8 @@ export function LessonkitProvider(props: { config: LessonkitConfig; children: Re
     };
   }, []);
 
-  const setActiveLesson = useCallback(
-    (lessonId: LessonId) => {
-      if (activeLessonIdRef.current === lessonId) return;
-      activeLessonIdRef.current = lessonId;
-      setActiveLessonId(lessonId);
-      lessonStartTimesRef.current.set(lessonId, Date.now());
-      track("lesson_started", { lessonId }, { lessonId });
-    },
-    [track],
-  );
-
-  const completeLesson = useCallback(
-    (lessonId: LessonId) => {
-      if (completedLessonIdsRef.current.has(lessonId)) return;
-      completedLessonIdsRef.current = new Set(completedLessonIdsRef.current).add(lessonId);
-      setCompletedLessonIds(completedLessonIdsRef.current);
-
-      const startedAt = lessonStartTimesRef.current.get(lessonId);
-      lessonStartTimesRef.current.delete(lessonId);
-      const durationMs = typeof startedAt === "number" ? Math.max(0, Date.now() - startedAt) : undefined;
+  const emitLessonCompleted = useCallback(
+    (lessonId: LessonId, durationMs?: number) => {
       track("lesson_completed", { lessonId, durationMs }, { lessonId });
       if (durationMs !== undefined) {
         track("lesson_time_on_task", { lessonId, durationMs }, { lessonId });
@@ -240,21 +216,42 @@ export function LessonkitProvider(props: { config: LessonkitConfig; children: Re
     [track],
   );
 
-  const completeCourse = useCallback(() => {
-    if (courseCompletedRef.current) return;
-    courseCompletedRef.current = true;
-    setCourseCompleted(true);
-    track("course_completed");
-  }, [track]);
-
-  const progress = useMemo<ProgressState>(
-    () => ({
-      activeLessonId,
-      completedLessonIds: new Set(completedLessonIds),
-      courseCompleted,
-    }),
-    [activeLessonId, completedLessonIds, courseCompleted],
+  const completeLesson = useCallback(
+    (lessonId: LessonId) => {
+      const result = progressRef.current.completeLesson(lessonId, Date.now());
+      if (!result.didComplete) return;
+      syncProgress();
+      emitLessonCompleted(lessonId, result.durationMs);
+    },
+    [syncProgress, emitLessonCompleted],
   );
+
+  const setActiveLesson = useCallback(
+    (lessonId: LessonId) => {
+      const current = progressRef.current.getState();
+      if (current.activeLessonId === lessonId) return;
+
+      const previous = current.activeLessonId;
+      if (previous && previous !== lessonId) {
+        const completed = progressRef.current.completeLesson(previous, Date.now());
+        if (completed.didComplete) {
+          emitLessonCompleted(previous, completed.durationMs);
+        }
+      }
+
+      progressRef.current.setActiveLesson(lessonId, Date.now());
+      syncProgress();
+      track("lesson_started", { lessonId }, { lessonId });
+    },
+    [track, syncProgress, emitLessonCompleted],
+  );
+
+  const completeCourse = useCallback(() => {
+    const result = progressRef.current.completeCourse();
+    if (!result.didComplete) return;
+    syncProgress();
+    track("course_completed");
+  }, [track, syncProgress]);
 
   const runtime = useMemo<LessonkitRuntime>(
     () => ({

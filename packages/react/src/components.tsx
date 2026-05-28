@@ -3,6 +3,7 @@ import { visuallyHiddenStyle } from "@lessonkit/accessibility";
 import type { BlockId, CheckId, CourseId, LessonId } from "@lessonkit/core";
 import { LessonkitProvider } from "./context";
 import { useCompletion, useLessonkit, useQuizState } from "./hooks";
+import { warnInvalidComponentId } from "./runtime/validateComponentId";
 
 export function Course(props: {
   title: string;
@@ -10,6 +11,8 @@ export function Course(props: {
   config?: Omit<React.ComponentProps<typeof LessonkitProvider>["config"], "courseId">;
   children: React.ReactNode;
 }) {
+  warnInvalidComponentId(props.courseId, "courseId");
+
   const providerConfig = useMemo(
     () => ({ ...props.config, courseId: props.courseId }),
     [props.config, props.courseId],
@@ -26,14 +29,25 @@ export function Course(props: {
 }
 
 export function Lesson(props: { title: string; lessonId: LessonId; children: React.ReactNode }) {
+  warnInvalidComponentId(props.lessonId, "lessonId");
+
   const { setActiveLesson } = useLessonkit();
   const { completeLesson } = useCompletion();
   const id = props.lessonId;
+  const pendingCompleteRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
+    if (pendingCompleteRef.current !== null) {
+      clearTimeout(pendingCompleteRef.current);
+      pendingCompleteRef.current = null;
+    }
     setActiveLesson(id);
     return () => {
-      completeLesson(id);
+      const lessonId = id;
+      pendingCompleteRef.current = setTimeout(() => {
+        pendingCompleteRef.current = null;
+        completeLesson(lessonId);
+      }, 0);
     };
   }, [id, setActiveLesson, completeLesson]);
 
@@ -46,6 +60,7 @@ export function Lesson(props: { title: string; lessonId: LessonId; children: Rea
 }
 
 export function Scenario(props: { blockId?: BlockId; children: React.ReactNode }) {
+  if (props.blockId !== undefined) warnInvalidComponentId(props.blockId, "blockId");
   return <section aria-label="Scenario" data-lk-block-id={props.blockId}>{props.children}</section>;
 }
 
@@ -54,6 +69,7 @@ export function Reflection(props: {
   prompt?: string;
   children?: React.ReactNode;
 }) {
+  if (props.blockId !== undefined) warnInvalidComponentId(props.blockId, "blockId");
   const promptId = useId();
   return (
     <section aria-label="Reflection" data-lk-block-id={props.blockId}>
@@ -89,6 +105,8 @@ export function Quiz(props: {
   choices: string[];
   answer: string;
 }) {
+  warnInvalidComponentId(props.checkId, "checkId");
+
   const quiz = useQuizState();
   const [selected, setSelected] = useState<string | null>(null);
   const completedRef = useRef(false);

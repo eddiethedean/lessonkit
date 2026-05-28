@@ -1,10 +1,13 @@
 import { describe, expect, it } from "vitest";
 import catalogJson from "../telemetry-catalog.v1.json";
+import identityContractJson from "../identity-contract.v1.json";
 import {
   assertValidId,
   buildLessonkitUrn,
   buildTelemetryCatalog,
   deriveId,
+  ID_MAX_LENGTH,
+  ID_PATTERN,
   slugifyId,
   validateId,
 } from "../src";
@@ -63,6 +66,12 @@ describe("@lessonkit/core identity", () => {
     for (let n = 2; n < 1000; n++) used.add(`intro-${n}`);
     const id = deriveId("Intro", used);
     expect(id.startsWith("intro-")).toBe(true);
+  });
+
+  it("identity-contract.v1.json idPattern matches ID_PATTERN", () => {
+    const contract = identityContractJson as { idPattern: string; maxLength: number };
+    expect(new RegExp(contract.idPattern).source).toBe(ID_PATTERN.source);
+    expect(contract.maxLength).toBe(ID_MAX_LENGTH);
   });
 
   it("telemetry-catalog.v1.json matches buildTelemetryCatalog()", () => {

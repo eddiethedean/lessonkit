@@ -12,7 +12,7 @@ LessonKit CLI (early stub).
 npm install -g @lessonkit/cli
 ```
 
-## Commands (0.4.0 stubs)
+## Commands (0.5.0 stubs)
 
 ```bash
 lessonkit init

@@ -9,19 +9,19 @@ Published packages: `@lessonkit/core`, `@lessonkit/xapi`, `@lessonkit/accessibil
 - [CHANGELOG.md](CHANGELOG.md) documents the release.
 - No pending files in [`.changeset/`](.changeset/) that would run `changeset version` and bump versions unexpectedly (this repo publishes via **git tags**, not `changeset publish`).
 
-### 0.4.0 checklist (before tagging)
+### 0.5.0 checklist (before tagging)
 
 | Item | Status |
 |------|--------|
-| All six `@lessonkit/*` packages at `0.4.0` in `package.json` | Required |
-| `@lessonkit/react` depends on `@lessonkit/themes@0.4.0` | Required |
-| [CHANGELOG.md](CHANGELOG.md) `## [0.4.0]` includes Added / Changed / Fixed | Required |
-| `docs/THEMING.md`, `docs/STUDIO_READINESS.md` 0.4.x items | Done in repo |
-| npm latest is `0.3.1` (0.4.0 not published yet) | Expected until tag |
-| Git tag `v0.4.0` does not exist yet | Create on publish |
+| All six `@lessonkit/*` packages at `0.5.0` in `package.json` | Required |
+| `@lessonkit/react` depends on `@lessonkit/*@0.5.0` | Required |
+| [CHANGELOG.md](CHANGELOG.md) `## [0.5.0]` includes Added / Changed / Breaking / Migration | Required |
+| `docs/IDENTITY.md`, `docs/TELEMETRY.md`, `docs/STUDIO_READINESS.md` 0.5.x items | Done in repo |
 | `NPM_TOKEN` secret configured on GitHub | Required for Release workflow |
 
-**Breaking note for consumers:** `LessonkitTheme` is now the full `LessonkitThemeV1` schema (see CHANGELOG).
+**Breaking note for consumers:** `courseId`, `lessonId`, and `checkId` are required on core components (see [CHANGELOG.md](CHANGELOG.md) and [`docs/IDENTITY.md`](docs/IDENTITY.md)).
+
+> **Do not create or push a `v0.5.0` git tag** until you intend to publish to npm. Tagging triggers the Release workflow.
 
 ## Publish to npm (tag-based)
 
@@ -31,16 +31,17 @@ Published packages: `@lessonkit/core`, `@lessonkit/xapi`, `@lessonkit/accessibil
    npm ci
    npm run build
    npm test
+   npm run typecheck
    npm run coverage
    ```
 
 2. Commit and push any release-prep changes on `main`.
 
-3. Create and push the version tag (triggers [`.github/workflows/release.yml`](.github/workflows/release.yml)):
+3. When ready to publish, create and push the version tag (triggers [`.github/workflows/release.yml`](.github/workflows/release.yml)):
 
    ```bash
-   git tag v0.4.0
-   git push origin v0.4.0
+   git tag v0.5.0
+   git push origin v0.5.0
    ```
 
 4. Verify the **Release** workflow on GitHub Actions and packages on [npm](https://www.npmjs.com/org/lessonkit).
@@ -49,7 +50,7 @@ The release job sets each package version from the tag, aligns `@lessonkit/*` de
 
 ## After release
 
-- Confirm npm shows `0.4.0` for each `@lessonkit/*` package.
+- Confirm npm shows `0.5.0` for each `@lessonkit/*` package.
 - Optional: create a GitHub Release from the tag with notes copied from [CHANGELOG.md](CHANGELOG.md).
 
 ## Changesets

@@ -126,13 +126,27 @@ Identity rules (`courseId`, `lessonId`, `checkId`, URNs): [`docs/IDENTITY.md`](d
 
 ## Example
 
-```tsx
-const tracking = useXAPI();
+Telemetry and xAPI share one path via `LessonkitProvider` and `track()`:
 
-tracking.completeLesson({
-  lessonId: "phishing-101"
-});
+```tsx
+import { LessonkitProvider } from "@lessonkit/react";
+import type { XAPIStatement } from "@lessonkit/xapi";
+
+<LessonkitProvider
+  config={{
+    courseId: "cyber-basics",
+    xapi: {
+      transport: (statement: XAPIStatement) => {
+        // send to your LRS
+      },
+    },
+  }}
+>
+  {/* Course / Lesson children */}
+</LessonkitProvider>
 ```
+
+Canonical mapping: `telemetryEventToXAPIStatement()` from `@lessonkit/xapi` (see [`docs/TELEMETRY.md`](docs/TELEMETRY.md)).
 
 ---
 

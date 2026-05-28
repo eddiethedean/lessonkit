@@ -2,7 +2,7 @@ import React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, render, waitFor } from "@testing-library/react";
 import type { TelemetryEvent } from "@lessonkit/core";
-import { LessonkitProvider, useLessonkit } from "../src";
+import { Lesson, LessonkitProvider, useLessonkit } from "../src";
 
 describe("@lessonkit/react provider dispose regression", () => {
   afterEach(() => {
@@ -31,11 +31,13 @@ describe("@lessonkit/react provider dispose regression", () => {
 
     let runtime!: ReturnType<typeof useLk>;
     function Driver() {
-      runtime = useLk();
+      const lk = useLk();
+      runtime = lk;
+      const { setActiveLesson } = lk;
       React.useEffect(() => {
-        runtime.setActiveLesson("lesson-1");
-        runtime.setActiveLesson("lesson-2");
-      }, [runtime]);
+        setActiveLesson("lesson-1");
+        setActiveLesson("lesson-2");
+      }, [setActiveLesson]);
       return <div>driver</div>;
     }
 
@@ -171,11 +173,11 @@ describe("@lessonkit/react provider dispose regression", () => {
 
     let complete!: (lessonId: string) => void;
     function Driver() {
-      const runtime = useLessonkit();
+      const { setActiveLesson, completeLesson } = useLessonkit();
       React.useEffect(() => {
-        runtime.setActiveLesson("lesson-1");
-        complete = runtime.completeLesson;
-      }, [runtime]);
+        setActiveLesson("lesson-1");
+        complete = completeLesson;
+      }, [setActiveLesson, completeLesson]);
       return <div>driver</div>;
     }
 
@@ -193,5 +195,64 @@ describe("@lessonkit/react provider dispose regression", () => {
     complete("lesson-1");
 
     await waitFor(() => expect(events.filter((e) => e.name === "lesson_completed").length).toBe(1));
+  });
+
+  it("setActiveLesson completes the previous lesson", async () => {
+    const events: TelemetryEvent[] = [];
+
+    let runtime!: ReturnType<typeof useLessonkit>;
+    function Driver() {
+      const lk = useLessonkit();
+      runtime = lk;
+      const { setActiveLesson } = lk;
+      React.useEffect(() => {
+        setActiveLesson("lesson-1");
+        setActiveLesson("lesson-2");
+      }, [setActiveLesson]);
+      return <div>driver</div>;
+    }
+
+    render(
+      <LessonkitProvider
+        config={{ courseId: "course-1", tracking: { sink: (e: TelemetryEvent) => void events.push(e) } }}
+      >
+        <Driver />
+      </LessonkitProvider>,
+    );
+
+    await waitFor(() => {
+      expect(runtime.progress.activeLessonId).toBe("lesson-2");
+      expect(runtime.progress.completedLessonIds.has("lesson-1")).toBe(true);
+      expect(events.filter((e) => e.name === "lesson_completed" && e.lessonId === "lesson-1").length).toBe(
+        1,
+      );
+    });
+  });
+
+  it("Lesson under StrictMode does not complete until removed from the tree", async () => {
+    const events: TelemetryEvent[] = [];
+
+    const { unmount } = render(
+      <React.StrictMode>
+        <LessonkitProvider
+          config={{ courseId: "course-1", tracking: { sink: (e: TelemetryEvent) => void events.push(e) } }}
+        >
+          <Lesson title="Lesson" lessonId="lesson-1">
+            <div>child</div>
+          </Lesson>
+        </LessonkitProvider>
+      </React.StrictMode>,
+    );
+
+    await waitFor(() => expect(events.some((e) => e.name === "lesson_started")).toBe(true));
+    await new Promise((r) => setTimeout(r, 20));
+    expect(events.filter((e) => e.name === "lesson_completed").length).toBe(0);
+
+    unmount();
+    await waitFor(() =>
+      expect(events.filter((e) => e.name === "lesson_completed" && e.lessonId === "lesson-1").length).toBe(
+        1,
+      ),
+    );
   });
 });

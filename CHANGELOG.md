@@ -97,6 +97,7 @@ Last version published to npm before 0.2.x.
 - Initial public packages: `@lessonkit/core`, `@lessonkit/react`, `@lessonkit/xapi`, `@lessonkit/accessibility`, `@lessonkit/themes`, `@lessonkit/cli`.
 - Tag-based publish workflow and CI checks (build, typecheck, test, coverage).
 
+[0.5.0]: https://github.com/eddiethedean/lessonkit/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/eddiethedean/lessonkit/compare/v0.3.1...v0.4.0
 [0.3.1]: https://github.com/eddiethedean/lessonkit/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/eddiethedean/lessonkit/compare/v0.1.1...v0.3.0

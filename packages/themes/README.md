@@ -12,7 +12,7 @@ Design tokens and theme utilities for LessonKit.
 npm install @lessonkit/themes
 ```
 
-## API (0.4.0)
+## API (0.5.0)
 
 ### Types
 

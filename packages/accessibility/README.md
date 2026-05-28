@@ -12,7 +12,7 @@ Small accessibility utilities used by LessonKit packages and apps.
 npm install @lessonkit/accessibility
 ```
 
-## Included (0.4.0)
+## Included (0.5.0)
 
 - `prefersReducedMotion()`
 - `getReducedMotionPreference()`

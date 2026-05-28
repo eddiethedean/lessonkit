@@ -1,4 +1,4 @@
-import type { LessonId, TelemetryEventName } from "@lessonkit/core";
+import type { LessonId } from "@lessonkit/core";
 
 export type ProgressState = {
   activeLessonId?: LessonId;

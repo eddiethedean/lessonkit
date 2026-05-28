@@ -34,8 +34,14 @@ export function emitTelemetry(
     return;
   }
   tracking.track(event);
-  const statement = telemetryEventToXAPIStatement(event);
-  if (statement) xapi?.send(statement);
+  try {
+    const statement = telemetryEventToXAPIStatement(event);
+    if (statement) xapi?.send(statement);
+  } catch (err) {
+    if (isDevEnvironment()) {
+      console.warn("[lessonkit] xAPI mapping skipped:", err instanceof Error ? err.message : err);
+    }
+  }
 }
 
 export function buildTrackEvent(opts: {

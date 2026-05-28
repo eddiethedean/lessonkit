@@ -348,7 +348,7 @@ These are delivered as part of framework milestones **before** the Studio gateâ€
 | Analytics, session model, batching | 0.2.0 |
 | Focus/roving tabindex, a11y docs | 0.3.0 |
 | Theme tokens + CSS variables | 0.4.0 |
-| `lessonkit init` / `dev` / `build` | 0.5.0 |
+| `lessonkit init` / `dev` / `build` | 0.7.0 |
 | `@lessonkit/lxpack` SCORM export | 0.6.0 |
 | xAPI/cmi5/standalone via LXPack | 0.7.0 |
 | Plugin hooks (as scoped) | 0.8.0+ |

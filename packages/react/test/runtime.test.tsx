@@ -11,6 +11,29 @@ describe("@lessonkit/react runtime", () => {
     sessionStorage.clear();
   });
 
+  it("warns in dev when courseId is invalid", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    vi.stubEnv("NODE_ENV", "development");
+
+    try {
+      render(
+        <Course
+          title="Course"
+          courseId={"1bad" as "course-1"}
+          config={{ xapi: { enabled: false } }}
+        >
+          <div>child</div>
+        </Course>,
+      );
+      await waitFor(() =>
+        expect(warn).toHaveBeenCalledWith(expect.stringMatching(/invalid courseId/)),
+      );
+    } finally {
+      vi.unstubAllEnvs();
+      warn.mockRestore();
+    }
+  });
+
   it("throws a helpful error when used without provider", () => {
     function Bad() {
       useLessonkit();
@@ -105,11 +128,11 @@ describe("@lessonkit/react runtime", () => {
     let complete!: (lessonId: string) => void;
 
     function Driver() {
-      const runtime = useLessonkit();
+      const { setActiveLesson, completeLesson } = useLessonkit();
       React.useEffect(() => {
-        runtime.setActiveLesson("lesson-1");
-        complete = runtime.completeLesson;
-      }, [runtime]);
+        setActiveLesson("lesson-1");
+        complete = completeLesson;
+      }, [setActiveLesson, completeLesson]);
       return <div>driver</div>;
     }
 

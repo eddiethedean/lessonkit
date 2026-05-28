@@ -87,10 +87,14 @@ export default function App() {
 - `Course` accepts a `config` prop that is passed through to `LessonkitProvider` (tracking sink,
   optional `xapi.transport` or custom `xapi.client`, session metadata). Hoist `config` with `useMemo`
   so tracking/xAPI clients are not recreated every render.
-- When a `<Lesson>` unmounts (for example, wizard navigation), it automatically calls `completeLesson`
-  for that lesson. Use stable `lessonId` values so completion and time-on-task telemetry stay consistent.
+- A lesson is marked complete when its `<Lesson>` unmounts (for example, wizard navigation) or when
+  another lesson becomes active via `setActiveLesson`. Use stable `lessonId` values so completion and
+  time-on-task telemetry stay consistent.
+- `<Lesson>` defers completion on unmount so React Strict Mode remounts in development do not emit
+  spurious `lesson_completed` events; completion runs after the component leaves the tree.
 - If you omit `session.sessionId`, the provider reuses a tab-scoped id via `sessionStorage` so React
   Strict Mode remounts do not split analytics sessions in development.
+- In development, invalid `courseId` / `lessonId` / `checkId` values log a one-time `console.warn`.
 - Accessibility guidance lives in [`docs/ACCESSIBILITY.md`](../../docs/ACCESSIBILITY.md).
 - Theming and token catalog: [`docs/THEMING.md`](../../docs/THEMING.md).
 - Identity and telemetry: [`docs/IDENTITY.md`](../../docs/IDENTITY.md), [`docs/TELEMETRY.md`](../../docs/TELEMETRY.md).
