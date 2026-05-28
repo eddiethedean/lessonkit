@@ -34,7 +34,7 @@ function mergeGroup<T extends Record<string, string>>(
  */
 export function mergeThemes(
   base: LessonkitThemeV1,
-  ...overrides: PartialLessonkitThemeV1[]
+  ...overrides: (PartialLessonkitThemeV1 | undefined)[]
 ): LessonkitThemeV1 {
   let result: LessonkitThemeV1 = { ...base };
 
