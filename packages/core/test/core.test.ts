@@ -33,6 +33,16 @@ describe("@lessonkit/core", () => {
   it("is a safe no-op when batching enabled but no sinks provided", () => {
     const client = createTrackingClient({ batch: { enabled: true } });
     expect(() => client.track({ name: "interaction", timestamp: "t" })).not.toThrow();
+    expect(() => client.dispose?.()).not.toThrow();
+  });
+
+  it("non-batched dispose stops further tracking", () => {
+    const sink = vi.fn();
+    const client = createTrackingClient({ sink, batch: { enabled: false } });
+    client.track({ name: "interaction", timestamp: "t1" });
+    client.dispose?.();
+    client.track({ name: "interaction", timestamp: "t2" });
+    expect(sink).toHaveBeenCalledTimes(1);
   });
 
   it("flushes to batchSink and does not overlap in-flight flushes", async () => {
@@ -110,6 +120,62 @@ describe("@lessonkit/core", () => {
 
     setIntervalSpy.mockRestore();
     clearIntervalSpy.mockRestore();
+  });
+
+  it("dispose flushes buffered events to sink", async () => {
+    const sink = vi.fn(async () => {});
+    const client = createTrackingClient({
+      sink,
+      batch: { enabled: true, flushIntervalMs: 0, maxBatchSize: 100 },
+    });
+
+    client.track({ name: "interaction", timestamp: "t1" });
+    client.track({ name: "interaction", timestamp: "t2" });
+    client.dispose?.();
+    await new Promise((r) => setTimeout(r, 10));
+    expect(sink).toHaveBeenCalledTimes(2);
+  });
+
+  it("track is a no-op after dispose", async () => {
+    const sink = vi.fn(async () => {});
+    const client = createTrackingClient({
+      sink,
+      batch: { enabled: true, flushIntervalMs: 0, maxBatchSize: 100 },
+    });
+
+    client.dispose?.();
+    client.track({ name: "interaction", timestamp: "t1" });
+    await new Promise((r) => setTimeout(r, 0));
+    expect(sink).not.toHaveBeenCalled();
+  });
+
+  it("delivers all events when tracking during a slow in-flight flush", async () => {
+    let resolveFlush!: () => void;
+    const batchSink = vi.fn<(events: TelemetryEvent[]) => Promise<void>>(
+      () =>
+        new Promise<void>((r) => {
+          resolveFlush = r;
+        }),
+    );
+
+    const client = createTrackingClient({
+      batchSink,
+      batch: { enabled: true, flushIntervalMs: 0, maxBatchSize: 100 },
+    });
+
+    for (let i = 0; i < 5; i++) {
+      client.track({ name: "interaction", timestamp: `t${i}` });
+    }
+    client.flush?.();
+    await new Promise((r) => setTimeout(r, 0));
+    client.track({ name: "interaction", timestamp: "t5" });
+    client.track({ name: "interaction", timestamp: "t6" });
+
+    resolveFlush();
+    await new Promise((r) => setTimeout(r, 10));
+
+    const totalDelivered = batchSink.mock.calls.reduce((n, [events]) => n + events.length, 0);
+    expect(totalDelivered).toBe(7);
   });
 });
 

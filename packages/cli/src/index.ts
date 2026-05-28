@@ -1,4 +1,8 @@
+import { createRequire } from "node:module";
 import { Command } from "commander";
+
+const require = createRequire(import.meta.url);
+const { version } = require("../package.json") as { version: string };
 
 export type CliLogger = {
   log: (...args: unknown[]) => void;
@@ -7,7 +11,7 @@ export type CliLogger = {
 export function createProgram(logger: CliLogger = console): Command {
   const program = new Command();
 
-  program.name("lessonkit").description("LessonKit CLI").version("0.2.0");
+  program.name("lessonkit").description("LessonKit CLI").version(version);
 
   program
     .command("init")

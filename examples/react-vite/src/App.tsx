@@ -1,31 +1,32 @@
 import React from "react";
 import { Course, Lesson, ProgressTracker, Quiz, Scenario, useCompletion, useLessonkit, useTracking } from "@lessonkit/react";
-import { createXAPIClient } from "@lessonkit/xapi";
 import type { TelemetryEvent } from "@lessonkit/core";
+import type { XAPIStatement } from "@lessonkit/xapi";
+
+const COURSE_ID = "react-showcase-security";
 
 export default function App() {
   const [step, setStep] = React.useState(0);
 
+  const courseConfig = React.useMemo(
+    () => ({
+      tracking: {
+        sink: (event: TelemetryEvent) => {
+          console.log("[telemetry]", event);
+        },
+      },
+      xapi: {
+        transport: (statement: XAPIStatement) => {
+          console.log("[xapi]", statement);
+        },
+      },
+    }),
+    [],
+  );
+
   return (
     <div className="app-shell">
-      <Course
-        title="React-Native Security Training (Showcase)"
-        courseId="react-showcase-security"
-        config={{
-          tracking: {
-            sink: (event: TelemetryEvent) => {
-              console.log("[telemetry]", event);
-            },
-          },
-          xapi: {
-            client: createXAPIClient({
-              transport: (statement) => {
-                console.log("[xapi]", statement);
-              },
-            }),
-          },
-        }}
-      >
+      <Course title="React-Native Security Training (Showcase)" courseId={COURSE_ID} config={courseConfig}>
         <ProgressTracker />
 
         <CourseNav step={step} setStep={setStep} />

@@ -1,7 +1,7 @@
 import React, { createContext, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { CourseId, LessonId, TelemetryEvent, TelemetryUser, TrackingClient } from "@lessonkit/core";
 import { createSessionId, createTrackingClient, nowIso } from "@lessonkit/core";
-import type { XAPIClient } from "@lessonkit/xapi";
+import type { XAPIClient, XAPITransport } from "@lessonkit/xapi";
 import { createXAPIClient } from "@lessonkit/xapi";
 
 export type LessonkitConfig = {
@@ -23,6 +23,7 @@ export type LessonkitConfig = {
   };
   xapi?: {
     enabled?: boolean;
+    transport?: XAPITransport;
     client?: XAPIClient;
   };
 };
@@ -55,33 +56,60 @@ export type LessonkitRuntime = {
 
 export const LessonkitContext = createContext<LessonkitRuntime | null>(null);
 
+function disposeTrackingClient(client: TrackingClient | null | undefined): void {
+  client?.flush?.();
+  client?.dispose?.();
+}
+
 export function LessonkitProvider(props: { config?: LessonkitConfig; children: React.ReactNode }) {
   const config = props.config ?? {};
 
+  const trackingRef = useRef<TrackingClient | null>(null);
   const tracking = useMemo(() => {
-    if (config.tracking?.enabled === false) return createTrackingClient();
-    return createTrackingClient({
-      sink: config.tracking?.sink,
-      batchSink: config.tracking?.batchSink,
-      batch: config.tracking?.batch,
-    });
+    disposeTrackingClient(trackingRef.current);
+    const next =
+      config.tracking?.enabled === false
+        ? createTrackingClient()
+        : createTrackingClient({
+            sink: config.tracking?.sink,
+            batchSink: config.tracking?.batchSink,
+            batch: config.tracking?.batch,
+          });
+    trackingRef.current = next;
+    return next;
   }, [config.tracking?.enabled, config.tracking?.sink, config.tracking?.batchSink, config.tracking?.batch]);
 
+  const xapiRef = useRef<XAPIClient | null>(null);
   const xapi = useMemo(() => {
-    if (config.xapi?.enabled === false) return null;
+    if (config.xapi?.enabled === false) {
+      xapiRef.current = null;
+      return null;
+    }
     const baseId = config.courseId ? `urn:lessonkit:course:${config.courseId}` : undefined;
-    return config.xapi?.client ?? createXAPIClient({ baseId });
-  }, [config.xapi?.enabled, config.xapi?.client, config.courseId]);
+    const next =
+      config.xapi?.client ??
+      createXAPIClient({ baseId, transport: config.xapi?.transport });
+    xapiRef.current = next;
+    return next;
+  }, [config.xapi?.enabled, config.xapi?.client, config.xapi?.transport, config.courseId]);
 
   const sessionIdRef = useRef<string>(config.session?.sessionId ?? createSessionId());
+  if (config.session?.sessionId) sessionIdRef.current = config.session.sessionId;
+
   const attemptIdRef = useRef<string | undefined>(config.session?.attemptId);
   const userRef = useRef<TelemetryUser | undefined>(config.session?.user);
   attemptIdRef.current = config.session?.attemptId;
   userRef.current = config.session?.user;
 
   const [completedLessonIds, setCompletedLessonIds] = useState<Set<LessonId>>(() => new Set());
+  const completedLessonIdsRef = useRef<Set<LessonId>>(completedLessonIds);
+  completedLessonIdsRef.current = completedLessonIds;
+
   const [activeLessonId, setActiveLessonId] = useState<LessonId | undefined>(undefined);
   const [courseCompleted, setCourseCompleted] = useState(false);
+  const courseCompletedRef = useRef(false);
+  courseCompletedRef.current = courseCompleted;
+
   const activeLessonIdRef = useRef<LessonId | undefined>(undefined);
   activeLessonIdRef.current = activeLessonId;
   const courseIdRef = useRef<CourseId | undefined>(config.courseId);
@@ -110,11 +138,18 @@ export function LessonkitProvider(props: { config?: LessonkitConfig; children: R
       didStartCourseRef.current = true;
       track("course_started");
     }
-    return () => tracking.dispose?.();
-  }, [track, tracking]);
+  }, [track]);
+
+  useEffect(() => {
+    return () => {
+      trackingRef.current?.flush?.();
+      void xapiRef.current?.flush();
+    };
+  }, []);
 
   const setActiveLesson = useCallback(
     (lessonId: LessonId) => {
+      if (activeLessonIdRef.current === lessonId) return;
       activeLessonIdRef.current = lessonId;
       setActiveLessonId(lessonId);
       lessonStartTimesRef.current.set(lessonId, Date.now());
@@ -126,8 +161,12 @@ export function LessonkitProvider(props: { config?: LessonkitConfig; children: R
 
   const completeLesson = useCallback(
     (lessonId: LessonId) => {
-      setCompletedLessonIds((prev) => new Set(prev).add(lessonId));
+      if (completedLessonIdsRef.current.has(lessonId)) return;
+      completedLessonIdsRef.current = new Set(completedLessonIdsRef.current).add(lessonId);
+      setCompletedLessonIds(completedLessonIdsRef.current);
+
       const startedAt = lessonStartTimesRef.current.get(lessonId);
+      lessonStartTimesRef.current.delete(lessonId);
       const durationMs = typeof startedAt === "number" ? Math.max(0, Date.now() - startedAt) : undefined;
       track("lesson_completed", { lessonId, durationMs }, { lessonId });
       if (durationMs !== undefined) {
@@ -139,6 +178,8 @@ export function LessonkitProvider(props: { config?: LessonkitConfig; children: R
   );
 
   const completeCourse = useCallback(() => {
+    if (courseCompletedRef.current) return;
+    courseCompletedRef.current = true;
     setCourseCompleted(true);
     track("course_completed");
     xapi?.completeCourse();
@@ -179,4 +220,3 @@ export function LessonkitProvider(props: { config?: LessonkitConfig; children: R
 
   return <LessonkitContext.Provider value={runtime}>{props.children}</LessonkitContext.Provider>;
 }
-

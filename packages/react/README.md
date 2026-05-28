@@ -15,26 +15,26 @@ npm install @lessonkit/react react react-dom
 ## Quick example
 
 ```tsx
+import { useMemo } from "react";
 import type { TelemetryEvent } from "@lessonkit/core";
 import { Course, Lesson, Quiz, Scenario, ProgressTracker } from "@lessonkit/react";
-import { createXAPIClient } from "@lessonkit/xapi";
+import type { XAPIStatement } from "@lessonkit/xapi";
 
 export default function App() {
+  const config = useMemo(
+    () => ({
+      tracking: {
+        sink: (event: TelemetryEvent) => console.log(event),
+      },
+      xapi: {
+        transport: (statement: XAPIStatement) => console.log(statement),
+      },
+    }),
+    [],
+  );
+
   return (
-    <Course
-      title="Cybersecurity Basics"
-      courseId="cyber-basics"
-      config={{
-        tracking: {
-          sink: (event: TelemetryEvent) => console.log(event),
-        },
-        xapi: {
-          client: createXAPIClient({
-            transport: (statement) => console.log(statement),
-          }),
-        },
-      }}
-    >
+    <Course title="Cybersecurity Basics" courseId="cyber-basics" config={config}>
       <ProgressTracker />
 
       <Lesson title="Phishing Awareness" lessonId="phishing-101">
@@ -77,5 +77,6 @@ export default function App() {
 - `@lessonkit/react` ships **framework primitives**, not content. You bring your own layout/content
   and compose interactions as React components.
 - `Course` accepts a `config` prop that is passed through to `LessonkitProvider` (tracking sink,
-  xAPI client, session metadata).
+  optional `xapi.transport` or custom `xapi.client`, session metadata). Hoist `config` with `useMemo`
+  so tracking/xAPI clients are not recreated every render.
 

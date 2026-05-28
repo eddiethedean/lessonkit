@@ -9,8 +9,13 @@ export function Course(props: {
   config?: Omit<React.ComponentProps<typeof LessonkitProvider>["config"], "courseId">;
   children: React.ReactNode;
 }) {
+  const providerConfig = useMemo(
+    () => ({ ...props.config, courseId: props.courseId }),
+    [props.config, props.courseId],
+  );
+
   return (
-    <LessonkitProvider config={{ ...props.config, courseId: props.courseId }}>
+    <LessonkitProvider config={providerConfig}>
       <section aria-label={props.title}>
         <h1>{props.title}</h1>
         <div>{props.children}</div>
@@ -78,8 +83,8 @@ export function Quiz(props: { question: string; choices: string[]; answer: strin
       <p id={questionId}>{props.question}</p>
       <fieldset aria-labelledby={questionId}>
         <legend className="sr-only">Quiz choices</legend>
-        {props.choices.map((c) => (
-          <label key={c} style={{ display: "block" }}>
+        {props.choices.map((c, i) => (
+          <label key={`${questionId}-${i}`} style={{ display: "block" }}>
             <input
               type="radio"
               name={questionId}

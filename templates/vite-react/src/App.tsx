@@ -1,28 +1,24 @@
 import React from "react";
 import { Course, Lesson, Quiz, Scenario } from "@lessonkit/react";
-import { createXAPIClient } from "@lessonkit/xapi";
 import type { TelemetryEvent } from "@lessonkit/core";
+import type { XAPIStatement } from "@lessonkit/xapi";
+
+const courseConfig = {
+  tracking: {
+    sink: (event: TelemetryEvent) => {
+      console.log("[telemetry]", event);
+    },
+  },
+  xapi: {
+    transport: (statement: XAPIStatement) => {
+      console.log("[xapi]", statement);
+    },
+  },
+} as const;
 
 export default function App() {
   return (
-    <Course
-      title="My LessonKit Course"
-      courseId="my-course"
-      config={{
-        tracking: {
-          sink: (event: TelemetryEvent) => {
-            console.log("[telemetry]", event);
-          },
-        },
-        xapi: {
-          client: createXAPIClient({
-            transport: (statement) => {
-              console.log("[xapi]", statement);
-            },
-          }),
-        },
-      }}
-    >
+    <Course title="My LessonKit Course" courseId="my-course" config={courseConfig}>
       <Lesson title="My first lesson" lessonId="lesson-1">
         <Scenario>
           <p>Replace this content with your training material.</p>
@@ -37,4 +33,3 @@ export default function App() {
     </Course>
   );
 }
-

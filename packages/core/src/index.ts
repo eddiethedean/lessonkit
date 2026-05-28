@@ -54,9 +54,14 @@ export function createTrackingClient(opts?: {
   const maxBatchSize = opts?.batch?.maxBatchSize ?? 25;
 
   if (!batchEnabled) {
+    let disposed = false;
     return {
       track: (event) => {
+        if (disposed) return;
         void sink?.(event);
+      },
+      dispose: () => {
+        disposed = true;
       },
     };
   }
@@ -68,24 +73,28 @@ export function createTrackingClient(opts?: {
 
   const buffer: TelemetryEvent[] = [];
   let flushInFlight: Promise<void> | null = null;
+  let disposed = false;
+  let intervalId: ReturnType<typeof globalThis.setInterval> | undefined;
 
   const flush = (): void => {
-    if (flushInFlight) return;
+    if (disposed || flushInFlight) return;
     if (!buffer.length) return;
 
     const events = buffer.splice(0, buffer.length);
     let sent = 0;
+    let succeeded = false;
     flushInFlight = Promise.resolve()
       .then(async () => {
         if (batchSink) {
           await batchSink(events);
-          return;
+        } else {
+          // If per-event sink throws partway through, only re-queue the unsent tail.
+          for (const e of events) {
+            await sink?.(e);
+            sent += 1;
+          }
         }
-        // If per-event sink throws partway through, only re-queue the unsent tail.
-        for (const e of events) {
-          await sink?.(e);
-          sent += 1;
-        }
+        succeeded = true;
       })
       .catch(() => {
         // Re-queue on any error so events aren't silently dropped.
@@ -94,20 +103,28 @@ export function createTrackingClient(opts?: {
       })
       .finally(() => {
         flushInFlight = null;
+        if (succeeded && !disposed && buffer.length > 0) flush();
       });
   };
 
-  const intervalId =
+  intervalId =
     flushIntervalMs > 0 ? globalThis.setInterval(flush, flushIntervalMs) : undefined;
 
   return {
     track: (event) => {
+      if (disposed) return;
       buffer.push(event);
       if (buffer.length >= maxBatchSize) flush();
     },
     flush,
     dispose: () => {
-      if (intervalId !== undefined) globalThis.clearInterval(intervalId);
+      if (disposed) return;
+      if (intervalId !== undefined) {
+        globalThis.clearInterval(intervalId);
+        intervalId = undefined;
+      }
+      flush();
+      disposed = true;
     },
   };
 }
@@ -119,6 +136,5 @@ export function nowIso(): string {
 export function createSessionId(): string {
   const g = globalThis as unknown as { crypto?: Crypto };
   if (g.crypto?.randomUUID) return g.crypto.randomUUID();
-  return Math.random().toString(16).slice(2);
+  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 11)}`;
 }
-

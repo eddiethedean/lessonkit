@@ -12,7 +12,9 @@
     "lint": "echo \"(no lint configured yet)\""
   },
   "dependencies": {
+    "@lessonkit/core": "file:../../packages/core",
     "@lessonkit/react": "file:../../packages/react",
+    "@lessonkit/xapi": "file:../../packages/xapi",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },

@@ -1,6 +1,6 @@
 {
   "name": "@lessonkit/xapi",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "private": false,
   "description": "xAPI statement generation primitives for LessonKit.",
   "license": "Apache-2.0",
@@ -45,7 +45,7 @@
     "lint": "echo \"(no lint configured yet)\""
   },
   "dependencies": {
-    "@lessonkit/core": "0.2.0"
+    "@lessonkit/core": "0.2.1"
   },
   "devDependencies": {
     "tsup": "^8.5.0",

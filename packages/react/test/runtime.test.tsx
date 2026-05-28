@@ -182,19 +182,6 @@ describe("@lessonkit/react runtime", () => {
     expect(events.filter((e) => e.name === "course_started")).toHaveLength(1);
   });
 
-  it("Lesson auto-generates an id when lessonId is omitted", async () => {
-    const events: TelemetryEvent[] = [];
-    render(
-      <Course title="Course" config={{ tracking: { sink: (e: TelemetryEvent) => void events.push(e) } }}>
-        <Lesson title="Lesson">{null}</Lesson>
-      </Course>,
-    );
-
-    await waitFor(() => expect(events.some((e) => e.name === "lesson_started")).toBe(true));
-    const started = events.find((e) => e.name === "lesson_started");
-    expect(started?.lessonId).toMatch(/^lesson-/);
-  });
-
   it("covers Scenario and KnowledgeCheck components", async () => {
     const events: TelemetryEvent[] = [];
     const { getAllByLabelText } = render(
@@ -224,6 +211,26 @@ describe("@lessonkit/react runtime", () => {
     expect(started?.lessonId).toMatch(/^lesson-[a-zA-Z0-9_-]+$/);
   });
 
+  it("completeCourse is idempotent for telemetry", async () => {
+    const events: TelemetryEvent[] = [];
+    function Driver() {
+      const { completeCourse } = useCompletion();
+      React.useEffect(() => {
+        completeCourse();
+        completeCourse();
+      }, [completeCourse]);
+      return <div>driver</div>;
+    }
+
+    render(
+      <LessonkitProvider config={{ tracking: { sink: (e: TelemetryEvent) => void events.push(e) } }}>
+        <Driver />
+      </LessonkitProvider>,
+    );
+
+    await waitFor(() => expect(events.filter((e) => e.name === "course_completed").length).toBe(1));
+  });
+
   it("completeCourse marks progress and tracks course_completed", async () => {
     const events: TelemetryEvent[] = [];
     function Driver() {
@@ -245,6 +252,26 @@ describe("@lessonkit/react runtime", () => {
     expect(events.some((e) => e.name === "course_completed")).toBe(true);
   });
 
+  it("tracking disabled does not invoke sink", async () => {
+    const events: TelemetryEvent[] = [];
+    function Driver() {
+      const { track } = useTracking();
+      React.useEffect(() => {
+        track("interaction", { kind: "noop" });
+      }, [track]);
+      return <div>driver</div>;
+    }
+
+    render(
+      <LessonkitProvider config={{ tracking: { enabled: false, sink: (e: TelemetryEvent) => void events.push(e) } }}>
+        <Driver />
+      </LessonkitProvider>,
+    );
+
+    await new Promise((r) => setTimeout(r, 10));
+    expect(events).toHaveLength(0);
+  });
+
   it("xAPI can be disabled and does not emit statements", async () => {
     const transport = vi.fn(async (_s: XAPIStatement) => {});
     const events: TelemetryEvent[] = [];
@@ -254,7 +281,7 @@ describe("@lessonkit/react runtime", () => {
         title="Course"
         config={{
           tracking: { sink: (e: TelemetryEvent) => void events.push(e) },
-          xapi: { enabled: false, client: { send: () => {}, flush: async () => {}, queueSize: () => 0, startedLesson: () => {}, completeLesson: () => {}, completeCourse: () => {} } },
+          xapi: { enabled: false, transport },
         }}
       >
         <Lesson title="Lesson" lessonId="lesson-1">
