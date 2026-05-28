@@ -350,7 +350,7 @@ These are delivered as part of framework milestones **before** the Studio gateâ€
 | Theme tokens + CSS variables | 0.4.0 |
 | `lessonkit init` / `dev` / `build` | 0.7.0 |
 | `@lessonkit/lxpack` SCORM export | 0.6.0 |
-| xAPI/cmi5/standalone via LXPack | 0.7.0 |
+| xAPI/cmi5/standalone via LXPack | 0.6.0 |
 | Plugin hooks (as scoped) | 0.8.0+ |
 | Stable public API + docs + e2e CI | **1.0.0 (gate)** |
 

@@ -35,7 +35,7 @@ export function useQuizState() {
       }) => {
         track("quiz_answered", opts);
       },
-      complete: (opts: { checkId: CheckId; score?: number; maxScore?: number }) => {
+      complete: (opts: { checkId: CheckId; score?: number; maxScore?: number; passingScore?: number }) => {
         track("quiz_completed", opts);
       },
     }),

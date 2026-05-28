@@ -125,7 +125,7 @@ Potential future packages:
 
 - @lessonkit/core
 - @lessonkit/react
-- @lessonkit/scorm
+- @lessonkit/lxpack
 - @lessonkit/xapi
 - @lessonkit/cli
 - @lessonkit/storyboard

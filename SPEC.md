@@ -220,7 +220,7 @@ Key requirements:
 - @lessonkit/core
 - @lessonkit/react
 - @lessonkit/xapi
-- @lessonkit/scorm
+- @lessonkit/lxpack
 - @lessonkit/cli
 
 ---

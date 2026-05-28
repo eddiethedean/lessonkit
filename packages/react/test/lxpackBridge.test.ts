@@ -1,9 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
-import { buildTrackEvent } from "../src/runtime/emitTelemetry";
-import {
-  forwardTelemetryToLxpack,
-  setLxpackBridgeMode,
-} from "../src/runtime/lxpackBridge";
+import { buildTrackEvent, emitTelemetry } from "../src/runtime/emitTelemetry";
+import { forwardTelemetryToLxpack } from "../src/runtime/lxpackBridge";
+import { createTrackingClient } from "@lessonkit/core";
 
 describe("lxpackBridge", () => {
   it("forwards course_completed and quiz_completed", () => {
@@ -22,7 +20,7 @@ describe("lxpackBridge", () => {
         courseId: "c",
         lessonId: "l",
         sessionId: "s",
-        data: { checkId: "q1", score: 1, maxScore: 1 },
+        data: { checkId: "q1", score: 1, maxScore: 1, passingScore: 0.8 },
       }),
     );
 
@@ -30,13 +28,12 @@ describe("lxpackBridge", () => {
     expect(submitAssessment).toHaveBeenCalledWith({
       id: "q1",
       score: 1,
-      passingScore: 1,
+      passingScore: 0.8,
     });
     vi.unstubAllGlobals();
   });
 
   it("does not forward when bridge mode is off", () => {
-    setLxpackBridgeMode("off");
     const completeLesson = vi.fn();
     vi.stubGlobal("window", {
       parent: { lxpackBridge: { v1: { completeLesson } } },
@@ -50,10 +47,10 @@ describe("lxpackBridge", () => {
         sessionId: "s",
         data: { lessonId: "l" },
       }),
+      "off",
     );
 
     expect(completeLesson).not.toHaveBeenCalled();
-    setLxpackBridgeMode("auto");
     vi.unstubAllGlobals();
   });
 
@@ -78,6 +75,23 @@ describe("lxpackBridge", () => {
     );
 
     expect(submitAssessment).not.toHaveBeenCalled();
+    vi.unstubAllGlobals();
+  });
+
+  it("emitTelemetry respects per-call lxpack bridge mode", () => {
+    const completeCourse = vi.fn();
+    vi.stubGlobal("window", {
+      parent: { lxpackBridge: { v1: { completeCourse } } },
+    } as unknown as Window);
+
+    const tracking = createTrackingClient();
+    const event = buildTrackEvent({ name: "course_completed", courseId: "c", sessionId: "s" });
+
+    emitTelemetry(tracking, null, event, { lxpackBridge: "off" });
+    expect(completeCourse).not.toHaveBeenCalled();
+
+    emitTelemetry(tracking, null, event, { lxpackBridge: "auto" });
+    expect(completeCourse).toHaveBeenCalledTimes(1);
     vi.unstubAllGlobals();
   });
 });

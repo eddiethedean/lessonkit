@@ -1,4 +1,4 @@
-import { cp, mkdir, writeFile } from "node:fs/promises";
+import { access, cp, mkdir, writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { descriptorToInterchange, resolveSpaLessons } from "./interchange";
 import { themeToLxpackRuntime } from "./theme";
@@ -56,6 +56,11 @@ export async function writeLxpackProject(
 
   if (descriptor.layout === "single-spa") {
     const srcDist = resolve(options.spaDistDir ?? descriptor.spaDistDir ?? "dist");
+    try {
+      await access(srcDist);
+    } catch {
+      throw new Error(`spaDistDir not found: ${srcDist}`);
+    }
     const destDist = join(outDir, "dist");
     await copyDir(srcDist, destDist);
   } else {

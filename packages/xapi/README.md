@@ -1,6 +1,6 @@
 # `@lessonkit/xapi`
 
-[![CI](https://github.com/eddiethedean/lessonkit/actions/workflows/checks.yml/badge.svg)](https://github.com/eddiethedean/lessonkit/actions/workflows/checks.yml)
+[![CI](https://github.com/eddiethedean/lessonkit/actions/workflows/ci.yml/badge.svg)](https://github.com/eddiethedean/lessonkit/actions/workflows/ci.yml)
 [![npm](https://img.shields.io/npm/v/@lessonkit/xapi.svg)](https://www.npmjs.com/package/@lessonkit/xapi)
 [![License](https://img.shields.io/github/license/eddiethedean/lessonkit)](../../LICENSE)
 
@@ -29,7 +29,7 @@ xapi.completeLesson({ lessonId: "phishing-101", durationMs: 1500, success: true,
 
 Prefer mapping from telemetry: `telemetryEventToXAPIStatement(event)` (canonical object URNs).
 
-## Notes (0.5.0)
+## Notes (0.6.0)
 
 - `createXAPIClient` requires `courseId` for lifecycle helpers; React uses the mapper after each `track()`.
 - If the transport throws/rejects, statements are queued in-memory.

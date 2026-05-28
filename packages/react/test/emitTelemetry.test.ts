@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import type { TelemetryEvent, TelemetryEventName } from "@lessonkit/core";
 import { createTrackingClient } from "@lessonkit/core";
 import { createXAPIClient } from "@lessonkit/xapi";
-import { buildTrackEvent, emitTelemetry } from "../src/runtime/emitTelemetry";
+import { buildTrackEvent, emitTelemetry, tryBuildTrackEvent } from "../src/runtime/emitTelemetry";
 
 describe("emitTelemetry", () => {
   it("warns once in development when courseId is missing", () => {
@@ -90,5 +90,59 @@ describe("emitTelemetry", () => {
         data: { checkId: "q1", question: "Q", choice: "A", correct: false },
       }),
     ).toThrow(/lessonId/);
+  });
+});
+
+describe("tryBuildTrackEvent", () => {
+  it("returns null and warns in dev when quiz events lack lessonId", () => {
+    vi.stubEnv("NODE_ENV", "development");
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+    expect(
+      tryBuildTrackEvent({
+        name: "quiz_answered",
+        courseId: "c",
+        data: { checkId: "q1", question: "Q", choice: "A", correct: false },
+      }),
+    ).toBeNull();
+
+    expect(warn).toHaveBeenCalledWith(
+      expect.stringMatching(/wrap <Quiz> in <Lesson>/),
+    );
+    warn.mockRestore();
+    vi.unstubAllEnvs();
+  });
+
+  it("returns null silently in production when quiz events lack lessonId", () => {
+    vi.stubEnv("NODE_ENV", "production");
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+    expect(
+      tryBuildTrackEvent({
+        name: "quiz_completed",
+        courseId: "c",
+        data: { checkId: "q1" },
+      }),
+    ).toBeNull();
+
+    expect(warn).not.toHaveBeenCalled();
+    warn.mockRestore();
+    vi.unstubAllEnvs();
+  });
+
+  it("rethrows when buildTrackEvent throws for non-quiz events", () => {
+    expect(() =>
+      tryBuildTrackEvent({ name: "lesson_started", courseId: "c" }),
+    ).toThrow(/lessonId/);
+  });
+
+  it("returns built events for valid quiz payloads", () => {
+    const event = tryBuildTrackEvent({
+      name: "quiz_completed",
+      courseId: "c",
+      lessonId: "lesson-1",
+      data: { checkId: "q1", score: 1 },
+    });
+    expect(event?.name).toBe("quiz_completed");
   });
 });

@@ -11,12 +11,12 @@ import type { CourseId, LessonId, TelemetryEventName, TelemetryUser, TrackingCli
 import { createTrackingClient } from "@lessonkit/core";
 import type { XAPIClient, XAPITransport } from "@lessonkit/xapi";
 import { createInMemoryXAPIQueue } from "@lessonkit/xapi";
-import { buildTrackEvent, emitTelemetry } from "./runtime/emitTelemetry";
+import { buildTrackEvent, emitTelemetry, tryBuildTrackEvent } from "./runtime/emitTelemetry";
+import type { LxpackBridgeMode } from "./runtime/lxpackBridge";
 import { createSessionStoragePort } from "./runtime/ports";
 import { createProgressController, type ProgressState } from "./runtime/progress";
 import { createXapiClientFromConfig } from "./runtime/xapi";
 import { hasCourseStarted, markCourseStarted, resolveSessionId } from "./runtime/session";
-import { setLxpackBridgeMode } from "./runtime/lxpackBridge";
 
 export type LessonkitConfig = {
   courseId: CourseId;
@@ -89,11 +89,6 @@ function createTrackingClientFromConfig(config: LessonkitConfig): TrackingClient
 export function LessonkitProvider(props: { config: LessonkitConfig; children: React.ReactNode }) {
   const config = props.config;
 
-  useIsoLayoutEffect(() => {
-    setLxpackBridgeMode(config.lxpack?.bridge ?? "auto");
-    return () => setLxpackBridgeMode("auto");
-  }, [config.lxpack?.bridge]);
-
   const sessionIdRef = useRef<string>(resolveSessionId(defaultStorage, config.session?.sessionId));
   if (config.session?.sessionId) sessionIdRef.current = config.session.sessionId;
 
@@ -105,6 +100,9 @@ export function LessonkitProvider(props: { config: LessonkitConfig; children: Re
   const courseIdRef = useRef<CourseId>(config.courseId);
   courseIdRef.current = config.courseId;
 
+  const lxpackBridgeModeRef = useRef<LxpackBridgeMode>(config.lxpack?.bridge ?? "auto");
+  lxpackBridgeModeRef.current = config.lxpack?.bridge ?? "auto";
+
   const progressRef = useRef(createProgressController());
   const [progress, setProgress] = useState<ProgressState>(() => progressRef.current.getState());
 
@@ -114,51 +112,6 @@ export function LessonkitProvider(props: { config: LessonkitConfig; children: Re
 
   const activeLessonIdRef = useRef<LessonId | undefined>(progress.activeLessonId);
   activeLessonIdRef.current = progress.activeLessonId;
-
-  const trackingRef = useRef<TrackingClient>(createTrackingClient());
-  const [tracking, setTracking] = useState<TrackingClient>(() => trackingRef.current);
-
-  const trackingEnabled = config.tracking?.enabled;
-  const trackingSink = config.tracking?.sink;
-  const trackingBatchSink = config.tracking?.batchSink;
-  const batchEnabled = config.tracking?.batch?.enabled;
-  const batchFlushIntervalMs = config.tracking?.batch?.flushIntervalMs;
-  const batchMaxBatchSize = config.tracking?.batch?.maxBatchSize;
-
-  useIsoLayoutEffect(() => {
-    const prev = trackingRef.current;
-    const next = createTrackingClientFromConfig(config);
-    trackingRef.current = next;
-    setTracking(next);
-
-    const sessionId = sessionIdRef.current;
-    const cid = courseIdRef.current;
-    if (!hasCourseStarted(defaultStorage, sessionId, cid)) {
-      markCourseStarted(defaultStorage, sessionId, cid);
-      emitTelemetry(
-        next,
-        xapiRef.current,
-        buildTrackEvent({
-          name: "course_started",
-          courseId: cid,
-          sessionId,
-          attemptId: attemptIdRef.current,
-          user: userRef.current,
-        }),
-      );
-    }
-
-    return () => {
-      disposeTrackingClient(prev);
-    };
-  }, [
-    trackingEnabled,
-    trackingSink,
-    trackingBatchSink,
-    batchEnabled,
-    batchFlushIntervalMs,
-    batchMaxBatchSize,
-  ]);
 
   const xapiQueueRef = useRef(createInMemoryXAPIQueue());
   const xapiRef = useRef<XAPIClient | null>(null);
@@ -193,9 +146,64 @@ export function LessonkitProvider(props: { config: LessonkitConfig; children: Re
     };
   }, [xapiEnabled, xapiClient, xapiTransport, courseId]);
 
+  const trackingRef = useRef<TrackingClient>(createTrackingClient());
+  const [tracking, setTracking] = useState<TrackingClient>(() => trackingRef.current);
+
+  const trackingEnabled = config.tracking?.enabled;
+  const trackingSink = config.tracking?.sink;
+  const trackingBatchSink = config.tracking?.batchSink;
+  const batchEnabled = config.tracking?.batch?.enabled;
+  const batchFlushIntervalMs = config.tracking?.batch?.flushIntervalMs;
+  const batchMaxBatchSize = config.tracking?.batch?.maxBatchSize;
+
+  useIsoLayoutEffect(() => {
+    const prev = trackingRef.current;
+    const next = createTrackingClientFromConfig(config);
+    trackingRef.current = next;
+    setTracking(next);
+
+    const sessionId = sessionIdRef.current;
+    const cid = courseIdRef.current;
+    if (!hasCourseStarted(defaultStorage, sessionId, cid)) {
+      markCourseStarted(defaultStorage, sessionId, cid);
+      emitTelemetry(
+        next,
+        xapiRef.current,
+        buildTrackEvent({
+          name: "course_started",
+          courseId: cid,
+          sessionId,
+          attemptId: attemptIdRef.current,
+          user: userRef.current,
+        }),
+        { lxpackBridge: lxpackBridgeModeRef.current },
+      );
+    }
+
+    return () => {
+      disposeTrackingClient(prev);
+    };
+  }, [
+    trackingEnabled,
+    trackingSink,
+    trackingBatchSink,
+    batchEnabled,
+    batchFlushIntervalMs,
+    batchMaxBatchSize,
+  ]);
+
+  const emitWithBridge = useCallback(
+    (trackingClient: TrackingClient, event: Parameters<typeof emitTelemetry>[2]) => {
+      emitTelemetry(trackingClient, xapiRef.current, event, {
+        lxpackBridge: lxpackBridgeModeRef.current,
+      });
+    },
+    [],
+  );
+
   const track = useCallback(
     (name: TelemetryEventName, data?: unknown, opts?: { lessonId?: LessonId }) => {
-      const event = buildTrackEvent({
+      const event = tryBuildTrackEvent({
         name,
         courseId: courseIdRef.current,
         lessonId: opts?.lessonId ?? activeLessonIdRef.current,
@@ -204,9 +212,10 @@ export function LessonkitProvider(props: { config: LessonkitConfig; children: Re
         user: userRef.current,
         data,
       });
-      emitTelemetry(trackingRef.current, xapiRef.current, event);
+      if (!event) return;
+      emitWithBridge(trackingRef.current, event);
     },
-    [],
+    [emitWithBridge],
   );
 
   useEffect(() => {
@@ -263,6 +272,10 @@ export function LessonkitProvider(props: { config: LessonkitConfig; children: Re
     track("course_completed");
   }, [track, syncProgress]);
 
+  const sessionUser = config.session?.user;
+  const sessionAttemptId = config.session?.attemptId;
+  const sessionConfiguredId = config.session?.sessionId;
+
   const runtime = useMemo<LessonkitRuntime>(
     () => ({
       config,
@@ -275,7 +288,19 @@ export function LessonkitProvider(props: { config: LessonkitConfig; children: Re
       completeCourse,
       track,
     }),
-    [config, tracking, xapi, progress, setActiveLesson, completeLesson, completeCourse, track],
+    [
+      config,
+      tracking,
+      xapi,
+      progress,
+      setActiveLesson,
+      completeLesson,
+      completeCourse,
+      track,
+      sessionUser,
+      sessionAttemptId,
+      sessionConfiguredId,
+    ],
   );
 
   return <LessonkitContext.Provider value={runtime}>{props.children}</LessonkitContext.Provider>;

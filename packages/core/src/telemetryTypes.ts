@@ -46,6 +46,7 @@ export type QuizCompletedData = {
   checkId: CheckId;
   score?: number;
   maxScore?: number;
+  passingScore?: number;
 };
 
 export type InteractionData = {

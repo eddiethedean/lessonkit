@@ -1,6 +1,6 @@
 # `@lessonkit/react`
 
-[![CI](https://github.com/eddiethedean/lessonkit/actions/workflows/checks.yml/badge.svg)](https://github.com/eddiethedean/lessonkit/actions/workflows/checks.yml)
+[![CI](https://github.com/eddiethedean/lessonkit/actions/workflows/ci.yml/badge.svg)](https://github.com/eddiethedean/lessonkit/actions/workflows/ci.yml)
 [![npm](https://img.shields.io/npm/v/@lessonkit/react.svg)](https://www.npmjs.com/package/@lessonkit/react)
 [![License](https://img.shields.io/github/license/eddiethedean/lessonkit)](../../LICENSE)
 
@@ -56,7 +56,7 @@ export default function App() {
 }
 ```
 
-## API (0.5.0)
+## API (0.6.0)
 
 ### Components
 
@@ -87,6 +87,8 @@ export default function App() {
 - `Course` accepts a `config` prop that is passed through to `LessonkitProvider` (tracking sink,
   optional `xapi.transport` or custom `xapi.client`, session metadata). Hoist `config` with `useMemo`
   so tracking/xAPI clients are not recreated every render.
+- xAPI is enabled by default unless `xapi.enabled: false`. Provide `xapi.transport` or `xapi.client`
+  or statements are queued in memory and never sent (dev warns once).
 - A lesson is marked complete when its `<Lesson>` unmounts (for example, wizard navigation) or when
   another lesson becomes active via `setActiveLesson`. Use stable `lessonId` values so completion and
   time-on-task telemetry stay consistent.

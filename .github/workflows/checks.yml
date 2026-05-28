@@ -63,3 +63,9 @@ jobs:
       - name: Verify SCORM ZIP exists
         run: test -f examples/lxpack-golden/.lxpack/course/.lxpack/out/course-scorm12.zip
 
+      - name: Package standalone artifact
+        run: npm run package:standalone -w lessonkit-example-lxpack-golden
+
+      - name: Verify standalone directory exists
+        run: test -d examples/lxpack-golden/.lxpack/course/.lxpack/out/standalone
+

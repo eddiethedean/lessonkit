@@ -18,7 +18,8 @@ function slugChoiceId(text: string, index: number): string {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "")
     .slice(0, 32);
-  return base.length ? base : `choice-${index + 1}`;
+  const stem = base.length ? base : "choice";
+  return `${stem}-${index + 1}`;
 }
 
 export function assessmentDescriptorToLxpack(

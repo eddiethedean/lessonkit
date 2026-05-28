@@ -1,6 +1,6 @@
 # `@lessonkit/accessibility`
 
-[![CI](https://github.com/eddiethedean/lessonkit/actions/workflows/checks.yml/badge.svg)](https://github.com/eddiethedean/lessonkit/actions/workflows/checks.yml)
+[![CI](https://github.com/eddiethedean/lessonkit/actions/workflows/ci.yml/badge.svg)](https://github.com/eddiethedean/lessonkit/actions/workflows/ci.yml)
 [![npm](https://img.shields.io/npm/v/@lessonkit/accessibility.svg)](https://www.npmjs.com/package/@lessonkit/accessibility)
 [![License](https://img.shields.io/github/license/eddiethedean/lessonkit)](../../LICENSE)
 
@@ -12,7 +12,7 @@ Small accessibility utilities used by LessonKit packages and apps.
 npm install @lessonkit/accessibility
 ```
 
-## Included (0.5.0)
+## Included (0.6.0)
 
 - `prefersReducedMotion()`
 - `getReducedMotionPreference()`

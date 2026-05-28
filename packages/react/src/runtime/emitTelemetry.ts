@@ -13,12 +13,13 @@ import type {
 import { nowIso } from "@lessonkit/core";
 import type { XAPIClient } from "@lessonkit/xapi";
 import { telemetryEventToXAPIStatement } from "@lessonkit/xapi";
-import { forwardTelemetryToLxpack } from "./lxpackBridge";
+import { forwardTelemetryToLxpack, type LxpackBridgeMode } from "./lxpackBridge";
 
 let warnedMissingCourseId = false;
+let warnedMissingQuizLesson = false;
 
 function isDevEnvironment(): boolean {
-  const g = globalThis as typeof globalThis & { process?: { env?: { NODE_ENV?: string } } };
+  const g = globalThis as typeof globalThis & { process?: { NODE_ENV?: string } };
   return typeof g.process !== "undefined" && g.process.env?.NODE_ENV !== "production";
 }
 
@@ -26,6 +27,7 @@ export function emitTelemetry(
   tracking: TrackingClient,
   xapi: XAPIClient | null,
   event: TelemetryEvent,
+  opts?: { lxpackBridge?: LxpackBridgeMode },
 ): void {
   if (!event.courseId) {
     if (isDevEnvironment() && !warnedMissingCourseId) {
@@ -44,7 +46,7 @@ export function emitTelemetry(
     }
   }
 
-  forwardTelemetryToLxpack(event);
+  forwardTelemetryToLxpack(event, opts?.lxpackBridge ?? "auto");
 }
 
 export function buildTrackEvent(opts: {
@@ -114,4 +116,22 @@ export function buildTrackEvent(opts: {
     default:
       return { name: opts.name, ...base } as TelemetryEvent;
   }
+}
+
+/**
+ * Like `buildTrackEvent`, but returns null (with a dev warning) when quiz events lack an active lesson.
+ */
+export function tryBuildTrackEvent(opts: Parameters<typeof buildTrackEvent>[0]): TelemetryEvent | null {
+  const isQuiz =
+    opts.name === "quiz_answered" || opts.name === "quiz_completed";
+  if (isQuiz && !opts.lessonId) {
+    if (isDevEnvironment() && !warnedMissingQuizLesson) {
+      warnedMissingQuizLesson = true;
+      console.warn(
+        `[lessonkit] ${opts.name} skipped: wrap <Quiz> in <Lesson> so an active lessonId is available`,
+      );
+    }
+    return null;
+  }
+  return buildTrackEvent(opts);
 }

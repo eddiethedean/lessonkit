@@ -2,11 +2,8 @@ import type { QuizCompletedData, TelemetryEvent } from "@lessonkit/core";
 
 export type LxpackBridgeMode = "auto" | "off";
 
-let bridgeMode: LxpackBridgeMode = "auto";
-
-export function setLxpackBridgeMode(mode: LxpackBridgeMode): void {
-  bridgeMode = mode;
-}
+/** @deprecated Bridge mode is passed per call; this is a no-op kept for compatibility. */
+export function setLxpackBridgeMode(_mode: LxpackBridgeMode): void {}
 
 type LxpackBridgeV1 = {
   completeLesson?: (lessonId: string) => void;
@@ -28,8 +25,11 @@ function getBridge(): LxpackBridgeV1 | null {
   return parent.lxpackBridge?.v1 ?? parent.lxpack ?? null;
 }
 
-export function forwardTelemetryToLxpack(event: TelemetryEvent): void {
-  if (bridgeMode === "off") return;
+export function forwardTelemetryToLxpack(
+  event: TelemetryEvent,
+  mode: LxpackBridgeMode = "auto",
+): void {
+  if (mode === "off") return;
   const bridge = getBridge();
   if (!bridge) return;
 
@@ -47,10 +47,12 @@ export function forwardTelemetryToLxpack(event: TelemetryEvent): void {
       if (!data?.checkId) return;
       const maxScore = typeof data.maxScore === "number" && data.maxScore > 0 ? data.maxScore : 1;
       const raw = typeof data.score === "number" ? data.score : 1;
+      const passingScore =
+        typeof data.passingScore === "number" && data.passingScore > 0 ? data.passingScore : 1;
       bridge.submitAssessment?.({
         id: data.checkId,
         score: raw / maxScore,
-        passingScore: 1,
+        passingScore,
       });
       return;
     }

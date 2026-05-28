@@ -1,15 +1,17 @@
 import type { LessonkitCourseDescriptor } from "@lessonkit/lxpack";
 
+/**
+ * Golden LXPack course descriptor for CI packaging smoke tests.
+ * The React app uses in-app step navigation for the knowledge check; only one
+ * lesson row is packaged for single-spa layout.
+ */
 export const goldenCourseDescriptor: LessonkitCourseDescriptor = {
   courseId: "lxpack-golden",
   title: "LessonKit LXPack Golden Course",
   version: "1.0.0",
   layout: "single-spa",
   spaLessonId: "intro",
-  lessons: [
-    { id: "intro", title: "Introduction" },
-    { id: "check", title: "Knowledge check" },
-  ],
+  lessons: [{ id: "intro", title: "Introduction" }],
   assessments: [
     {
       checkId: "ready-check",

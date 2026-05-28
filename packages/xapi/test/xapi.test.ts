@@ -51,6 +51,20 @@ describe("@lessonkit/xapi", () => {
     expect(client.queueSize()).toBe(1);
   });
 
+  it("warns in dev when statements queue without transport", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    vi.stubEnv("NODE_ENV", "development");
+
+    try {
+      const client = createXAPIClient({ courseId });
+      client.startedLesson({ lessonId: "lesson-1" });
+      expect(warn).toHaveBeenCalledWith(expect.stringMatching(/no transport/));
+    } finally {
+      vi.unstubAllEnvs();
+      warn.mockRestore();
+    }
+  });
+
   it("uses Math.random fallback when crypto.randomUUID is unavailable", async () => {
     vi.stubGlobal("crypto", {});
     const queue = createInMemoryXAPIQueue();

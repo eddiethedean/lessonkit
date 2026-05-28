@@ -135,7 +135,7 @@ export function Quiz(props: {
                 });
                 if (correct && !completedRef.current) {
                   completedRef.current = true;
-                  quiz.complete({ checkId: props.checkId, score: 1, maxScore: 1 });
+                  quiz.complete({ checkId: props.checkId, score: 1, maxScore: 1, passingScore: 1 });
                 }
               }}
             />

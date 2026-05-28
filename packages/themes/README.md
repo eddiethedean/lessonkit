@@ -1,6 +1,6 @@
 # `@lessonkit/themes`
 
-[![CI](https://github.com/eddiethedean/lessonkit/actions/workflows/checks.yml/badge.svg)](https://github.com/eddiethedean/lessonkit/actions/workflows/checks.yml)
+[![CI](https://github.com/eddiethedean/lessonkit/actions/workflows/ci.yml/badge.svg)](https://github.com/eddiethedean/lessonkit/actions/workflows/ci.yml)
 [![npm](https://img.shields.io/npm/v/@lessonkit/themes.svg)](https://www.npmjs.com/package/@lessonkit/themes)
 [![License](https://img.shields.io/github/license/eddiethedean/lessonkit)](../../LICENSE)
 
@@ -12,7 +12,7 @@ Design tokens and theme utilities for LessonKit.
 npm install @lessonkit/themes
 ```
 
-## API (0.5.0)
+## API (0.6.0)
 
 ### Types
 

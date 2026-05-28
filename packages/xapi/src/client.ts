@@ -4,6 +4,11 @@ import type { XAPIClient, XAPIQueue, XAPIStatement, XAPITransport } from "./type
 import { createInMemoryXAPIQueue } from "./queue";
 import { telemetryEventToXAPIStatement } from "./telemetryMap";
 
+function isDevEnvironment(): boolean {
+  const g = globalThis as typeof globalThis & { process?: { NODE_ENV?: string } };
+  return typeof g.process !== "undefined" && g.process.env?.NODE_ENV !== "production";
+}
+
 export function createXAPIClient(opts?: {
   transport?: XAPITransport;
   courseId?: CourseId;
@@ -12,10 +17,17 @@ export function createXAPIClient(opts?: {
   const transport = opts?.transport;
   const courseId = opts?.courseId;
   const queue = opts?.queue ?? createInMemoryXAPIQueue();
+  let warnedNoTransport = false;
 
   const sendOrQueue = (statement: XAPIStatement) => {
     if (!transport) {
       queue.enqueue(statement);
+      if (isDevEnvironment() && !warnedNoTransport) {
+        warnedNoTransport = true;
+        console.warn(
+          "[lessonkit] xAPI statements are queued but no transport is configured; pass config.xapi.transport or config.xapi.client",
+        );
+      }
       return;
     }
     void Promise.resolve()

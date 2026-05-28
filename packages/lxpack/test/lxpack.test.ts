@@ -30,10 +30,7 @@ const baseDescriptor = {
   courseId: "cyber-basics",
   title: "Cybersecurity Basics",
   layout: "single-spa" as const,
-  lessons: [
-    { id: "phishing-101", title: "Phishing Awareness" },
-    { id: "quiz-101", title: "Quiz" },
-  ],
+  lessons: [{ id: "phishing-101", title: "Phishing Awareness" }],
   assessments: [
     {
       checkId: "email-first-step",
@@ -59,6 +56,29 @@ describe("validateDescriptor", () => {
     expect(result.ok).toBe(false);
   });
 
+  it("rejects duplicate checkId", () => {
+    const assessment = baseDescriptor.assessments![0]!;
+    const result = validateDescriptor({
+      ...baseDescriptor,
+      assessments: [assessment, { ...assessment }],
+    });
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.issues.some((i) => i.message.includes("duplicate checkId"))).toBe(true);
+    }
+  });
+
+  it("rejects single-spa with multiple lesson rows", () => {
+    const result = validateDescriptor({
+      ...baseDescriptor,
+      lessons: [
+        { id: "a", title: "A" },
+        { id: "b", title: "B" },
+      ],
+    });
+    expect(result.ok).toBe(false);
+  });
+
   it("requires spaPath for per-lesson-spa", () => {
     const result = validateDescriptor({
       ...baseDescriptor,
@@ -73,7 +93,7 @@ describe("mapLessonkitIds", () => {
   it("preserves lesson and check ids", () => {
     const mapped = mapLessonkitIds(baseDescriptor);
     expect(mapped.courseId).toBe("cyber-basics");
-    expect(mapped.lessonIds).toEqual(["phishing-101", "quiz-101"]);
+    expect(mapped.lessonIds).toEqual(["phishing-101"]);
     expect(mapped.checkIds).toEqual(["email-first-step"]);
   });
 });
@@ -84,7 +104,14 @@ describe("interchange", () => {
     expect(lessons).toEqual([
       { id: "phishing-101", title: "Phishing Awareness", path: "dist" },
     ]);
-    const custom = resolveSpaLessons({ ...baseDescriptor, spaLessonId: "quiz-101" });
+    const multiLessonDescriptor = {
+      ...baseDescriptor,
+      lessons: [
+        { id: "phishing-101", title: "Phishing Awareness" },
+        { id: "quiz-101", title: "Quiz" },
+      ],
+    };
+    const custom = resolveSpaLessons({ ...multiLessonDescriptor, spaLessonId: "quiz-101" });
     expect(custom[0]?.id).toBe("quiz-101");
     const interchange = descriptorToInterchange(baseDescriptor);
     expect(interchange.format).toBe("lessonkit");
@@ -112,6 +139,17 @@ describe("assessments", () => {
     expect(lx.id).toBe("email-first-step");
     expect(lx.questions[0]?.choices.some((c) => c.correct)).toBe(true);
     expect(extractAssessments(baseDescriptor)).toHaveLength(1);
+  });
+
+  it("assigns distinct choice ids when labels slug to the same value", () => {
+    const lx = assessmentDescriptorToLxpack({
+      checkId: "collision-check",
+      question: "Pick one",
+      choices: ["Yes", "YES"],
+      answer: "Yes",
+    });
+    const ids = lx.questions[0]?.choices.map((c) => c.id) ?? [];
+    expect(new Set(ids).size).toBe(2);
   });
 });
 
@@ -206,6 +244,17 @@ describe("writeLxpackProject errors", () => {
       }),
     ).rejects.toThrow(/courseId/);
   });
+
+  it("throws when spaDistDir is missing", async () => {
+    const root = await makeTempDir();
+    await expect(
+      writeLxpackProject({
+        descriptor: baseDescriptor,
+        outDir: join(root, "out"),
+        spaDistDir: join(root, "missing-dist"),
+      }),
+    ).rejects.toThrow(/spaDistDir not found/);
+  });
 });
 
 describe("validateDescriptor edge cases", () => {
@@ -241,6 +290,30 @@ describe("packageLessonkitCourse", () => {
     if (result.ok) {
       expect(result.fileCount).toBeGreaterThan(0);
       expect(result.outputPath).toContain("course-scorm12.zip");
+    }
+  }, 30_000);
+
+  it("builds standalone directory from descriptor", async () => {
+    const root = await makeTempDir();
+    const dist = join(root, "dist");
+    await mkdir(dist, { recursive: true });
+    const { writeFile } = await import("node:fs/promises");
+    await writeFile(join(dist, "index.html"), "<!DOCTYPE html><html><body>ok</body></html>", "utf-8");
+
+    const outDir = join(root, "course");
+    const result = await packageLessonkitCourse({
+      descriptor: { ...baseDescriptor, assessments: [] },
+      outDir,
+      spaDistDir: dist,
+      target: "standalone",
+      output: ".lxpack/out/standalone",
+      dir: true,
+    });
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.outputDir).toContain("standalone");
+      expect(result.fileCount).toBeGreaterThan(0);
     }
   }, 30_000);
 });

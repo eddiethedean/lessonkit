@@ -26,6 +26,14 @@ export function validateDescriptor(
     issues.push({ path: "lessons", message: "at least one lesson is required" });
   }
 
+  if (input.layout === "single-spa" && (input.lessons?.length ?? 0) > 1) {
+    issues.push({
+      path: "lessons",
+      message:
+        "single-spa layout packages one SPA lesson; remove extra lesson entries or use per-lesson-spa",
+    });
+  }
+
   const lessonIds = new Set<string>();
   for (const [index, lesson] of (input.lessons ?? []).entries()) {
     const path = `lessons[${index}]`;
@@ -48,11 +56,16 @@ export function validateDescriptor(
     }
   }
 
+  const checkIds = new Set<string>();
   for (const [index, assessment] of (input.assessments ?? []).entries()) {
     const path = `assessments[${index}]`;
     const check = validateId(assessment.checkId, `${path}.checkId`);
     if (!check.ok) {
       issues.push(...check.issues.map((i) => ({ path: i.path, message: i.message })));
+    } else if (checkIds.has(check.id)) {
+      issues.push({ path: `${path}.checkId`, message: "duplicate checkId" });
+    } else {
+      checkIds.add(check.id);
     }
     if (!assessment.question?.trim()) {
       issues.push({ path: `${path}.question`, message: "question is required" });

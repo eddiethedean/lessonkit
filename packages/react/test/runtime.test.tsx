@@ -319,6 +319,32 @@ describe("@lessonkit/react runtime", () => {
     expect(events).toHaveLength(0);
   });
 
+  it("emits course_started xAPI statement on mount when transport is configured", async () => {
+    const transport = vi.fn(async (_s: XAPIStatement) => {});
+
+    render(
+      <Course
+        title="Course"
+        courseId="course-1"
+        config={{
+          tracking: { enabled: false },
+          xapi: { transport },
+        }}
+      >
+        <div>child</div>
+      </Course>,
+    );
+
+    await waitFor(() =>
+      expect(
+        transport.mock.calls.some((call) =>
+          call[0]?.object.id?.includes("urn:lessonkit:course:course-1"),
+        ),
+      ).toBe(true),
+    );
+    expect(transport.mock.calls[0]?.[0]?.verb).toContain("initialized");
+  });
+
   it("xAPI can be disabled and does not emit statements", async () => {
     const transport = vi.fn(async (_s: XAPIStatement) => {});
     const events: TelemetryEvent[] = [];
@@ -533,6 +559,64 @@ describe("@lessonkit/react runtime", () => {
       </Course>,
     );
     await waitFor(() => expect(events.filter((e) => e.name === "course_started").length).toBe(2));
+  });
+
+  it("Quiz outside Lesson warns in dev and does not throw", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    vi.stubEnv("NODE_ENV", "development");
+    const events: TelemetryEvent[] = [];
+
+    try {
+      const { getByLabelText } = render(
+        <Course
+          title="Course"
+          courseId="course-1"
+          config={{ tracking: { sink: (e: TelemetryEvent) => void events.push(e) } }}
+        >
+          <Quiz checkId="check-1" question="Q" choices={["A", "B"]} answer="B" />
+        </Course>,
+      );
+
+      fireEvent.click(getByLabelText("B"));
+      await waitFor(() => expect(warn).toHaveBeenCalled());
+      expect(events.some((e) => e.name === "quiz_answered")).toBe(false);
+    } finally {
+      vi.unstubAllEnvs();
+      warn.mockRestore();
+    }
+  });
+
+  it("updates runtime.session when session config changes", async () => {
+    function SessionReader() {
+      const { session } = useLessonkit();
+      return <div data-testid="user">{session.user?.id ?? "none"}</div>;
+    }
+
+    const { getByTestId, rerender } = render(
+      <LessonkitProvider
+        config={{
+          courseId: "course-1",
+          session: { user: { id: "user-a" } },
+        }}
+      >
+        <SessionReader />
+      </LessonkitProvider>,
+    );
+
+    expect(getByTestId("user").textContent).toBe("user-a");
+
+    rerender(
+      <LessonkitProvider
+        config={{
+          courseId: "course-1",
+          session: { user: { id: "user-b" } },
+        }}
+      >
+        <SessionReader />
+      </LessonkitProvider>,
+    );
+
+    expect(getByTestId("user").textContent).toBe("user-b");
   });
 
   it("Quiz legend uses visually hidden styles without sr-only class", () => {

@@ -98,6 +98,7 @@ jobs:
           npm -w @lessonkit/react publish --access public
           npm -w @lessonkit/accessibility publish --access public
           npm -w @lessonkit/themes publish --access public
+          npm -w @lessonkit/lxpack publish --access public
           npm -w @lessonkit/cli publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
