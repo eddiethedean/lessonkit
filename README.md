@@ -7,6 +7,8 @@
 
 **Current release:** [0.7.0](CHANGELOG.md) · Published on npm as [`@lessonkit/*`](https://www.npmjs.com/org/lessonkit)
 
+**Documentation:** [Read the Docs](https://lessonkit.readthedocs.io/) — [vibe coding guides](https://lessonkit.readthedocs.io/en/latest/guides/vibe-coding/index.html) · [React developer guides](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/index.html) (build locally: [docs/READTHEDOCS.md](docs/READTHEDOCS.md))
+
 ---
 
 ## Why LessonKit
@@ -200,7 +202,14 @@ lessonkit/
 
 ## Documentation
 
-### Guides
+Full site (Sphinx + Read the Docs): **[lessonkit.readthedocs.io](https://lessonkit.readthedocs.io/)**
+
+| Audience | Start |
+| --- | --- |
+| Vibe coding (AI-assisted, no React required) | [guides/vibe-coding](https://lessonkit.readthedocs.io/en/latest/guides/vibe-coding/index.html) |
+| React developers | [guides/react-developers](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/index.html) |
+
+### Reference (also in repo)
 
 | Topic | Doc |
 | --- | --- |
@@ -211,6 +220,7 @@ lessonkit/
 | Theming | [docs/THEMING.md](docs/THEMING.md) |
 | Accessibility | [docs/ACCESSIBILITY.md](docs/ACCESSIBILITY.md) |
 | LXPack interoperability | [docs/LXPACK_UPGRADES_FOR_LESSONKIT.md](docs/LXPACK_UPGRADES_FOR_LESSONKIT.md) |
+| RTD setup | [docs/READTHEDOCS.md](docs/READTHEDOCS.md) |
 
 ### Project meta
 

@@ -5,6 +5,8 @@ dist/
 .turbo
 *.log
 coverage/
+docs/_build/
+docs/.venv/
 .lxpack/
 .env
 .env.*

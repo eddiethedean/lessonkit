@@ -1,0 +1,109 @@
+```{raw} html
+<div class="lk-hero">
+  <div class="lk-hero-badges">
+    <span class="lk-badge lk-badge--accent">v0.7.0</span>
+    <span class="lk-badge">React-first</span>
+    <span class="lk-badge">SCORM · xAPI · cmi5</span>
+  </div>
+  <h1>Build learning experiences that ship to your LMS</h1>
+  <p class="lk-lead">
+    LessonKit is a framework for accessible, trackable courses—authored in React,
+    packaged for SCORM and modern learning platforms, with telemetry and xAPI built in.
+  </p>
+</div>
+```
+
+Pick the path that matches how you work:
+
+:::{grid} 1 2 2 2
+:gutter: 3
+
+:::{grid-item-card} ✨ Vibe coding
+:link: guides/vibe-coding/index
+:link-type: doc
+:class-header: text-center
+
+**No React required.** Use Cursor, Copilot, or ChatGPT with copy-paste prompts to scaffold a course, edit content, preview locally, and package for your LMS.
+
++++
+**Start vibe coding →**
+:::
+
+:::{grid-item-card} ⚛️ React developers
+:link: guides/react-developers/index
+:link-type: doc
+:class-header: text-center
+
+**You know React.** Compose `Course` / `Lesson` / `Quiz`, wire telemetry and xAPI, theme with `ThemeProvider`, and export with the CLI or `@lessonkit/lxpack`.
+
++++
+**Open developer guides →**
+:::
+
+:::
+
+```{raw} html
+<div class="lk-callout">
+  <strong>Node.js:</strong> 18+ for dev and build · 20+ for <code>lessonkit package</code> (LMS export).
+</div>
+```
+
+## What you need
+
+| Task | Node.js |
+| --- | --- |
+| Create a course, run `lessonkit dev`, build | **18+** |
+| Package for LMS (`lessonkit package`) | **20+** |
+
+Release notes: [changelog](project/changelog.md) on this site · [GitHub](https://github.com/eddiethedean/lessonkit).
+
+(documentation-map)=
+## Documentation map
+
+```{toctree}
+:maxdepth: 2
+:caption: Guides — vibe coding
+
+guides/vibe-coding/index
+guides/vibe-coding/getting-started
+guides/vibe-coding/your-first-course
+guides/vibe-coding/prompting-and-workflows
+guides/vibe-coding/shipping-to-lms
+guides/vibe-coding/troubleshooting
+```
+
+```{toctree}
+:maxdepth: 2
+:caption: Guides — React developers
+
+guides/react-developers/index
+guides/react-developers/quickstart
+guides/react-developers/project-structure
+guides/react-developers/components-and-hooks
+guides/react-developers/telemetry-and-xapi
+guides/react-developers/theming-and-accessibility
+guides/react-developers/packaging-and-cli
+guides/react-developers/contributing-to-the-monorepo
+```
+
+```{toctree}
+:maxdepth: 1
+:caption: Reference
+
+reference/cli
+reference/packaging
+reference/identity
+reference/telemetry
+reference/theming
+reference/accessibility
+reference/lxpack-upgrades
+```
+
+```{toctree}
+:maxdepth: 1
+:caption: Project
+
+project/changelog
+project/security
+project/roadmap
+```

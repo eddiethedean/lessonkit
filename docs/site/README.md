@@ -1,12 +1,9 @@
-# Docusaurus site (placeholder)
+# Documentation site
 
-[![CI](https://github.com/eddiethedean/lessonkit/actions/workflows/ci.yml/badge.svg)](https://github.com/eddiethedean/lessonkit/actions/workflows/ci.yml)
-[![License](https://img.shields.io/github/license/eddiethedean/lessonkit)](../../LICENSE)
+LessonKit documentation is published with **Sphinx** on **Read the Docs**, not Docusaurus.
 
-Planned: framework documentation site (getting started, concepts, API reference).
+- Live site: [lessonkit.readthedocs.io](https://lessonkit.readthedocs.io/)
+- Source: [`docs/`](../) (conf.py, guides, reference includes)
+- Setup: [READTHEDOCS.md](../READTHEDOCS.md)
 
-Next steps when you’re ready:
-
-- scaffold Docusaurus
-- publish via GitHub Pages / hosting of choice
-
+This folder is a legacy placeholder and may be removed later.

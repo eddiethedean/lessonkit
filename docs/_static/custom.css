@@ -1,0 +1,188 @@
+/* LessonKit docs — modern layer on Furo */
+
+/* ── Landing hero ───────────────────────────────────────────── */
+.lk-hero {
+  margin: -0.5rem 0 2.5rem;
+  padding: 2.75rem 2rem 2.5rem;
+  border-radius: 1.25rem;
+  border: 1px solid var(--color-background-border);
+  background:
+    radial-gradient(ellipse 120% 80% at 100% -20%, rgba(37, 99, 235, 0.14), transparent 55%),
+    radial-gradient(ellipse 80% 60% at 0% 100%, rgba(124, 58, 237, 0.1), transparent 50%),
+    var(--color-background-secondary);
+  position: relative;
+  overflow: hidden;
+}
+
+.lk-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, transparent 40%, rgba(37, 99, 235, 0.04) 100%);
+  pointer-events: none;
+}
+
+.lk-hero > * {
+  position: relative;
+}
+
+.lk-hero h1 {
+  font-size: clamp(2rem, 4vw, 2.75rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  margin: 0 0 0.75rem;
+  background: linear-gradient(120deg, var(--color-foreground-primary) 0%, var(--color-brand-primary) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+html[data-theme="dark"] .lk-hero h1 {
+  background: linear-gradient(120deg, #f8fafc 0%, #60a5fa 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+.lk-hero .lk-lead {
+  font-size: 1.125rem;
+  line-height: 1.6;
+  color: var(--color-foreground-secondary);
+  max-width: 42rem;
+  margin: 0 0 1.5rem;
+}
+
+.lk-hero-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.lk-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.65rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  border-radius: 999px;
+  border: 1px solid var(--color-background-border);
+  background: var(--color-background-primary);
+  color: var(--color-foreground-secondary);
+}
+
+.lk-badge--accent {
+  border-color: rgba(37, 99, 235, 0.35);
+  background: rgba(37, 99, 235, 0.08);
+  color: var(--color-brand-content);
+}
+
+/* ── Sphinx Design cards ────────────────────────────────────── */
+.sd-card {
+  border-radius: 1rem !important;
+  border: 1px solid var(--color-background-border) !important;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.sd-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px -12px rgba(15, 23, 42, 0.15);
+  border-color: rgba(37, 99, 235, 0.35) !important;
+}
+
+html[data-theme="dark"] .sd-card:hover {
+  box-shadow: 0 12px 40px -12px rgba(0, 0, 0, 0.45);
+}
+
+.sd-card-title {
+  font-weight: 700 !important;
+  letter-spacing: -0.02em;
+}
+
+.sd-card-footer {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-brand-primary) !important;
+}
+
+.sd-gutter-3 {
+  margin-bottom: 2rem !important;
+}
+
+/* ── Callouts ───────────────────────────────────────────────── */
+.lk-callout {
+  padding: 1rem 1.25rem;
+  margin: 1.5rem 0;
+  border-radius: 0.75rem;
+  border-left: 4px solid var(--color-brand-primary);
+  background: rgba(37, 99, 235, 0.06);
+}
+
+html[data-theme="dark"] .lk-callout {
+  background: rgba(96, 165, 250, 0.08);
+}
+
+/* ── Content polish ─────────────────────────────────────────── */
+article.bd-article p {
+  line-height: 1.7;
+}
+
+article.bd-article table {
+  border-radius: 0.75rem;
+  overflow: hidden;
+  border: 1px solid var(--color-background-border);
+}
+
+article.bd-article thead {
+  background: var(--color-background-secondary);
+}
+
+article.bd-article th,
+article.bd-article td {
+  padding: 0.65rem 1rem;
+}
+
+div.highlight {
+  border-radius: 0.75rem;
+  border: 1px solid var(--color-background-border);
+}
+
+div.highlight pre {
+  font-size: 0.875rem;
+  line-height: 1.55;
+}
+
+/* Copy button */
+button.copybtn {
+  border-radius: 0.375rem;
+}
+
+/* Sidebar */
+.sidebar-brand-text {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.sidebar-tree .reference {
+  border-radius: 0.375rem;
+}
+
+/* Footer npm label */
+.lk-footer-npm {
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  padding: 0.15rem 0.4rem;
+  border-radius: 0.25rem;
+  background: #cb3837;
+  color: #fff;
+}
+
+/* Section labels on home */
+h2#documentation-map {
+  margin-top: 2.5rem;
+}
