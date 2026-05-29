@@ -5,9 +5,31 @@ Published packages: `@lessonkit/core`, `@lessonkit/xapi`, `@lessonkit/accessibil
 ## Prerequisites
 
 - `main` is green (see [CI workflow](.github/workflows/ci.yml)).
-- All `packages/*/package.json` versions match the release (e.g. `0.9.0`).
+- All `packages/*/package.json` versions match the release (e.g. `0.9.1`).
 - [CHANGELOG.md](CHANGELOG.md) documents the release.
 - No pending files in [`.changeset/`](.changeset/) that would run `changeset version` and bump versions unexpectedly (this repo publishes via **git tags**, not `changeset publish`).
+
+### 0.9.1 checklist (before tagging)
+
+| Item | Status |
+|------|--------|
+| `main` CI green (includes `test:e2e` with telemetry-harness project) | Required |
+| All seven `@lessonkit/*` packages at `0.9.1` in `package.json` | Required |
+| `@lessonkit/react` / `@lessonkit/lxpack` / `@lessonkit/cli` depend on matching `@lessonkit/*@0.9.1` | Required |
+| `lessonkit init` template pins `^0.9.1` for `@lessonkit/*` | Required (`copy-template.mjs`) |
+| `npm run test:e2e` passes (10 specs: golden-vite + telemetry-harness) | Required |
+| `conformance:lxpack` + `conformance:golden` pass | Required |
+| [CHANGELOG.md](CHANGELOG.md) `## [0.9.1]` | Required |
+| Sphinx `docs/conf.py` `release` matches `0.9.1` | Required |
+| Git tag `v0.9.1` | Create when ready to publish to npm |
+
+> **Do not create or push a `v0.9.1` git tag** until you intend to publish to npm.
+
+### 0.9.0 checklist (shipped)
+
+| Item | Status |
+|------|--------|
+| Git tag `v0.9.0` | Published |
 
 ### 0.9.0 checklist (before tagging)
 

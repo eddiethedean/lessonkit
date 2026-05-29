@@ -1,6 +1,5 @@
 import { execSync } from "node:child_process";
-import { existsSync } from "node:fs";
-import { mkdirSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { packageLessonkitCourse } from "@lessonkit/lxpack";
 import { goldenCourseDescriptor } from "../examples/lxpack-golden/course.descriptor";
@@ -9,27 +8,54 @@ import {
   ARTIFACTS_MANIFEST,
   GOLDEN_DIR,
   REPO_ROOT,
+  TELEMETRY_HARNESS_DIR,
 } from "./support/paths";
 import { resolveScorm12LaunchPath, unpackScormZip } from "./support/scorm/unpack";
 
-async function globalSetup(): Promise<void> {
-  mkdirSync(ARTIFACTS_DIR, { recursive: true });
+function ensurePackagesBuilt(): void {
+  execSync("npm run build:packages", { cwd: REPO_ROOT, stdio: "inherit" });
+}
 
+function ensureGoldenDist(): string {
   const distDir = join(GOLDEN_DIR, "dist");
-  const distReady = existsSync(join(distDir, "index.html"));
-
-  if (!process.env.E2E_FORCE_REBUILD && existsSync(ARTIFACTS_MANIFEST) && distReady) {
-    console.log("e2e: reusing existing artifacts (set E2E_FORCE_REBUILD=1 to rebuild)");
-    return;
-  }
-
-  if (!distReady) {
-    console.log("e2e: building packages and golden dist…");
-    execSync("npm run build:packages", { cwd: REPO_ROOT, stdio: "inherit" });
+  if (!existsSync(join(distDir, "index.html"))) {
+    console.log("e2e: building golden dist…");
+    ensurePackagesBuilt();
     execSync("npm run build -w lessonkit-example-lxpack-golden", {
       cwd: REPO_ROOT,
       stdio: "inherit",
     });
+  }
+  return distDir;
+}
+
+function ensureTelemetryHarnessDist(): string {
+  const distDir = join(TELEMETRY_HARNESS_DIR, "dist");
+  if (!existsSync(join(distDir, "index.html"))) {
+    console.log("e2e: building telemetry harness…");
+    ensurePackagesBuilt();
+    execSync("npm run build -w lessonkit-e2e-telemetry-harness", {
+      cwd: REPO_ROOT,
+      stdio: "inherit",
+    });
+  }
+  return distDir;
+}
+
+async function globalSetup(): Promise<void> {
+  mkdirSync(ARTIFACTS_DIR, { recursive: true });
+
+  const goldenDistDir = ensureGoldenDist();
+  const telemetryHarnessDistDir = ensureTelemetryHarnessDist();
+
+  if (!process.env.E2E_FORCE_REBUILD && existsSync(ARTIFACTS_MANIFEST)) {
+    console.log("e2e: reusing existing LXPack artifacts (set E2E_FORCE_REBUILD=1 to rebuild)");
+    const existing = JSON.parse(readFileSync(ARTIFACTS_MANIFEST, "utf8")) as {
+      telemetryHarnessDistDir?: string;
+    };
+    if (existing.telemetryHarnessDistDir) {
+      return;
+    }
   }
 
   console.log("e2e: packaging golden artifacts…");
@@ -40,7 +66,7 @@ async function globalSetup(): Promise<void> {
   const standaloneResult = await packageLessonkitCourse({
     descriptor: goldenCourseDescriptor,
     outDir: courseOutDir,
-    spaDistDir: distDir,
+    spaDistDir: goldenDistDir,
     target: "standalone",
     output: ".lxpack/out/standalone",
     dir: true,
@@ -55,7 +81,7 @@ async function globalSetup(): Promise<void> {
   const scormResult = await packageLessonkitCourse({
     descriptor: goldenCourseDescriptor,
     outDir: scormCourseOutDir,
-    spaDistDir: distDir,
+    spaDistDir: goldenDistDir,
     target: "scorm12",
     output: ".lxpack/out/course-scorm12.zip",
     outputBaseDir: ".lxpack/out",
@@ -71,7 +97,8 @@ async function globalSetup(): Promise<void> {
   const launchPath = resolveScorm12LaunchPath(scorm12UnpackedDir);
 
   const manifest = {
-    goldenDistDir: distDir,
+    goldenDistDir,
+    telemetryHarnessDistDir,
     standaloneDir:
       standaloneResult.outputDir ?? join(courseOutDir, ".lxpack/out/standalone"),
     scorm12Zip,

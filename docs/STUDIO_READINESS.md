@@ -75,10 +75,12 @@ for:
 - [x] Playwright e2e covers:
   - [x] keyboard navigation/focus flows
   - [x] telemetry / progress persistence on Vite surface
+  - [x] telemetry batching + xAPI queue behavior (telemetry-harness Playwright project)
   - [x] packaging artifact smoke (standalone + SCORM 1.2 launch with LMS API mock)
 - [x] Conformance matrix exists and is enforced in CI:
   - [x] `@lxpack/conformance` + golden package matrix scripts
   - [x] React/Vite, standalone, and SCORM 1.2 parity spec on `examples/lxpack-golden`
+- [x] Contributor docs for Playwright e2e and packaging smoke ([export parity guide](guides/react-developers/export-parity.md), [e2e/README.md](../e2e/README.md), [contributing E2E section](guides/react-developers/contributing-to-the-monorepo.md#e2e-and-conformance))
 
 ## 0.8.0+ — Plugin architecture
 

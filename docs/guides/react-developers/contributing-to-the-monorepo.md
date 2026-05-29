@@ -42,3 +42,25 @@ Tag-based npm publish — [RELEASING.md](https://github.com/eddiethedean/lessonk
 ## Roadmap
 
 Studio and 1.0 API stability are tracked in [ROADMAP.md](https://github.com/eddiethedean/lessonkit/blob/main/ROADMAP.md).
+
+## E2E and conformance
+
+Export parity between React/Vite and LMS artifacts is enforced by Playwright and packaging scripts in [`e2e/`](https://github.com/eddiethedean/lessonkit/tree/main/e2e). See the [export parity guide](export-parity.md) for the full matrix.
+
+**Prerequisites:** Node.js **20+**; after `npm ci`, install Playwright once:
+
+```bash
+npm exec -w @lessonkit/e2e -- playwright install --with-deps chromium
+```
+
+**Commands:**
+
+| Command | When to run |
+|---------|-------------|
+| `npm run test:e2e` | Changes to `packages/react`, `e2e/`, `examples/lxpack-golden`, or packaging |
+| `npm run test:e2e:ui` | Debugging flaky Playwright specs locally |
+| `npm run conformance:lxpack` | Changes to `@lessonkit/lxpack` or LXPack dependency pins |
+| `npm run conformance:golden` | Golden example packaging or `lessonkit.json` descriptor |
+| `E2E_FORCE_REBUILD=1 npm run test:e2e` | After changing global-setup artifact paths or harness fixture |
+
+Details: [`e2e/README.md`](https://github.com/eddiethedean/lessonkit/blob/main/e2e/README.md).

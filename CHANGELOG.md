@@ -3,6 +3,18 @@
 All notable changes to the LessonKit monorepo are documented here. Published packages use the
 [`@lessonkit/*`](https://www.npmjs.com/org/lessonkit) scope.
 
+## [0.9.1] - 2026-05-29
+
+### Added
+
+- **E2E telemetry harness** (`e2e/fixtures/telemetry-harness/`): Playwright project for telemetry batching and xAPI queue behavior via `window.__e2e`.
+- **E2E**: Expanded keyboard coverage on golden Vite (lesson nav, knowledge check).
+- **Docs**: Conformance matrix table and CI job map in [export parity guide](docs/guides/react-developers/export-parity.md); expanded [`e2e/README.md`](e2e/README.md); [contributing E2E section](docs/guides/react-developers/contributing-to-the-monorepo.md#e2e-and-conformance).
+
+### Changed
+
+- Monorepo packages bumped to **0.9.1**; **0.9.x conformance harness** milestone complete per [ROADMAP.md](ROADMAP.md).
+
 ## [0.9.0] - 2026-05-29
 
 ### Added

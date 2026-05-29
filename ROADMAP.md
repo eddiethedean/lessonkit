@@ -28,7 +28,7 @@ this repo until that gate is met.
 
 ## Status
 
-- **Framework:** **0.9.0** — conformance harness (Playwright export parity, `@lxpack/conformance` CI, SCORM 1.2 LMS mock); LXPack **0.6.0** packaging; block catalog v1
+- **Framework:** **0.9.1** — 0.9.x conformance harness complete (Playwright golden + telemetry harness, export parity docs, CI matrices); LXPack **0.6.0** packaging; block catalog v1
 - **Studio:** **blocked** — no implementation work until **[1.0.0 — Stable public API (framework)](#100--stable-public-api-framework)** is shipped (see [Studio development gate](#studio-development-gate))
 - **Focus (now):** 1.0.0 stable API and docs gate
 

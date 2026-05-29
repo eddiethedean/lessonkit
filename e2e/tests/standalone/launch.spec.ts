@@ -6,7 +6,7 @@ import { startStaticServer, stopServer } from "../../support/standalone-server";
 
 test.describe("golden standalone", () => {
   let server: Server;
-  const port = 4174;
+  const port = 4178;
   let baseUrl: string;
 
   test.beforeAll(async () => {
