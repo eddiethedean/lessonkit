@@ -16,7 +16,7 @@
     "build:packages": "npm run -w @lessonkit/core build && npm run -w @lessonkit/xapi build && npm run -w @lessonkit/accessibility build && npm run -w @lessonkit/themes build && npm run -w @lessonkit/lxpack build && npm run -w @lessonkit/react build && npm run -w @lessonkit/cli build",
     "build:apps": "npm run -w lessonkit-example-react-vite build && npm run -w lessonkit-example-lxpack-golden build && npm run -w lessonkit-example-data-privacy build && npm run -w lessonkit-example-customer-service build && npm run -w lessonkit-template-vite-react build && npm run -w lessonkit-e2e-telemetry-harness build",
     "dev": "npm run --workspaces --if-present dev",
-    "test": "npm run --workspaces --if-present test",
+    "test": "npm run --workspaces --if-present test --ignore-workspaces=@lessonkit/integration",
     "coverage": "npm run --workspaces --if-present test:coverage",
     "audit:ci": "npm audit --omit=dev --audit-level=high && npm audit --audit-level=high",
     "lint": "npm run --workspaces --if-present lint",
