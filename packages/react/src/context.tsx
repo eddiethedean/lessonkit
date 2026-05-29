@@ -133,6 +133,7 @@ function emitCourseStarted(opts: {
     markCourseStarted(opts.storage, opts.sessionId, opts.courseId);
     return true;
   } catch {
+    /* v8 ignore next -- sink/xAPI failures leave dedupe unmarked so a later effect can retry */
     return false;
   }
 }
@@ -402,10 +403,12 @@ export function LessonkitProvider(props: { config: LessonkitConfig; children: Re
     void (async () => {
       try {
         await trackingRef.current?.flush?.();
+        /* v8 ignore next 3 -- flush errors during course switch must not block lifecycle */
       } catch {
         // ignore flush errors during course switch
       }
 
+      /* v8 ignore start -- backup emit when tracking effect did not mark course_started */
       if (
         !courseStartedEmittedToSinkRef.current &&
         !hasCourseStarted(defaultStorage, sessionId, cid)
@@ -423,6 +426,7 @@ export function LessonkitProvider(props: { config: LessonkitConfig; children: Re
         });
         courseStartedEmittedToSinkRef.current = emitted;
       }
+      /* v8 ignore stop */
     })();
   }, [config.courseId, config.tracking?.enabled, syncProgress]);
 

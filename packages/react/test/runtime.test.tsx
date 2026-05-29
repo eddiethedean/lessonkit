@@ -1484,6 +1484,183 @@ describe("@lessonkit/react runtime", () => {
     expect(statements.some((s) => s.object.id?.includes("course-a"))).toBe(false);
   });
 
+  it("does not mark course_started when emit throws, then succeeds when sink changes", async () => {
+    const events: TelemetryEvent[] = [];
+    let shouldThrow = true;
+    const failingSink = (e: TelemetryEvent) => {
+      if (e.name === "course_started" && shouldThrow) throw new Error("sink failed");
+      events.push(e);
+    };
+    const okSink = (e: TelemetryEvent) => {
+      events.push(e);
+    };
+
+    const { rerender } = render(
+      <LessonkitProvider
+        config={{ courseId: "course-1", tracking: { sink: failingSink }, xapi: { enabled: false } }}
+      >
+        <div>child</div>
+      </LessonkitProvider>,
+    );
+
+    expect(events.some((e) => e.name === "course_started")).toBe(false);
+
+    shouldThrow = false;
+    rerender(
+      <LessonkitProvider
+        config={{ courseId: "course-1", tracking: { sink: okSink }, xapi: { enabled: false } }}
+      >
+        <div>child</div>
+      </LessonkitProvider>,
+    );
+
+    await waitFor(() =>
+      expect(events.some((e) => e.name === "course_started" && e.courseId === "course-1")).toBe(true),
+    );
+  });
+
+  it("falls back to base sink when wrapTrackingSink returns undefined", async () => {
+    const events: TelemetryEvent[] = [];
+    const plugin = defineLessonkitPlugin({
+      id: "wrap-undefined",
+      version: "1",
+      kind: "analytics",
+      wrapTrackingSink: () => undefined,
+    });
+
+    render(
+      <LessonkitProvider
+        config={{
+          courseId: "course-1",
+          plugins: [plugin],
+          tracking: { sink: (e) => void events.push(e) },
+          xapi: { enabled: false },
+        }}
+      >
+        <Lesson title="L" lessonId="lesson-1">
+          <div>content</div>
+        </Lesson>
+      </LessonkitProvider>,
+    );
+
+    await waitFor(() => expect(events.some((e) => e.name === "lesson_started")).toBe(true));
+  });
+
+  it("wrapTrackingSink receives fresh plugin context per event", async () => {
+    const ctxCourseIds: string[] = [];
+    const events: TelemetryEvent[] = [];
+    const plugin = defineLessonkitPlugin({
+      id: "wrap-ctx",
+      version: "1",
+      kind: "analytics",
+      wrapTrackingSink: (sink, ctx) => (event) => {
+        ctxCourseIds.push(ctx.courseId);
+        return sink(event);
+      },
+    });
+
+    const { rerender } = render(
+      <LessonkitProvider
+        config={{
+          courseId: "course-a",
+          plugins: [plugin],
+          tracking: { sink: (e) => void events.push(e) },
+          xapi: { enabled: false },
+        }}
+      >
+        <Lesson title="L" lessonId="lesson-1">
+          <div>content</div>
+        </Lesson>
+      </LessonkitProvider>,
+    );
+
+    await waitFor(() => expect(ctxCourseIds.some((id) => id === "course-a")).toBe(true));
+
+    rerender(
+      <LessonkitProvider
+        config={{
+          courseId: "course-b",
+          plugins: [plugin],
+          tracking: { sink: (e) => void events.push(e) },
+          xapi: { enabled: false },
+        }}
+      >
+        <Lesson title="L" lessonId="lesson-1">
+          <div>content</div>
+        </Lesson>
+      </LessonkitProvider>,
+    );
+
+    await waitFor(() => expect(ctxCourseIds.some((id) => id === "course-b")).toBe(true));
+  });
+
+  it("emits course_started after courseId change when flush fails once", async () => {
+    const events: TelemetryEvent[] = [];
+    let failNextFlush = false;
+
+    vi.resetModules();
+    vi.doMock("@lessonkit/core", async () => {
+      const actual = await vi.importActual<typeof import("@lessonkit/core")>("@lessonkit/core");
+      return {
+        ...actual,
+        createTrackingClient: (
+          opts?: Parameters<typeof import("@lessonkit/core").createTrackingClient>[0],
+        ) => {
+          const real = actual.createTrackingClient(opts);
+          return {
+            ...real,
+            flush: async () => {
+              if (failNextFlush) {
+                failNextFlush = false;
+                throw new Error("flush failed");
+              }
+              return real.flush?.();
+            },
+          };
+        },
+      };
+    });
+
+    const mod = await import("../src");
+    const { rerender } = render(
+      <mod.LessonkitProvider
+        config={{
+          courseId: "course-a",
+          tracking: { sink: (e) => void events.push(e) },
+          xapi: { enabled: false },
+        }}
+      >
+        <mod.Lesson title="L" lessonId="lesson-1">
+          <div>content</div>
+        </mod.Lesson>
+      </mod.LessonkitProvider>,
+    );
+
+    await waitFor(() =>
+      expect(events.some((e) => e.name === "course_started" && e.courseId === "course-a")).toBe(true),
+    );
+
+    failNextFlush = true;
+    rerender(
+      <mod.LessonkitProvider
+        config={{
+          courseId: "course-b",
+          tracking: { sink: (e) => void events.push(e) },
+          xapi: { enabled: false },
+        }}
+      >
+        <mod.Lesson title="L" lessonId="lesson-1">
+          <div>content</div>
+        </mod.Lesson>
+      </mod.LessonkitProvider>,
+    );
+
+    await waitFor(() =>
+      expect(events.some((e) => e.name === "course_started" && e.courseId === "course-b")).toBe(true),
+    );
+    vi.unmock("@lessonkit/core");
+  });
+
   it("Quiz legend uses visually hidden styles without sr-only class", () => {
     const { container } = render(
       <Course title="Course" courseId="course-1">
