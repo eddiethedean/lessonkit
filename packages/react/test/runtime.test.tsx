@@ -2,7 +2,7 @@ import React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { Course, KnowledgeCheck, Lesson, LessonkitProvider, ProgressTracker, Quiz, Reflection, Scenario, useCompletion, useLessonkit, useProgress, useQuizState, useTracking } from "../src";
-import { defineLessonkitPlugin, type TelemetryEvent } from "@lessonkit/core";
+import { defineLessonkitPlugin, type TelemetryEvent, type TelemetrySink } from "@lessonkit/core";
 import * as xapiModule from "@lessonkit/xapi";
 import type { XAPIStatement, XAPITransport } from "@lessonkit/xapi";
 
@@ -1525,7 +1525,7 @@ describe("@lessonkit/react runtime", () => {
       id: "wrap-undefined",
       version: "1",
       kind: "analytics",
-      wrapTrackingSink: () => undefined,
+      wrapTrackingSink: () => undefined as unknown as TelemetrySink,
     });
 
     render(
