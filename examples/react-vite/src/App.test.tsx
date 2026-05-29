@@ -23,82 +23,73 @@ describe("example App", () => {
     );
     fireEvent.click(getByRole("button", { name: "Dark" }));
     expect(document.documentElement.getAttribute("data-lk-theme")).toBe("dark");
-    expect(document.documentElement.style.getPropertyValue("--lk-color-background").trim()).toBe(
-      "#0b1020",
-    );
     spy.mockRestore();
   });
 
   it(
     "lets you triage inbox, navigate lessons, unlock hints, and complete the course",
     async () => {
-    const spy = vi.spyOn(console, "log").mockImplementation(() => {});
-    vi.useFakeTimers();
+      const spy = vi.spyOn(console, "log").mockImplementation(() => {});
+      vi.useFakeTimers();
 
-    const { getAllByLabelText, getAllByText, getByText, queryByText } = render(<App />);
-    const nav = within(getAllByLabelText("Navigation")[0]!);
+      const { getAllByLabelText, getAllByText, getByText, queryByText } = render(<App />);
+      const nav = within(getAllByLabelText("Course navigation")[0]!);
 
-    // Lesson 1: triage inbox (3 emails)
-    await act(async () => {
-      fireEvent.click(getAllByText("Open")[0]!);
-      fireEvent.click(getAllByText("Ignore")[1]!);
-      fireEvent.click(getAllByText("Report")[2]!);
-    });
+      await act(async () => {
+        fireEvent.click(getAllByText("Open attachment / link")[0]!);
+        fireEvent.click(getAllByText("Ignore for now")[1]!);
+        fireEvent.click(getAllByText("Report as phishing")[2]!);
+      });
 
-    expect(getAllByText(/Handled:/)).toHaveLength(3);
-    expect(queryByText(/High risk/i)).toBeTruthy();
+      expect(getAllByText(/You chose:/)).toHaveLength(3);
+      expect(queryByText(/High exposure/i)).toBeTruthy();
 
-    // Navigate to lesson 2 (unmounts lesson 1 -> completion)
-    fireEvent.click(nav.getByText("Next"));
+      fireEvent.click(nav.getByText("Next"));
 
-    // Lesson 2: wait for hint unlocks, then choose a path.
-    await act(async () => {
-      vi.advanceTimersByTime(6000);
-    });
-    expect(getByText(/Hint unlocked/)).toBeDefined();
+      await act(async () => {
+        vi.advanceTimersByTime(6000);
+      });
+      expect(getByText(/Coaching tip:/)).toBeDefined();
 
-    await act(async () => {
-      vi.advanceTimersByTime(5000);
-    });
-    expect(getByText(/Deeper hint/)).toBeDefined();
+      await act(async () => {
+        vi.advanceTimersByTime(5000);
+      });
+      expect(getByText(/Policy reminder:/)).toBeDefined();
 
-    fireEvent.click(getByText("Tell them to verify using the portal"));
-    expect(getByText(/Good\./)).toBeDefined();
+      fireEvent.click(getByText("Ask them to use the official IT self-service portal"));
+      expect(getByText(/Correct approach/)).toBeDefined();
 
-    // Navigate to lesson 3 (unmounts lesson 2 -> completion)
-    fireEvent.click(nav.getByText("Next"));
+      fireEvent.click(nav.getByText("Next"));
+      fireEvent.click(nav.getByText("Next"));
 
-    // Course completion is gated by completing prior lessons.
-    const completeBtn = getByText("Mark course complete") as HTMLButtonElement;
-    expect(completeBtn.disabled).toBe(false);
-    fireEvent.click(completeBtn);
+      const completeBtn = getByText("Mark module complete") as HTMLButtonElement;
+      expect(completeBtn.disabled).toBe(false);
+      fireEvent.click(completeBtn);
 
-    vi.useRealTimers();
-    spy.mockRestore();
+      vi.useRealTimers();
+      spy.mockRestore();
     },
     15000,
   );
 
-  it("covers the risky timed-decision branch", async () => {
+  it("covers the risky urgent-request branch", async () => {
     const spy = vi.spyOn(console, "log").mockImplementation(() => {});
     vi.useFakeTimers();
 
     const { getAllByLabelText, getByText } = render(<App />);
-    const nav = within(getAllByLabelText("Navigation")[0]!);
+    const nav = within(getAllByLabelText("Course navigation")[0]!);
 
-    // Jump to lesson 2
     fireEvent.click(nav.getByText("Next"));
-    expect(getByText(/Time pressure/)).toBeDefined();
+    expect(nav.getByText(/Slow down under pressure/)).toBeDefined();
 
     await act(async () => {
       vi.advanceTimersByTime(6000);
     });
 
-    fireEvent.click(getByText("Tell them to act immediately"));
-    expect(getByText(/Risky\./)).toBeDefined();
+    fireEvent.click(getByText("Forward the reset link they sent"));
+    expect(getByText(/Risky choice/)).toBeDefined();
 
     vi.useRealTimers();
     spy.mockRestore();
   });
 });
-

@@ -4,6 +4,7 @@ import {
   Lesson,
   ProgressTracker,
   Quiz,
+  Reflection,
   Scenario,
   ThemeProvider,
   useCompletion,
@@ -14,7 +15,14 @@ import {
 import type { TelemetryEvent } from "@lessonkit/core";
 import type { XAPIStatement } from "@lessonkit/xapi";
 
-const COURSE_ID = "react-showcase-security";
+const COURSE_ID = "cybersecurity-awareness";
+
+const LESSONS = [
+  { id: "phishing-inbox", title: "Spotting suspicious email" },
+  { id: "urgent-requests", title: "Slow down under pressure" },
+  { id: "credential-hygiene", title: "Protecting your credentials" },
+  { id: "module-assessment", title: "Module assessment" },
+] as const;
 
 export default function App() {
   const [step, setStep] = React.useState(0);
@@ -39,52 +47,87 @@ export default function App() {
   return (
     <ThemeProvider mode={themeMode} preset="brand">
       <div className="app-shell">
-        <Course title="React-Native Security Training (Showcase)" courseId={COURSE_ID} config={courseConfig}>
+        <Course
+          title="Cybersecurity Awareness for Employees"
+          courseId={COURSE_ID}
+          config={courseConfig}
+        >
+          <header className="course-header">
+            <p className="course-eyebrow">Required annual training · ~12 minutes</p>
+            <p className="course-intro muted">
+              Learn to recognize phishing, resist social engineering, and protect company and personal
+              accounts. Your progress is saved automatically.
+            </p>
+            <ul className="objectives">
+              <li>Identify common phishing signals in email</li>
+              <li>Respond safely when someone pressures you to act quickly</li>
+              <li>Apply credential hygiene habits at work</li>
+            </ul>
+          </header>
+
           <ProgressTracker />
 
-          <CourseNav step={step} setStep={setStep} themeMode={themeMode} onThemeModeChange={setThemeMode} />
+          <CourseNav
+            step={step}
+            setStep={setStep}
+            themeMode={themeMode}
+            onThemeModeChange={setThemeMode}
+          />
 
-        {step === 0 ? (
-          <Lesson title="1) Adaptive inbox triage" lessonId="inbox-triage">
-            <Scenario>
-              <p>
-                This lesson reacts to your choices: the UI updates immediately, your risk score changes, and the
-                next content branches based on your behavior.
-              </p>
-            </Scenario>
-            <InboxTriage />
-          </Lesson>
-        ) : null}
+          {step === 0 ? (
+            <Lesson title={LESSONS[0].title} lessonId={LESSONS[0].id}>
+              <Scenario>
+                <p>
+                  You are covering the shared inbox while a teammate is out. Three messages arrived in
+                  the last hour. Review each one and choose the safest action before moving on.
+                </p>
+              </Scenario>
+              <PhishingInbox />
+            </Lesson>
+          ) : null}
 
-        {step === 1 ? (
-          <Lesson title="2) Time pressure + hints" lessonId="time-pressure">
-            <Scenario>
-              <p>
-                This lesson demonstrates reactivity under time pressure: hints unlock as time passes, and your
-                decision affects what the next section reveals.
-              </p>
-            </Scenario>
-            <TimedDecision />
-          </Lesson>
-        ) : null}
+          {step === 1 ? (
+            <Lesson title={LESSONS[1].title} lessonId={LESSONS[1].id}>
+              <Scenario>
+                <p>
+                  A colleague messages you on chat: their VPN token expired and payroll is due today.
+                  They ask you to approve a reset link they were sent. Take your time—hints appear if
+                  you need them.
+                </p>
+              </Scenario>
+              <UrgentRequestScenario />
+            </Lesson>
+          ) : null}
 
-        {step === 2 ? (
-          <Lesson title="3) Knowledge check (standard quiz)" lessonId="quiz-101">
-            <Scenario>
-              <p>
-                Here’s the conventional “HTML course” style interaction — but it still feeds telemetry and
-                completion the same way.
-              </p>
-            </Scenario>
-            <Quiz
-              checkId="email-first-step"
-              question="What should you do first when an email feels off?"
-              choices={["Click the link quickly", "Verify sender and context"]}
-              answer="Verify sender and context"
-            />
-            <FinishCourse />
-          </Lesson>
-        ) : null}
+          {step === 2 ? (
+            <Lesson title={LESSONS[2].title} lessonId={LESSONS[2].id}>
+              <Scenario>
+                <p>
+                  Your organization is rolling out passkeys and hardware security keys. Read the
+                  policy summary, then note one habit you will adopt this week.
+                </p>
+              </Scenario>
+              <CredentialHygiene />
+            </Lesson>
+          ) : null}
+
+          {step === 3 ? (
+            <Lesson title={LESSONS[3].title} lessonId={LESSONS[3].id}>
+              <Scenario>
+                <p>Confirm your understanding before returning to your LMS transcript.</p>
+              </Scenario>
+              <Quiz
+                checkId="module-assessment-check"
+                question="A vendor emails an invoice with a one-time payment link. What is the best first step?"
+                choices={[
+                  "Pay immediately to avoid late fees",
+                  "Verify the request through your procurement portal or known contact",
+                ]}
+                answer="Verify the request through your procurement portal or known contact"
+              />
+              <FinishCourse />
+            </Lesson>
+          ) : null}
         </Course>
       </div>
     </ThemeProvider>
@@ -93,7 +136,7 @@ export default function App() {
 
 function ThemeToggle(props: { mode: ThemeMode; onChange: (mode: ThemeMode) => void }) {
   return (
-    <div className="theme-toggle" role="group" aria-label="Theme">
+    <div className="theme-toggle" role="group" aria-label="Display theme">
       {(["light", "dark", "system"] as const).map((m) => (
         <button
           key={m}
@@ -117,25 +160,40 @@ function CourseNav(props: {
 }) {
   const { progress } = useLessonkit();
   const completed = progress.completedLessonIds.size;
+  const last = LESSONS.length - 1;
 
   return (
-    <aside aria-label="Navigation" className="nav">
+    <aside aria-label="Course navigation" className="nav">
+      <div className="lesson-tabs" role="tablist" aria-label="Lessons">
+        {LESSONS.map((lesson, i) => (
+          <button
+            key={lesson.id}
+            type="button"
+            role="tab"
+            aria-selected={props.step === i}
+            className={props.step === i ? "tab-active" : undefined}
+            onClick={() => props.setStep(i)}
+          >
+            {i + 1}. {lesson.title}
+          </button>
+        ))}
+      </div>
       <div className="nav-row">
-        <button onClick={() => props.setStep(Math.max(0, props.step - 1))} disabled={props.step === 0}>
+        <button type="button" onClick={() => props.setStep(Math.max(0, props.step - 1))} disabled={props.step === 0}>
           Previous
         </button>
         <div className="nav-status">
-          <strong>Lesson</strong> {props.step + 1} / 3 · <strong>Completed</strong> {completed}
+          <strong>Progress</strong> {completed} of {LESSONS.length} lessons completed
         </div>
-        <button onClick={() => props.setStep(Math.min(2, props.step + 1))} disabled={props.step === 2}>
+        <button
+          type="button"
+          onClick={() => props.setStep(Math.min(last, props.step + 1))}
+          disabled={props.step === last}
+        >
           Next
         </button>
       </div>
       <ThemeToggle mode={props.themeMode} onChange={props.onThemeModeChange} />
-      <p className="muted">
-        Navigation intentionally unmounts/mounts lessons so you can see lifecycle tracking (start/complete + time
-        on task) working like a real app. Use the theme controls to switch LessonKit tokens (light / dark / system).
-      </p>
     </aside>
   );
 }
@@ -148,7 +206,7 @@ type Email = {
   isPhish: boolean;
 };
 
-function InboxTriage() {
+function PhishingInbox() {
   const { track } = useTracking();
   const [risk, setRisk] = React.useState(0);
   const [handled, setHandled] = React.useState<Record<string, "report" | "open" | "ignore">>({});
@@ -157,23 +215,23 @@ function InboxTriage() {
     () => [
       {
         id: "e1",
-        subject: "Your payroll settings changed",
-        from: "HR Support <hr-support@payr0ll-help.com>",
-        body: "We detected an issue. Please verify your details with the secure link.",
+        subject: "Action required: payroll direct deposit",
+        from: "People Operations <payroll-update@hr-portal-secure.net>",
+        body: "Your deposit information will expire today. Confirm your bank details using the secure form.",
         isPhish: true,
       },
       {
         id: "e2",
-        subject: "Team offsite agenda",
-        from: "Alex <alex@company.example>",
-        body: "Draft agenda attached — add comments when you have time.",
+        subject: "Q3 facilities walkthrough — notes attached",
+        from: "Jordan Lee <jlee@company.example>",
+        body: "Slides from yesterday’s tour are in SharePoint. No action needed unless you spot a correction.",
         isPhish: false,
       },
       {
         id: "e3",
-        subject: "Unusual sign-in attempt",
-        from: "Security <security@company.example>",
-        body: "We blocked a sign-in. If this was you, reset your password from the portal.",
+        subject: "Password reset requested for your account",
+        from: "IT Service Desk <it-help@company.example>",
+        body: "We received a reset request. If this was not you, contact the help desk extension 2200.",
         isPhish: false,
       },
     ],
@@ -185,11 +243,9 @@ function InboxTriage() {
 
     let delta = 0;
     if (email.isPhish && action === "open") delta = 30;
-    if (email.isPhish && action === "ignore") delta = 10;
-    if (email.isPhish && action === "report") delta = -10;
-    if (!email.isPhish && action === "open") delta = 0;
-    if (!email.isPhish && action === "ignore") delta = 0;
-    if (!email.isPhish && action === "report") delta = 5;
+    if (email.isPhish && action === "ignore") delta = 12;
+    if (email.isPhish && action === "report") delta = -8;
+    if (!email.isPhish && action === "report") delta = 4;
 
     setRisk((r) => Math.max(0, r + delta));
     track("interaction", { kind: "inbox_action", emailId: email.id, isPhish: email.isPhish, action, riskDelta: delta });
@@ -197,21 +253,20 @@ function InboxTriage() {
 
   const allHandled = Object.keys(handled).length === emails.length;
   const grade =
-    risk <= 5 ? { label: "Great", detail: "You kept risk low and handled the inbox deliberately." } :
-    risk <= 20 ? { label: "Okay", detail: "Some risk accumulated — review why the actions mattered." } :
-    { label: "High risk", detail: "In a real org, this pattern leads to incidents. Slow down and verify." };
+    risk <= 5
+      ? { label: "Strong judgment", detail: "You reported the suspicious payroll message and avoided risky clicks." }
+      : risk <= 18
+        ? { label: "Needs review", detail: "Consider why official IT channels differ from look-alike domains." }
+        : { label: "High exposure", detail: "In production, opening unknown links can compromise your workstation." };
 
   return (
-    <section aria-label="Inbox triage" className="panel">
+    <section aria-label="Inbox exercise" className="panel">
       <div className="score-row">
         <div>
-          <strong>Live risk score</strong>
+          <strong>Risk indicator</strong>
           <div className="score">{risk}</div>
         </div>
-        <div className="muted">
-          This score updates instantly as state changes — it’s not a static page. Your actions also emit telemetry
-          events (`interaction`).
-        </div>
+        <p className="muted">Lower is better. Report phishing using your company’s official button when available.</p>
       </div>
 
       <div className="inbox">
@@ -225,22 +280,21 @@ function InboxTriage() {
                   <div className="meta">From: {e.from}</div>
                 </div>
                 <div className={`pill ${e.isPhish ? "pill-warn" : "pill-ok"}`}>
-                  {e.isPhish ? "Suspicious" : "Likely legit"}
+                  {e.isPhish ? "Review carefully" : "Likely legitimate"}
                 </div>
               </div>
               <p className="body">{e.body}</p>
-
               <div className="actions">
-                <button onClick={() => decide(e, "open")} disabled={Boolean(action)}>
-                  Open
+                <button type="button" onClick={() => decide(e, "report")} disabled={Boolean(action)}>
+                  Report as phishing
                 </button>
-                <button onClick={() => decide(e, "ignore")} disabled={Boolean(action)}>
-                  Ignore
+                <button type="button" onClick={() => decide(e, "open")} disabled={Boolean(action)}>
+                  Open attachment / link
                 </button>
-                <button onClick={() => decide(e, "report")} disabled={Boolean(action)}>
-                  Report
+                <button type="button" onClick={() => decide(e, "ignore")} disabled={Boolean(action)}>
+                  Ignore for now
                 </button>
-                {action ? <span className="muted">Handled: {action}</span> : null}
+                {action ? <span className="muted">You chose: {action}</span> : null}
               </div>
             </div>
           );
@@ -252,18 +306,18 @@ function InboxTriage() {
           <strong>{grade.label}.</strong> {grade.detail}
         </div>
       ) : (
-        <div className="muted" role="status" aria-live="polite">
-          Handle all emails to see a summary.
-        </div>
+        <p className="muted" role="status" aria-live="polite">
+          Review all messages to unlock feedback.
+        </p>
       )}
     </section>
   );
 }
 
-function TimedDecision() {
+function UrgentRequestScenario() {
   const { track } = useTracking();
   const [seconds, setSeconds] = React.useState(0);
-  const [choice, setChoice] = React.useState<"panic" | "verify" | null>(null);
+  const [choice, setChoice] = React.useState<"approve" | "verify" | null>(null);
 
   React.useEffect(() => {
     const id = window.setInterval(() => setSeconds((s) => s + 1), 1000);
@@ -273,51 +327,50 @@ function TimedDecision() {
   const hintUnlocked = seconds >= 5;
   const deeperHintUnlocked = seconds >= 10;
 
-  const choose = (c: "panic" | "verify") => {
+  const choose = (c: "approve" | "verify") => {
     setChoice(c);
-    track("interaction", { kind: "timed_decision", seconds, choice: c });
+    track("interaction", { kind: "urgent_request", seconds, choice: c });
   };
 
   return (
-    <section aria-label="Timed decision" className="panel">
+    <section aria-label="Urgent request scenario" className="panel">
       <div className="score-row">
         <div>
-          <strong>Timer</strong>
+          <strong>Time on scenario</strong>
           <div className="score">{seconds}s</div>
         </div>
-        <div className="muted">
-          This kind of progressive disclosure is trivial in React: UI state unlocks hints and branches the story.
-        </div>
+        <p className="muted">Legitimate IT teams rarely pressure you through unofficial chat links.</p>
       </div>
 
       <div className="callout">
         <p>
-          A teammate pings: “I got an email saying my account is locked. Should I follow the instructions?”
+          <strong>Jordan (chat):</strong> “Can you approve this reset? Payroll locks me out in 20 minutes and
+          I’m stuck on a call.”
         </p>
         <div className="actions">
-          <button onClick={() => choose("panic")} disabled={choice !== null}>
-            Tell them to act immediately
+          <button type="button" onClick={() => choose("approve")} disabled={choice !== null}>
+            Forward the reset link they sent
           </button>
-          <button onClick={() => choose("verify")} disabled={choice !== null}>
-            Tell them to verify using the portal
+          <button type="button" onClick={() => choose("verify")} disabled={choice !== null}>
+            Ask them to use the official IT self-service portal
           </button>
         </div>
       </div>
 
       {hintUnlocked ? (
         <div className="hint" role="status" aria-live="polite">
-          <strong>Hint unlocked:</strong> attackers use urgency to bypass good judgment.
+          <strong>Coaching tip:</strong> urgency is a common social engineering tactic—pause before acting.
         </div>
       ) : (
-        <div className="muted" role="status" aria-live="polite">
-          Hint unlocks in {Math.max(0, 5 - seconds)}s…
-        </div>
+        <p className="muted" role="status" aria-live="polite">
+          Coaching tip unlocks in {Math.max(0, 5 - seconds)}s…
+        </p>
       )}
 
       {deeperHintUnlocked ? (
         <div className="hint" role="status" aria-live="polite">
-          <strong>Deeper hint:</strong> verify via a known-good path (bookmark, typed URL, or internal portal), not
-          the message itself.
+          <strong>Policy reminder:</strong> never use links from chat or email—open the portal from your bookmark or
+          intranet.
         </div>
       ) : null}
 
@@ -325,11 +378,12 @@ function TimedDecision() {
         <div className="callout" role="status" aria-live="polite">
           {choice === "verify" ? (
             <>
-              <strong>Good.</strong> You reduced risk by steering them to a trusted flow.
+              <strong>Correct approach.</strong> You redirected Jordan to a trusted channel without sharing
+              credentials.
             </>
           ) : (
             <>
-              <strong>Risky.</strong> Urgency + unclear instructions is exactly when you slow down and verify.
+              <strong>Risky choice.</strong> Attackers often impersonate coworkers to bypass verification steps.
             </>
           )}
         </div>
@@ -338,21 +392,49 @@ function TimedDecision() {
   );
 }
 
-function FinishCourse() {
-  const { progress } = useLessonkit();
-  const { completeCourse } = useCompletion();
-  const done = progress.completedLessonIds.size >= 2;
+function CredentialHygiene() {
+  const [acknowledged, setAcknowledged] = React.useState(false);
 
   return (
-    <section aria-label="Finish course" className="panel">
-      <p className="muted">
-        Course completion is reactive too: this button enables once you’ve actually completed prior lessons.
-      </p>
-      <button onClick={() => completeCourse()} disabled={!done}>
-        Mark course complete
-      </button>
-      {!done ? <p className="muted">Complete the first two lessons (use Next/Previous) to enable.</p> : null}
+    <section aria-label="Credential hygiene" className="panel">
+      <div className="callout">
+        <h3 className="section-title">Policy highlights</h3>
+        <ul>
+          <li>Use a unique password or passkey for every work system.</li>
+          <li>Approve MFA prompts only when you initiated the sign-in.</li>
+          <li>Never store passwords in chat, tickets, or shared documents.</li>
+        </ul>
+        <label className="checkbox-row">
+          <input
+            type="checkbox"
+            checked={acknowledged}
+            onChange={(e) => setAcknowledged(e.target.checked)}
+          />
+          I will enable MFA on my primary work account this week.
+        </label>
+      </div>
+      <Reflection prompt="Name one habit you will change after this module (e.g., password manager, hardware key)." />
     </section>
   );
 }
 
+function FinishCourse() {
+  const { progress } = useLessonkit();
+  const { completeCourse } = useCompletion();
+  const done = progress.completedLessonIds.size >= 3;
+
+  return (
+    <section aria-label="Complete course" className="panel">
+      <p className="muted">
+        When you have passed the assessment and visited earlier lessons, mark the module complete for your
+        training record.
+      </p>
+      <button type="button" onClick={() => completeCourse()} disabled={!done}>
+        Mark module complete
+      </button>
+      {!done ? (
+        <p className="muted">Complete the first three lessons, then pass the assessment above.</p>
+      ) : null}
+    </section>
+  );
+}

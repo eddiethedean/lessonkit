@@ -34,11 +34,13 @@ sphinx-build -b html . _build/html
 open _build/html/index.html   # macOS; or open the folder in a browser
 ```
 
-Or use the Makefile:
+Or use the Makefile (builds examples, then Sphinx):
 
 ```bash
 cd docs && make html
 ```
+
+Compiled examples are embedded under **Examples → Live examples**. The Makefile runs `docs/scripts/build-docs-demos.sh` first (Node 20+ at repo root).
 
 ## Custom domain (optional)
 

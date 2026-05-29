@@ -191,3 +191,19 @@ button.copybtn {
 h2#documentation-map {
   margin-top: 2.5rem;
 }
+
+/* Embedded compiled examples */
+.lk-demo-frame {
+  width: 100%;
+  min-height: 640px;
+  height: min(80vh, 900px);
+  border: 1px solid var(--color-background-border);
+  border-radius: 1rem;
+  background: var(--color-background-primary);
+  margin: 1rem 0 1.5rem;
+  box-shadow: 0 8px 30px -12px rgba(15, 23, 42, 0.12);
+}
+
+html[data-theme="dark"] .lk-demo-frame {
+  box-shadow: 0 8px 30px -12px rgba(0, 0, 0, 0.45);
+}

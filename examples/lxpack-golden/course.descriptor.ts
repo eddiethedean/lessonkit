@@ -1,23 +1,25 @@
 import type { LessonkitCourseDescriptor } from "@lessonkit/lxpack";
 
-/**
- * Golden LXPack course descriptor for CI packaging smoke tests.
- * The React app uses in-app step navigation for the knowledge check; only one
- * lesson row is packaged for single-spa layout.
- */
 export const goldenCourseDescriptor: LessonkitCourseDescriptor = {
-  courseId: "lxpack-golden",
-  title: "LessonKit LXPack Golden Course",
+  courseId: "workplace-safety-briefing",
+  title: "Workplace Safety: Warehouse Briefing",
   version: "1.0.0",
   layout: "single-spa",
-  spaLessonId: "intro",
-  lessons: [{ id: "intro", title: "Introduction" }],
+  spaLessonId: "welcome",
+  lessons: [
+    { id: "welcome", title: "Welcome & objectives" },
+    { id: "hazard-walkthrough", title: "Warehouse hazard walkthrough" },
+    { id: "safety-check", title: "Safety knowledge check" },
+  ],
   assessments: [
     {
-      checkId: "ready-check",
-      question: "Did you complete the intro?",
-      choices: ["No", "Yes"],
-      answer: "Yes",
+      checkId: "safety-check",
+      question: "You notice an unmarked wet floor near a blind corner. What should you do first?",
+      choices: [
+        "Walk quickly past before someone else slips",
+        "Barricade the area and notify your supervisor",
+      ],
+      answer: "Barricade the area and notify your supervisor",
       passingScore: 1,
     },
   ],

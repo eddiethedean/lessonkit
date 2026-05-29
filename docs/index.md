@@ -61,6 +61,13 @@ Release notes: [changelog](project/changelog.md) on this site · [GitHub](https:
 ## Documentation map
 
 ```{toctree}
+:maxdepth: 1
+:caption: Examples
+
+examples/index
+```
+
+```{toctree}
 :maxdepth: 2
 :caption: Guides — vibe coding
 

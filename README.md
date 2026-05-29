@@ -191,8 +191,10 @@ lessonkit/
 │   ├── lxpack/          # SCORM / standalone / xAPI / cmi5 export
 │   └── cli/             # lessonkit CLI + bundled template
 ├── examples/
-│   ├── react-vite/      # interactive showcase
-│   └── lxpack-golden/   # packaging reference + CI smoke
+│   ├── react-vite/         # cybersecurity awareness (multi-lesson)
+│   ├── data-privacy/       # GDPR-style compliance onboarding
+│   ├── customer-service/   # de-escalation & branching chat practice
+│   └── lxpack-golden/      # workplace safety + packaging smoke tests
 ├── templates/
 │   └── vite-react/      # source for lessonkit init
 └── docs/                # guides (CLI, packaging, identity, …)
@@ -208,6 +210,7 @@ Full site (Sphinx + Read the Docs): **[lessonkit.readthedocs.io](https://lessonk
 | --- | --- |
 | Vibe coding (AI-assisted, no React required) | [guides/vibe-coding](https://lessonkit.readthedocs.io/en/latest/guides/vibe-coding/index.html) |
 | React developers | [guides/react-developers](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/index.html) |
+| Live compiled examples | [examples](https://lessonkit.readthedocs.io/en/latest/examples/index.html) |
 
 ### Reference (also in repo)
 
