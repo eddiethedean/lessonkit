@@ -4,6 +4,8 @@ test.describe("telemetry harness batching", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/");
     await expect(page.getByTestId("harness-controls")).toBeVisible();
+    // Drain mount lifecycle events (course/lesson started) so the test flush only covers quiz interaction.
+    await page.getByTestId("flush-tracking").click();
     await page.evaluate(() => {
       window.__e2e!.batches.length = 0;
     });
@@ -23,7 +25,6 @@ test.describe("telemetry harness batching", () => {
     });
 
     expect(batchSummary.batchCount).toBeGreaterThanOrEqual(1);
-    expect(batchSummary.names).toContain("course_started");
     expect(batchSummary.names).toContain("quiz_answered");
     expect(batchSummary.names.filter((n) => n === "quiz_answered")).toHaveLength(1);
   });

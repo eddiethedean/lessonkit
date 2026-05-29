@@ -10,10 +10,23 @@ All notable changes to the LessonKit monorepo are documented here. Published pac
 - **E2E telemetry harness** (`e2e/fixtures/telemetry-harness/`): Playwright project for telemetry batching and xAPI queue behavior via `window.__e2e`.
 - **E2E**: Expanded keyboard coverage on golden Vite (lesson nav, knowledge check).
 - **Docs**: Conformance matrix table and CI job map in [export parity guide](docs/guides/react-developers/export-parity.md); expanded [`e2e/README.md`](e2e/README.md); [contributing E2E section](docs/guides/react-developers/contributing-to-the-monorepo.md#e2e-and-conformance).
+- **`PluginHost.deliverTelemetryBatch`**: batch flush hook for events already filtered at emit time (avoids double `onTelemetry` passes).
 
 ### Changed
 
 - Monorepo packages bumped to **0.9.1**; **0.9.x conformance harness** milestone complete per [ROADMAP.md](ROADMAP.md).
+- **`@lessonkit/core`**: `TrackingClient.flush` / `dispose` may return `Promise<void>`; batched `dispose` drains the buffer after in-flight flushes complete.
+- **`@lessonkit/react`**: Provider unmount awaits tracking flush/dispose; `setActiveLesson` flushes batched telemetry after auto-completing the previous lesson.
+
+### Fixed
+
+- **@lessonkit/react**: Duplicate course-level xAPI `initialized` when tracking starts disabled and is enabled later with a transport (bootstrap now marks `course_started` in session storage).
+- **@lessonkit/react**: Plugin `batchSink` no longer re-runs `onTelemetry` on buffered events (prevents silent drops from stateful plugins).
+- **@lessonkit/react**: `Quiz` / `KnowledgeCheck` honor `scoreAssessment` plugins from `LessonkitProvider`.
+- **@lessonkit/react**: Dev warning and flush when `courseId` changes with an injected `config.xapi.client`.
+- **@lessonkit/lxpack**: Validate `outDir` / `outputBaseDir` when `projectRoot` is set; allow `./dist`-style paths; log promote restore failures.
+- **@lessonkit/cli**: Pass `projectRoot` into packaging; map unsafe `--out` paths to `CliError` (`INVALID_PROJECT`); harden `lessonkit init` JSX string escaping.
+- **E2E**: Telemetry harness batching spec drains startup lifecycle events before asserting quiz batch coalescing.
 
 ## [0.9.0] - 2026-05-29
 

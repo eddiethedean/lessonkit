@@ -1059,6 +1059,118 @@ describe("@lessonkit/react runtime", () => {
     expect(getByTestId("sid").textContent).not.toBe("lms-a");
   });
 
+  it("sends one course-level initialized when tracking disabled then enabled with xapi", async () => {
+    const statements: XAPIStatement[] = [];
+    const transport: XAPITransport = async (s) => {
+      statements.push(s);
+    };
+    const courseUrn = "urn:lessonkit:course:course-1";
+    const isCourseInit = (s: XAPIStatement) =>
+      s.object.id === courseUrn &&
+      s.verb === "http://adlnet.gov/expapi/verbs/initialized";
+
+    const { rerender } = render(
+      <LessonkitProvider
+        config={{
+          courseId: "course-1",
+          tracking: { enabled: false },
+          xapi: { transport },
+        }}
+      >
+        <div>child</div>
+      </LessonkitProvider>,
+    );
+
+    await waitFor(() => expect(statements.some(isCourseInit)).toBe(true));
+
+    rerender(
+      <LessonkitProvider
+        config={{
+          courseId: "course-1",
+          tracking: { sink: () => {} },
+          xapi: { transport },
+        }}
+      >
+        <div>child</div>
+      </LessonkitProvider>,
+    );
+
+    await waitFor(() => expect(statements.filter(isCourseInit)).toHaveLength(1));
+  });
+
+  it("flushes batched telemetry when setActiveLesson completes the previous lesson", async () => {
+    const batches: TelemetryEvent[][] = [];
+    const batchSink = async (events: TelemetryEvent[]) => {
+      batches.push(events);
+    };
+
+    function Nav() {
+      const { setActiveLesson } = useLessonkit();
+      return (
+        <button type="button" onClick={() => setActiveLesson("lesson-2")}>
+          next
+        </button>
+      );
+    }
+
+    const { getByRole } = render(
+      <LessonkitProvider
+        config={{
+          courseId: "course-1",
+          tracking: { batchSink, batch: { enabled: true, flushIntervalMs: 60_000 } },
+          xapi: { enabled: false },
+        }}
+      >
+        <Lesson title="One" lessonId="lesson-1">
+          <div>one</div>
+        </Lesson>
+        <Lesson title="Two" lessonId="lesson-2">
+          <div>two</div>
+        </Lesson>
+        <Nav />
+      </LessonkitProvider>,
+    );
+
+    await waitFor(() => expect(batches.some((b) => b.some((e) => e.name === "lesson_started"))).toBe(true));
+    fireEvent.click(getByRole("button", { name: "next" }));
+    await waitFor(() =>
+      expect(batches.some((b) => b.some((e) => e.name === "lesson_completed"))).toBe(true),
+    );
+  });
+
+  it("Quiz uses scoreAssessment plugin when registered", async () => {
+    const events: TelemetryEvent[] = [];
+    const plugin = defineLessonkitPlugin({
+      id: "scorer",
+      version: "1",
+      kind: "assessment",
+      scoreAssessment: () => ({ score: 1, maxScore: 1, passed: true }),
+    });
+
+    const { getByLabelText } = render(
+      <Course
+        title="Course"
+        courseId="course-1"
+        config={{
+          plugins: [plugin],
+          tracking: { sink: (e) => void events.push(e) },
+          xapi: { enabled: false },
+        }}
+      >
+        <Lesson title="Lesson" lessonId="lesson-1">
+          <Quiz checkId="check-1" question="Q?" choices={["wrong", "right"]} answer="right" />
+        </Lesson>
+      </Course>,
+    );
+
+    fireEvent.click(getByLabelText("wrong"));
+    await waitFor(() =>
+      expect(events.some((e) => e.name === "quiz_completed" && e.data?.checkId === "check-1")).toBe(
+        true,
+      ),
+    );
+  });
+
   it("emits course_started when tracking is re-enabled after disabled mount", async () => {
     const events: TelemetryEvent[] = [];
 

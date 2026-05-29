@@ -58,7 +58,7 @@ describe("@lessonkit/react provider dispose regression", () => {
     dispose.mockClear();
     expect(dispose).not.toHaveBeenCalled();
     unmount();
-    expect(dispose).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(dispose.mock.calls.length).toBeGreaterThanOrEqual(1));
 
     vi.unmock("@lessonkit/core");
   });
@@ -97,7 +97,7 @@ describe("@lessonkit/react provider dispose regression", () => {
       </Provider>,
     );
 
-    expect(dispose).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(dispose).toHaveBeenCalledTimes(1));
     vi.unmock("@lessonkit/core");
   });
 

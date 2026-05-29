@@ -3,6 +3,7 @@ import { materializeLessonkitProject } from "@lxpack/validators";
 import { descriptorToInterchange } from "./interchange";
 import { resolveSpaDirs } from "./spaDirs";
 import type { LessonkitCourseDescriptor } from "./types";
+import { assertResolvedPathUnderRoot } from "./spaPath";
 import { validateDescriptor } from "./validateDescriptor";
 
 export type WriteLxpackProjectOptions = {
@@ -43,6 +44,9 @@ export async function writeLxpackProject(
 
   const descriptor = validation.descriptor;
   const outDir = resolve(options.outDir);
+  if (options.projectRoot) {
+    assertResolvedPathUnderRoot(resolve(options.projectRoot), outDir);
+  }
   const spaDirs = await resolveSpaDirs({ ...options, descriptor });
   const interchange = descriptorToInterchange(descriptor);
 

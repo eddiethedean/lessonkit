@@ -12,6 +12,7 @@ import {
 } from "@lxpack/api";
 import { descriptorToInterchange } from "./interchange";
 import { resolveSpaDirs } from "./spaDirs";
+import { assertResolvedPathUnderRoot, isSafeRelativeSpaPath } from "./spaPath";
 import { validateDescriptor } from "./validateDescriptor";
 import type { WriteLxpackProjectOptions } from "./writeProject";
 
@@ -109,7 +110,14 @@ export async function promoteStagingToOutDir(stagingDir: string, outDir: string)
     await fsp.rename(tmpPromote, outDir);
   } catch (promoteError) {
     if (hadOutDir) {
-      await fsp.rename(backup, outDir).catch(() => undefined);
+      try {
+        await fsp.rename(backup, outDir);
+      } catch (restoreError) {
+        console.warn(
+          `[lessonkit/lxpack] failed to restore ${outDir} after promote error:`,
+          restoreError instanceof Error ? restoreError.message : restoreError,
+        );
+      }
     }
     await fsp.rm(tmpPromote, { recursive: true, force: true }).catch(() => undefined);
     throw promoteError;
@@ -125,6 +133,19 @@ export async function packageLessonkitCourse(
 ): Promise<PackageLessonkitCourseResult> {
   const { target, output, dir, outputBaseDir, ...writeOpts } = options;
   const outDir = resolve(writeOpts.outDir);
+  const projectRoot = writeOpts.projectRoot ? resolve(writeOpts.projectRoot) : undefined;
+
+  if (projectRoot) {
+    assertResolvedPathUnderRoot(projectRoot, outDir);
+  }
+  if (outputBaseDir && !isSafeRelativeSpaPath(outputBaseDir)) {
+    return {
+      ok: false,
+      courseDir: outDir,
+      target,
+      issues: [{ path: "outputBaseDir", message: `unsafe outputBaseDir: ${outputBaseDir}` }],
+    };
+  }
 
   const descriptorValidation = validateDescriptor(writeOpts.descriptor);
   if (!descriptorValidation.ok) {

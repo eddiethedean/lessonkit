@@ -8,6 +8,12 @@ import {
 } from "../src/validateProjectPaths";
 
 describe("validateProjectPaths", () => {
+  it("accepts ./dist style paths under project root", () => {
+    const root = resolve("/tmp/my-project");
+    const issues = validateProjectPaths(root, { spaDistDir: "./dist" });
+    expect(issues).toHaveLength(0);
+  });
+
   it("accepts safe paths under project root", () => {
     const root = resolve("/tmp/my-project");
     const issues = validateProjectPaths(root, {

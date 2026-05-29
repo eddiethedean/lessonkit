@@ -13,14 +13,17 @@ Published packages: `@lessonkit/core`, `@lessonkit/xapi`, `@lessonkit/accessibil
 
 | Item | Status |
 |------|--------|
-| `main` CI green (includes `test:e2e` with telemetry-harness project) | Required |
-| All seven `@lessonkit/*` packages at `0.9.1` in `package.json` | Required |
-| `@lessonkit/react` / `@lessonkit/lxpack` / `@lessonkit/cli` depend on matching `@lessonkit/*@0.9.1` | Required |
-| `lessonkit init` template pins `^0.9.1` for `@lessonkit/*` | Required (`copy-template.mjs`) |
-| `npm run test:e2e` passes (10 specs: golden-vite + telemetry-harness) | Required |
-| `conformance:lxpack` + `conformance:golden` pass | Required |
-| [CHANGELOG.md](CHANGELOG.md) `## [0.9.1]` | Required |
-| Sphinx `docs/conf.py` `release` matches `0.9.1` | Required |
+| `main` CI green (includes `test:e2e` with telemetry-harness project) | Required — verify on push |
+| All seven `@lessonkit/*` packages at `0.9.1` in `package.json` | Done (local) |
+| `@lessonkit/react` / `@lessonkit/lxpack` / `@lessonkit/cli` depend on matching `@lessonkit/*@0.9.1` | Done (local) |
+| `lessonkit init` template pins `^0.9.1` for `@lessonkit/*` | Done (`copy-template.mjs`) |
+| `npm run test:e2e` passes (10 specs: golden-vite + telemetry-harness) | Done (local, 2026-05-29) |
+| `conformance:lxpack` + `conformance:golden` pass | Done (local, 2026-05-29) |
+| [CHANGELOG.md](CHANGELOG.md) `## [0.9.1]` (includes 0.9.1 bugfix pass) | Done (local) |
+| Sphinx `docs/conf.py` `release` matches `0.9.1` | Done |
+| `npm run build` + `npm test` + `npm run typecheck` + `npm run audit:ci` | Done (local, 2026-05-29) |
+| No pending `.changeset/*.md` files | Done (only `config.json`) |
+| Commit all release changes on `main` | Required before tag |
 | Git tag `v0.9.1` | Create when ready to publish to npm |
 
 > **Do not create or push a `v0.9.1` git tag** until you intend to publish to npm.

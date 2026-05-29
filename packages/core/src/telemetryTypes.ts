@@ -71,6 +71,6 @@ export type TelemetryBatchSink = (events: TelemetryEvent[]) => void | Promise<vo
 
 export type TrackingClient = {
   track: (event: TelemetryEvent) => void;
-  flush?: () => void;
-  dispose?: () => void;
+  flush?: () => void | Promise<void>;
+  dispose?: () => void | Promise<void>;
 };

@@ -157,7 +157,17 @@ export function LessonkitProvider(props: { config: LessonkitConfig; children: Re
   const trackingEnabled = config.tracking?.enabled;
 
   useIsoLayoutEffect(() => {
-    if (prevXapiCourseIdRef.current !== courseId) {
+    const courseChanged = prevXapiCourseIdRef.current !== courseId;
+    if (courseChanged) {
+      if (config.xapi?.client) {
+        const g = globalThis as typeof globalThis & { process?: { NODE_ENV?: string } };
+        if (typeof g.process !== "undefined" && g.process.env?.NODE_ENV !== "production") {
+          console.warn(
+            "[lessonkit] courseId changed while using config.xapi.client; flush the client between courses or use config.xapi.transport so the provider can manage the queue.",
+          );
+        }
+        void xapiRef.current?.flush();
+      }
       xapiQueueRef.current = createInMemoryXAPIQueue();
       prevXapiCourseIdRef.current = courseId;
     }
@@ -185,7 +195,10 @@ export function LessonkitProvider(props: { config: LessonkitConfig; children: Re
               user: userRef.current,
             }),
           );
-          if (statement) next.send(statement);
+          if (statement) {
+            next.send(statement);
+            markCourseStarted(defaultStorage, sessionId, cid);
+          }
         } catch {
           // xAPI mapping may skip invalid ids; ignore
         }
@@ -237,8 +250,8 @@ export function LessonkitProvider(props: { config: LessonkitConfig; children: Re
     const batchSink =
       pluginHostRef.current && config.tracking?.batchSink
         ? (events: TelemetryEvent[]) => {
-            const filtered = pluginHostRef.current!.runTelemetryBatch(events, pluginCtx);
-            return config.tracking!.batchSink!(filtered);
+            const delivered = pluginHostRef.current!.deliverTelemetryBatch(events, pluginCtx);
+            return config.tracking!.batchSink!(delivered);
           }
         : config.tracking?.batchSink;
     const next = createTrackingClientFromConfig({
@@ -284,7 +297,7 @@ export function LessonkitProvider(props: { config: LessonkitConfig; children: Re
 
     return () => {
       if (prev !== trackingRef.current) {
-        disposeTrackingClient(prev);
+        void disposeTrackingClient(prev);
       }
     };
   }, [
@@ -381,27 +394,31 @@ export function LessonkitProvider(props: { config: LessonkitConfig; children: Re
       if (!result.didComplete) return;
       syncProgress();
       emitLessonCompleted(lessonId, result.durationMs);
-      void trackingRef.current?.flush?.();
+      void Promise.resolve(trackingRef.current?.flush?.());
     },
     [syncProgress, emitLessonCompleted],
   );
 
-  const unmountTimerIdsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
   useEffect(() => {
     return () => {
-      for (const id of unmountTimerIdsRef.current) clearTimeout(id);
-      unmountTimerIdsRef.current = [];
-
       const client = trackingClientForUnmountRef.current;
-      void xapiRef.current?.flush();
-      const flushTimer = setTimeout(() => {
-        client?.flush?.();
-        const disposeTimer = setTimeout(() => {
-          client?.dispose?.();
-        }, 0);
-        unmountTimerIdsRef.current.push(disposeTimer);
-      }, 0);
-      unmountTimerIdsRef.current.push(flushTimer);
+      void (async () => {
+        try {
+          await xapiRef.current?.flush();
+        } catch {
+          // ignore
+        }
+        try {
+          await client?.flush?.();
+        } catch {
+          // ignore
+        }
+        try {
+          await client?.dispose?.();
+        } catch {
+          // ignore
+        }
+      })();
     };
   }, []);
 
@@ -415,6 +432,7 @@ export function LessonkitProvider(props: { config: LessonkitConfig; children: Re
         const completed = progressRef.current.completeLesson(previous, Date.now());
         if (completed.didComplete) {
           emitLessonCompleted(previous, completed.durationMs);
+          void Promise.resolve(trackingRef.current?.flush?.());
         }
       }
 

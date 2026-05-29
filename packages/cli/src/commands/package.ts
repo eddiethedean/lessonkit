@@ -74,6 +74,7 @@ export async function runPackage(opts: PackageOptions): Promise<CliJsonResult> {
     descriptor: project.course,
     outDir,
     spaDistDir: distDir,
+    projectRoot: project.root,
     target,
     output,
     dir,

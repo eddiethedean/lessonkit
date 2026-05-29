@@ -45,7 +45,13 @@ async function isDirEmptyOrDotfilesOnly(dir: string): Promise<boolean> {
 }
 
 function escapeJsxString(value: string): string {
-  return value.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+  return value
+    .replace(/\\/g, "\\\\")
+    .replace(/"/g, '\\"')
+    .replace(/\{/g, "\\{")
+    .replace(/\}/g, "\\}")
+    .replace(/</g, "\\u003c")
+    .replace(/\r\n|\n|\r/g, "\\n");
 }
 
 async function copyTemplate(src: string, dest: string): Promise<void> {

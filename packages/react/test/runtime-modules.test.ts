@@ -151,10 +151,10 @@ describe("@lessonkit/react runtime modules", () => {
     expect(events).toHaveLength(1);
   });
 
-  it("telemetry: disposeTrackingClient calls flush+dispose when present", () => {
+  it("telemetry: disposeTrackingClient calls flush+dispose when present", async () => {
     const flush = vi.fn();
     const dispose = vi.fn();
-    disposeTrackingClient({ track: () => {}, flush, dispose });
+    await disposeTrackingClient({ track: () => {}, flush, dispose });
     expect(flush).toHaveBeenCalledTimes(1);
     expect(dispose).toHaveBeenCalledTimes(1);
   });

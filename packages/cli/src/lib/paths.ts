@@ -1,5 +1,6 @@
 import { resolve } from "node:path";
 import { resolveSafePackageOutputOverride, type ExportTarget } from "@lessonkit/lxpack";
+import { CliError, EXIT_INVALID_PROJECT } from "./errors.js";
 import type { LessonkitProject } from "./project.js";
 
 export function resolveDistDir(project: LessonkitProject): string {
@@ -18,8 +19,13 @@ export function resolvePackageOutput(
   const outputBaseDir = project.paths.outputBaseDir;
 
   if (override) {
-    const resolved = resolveSafePackageOutputOverride(project.root, override);
-    return { output: resolved, dir: target === "standalone", outputBaseDir };
+    try {
+      const resolved = resolveSafePackageOutputOverride(project.root, override);
+      return { output: resolved, dir: target === "standalone", outputBaseDir };
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      throw new CliError(message, { code: "INVALID_PROJECT", exitCode: EXIT_INVALID_PROJECT });
+    }
   }
 
   if (target === "standalone") {

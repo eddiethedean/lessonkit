@@ -3,6 +3,7 @@ import { visuallyHiddenStyle } from "@lessonkit/accessibility";
 import type { BlockId, CheckId, CourseId, LessonId } from "@lessonkit/core";
 import { LessonkitProvider } from "./context";
 import { useCompletion, useLessonkit, useQuizState } from "./hooks";
+import { buildPluginContext } from "./runtime/plugins";
 import { warnInvalidComponentId } from "./runtime/validateComponentId";
 
 export function Course(props: {
@@ -105,6 +106,7 @@ export function Quiz(props: {
   warnInvalidComponentId(props.checkId, "checkId");
 
   const quiz = useQuizState();
+  const { plugins, config, progress, session } = useLessonkit();
   const [selected, setSelected] = useState<string | null>(null);
   const completedRef = useRef(false);
   const questionId = useId();
@@ -128,7 +130,25 @@ export function Quiz(props: {
               checked={selected === c}
               onChange={() => {
                 setSelected(c);
-                const correct = c === props.answer;
+                const pluginCtx = buildPluginContext({
+                  courseId: config.courseId,
+                  sessionId: session.sessionId,
+                  attemptId: session.attemptId,
+                });
+                const custom = plugins?.scoreAssessment(
+                  {
+                    checkId: props.checkId,
+                    lessonId: progress.activeLessonId,
+                    response: c,
+                  },
+                  pluginCtx,
+                );
+                const correct = custom
+                  ? (custom.passed ??
+                    (custom.maxScore != null && custom.maxScore > 0
+                      ? custom.score / custom.maxScore >= 1
+                      : custom.score > 0))
+                  : c === props.answer;
                 quiz.answer({
                   checkId: props.checkId,
                   question: props.question,
@@ -137,7 +157,12 @@ export function Quiz(props: {
                 });
                 if (correct && !completedRef.current) {
                   completedRef.current = true;
-                  quiz.complete({ checkId: props.checkId, score: 1, maxScore: 1, passingScore: 1 });
+                  quiz.complete({
+                    checkId: props.checkId,
+                    score: custom?.score ?? 1,
+                    maxScore: custom?.maxScore ?? 1,
+                    passingScore: 1,
+                  });
                 }
               }}
             />

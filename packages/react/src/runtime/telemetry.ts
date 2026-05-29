@@ -24,9 +24,17 @@ export function createTrackingClientFromConfig(config: { tracking?: TelemetryCon
   });
 }
 
-export function disposeTrackingClient(client: TrackingClient | null | undefined): void {
-  client?.flush?.();
-  client?.dispose?.();
+export async function disposeTrackingClient(client: TrackingClient | null | undefined): Promise<void> {
+  try {
+    await client?.flush?.();
+  } catch {
+    // ignore
+  }
+  try {
+    await client?.dispose?.();
+  } catch {
+    // ignore
+  }
 }
 
 export function buildTelemetryEvent(opts: {

@@ -69,6 +69,8 @@ export type PluginHost = {
   disposeAll: () => void;
   runTelemetry: (event: TelemetryEvent, ctx: LessonkitPluginContext) => TelemetryEvent | null;
   runTelemetryBatch: (events: TelemetryEvent[], ctx: LessonkitPluginContext) => TelemetryEvent[];
+  /** Invoke only `onTelemetryBatch` hooks; events were already filtered at emit time. */
+  deliverTelemetryBatch: (events: TelemetryEvent[], ctx: LessonkitPluginContext) => TelemetryEvent[];
   composeTrackingSink: (
     sink: TelemetrySink | undefined,
     ctx: LessonkitPluginContext,
@@ -128,6 +130,16 @@ export function createPluginHost(plugins: readonly LessonkitPlugin[] = []): Plug
     return filtered;
   };
 
+  const deliverTelemetryBatch = (
+    events: TelemetryEvent[],
+    ctx: LessonkitPluginContext,
+  ): TelemetryEvent[] => {
+    for (const plugin of list) {
+      plugin.onTelemetryBatch?.(events, ctx);
+    }
+    return events;
+  };
+
   const composeTrackingSink = (
     sink: TelemetrySink | undefined,
     ctx: LessonkitPluginContext,
@@ -158,6 +170,7 @@ export function createPluginHost(plugins: readonly LessonkitPlugin[] = []): Plug
     disposeAll,
     runTelemetry,
     runTelemetryBatch,
+    deliverTelemetryBatch,
     composeTrackingSink,
     scoreAssessment,
   };

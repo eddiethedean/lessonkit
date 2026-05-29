@@ -113,6 +113,26 @@ describe("createPluginHost", () => {
     }
   });
 
+  it("deliverTelemetryBatch runs only batch hooks without re-filtering", () => {
+    const seen: TelemetryEvent[] = [];
+    const host = createPluginHost([
+      defineLessonkitPlugin({
+        id: "once",
+        version: "1",
+        kind: "analytics",
+        onTelemetry: (event) => (seen.includes(event) ? null : (seen.push(event), event)),
+        onTelemetryBatch: (events) => {
+          expect(events).toHaveLength(1);
+        },
+      }),
+    ]);
+    const events = [baseEvent];
+    host.runTelemetry(events[0]!, ctx);
+    const delivered = host.deliverTelemetryBatch(events, ctx);
+    expect(delivered).toHaveLength(1);
+    expect(seen).toHaveLength(1);
+  });
+
   it("runs onTelemetryBatch after filtering", () => {
     const batch = vi.fn();
     const host = createPluginHost([
