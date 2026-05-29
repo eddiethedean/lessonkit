@@ -166,10 +166,10 @@ button.copybtn {
   border-radius: 0.375rem;
 }
 
-/* Sidebar */
-.sidebar-brand-text {
-  font-weight: 700;
-  letter-spacing: -0.02em;
+/* Sidebar — LK mark + wordmark in logo.svg */
+.sidebar-logo {
+  max-width: min(100%, 11.5rem);
+  height: auto;
 }
 
 .sidebar-tree .reference {

@@ -7,7 +7,7 @@ from datetime import datetime
 project = "LessonKit"
 copyright = f"{datetime.now().year}, LessonKit contributors"
 author = "LessonKit contributors"
-release = "0.7.0"
+release = "0.8.0"
 
 extensions = [
     "myst_parser",
@@ -100,7 +100,7 @@ html_theme_options = {
         "color-api-name": "#f8fafc",
         "color-api-pre-name": "#94a3b8",
     },
-    "sidebar_hide_name": False,
+    "sidebar_hide_name": True,
     "top_of_page_buttons": ["view", "edit"],
     "footer_icons": [
         {
