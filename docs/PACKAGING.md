@@ -54,11 +54,11 @@ One build output per lesson (multi-SCO friendly).
 ## Assessments and passing scores
 
 - **Packaged YAML** (`assessments/*.yaml`): `passingScore` is an **absolute** point threshold (default `1` for a single-question check).
-- **Embedded SPA bridge** (`window.parent.lxpackBridge.v1.submitAssessment`): `score` is **0–1** (scaled). `@lessonkit/react` divides `score / maxScore` from `quiz_completed` telemetry; use `normalizeAssessmentScore` from `@lessonkit/lxpack/bridge` for custom integrations.
+- **Embedded SPA bridge** (`window.parent.lxpackBridge.v1.submitAssessment`): `score` and `passingScore` are **0–1** (scaled). `@lessonkit/react` divides `score / maxScore` and `passingScore / maxScore` from `quiz_completed` telemetry; use `normalizeAssessmentScore` and `normalizeAssessmentPassingScore` from `@lessonkit/lxpack/bridge` for custom integrations.
 
 ## Packaging failures and stale output
 
-`packageLessonkitCourse` writes to a temporary directory first and only replaces `outDir` after validate + build succeed, so a failed run does not overwrite a previously good project. Re-packaging clears prior SPA output under `dist/` (or each lesson `spaPath`) before copying fresh build artifacts.
+`packageLessonkitCourse` writes to a temporary directory first and atomically swaps it into `outDir` only after validate + build succeed, so a failed run does not overwrite a previously good project. Re-packaging clears prior SPA output under `dist/` (or each lesson `spaPath`) before copying fresh build artifacts.
 
 ## Output layout (stable)
 

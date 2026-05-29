@@ -74,6 +74,30 @@ describe("lxpackBridge", () => {
     vi.unstubAllGlobals();
   });
 
+  it("scales passingScore by maxScore for the bridge", () => {
+    const submitAssessment = vi.fn();
+    vi.stubGlobal("window", {
+      parent: { lxpackBridge: { v1: { submitAssessment } } },
+    } as unknown as Window);
+
+    forwardTelemetryToLxpack(
+      buildTrackEvent({
+        name: "quiz_completed",
+        courseId: "c",
+        lessonId: "l",
+        sessionId: "s",
+        data: { checkId: "q1", score: 2, maxScore: 4, passingScore: 2 },
+      }),
+    );
+
+    expect(submitAssessment).toHaveBeenCalledWith({
+      id: "q1",
+      score: 0.5,
+      passingScore: 0.5,
+    });
+    vi.unstubAllGlobals();
+  });
+
   it("uses legacy parent.lxpack and ignores quiz without checkId", () => {
     const completeLesson = vi.fn();
     const submitAssessment = vi.fn();

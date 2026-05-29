@@ -1,4 +1,4 @@
-import { mkdir, mkdtemp, rename, rm } from "node:fs/promises";
+import * as fsp from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { tmpdir } from "node:os";
 import {
@@ -80,6 +80,45 @@ export async function buildLessonkitProject(
   } as BuildCourseOptions);
 }
 
+async function pathExists(path: string): Promise<boolean> {
+  try {
+    await fsp.access(path);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Atomically replace `outDir` with the packaged tree at `stagingDir`.
+ * Restores the previous `outDir` when promote fails after a backup rename.
+ */
+export async function promoteStagingToOutDir(stagingDir: string, outDir: string): Promise<void> {
+  const tmpPromote = `${outDir}.tmp-promote`;
+  const backup = `${outDir}.bak`;
+
+  await fsp.rename(stagingDir, tmpPromote);
+
+  const hadOutDir = await pathExists(outDir);
+  if (hadOutDir) {
+    await fsp.rename(outDir, backup);
+  }
+
+  try {
+    await fsp.rename(tmpPromote, outDir);
+  } catch (promoteError) {
+    if (hadOutDir) {
+      await fsp.rename(backup, outDir).catch(() => undefined);
+    }
+    await fsp.rm(tmpPromote, { recursive: true, force: true }).catch(() => undefined);
+    throw promoteError;
+  }
+
+  if (hadOutDir) {
+    await fsp.rm(backup, { recursive: true, force: true }).catch(() => undefined);
+  }
+}
+
 export async function packageLessonkitCourse(
   options: PackageLessonkitCourseOptions,
 ): Promise<PackageLessonkitCourseResult> {
@@ -100,7 +139,7 @@ export async function packageLessonkitCourse(
   }
 
   const descriptor = descriptorValidation.descriptor;
-  const stagingDir = await mkdtemp(join(tmpdir(), "lessonkit-lxpack-"));
+  const stagingDir = await fsp.mkdtemp(join(tmpdir(), "lessonkit-lxpack-"));
   let promoted = false;
 
   try {
@@ -124,7 +163,7 @@ export async function packageLessonkitCourse(
     }
 
     const outputBase = outputBaseDir ?? ".lxpack/out";
-    await mkdir(join(courseDir, outputBase), { recursive: true });
+    await fsp.mkdir(join(courseDir, outputBase), { recursive: true });
 
     const defaultOutput =
       output ??
@@ -153,9 +192,8 @@ export async function packageLessonkitCourse(
       };
     }
 
-    await rm(outDir, { recursive: true, force: true });
-    await mkdir(dirname(outDir), { recursive: true });
-    await rename(stagingDir, outDir);
+    await fsp.mkdir(dirname(outDir), { recursive: true });
+    await promoteStagingToOutDir(stagingDir, outDir);
     promoted = true;
 
     const remapArtifactPath = (artifactPath: string | undefined): string | undefined => {
@@ -180,7 +218,7 @@ export async function packageLessonkitCourse(
     };
   } finally {
     if (!promoted) {
-      await rm(stagingDir, { recursive: true, force: true }).catch(() => undefined);
+      await fsp.rm(stagingDir, { recursive: true, force: true }).catch(() => undefined);
     }
   }
 }

@@ -35,7 +35,7 @@ See [READTHEDOCS.md](https://github.com/eddiethedean/lessonkit/blob/main/docs/RE
 | Telemetry | [reference/telemetry](https://lessonkit.readthedocs.io/en/latest/reference/telemetry.html) | [TELEMETRY.md](https://github.com/eddiethedean/lessonkit/blob/main/docs/TELEMETRY.md) |
 | Theming | [reference/theming](https://lessonkit.readthedocs.io/en/latest/reference/theming.html) | [THEMING.md](https://github.com/eddiethedean/lessonkit/blob/main/docs/THEMING.md) |
 | Accessibility | [reference/accessibility](https://lessonkit.readthedocs.io/en/latest/reference/accessibility.html) | [ACCESSIBILITY.md](https://github.com/eddiethedean/lessonkit/blob/main/docs/ACCESSIBILITY.md) |
-| LXPack upgrades | [reference/lxpack-upgrades](https://lessonkit.readthedocs.io/en/latest/reference/lxpack-upgrades.html) | [LXPACK_UPGRADES_FOR_LESSONKIT.md](https://github.com/eddiethedean/lessonkit/blob/main/docs/LXPACK_UPGRADES_FOR_LESSONKIT.md) |
+| LXPack interoperability | [reference/lxpack-upgrades](https://lessonkit.readthedocs.io/en/latest/reference/lxpack-upgrades.html) | [LXPACK_UPGRADE_PLAN_FOR_MAINTAINERS.md](https://github.com/eddiethedean/lessonkit/blob/main/docs/LXPACK_UPGRADE_PLAN_FOR_MAINTAINERS.md) · [historical checklist](https://github.com/eddiethedean/lessonkit/blob/main/docs/LXPACK_UPGRADES_FOR_LESSONKIT.md) |
 
 Edit the source markdown files; Sphinx pulls them in via `reference/*` wrappers.
 

@@ -170,6 +170,54 @@ describe("@lessonkit/react provider dispose regression", () => {
     expect(started?.courseId).toBe("course-strict");
   });
 
+  it("does not dispose the active tracking client during StrictMode remount", async () => {
+    const disposedIds: number[] = [];
+    let latestClientId = 0;
+
+    vi.resetModules();
+    vi.doMock("@lessonkit/core", async () => {
+      const actual = await vi.importActual<typeof import("@lessonkit/core")>("@lessonkit/core");
+      return {
+        ...actual,
+        createTrackingClient: () => {
+          const id = ++latestClientId;
+          return {
+            track: vi.fn(),
+            flush: vi.fn(),
+            dispose: () => {
+              disposedIds.push(id);
+            },
+          };
+        },
+      };
+    });
+
+    const mod = await import("../src");
+    const { LessonkitProvider: Provider } = mod;
+
+    const { unmount } = render(
+      <React.StrictMode>
+        <Provider config={{ courseId: "course-strict-dispose" }}>
+          <div>child</div>
+        </Provider>
+      </React.StrictMode>,
+    );
+
+    await waitFor(() => expect(latestClientId).toBeGreaterThanOrEqual(1));
+    const activeClientId = latestClientId;
+    expect(disposedIds).not.toContain(activeClientId);
+
+    const disposedBeforeUnmount = disposedIds.length;
+    vi.useFakeTimers();
+    unmount();
+    await vi.runAllTimersAsync();
+    vi.useRealTimers();
+
+    expect(disposedIds.length).toBeGreaterThan(disposedBeforeUnmount);
+
+    vi.unmock("@lessonkit/core");
+  });
+
   it("completeLesson is idempotent for telemetry", async () => {
     const events: TelemetryEvent[] = [];
 

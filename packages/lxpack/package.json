@@ -1,6 +1,6 @@
 {
   "name": "@lessonkit/lxpack",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "private": false,
   "description": "LXPack export adapter for LessonKit courses (SCORM, standalone, xAPI, cmi5).",
   "license": "Apache-2.0",
@@ -53,8 +53,8 @@
     "lint": "echo \"(no lint configured yet)\""
   },
   "dependencies": {
-    "@lessonkit/core": "0.8.0",
-    "@lessonkit/themes": "0.8.0",
+    "@lessonkit/core": "0.8.1",
+    "@lessonkit/themes": "0.8.1",
     "@lxpack/api": "^0.4.0"
   },
   "devDependencies": {

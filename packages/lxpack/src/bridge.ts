@@ -31,9 +31,21 @@ export function normalizeAssessmentScore(opts: {
   return opts.score / maxScore;
 }
 
-/** Bridge passing threshold (0–1 scale). Defaults to 1 when omitted or invalid. */
-export function normalizeAssessmentPassingScore(passingScore?: number): number {
-  return typeof passingScore === "number" && passingScore > 0 ? passingScore : 1;
+/**
+ * Scale a raw passing threshold to 0–1 for the LXPack parent bridge.
+ * Uses the same `maxScore` denominator as `normalizeAssessmentScore`. Defaults to 1 when omitted or invalid.
+ */
+export function normalizeAssessmentPassingScore(opts?: {
+  passingScore?: number;
+  maxScore?: number;
+}): number {
+  const passingScore = opts?.passingScore;
+  if (typeof passingScore !== "number" || !Number.isFinite(passingScore) || passingScore <= 0) {
+    return 1;
+  }
+  const maxScore =
+    typeof opts?.maxScore === "number" && opts.maxScore > 0 ? opts.maxScore : 1;
+  return passingScore / maxScore;
 }
 
 function getBridge(): LxpackBridgeV1 | null {

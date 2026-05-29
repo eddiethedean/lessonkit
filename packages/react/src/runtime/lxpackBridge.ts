@@ -57,7 +57,10 @@ export function forwardTelemetryToLxpack(
       bridge.submitAssessment?.({
         id: data.checkId,
         score: scaled,
-        passingScore: normalizeAssessmentPassingScore(data.passingScore),
+        passingScore: normalizeAssessmentPassingScore({
+          passingScore: data.passingScore,
+          maxScore: data.maxScore,
+        }),
       });
       return;
     }

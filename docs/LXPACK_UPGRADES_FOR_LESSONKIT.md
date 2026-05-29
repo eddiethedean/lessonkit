@@ -1,5 +1,7 @@
 # LXPack upgrades for LessonKit interoperability
 
+> **For LXPack maintainers:** see **[LXPACK_UPGRADE_PLAN_FOR_MAINTAINERS.md](LXPACK_UPGRADE_PLAN_FOR_MAINTAINERS.md)** for the forward-looking upgrade plan (responsibility shifts, proposed APIs, release sequence). This page is the historical checklist and LessonKit-side integration status.
+
 This document captures the improvements we wanted in [LXPack](https://github.com/eddiethedean/lxpack)
 so it works better as the **packaging and LMS export layer** for
 [LessonKit](https://github.com/eddiethedean/lessonkit), plus what LessonKit should do next.

@@ -45,4 +45,4 @@ import { notifyLxpackLessonComplete } from "@lessonkit/lxpack/bridge";
 
 `@lessonkit/react` forwards `lesson_completed`, `course_completed`, and `quiz_completed` automatically when `window.parent.lxpackBridge.v1` is present (`config.lxpack.bridge: "off"` to disable).
 
-For interoperability notes, see [LXPack upgrades](https://lessonkit.readthedocs.io/en/latest/reference/lxpack-upgrades.html).
+For interoperability notes, see [LXPack upgrades](https://lessonkit.readthedocs.io/en/latest/reference/lxpack-upgrades.html). LXPack maintainers: [upgrade plan for maintainers](https://github.com/eddiethedean/lessonkit/blob/main/docs/LXPACK_UPGRADE_PLAN_FOR_MAINTAINERS.md).

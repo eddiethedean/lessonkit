@@ -5,9 +5,23 @@ Published packages: `@lessonkit/core`, `@lessonkit/xapi`, `@lessonkit/accessibil
 ## Prerequisites
 
 - `main` is green (see [CI workflow](.github/workflows/ci.yml)).
-- All `packages/*/package.json` versions match the release (e.g. `0.8.0`).
+- All `packages/*/package.json` versions match the release (e.g. `0.8.1`).
 - [CHANGELOG.md](CHANGELOG.md) documents the release.
 - No pending files in [`.changeset/`](.changeset/) that would run `changeset version` and bump versions unexpectedly (this repo publishes via **git tags**, not `changeset publish`).
+
+### 0.8.1 checklist (before tagging)
+
+| Item | Status |
+|------|--------|
+| `main` CI green | Required |
+| All seven `@lessonkit/*` packages at `0.8.1` in `package.json` | Required |
+| `@lessonkit/react` / `@lessonkit/lxpack` / `@lessonkit/cli` depend on matching `@lessonkit/*@0.8.1` | Required |
+| `lessonkit init` template pins `^0.8.1` for `@lessonkit/*` | Required |
+| [CHANGELOG.md](CHANGELOG.md) `## [0.8.1]` documents fixes | Required |
+| No pending `.changeset/*.md` files | Required |
+| Git tag `v0.8.1` | Create only when ready to publish |
+
+> **Do not create or push a `v0.8.1` git tag** until you intend to publish to npm.
 
 ### 0.8.0 checklist (before tagging)
 

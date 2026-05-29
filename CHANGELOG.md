@@ -3,6 +3,15 @@
 All notable changes to the LessonKit monorepo are documented here. Published packages use the
 [`@lessonkit/*`](https://www.npmjs.com/org/lessonkit) scope.
 
+## [0.8.1] - 2026-05-29
+
+### Fixed
+
+- **@lessonkit/lxpack/bridge**: Scale `passingScore` to 0–1 when `maxScore` is provided (matches `normalizeAssessmentScore`).
+- **@lessonkit/lxpack**: Atomic promote of packaged `outDir` so a failed `rename` does not delete the previous course tree.
+- **@lessonkit/react**: Emit `course_started` before `lesson_started` when `courseId` changes; reset xAPI queue on `courseId` change.
+- **@lessonkit/react**: Harden tracking client dispose on provider unmount.
+
 ## [0.8.0] - 2026-05-28
 
 ### Added

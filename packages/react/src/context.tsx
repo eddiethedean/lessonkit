@@ -117,6 +117,7 @@ export function LessonkitProvider(props: { config: LessonkitConfig; children: Re
   const xapiQueueRef = useRef(createInMemoryXAPIQueue());
   const xapiRef = useRef<XAPIClient | null>(null);
   const [xapi, setXapi] = useState<XAPIClient | null>(null);
+  const prevXapiCourseIdRef = useRef(config.courseId);
 
   const xapiEnabled = config.xapi?.enabled;
   const xapiClient = config.xapi?.client;
@@ -124,6 +125,11 @@ export function LessonkitProvider(props: { config: LessonkitConfig; children: Re
   const courseId = config.courseId;
 
   useIsoLayoutEffect(() => {
+    if (prevXapiCourseIdRef.current !== courseId) {
+      xapiQueueRef.current = createInMemoryXAPIQueue();
+      prevXapiCourseIdRef.current = courseId;
+    }
+
     const prev = xapiRef.current;
     const next = createXapiClientFromConfig(config, xapiQueueRef.current);
     xapiRef.current = next;
@@ -170,6 +176,7 @@ export function LessonkitProvider(props: { config: LessonkitConfig; children: Re
   }, [xapiEnabled, xapiClient, xapiTransport, courseId]);
 
   const trackingRef = useRef<TrackingClient>(createTrackingClient());
+  const trackingClientForUnmountRef = useRef<TrackingClient>(trackingRef.current);
   const [tracking, setTracking] = useState<TrackingClient>(() => trackingRef.current);
 
   const trackingEnabled = config.tracking?.enabled;
@@ -183,6 +190,7 @@ export function LessonkitProvider(props: { config: LessonkitConfig; children: Re
     const prev = trackingRef.current;
     const next = createTrackingClientFromConfig(config);
     trackingRef.current = next;
+    trackingClientForUnmountRef.current = next;
     setTracking(next);
 
     const sessionId = sessionIdRef.current;
@@ -252,12 +260,6 @@ export function LessonkitProvider(props: { config: LessonkitConfig; children: Re
     progressRef.current = createProgressController();
     syncProgress();
 
-    if (previousActiveLesson) {
-      progressRef.current.setActiveLesson(previousActiveLesson, Date.now());
-      syncProgress();
-      track("lesson_started", { lessonId: previousActiveLesson }, { lessonId: previousActiveLesson });
-    }
-
     const sessionId = sessionIdRef.current;
     const cid = config.courseId;
     if (!hasCourseStarted(defaultStorage, sessionId, cid)) {
@@ -274,6 +276,12 @@ export function LessonkitProvider(props: { config: LessonkitConfig; children: Re
         }),
         { lxpackBridge: lxpackBridgeModeRef.current },
       );
+    }
+
+    if (previousActiveLesson) {
+      progressRef.current.setActiveLesson(previousActiveLesson, Date.now());
+      syncProgress();
+      track("lesson_started", { lessonId: previousActiveLesson }, { lessonId: previousActiveLesson });
     }
   }, [config.courseId, syncProgress, track]);
 
@@ -300,7 +308,7 @@ export function LessonkitProvider(props: { config: LessonkitConfig; children: Re
 
   useEffect(() => {
     return () => {
-      const client = trackingRef.current;
+      const client = trackingClientForUnmountRef.current;
       void xapiRef.current?.flush();
       setTimeout(() => {
         client?.flush?.();

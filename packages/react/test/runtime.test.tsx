@@ -741,6 +741,49 @@ describe("@lessonkit/react runtime", () => {
         1,
       ),
     );
+
+    const courseBStartedIdx = events.findIndex(
+      (e) => e.name === "course_started" && e.courseId === "course-b",
+    );
+    const courseBLessonStartedIdx = events.findIndex(
+      (e) => e.name === "lesson_started" && e.courseId === "course-b",
+    );
+    expect(courseBStartedIdx).toBeGreaterThanOrEqual(0);
+    expect(courseBLessonStartedIdx).toBeGreaterThanOrEqual(0);
+    expect(courseBStartedIdx).toBeLessThan(courseBLessonStartedIdx);
+  });
+
+  it("drops queued xAPI when courseId changes", async () => {
+    const statements: XAPIStatement[] = [];
+    const failingTransport = vi.fn(async () => {
+      throw new Error("network");
+    });
+    const okTransport = vi.fn(async (s: XAPIStatement) => {
+      statements.push(s);
+    });
+
+    const { rerender } = render(
+      <LessonkitProvider config={{ courseId: "course-a", xapi: { transport: failingTransport } }}>
+        <Lesson title="Lesson" lessonId="lesson-1">
+          <div>child</div>
+        </Lesson>
+      </LessonkitProvider>,
+    );
+
+    await waitFor(() => expect(failingTransport).toHaveBeenCalled());
+
+    rerender(
+      <LessonkitProvider config={{ courseId: "course-b", xapi: { transport: okTransport } }}>
+        <Lesson title="Lesson" lessonId="lesson-1">
+          <div>child</div>
+        </Lesson>
+      </LessonkitProvider>,
+    );
+
+    await waitFor(() => expect(okTransport).toHaveBeenCalled());
+    expect(statements.length).toBeGreaterThan(0);
+    expect(statements.every((s) => s.object.id?.includes("course-b"))).toBe(true);
+    expect(statements.some((s) => s.object.id?.includes("course-a"))).toBe(false);
   });
 
   it("Quiz legend uses visually hidden styles without sr-only class", () => {
