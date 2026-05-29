@@ -26,7 +26,7 @@
   position: relative;
 }
 
-.lk-hero h1 {
+.lk-hero-title {
   font-size: clamp(2rem, 4vw, 2.75rem);
   font-weight: 800;
   letter-spacing: -0.03em;
@@ -38,10 +38,15 @@
   -webkit-text-fill-color: transparent;
 }
 
-html[data-theme="dark"] .lk-hero h1 {
+html[data-theme="dark"] .lk-hero-title {
   background: linear-gradient(120deg, #f8fafc 0%, #60a5fa 100%);
   -webkit-background-clip: text;
   background-clip: text;
+}
+
+/* Hide duplicate page title above hero (Furo renders the H1 separately) */
+article.bd-article > h1:first-of-type {
+  display: none;
 }
 
 .lk-hero .lk-lead {

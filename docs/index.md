@@ -1,3 +1,5 @@
+# LessonKit documentation
+
 ```{raw} html
 <div class="lk-hero">
   <div class="lk-hero-badges">
@@ -5,7 +7,7 @@
     <span class="lk-badge">React-first</span>
     <span class="lk-badge">SCORM · xAPI · cmi5</span>
   </div>
-  <h1>Build learning experiences that ship to your LMS</h1>
+  <p class="lk-hero-title">Build learning experiences that ship to your LMS</p>
   <p class="lk-lead">
     LessonKit is a framework for accessible, trackable courses—authored in React,
     packaged for SCORM and modern learning platforms, with telemetry and xAPI built in.
@@ -15,13 +17,12 @@
 
 Pick the path that matches how you work:
 
-:::{grid} 1 2 2 2
+::::{grid} 2
 :gutter: 3
 
-:::{grid-item-card} ✨ Vibe coding
+:::{grid-item-card} Vibe coding
 :link: guides/vibe-coding/index
 :link-type: doc
-:class-header: text-center
 
 **No React required.** Use Cursor, Copilot, or ChatGPT with copy-paste prompts to scaffold a course, edit content, preview locally, and package for your LMS.
 
@@ -29,10 +30,9 @@ Pick the path that matches how you work:
 **Start vibe coding →**
 :::
 
-:::{grid-item-card} ⚛️ React developers
+:::{grid-item-card} React developers
 :link: guides/react-developers/index
 :link-type: doc
-:class-header: text-center
 
 **You know React.** Compose `Course` / `Lesson` / `Quiz`, wire telemetry and xAPI, theme with `ThemeProvider`, and export with the CLI or `@lessonkit/lxpack`.
 
@@ -40,7 +40,7 @@ Pick the path that matches how you work:
 **Open developer guides →**
 :::
 
-:::
+::::
 
 ```{raw} html
 <div class="lk-callout">

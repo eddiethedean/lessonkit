@@ -39,6 +39,26 @@ jobs:
       - name: Coverage
         run: npm run coverage
 
+  docs:
+    name: Docs (Sphinx)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: docs/requirements.txt
+
+      - name: Install dependencies
+        run: pip install -r docs/requirements.txt
+
+      - name: Build HTML
+        run: sphinx-build -b html docs docs/_build/html -W
+
   packaging:
     name: Packaging smoke (Node 20)
     runs-on: ubuntu-latest

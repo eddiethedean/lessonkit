@@ -46,7 +46,7 @@ In the RTD project → **Admin** → **Domains**, add e.g. `docs.lessonkit.dev` 
 
 ## CI
 
-GitHub Actions runs `sphinx-build -W` on every push to `main` and on pull requests (see `.github/workflows/docs.yml`).
+GitHub Actions runs `sphinx-build -W` on every push to `main` and on pull requests (see `.github/workflows/checks.yml`, `docs` job).
 
 ## Editing guides
 

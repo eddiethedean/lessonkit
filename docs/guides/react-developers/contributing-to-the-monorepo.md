@@ -33,7 +33,7 @@ sphinx-build -b html . _build/html
 open _build/html/index.html
 ```
 
-Read the Docs uses [`.readthedocs.yaml`](https://github.com/eddiethedean/lessonkit/blob/main/.readthedocs.yaml) at the repo root. Setup: [READTHEDOCS.md](https://github.com/eddiethedean/lessonkit/blob/main/docs/READTHEDOCS.md).
+Read the Docs uses [`.readthedocs.yaml`](https://github.com/eddiethedean/lessonkit/blob/main/.readthedocs.yaml) at the repo root. CI validates docs via the `docs` job in [`.github/workflows/checks.yml`](https://github.com/eddiethedean/lessonkit/blob/main/.github/workflows/checks.yml). Setup: [READTHEDOCS.md](https://github.com/eddiethedean/lessonkit/blob/main/docs/READTHEDOCS.md).
 
 ## Releases
 
