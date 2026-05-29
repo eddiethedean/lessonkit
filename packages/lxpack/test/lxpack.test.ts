@@ -1,4 +1,4 @@
-import { mkdir, mkdtemp, readFile, rm } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { afterEach, describe, expect, it } from "vitest";
@@ -264,6 +264,22 @@ describe("writeLxpackProject", () => {
 });
 
 describe("writeLxpackProject errors", () => {
+  it("rejects outDir outside projectRoot when projectRoot is set", async () => {
+    const root = await makeTempDir();
+    const dist = join(root, "dist");
+    await mkdir(dist, { recursive: true });
+    await writeFile(join(dist, "index.html"), "<html></html>", "utf-8");
+
+    await expect(
+      writeLxpackProject({
+        descriptor: baseDescriptor,
+        outDir: join(root, "..", "outside"),
+        spaDistDir: dist,
+        projectRoot: root,
+      }),
+    ).rejects.toThrow(/unsafe path escapes project root/);
+  });
+
   it("throws when descriptor is invalid", async () => {
     const root = await makeTempDir();
     await expect(

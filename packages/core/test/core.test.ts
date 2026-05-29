@@ -128,6 +128,23 @@ describe("@lessonkit/core", () => {
     clearIntervalSpy.mockRestore();
   });
 
+  it("dispose drains tail events via repeated flush in drainAll", async () => {
+    const batchSink = vi.fn(async () => {
+      await Promise.resolve();
+    });
+    const client = createTrackingClient({
+      batchSink,
+      batch: { enabled: true, flushIntervalMs: 0, maxBatchSize: 1 },
+    });
+
+    client.track(interactionEvent("t1"));
+    client.track(interactionEvent("t2"));
+    await client.dispose?.();
+
+    const totalDelivered = batchSink.mock.calls.reduce((n, [events]) => n + events.length, 0);
+    expect(totalDelivered).toBe(2);
+  });
+
   it("dispose flushes buffered events to sink", async () => {
     const sink = vi.fn(async () => {});
     const client = createTrackingClient({

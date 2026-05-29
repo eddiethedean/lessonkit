@@ -48,6 +48,43 @@ beforeEach(() => {
 });
 
 describe("packageLessonkitCourse errors", () => {
+  it("returns ok false for unsafe outputBaseDir", async () => {
+    const root = await makeTempDir();
+    const dist = join(root, "dist");
+    await mkdir(dist, { recursive: true });
+    await writeFile(join(dist, "index.html"), "<html></html>", "utf-8");
+
+    const result = await packageLessonkitCourse({
+      descriptor,
+      outDir: join(root, "course"),
+      spaDistDir: dist,
+      target: "scorm12",
+      outputBaseDir: "../../../evil",
+    });
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.issues.some((i) => i.path === "outputBaseDir")).toBe(true);
+    }
+  });
+
+  it("rejects outDir outside projectRoot when projectRoot is set", async () => {
+    const root = await makeTempDir();
+    const dist = join(root, "dist");
+    await mkdir(dist, { recursive: true });
+    await writeFile(join(dist, "index.html"), "<html></html>", "utf-8");
+
+    await expect(
+      packageLessonkitCourse({
+        descriptor,
+        outDir: join(root, "..", "outside-course"),
+        spaDistDir: dist,
+        projectRoot: root,
+        target: "scorm12",
+      }),
+    ).rejects.toThrow(/unsafe path escapes project root/);
+  });
+
   it("returns ok false when descriptor is invalid", async () => {
     const root = await makeTempDir();
     const result = await packageLessonkitCourse({

@@ -1138,13 +1138,13 @@ describe("@lessonkit/react runtime", () => {
     );
   });
 
-  it("Quiz uses scoreAssessment plugin when registered", async () => {
+  it("Quiz uses scoreAssessment plugin with maxScore ratio", async () => {
     const events: TelemetryEvent[] = [];
     const plugin = defineLessonkitPlugin({
-      id: "scorer",
+      id: "scorer-ratio",
       version: "1",
       kind: "assessment",
-      scoreAssessment: () => ({ score: 1, maxScore: 1, passed: true }),
+      scoreAssessment: () => ({ score: 1, maxScore: 1 }),
     });
 
     const { getByLabelText } = render(
@@ -1164,6 +1164,39 @@ describe("@lessonkit/react runtime", () => {
     );
 
     fireEvent.click(getByLabelText("wrong"));
+    await waitFor(() =>
+      expect(events.some((e) => e.name === "quiz_completed" && e.data?.checkId === "check-1")).toBe(
+        true,
+      ),
+    );
+  });
+
+  it("Quiz uses scoreAssessment plugin with score-only fallback", async () => {
+    const events: TelemetryEvent[] = [];
+    const plugin = defineLessonkitPlugin({
+      id: "scorer-score",
+      version: "1",
+      kind: "assessment",
+      scoreAssessment: () => ({ score: 1, maxScore: 0 }),
+    });
+
+    const { getByLabelText } = render(
+      <Course
+        title="Course"
+        courseId="course-1"
+        config={{
+          plugins: [plugin],
+          tracking: { sink: (e) => void events.push(e) },
+          xapi: { enabled: false },
+        }}
+      >
+        <Lesson title="Lesson" lessonId="lesson-1">
+          <Quiz checkId="check-1" question="Q?" choices={["x", "y"]} answer="right" />
+        </Lesson>
+      </Course>,
+    );
+
+    fireEvent.click(getByLabelText("x"));
     await waitFor(() =>
       expect(events.some((e) => e.name === "quiz_completed" && e.data?.checkId === "check-1")).toBe(
         true,
@@ -1192,6 +1225,87 @@ describe("@lessonkit/react runtime", () => {
     );
 
     await waitFor(() => expect(events.some((e) => e.name === "course_started")).toBe(true));
+  });
+
+  it("warns and flushes injected xapi client when courseId changes in development", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    vi.stubEnv("NODE_ENV", "development");
+
+    const client = {
+      send: vi.fn(),
+      flush: vi.fn().mockResolvedValue(undefined),
+      queueSize: () => 0,
+      startedLesson: vi.fn(),
+      completeLesson: vi.fn(),
+      completeCourse: vi.fn(),
+    };
+
+    try {
+      const { rerender } = render(
+        <LessonkitProvider config={{ courseId: "course-a", xapi: { client } }}>
+          <div>child</div>
+        </LessonkitProvider>,
+      );
+
+      rerender(
+        <LessonkitProvider config={{ courseId: "course-b", xapi: { client } }}>
+          <div>child</div>
+        </LessonkitProvider>,
+      );
+
+      await waitFor(() =>
+        expect(warn).toHaveBeenCalledWith(expect.stringMatching(/courseId changed/)),
+      );
+      expect(client.flush).toHaveBeenCalled();
+    } finally {
+      vi.unstubAllEnvs();
+      warn.mockRestore();
+    }
+  });
+
+  it("swallows flush errors on provider unmount", async () => {
+    const trackingFlush = vi.fn().mockRejectedValue(new Error("tracking flush failed"));
+    const trackingDispose = vi.fn().mockRejectedValue(new Error("tracking dispose failed"));
+    const xapiClient = {
+      send: vi.fn(),
+      flush: vi.fn().mockRejectedValue(new Error("xapi flush failed")),
+      queueSize: () => 0,
+      startedLesson: vi.fn(),
+      completeLesson: vi.fn(),
+      completeCourse: vi.fn(),
+    };
+
+    vi.resetModules();
+    vi.doMock("@lessonkit/core", async () => {
+      const actual = await vi.importActual<typeof import("@lessonkit/core")>("@lessonkit/core");
+      return {
+        ...actual,
+        createTrackingClient: () => ({
+          track: vi.fn(),
+          flush: trackingFlush,
+          dispose: trackingDispose,
+        }),
+      };
+    });
+
+    const mod = await import("../src");
+    const { unmount } = render(
+      <mod.LessonkitProvider
+        config={{
+          courseId: "course-1",
+          tracking: { sink: () => {} },
+          xapi: { client: xapiClient },
+        }}
+      >
+        <div>child</div>
+      </mod.LessonkitProvider>,
+    );
+
+    unmount();
+    await waitFor(() => expect(xapiClient.flush).toHaveBeenCalled());
+    await waitFor(() => expect(trackingFlush).toHaveBeenCalled());
+    await waitFor(() => expect(trackingDispose).toHaveBeenCalled());
+    vi.unmock("@lessonkit/core");
   });
 
   it("drops queued xAPI when courseId changes", async () => {
