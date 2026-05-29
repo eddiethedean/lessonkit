@@ -1,7 +1,7 @@
 # Storybook (placeholder)
 
 [![Documentation](https://readthedocs.org/projects/lessonkit/badge/?version=latest)](https://lessonkit.readthedocs.io/en/latest/)
-[![License](https://img.shields.io/github/license/eddiethedean/lessonkit)](../../LICENSE)
+[![License](https://img.shields.io/github/license/eddiethedean/lessonkit)](https://github.com/eddiethedean/lessonkit/blob/main/LICENSE)
 
 Planned: component documentation for `@lessonkit/react`, linked from the [components & hooks guide](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/components-and-hooks.html).
 

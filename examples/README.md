@@ -1,7 +1,7 @@
 # LessonKit examples
 
 [![Documentation](https://readthedocs.org/projects/lessonkit/badge/?version=latest)](https://lessonkit.readthedocs.io/en/latest/examples/index.html)
-[![License](https://img.shields.io/github/license/eddiethedean/lessonkit)](../LICENSE)
+[![License](https://img.shields.io/github/license/eddiethedean/lessonkit)](https://github.com/eddiethedean/lessonkit/blob/main/LICENSE)
 
 Runnable Vite + React courses with a **shared modern LMS shell** (`_shared/lms-ui.css`, `_shared/course-ui.tsx`): top bar with progress ring, curriculum sidebar, lesson cards, and themed variants. Each demo still uses different scenarios and content patterns with `@lessonkit/react`.
 
@@ -30,4 +30,4 @@ Swap the workspace name for any example. See the [React quickstart](https://less
 bash docs/scripts/build-docs-demos.sh
 ```
 
-Then open [examples on Read the Docs](https://lessonkit.readthedocs.io/en/latest/examples/index.html) or build Sphinx locally per [docs/README.md](../docs/README.md).
+Then open [examples on Read the Docs](https://lessonkit.readthedocs.io/en/latest/examples/index.html) or build Sphinx locally per [docs/README.md](https://github.com/eddiethedean/lessonkit/blob/main/docs/README.md).

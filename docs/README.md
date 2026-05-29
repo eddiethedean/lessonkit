@@ -1,7 +1,7 @@
 # Documentation
 
 [![Documentation](https://readthedocs.org/projects/lessonkit/badge/?version=latest)](https://lessonkit.readthedocs.io/en/latest/)
-[![License](https://img.shields.io/github/license/eddiethedean/lessonkit)](../LICENSE)
+[![License](https://img.shields.io/github/license/eddiethedean/lessonkit)](https://github.com/eddiethedean/lessonkit/blob/main/LICENSE)
 
 LessonKit documentation is built with **Sphinx** and published on **[Read the Docs](https://lessonkit.readthedocs.io/en/latest/)**.
 
@@ -23,23 +23,23 @@ open _build/html/index.html
 
 ## Publish on Read the Docs
 
-See [READTHEDOCS.md](READTHEDOCS.md). Configuration lives at the repo root: [`.readthedocs.yaml`](../.readthedocs.yaml).
+See [READTHEDOCS.md](https://github.com/eddiethedean/lessonkit/blob/main/docs/READTHEDOCS.md). Configuration lives at the repo root: [`.readthedocs.yaml`](https://github.com/eddiethedean/lessonkit/blob/main/.readthedocs.yaml).
 
 ## Reference (published pages)
 
 | Topic | Read the Docs | Source markdown |
 | --- | --- | --- |
-| CLI | [reference/cli](https://lessonkit.readthedocs.io/en/latest/reference/cli.html) | [CLI.md](CLI.md) |
-| Packaging | [reference/packaging](https://lessonkit.readthedocs.io/en/latest/reference/packaging.html) | [PACKAGING.md](PACKAGING.md) |
-| Identity | [reference/identity](https://lessonkit.readthedocs.io/en/latest/reference/identity.html) | [IDENTITY.md](IDENTITY.md) |
-| Telemetry | [reference/telemetry](https://lessonkit.readthedocs.io/en/latest/reference/telemetry.html) | [TELEMETRY.md](TELEMETRY.md) |
-| Theming | [reference/theming](https://lessonkit.readthedocs.io/en/latest/reference/theming.html) | [THEMING.md](THEMING.md) |
-| Accessibility | [reference/accessibility](https://lessonkit.readthedocs.io/en/latest/reference/accessibility.html) | [ACCESSIBILITY.md](ACCESSIBILITY.md) |
-| LXPack upgrades | [reference/lxpack-upgrades](https://lessonkit.readthedocs.io/en/latest/reference/lxpack-upgrades.html) | [LXPACK_UPGRADES_FOR_LESSONKIT.md](LXPACK_UPGRADES_FOR_LESSONKIT.md) |
+| CLI | [reference/cli](https://lessonkit.readthedocs.io/en/latest/reference/cli.html) | [CLI.md](https://github.com/eddiethedean/lessonkit/blob/main/docs/CLI.md) |
+| Packaging | [reference/packaging](https://lessonkit.readthedocs.io/en/latest/reference/packaging.html) | [PACKAGING.md](https://github.com/eddiethedean/lessonkit/blob/main/docs/PACKAGING.md) |
+| Identity | [reference/identity](https://lessonkit.readthedocs.io/en/latest/reference/identity.html) | [IDENTITY.md](https://github.com/eddiethedean/lessonkit/blob/main/docs/IDENTITY.md) |
+| Telemetry | [reference/telemetry](https://lessonkit.readthedocs.io/en/latest/reference/telemetry.html) | [TELEMETRY.md](https://github.com/eddiethedean/lessonkit/blob/main/docs/TELEMETRY.md) |
+| Theming | [reference/theming](https://lessonkit.readthedocs.io/en/latest/reference/theming.html) | [THEMING.md](https://github.com/eddiethedean/lessonkit/blob/main/docs/THEMING.md) |
+| Accessibility | [reference/accessibility](https://lessonkit.readthedocs.io/en/latest/reference/accessibility.html) | [ACCESSIBILITY.md](https://github.com/eddiethedean/lessonkit/blob/main/docs/ACCESSIBILITY.md) |
+| LXPack upgrades | [reference/lxpack-upgrades](https://lessonkit.readthedocs.io/en/latest/reference/lxpack-upgrades.html) | [LXPACK_UPGRADES_FOR_LESSONKIT.md](https://github.com/eddiethedean/lessonkit/blob/main/docs/LXPACK_UPGRADES_FOR_LESSONKIT.md) |
 
 Edit the source markdown files; Sphinx pulls them in via `reference/*` wrappers.
 
 ## Other folders
 
-- [storybook/](storybook/) — planned component gallery
-- [site/](site/) — legacy Docusaurus placeholder (superseded by Read the Docs)
+- [storybook/](https://github.com/eddiethedean/lessonkit/tree/main/docs/storybook) — planned component gallery
+- [site/](https://github.com/eddiethedean/lessonkit/tree/main/docs/site) — legacy Docusaurus placeholder (superseded by Read the Docs)

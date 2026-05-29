@@ -3,7 +3,7 @@
 [![CI](https://github.com/eddiethedean/lessonkit/actions/workflows/ci.yml/badge.svg)](https://github.com/eddiethedean/lessonkit/actions/workflows/ci.yml)
 [![Documentation](https://readthedocs.org/projects/lessonkit/badge/?version=latest)](https://lessonkit.readthedocs.io/en/latest/)
 [![npm](https://img.shields.io/npm/v/@lessonkit/cli.svg)](https://www.npmjs.com/package/@lessonkit/cli)
-[![License](https://img.shields.io/github/license/eddiethedean/lessonkit)](../../LICENSE)
+[![License](https://img.shields.io/github/license/eddiethedean/lessonkit)](https://github.com/eddiethedean/lessonkit/blob/main/LICENSE)
 
 LessonKit CLI — scaffold, dev, build, and package learning experiences.
 
@@ -37,7 +37,7 @@ lessonkit package --target scorm12
 | `lessonkit dev` | Run Vite dev server |
 | `lessonkit build` | Production Vite build |
 | `lessonkit package --target <target>` | Build or package for web / LMS |
-| `lessonkit publish` | Stub — see [`RELEASING.md`](../../RELEASING.md) |
+| `lessonkit publish` | Stub — see [`RELEASING.md`](https://github.com/eddiethedean/lessonkit/blob/main/RELEASING.md) |
 
 ### Package targets
 
@@ -52,4 +52,4 @@ Projects include a `lessonkit.json` at the root. See the [CLI reference](https:/
 
 - [Packaging reference](https://lessonkit.readthedocs.io/en/latest/reference/packaging.html) — LXPack output layout
 - [React quickstart](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/quickstart.html)
-- [`templates/vite-react`](../../templates/vite-react) — starter template
+- [`templates/vite-react`](https://github.com/eddiethedean/lessonkit/tree/main/templates/vite-react) — starter template

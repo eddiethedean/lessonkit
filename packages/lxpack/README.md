@@ -2,7 +2,7 @@
 
 [![Documentation](https://readthedocs.org/projects/lessonkit/badge/?version=latest)](https://lessonkit.readthedocs.io/en/latest/)
 [![npm](https://img.shields.io/npm/v/@lessonkit/lxpack.svg)](https://www.npmjs.com/package/@lessonkit/lxpack)
-[![License](https://img.shields.io/github/license/eddiethedean/lessonkit)](../../LICENSE)
+[![License](https://img.shields.io/github/license/eddiethedean/lessonkit)](https://github.com/eddiethedean/lessonkit/blob/main/LICENSE)
 
 LXPack export adapter for LessonKit — write `lessonkit.json` + `course.yaml`, copy SPA builds, and package to SCORM / standalone / xAPI / cmi5 via [`@lxpack/api`](https://www.npmjs.com/package/@lxpack/api).
 
@@ -33,7 +33,7 @@ const result = await packageLessonkitCourse({
 if (!result.ok) throw new Error("packaging failed");
 ```
 
-See the [packaging reference](https://lessonkit.readthedocs.io/en/latest/reference/packaging.html) and the [`examples/lxpack-golden`](../../examples/lxpack-golden) course.
+See the [packaging reference](https://lessonkit.readthedocs.io/en/latest/reference/packaging.html) and the [`examples/lxpack-golden`](https://github.com/eddiethedean/lessonkit/tree/main/examples/lxpack-golden) course.
 
 ## Browser bridge
 

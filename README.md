@@ -2,13 +2,13 @@
 
 [![CI](https://github.com/eddiethedean/lessonkit/actions/workflows/ci.yml/badge.svg)](https://github.com/eddiethedean/lessonkit/actions/workflows/ci.yml)
 [![Documentation](https://readthedocs.org/projects/lessonkit/badge/?version=latest)](https://lessonkit.readthedocs.io/en/latest/)
-[![License](https://img.shields.io/github/license/eddiethedean/lessonkit)](LICENSE)
+[![License](https://img.shields.io/github/license/eddiethedean/lessonkit)](https://github.com/eddiethedean/lessonkit/blob/main/LICENSE)
 
 **LessonKit** is a React-first framework for building accessible, trackable learning experiences—and shipping them to the LMS. Author courses as components, wire telemetry and xAPI, theme with design tokens, and export SCORM, standalone, xAPI, or cmi5 packages from the same codebase.
 
-**Current release:** [0.7.0](CHANGELOG.md) · Published on npm as [`@lessonkit/*`](https://www.npmjs.com/org/lessonkit)
+**Current release:** [0.7.0](https://github.com/eddiethedean/lessonkit/blob/main/CHANGELOG.md) · Published on npm as [`@lessonkit/*`](https://www.npmjs.com/org/lessonkit)
 
-**Documentation:** [lessonkit.readthedocs.io](https://lessonkit.readthedocs.io/en/latest/) — [vibe coding](https://lessonkit.readthedocs.io/en/latest/guides/vibe-coding/index.html) · [React developers](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/index.html) · [live examples](https://lessonkit.readthedocs.io/en/latest/examples/index.html) (contributors: [docs/README.md](docs/README.md) · [Read the Docs setup](docs/READTHEDOCS.md))
+**Documentation:** [lessonkit.readthedocs.io](https://lessonkit.readthedocs.io/en/latest/) — [vibe coding](https://lessonkit.readthedocs.io/en/latest/guides/vibe-coding/index.html) · [React developers](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/index.html) · [live examples](https://lessonkit.readthedocs.io/en/latest/examples/index.html) (contributors: [docs/README.md](https://github.com/eddiethedean/lessonkit/blob/main/docs/README.md) · [Read the Docs setup](https://github.com/eddiethedean/lessonkit/blob/main/docs/READTHEDOCS.md))
 
 ---
 
@@ -21,7 +21,7 @@
 | **Accessibility** | Semantic structure, focus utilities, reduced-motion helpers, and documented WCAG targets |
 | **Delivery** | Dual export: modern SPA via Vite plus LMS artifacts through [`@lessonkit/lxpack`](https://lessonkit.readthedocs.io/en/latest/reference/packaging.html) |
 
-LessonKit is developer tooling—not a timeline authoring tool. Think **React + telemetry + packaging**, not Storyline-in-a-box. A visual **LessonKit Studio** is planned after framework 1.0; see the [roadmap](https://lessonkit.readthedocs.io/en/latest/project/roadmap.html) ([ROADMAP.md](ROADMAP.md)).
+LessonKit is developer tooling—not a timeline authoring tool. Think **React + telemetry + packaging**, not Storyline-in-a-box. A visual **LessonKit Studio** is planned after framework 1.0; see the [roadmap](https://lessonkit.readthedocs.io/en/latest/project/roadmap.html) ([ROADMAP.md](https://github.com/eddiethedean/lessonkit/blob/main/ROADMAP.md)).
 
 ---
 
@@ -225,15 +225,15 @@ Full site (Sphinx + Read the Docs): **[lessonkit.readthedocs.io](https://lessonk
 | Accessibility | [Accessibility reference](https://lessonkit.readthedocs.io/en/latest/reference/accessibility.html) |
 | LXPack interoperability | [LXPack upgrades](https://lessonkit.readthedocs.io/en/latest/reference/lxpack-upgrades.html) |
 
-Source markdown for reference pages lives under [`docs/`](docs/) (also see [contributing to the monorepo](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/contributing-to-the-monorepo.html)).
+Source markdown for reference pages lives under [`docs/`](https://github.com/eddiethedean/lessonkit/tree/main/docs) (also see [contributing to the monorepo](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/contributing-to-the-monorepo.html)).
 
 ### Project meta
 
-- [Changelog](https://lessonkit.readthedocs.io/en/latest/project/changelog.html) · [CHANGELOG.md](CHANGELOG.md) — release history
-- [RELEASING.md](RELEASING.md) — publish `@lessonkit/*` to npm
-- [Security](https://lessonkit.readthedocs.io/en/latest/project/security.html) · [SECURITY.md](SECURITY.md) — vulnerability reporting
-- [Roadmap](https://lessonkit.readthedocs.io/en/latest/project/roadmap.html) · [PLAN.md](PLAN.md) · [SPEC.md](SPEC.md) · [ROADMAP.md](ROADMAP.md)
-- [docs/LessonKit_Studio_PLAN.md](docs/LessonKit_Studio_PLAN.md) — future visual authoring (post–framework 1.0)
+- [Changelog](https://lessonkit.readthedocs.io/en/latest/project/changelog.html) · [CHANGELOG.md](https://github.com/eddiethedean/lessonkit/blob/main/CHANGELOG.md) — release history
+- [RELEASING.md](https://github.com/eddiethedean/lessonkit/blob/main/RELEASING.md) — publish `@lessonkit/*` to npm
+- [Security](https://lessonkit.readthedocs.io/en/latest/project/security.html) · [SECURITY.md](https://github.com/eddiethedean/lessonkit/blob/main/SECURITY.md) — vulnerability reporting
+- [Roadmap](https://lessonkit.readthedocs.io/en/latest/project/roadmap.html) · [PLAN.md](https://github.com/eddiethedean/lessonkit/blob/main/PLAN.md) · [SPEC.md](https://github.com/eddiethedean/lessonkit/blob/main/SPEC.md) · [ROADMAP.md](https://github.com/eddiethedean/lessonkit/blob/main/ROADMAP.md)
+- [docs/LessonKit_Studio_PLAN.md](https://github.com/eddiethedean/lessonkit/blob/main/docs/LessonKit_Studio_PLAN.md) — future visual authoring (post–framework 1.0)
 
 ---
 
@@ -247,18 +247,18 @@ Source markdown for reference pages lives under [`docs/`](docs/) (also see [cont
 | `npm run coverage` | Coverage across workspaces |
 | `npm run audit:ci` | Dependency audit (CI-aligned) |
 
-Prettier is configured at the repo root. CI runs on Node 18 and 20 (see [.github/workflows/ci.yml](.github/workflows/ci.yml)).
+Prettier is configured at the repo root. CI runs on Node 18 and 20 (see [.github/workflows/ci.yml](https://github.com/eddiethedean/lessonkit/blob/main/.github/workflows/ci.yml)).
 
 ---
 
 ## Versioning
 
-LessonKit follows [semver](https://semver.org/). The **0.x** line evolves quickly; see [CHANGELOG.md](CHANGELOG.md) for breaking changes (notably identity requirements in **0.5.0**).
+LessonKit follows [semver](https://semver.org/). The **0.x** line evolves quickly; see [CHANGELOG.md](https://github.com/eddiethedean/lessonkit/blob/main/CHANGELOG.md) for breaking changes (notably identity requirements in **0.5.0**).
 
-To publish packages from this monorepo, follow [RELEASING.md](RELEASING.md).
+To publish packages from this monorepo, follow [RELEASING.md](https://github.com/eddiethedean/lessonkit/blob/main/RELEASING.md).
 
 ---
 
 ## License
 
-[MIT](LICENSE) — Copyright (c) LessonKit contributors.
+[MIT](https://github.com/eddiethedean/lessonkit/blob/main/LICENSE) — Copyright (c) LessonKit contributors.
