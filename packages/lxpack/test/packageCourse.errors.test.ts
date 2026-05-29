@@ -3,14 +3,14 @@ import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-const { validateCourse, buildCourse } = vi.hoisted(() => ({
-  validateCourse: vi.fn(),
-  buildCourse: vi.fn(),
+const { packageLessonkit } = vi.hoisted(() => ({
+  packageLessonkit: vi.fn(),
 }));
 
 vi.mock("@lxpack/api", () => ({
-  validateCourse,
-  buildCourse,
+  validateCourse: vi.fn(),
+  buildCourse: vi.fn(),
+  packageLessonkit,
 }));
 
 import { packageLessonkitCourse } from "../src/packageCourse";
@@ -37,20 +37,21 @@ afterEach(async () => {
 });
 
 beforeEach(() => {
-  validateCourse.mockResolvedValue({ ok: true, manifest: { title: "Test" }, issues: [] });
-  buildCourse.mockResolvedValue({
+  packageLessonkit.mockResolvedValue({
     ok: true,
     target: "scorm12",
     fileCount: 1,
     outputPath: "/tmp/out.zip",
+    manifest: { title: "Test" },
     issues: [],
   });
 });
 
 describe("packageLessonkitCourse errors", () => {
-  it("returns ok false when validateCourse fails", async () => {
-    validateCourse.mockResolvedValueOnce({
+  it("returns ok false when packageLessonkit fails validation", async () => {
+    packageLessonkit.mockResolvedValueOnce({
       ok: false,
+      target: "scorm12",
       issues: [{ severity: "error", message: "bad course", path: "title" }],
     });
 
@@ -68,11 +69,10 @@ describe("packageLessonkitCourse errors", () => {
 
     expect(result.ok).toBe(false);
     if (!result.ok) expect(result.issues[0]?.message).toContain("bad course");
-    expect(buildCourse).not.toHaveBeenCalled();
   });
 
-  it("returns ok false when buildCourse fails", async () => {
-    buildCourse.mockResolvedValueOnce({
+  it("returns ok false when packageLessonkit build fails", async () => {
+    packageLessonkit.mockResolvedValueOnce({
       ok: false,
       target: "scorm12",
       issues: [{ severity: "error", message: "build failed", path: "dist" }],

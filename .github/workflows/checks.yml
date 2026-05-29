@@ -115,6 +115,34 @@ jobs:
           node ../../packages/cli/dist/bin.js package --target scorm12 --json --no-build | tee /tmp/lk-cli-package.json
           node -e "const r=JSON.parse(require('fs').readFileSync('/tmp/lk-cli-package.json','utf8')); if(!r.ok) { console.error(r); process.exit(1); }"
 
+      - name: LXPack conformance matrix
+        run: npm run conformance:lxpack
+
+      - name: Golden package matrix
+        run: npm run conformance:golden
+
+  e2e:
+    name: E2E (Playwright, Node 20)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: E2E tests
+        run: npm run test:e2e
+
   security-audit:
     name: Security (npm audit)
     runs-on: ubuntu-latest

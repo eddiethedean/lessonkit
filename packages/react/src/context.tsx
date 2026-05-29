@@ -7,7 +7,16 @@ import React, {
   useRef,
   useState,
 } from "react";
-import type { CourseId, LessonId, TelemetryEventName, TelemetryUser, TrackingClient } from "@lessonkit/core";
+import type {
+  CourseId,
+  LessonId,
+  LessonkitPlugin,
+  TelemetryEvent,
+  TelemetryEventName,
+  TelemetryUser,
+  PluginHost,
+  TrackingClient,
+} from "@lessonkit/core";
 import { createTrackingClient } from "@lessonkit/core";
 import type { XAPIClient, XAPITransport } from "@lessonkit/xapi";
 import { createInMemoryXAPIQueue } from "@lessonkit/xapi";
@@ -24,6 +33,11 @@ import {
   migrateCourseStartedMark,
   resolveSessionId,
 } from "./runtime/session";
+import {
+  buildPluginContext,
+  createReactPluginHost,
+  emitTelemetryWithPlugins,
+} from "./runtime/plugins";
 import { createTrackingClientFromConfig, disposeTrackingClient } from "./runtime/telemetry";
 
 export type LessonkitConfig = {
@@ -52,6 +66,8 @@ export type LessonkitConfig = {
     /** Forward completion events to `window.parent.lxpackBridge.v1` when embedded (default `auto`). */
     bridge?: "auto" | "off";
   };
+  /** Framework plugins (analytics, LMS, assessment, interaction, AI). */
+  plugins?: LessonkitPlugin[];
 };
 
 export type { ProgressState };
@@ -70,6 +86,7 @@ export type LessonkitRuntime = {
   completeLesson: (lessonId: LessonId) => void;
   completeCourse: () => void;
   track: (name: TelemetryEventName, data?: unknown, opts?: { lessonId?: LessonId }) => void;
+  plugins: PluginHost | null;
 };
 
 export const LessonkitContext = createContext<LessonkitRuntime | null>(null);
@@ -103,6 +120,10 @@ export function LessonkitProvider(props: { config: LessonkitConfig; children: Re
 
   const lxpackBridgeModeRef = useRef<LxpackBridgeMode>(config.lxpack?.bridge ?? "auto");
   lxpackBridgeModeRef.current = config.lxpack?.bridge ?? "auto";
+
+  const pluginHost = useMemo(() => createReactPluginHost(config.plugins), [config.plugins]);
+  const pluginHostRef = useRef(pluginHost);
+  pluginHostRef.current = pluginHost;
 
   const progressRef = useRef(createProgressController());
   const courseStartedEmittedToSinkRef = useRef(false);
@@ -199,7 +220,24 @@ export function LessonkitProvider(props: { config: LessonkitConfig; children: Re
 
   useIsoLayoutEffect(() => {
     const prev = trackingRef.current;
-    const next = createTrackingClientFromConfig({ tracking: config.tracking });
+    const pluginCtx = buildPluginContext({
+      courseId: courseIdRef.current,
+      sessionId: sessionIdRef.current,
+      attemptId: attemptIdRef.current,
+    });
+    const sink =
+      pluginHostRef.current?.composeTrackingSink(config.tracking?.sink, pluginCtx) ??
+      config.tracking?.sink;
+    const batchSink =
+      pluginHostRef.current && config.tracking?.batchSink
+        ? (events: TelemetryEvent[]) => {
+            const filtered = pluginHostRef.current!.runTelemetryBatch(events, pluginCtx);
+            return config.tracking!.batchSink!(filtered);
+          }
+        : config.tracking?.batchSink;
+    const next = createTrackingClientFromConfig({
+      tracking: { ...config.tracking, sink, batchSink },
+    });
     trackingRef.current = next;
     trackingClientForUnmountRef.current = next;
     setTracking(next);
@@ -215,18 +253,24 @@ export function LessonkitProvider(props: { config: LessonkitConfig; children: Re
       !hasCourseStarted(defaultStorage, sessionId, cid)
     ) {
       markCourseStarted(defaultStorage, sessionId, cid);
-      emitTelemetry(
-        next,
-        xapiRef.current,
-        buildTrackEvent({
+      emitTelemetryWithPlugins({
+        pluginHost: pluginHostRef.current,
+        tracking: next,
+        xapi: xapiRef.current,
+        event: buildTrackEvent({
           name: "course_started",
           courseId: cid,
           sessionId,
           attemptId: attemptIdRef.current,
           user: userRef.current,
         }),
-        { lxpackBridge: lxpackBridgeModeRef.current },
-      );
+        pluginCtx: buildPluginContext({
+          courseId: cid,
+          sessionId,
+          attemptId: attemptIdRef.current,
+        }),
+        lxpackBridge: lxpackBridgeModeRef.current,
+      });
       courseStartedEmittedToSinkRef.current = true;
     } else if (trackingActive) {
       courseStartedEmittedToSinkRef.current = true;
@@ -244,16 +288,23 @@ export function LessonkitProvider(props: { config: LessonkitConfig; children: Re
     batchEnabled,
     batchFlushIntervalMs,
     batchMaxBatchSize,
+    config.plugins,
   ]);
 
-  const emitWithBridge = useCallback(
-    (trackingClient: TrackingClient, event: Parameters<typeof emitTelemetry>[2]) => {
-      emitTelemetry(trackingClient, xapiRef.current, event, {
-        lxpackBridge: lxpackBridgeModeRef.current,
-      });
-    },
-    [],
-  );
+  const emitWithBridge = useCallback((trackingClient: TrackingClient, event: TelemetryEvent) => {
+    emitTelemetryWithPlugins({
+      pluginHost: pluginHostRef.current,
+      tracking: trackingClient,
+      xapi: xapiRef.current,
+      event,
+      pluginCtx: buildPluginContext({
+        courseId: courseIdRef.current,
+        sessionId: sessionIdRef.current,
+        attemptId: attemptIdRef.current,
+      }),
+      lxpackBridge: lxpackBridgeModeRef.current,
+    });
+  }, []);
 
   const track = useCallback(
     (name: TelemetryEventName, data?: unknown, opts?: { lessonId?: LessonId }) => {
@@ -286,18 +337,24 @@ export function LessonkitProvider(props: { config: LessonkitConfig; children: Re
       !hasCourseStarted(defaultStorage, sessionId, cid)
     ) {
       markCourseStarted(defaultStorage, sessionId, cid);
-      emitTelemetry(
-        trackingRef.current,
-        xapiRef.current,
-        buildTrackEvent({
+      emitTelemetryWithPlugins({
+        pluginHost: pluginHostRef.current,
+        tracking: trackingRef.current,
+        xapi: xapiRef.current,
+        event: buildTrackEvent({
           name: "course_started",
           courseId: cid,
           sessionId,
           attemptId: attemptIdRef.current,
           user: userRef.current,
         }),
-        { lxpackBridge: lxpackBridgeModeRef.current },
-      );
+        pluginCtx: buildPluginContext({
+          courseId: cid,
+          sessionId,
+          attemptId: attemptIdRef.current,
+        }),
+        lxpackBridge: lxpackBridgeModeRef.current,
+      });
       courseStartedEmittedToSinkRef.current = true;
     }
   }, [config.courseId, config.tracking?.enabled, syncProgress]);
@@ -375,6 +432,19 @@ export function LessonkitProvider(props: { config: LessonkitConfig; children: Re
   const sessionConfiguredId = config.session?.sessionId;
 
   useEffect(() => {
+    if (!pluginHost) return;
+    const ctx = buildPluginContext({
+      courseId: courseIdRef.current,
+      sessionId: sessionIdRef.current,
+      attemptId: attemptIdRef.current,
+    });
+    pluginHost.setupAll(ctx);
+    return () => {
+      pluginHost.disposeAll();
+    };
+  }, [pluginHost, config.courseId, sessionAttemptId, sessionConfiguredId]);
+
+  useEffect(() => {
     const nextConfigured = config.session?.sessionId;
     const prevConfigured = prevConfiguredSessionIdRef.current;
     if (nextConfigured === prevConfigured) return;
@@ -411,6 +481,7 @@ export function LessonkitProvider(props: { config: LessonkitConfig; children: Re
       completeLesson,
       completeCourse,
       track,
+      plugins: pluginHost,
     }),
     [
       config,
@@ -421,6 +492,7 @@ export function LessonkitProvider(props: { config: LessonkitConfig; children: Re
       completeLesson,
       completeCourse,
       track,
+      pluginHost,
       sessionUser,
       sessionAttemptId,
       sessionConfiguredId,

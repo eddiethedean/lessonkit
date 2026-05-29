@@ -5,24 +5,37 @@ Published packages: `@lessonkit/core`, `@lessonkit/xapi`, `@lessonkit/accessibil
 ## Prerequisites
 
 - `main` is green (see [CI workflow](.github/workflows/ci.yml)).
-- All `packages/*/package.json` versions match the release (e.g. `0.8.1`).
+- All `packages/*/package.json` versions match the release (e.g. `0.9.0`).
 - [CHANGELOG.md](CHANGELOG.md) documents the release.
 - No pending files in [`.changeset/`](.changeset/) that would run `changeset version` and bump versions unexpectedly (this repo publishes via **git tags**, not `changeset publish`).
 
-### 0.8.1 checklist (before tagging)
+### 0.9.0 checklist (before tagging)
 
 | Item | Status |
 |------|--------|
-| `main` CI green | Done (verify latest run on `main`) |
-| All seven `@lessonkit/*` packages at `0.8.1` in `package.json` | Done |
-| `@lessonkit/react` / `@lessonkit/lxpack` / `@lessonkit/cli` depend on matching `@lessonkit/*@0.8.1` | Done |
-| `lessonkit init` template pins `^0.8.1` for `@lessonkit/*` | Done (`copy-template.mjs`) |
-| `templates/vite-react` synced to `packages/cli/template` (`copy-template`; CI enforces) | Done (CI step) |
-| [CHANGELOG.md](CHANGELOG.md) `## [0.8.1]` documents fixes | Done |
+| `main` CI green (includes `test:e2e` and conformance scripts) | Verify latest run on `main` |
+| All seven `@lessonkit/*` packages at `0.9.0` in `package.json` | Done |
+| `@lessonkit/react` / `@lessonkit/lxpack` / `@lessonkit/cli` depend on matching `@lessonkit/*@0.9.0` | Done |
+| `lessonkit init` template pins `^0.9.0` for `@lessonkit/*` | Done (`copy-template.mjs`) |
+| `npm run test:e2e` passes locally (Node 20) | Required |
+| `@lxpack/conformance` matrix script passes in CI | Required |
+| [CHANGELOG.md](CHANGELOG.md) `## [0.9.0]` documents conformance harness | Done |
 | No pending `.changeset/*.md` files | Done (only `config.json`) |
-| Git tag `v0.8.1` | **Not created** — push only when ready to publish to npm |
+| Git tag `v0.9.0` | Create when ready to publish to npm |
 
-> **Do not create or push a `v0.8.1` git tag** until you intend to publish to npm.
+> **Do not create or push a `v0.9.0` git tag** until you intend to publish to npm.
+
+### 0.8.2 checklist (shipped)
+
+| Item | Status |
+|------|--------|
+| Git tag `v0.8.2` | Published |
+
+### 0.8.1 checklist (shipped)
+
+| Item | Status |
+|------|--------|
+| Git tag `v0.8.1` | Published |
 
 ### 0.8.0 checklist (before tagging)
 
@@ -64,8 +77,8 @@ Published packages: `@lessonkit/core`, `@lessonkit/xapi`, `@lessonkit/accessibil
 3. When ready to publish, create and push the version tag (triggers [`.github/workflows/release.yml`](.github/workflows/release.yml)):
 
    ```bash
-   git tag v0.8.1
-   git push origin v0.8.1
+   git tag v0.9.0
+   git push origin v0.9.0
    ```
 
 4. Verify the **Release** workflow on GitHub Actions and packages on [npm](https://www.npmjs.com/org/lessonkit).
@@ -74,7 +87,7 @@ The release job sets each package version from the tag, aligns `@lessonkit/*` de
 
 ## After release
 
-- Confirm npm shows `0.8.1` for each `@lessonkit/*` package.
+- Confirm npm shows `0.9.0` for each `@lessonkit/*` package.
 - Optional: create a GitHub Release from the tag with notes copied from [CHANGELOG.md](CHANGELOG.md).
 
 ## Changesets

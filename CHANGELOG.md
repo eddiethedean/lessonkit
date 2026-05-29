@@ -3,6 +3,30 @@
 All notable changes to the LessonKit monorepo are documented here. Published packages use the
 [`@lessonkit/*`](https://www.npmjs.com/org/lessonkit) scope.
 
+## [0.9.0] - 2026-05-29
+
+### Added
+
+- **Plugin architecture (v1)** in `@lessonkit/core` / `@lessonkit/react`: `LessonkitPlugin`, `createPluginHost`, `config.plugins` on `LessonkitProvider` (telemetry hooks, sink wrapping, assessment scoring slot).
+- **Docs**: [plugins reference](docs/reference/plugins.md), [plugin cookbook](docs/guides/react-developers/plugin-cookbook.md), example `consoleAnalyticsPlugin`.
+- **Conformance harness** (`e2e/`): Playwright e2e for `examples/lxpack-golden` on Vite preview, standalone, and SCORM 1.2 (LMS API mock).
+- **CI**: `@lxpack/conformance` packaging matrix, golden package matrix, and `test:e2e` job (Node 20).
+- **Docs**: [export parity guide](docs/guides/react-developers/export-parity.md), `e2e/README.md`, contributor notes for conformance.
+
+### Changed
+
+- Monorepo packages bumped to **0.9.0**; focus milestone is export parity before framework 1.0.
+
+## [0.8.2] - 2026-05-29
+
+### Changed
+
+- **@lessonkit/lxpack**: Bump `@lxpack/api`, `@lxpack/spa-bridge`, `@lxpack/validators`, and `@lxpack/tracking-schema` to **^0.6.0**; `packageLessonkitCourse()` uses LXPack `packageLessonkit()` instead of hand-built YAML + separate validate/build.
+- **@lessonkit/lxpack**: `descriptorToInterchange()` includes `runtime`, `assessments`, and interchange types from `@lxpack/validators`; `writeLxpackProject()` delegates to `materializeLessonkitProject()` (removed local YAML emitters).
+- **@lessonkit/lxpack/bridge**: Re-export `@lxpack/spa-bridge` and `mapLessonkitTelemetryToBridgeAction` from `@lxpack/tracking-schema`; `telemetryEventToLessonkit()` adapts `@lessonkit/core` events.
+- **@lessonkit/react**: Forward telemetry to the LXPack bridge via the shared tracking map (replacing hand-rolled switch).
+- **@lessonkit/lxpack**: Export `materializeLessonkitProject`, `parseLessonkitInterchange`, and `lessonkitInterchangeSchema` for advanced tooling.
+
 ## [0.8.1] - 2026-05-29
 
 ### Fixed

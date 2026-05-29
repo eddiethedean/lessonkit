@@ -144,6 +144,8 @@ describe("interchange", () => {
     const interchange = descriptorToInterchange(baseDescriptor);
     expect(interchange.format).toBe("lessonkit");
     expect(interchange.lessons).toHaveLength(1);
+    expect(interchange.runtime?.cssVariables?.["--lk-color-primary"]).toBeDefined();
+    expect(interchange.assessments?.[0]?.id).toBe("email-first-step");
   });
 
   it("per-lesson-spa emits one entry per lesson", () => {

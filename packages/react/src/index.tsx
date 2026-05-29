@@ -20,6 +20,17 @@ export type { LessonkitConfig, LessonkitRuntime } from "./context";
 export { LessonkitProvider } from "./context";
 
 export type {
+  AssessmentScoreInput,
+  AssessmentScoreResult,
+  InteractionBlockRegistration,
+  LessonkitPlugin,
+  LessonkitPluginContext,
+  LessonkitPluginKind,
+  PluginHost,
+} from "@lessonkit/core";
+export { createPluginHost, defineLessonkitPlugin } from "@lessonkit/core";
+
+export type {
   ThemeContextValue,
   ThemeMode,
   ThemeProviderProps,

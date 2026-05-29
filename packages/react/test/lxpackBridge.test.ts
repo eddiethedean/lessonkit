@@ -29,6 +29,7 @@ describe("lxpackBridge", () => {
       id: "q1",
       score: 1,
       passingScore: 0.8,
+      maxScore: 1,
     });
     vi.unstubAllGlobals();
   });
@@ -94,6 +95,7 @@ describe("lxpackBridge", () => {
       id: "q1",
       score: 0.5,
       passingScore: 0.5,
+      maxScore: 4,
     });
     vi.unstubAllGlobals();
   });

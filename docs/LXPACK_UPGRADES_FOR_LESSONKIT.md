@@ -8,8 +8,8 @@ so it works better as the **packaging and LMS export layer** for
 
 ## Status
 
-Per project update: **LXPack v0.4.0 implements the suggested features in this document**. That
-shifts this doc from “proposal” to “integration checklist”.
+- **LXPack v0.4.0** — baseline SPA + `@lxpack/api` + `lessonkit.json` merge (historical checklist below).
+- **LXPack v0.6.0** — `packageLessonkit()`, interchange schema in `@lxpack/validators`, `@lxpack/spa-bridge`, `@lxpack/tracking-schema` telemetry map, interchange `runtime` + `assessments`. **LessonKit 0.8.2** integrates these (`^0.6.0`); see [maintainer upgrade plan](LXPACK_UPGRADE_PLAN_FOR_MAINTAINERS.md#status-lxpack-v060--shipped).
 
 LessonKit is React-first authoring (`@lessonkit/react`). LXPack is a manifest-driven compiler and
 runtime (`course.yaml`, markdown/HTML/component lessons, SCORM/xAPI/cmi5 export). The two projects

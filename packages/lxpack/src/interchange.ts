@@ -1,5 +1,10 @@
-import type { LessonkitCourseDescriptor, LessonkitInterchangeV1 } from "./types";
+import type { LessonkitInterchangeV1 } from "@lxpack/validators";
+import { extractAssessments } from "./assessments";
 import { mapLessonkitIds } from "./mapIds";
+import { themeToLxpackRuntime } from "./theme";
+import type { LessonkitCourseDescriptor } from "./types";
+
+export type { LessonkitInterchangeV1 } from "@lxpack/validators";
 
 export type SpaLessonEntry = {
   id: string;
@@ -36,6 +41,9 @@ export function descriptorToInterchange(
   const mapped = mapLessonkitIds(descriptor);
   const spaLessons = resolveSpaLessons(descriptor);
 
+  const runtime = descriptor.theme ? themeToLxpackRuntime(descriptor.theme) : undefined;
+  const assessments = extractAssessments(descriptor);
+
   return {
     format: "lessonkit",
     version: "1",
@@ -49,6 +57,13 @@ export function descriptorToInterchange(
       type: "spa",
       path: l.path,
     })),
-    tracking: descriptor.tracking,
+    tracking: descriptor.tracking as LessonkitInterchangeV1["tracking"],
+    runtime: runtime
+      ? {
+          theme: runtime.theme,
+          cssVariables: runtime.cssVariables,
+        }
+      : undefined,
+    assessments: assessments.length ? assessments : undefined,
   };
 }

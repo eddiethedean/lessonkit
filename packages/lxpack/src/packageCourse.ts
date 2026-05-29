@@ -3,16 +3,17 @@ import { dirname, join, resolve } from "node:path";
 import { tmpdir } from "node:os";
 import {
   buildCourse,
+  packageLessonkit,
   validateCourse,
   type BuildCourseOptions,
   type BuildCourseResult,
   type ExportTarget,
   type ValidateCourseResult,
 } from "@lxpack/api";
-import { extractAssessments } from "./assessments";
-import type { LessonkitCourseDescriptor } from "./types";
+import { descriptorToInterchange } from "./interchange";
+import { resolveSpaDirs } from "./spaDirs";
 import { validateDescriptor } from "./validateDescriptor";
-import { writeLxpackProject, type WriteLxpackProjectOptions } from "./writeProject";
+import type { WriteLxpackProjectOptions } from "./writeProject";
 
 export type { ExportTarget } from "@lxpack/api";
 
@@ -143,41 +144,47 @@ export async function packageLessonkitCourse(
   let promoted = false;
 
   try {
-    const written = await writeLxpackProject({ ...writeOpts, descriptor, outDir: stagingDir });
-    const courseDir = written.outDir;
-    const assessments = extractAssessments(descriptor);
-
-    const validation = await validateLessonkitProject({ courseDir, target });
-    if (!validation.ok) {
+    let spaDirs: Record<string, string>;
+    try {
+      spaDirs = await resolveSpaDirs({ ...writeOpts, descriptor });
+    } catch (err) {
       return {
         ok: false,
         courseDir: outDir,
         target,
-        validation,
-        issues: validation.issues.map((i) => ({
-          path: i.path,
-          message: i.message,
-          severity: i.severity,
-        })),
+        issues: [
+          {
+            path: "spaDirs",
+            message: err instanceof Error ? err.message : String(err),
+          },
+        ],
       };
     }
 
+    const interchange = descriptorToInterchange(descriptor);
     const outputBase = outputBaseDir ?? ".lxpack/out";
-    await fsp.mkdir(join(courseDir, outputBase), { recursive: true });
-
+    await fsp.mkdir(join(stagingDir, outputBase), { recursive: true });
     const defaultOutput =
       output ??
       (dir ? join(outputBase, target) : join(outputBase, `course-${target}.zip`));
 
-    const build = await buildLessonkitProject({
-      courseDir,
+    const build = await packageLessonkit({
+      interchange,
+      spaDirs,
       target,
-      output: defaultOutput.startsWith("/") ? defaultOutput : join(courseDir, defaultOutput),
+      courseDir: stagingDir,
+      output: defaultOutput,
       dir,
-      assessments: assessments.length ? assessments : undefined,
+      outputBaseDir,
+      outputAnchorDir: stagingDir,
+      writeAuthoringFiles: true,
     });
 
     if (!build.ok) {
+      const validation: ValidateCourseResult = {
+        ok: false,
+        issues: build.issues,
+      };
       return {
         ok: false,
         courseDir: outDir,
@@ -192,16 +199,18 @@ export async function packageLessonkitCourse(
       };
     }
 
-    await fsp.mkdir(dirname(outDir), { recursive: true });
-    await promoteStagingToOutDir(stagingDir, outDir);
-    promoted = true;
+    const validation: ValidateCourseResult = {
+      ok: true,
+      manifest: build.manifest,
+      issues: build.issues,
+    };
 
+    const stagingRoot = await fsp.realpath(stagingDir);
     const remapArtifactPath = (artifactPath: string | undefined): string | undefined => {
       if (!artifactPath) return undefined;
       const resolved = resolve(artifactPath);
-      const stagingResolved = resolve(stagingDir);
-      if (resolved === stagingResolved || resolved.startsWith(stagingResolved + "/")) {
-        return join(outDir, resolved.slice(stagingResolved.length + 1));
+      if (resolved === stagingRoot || resolved.startsWith(`${stagingRoot}/`)) {
+        return join(outDir, resolved.slice(stagingRoot.length + 1));
       }
       return artifactPath;
     };
@@ -210,6 +219,10 @@ export async function packageLessonkitCourse(
       "outputPath" in build ? build.outputPath : undefined,
     );
     const remappedOutputDir = remapArtifactPath("outputDir" in build ? build.outputDir : undefined);
+
+    await fsp.mkdir(dirname(outDir), { recursive: true });
+    await promoteStagingToOutDir(stagingDir, outDir);
+    promoted = true;
     const remappedBuild: BuildCourseResult = { ...build };
     if ("outputPath" in remappedBuild && remappedOutputPath !== undefined) {
       remappedBuild.outputPath = remappedOutputPath;

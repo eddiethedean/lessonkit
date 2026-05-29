@@ -1,18 +1,41 @@
 import type { CheckId, LessonId } from "@lessonkit/core";
+import {
+  createLxpackBridgeHost,
+  getLxpackBridge as getLxpackBridgeFromParent,
+  normalizePassingThreshold,
+  normalizeScore,
+  type LxpackBridgeSubmitAssessmentPayload,
+  type LxpackBridgeV1,
+} from "@lxpack/spa-bridge";
 
-export type LxpackBridgeV1 = {
-  completeLesson?: (lessonId: LessonId) => void;
-  completeCourse?: () => void;
-  submitAssessment?: (payload: {
-    id: string;
-    score: number;
-    passingScore?: number;
-  }) => void;
-  track?: (payload: { type: string; id: string; data?: Record<string, unknown> }) => void;
-};
+export type { LxpackBridgeSubmitAssessmentPayload, LxpackBridgeV1 } from "@lxpack/spa-bridge";
+export {
+  createLxpackBridgeHost,
+  DEFAULT_BRIDGE_PASSING_SCORE,
+  getLxpackBridge,
+  LXPACK_BRIDGE_VERSIONS,
+  normalizePassingThreshold,
+  normalizeScore,
+  supportedBridgeVersions,
+} from "@lxpack/spa-bridge";
 
-export type LxpackBridgeHost = {
+export type {
+  LessonkitBridgeAction,
+  LessonkitTelemetryEvent,
+  LessonkitTelemetryEventName,
+  TrackingSchemaEvent,
+} from "@lxpack/tracking-schema";
+export {
+  LESSONKIT_TELEMETRY_EVENTS,
+  mapLessonkitTelemetryToBridgeAction,
+  mapLessonkitTelemetryToLxpack,
+} from "@lxpack/tracking-schema";
+
+export { telemetryEventToLessonkit } from "./telemetry";
+
+type LxpackBridgeHost = {
   lxpackBridge?: { v1?: LxpackBridgeV1 };
+  /** @deprecated Pre-v0.5 host alias; prefer `lxpackBridge.v1`. */
   lxpack?: LxpackBridgeV1;
 };
 
@@ -27,32 +50,30 @@ export function normalizeAssessmentScore(opts: {
   if (typeof opts.score !== "number" || !Number.isFinite(opts.score)) {
     return null;
   }
-  const maxScore = typeof opts.maxScore === "number" && opts.maxScore > 0 ? opts.maxScore : 1;
-  return Math.min(1, opts.score / maxScore);
+  return normalizeScore({ score: opts.score, maxScore: opts.maxScore });
 }
 
 /**
  * Scale a raw passing threshold to 0–1 for the LXPack parent bridge.
- * Uses the same `maxScore` denominator as `normalizeAssessmentScore`. Defaults to 1 when omitted or invalid.
+ * Delegates to `@lxpack/spa-bridge` (default 0.7 when omitted).
  */
 export function normalizeAssessmentPassingScore(opts?: {
   passingScore?: number;
   maxScore?: number;
 }): number {
-  const passingScore = opts?.passingScore;
-  if (typeof passingScore !== "number" || !Number.isFinite(passingScore) || passingScore <= 0) {
-    return 1;
-  }
-  const maxScore =
-    typeof opts?.maxScore === "number" && opts.maxScore > 0 ? opts.maxScore : 1;
-  return Math.min(1, passingScore / maxScore);
+  return normalizePassingThreshold({
+    passingScore: opts?.passingScore,
+    maxScore: opts?.maxScore,
+  });
 }
 
-function getBridge(): LxpackBridgeV1 | null {
+function getBridge(parentWindow?: Window): LxpackBridgeV1 | null {
+  const fromSdk = getLxpackBridgeFromParent(parentWindow);
+  if (fromSdk) return fromSdk;
   if (typeof window === "undefined") return null;
-  const parent = window.parent as (Window & LxpackBridgeHost) | null;
+  const parent = (parentWindow ?? window.parent) as (Window & LxpackBridgeHost) | null;
   if (!parent || parent === window) return null;
-  return parent.lxpackBridge?.v1 ?? parent.lxpack ?? null;
+  return parent.lxpack ?? null;
 }
 
 export function createLxpackBridge(): LxpackBridgeV1 | null {
@@ -77,11 +98,9 @@ export function notifyLxpackCourseComplete(): boolean {
  * Submit assessment results to the parent LXPack bridge.
  * `score` must already be on a 0–1 scale (use `normalizeAssessmentScore` for raw points).
  */
-export function notifyLxpackAssessment(payload: {
-  id: CheckId;
-  score: number;
-  passingScore?: number;
-}): boolean {
+export function notifyLxpackAssessment(
+  payload: LxpackBridgeSubmitAssessmentPayload & { id: CheckId },
+): boolean {
   const bridge = getBridge();
   if (!bridge?.submitAssessment) return false;
   bridge.submitAssessment(payload);

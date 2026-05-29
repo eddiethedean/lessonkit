@@ -37,3 +37,15 @@ export {
 export { createTrackingClient } from "./trackingClient";
 export { createSessionId } from "./ids";
 export { nowIso } from "./time";
+
+export type {
+  AssessmentScoreInput,
+  AssessmentScoreResult,
+  InteractionBlockRegistration,
+  LessonkitPlugin,
+  LessonkitPluginContext,
+  LessonkitPluginKind,
+  PluginHost,
+} from "./plugins";
+
+export { createPluginHost, defineLessonkitPlugin } from "./plugins";

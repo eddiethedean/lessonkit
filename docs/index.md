@@ -3,7 +3,7 @@
 ```{raw} html
 <div class="lk-hero">
   <div class="lk-hero-badges">
-    <span class="lk-badge lk-badge--accent">v0.8.1</span>
+    <span class="lk-badge lk-badge--accent">v0.9.0</span>
     <span class="lk-badge">React-first</span>
     <span class="lk-badge">SCORM · xAPI · cmi5</span>
   </div>
@@ -93,6 +93,7 @@ guides/react-developers/components-and-hooks
 guides/react-developers/telemetry-and-xapi
 guides/react-developers/theming-and-accessibility
 guides/react-developers/packaging-and-cli
+guides/react-developers/export-parity
 guides/react-developers/contributing-to-the-monorepo
 ```
 
@@ -107,6 +108,7 @@ reference/telemetry
 reference/theming
 reference/accessibility
 reference/block-catalog
+reference/plugins
 reference/lxpack-upgrades
 ```
 

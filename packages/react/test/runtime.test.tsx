@@ -2,7 +2,7 @@ import React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, waitFor } from "@testing-library/react";
 import { Course, KnowledgeCheck, Lesson, LessonkitProvider, ProgressTracker, Quiz, Reflection, Scenario, useCompletion, useLessonkit, useProgress, useQuizState, useTracking } from "../src";
-import type { TelemetryEvent } from "@lessonkit/core";
+import { defineLessonkitPlugin, type TelemetryEvent } from "@lessonkit/core";
 import * as xapiModule from "@lessonkit/xapi";
 import type { XAPIStatement, XAPITransport } from "@lessonkit/xapi";
 
@@ -90,6 +90,35 @@ describe("@lessonkit/react runtime", () => {
     expect(quizAnswered.courseId).toBe("course-1");
     expect(quizAnswered.lessonId).toBe("lesson-1");
     expect(typeof quizAnswered.sessionId).toBe("string");
+  });
+
+  it("plugins can filter telemetry via onTelemetry", async () => {
+    const events: TelemetryEvent[] = [];
+    const dropInteractions = defineLessonkitPlugin({
+      id: "test.drop-interaction",
+      version: "1",
+      kind: "analytics",
+      onTelemetry: (event) => (event.name === "interaction" ? null : event),
+    });
+
+    render(
+      <LessonkitProvider
+        config={{
+          courseId: "course-1",
+          plugins: [dropInteractions],
+          tracking: { sink: (e: TelemetryEvent) => events.push(e) },
+        }}
+      >
+        <Lesson title="Lesson" lessonId="lesson-1">
+          <div>child</div>
+        </Lesson>
+      </LessonkitProvider>,
+    );
+
+    await waitFor(() => {
+      expect(events.some((e) => e.name === "course_started")).toBe(true);
+    });
+    expect(events.some((e) => e.name === "interaction")).toBe(false);
   });
 
   it("QuizState.complete emits quiz_completed", async () => {

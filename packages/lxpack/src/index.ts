@@ -42,3 +42,23 @@ export {
 } from "./packageCourse";
 
 export type { ExportTarget } from "./packageCourse";
+
+export type {
+  LessonkitBridgeAction,
+  LessonkitTelemetryEvent,
+  LessonkitTelemetryEventName,
+  TrackingSchemaEvent,
+} from "@lxpack/tracking-schema";
+export {
+  LESSONKIT_TELEMETRY_EVENTS,
+  mapLessonkitTelemetryToBridgeAction,
+  mapLessonkitTelemetryToLxpack,
+} from "@lxpack/tracking-schema";
+export { telemetryEventToLessonkit } from "./telemetry";
+
+export type { MaterializeLessonkitOptions, MaterializeLessonkitResult } from "@lxpack/validators";
+export {
+  lessonkitInterchangeSchema,
+  materializeLessonkitProject,
+  parseLessonkitInterchange,
+} from "@lxpack/validators";

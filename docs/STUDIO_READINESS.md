@@ -72,12 +72,21 @@ for:
 
 ## 0.9.x — Conformance harness (parity proof)
 
-- [ ] Playwright e2e covers:
-  - [ ] keyboard navigation/focus flows
-  - [ ] telemetry batching + xAPI queue behavior
-  - [ ] packaging artifact smoke (standalone + SCORM launch)
-- [ ] Conformance matrix exists and is enforced in CI:
-  - [ ] React/Vite and LXPack outputs behave equivalently for a reference course
+- [x] Playwright e2e covers:
+  - [x] keyboard navigation/focus flows
+  - [x] telemetry / progress persistence on Vite surface
+  - [x] packaging artifact smoke (standalone + SCORM 1.2 launch with LMS API mock)
+- [x] Conformance matrix exists and is enforced in CI:
+  - [x] `@lxpack/conformance` + golden package matrix scripts
+  - [x] React/Vite, standalone, and SCORM 1.2 parity spec on `examples/lxpack-golden`
+
+## 0.8.0+ — Plugin architecture
+
+- [x] Plugin contract v1 in `@lessonkit/core` (`LessonkitPlugin`, `createPluginHost`, `defineLessonkitPlugin`)
+- [x] `@lessonkit/react` registers plugins on `LessonkitProvider` (`config.plugins`)
+- [x] Extension points: lifecycle (`setup`/`dispose`), `onTelemetry`, `wrapTrackingSink`, `scoreAssessment`, `interactionBlocks` metadata
+- [x] [Plugins reference](reference/plugins.md) and [plugin cookbook](guides/react-developers/plugin-cookbook.md)
+- [x] Example plugin: `examples/_shared/plugins/consoleAnalyticsPlugin.ts`
 
 ## 1.0.0 — Studio gate checklist (framework)
 

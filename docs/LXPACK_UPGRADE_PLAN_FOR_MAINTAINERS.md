@@ -2,17 +2,34 @@
 
 **Audience:** [LXPack](https://github.com/eddiethedean/lxpack) maintainers and contributors.  
 **Purpose:** Prioritize LXPack changes that reduce duplication, tighten the LessonKit integration contract, and move packaging/runtime concerns to the right layer.  
-**LessonKit reference:** [`@lessonkit/lxpack`](https://github.com/eddiethedean/lessonkit/tree/main/packages/lxpack) (adapter, v0.8.1) · [golden example](https://github.com/eddiethedean/lessonkit/tree/main/examples/lxpack-golden) · [packaging guide](PACKAGING.md)
+**LessonKit reference:** [`@lessonkit/lxpack`](https://github.com/eddiethedean/lessonkit/tree/main/packages/lxpack) (adapter) · [golden example](https://github.com/eddiethedean/lessonkit/tree/main/examples/lxpack-golden) · [packaging guide](PACKAGING.md)
+
+---
+
+## Status (LXPack v0.6.0 — shipped)
+
+**LXPack [v0.6.0](https://www.npmjs.com/package/@lxpack/api/v/0.6.0)** implements the P0–P1 items below. LessonKit integrates it as follows:
+
+| LXPack deliverable | LessonKit usage |
+|--------------------|-----------------|
+| `packageLessonkit()` on `@lxpack/api` | `packageLessonkitCourse()` calls it (no hand-built tree before build) |
+| `LessonkitInterchangeV1` in `@lxpack/validators` | Re-exported from `@lessonkit/lxpack`; `descriptorToInterchange()` adds `runtime` theme |
+| `@lxpack/spa-bridge` | Re-exported from `@lessonkit/lxpack/bridge`; `@lessonkit/react` forwards telemetry via the same normalizers |
+| Materialize + validate + build | Owned by LXPack; LessonKit keeps descriptor validation, SPA path resolution, staging promote |
+
+**Still open (P2+):** shared `@lxpack/conformance` fixtures with LessonKit 0.9.x, preview parity flags. LessonKit 0.8.2 removed local YAML emitters; `writeLxpackProject()` is a thin wrapper over `materializeLessonkitProject()`. Authors may also use npm `@lxpack/lessonkit` (re-exports the same APIs).
+
+**Dependency pin:** `@lxpack/api` and `@lxpack/spa-bridge` at `^0.6.0` in `@lessonkit/lxpack`.
 
 ---
 
 ## Executive summary
 
-LessonKit authors **React** courses; LXPack **validates, packages, and runs** them in LMS contexts. **v0.4.0** delivered the critical baseline (SPA lessons, `@lxpack/api`, `lessonkit.json` merge, in-memory assessments, `lxpackBridge.v1`).
+LessonKit authors **React** courses; LXPack **validates, packages, and runs** them in LMS contexts. **v0.4.0** delivered the critical baseline (SPA lessons, `@lxpack/api`, `lessonkit.json` merge, in-memory assessments, `lxpackBridge.v1`). **v0.6.0** adds `packageLessonkit()`, interchange schema in validators, `@lxpack/spa-bridge`, and interchange `runtime` (theme/cssVariables).
 
-The next wins are not “more lesson types”—they are **shrinking `@lessonkit/lxpack`** so LXPack owns interchange, project materialization, bridge contracts, and conformance. LessonKit should keep React authoring, telemetry catalog, and thin CLI wiring.
+Remaining wins are **conformance** and **optional meta-packages**, not core packaging. LessonKit should keep React authoring, telemetry catalog, and thin CLI wiring.
 
-**Target end state:** `@lessonkit/lxpack` becomes a small facade (or is retired in favor of `@lxpack/api` + `@lxpack/lessonkit`).
+**Target end state:** `@lessonkit/lxpack` becomes a small facade (descriptor → interchange + path helpers), or authors depend on `@lxpack/api` + `@lxpack/lessonkit` directly.
 
 ---
 
@@ -24,13 +41,13 @@ The next wins are not “more lesson types”—they are **shrinking `@lessonkit
 |------|-------------|--------|
 | Validate `LessonkitCourseDescriptor` | LessonKit | Uses `@lessonkit/core` id rules + layout rules |
 | Copy Vite `dist/` into LXPack tree | LessonKit | `single-spa` → `{outDir}/dist`; `per-lesson-spa` → per-lesson paths |
-| Emit `course.yaml` | LessonKit | Custom minimal YAML emitter (`packages/lxpack/src/yaml.ts`) |
-| Emit `assessments/*.yaml` | LessonKit | From descriptor; also passes structured assessments to `buildCourse` |
-| Emit `lessonkit.json` interchange | LessonKit | `format: "lessonkit"`, `version: "1"` |
-| Map theme → `runtime.cssVariables` | LessonKit | Depends on `@lessonkit/themes` |
-| `validateCourse` / `buildCourse` | LXPack (`@lxpack/api`) | After files are on disk |
+| Materialize LXPack project from interchange | **LXPack** (`packageLessonkit` / `materializeLessonkitProject`) | LessonKit supplies interchange + `spaDirs` |
+| Emit authoring YAML (optional) | LXPack when `writeAuthoringFiles: true` | Legacy `writeLxpackProject()` still available for tests |
+| Build interchange JSON | LessonKit | `descriptorToInterchange()` → `@lxpack/validators` schema |
+| Map theme → `runtime.cssVariables` | LessonKit descriptor → interchange `runtime` | LXPack resolves presets at materialize |
+| `validateCourse` / `buildCourse` | LXPack (`@lxpack/api`) | Via `packageLessonkit()` |
 | Staging + atomic promote to `outDir` | LessonKit | Temp dir; rollback on failure |
-| Runtime bridge (browser) | Split | LXPack exposes `lxpackBridge.v1`; LessonKit normalizes scores + forwards telemetry |
+| Runtime bridge (browser) | **`@lxpack/spa-bridge`** | Re-exported from `@lessonkit/lxpack/bridge`; React forwards telemetry |
 
 ### What LXPack already owns (keep)
 
@@ -355,13 +372,13 @@ lxpack preview --lessonkit ./lessonkit.json --spa dist/
 
 ## Suggested LXPack release sequence
 
-| Release | Theme | Key deliverables |
-|---------|--------|------------------|
-| **v0.5.0** | Thin packaging | `packageLessonkit()`, interchange Zod schema, docs update |
-| **v0.5.x** | Bridge SDK | `@lxpack/spa-bridge`, versioning doc, validator warnings |
-| **v0.6.0** | Tracking + theme | Telemetry map, expanded interchange `runtime`, preview flags |
-| **v0.6.x** | Conformance | Shared fixtures package, SCORM recipes |
-| **v0.7.0** | Optional meta-package | `@lxpack/lessonkit`; deprecate duplicate adapter surface |
+| Release | Theme | Status |
+|---------|--------|--------|
+| **v0.5.0** | Thin packaging | **Shipped** — `packageLessonkit()`, interchange schema |
+| **v0.5.x** | Bridge SDK | **Shipped** — `@lxpack/spa-bridge` |
+| **v0.6.0** | Tracking + theme | **Shipped** — interchange `runtime`, telemetry map, LessonKit integration in this repo |
+| **v0.6.x** | Conformance | Planned — shared fixtures package, SCORM recipes |
+| **v0.7.0** | Optional meta-package | Planned — `@lxpack/lessonkit`; thin `@lessonkit/lxpack` |
 
 Coordinate with LessonKit **0.9.x** (conformance harness) and **1.0.0** (stable public API).
 

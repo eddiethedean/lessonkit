@@ -40,25 +40,7 @@ export type LessonkitCourseDescriptor = {
   spaLessonId?: string;
 };
 
-export type LessonkitInterchangeV1 = {
-  format: "lessonkit";
-  version: "1";
-  course: {
-    id: CourseId;
-    title: string;
-  };
-  lessons: Array<{
-    id: LessonId;
-    title: string;
-    type: "spa";
-    path: string;
-  }>;
-  tracking?: {
-    completion?: {
-      threshold?: number;
-    };
-  };
-};
+export type { LessonkitInterchangeV1 } from "@lxpack/validators";
 
 export type MappedLessonkitIds = {
   courseId: CourseId;

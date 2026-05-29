@@ -1,40 +1,20 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 44" role="img" aria-label="LessonKit">
-  <defs>
-    <linearGradient id="lk-bg" x1="4" y1="2" x2="28" y2="30" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#3b82f6"/>
-      <stop offset="52%" stop-color="#6366f1"/>
-      <stop offset="100%" stop-color="#a855f7"/>
-    </linearGradient>
-    <linearGradient id="lk-shine" x1="16" y1="3" x2="16" y2="17" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#fff" stop-opacity="0.32"/>
-      <stop offset="100%" stop-color="#fff" stop-opacity="0"/>
-    </linearGradient>
-    <linearGradient id="lk-word" x1="52" y1="0" x2="178" y2="0" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#3b82f6"/>
-      <stop offset="55%" stop-color="#6366f1"/>
-      <stop offset="100%" stop-color="#a855f7"/>
-    </linearGradient>
-    <filter id="lk-shadow" x="-25%" y="-15%" width="150%" height="160%">
-      <feDropShadow dx="0" dy="1.25" stdDeviation="1.15" flood-color="#312e81" flood-opacity="0.32"/>
-    </filter>
-  </defs>
-  <svg x="2" y="2" width="40" height="40" viewBox="0 0 32 32" aria-hidden="true">
-    <g filter="url(#lk-shadow)">
-      <rect width="32" height="32" rx="9" fill="url(#lk-bg)"/>
-      <rect width="32" height="32" rx="9" fill="url(#lk-shine)"/>
-    </g>
-    <g fill="#fff" transform="translate(16 16.25) scale(1.18) translate(-18.725 -15.75)">
-      <path d="M8.75 9.25h2.85v10.35h5.65v2.65H8.75V9.25z"/>
-      <path d="M17.85 9.25h2.9v5.15L26.35 9.25h2.35l-6.15 5.35L28.1 22.15h-2.7l-5.85-7.35H17.85V9.25z"/>
-    </g>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 48" role="img" aria-label="LessonKit">
+  <svg x="0" y="2" width="44" height="44" viewBox="0 0 512 512" aria-hidden="true">
+    <rect x="16" y="16" width="480" height="480" rx="96" fill="#0F172A"/>
+    <rect x="272" y="128" width="56" height="256" rx="28" fill="#2563EB"/>
+    <path d="M166 128C181.464 128 194 140.536 194 156V348C194 363.464 206.536 376 222 376H304C319.464 376 332 388.536 332 404C332 419.464 319.464 432 304 432H222C175.608 432 138 394.392 138 348V156C138 140.536 150.536 128 166 128Z" fill="#FFFFFF"/>
+    <path d="M305 260L405 154C416 142 435 142 446 154C457 166 457 184 445 196L344 302L305 260Z" fill="#3B82F6"/>
+    <path d="M305 252L445 358C457 370 457 388 446 400C435 412 416 412 405 400L305 294V252Z" fill="#2563EB"/>
+    <circle cx="300" cy="276" r="44" fill="#3B82F6"/>
+    <circle cx="300" cy="276" r="20" fill="#0F172A"/>
   </svg>
   <text
     x="52"
-    y="29"
-    fill="url(#lk-word)"
+    y="31"
+    fill="#0F172A"
     font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif"
-    font-size="18.5"
+    font-size="20"
     font-weight="600"
-    letter-spacing="-0.045em"
+    letter-spacing="-0.04em"
   >LessonKit</text>
 </svg>

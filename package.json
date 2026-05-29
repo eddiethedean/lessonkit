@@ -1,12 +1,13 @@
 {
   "name": "lessonkit",
-  "version": "0.8.1",
+  "version": "0.9.0",
   "private": true,
   "packageManager": "npm@10.9.0",
   "workspaces": [
     "packages/*",
     "examples/*",
-    "templates/*"
+    "templates/*",
+    "e2e"
   ],
   "scripts": {
     "build": "npm run build:packages && npm run build:apps",
@@ -18,6 +19,10 @@
     "audit:ci": "npm audit --omit=dev --audit-level=high && npm audit --audit-level=high",
     "lint": "npm run --workspaces --if-present lint",
     "typecheck": "npm run build:packages && npm run --workspaces --if-present typecheck",
+    "test:e2e": "npm run test -w @lessonkit/e2e",
+    "test:e2e:ui": "npm run test:ui -w @lessonkit/e2e",
+    "conformance:lxpack": "npm run conformance:lxpack -w @lessonkit/e2e",
+    "conformance:golden": "npm run conformance:golden -w @lessonkit/e2e",
     "changeset": "changeset",
     "version-packages": "changeset version",
     "release": "changeset publish"

@@ -59,6 +59,7 @@ export default function App() {
                   </button>
                   <button
                     type="button"
+                    data-testid="course-continue"
                     onClick={() => setStep(Math.min(last, step + 1))}
                     disabled={step === last}
                   >

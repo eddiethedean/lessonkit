@@ -167,7 +167,7 @@ button.copybtn {
   border-radius: 0.375rem;
 }
 
-/* Sidebar — LK mark + wordmark in logo.svg */
+/* Sidebar — app icon + wordmark in logo.svg */
 .sidebar-logo {
   max-width: min(100%, 11.5rem);
   height: auto;

@@ -1,12 +1,9 @@
-import { access, cp, mkdir, rm, writeFile } from "node:fs/promises";
-import { dirname, join, resolve } from "node:path";
-import { descriptorToInterchange, resolveSpaLessons } from "./interchange";
-import { assertResolvedPathUnderRoot } from "./spaPath";
-import { themeToLxpackRuntime } from "./theme";
+import { join, resolve } from "node:path";
+import { materializeLessonkitProject } from "@lxpack/validators";
+import { descriptorToInterchange } from "./interchange";
+import { resolveSpaDirs } from "./spaDirs";
 import type { LessonkitCourseDescriptor } from "./types";
 import { validateDescriptor } from "./validateDescriptor";
-import { emitAssessmentYaml } from "./assessmentYaml";
-import { emitCourseYaml } from "./yaml";
 
 export type WriteLxpackProjectOptions = {
   descriptor: LessonkitCourseDescriptor;
@@ -31,11 +28,9 @@ export type WriteLxpackProjectResult = {
   lessonkitJsonPath: string;
 };
 
-async function copyDir(src: string, dest: string): Promise<void> {
-  await mkdir(dirname(dest), { recursive: true });
-  await cp(src, dest, { recursive: true });
-}
-
+/**
+ * Materialize an LXPack project tree from a LessonKit descriptor (delegates to LXPack 0.6+).
+ */
 export async function writeLxpackProject(
   options: WriteLxpackProjectOptions,
 ): Promise<WriteLxpackProjectResult> {
@@ -48,82 +43,28 @@ export async function writeLxpackProject(
 
   const descriptor = validation.descriptor;
   const outDir = resolve(options.outDir);
-  await mkdir(outDir, { recursive: true });
+  const spaDirs = await resolveSpaDirs({ ...options, descriptor });
+  const interchange = descriptorToInterchange(descriptor);
 
-  const spaLessons = resolveSpaLessons(descriptor);
-  const runtime = descriptor.theme ? themeToLxpackRuntime(descriptor.theme) : undefined;
-  const assessments = (descriptor.assessments ?? []).map((a) => ({
-    id: a.checkId,
-    file: `assessments/${a.checkId}.yaml`,
-  }));
+  const materialized = await materializeLessonkitProject({
+    interchange,
+    spaDirs,
+    courseDir: outDir,
+    writeAuthoringFiles: true,
+  });
 
-  if (descriptor.layout === "single-spa") {
-    const spaDistRelative = options.spaDistDir ?? descriptor.spaDistDir ?? "dist";
-    const srcDist = options.projectRoot
-      ? resolve(options.projectRoot, spaDistRelative)
-      : resolve(spaDistRelative);
-    if (options.projectRoot) {
-      assertResolvedPathUnderRoot(resolve(options.projectRoot), srcDist);
-    }
-    try {
-      await access(srcDist);
-    } catch {
-      throw new Error(`spaDistDir not found: ${srcDist}`);
-    }
-    const destDist = join(outDir, "dist");
-    await rm(destDist, { recursive: true, force: true });
-    await copyDir(srcDist, destDist);
-  } else {
-    const lessonDirs = options.lessonSpaDirs ?? {};
-    for (const lesson of descriptor.lessons) {
-      const src = lessonDirs[lesson.id];
-      if (!src) {
-        throw new Error(`lessonSpaDirs missing build output for lesson "${lesson.id}"`);
-      }
-      const dest = join(outDir, lesson.spaPath!);
-      assertResolvedPathUnderRoot(outDir, dest);
-      await rm(dest, { recursive: true, force: true });
-      await copyDir(resolve(src), dest);
-    }
+  if (!materialized.ok) {
+    throw new Error(
+      materialized.issues
+        .map((i) => `${i.path ?? ""}: ${i.message}`.trim())
+        .join("; "),
+    );
   }
 
-  if (assessments.length) {
-    const assessmentsDir = join(outDir, "assessments");
-    await mkdir(assessmentsDir, { recursive: true });
-    for (const assessment of descriptor.assessments ?? []) {
-      await writeFile(
-        join(outDir, `assessments/${assessment.checkId}.yaml`),
-        emitAssessmentYaml(assessment),
-        "utf-8",
-      );
-    }
-  }
-
-  const courseYamlPath = join(outDir, "course.yaml");
-  await writeFile(
-    courseYamlPath,
-    emitCourseYaml({
-      title: descriptor.title,
-      version: descriptor.version ?? "1.0.0",
-      runtime,
-      tracking: descriptor.tracking,
-      lessons: spaLessons.map((l) => ({
-        id: l.id,
-        title: l.title,
-        type: "spa",
-        path: l.path,
-      })),
-      assessments,
-    }),
-    "utf-8",
-  );
-
-  const lessonkitJsonPath = join(outDir, "lessonkit.json");
-  await writeFile(
-    lessonkitJsonPath,
-    `${JSON.stringify(descriptorToInterchange(descriptor), null, 2)}\n`,
-    "utf-8",
-  );
-
-  return { outDir, courseYamlPath, lessonkitJsonPath };
+  const courseDir = materialized.courseDir;
+  return {
+    outDir: courseDir,
+    courseYamlPath: join(courseDir, "course.yaml"),
+    lessonkitJsonPath: join(courseDir, "lessonkit.json"),
+  };
 }

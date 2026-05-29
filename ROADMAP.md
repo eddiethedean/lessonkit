@@ -28,9 +28,9 @@ this repo until that gate is met.
 
 ## Status
 
-- **Framework:** **0.8.1** — runtime block catalog v1 (`@lessonkit/react/block-catalog.v1.json`), renderer parity in golden example; patch fixes for lxpack validation, packaging paths, CLI, and examples
+- **Framework:** **0.9.0** — conformance harness (Playwright export parity, `@lxpack/conformance` CI, SCORM 1.2 LMS mock); LXPack **0.6.0** packaging; block catalog v1
 - **Studio:** **blocked** — no implementation work until **[1.0.0 — Stable public API (framework)](#100--stable-public-api-framework)** is shipped (see [Studio development gate](#studio-development-gate))
-- **Focus (now):** conformance harness (0.9.x), docs kept in sync through 1.0.0
+- **Focus (now):** 1.0.0 stable API and docs gate
 
 ## Guiding principles
 
@@ -241,22 +241,16 @@ See [`docs/IDENTITY.md`](docs/IDENTITY.md) and [`docs/TELEMETRY.md`](docs/TELEME
 
 ---
 
-### 0.8.0+ — Plugin architecture (future)
+### 0.8.0+ — Plugin architecture
 
-Potential plugin areas (from spec):
+**Shipped (v1):** static plugins on `LessonkitProvider` (`config.plugins`).
 
-- AI integrations
-- LMS connectors
-- Analytics providers
-- Assessment engines
-- Custom interactions
+- Kinds: `analytics`, `lms`, `assessment`, `interaction`, `ai`
+- Hooks: `setup` / `dispose`, `onTelemetry`, `wrapTrackingSink`, `onTelemetryBatch`, `scoreAssessment`, `interactionBlocks` metadata
+- Docs: [`docs/reference/plugins.md`](docs/reference/plugins.md), [plugin cookbook](docs/guides/react-developers/plugin-cookbook.md)
+- Example: `examples/_shared/plugins/consoleAnalyticsPlugin.ts`
 
-**Documentation** (as plugin API ships):
-
-- plugin architecture reference (`docs/reference/plugins.md`) — extension points, lifecycle, and constraints
-- at least one documented plugin example or cookbook entry
-
-**Studio (later):** plugin API and marketplace remain post–Studio 1.0 (see Studio future scope).
+**Future:** dynamic loading, LMS connector presets, AI integrations, marketplace (post–Studio 1.0).
 
 ---
 

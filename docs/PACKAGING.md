@@ -53,8 +53,8 @@ One build output per lesson (multi-SCO friendly).
 
 ## Assessments and passing scores
 
-- **Packaged YAML** (`assessments/*.yaml`): `passingScore` is an **absolute** point threshold (default `1` for a single-question check).
-- **Embedded SPA bridge** (`window.parent.lxpackBridge.v1.submitAssessment`): `score` and `passingScore` are **0–1** (scaled). `@lessonkit/react` divides `score / maxScore` and `passingScore / maxScore` from `quiz_completed` telemetry; use `normalizeAssessmentScore` and `normalizeAssessmentPassingScore` from `@lessonkit/lxpack/bridge` for custom integrations.
+- **Packaged YAML** (`assessments/*.yaml`, when `writeAuthoringFiles: true`): `passingScore` is an **absolute** point threshold (default `1` for a single-question check).
+- **Embedded SPA bridge** (`window.parent.lxpackBridge.v1.submitAssessment`): `score` and `passingScore` are **0–1** (scaled). `@lessonkit/react` uses `mapLessonkitTelemetryToBridgeAction` from `@lxpack/tracking-schema` (via `@lessonkit/lxpack/bridge`) with `@lxpack/spa-bridge` score normalizers.
 
 ## Packaging failures and stale output
 
@@ -97,7 +97,7 @@ const runtime = themeToLxpackRuntime({ preset: "brand" });
 // → { theme: "brand", cssVariables: { "--lk-color-primary": "...", ... } }
 ```
 
-`writeLxpackProject` writes `runtime.cssVariables` into `course.yaml` so packaged shells match your React preview.
+`descriptorToInterchange()` + LXPack materialization write `runtime.cssVariables` into `course.yaml` so packaged shells match your React preview.
 
 ## LMS bridge (iframe)
 

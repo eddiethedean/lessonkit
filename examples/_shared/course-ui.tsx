@@ -70,6 +70,7 @@ export function SidebarLessons(props: {
             <li key={lesson.id}>
               <button
                 type="button"
+                data-testid={`lesson-nav-${lesson.id}`}
                 className={`lms-outline-btn${done ? " lms-outline-done" : ""}${active ? " lms-outline-active" : ""}`}
                 aria-current={active ? "step" : undefined}
                 onClick={() => props.setStep(i)}

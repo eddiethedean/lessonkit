@@ -1,7 +1,11 @@
-import type { QuizCompletedData, TelemetryEvent } from "@lessonkit/core";
+import type { TelemetryEvent } from "@lessonkit/core";
 import {
-  normalizeAssessmentPassingScore,
-  normalizeAssessmentScore,
+  getLxpackBridge as getLxpackBridgeFromSdk,
+  mapLessonkitTelemetryToBridgeAction,
+  normalizePassingThreshold,
+  normalizeScore,
+  telemetryEventToLessonkit,
+  type LxpackBridgeV1,
 } from "@lessonkit/lxpack/bridge";
 
 export type LxpackBridgeMode = "auto" | "off";
@@ -9,24 +13,51 @@ export type LxpackBridgeMode = "auto" | "off";
 /** @deprecated Bridge mode is passed per call; this is a no-op kept for compatibility. */
 export function setLxpackBridgeMode(_mode: LxpackBridgeMode): void {}
 
-type LxpackBridgeV1 = {
-  completeLesson?: (lessonId: string) => void;
-  completeCourse?: () => void;
-  submitAssessment?: (payload: {
-    id: string;
-    score: number;
-    passingScore?: number;
-  }) => void;
-};
-
 function getBridge(): LxpackBridgeV1 | null {
+  const fromSdk = getLxpackBridgeFromSdk();
+  if (fromSdk) return fromSdk;
   if (typeof window === "undefined") return null;
   const parent = window.parent as {
     lxpackBridge?: { v1?: LxpackBridgeV1 };
+    /** @deprecated Pre-v0.5 host alias */
     lxpack?: LxpackBridgeV1;
   } | null;
   if (!parent || parent === window) return null;
-  return parent.lxpackBridge?.v1 ?? parent.lxpack ?? null;
+  return parent.lxpack ?? null;
+}
+
+function applyBridgeAction(bridge: LxpackBridgeV1, action: ReturnType<typeof mapLessonkitTelemetryToBridgeAction>): void {
+  if (!action) return;
+  switch (action.kind) {
+    case "completeLesson":
+      bridge.completeLesson?.(action.lessonId);
+      return;
+    case "completeCourse":
+      bridge.completeCourse?.();
+      return;
+    case "submitAssessment": {
+      const scaled = normalizeScore({
+        score: action.score,
+        maxScore: action.maxScore,
+      });
+      if (scaled === null) return;
+      bridge.submitAssessment?.({
+        id: action.id,
+        score: scaled,
+        passingScore: normalizePassingThreshold({
+          passingScore: action.passingScore,
+          maxScore: action.maxScore,
+        }),
+        maxScore: action.maxScore,
+      });
+      return;
+    }
+    case "track":
+      bridge.track?.(action.event);
+      return;
+    default:
+      return;
+  }
 }
 
 export function forwardTelemetryToLxpack(
@@ -37,34 +68,9 @@ export function forwardTelemetryToLxpack(
   const bridge = getBridge();
   if (!bridge) return;
 
-  switch (event.name) {
-    case "lesson_completed": {
-      const lessonId = event.lessonId;
-      if (lessonId) bridge.completeLesson?.(lessonId);
-      return;
-    }
-    case "course_completed":
-      bridge.completeCourse?.();
-      return;
-    case "quiz_completed": {
-      const data = event.data as QuizCompletedData | undefined;
-      if (!data?.checkId) return;
-      const scaled = normalizeAssessmentScore({
-        score: data.score,
-        maxScore: data.maxScore,
-      });
-      if (scaled === null) return;
-      bridge.submitAssessment?.({
-        id: data.checkId,
-        score: scaled,
-        passingScore: normalizeAssessmentPassingScore({
-          passingScore: data.passingScore,
-          maxScore: data.maxScore,
-        }),
-      });
-      return;
-    }
-    default:
-      return;
-  }
+  const lessonkitEvent = telemetryEventToLessonkit(event);
+  if (!lessonkitEvent) return;
+
+  const action = mapLessonkitTelemetryToBridgeAction(lessonkitEvent);
+  applyBridgeAction(bridge, action);
 }

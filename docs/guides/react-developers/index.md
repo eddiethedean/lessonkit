@@ -60,6 +60,8 @@ Use the [Vibe coding guides](../vibe-coding/index.md) with an AI editor and the 
 | Telemetry & xAPI | [telemetry-and-xapi.md](telemetry-and-xapi.md) |
 | Theming & a11y | [theming-and-accessibility.md](theming-and-accessibility.md) |
 | Packaging & CLI | [packaging-and-cli.md](packaging-and-cli.md) |
+| Export parity | [export-parity.md](export-parity.md) |
+| Plugins | [plugin-cookbook.md](plugin-cookbook.md) |
 | Monorepo | [contributing-to-the-monorepo.md](contributing-to-the-monorepo.md) |
 
 ## Identity requirements (0.5+)
