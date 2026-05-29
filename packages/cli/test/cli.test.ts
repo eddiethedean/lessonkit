@@ -244,6 +244,72 @@ describe("loadLessonkitJson", () => {
     });
   });
 
+  it("rejects non-array course.lessons", async () => {
+    await writeFile(
+      join(dir, "lessonkit.json"),
+      JSON.stringify({
+        schemaVersion: 1,
+        name: "demo",
+        course: {
+          courseId: "demo",
+          title: "Demo",
+          layout: "single-spa",
+          lessons: "not-an-array",
+        },
+      }),
+      "utf8",
+    );
+    await expect(loadLessonkitJson(dir)).rejects.toMatchObject({
+      exitCode: EXIT_INVALID_PROJECT,
+      message: expect.stringContaining("course.lessons"),
+    });
+  });
+
+  it("rejects invalid paths.spaDistDir type", async () => {
+    await writeFile(
+      join(dir, "lessonkit.json"),
+      JSON.stringify({
+        schemaVersion: 1,
+        name: "demo",
+        course: {
+          courseId: "demo",
+          title: "Demo",
+          layout: "single-spa",
+          lessons: [{ id: "lesson-1", title: "Lesson" }],
+        },
+        paths: { spaDistDir: 123 },
+      }),
+      "utf8",
+    );
+    await expect(loadLessonkitJson(dir)).rejects.toMatchObject({
+      exitCode: EXIT_INVALID_PROJECT,
+      message: expect.stringContaining("paths.spaDistDir"),
+    });
+  });
+
+  it("rejects course.spaDistDir that differs from paths.spaDistDir", async () => {
+    await writeFile(
+      join(dir, "lessonkit.json"),
+      JSON.stringify({
+        schemaVersion: 1,
+        name: "demo",
+        course: {
+          courseId: "demo",
+          title: "Demo",
+          layout: "single-spa",
+          spaDistDir: "build/spa",
+          lessons: [{ id: "lesson-1", title: "Lesson" }],
+        },
+        paths: { spaDistDir: "dist" },
+      }),
+      "utf8",
+    );
+    await expect(loadLessonkitJson(dir)).rejects.toMatchObject({
+      exitCode: EXIT_INVALID_PROJECT,
+      message: expect.stringContaining("course.spaDistDir"),
+    });
+  });
+
   it("rejects invalid schemaVersion", async () => {
     await writeFile(
       join(dir, "lessonkit.json"),

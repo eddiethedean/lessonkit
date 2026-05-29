@@ -6,7 +6,7 @@
 
 **LessonKit** is a React-first framework for building accessible, trackable learning experiences—and shipping them to the LMS. Author courses as components, wire telemetry and xAPI, theme with design tokens, and export SCORM, standalone, xAPI, or cmi5 packages from the same codebase.
 
-**Current release:** [0.9.1](https://github.com/eddiethedean/lessonkit/blob/main/CHANGELOG.md) · Published on npm as [`@lessonkit/*`](https://www.npmjs.com/org/lessonkit)
+**Current release:** [0.9.2](https://github.com/eddiethedean/lessonkit/blob/main/CHANGELOG.md) · Published on npm as [`@lessonkit/*`](https://www.npmjs.com/org/lessonkit)
 
 **Documentation:** [lessonkit.readthedocs.io](https://lessonkit.readthedocs.io/en/latest/) — [vibe coding](https://lessonkit.readthedocs.io/en/latest/guides/vibe-coding/index.html) · [React developers](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/index.html) · [live examples](https://lessonkit.readthedocs.io/en/latest/examples/index.html) (contributors: [docs/README.md](https://github.com/eddiethedean/lessonkit/blob/main/docs/README.md) · [Read the Docs setup](https://github.com/eddiethedean/lessonkit/blob/main/docs/READTHEDOCS.md))
 

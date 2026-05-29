@@ -3,6 +3,23 @@
 All notable changes to the LessonKit monorepo are documented here. Published packages use the
 [`@lessonkit/*`](https://www.npmjs.com/org/lessonkit) scope.
 
+## [0.9.2] - 2026-05-29
+
+### Changed
+
+- Monorepo packages bumped to **0.9.2**.
+
+### Fixed
+
+- **@lessonkit/react**: Plugin `onTelemetryBatch` and `wrapTrackingSink` use fresh `courseId` / session context at delivery time (fixes stale context after in-app `courseId` changes with batched tracking).
+- **@lessonkit/react**: Flush batched telemetry before emitting `course_started` when `courseId` changes.
+- **@lessonkit/react**: `Quiz` feedback reflects `scoreAssessment` result (not only `props.answer`).
+- **@lessonkit/react**: `scoreAssessment` without explicit `passed` and with `maxScore` 0 or unset falls back to answer matching (no longer treats any `score > 0` as pass).
+- **@lessonkit/react**: `course_started` session dedupe is marked only after a successful emit (sink failures can retry).
+- **@lessonkit/cli**: Stricter `lessonkit.json` validation (`paths` types, `course.lessons` / `course.assessments` arrays, `course.spaDistDir` vs `paths.spaDistDir` conflict).
+- **@lessonkit/cli**: `react-vite` package target uses `INVALID_PROJECT` when `dist` is missing after build.
+- **@lessonkit/lxpack**: Reject `output` paths outside `projectRoot` when `projectRoot` is set (direct API use).
+
 ## [0.9.1] - 2026-05-29
 
 ### Added

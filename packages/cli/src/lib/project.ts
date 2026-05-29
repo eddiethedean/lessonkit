@@ -107,6 +107,20 @@ export async function loadLessonkitJson(projectRoot: string): Promise<LessonkitP
     });
   }
 
+  const courseObj = courseRaw as Record<string, unknown>;
+  if (courseObj.lessons !== undefined && !Array.isArray(courseObj.lessons)) {
+    throw new CliError(`${configPath}: "course.lessons" must be an array.`, {
+      code: "INVALID_PROJECT",
+      exitCode: EXIT_INVALID_PROJECT,
+    });
+  }
+  if (courseObj.assessments !== undefined && !Array.isArray(courseObj.assessments)) {
+    throw new CliError(`${configPath}: "course.assessments" must be an array.`, {
+      code: "INVALID_PROJECT",
+      exitCode: EXIT_INVALID_PROJECT,
+    });
+  }
+
   const validation = validateDescriptor(courseRaw as LessonkitCourseDescriptor);
   if (!validation.ok) {
     throw new CliError(`${configPath}: invalid course descriptor.`, {
@@ -128,11 +142,49 @@ export async function loadLessonkitJson(projectRoot: string): Promise<LessonkitP
 
   const pathsRaw = config.paths;
   const paths: LessonkitPaths = { ...DEFAULT_PATHS };
+  if (pathsRaw !== undefined && (typeof pathsRaw !== "object" || pathsRaw === null)) {
+    throw new CliError(`${configPath}: "paths" must be an object.`, {
+      code: "INVALID_PROJECT",
+      exitCode: EXIT_INVALID_PROJECT,
+    });
+  }
   if (pathsRaw && typeof pathsRaw === "object") {
     const p = pathsRaw as Record<string, unknown>;
-    if (typeof p.spaDistDir === "string" && p.spaDistDir.trim()) paths.spaDistDir = p.spaDistDir;
-    if (typeof p.lxpackOutDir === "string" && p.lxpackOutDir.trim()) paths.lxpackOutDir = p.lxpackOutDir;
-    if (typeof p.outputBaseDir === "string" && p.outputBaseDir.trim()) paths.outputBaseDir = p.outputBaseDir;
+    if (p.spaDistDir !== undefined) {
+      if (typeof p.spaDistDir !== "string" || !p.spaDistDir.trim()) {
+        throw new CliError(`${configPath}: "paths.spaDistDir" must be a non-empty string.`, {
+          code: "INVALID_PROJECT",
+          exitCode: EXIT_INVALID_PROJECT,
+        });
+      }
+      paths.spaDistDir = p.spaDistDir;
+    }
+    if (p.lxpackOutDir !== undefined) {
+      if (typeof p.lxpackOutDir !== "string" || !p.lxpackOutDir.trim()) {
+        throw new CliError(`${configPath}: "paths.lxpackOutDir" must be a non-empty string.`, {
+          code: "INVALID_PROJECT",
+          exitCode: EXIT_INVALID_PROJECT,
+        });
+      }
+      paths.lxpackOutDir = p.lxpackOutDir;
+    }
+    if (p.outputBaseDir !== undefined) {
+      if (typeof p.outputBaseDir !== "string" || !p.outputBaseDir.trim()) {
+        throw new CliError(`${configPath}: "paths.outputBaseDir" must be a non-empty string.`, {
+          code: "INVALID_PROJECT",
+          exitCode: EXIT_INVALID_PROJECT,
+        });
+      }
+      paths.outputBaseDir = p.outputBaseDir;
+    }
+  }
+
+  const courseSpaDistDir = validation.descriptor.spaDistDir?.trim();
+  if (courseSpaDistDir && courseSpaDistDir !== paths.spaDistDir) {
+    throw new CliError(
+      `${configPath}: "course.spaDistDir" (${courseSpaDistDir}) differs from "paths.spaDistDir" (${paths.spaDistDir}). Use paths.spaDistDir for CLI build and package.`,
+      { code: "INVALID_PROJECT", exitCode: EXIT_INVALID_PROJECT },
+    );
   }
 
   const pathIssues = validateProjectPaths(projectRoot, paths);

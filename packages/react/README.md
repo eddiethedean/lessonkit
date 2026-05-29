@@ -59,7 +59,7 @@ export default function App() {
 }
 ```
 
-## API (0.9.1)
+## API (0.9.2)
 
 ### Block catalog
 

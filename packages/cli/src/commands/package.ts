@@ -47,7 +47,7 @@ export async function runPackage(opts: PackageOptions): Promise<CliJsonResult> {
     }
     if (!existsSync(distDir)) {
       throw new CliError(`Build completed but dist directory not found at ${distDir}.`, {
-        code: "RUNTIME",
+        code: "INVALID_PROJECT",
         exitCode: EXIT_INVALID_PROJECT,
       });
     }

@@ -1,6 +1,6 @@
 import React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { cleanup, fireEvent, render, waitFor } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { Course, KnowledgeCheck, Lesson, LessonkitProvider, ProgressTracker, Quiz, Reflection, Scenario, useCompletion, useLessonkit, useProgress, useQuizState, useTracking } from "../src";
 import { defineLessonkitPlugin, type TelemetryEvent } from "@lessonkit/core";
 import * as xapiModule from "@lessonkit/xapi";
@@ -1171,7 +1171,7 @@ describe("@lessonkit/react runtime", () => {
     );
   });
 
-  it("Quiz uses scoreAssessment plugin with score-only fallback", async () => {
+  it("Quiz does not complete on score-only plugin without explicit passed", async () => {
     const events: TelemetryEvent[] = [];
     const plugin = defineLessonkitPlugin({
       id: "scorer-score",
@@ -1180,7 +1180,7 @@ describe("@lessonkit/react runtime", () => {
       scoreAssessment: () => ({ score: 1, maxScore: 0 }),
     });
 
-    const { getByLabelText } = render(
+    const { getByLabelText, getByRole } = render(
       <Course
         title="Course"
         courseId="course-1"
@@ -1196,12 +1196,155 @@ describe("@lessonkit/react runtime", () => {
       </Course>,
     );
 
-    fireEvent.click(getByLabelText("x"));
+    await act(async () => {
+      fireEvent.click(getByLabelText("x"));
+    });
+    expect(await screen.findByText("Try again")).toBeTruthy();
+    expect(events.some((e) => e.name === "quiz_completed")).toBe(false);
+  });
+
+  it("Quiz feedback follows scoreAssessment passed flag", async () => {
+    const plugin = defineLessonkitPlugin({
+      id: "scorer-pass",
+      version: "1",
+      kind: "assessment",
+      scoreAssessment: () => ({ passed: true, score: 1, maxScore: 1 }),
+    });
+
+    const { getByLabelText } = render(
+      <Course
+        title="Course"
+        courseId="course-1"
+        config={{
+          plugins: [plugin],
+          tracking: { enabled: false },
+          xapi: { enabled: false },
+        }}
+      >
+        <Lesson title="Lesson" lessonId="lesson-1">
+          <Quiz checkId="check-1" question="Q?" choices={["wrong", "right"]} answer="right" />
+        </Lesson>
+      </Course>,
+    );
+
+    await act(async () => {
+      fireEvent.click(getByLabelText("wrong"));
+    });
+    expect(await screen.findByText("Correct")).toBeTruthy();
+  });
+
+  it("onTelemetryBatch receives current courseId after courseId change", async () => {
+    const batchCtxCourseIds: string[] = [];
+    const batches: TelemetryEvent[][] = [];
+    const plugin = defineLessonkitPlugin({
+      id: "batch-ctx",
+      version: "1",
+      kind: "analytics",
+      onTelemetryBatch: (_events, ctx) => {
+        batchCtxCourseIds.push(ctx.courseId);
+      },
+    });
+
+    const trackingConfig = {
+      batchSink: async (events: TelemetryEvent[]) => {
+        batches.push(events);
+      },
+      batch: { enabled: true, flushIntervalMs: 60_000, maxBatchSize: 1 },
+    };
+
+    const { rerender } = render(
+      <LessonkitProvider
+        config={{
+          courseId: "course-a",
+          plugins: [plugin],
+          tracking: trackingConfig,
+          xapi: { enabled: false },
+        }}
+      >
+        <Lesson title="L" lessonId="lesson-1">
+          <div>content</div>
+        </Lesson>
+      </LessonkitProvider>,
+    );
+
+    await waitFor(() => expect(batches.length).toBeGreaterThan(0));
+
+    rerender(
+      <LessonkitProvider
+        config={{
+          courseId: "course-b",
+          plugins: [plugin],
+          tracking: trackingConfig,
+          xapi: { enabled: false },
+        }}
+      >
+        <Lesson title="L" lessonId="lesson-1">
+          <div>content</div>
+        </Lesson>
+      </LessonkitProvider>,
+    );
+
+    await waitFor(() => expect(batchCtxCourseIds.some((id) => id === "course-b")).toBe(true));
+  });
+
+  it("flushes batched events before course_started when courseId changes", async () => {
+    const batches: TelemetryEvent[][] = [];
+    const batchSink = async (events: TelemetryEvent[]) => {
+      batches.push([...events]);
+    };
+    const batchConfig = { enabled: true, flushIntervalMs: 60_000, maxBatchSize: 1 };
+
+    const { rerender } = render(
+      <LessonkitProvider
+        config={{
+          courseId: "course-a",
+          tracking: { batchSink, batch: batchConfig },
+          xapi: { enabled: false },
+        }}
+      >
+        <Lesson title="L" lessonId="lesson-1">
+          <div>content</div>
+        </Lesson>
+      </LessonkitProvider>,
+    );
+
     await waitFor(() =>
-      expect(events.some((e) => e.name === "quiz_completed" && e.data?.checkId === "check-1")).toBe(
+      expect(batches.some((b) => b.some((e) => e.name === "lesson_started" && e.courseId === "course-a"))).toBe(
         true,
       ),
     );
+
+    rerender(
+      <LessonkitProvider
+        config={{
+          courseId: "course-b",
+          tracking: { batchSink, batch: batchConfig },
+          xapi: { enabled: false },
+        }}
+      >
+        <Lesson title="L" lessonId="lesson-1">
+          <div>content</div>
+        </Lesson>
+      </LessonkitProvider>,
+    );
+
+    await waitFor(() =>
+      expect(batches.some((b) => b.some((e) => e.name === "course_started" && e.courseId === "course-b"))).toBe(
+        true,
+      ),
+    );
+
+    const courseBStartBatchIdx = batches.findIndex((b) =>
+      b.some((e) => e.name === "course_started" && e.courseId === "course-b"),
+    );
+    const priorCourseAInSameBatch = batches
+      .slice(0, courseBStartBatchIdx + 1)
+      .some(
+        (b) =>
+          b.some((e) => e.name === "course_started" && e.courseId === "course-b") &&
+          b.some((e) => e.courseId === "course-a" && e.name === "lesson_started"),
+      );
+    expect(priorCourseAInSameBatch).toBe(false);
   });
 
   it("emits course_started when tracking is re-enabled after disabled mount", async () => {

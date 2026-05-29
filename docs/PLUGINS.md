@@ -26,6 +26,7 @@ LessonKit plugins extend the runtime without forking `@lessonkit/react`. They re
 - `onTelemetry` is **synchronous**; keep work fast or enqueue to your own service.
 - Custom **interaction** blocks require you to render React components; `interactionBlocks` is metadata for tooling.
 - Plugins must use **stable `id`** strings (reverse-DNS recommended, e.g. `com.example.analytics`).
+- `onTelemetryBatch` runs when you configure `tracking.batchSink` (the provider wraps your batch sink). Batched flushes that only use `tracking.sink` do not invoke `onTelemetryBatch`.
 
 ## API surface
 

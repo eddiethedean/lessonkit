@@ -28,7 +28,7 @@ Open the browser developer console (F12) and paste errors into the chat.
 
 ## Packaging says layout not supported
 
-Use `"layout": "single-spa"` in `lessonkit.json`. `per-lesson-spa` is not supported by `lessonkit package` (0.9.1).
+Use `"layout": "single-spa"` in `lessonkit.json`. `per-lesson-spa` is not supported by `lessonkit package` (0.9.2).
 
 ## “Could not find lessonkit.json”
 

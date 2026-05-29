@@ -48,6 +48,27 @@ beforeEach(() => {
 });
 
 describe("packageLessonkitCourse errors", () => {
+  it("returns ok false for unsafe output when projectRoot is set", async () => {
+    const root = await makeTempDir();
+    const dist = join(root, "dist");
+    await mkdir(dist, { recursive: true });
+    await writeFile(join(dist, "index.html"), "<html></html>", "utf-8");
+
+    const result = await packageLessonkitCourse({
+      descriptor,
+      outDir: join(root, "course"),
+      spaDistDir: dist,
+      projectRoot: root,
+      target: "scorm12",
+      output: "../../../evil.zip",
+    });
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.issues.some((i) => i.path === "output")).toBe(true);
+    }
+  });
+
   it("returns ok false for unsafe outputBaseDir", async () => {
     const root = await makeTempDir();
     const dist = join(root, "dist");

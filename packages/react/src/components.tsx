@@ -1,6 +1,6 @@
 import React, { useEffect, useId, useMemo, useRef, useState } from "react";
 import { visuallyHiddenStyle } from "@lessonkit/accessibility";
-import type { BlockId, CheckId, CourseId, LessonId } from "@lessonkit/core";
+import type { AssessmentScoreResult, BlockId, CheckId, CourseId, LessonId } from "@lessonkit/core";
 import { LessonkitProvider } from "./context";
 import { useCompletion, useLessonkit, useQuizState } from "./hooks";
 import { buildPluginContext } from "./runtime/plugins";
@@ -108,13 +108,24 @@ export function Quiz(props: {
   const quiz = useQuizState();
   const { plugins, config, progress, session } = useLessonkit();
   const [selected, setSelected] = useState<string | null>(null);
+  const [selectionCorrect, setSelectionCorrect] = useState<boolean | null>(null);
   const completedRef = useRef(false);
   const questionId = useId();
 
   useEffect(() => {
     completedRef.current = false;
     setSelected(null);
+    setSelectionCorrect(null);
   }, [props.checkId, props.answer, props.question]);
+
+  const isChoiceCorrect = (choice: string, custom: AssessmentScoreResult | null): boolean => {
+    if (!custom) return choice === props.answer;
+    if (custom.passed !== undefined) return custom.passed;
+    if (custom.maxScore != null && custom.maxScore > 0) {
+      return custom.score / custom.maxScore >= 1;
+    }
+    return choice === props.answer;
+  };
 
   return (
     <section aria-label="Quiz" data-lk-check-id={props.checkId}>
@@ -135,20 +146,17 @@ export function Quiz(props: {
                   sessionId: session.sessionId,
                   attemptId: session.attemptId,
                 });
-                const custom = plugins?.scoreAssessment(
-                  {
-                    checkId: props.checkId,
-                    lessonId: progress.activeLessonId,
-                    response: c,
-                  },
-                  pluginCtx,
-                );
-                const correct = custom
-                  ? (custom.passed ??
-                    (custom.maxScore != null && custom.maxScore > 0
-                      ? custom.score / custom.maxScore >= 1
-                      : custom.score > 0))
-                  : c === props.answer;
+                const custom =
+                  plugins?.scoreAssessment(
+                    {
+                      checkId: props.checkId,
+                      lessonId: progress.activeLessonId,
+                      response: c,
+                    },
+                    pluginCtx,
+                  ) ?? null;
+                const correct = isChoiceCorrect(c, custom);
+                setSelectionCorrect(correct);
                 quiz.answer({
                   checkId: props.checkId,
                   question: props.question,
@@ -170,9 +178,9 @@ export function Quiz(props: {
           </label>
         ))}
       </fieldset>
-      {selected ? (
+      {selected && selectionCorrect !== null ? (
         <p role="status" aria-live="polite">
-          {selected === props.answer ? "Correct" : "Try again"}
+          {selectionCorrect ? "Correct" : "Try again"}
         </p>
       ) : null}
     </section>

@@ -57,7 +57,7 @@ Every LessonKit project includes a `lessonkit.json` at the project root. The CLI
 
 Keep `course.courseId`, `course.lessons[].id`, and `course.assessments[].checkId` aligned with your React component props. `lessonkit init` updates `lessonkit.json` and patches `src/App.tsx` `courseId` / course title for you. See [`IDENTITY.md`](IDENTITY.md).
 
-The CLI only recognizes project manifests with `schemaVersion: 1` (not the interchange `lessonkit.json` written under `.lxpack/course`). `per-lesson-spa` layout is not supported by `lessonkit package` (0.9.1) — use `single-spa`.
+The CLI only recognizes project manifests with `schemaVersion: 1` (not the interchange `lessonkit.json` written under `.lxpack/course`). `per-lesson-spa` layout is not supported by `lessonkit package` (0.9.2) — use `single-spa`. SPA build output is controlled by `paths.spaDistDir` (not `course.spaDistDir`).
 
 ## Commands
 
@@ -76,7 +76,7 @@ lessonkit init my-course --force
 |------|-------------|
 | `--here` | Initialize in the current directory instead of creating a subdirectory |
 | `--skip-install` | Skip `npm install` (CI/automation) |
-| `--force` | With `--here`, initialize into a non-empty current directory (merges template files; does not delete existing files) |
+| `--force` | With `--here` only: initialize when the current directory is empty or contains dotfiles only (merges template files; does not delete existing files) |
 
 ### `lessonkit dev`
 

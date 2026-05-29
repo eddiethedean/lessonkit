@@ -147,6 +147,25 @@ export async function packageLessonkitCourse(
     };
   }
 
+  if (projectRoot && output) {
+    const resolvedOutput = resolve(projectRoot, output);
+    try {
+      assertResolvedPathUnderRoot(projectRoot, resolvedOutput);
+    } catch (err) {
+      return {
+        ok: false,
+        courseDir: outDir,
+        target,
+        issues: [
+          {
+            path: "output",
+            message: err instanceof Error ? err.message : String(err),
+          },
+        ],
+      };
+    }
+  }
+
   const descriptorValidation = validateDescriptor(writeOpts.descriptor);
   if (!descriptorValidation.ok) {
     return {
