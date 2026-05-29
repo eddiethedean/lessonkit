@@ -129,7 +129,7 @@ describe("@lessonkit/core", () => {
   });
 
   it("dispose drains tail events via repeated flush in drainAll", async () => {
-    const batchSink = vi.fn(async () => {
+    const batchSink = vi.fn<(events: TelemetryEvent[]) => Promise<void>>(async () => {
       await Promise.resolve();
     });
     const client = createTrackingClient({
@@ -141,7 +141,7 @@ describe("@lessonkit/core", () => {
     client.track(interactionEvent("t2"));
     await client.dispose?.();
 
-    const totalDelivered = batchSink.mock.calls.reduce((n, [events]) => n + events.length, 0);
+    const totalDelivered = batchSink.mock.calls.reduce((n, call) => n + call[0].length, 0);
     expect(totalDelivered).toBe(2);
   });
 
