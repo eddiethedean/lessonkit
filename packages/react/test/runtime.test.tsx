@@ -413,6 +413,34 @@ describe("@lessonkit/react runtime", () => {
     expect(transport.mock.calls[0]?.[0]?.verb).toContain("initialized");
   });
 
+  it("emits one course initialized xAPI when both tracking sink and transport are configured", async () => {
+    const transport = vi.fn(async (_s: XAPIStatement) => {});
+    const events: TelemetryEvent[] = [];
+
+    render(
+      <Course
+        title="Course"
+        courseId="course-1"
+        config={{
+          tracking: { sink: (e: TelemetryEvent) => void events.push(e) },
+          xapi: { transport },
+        }}
+      >
+        <div>child</div>
+      </Course>,
+    );
+
+    await waitFor(() => expect(events.some((e) => e.name === "course_started")).toBe(true));
+    expect(events.filter((e) => e.name === "course_started")).toHaveLength(1);
+
+    const courseInitialized = transport.mock.calls.filter(
+      (call) =>
+        call[0]?.verb?.includes("initialized") &&
+        call[0]?.object.id === "urn:lessonkit:course:course-1",
+    );
+    expect(courseInitialized).toHaveLength(1);
+  });
+
   it("emits course_started to xAPI when transport is enabled after mount", async () => {
     const transport = vi.fn(async (_s: XAPIStatement) => {});
 

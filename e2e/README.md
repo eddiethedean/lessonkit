@@ -7,6 +7,11 @@ Playwright tests and packaging conformance scripts for **0.9.x** export parity.
 - **Node.js 20+**
 - `unzip` on `PATH` (SCORM unpack)
 - From repo root: `npm ci`
+- Playwright browsers (first time only):
+
+```bash
+npm exec -w @lessonkit/e2e -- playwright install --with-deps chromium
+```
 
 ## Commands
 

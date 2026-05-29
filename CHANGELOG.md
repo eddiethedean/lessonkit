@@ -17,6 +17,10 @@ All notable changes to the LessonKit monorepo are documented here. Published pac
 
 - Monorepo packages bumped to **0.9.0**; focus milestone is export parity before framework 1.0.
 
+### Fixed
+
+- **@lessonkit/react**: Emit one course-level xAPI `initialized` statement when both tracking and xAPI transport are configured (removed duplicate bootstrap send on provider mount).
+
 ## [0.8.2] - 2026-05-29
 
 ### Changed

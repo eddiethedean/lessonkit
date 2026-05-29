@@ -154,6 +154,7 @@ export function LessonkitProvider(props: { config: LessonkitConfig; children: Re
   const xapiClient = config.xapi?.client;
   const xapiTransport = config.xapi?.transport;
   const courseId = config.courseId;
+  const trackingEnabled = config.tracking?.enabled;
 
   useIsoLayoutEffect(() => {
     if (prevXapiCourseIdRef.current !== courseId) {
@@ -169,19 +170,25 @@ export function LessonkitProvider(props: { config: LessonkitConfig; children: Re
     if (next && !prev) {
       const sessionId = sessionIdRef.current;
       const cid = courseIdRef.current;
-      try {
-        const statement = telemetryEventToXAPIStatement(
-          buildTrackEvent({
-            name: "course_started",
-            courseId: cid,
-            sessionId,
-            attemptId: attemptIdRef.current,
-            user: userRef.current,
-          }),
-        );
-        if (statement) next.send(statement);
-      } catch {
-        // xAPI mapping may skip invalid ids; ignore
+      const trackingActive = isTrackingActive(config.tracking);
+      const alreadyStarted = hasCourseStarted(defaultStorage, sessionId, cid);
+      // When tracking is on, course_started (and xAPI) normally flow through emitTelemetry.
+      // Bootstrap here only for xAPI-only apps, or when transport is enabled after course_started.
+      if (!trackingActive || alreadyStarted) {
+        try {
+          const statement = telemetryEventToXAPIStatement(
+            buildTrackEvent({
+              name: "course_started",
+              courseId: cid,
+              sessionId,
+              attemptId: attemptIdRef.current,
+              user: userRef.current,
+            }),
+          );
+          if (statement) next.send(statement);
+        } catch {
+          // xAPI mapping may skip invalid ids; ignore
+        }
       }
     }
 
@@ -205,13 +212,12 @@ export function LessonkitProvider(props: { config: LessonkitConfig; children: Re
       cancelled = true;
       void prev?.flush();
     };
-  }, [xapiEnabled, xapiClient, xapiTransport, courseId]);
+  }, [xapiEnabled, xapiClient, xapiTransport, courseId, trackingEnabled]);
 
   const trackingRef = useRef<TrackingClient>(createTrackingClient());
   const trackingClientForUnmountRef = useRef<TrackingClient>(trackingRef.current);
   const [tracking, setTracking] = useState<TrackingClient>(() => trackingRef.current);
 
-  const trackingEnabled = config.tracking?.enabled;
   const trackingSink = config.tracking?.sink;
   const trackingBatchSink = config.tracking?.batchSink;
   const batchEnabled = config.tracking?.batch?.enabled;

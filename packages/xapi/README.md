@@ -7,7 +7,7 @@
 
 xAPI statement generation primitives.
 
-**Docs:** [Telemetry reference](https://lessonkit.readthedocs.io/en/latest/reference/telemetry.html) · [Telemetry & xAPI guide](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/telemetry-and-xapi.html)
+**Docs:** [xAPI reference](https://lessonkit.readthedocs.io/en/latest/reference/xapi.html) · [Telemetry reference](https://lessonkit.readthedocs.io/en/latest/reference/telemetry.html) · [Telemetry & xAPI guide](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/telemetry-and-xapi.html)
 
 ## Install
 

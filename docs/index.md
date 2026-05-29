@@ -106,6 +106,7 @@ reference/cli
 reference/packaging
 reference/identity
 reference/telemetry
+reference/xapi
 reference/theming
 reference/accessibility
 reference/block-catalog
