@@ -13,6 +13,14 @@ describe("example App", () => {
     expect(true).toBe(true);
   });
 
+  it("assignment acknowledgment unlocks lab feedback", () => {
+    const spy = vi.spyOn(console, "log").mockImplementation(() => {});
+    const { getByRole, getByText } = render(<App />);
+    fireEvent.click(getByRole("checkbox"));
+    expect(getByText(/Ready for labs/)).toBeDefined();
+    spy.mockRestore();
+  });
+
   it("theme toggle updates data-lk-theme and light background CSS on the document", () => {
     const spy = vi.spyOn(console, "log").mockImplementation(() => {});
     const { getByRole } = render(<App />);
@@ -76,6 +84,47 @@ describe("example App", () => {
     },
     15000,
   );
+
+  it("inbox exercise can land on needs-review risk band", async () => {
+    const spy = vi.spyOn(console, "log").mockImplementation(() => {});
+    const { getAllByLabelText, getAllByText, getByText } = render(<App />);
+    const nav = within(getAllByLabelText("Course curriculum")[0]!);
+
+    fireEvent.click(nav.getByText("Continue"));
+    fireEvent.click(getAllByText("Ignore for now")[0]!);
+    fireEvent.click(getAllByText("Report as phishing")[1]!);
+    fireEvent.click(getAllByText("Ignore for now")[2]!);
+    expect(getByText(/Needs review/)).toBeDefined();
+    spy.mockRestore();
+  });
+
+  it("covers smishing simulation safe path", () => {
+    const spy = vi.spyOn(console, "log").mockImplementation(() => {});
+    const { getAllByLabelText, getAllByText, getByText } = render(<App />);
+    const nav = within(getAllByLabelText("Course curriculum")[0]!);
+
+    fireEvent.click(nav.getByText("Continue"));
+    fireEvent.click(nav.getByText("Continue"));
+    fireEvent.click(getAllByText("Block & report")[0]!);
+    fireEvent.click(getAllByText("Block & report")[1]!);
+    fireEvent.click(getAllByText("Call number back")[2]!);
+    expect(getByText(/Good instincts/)).toBeDefined();
+    spy.mockRestore();
+  });
+
+  it("covers smishing simulation risky path", () => {
+    const spy = vi.spyOn(console, "log").mockImplementation(() => {});
+    const { getAllByLabelText, getAllByText, getByText } = render(<App />);
+    const nav = within(getAllByLabelText("Course curriculum")[0]!);
+
+    fireEvent.click(nav.getByText("Continue"));
+    fireEvent.click(nav.getByText("Continue"));
+    fireEvent.click(getAllByText("Open link")[0]!);
+    fireEvent.click(getAllByText("Open link")[1]!);
+    fireEvent.click(getAllByText("Open link")[2]!);
+    expect(getByText(/Review SOC guidance/)).toBeDefined();
+    spy.mockRestore();
+  });
 
   it("covers the risky urgent-request branch", async () => {
     const spy = vi.spyOn(console, "log").mockImplementation(() => {});
