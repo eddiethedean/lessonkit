@@ -104,14 +104,26 @@ jobs:
         run: |
           publish_workspace() {
             local workspace="$1"
-            local name version
+            local name version err
             name="$(npm pkg get name -w "$workspace" | tr -d '"')"
             version="$(npm pkg get version -w "$workspace" | tr -d '"')"
-            if npm view "${name}@${version}" version >/dev/null 2>&1; then
+            if npm view "${name}@${version}" version 2>/dev/null | grep -Fxq "${version}"; then
               echo "Already published: ${name}@${version}"
               return 0
             fi
-            npm -w "$workspace" publish --access public
+            err="$(mktemp)"
+            if npm -w "$workspace" publish --access public 2>"$err"; then
+              rm -f "$err"
+              return 0
+            fi
+            if grep -q 'cannot publish over the previously published versions' "$err"; then
+              echo "Already published (npm 403): ${name}@${version}"
+              rm -f "$err"
+              return 0
+            fi
+            cat "$err" >&2
+            rm -f "$err"
+            return 1
           }
           publish_workspace @lessonkit/core
           publish_workspace @lessonkit/xapi
