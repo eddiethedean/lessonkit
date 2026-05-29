@@ -6,10 +6,8 @@
     </linearGradient>
   </defs>
   <rect width="32" height="32" rx="8" fill="url(#lk-favicon-grad)"/>
-  <g fill="none" stroke="#fff" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M10 9.5v13H17"/>
-    <path d="M19.5 9.5v13"/>
-    <path d="M19.5 14.25L25 9.5"/>
-    <path d="M19.5 14.25L25 22.5"/>
+  <g fill="#fff">
+    <path d="M8.75 9.25h2.85v10.35h5.65v2.65H8.75V9.25z"/>
+    <path d="M17.85 9.25h2.9v5.15L26.35 9.25h2.35l-6.15 5.35L28.1 22.15h-2.7l-5.85-7.35H17.85V9.25z"/>
   </g>
 </svg>
