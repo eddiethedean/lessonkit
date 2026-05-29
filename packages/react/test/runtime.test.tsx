@@ -106,7 +106,11 @@ describe("@lessonkit/react runtime", () => {
         config={{
           courseId: "course-1",
           plugins: [dropInteractions],
-          tracking: { sink: (e: TelemetryEvent) => events.push(e) },
+          tracking: {
+            sink: (e: TelemetryEvent) => {
+              events.push(e);
+            },
+          },
         }}
       >
         <Lesson title="Lesson" lessonId="lesson-1">

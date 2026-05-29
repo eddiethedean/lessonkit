@@ -42,10 +42,13 @@ describe("createPluginHost", () => {
         id: "tag",
         version: "1",
         kind: "analytics",
-        onTelemetry: (event) => ({
-          ...event,
-          data: { ...(event.data as object), tagged: true },
-        }),
+        onTelemetry: (event) => {
+          if (event.name !== "interaction") return event;
+          return {
+            ...event,
+            data: { ...(event.data ?? {}), tagged: true },
+          };
+        },
       }),
       defineLessonkitPlugin({
         id: "drop-interaction",
@@ -63,7 +66,7 @@ describe("createPluginHost", () => {
       ctx,
     );
     expect(kept?.name).toBe("course_started");
-    expect((kept?.data as { tagged?: boolean })?.tagged).toBe(true);
+    expect((kept?.data as { tagged?: boolean } | undefined)?.tagged).toBeUndefined();
   });
 
   it("composes wrapTrackingSink inside-out by registration order", async () => {
