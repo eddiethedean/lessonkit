@@ -6,7 +6,7 @@
     "node": ">=20"
   },
   "scripts": {
-    "test": "playwright test",
+    "test:e2e": "playwright test",
     "test:ui": "playwright test --ui",
     "conformance:lxpack": "node scripts/run-lxpack-conformance.mjs",
     "conformance:golden": "node scripts/run-golden-package-matrix.mjs"

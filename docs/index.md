@@ -94,6 +94,7 @@ guides/react-developers/telemetry-and-xapi
 guides/react-developers/theming-and-accessibility
 guides/react-developers/packaging-and-cli
 guides/react-developers/export-parity
+guides/react-developers/plugin-cookbook
 guides/react-developers/contributing-to-the-monorepo
 ```
 
