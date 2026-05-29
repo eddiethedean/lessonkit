@@ -13,14 +13,14 @@ Published packages: `@lessonkit/core`, `@lessonkit/xapi`, `@lessonkit/accessibil
 
 | Item | Status |
 |------|--------|
-| `main` CI green | Required |
-| All seven `@lessonkit/*` packages at `0.8.1` in `package.json` | Required |
-| `@lessonkit/react` / `@lessonkit/lxpack` / `@lessonkit/cli` depend on matching `@lessonkit/*@0.8.1` | Required |
-| `lessonkit init` template pins `^0.8.1` for `@lessonkit/*` | Required |
-| `templates/vite-react` synced to `packages/cli/template` (`copy-template`; CI enforces) | Required |
-| [CHANGELOG.md](CHANGELOG.md) `## [0.8.1]` documents fixes | Required |
-| No pending `.changeset/*.md` files | Required |
-| Git tag `v0.8.1` | Create only when ready to publish |
+| `main` CI green | Done (verify latest run on `main`) |
+| All seven `@lessonkit/*` packages at `0.8.1` in `package.json` | Done |
+| `@lessonkit/react` / `@lessonkit/lxpack` / `@lessonkit/cli` depend on matching `@lessonkit/*@0.8.1` | Done |
+| `lessonkit init` template pins `^0.8.1` for `@lessonkit/*` | Done (`copy-template.mjs`) |
+| `templates/vite-react` synced to `packages/cli/template` (`copy-template`; CI enforces) | Done (CI step) |
+| [CHANGELOG.md](CHANGELOG.md) `## [0.8.1]` documents fixes | Done |
+| No pending `.changeset/*.md` files | Done (only `config.json`) |
+| Git tag `v0.8.1` | **Not created** — push only when ready to publish to npm |
 
 > **Do not create or push a `v0.8.1` git tag** until you intend to publish to npm.
 
@@ -64,8 +64,8 @@ Published packages: `@lessonkit/core`, `@lessonkit/xapi`, `@lessonkit/accessibil
 3. When ready to publish, create and push the version tag (triggers [`.github/workflows/release.yml`](.github/workflows/release.yml)):
 
    ```bash
-   git tag v0.8.0
-   git push origin v0.8.0
+   git tag v0.8.1
+   git push origin v0.8.1
    ```
 
 4. Verify the **Release** workflow on GitHub Actions and packages on [npm](https://www.npmjs.com/org/lessonkit).
@@ -74,7 +74,7 @@ The release job sets each package version from the tag, aligns `@lessonkit/*` de
 
 ## After release
 
-- Confirm npm shows `0.8.0` for each `@lessonkit/*` package.
+- Confirm npm shows `0.8.1` for each `@lessonkit/*` package.
 - Optional: create a GitHub Release from the tag with notes copied from [CHANGELOG.md](CHANGELOG.md).
 
 ## Changesets
