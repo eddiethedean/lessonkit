@@ -8,10 +8,7 @@
     <span class="lk-badge">SCORM · xAPI · cmi5</span>
   </div>
   <p class="lk-hero-title">Build learning experiences that ship to your LMS</p>
-  <p class="lk-lead">
-    LessonKit is a framework for accessible, trackable courses—authored in React,
-    packaged for SCORM and modern learning platforms, with telemetry and xAPI built in.
-  </p>
+  <p class="lk-lead">LessonKit is a framework for accessible, trackable courses—authored in React, packaged for SCORM and modern learning platforms, with built-in telemetry and xAPI.</p>
 </div>
 ```
 

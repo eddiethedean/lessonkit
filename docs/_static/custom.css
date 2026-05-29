@@ -55,6 +55,7 @@ article.bd-article > h1:first-of-type {
   color: var(--color-foreground-secondary);
   max-width: 42rem;
   margin: 0 0 1.5rem;
+  text-wrap: pretty;
 }
 
 .lk-hero-badges {
