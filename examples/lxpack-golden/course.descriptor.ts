@@ -6,7 +6,7 @@ export const goldenCourseDescriptor: LessonkitCourseDescriptor = {
   version: "1.0.0",
   layout: "single-spa",
   spaLessonId: "welcome",
-  lessons: [{ id: "welcome", title: "Workplace Safety: Warehouse Briefing" }],
+  lessons: [{ id: "welcome", title: "Site orientation" }],
   assessments: [
     {
       checkId: "safety-check",

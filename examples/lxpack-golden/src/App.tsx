@@ -21,7 +21,7 @@ const STEPS: readonly LessonMeta[] = [
   { id: "welcome", title: "Site orientation", duration: "3 min", type: "Reading" },
   { id: "ppe-check", title: "PPE fit & sign-off", duration: "2 min", type: "Checklist" },
   { id: "hazard-walkthrough", title: "Floor walk", duration: "4 min", type: "Photo review" },
-  { id: "safety-check", title: "Sign-off & near-miss", duration: "3 min", type: "Assessment" },
+  { id: "safety-signoff", title: "Sign-off & near-miss", duration: "3 min", type: "Assessment" },
 ];
 
 export default function App() {

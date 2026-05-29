@@ -2,7 +2,12 @@ import type { CourseId } from "@lessonkit/core";
 import { createSessionId } from "@lessonkit/core";
 import type { StoragePort } from "./ports";
 
-const SESSION_STORAGE_KEY = "lessonkit:sessionId";
+export const SESSION_STORAGE_KEY = "lessonkit:sessionId";
+
+/** Tab-scoped auto session id from storage (does not create a new id). */
+export function getTabSessionId(storage: StoragePort): string | null {
+  return storage.getItem(SESSION_STORAGE_KEY);
+}
 const COURSE_STARTED_PREFIX = "lessonkit:course_started:";
 
 export function resolveSessionId(storage: StoragePort, provided?: string): string {

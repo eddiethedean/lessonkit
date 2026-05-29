@@ -18,6 +18,7 @@ import { createSessionStoragePort } from "./runtime/ports";
 import { createProgressController, type ProgressState } from "./runtime/progress";
 import { createXapiClientFromConfig } from "./runtime/xapi";
 import {
+  getTabSessionId,
   hasCourseStarted,
   markCourseStarted,
   migrateCourseStartedMark,
@@ -147,6 +148,7 @@ export function LessonkitProvider(props: { config: LessonkitConfig; children: Re
       }
     }
 
+    let cancelled = false;
     void (async () => {
       if (prev) {
         try {
@@ -155,6 +157,7 @@ export function LessonkitProvider(props: { config: LessonkitConfig; children: Re
           // Swallow flush errors so a broken previous transport doesn't block the next one.
         }
       }
+      if (cancelled) return;
       try {
         await next?.flush();
       } catch {
@@ -162,6 +165,7 @@ export function LessonkitProvider(props: { config: LessonkitConfig; children: Re
       }
     })();
     return () => {
+      cancelled = true;
       void prev?.flush();
     };
   }, [xapiEnabled, xapiClient, xapiTransport, courseId]);
@@ -347,13 +351,18 @@ export function LessonkitProvider(props: { config: LessonkitConfig; children: Re
     const prevConfigured = prevConfiguredSessionIdRef.current;
     if (nextConfigured === prevConfigured) return;
     prevConfiguredSessionIdRef.current = nextConfigured;
-    if (nextConfigured && prevConfigured && prevConfigured !== nextConfigured) {
-      migrateCourseStartedMark(
-        defaultStorage,
-        prevConfigured,
-        nextConfigured,
-        courseIdRef.current,
-      );
+
+    if (nextConfigured) {
+      const cid = courseIdRef.current;
+      const fromIds = new Set<string>();
+      if (prevConfigured) fromIds.add(prevConfigured);
+      const tabId = getTabSessionId(defaultStorage);
+      if (tabId) fromIds.add(tabId);
+      for (const fromId of fromIds) {
+        if (fromId !== nextConfigured) {
+          migrateCourseStartedMark(defaultStorage, fromId, nextConfigured, cid);
+        }
+      }
       sessionIdRef.current = nextConfigured;
     }
   }, [sessionConfiguredId, config.courseId]);

@@ -310,6 +310,62 @@ describe("@lessonkit/react provider dispose regression", () => {
     );
   });
 
+  it("migrates course_started when session.sessionId is first supplied after auto id", async () => {
+    const events: TelemetryEvent[] = [];
+    const sink = (e: TelemetryEvent) => void events.push(e);
+
+    const { rerender, unmount } = render(
+      <LessonkitProvider
+        config={{
+          courseId: "course-1",
+          tracking: { sink },
+          xapi: { enabled: false },
+        }}
+      >
+        <div>child</div>
+      </LessonkitProvider>,
+    );
+
+    await waitFor(() => expect(events.some((e) => e.name === "course_started")).toBe(true));
+    const autoStarted = events.find((e) => e.name === "course_started");
+    expect(autoStarted?.sessionId).toBeTruthy();
+
+    rerender(
+      <LessonkitProvider
+        config={{
+          courseId: "course-1",
+          session: { sessionId: "session-lms" },
+          tracking: { sink },
+          xapi: { enabled: false },
+        }}
+      >
+        <div>child</div>
+      </LessonkitProvider>,
+    );
+
+    expect(events.filter((e) => e.name === "course_started")).toHaveLength(1);
+
+    unmount();
+    cleanup();
+    events.length = 0;
+
+    render(
+      <LessonkitProvider
+        config={{
+          courseId: "course-1",
+          session: { sessionId: "session-lms" },
+          tracking: { sink },
+          xapi: { enabled: false },
+        }}
+      >
+        <div>child</div>
+      </LessonkitProvider>,
+    );
+
+    await new Promise((r) => setTimeout(r, 30));
+    expect(events.filter((e) => e.name === "course_started")).toHaveLength(0);
+  });
+
   it("migrates course_started dedup when session.sessionId changes", async () => {
     const events: TelemetryEvent[] = [];
     const sink = (e: TelemetryEvent) => void events.push(e);

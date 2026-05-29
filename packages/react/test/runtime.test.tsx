@@ -693,6 +693,133 @@ describe("@lessonkit/react runtime", () => {
     expect(getByTestId("user").textContent).toBe("user-b");
   });
 
+  it("updates runtime.session.sessionId when session.sessionId changes", async () => {
+    const events: TelemetryEvent[] = [];
+    const sink = (e: TelemetryEvent) => void events.push(e);
+
+    function SessionReader() {
+      const { session } = useLessonkit();
+      return <div data-testid="session-id">{session.sessionId}</div>;
+    }
+
+    const { getByTestId, rerender } = render(
+      <LessonkitProvider
+        config={{
+          courseId: "course-1",
+          session: { sessionId: "session-a" },
+          tracking: { sink },
+          xapi: { enabled: false },
+        }}
+      >
+        <SessionReader />
+      </LessonkitProvider>,
+    );
+
+    await waitFor(() => expect(events.some((e) => e.name === "course_started")).toBe(true));
+    expect(getByTestId("session-id").textContent).toBe("session-a");
+    expect(events.find((e) => e.name === "course_started")?.sessionId).toBe("session-a");
+
+    rerender(
+      <LessonkitProvider
+        config={{
+          courseId: "course-1",
+          session: { sessionId: "session-b" },
+          tracking: { sink },
+          xapi: { enabled: false },
+        }}
+      >
+        <SessionReader />
+      </LessonkitProvider>,
+    );
+
+    expect(getByTestId("session-id").textContent).toBe("session-b");
+    expect(events.filter((e) => e.name === "course_started")).toHaveLength(1);
+  });
+
+  it("emits quiz_completed again when checkId changes on a mounted Quiz", async () => {
+    const events: TelemetryEvent[] = [];
+    const sink = (e: TelemetryEvent) => void events.push(e);
+
+    const { getByLabelText, rerender } = render(
+      <LessonkitProvider
+        config={{ courseId: "course-1", tracking: { sink }, xapi: { enabled: false } }}
+      >
+        <Lesson title="Lesson" lessonId="lesson-1">
+          <Quiz checkId="check-a" question="Q1" choices={["A", "B"]} answer="A" />
+        </Lesson>
+      </LessonkitProvider>,
+    );
+
+    fireEvent.click(getByLabelText("A"));
+    await waitFor(() =>
+      expect(events.filter((e) => e.name === "quiz_completed" && e.data?.checkId === "check-a").length).toBe(1),
+    );
+
+    rerender(
+      <LessonkitProvider
+        config={{ courseId: "course-1", tracking: { sink }, xapi: { enabled: false } }}
+      >
+        <Lesson title="Lesson" lessonId="lesson-1">
+          <Quiz checkId="check-b" question="Q2" choices={["X", "Y"]} answer="Y" />
+        </Lesson>
+      </LessonkitProvider>,
+    );
+
+    fireEvent.click(getByLabelText("Y"));
+    await waitFor(() =>
+      expect(events.filter((e) => e.name === "quiz_completed" && e.data?.checkId === "check-b").length).toBe(1),
+    );
+    expect(events.filter((e) => e.name === "quiz_completed").length).toBe(2);
+  });
+
+  it("still flushes new xAPI client when previous client flush is slow", async () => {
+    let releaseSlowFlush!: () => void;
+    const slowFlushGate = new Promise<void>((resolve) => {
+      releaseSlowFlush = resolve;
+    });
+
+    const client1 = {
+      send: vi.fn(),
+      flush: vi.fn(async () => {
+        await slowFlushGate;
+      }),
+      queueSize: vi.fn(() => 0),
+      startedLesson: vi.fn(),
+      completeLesson: vi.fn(),
+      completeCourse: vi.fn(),
+    };
+
+    const client2 = {
+      send: vi.fn(),
+      flush: vi.fn(async () => {}),
+      queueSize: vi.fn(() => 0),
+      startedLesson: vi.fn(),
+      completeLesson: vi.fn(),
+      completeCourse: vi.fn(),
+    };
+
+    const { rerender } = render(
+      <Course title="Course" courseId="course-1" config={{ xapi: { client: client1 } }}>
+        <Lesson title="Lesson" lessonId="lesson-1">
+          <div>child</div>
+        </Lesson>
+      </Course>,
+    );
+
+    await waitFor(() => expect(client1.flush).toHaveBeenCalled());
+
+    rerender(
+      <Course title="Course" courseId="course-1" config={{ xapi: { client: client2 } }}>
+        <Lesson title="Lesson" lessonId="lesson-1">
+          <div>child</div>
+        </Lesson>
+      </Course>,
+    );
+
+    releaseSlowFlush();
+    await waitFor(() => expect(client2.flush).toHaveBeenCalled());
+  });
+
   it("resets progress and emits course_started when courseId changes", async () => {
     const events: TelemetryEvent[] = [];
     const sink = (e: TelemetryEvent) => {

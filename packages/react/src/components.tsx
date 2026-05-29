@@ -109,6 +109,11 @@ export function Quiz(props: {
   const completedRef = useRef(false);
   const questionId = useId();
 
+  useEffect(() => {
+    completedRef.current = false;
+    setSelected(null);
+  }, [props.checkId]);
+
   return (
     <section aria-label="Quiz" data-lk-check-id={props.checkId}>
       <p id={questionId}>{props.question}</p>

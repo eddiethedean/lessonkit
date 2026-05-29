@@ -16,6 +16,11 @@ All notable changes to the LessonKit monorepo are documented here. Published pac
 - **@lessonkit/cli**: Honor `--no-build` for `react-vite` package target; clarify `init --force` (only with `--here`).
 - **Examples**: `lessonkit.json` for react-vite, data-privacy, and customer-service; golden `course.descriptor.ts` sync; `examples/lxpack-golden/README.md` documents `single-spa` lesson ids.
 - **Docs**: README license Apache-2.0; ROADMAP framework status 0.8.1.
+- **@lessonkit/react**: Migrate `course_started` dedup when `session.sessionId` is first supplied after a tab auto-id (including from stored tab session).
+- **@lessonkit/react**: Reset `Quiz` completion state when `checkId` changes on a mounted instance.
+- **@lessonkit/react**: Ignore stale xAPI flush work after transport/client/courseId layout effect cleanup.
+- **Examples**: `react-vite` manifest theme preset matches App (`brand`); `lxpack-golden` renames in-SPA lesson `safety-signoff` (distinct from assessment `checkId`) and aligns welcome lesson title with the app.
+- **Docs**: CLI and guide version callouts updated to 0.8.1.
 
 ## [0.8.0] - 2026-05-28
 
