@@ -13,17 +13,18 @@ import {
 } from "@lessonkit/react";
 import type { TelemetryEvent } from "@lessonkit/core";
 import type { XAPIStatement } from "@lessonkit/xapi";
+import { CourseTopbar, LessonIntro, SidebarLessons, type LessonMeta } from "../../_shared/course-ui";
 
 const COURSE_ID = "data-privacy-essentials";
 
-const LESSONS = [
-  { id: "program-overview", title: "Program overview" },
-  { id: "lawful-basis", title: "Lawful basis" },
-  { id: "case-studies", title: "Case file review" },
-  { id: "data-minimization", title: "Minimization lab" },
-  { id: "incident-tabletop", title: "Incident tabletop" },
-  { id: "certification", title: "Certification" },
-] as const;
+const LESSONS: readonly LessonMeta[] = [
+  { id: "program-overview", title: "Program overview", duration: "2 min", type: "Reading" },
+  { id: "lawful-basis", title: "Lawful basis", duration: "4 min", type: "Interactive" },
+  { id: "case-studies", title: "Case file review", duration: "3 min", type: "Review" },
+  { id: "data-minimization", title: "Minimization lab", duration: "3 min", type: "Lab" },
+  { id: "incident-tabletop", title: "Incident tabletop", duration: "4 min", type: "Simulation" },
+  { id: "certification", title: "Certification", duration: "2 min", type: "Assessment" },
+];
 
 export default function App() {
   const [step, setStep] = React.useState(0);
@@ -36,23 +37,51 @@ export default function App() {
     [],
   );
 
+  const last = LESSONS.length - 1;
+  const current = LESSONS[step]!;
+
   return (
     <ThemeProvider mode="light" preset="default">
-      <div className="app-shell compliance-layout">
+      <div className="lms-app lms-theme-compliance">
         <Course title="Data Privacy & GDPR Essentials" courseId={COURSE_ID} config={courseConfig}>
-          <header className="course-header">
-            <p className="course-eyebrow">Legal & Compliance · EU / UK workforce</p>
-            <p className="course-intro muted">
-              Self-paced module aligned to our Binding Corporate Rules. Estimated seat time 14 minutes. A
-              certificate generates in your LMS after certification.
-            </p>
-          </header>
+          <CourseTopbar
+            title="Data Privacy & GDPR Essentials"
+            subtitle="Legal & Compliance · EU / UK · Binding Corporate Rules"
+            lessonCount={LESSONS.length}
+            estimate="~18 min"
+            chips={
+              <>
+                <span className="lms-chip">Certificate on pass</span>
+                <span className="lms-chip">Microlearning</span>
+              </>
+            }
+          />
 
-          <div className="layout-grid">
-            <OutlineNav step={step} setStep={setStep} />
+          <div className="lms-shell">
+            <SidebarLessons
+              lessons={LESSONS}
+              step={step}
+              setStep={setStep}
+              title="Learning path"
+              footer={
+                <div className="lms-sidebar-footer">
+                  <button type="button" onClick={() => setStep(Math.max(0, step - 1))} disabled={step === 0}>
+                    Back
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setStep(Math.min(last, step + 1))}
+                    disabled={step === last}
+                  >
+                    Continue
+                  </button>
+                </div>
+              }
+            />
 
-            <main className="lesson-main">
+            <main className="lms-main">
               <ProgressTracker />
+              <LessonIntro type={current.type} title={current.title} duration={current.duration} />
 
               {step === 0 ? (
                 <Lesson title={LESSONS[0].title} lessonId={LESSONS[0].id}>
@@ -132,50 +161,10 @@ export default function App() {
   );
 }
 
-function OutlineNav(props: { step: number; setStep: (n: number) => void }) {
-  const { progress } = useLessonkit();
-  const completed = progress.completedLessonIds.size;
-
-  return (
-    <nav className="outline-nav" aria-label="Course outline">
-      <p className="outline-title">Outline</p>
-      <ol>
-        {LESSONS.map((lesson, i) => (
-          <li key={lesson.id}>
-            <button
-              type="button"
-              aria-current={props.step === i ? "step" : undefined}
-              className={props.step === i ? "outline-active" : undefined}
-              onClick={() => props.setStep(i)}
-            >
-              {lesson.title}
-            </button>
-          </li>
-        ))}
-      </ol>
-      <p className="outline-progress muted">
-        {completed} of {LESSONS.length} sections complete
-      </p>
-      <div className="outline-actions">
-        <button type="button" onClick={() => props.setStep(Math.max(0, props.step - 1))} disabled={props.step === 0}>
-          Back
-        </button>
-        <button
-          type="button"
-          onClick={() => props.setStep(Math.min(LESSONS.length - 1, props.step + 1))}
-          disabled={props.step === LESSONS.length - 1}
-        >
-          Continue
-        </button>
-      </div>
-    </nav>
-  );
-}
-
 function ProgramOverview() {
   return (
     <section className="panel">
-      <div className="instructor-note">
+      <div className="instructor-note lms-feedback lms-feedback--info">
         <strong>Instructor note</strong>
         <p>This module does not replace legal advice. Contact privacy@company.example for DPIAs.</p>
       </div>
@@ -486,7 +475,7 @@ function FinishCourse() {
 
   return (
     <section className="panel">
-      <button type="button" onClick={() => completeCourse()} disabled={!done}>
+      <button type="button" className="lms-btn-primary" onClick={() => completeCourse()} disabled={!done}>
         Record certification
       </button>
       {!done ? <p className="muted">Complete all prior sections and pass the attestation.</p> : null}

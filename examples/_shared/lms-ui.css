@@ -1,0 +1,535 @@
+/* Modern LMS shell — inspired by SaaS course UIs (sidebar progress, card lessons, microlearning chips). */
+
+.lms-app {
+  --lms-radius: 12px;
+  --lms-radius-sm: 8px;
+  --lms-shadow: 0 1px 2px rgba(0, 0, 0, 0.06), 0 4px 16px rgba(0, 0, 0, 0.06);
+  --lms-sidebar-w: 272px;
+  min-height: 100vh;
+}
+
+.lms-app * {
+  box-sizing: border-box;
+}
+
+/* Hide default plain progress aside; apps use lms-topbar progress ring */
+.lms-app aside[aria-label="Progress"] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+}
+
+.lms-topbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem 1.5rem;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--lk-color-border);
+  background: var(--lk-color-panel);
+}
+
+.lms-topbar-brand {
+  flex: 1;
+  min-width: 200px;
+}
+
+/* LessonKit Course h1 is sr-only; topbar shows the visible course title */
+.lms-app section[aria-label] > h1 {
+  display: none;
+}
+
+.lms-topbar-heading {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.3;
+}
+
+.lms-topbar-meta {
+  margin: 0.25rem 0 0;
+  font-size: 0.8125rem;
+  color: var(--lk-color-muted);
+}
+
+.lms-progress-ring {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.lms-progress-ring svg {
+  width: 48px;
+  height: 48px;
+  transform: rotate(-90deg);
+}
+
+.lms-progress-ring circle {
+  fill: none;
+  stroke-width: 4;
+}
+
+.lms-progress-ring .track {
+  stroke: color-mix(in srgb, var(--lk-color-border) 80%, transparent);
+}
+
+.lms-progress-ring .fill {
+  stroke: var(--lk-color-primary);
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.35s ease;
+}
+
+.lms-progress-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--lk-color-muted);
+}
+
+.lms-progress-label strong {
+  display: block;
+  font-size: 1.125rem;
+  color: var(--lk-color-foreground);
+}
+
+.lms-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.lms-chip {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 0.25rem 0.625rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--lk-color-primary) 12%, transparent);
+  color: var(--lk-color-primary);
+  border: 1px solid color-mix(in srgb, var(--lk-color-primary) 25%, transparent);
+}
+
+.lms-chip--warn {
+  background: color-mix(in srgb, var(--lk-color-danger) 10%, transparent);
+  color: var(--lk-color-danger);
+  border-color: color-mix(in srgb, var(--lk-color-danger) 30%, transparent);
+}
+
+.lms-shell {
+  display: grid;
+  grid-template-columns: var(--lms-sidebar-w) 1fr;
+  min-height: calc(100vh - 80px);
+}
+
+@media (max-width: 840px) {
+  .lms-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .lms-sidebar {
+    border-bottom: 1px solid var(--lk-color-border);
+  }
+}
+
+.lms-sidebar {
+  padding: 1rem;
+  border-right: 1px solid var(--lk-color-border);
+  background: color-mix(in srgb, var(--lk-color-background) 96%, var(--lk-color-panel));
+}
+
+.lms-sidebar-title {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--lk-color-muted);
+  margin: 0 0 0.75rem;
+}
+
+.lms-outline {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.lms-outline li {
+  margin-bottom: 0.35rem;
+}
+
+.lms-outline-btn {
+  width: 100%;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0.625rem 0.75rem;
+  border: 1px solid transparent;
+  border-radius: var(--lms-radius-sm);
+  background: transparent;
+  color: var(--lk-color-foreground);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.lms-outline-btn:hover:enabled {
+  background: color-mix(in srgb, var(--lk-color-primary) 8%, transparent);
+}
+
+.lms-outline-btn[aria-current="step"],
+.lms-outline-btn.lms-outline-active {
+  background: color-mix(in srgb, var(--lk-color-primary) 14%, transparent);
+  border-color: color-mix(in srgb, var(--lk-color-primary) 35%, transparent);
+}
+
+.lms-outline-btn.lms-outline-done .lms-outline-label::before {
+  content: "✓ ";
+  color: var(--lk-color-success);
+}
+
+.lms-outline-bar {
+  height: 3px;
+  border-radius: 999px;
+  background: var(--lk-color-border);
+  overflow: hidden;
+}
+
+.lms-outline-bar span {
+  display: block;
+  height: 100%;
+  background: var(--lk-color-primary);
+  border-radius: 999px;
+  transition: width 0.3s ease;
+}
+
+.lms-sidebar-footer {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--lk-color-border);
+}
+
+.lms-sidebar-footer button {
+  flex: 1;
+  font-size: 0.8125rem;
+}
+
+.lms-main {
+  padding: 1.25rem 1.5rem 3rem;
+  max-width: 720px;
+}
+
+/* LessonKit Lesson title; LessonIntro provides the visible heading */
+.lms-main article > h2 {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+}
+
+.lms-lesson-header {
+  margin-bottom: 1.25rem;
+}
+
+.lms-lesson-type {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--lk-color-primary);
+}
+
+.lms-lesson-title {
+  margin: 0.35rem 0 0.5rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.lms-lesson-duration {
+  font-size: 0.8125rem;
+  color: var(--lk-color-muted);
+}
+
+/* Scenario = modern callout block */
+.lms-app section[aria-label="Scenario"],
+.lms-scenario {
+  border-left: 4px solid var(--lk-color-primary);
+  padding: 1rem 1.125rem;
+  margin: 0 0 1.25rem;
+  border-radius: 0 var(--lms-radius-sm) var(--lms-radius-sm) 0;
+  background: color-mix(in srgb, var(--lk-color-primary) 6%, var(--lk-color-panel));
+  font-size: 0.9375rem;
+  line-height: 1.55;
+}
+
+.lms-app section[aria-label="Scenario"] p,
+.lms-scenario p {
+  margin: 0;
+}
+
+/* Content panels */
+.lms-app .panel,
+.lms-panel {
+  background: var(--lk-color-panel);
+  border: 1px solid var(--lk-color-border);
+  border-radius: var(--lms-radius);
+  padding: 1.25rem;
+  margin: 0 0 1rem;
+  box-shadow: var(--lms-shadow);
+}
+
+.lms-app section:not([aria-label="Scenario"]):not(.lms-sidebar):not(.lms-topbar),
+.lms-app article {
+  border: none;
+  box-shadow: none;
+  background: transparent;
+  padding: 0;
+  margin: 0 0 1rem;
+}
+
+.lms-app .callout,
+.lms-feedback {
+  border-radius: var(--lms-radius-sm);
+  padding: 1rem 1.125rem;
+  margin: 1rem 0 0;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+
+.lms-app .callout,
+.lms-feedback--info {
+  background: color-mix(in srgb, var(--lk-color-primary) 10%, var(--lk-color-panel));
+  border: 1px solid color-mix(in srgb, var(--lk-color-primary) 22%, transparent);
+}
+
+.lms-feedback--success {
+  background: color-mix(in srgb, var(--lk-color-success) 12%, var(--lk-color-panel));
+  border: 1px solid color-mix(in srgb, var(--lk-color-success) 35%, transparent);
+}
+
+.lms-feedback--warn {
+  background: color-mix(in srgb, var(--lk-color-warning) 12%, var(--lk-color-panel));
+  border: 1px solid color-mix(in srgb, var(--lk-color-warning) 35%, transparent);
+}
+
+.lms-app .hint {
+  border-radius: var(--lms-radius-sm);
+  padding: 0.875rem 1rem;
+  margin-top: 1rem;
+  border: 1px dashed color-mix(in srgb, var(--lk-color-primary) 40%, transparent);
+  background: color-mix(in srgb, var(--lk-color-primary) 5%, transparent);
+  font-size: 0.875rem;
+}
+
+/* Cards — email, cases, hazards */
+.lms-app .card,
+.lms-card {
+  background: var(--lk-color-panel);
+  border: 1px solid var(--lk-color-border);
+  border-radius: var(--lms-radius);
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+  box-shadow: var(--lms-shadow);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.lms-app .card:hover {
+  border-color: color-mix(in srgb, var(--lk-color-primary) 30%, var(--lk-color-border));
+}
+
+.lms-app .actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.lms-app .actions button,
+.lms-btn-option {
+  width: 100%;
+  text-align: left;
+  padding: 0.75rem 1rem;
+  border-radius: var(--lms-radius-sm);
+  border: 1px solid var(--lk-color-border);
+  background: var(--lk-color-background);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.lms-app .actions button:hover:enabled {
+  border-color: var(--lk-color-primary);
+  background: color-mix(in srgb, var(--lk-color-primary) 8%, var(--lk-color-background));
+}
+
+.lms-btn-primary {
+  background: var(--lk-color-primary) !important;
+  color: var(--lk-color-primary-foreground, #fff) !important;
+  border-color: var(--lk-color-primary) !important;
+  font-weight: 600;
+}
+
+.lms-app .pill {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.lms-app .pill-warn {
+  background: color-mix(in srgb, var(--lk-color-warning) 18%, transparent);
+  color: var(--lk-color-warning);
+  border: none;
+}
+
+.lms-app .pill-ok {
+  background: color-mix(in srgb, var(--lk-color-success) 18%, transparent);
+  color: var(--lk-color-success);
+  border: none;
+}
+
+.lms-score-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  border-radius: var(--lms-radius);
+  background: color-mix(in srgb, var(--lk-color-primary) 8%, var(--lk-color-panel));
+  border: 1px solid var(--lk-color-border);
+  margin-bottom: 1rem;
+}
+
+.lms-score-card .score {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--lk-color-primary);
+  background: none;
+  -webkit-text-fill-color: unset;
+}
+
+.lms-objectives {
+  margin: 0.75rem 0 0;
+  padding-left: 1.25rem;
+  font-size: 0.875rem;
+  color: var(--lk-color-muted);
+  line-height: 1.6;
+}
+
+.lms-theme-toggle {
+  display: flex;
+  gap: 0.35rem;
+  margin-top: 1rem;
+}
+
+.lms-theme-toggle button {
+  font-size: 0.75rem;
+  padding: 0.35rem 0.6rem;
+}
+
+.lms-theme-toggle button[aria-pressed="true"] {
+  border-color: var(--lk-color-primary);
+  background: color-mix(in srgb, var(--lk-color-primary) 15%, transparent);
+}
+
+/* Quiz from LessonKit */
+.lms-app form[role="form"],
+.lms-app fieldset {
+  border: 1px solid var(--lk-color-border);
+  border-radius: var(--lms-radius);
+  padding: 1.25rem;
+  background: var(--lk-color-panel);
+  box-shadow: var(--lms-shadow);
+}
+
+.lms-app label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  font-size: 0.9375rem;
+}
+
+/* Mobile inbox / chat chrome */
+.lms-device-frame {
+  max-width: 320px;
+  margin: 0 auto;
+  border-radius: 24px;
+  border: 3px solid var(--lk-color-border);
+  padding: 1rem;
+  background: color-mix(in srgb, var(--lk-color-background) 90%, #000);
+}
+
+.lms-chat-window {
+  border-radius: var(--lms-radius);
+  border: 1px solid var(--lk-color-border);
+  overflow: hidden;
+  background: var(--lk-color-background);
+}
+
+.lms-chat-header {
+  padding: 0.75rem 1rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  border-bottom: 1px solid var(--lk-color-border);
+  background: var(--lk-color-panel);
+}
+
+.lms-chat-body {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+/* Theme: security (dark) */
+.lms-theme-security {
+  background: var(--lk-color-background);
+}
+
+.lms-theme-security .lms-topbar {
+  background: color-mix(in srgb, var(--lk-color-panel) 95%, #000);
+}
+
+/* Theme: compliance (light) */
+.lms-theme-compliance {
+  background: #f8fafc;
+}
+
+.lms-theme-compliance .lms-topbar,
+.lms-theme-compliance .lms-sidebar {
+  background: #fff;
+}
+
+/* Theme: support (light warm) */
+.lms-theme-support {
+  background: #f4f6f8;
+}
+
+.lms-theme-support .lms-topbar {
+  background: #fff;
+  border-bottom-color: #e2e8f0;
+}
+
+/* Theme: field (light industrial) */
+.lms-theme-field {
+  background: #fafaf9;
+}
+
+.lms-theme-field .lms-topbar {
+  border-bottom: 3px solid #ea580c;
+}
+
+.lms-theme-field .lms-chip,
+.lms-theme-field .lms-outline-bar span {
+  --lk-color-primary: #ea580c;
+}

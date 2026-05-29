@@ -1,6 +1,6 @@
 # Live examples
 
-These pages embed **production builds** of the monorepo examples, compiled when the documentation site is built (CI and Read the Docs). Open your browser developer console to see telemetry and xAPI log output.
+These pages embed **production builds** of the monorepo examples, compiled when the documentation site is built (CI and Read the Docs). Each course uses the same modern LMS layout (sidebar curriculum, progress ring, lesson cards) with a different color theme and scenario content. Open your browser developer console to see telemetry and xAPI log output.
 
 :::{admonition} Local preview
 :class: tip
@@ -10,7 +10,7 @@ From the repo root, run `bash docs/scripts/build-docs-demos.sh` before `make htm
 
 ## Cybersecurity awareness (`examples/react-vite`)
 
-Corporate InfoSec annual module: policy attestation, email header triage, smishing simulation, Teams social engineering, and attestation.
+Corporate InfoSec annual module in the security theme: policy attestation, email header triage, smishing simulation, Teams social engineering, and attestation.
 
 ```{raw} html
 <iframe
@@ -25,7 +25,7 @@ Corporate InfoSec annual module: policy attestation, email header triage, smishi
 
 ## Data privacy essentials (`examples/data-privacy`)
 
-GDPR compliance track with sidebar outline: lawful-basis lab, audit case files, role-based minimization, and incident tabletop.
+GDPR compliance track (compliance theme): lawful-basis lab, audit case files, role-based minimization, and incident tabletop.
 
 ```{raw} html
 <iframe
@@ -40,7 +40,7 @@ GDPR compliance track with sidebar outline: lawful-basis lab, audit case files, 
 
 ## Customer de-escalation (`examples/customer-service`)
 
-Contact-center training with stepper UI: channel briefing, chat bubbles, voice pacing, and branching resolution paths.
+Contact-center training in the support theme: channel briefing, chat bubbles, voice pacing, and branching resolution paths.
 
 ```{raw} html
 <iframe
@@ -55,7 +55,7 @@ Contact-center training with stepper UI: channel briefing, chat bubbles, voice p
 
 ## Workplace safety briefing (`examples/lxpack-golden`)
 
-Warehouse new-hire briefing with progress bar, PPE sign-off, photo hazard walk, quiz, and practice near-miss form (LXPack smoke test).
+Warehouse new-hire briefing in the compact field theme: PPE sign-off, photo hazard walk, quiz, and practice near-miss form (LXPack smoke test).
 
 ```{raw} html
 <iframe

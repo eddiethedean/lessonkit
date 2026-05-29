@@ -1,6 +1,7 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App";
+import "../../_shared/lms-ui.css";
 import "./styles.css";
 
 const root = document.getElementById("root");

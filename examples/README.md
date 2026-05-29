@@ -3,16 +3,16 @@
 [![Documentation](https://readthedocs.org/projects/lessonkit/badge/?version=latest)](https://lessonkit.readthedocs.io/en/latest/examples/index.html)
 [![License](https://img.shields.io/github/license/eddiethedean/lessonkit)](../LICENSE)
 
-Runnable Vite + React courses demonstrating **different e-learning patterns** with `@lessonkit/react`.
+Runnable Vite + React courses with a **shared modern LMS shell** (`_shared/lms-ui.css`, `_shared/course-ui.tsx`): top bar with progress ring, curriculum sidebar, lesson cards, and themed variants. Each demo still uses different scenarios and content patterns with `@lessonkit/react`.
 
 Browse **[live compiled demos](https://lessonkit.readthedocs.io/en/latest/examples/index.html)** on Read the Docs (built from this folder on each docs deploy).
 
-| Directory | Course | UX pattern |
+| Directory | Course | Theme & highlights |
 | --- | --- | --- |
-| `react-vite/` | Cybersecurity Awareness (InfoSec) | Dark SOC portal · tab nav · inbox + SMS + Teams scenarios |
-| `data-privacy/` | Data Privacy & GDPR Essentials | Light compliance · **sidebar outline** · lawful-basis + tabletop ordering |
-| `customer-service/` | Customer Care: De-escalation | Light contact center · **vertical stepper** · chat bubbles + voice script |
-| `lxpack-golden/` | Workplace Safety: Warehouse Briefing | Compact field guide · **progress bar** · PPE sign-off + near-miss form |
+| `react-vite/` | Cybersecurity Awareness (InfoSec) | Security (dark) · inbox triage, SMS device frame, Teams chat simulation |
+| `data-privacy/` | Data Privacy & GDPR Essentials | Compliance (light) · lawful-basis lab, case files, incident tabletop |
+| `customer-service/` | Customer Care: De-escalation | Support (light) · channel briefing, live-chat coaching, branching resolution |
+| `lxpack-golden/` | Workplace Safety: Warehouse Briefing | Field (compact) · PPE sign-off, hazard photos, near-miss form |
 
 ## Run locally
 

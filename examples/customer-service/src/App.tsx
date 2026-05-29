@@ -13,16 +13,17 @@ import {
 } from "@lessonkit/react";
 import type { TelemetryEvent } from "@lessonkit/core";
 import type { XAPIStatement } from "@lessonkit/xapi";
+import { CourseTopbar, LessonIntro, SidebarLessons, type LessonMeta } from "../../_shared/course-ui";
 
 const COURSE_ID = "customer-de-escalation";
 
-const LESSONS = [
-  { id: "channels", title: "Channels & QA" },
-  { id: "chat-listening", title: "Live chat" },
-  { id: "phone-empathy", title: "Voice call" },
-  { id: "solve-or-escalate", title: "Resolution paths" },
-  { id: "skills-check", title: "Skills check" },
-] as const;
+const LESSONS: readonly LessonMeta[] = [
+  { id: "channels", title: "Channels & QA", duration: "3 min", type: "Reading" },
+  { id: "chat-listening", title: "Live chat", duration: "4 min", type: "Simulation" },
+  { id: "phone-empathy", title: "Voice call", duration: "4 min", type: "Role-play" },
+  { id: "solve-or-escalate", title: "Resolution paths", duration: "3 min", type: "Branching" },
+  { id: "skills-check", title: "Skills check", duration: "2 min", type: "Assessment" },
+];
 
 export default function App() {
   const [step, setStep] = React.useState(0);
@@ -35,23 +36,46 @@ export default function App() {
     [],
   );
 
+  const last = LESSONS.length - 1;
+  const current = LESSONS[step]!;
+
   return (
     <ThemeProvider mode="light" preset="brand">
-      <div className="app-shell contact-center">
+      <div className="lms-app lms-theme-support">
         <Course title="Customer Care: De-escalation" courseId={COURSE_ID} config={courseConfig}>
-          <header className="course-header">
-            <p className="course-eyebrow">North America Support · Wave 2 cohort</p>
-            <p className="course-intro muted">
-              Simulated interactions from real QA samples (identifiers changed). Your choices feed coaching
-              dashboards—not disciplinary scores.
-            </p>
-          </header>
+          <CourseTopbar
+            title="Customer Care: De-escalation"
+            subtitle="North America Support · Wave 2 · Coaching-safe practice"
+            lessonCount={LESSONS.length}
+            estimate="~16 min"
+            chips={<span className="lms-chip">QA cohort</span>}
+          />
 
-          <div className="stepper-layout">
-            <StepperNav step={step} setStep={setStep} />
+          <div className="lms-shell">
+            <SidebarLessons
+              lessons={LESSONS}
+              step={step}
+              setStep={setStep}
+              title="Practice path"
+              footer={
+                <div className="lms-sidebar-footer">
+                  <button type="button" onClick={() => setStep(Math.max(0, step - 1))} disabled={step === 0}>
+                    Back
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setStep(Math.min(last, step + 1))}
+                    disabled={step === last}
+                  >
+                    Continue
+                  </button>
+                </div>
+              }
+            />
 
-            <div className="stepper-content">
+            <main className="lms-main">
               <ProgressTracker />
+              <LessonIntro type={current.type} title={current.title} duration={current.duration} />
 
               {step === 0 ? (
                 <Lesson title={LESSONS[0].title} lessonId={LESSONS[0].id}>
@@ -103,34 +127,11 @@ export default function App() {
                   <FinishCourse />
                 </Lesson>
               ) : null}
-            </div>
+            </main>
           </div>
         </Course>
       </div>
     </ThemeProvider>
-  );
-}
-
-function StepperNav(props: { step: number; setStep: (n: number) => void }) {
-  const { progress } = useLessonkit();
-
-  return (
-    <nav className="stepper" aria-label="Training steps">
-      {LESSONS.map((lesson, i) => {
-        const done = progress.completedLessonIds.has(lesson.id);
-        return (
-          <button
-            key={lesson.id}
-            type="button"
-            className={`stepper-item ${props.step === i ? "stepper-active" : ""} ${done ? "stepper-done" : ""}`}
-            onClick={() => props.setStep(i)}
-          >
-            <span className="stepper-index">{i + 1}</span>
-            <span className="stepper-label">{lesson.title}</span>
-          </button>
-        );
-      })}
-    </nav>
   );
 }
 
@@ -184,13 +185,16 @@ function ChatOpening() {
 
   return (
     <section className="panel chat-panel" aria-label="Live chat simulation">
-      <div className="chat-log">
+      <div className="lms-chat-window">
+        <div className="lms-chat-header">Zendesk · Alex M. · Case #448291 · Priority</div>
+        <div className="lms-chat-body chat-log">
         <ChatBubble who="customer">
           This is the 4th agent today. Nobody reads my notes. I want a supervisor NOW.
         </ChatBubble>
         <ChatBubble who="customer">
           Replacement part was promised Monday. It’s Thursday.
         </ChatBubble>
+        </div>
       </div>
       <p className="muted">Your reply:</p>
       <div className="actions">
@@ -352,7 +356,7 @@ function FinishCourse() {
 
   return (
     <section className="panel">
-      <button type="button" onClick={() => completeCourse()} disabled={!done}>
+      <button type="button" className="lms-btn-primary" onClick={() => completeCourse()} disabled={!done}>
         Return to queue
       </button>
       {!done ? <p className="muted">Finish all practice steps and pass the skills check.</p> : null}

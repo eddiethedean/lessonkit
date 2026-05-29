@@ -9,113 +9,130 @@ import {
   ThemeProvider,
   useTracking,
 } from "@lessonkit/react";
+import { CourseTopbar, LessonIntro, SidebarLessons, type LessonMeta } from "../../_shared/course-ui";
 
 const COURSE_ID = "workplace-safety-briefing";
 
-const STEPS = [
-  { id: "welcome", title: "Site orientation" },
-  { id: "ppe-check", title: "PPE fit & sign-off" },
-  { id: "hazard-walkthrough", title: "Floor walk" },
-  { id: "safety-check", title: "Sign-off & near-miss" },
-] as const;
+const STEPS: readonly LessonMeta[] = [
+  { id: "welcome", title: "Site orientation", duration: "3 min", type: "Reading" },
+  { id: "ppe-check", title: "PPE fit & sign-off", duration: "2 min", type: "Checklist" },
+  { id: "hazard-walkthrough", title: "Floor walk", duration: "4 min", type: "Photo review" },
+  { id: "safety-check", title: "Sign-off & near-miss", duration: "3 min", type: "Assessment" },
+];
 
 export default function App() {
   const [step, setStep] = React.useState(0);
-  const progressPct = Math.round(((step + 1) / STEPS.length) * 100);
+  const last = STEPS.length - 1;
+  const current = STEPS[step]!;
 
   return (
     <ThemeProvider preset="brand" mode="light">
-      <div className="app-shell">
+      <div className="lms-app lms-theme-field">
         <Course title="Workplace Safety: Warehouse Briefing" courseId={COURSE_ID}>
-          <header className="course-header">
-            <p className="eyebrow">DC-14 · New hire · Day 1</p>
-            <p className="muted">
-              Supervisor: <strong>M. Okonkwo</strong> · Estimated time 12 minutes · Valid 12 months
-            </p>
-            <div className="progress-bar" role="progressbar" aria-valuenow={progressPct} aria-valuemin={0} aria-valuemax={100}>
-              <div className="progress-fill" style={{ width: `${progressPct}%` }} />
-            </div>
-          </header>
+          <CourseTopbar
+            title="Warehouse Safety Briefing"
+            subtitle="DC-14 new hire · Supervisor M. Okonkwo · Valid 12 months"
+            lessonCount={STEPS.length}
+            estimate="~12 min"
+            chips={
+              <>
+                <span className="lms-chip">Day 1</span>
+                <span className="lms-chip">Zone B</span>
+              </>
+            }
+          />
 
-          <ProgressTracker />
+          <div className="lms-shell">
+            <SidebarLessons
+              lessons={STEPS}
+              step={step}
+              setStep={setStep}
+              title="Onboarding steps"
+              footer={
+                <div className="lms-sidebar-footer">
+                  <button type="button" onClick={() => setStep(Math.max(0, step - 1))} disabled={step === 0}>
+                    Back
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setStep(Math.min(last, step + 1))}
+                    disabled={step === last}
+                  >
+                    Continue
+                  </button>
+                </div>
+              }
+            />
 
-          <nav className="lesson-nav" aria-label="Lessons">
-            {STEPS.map((s, i) => (
-              <button
-                key={s.id}
-                type="button"
-                aria-current={step === i ? "step" : undefined}
-                className={step === i ? "active" : undefined}
-                onClick={() => setStep(i)}
-              >
-                {i + 1}. {s.title}
-              </button>
-            ))}
-          </nav>
+            <main className="lms-main">
+              <ProgressTracker />
+              <LessonIntro type={current.type} title={current.title} duration={current.duration} />
 
-          {step === 0 ? (
-            <Lesson title={STEPS[0].title} lessonId={STEPS[0].id}>
-              <Scenario>
-                <p>
-                  Before your badge activates for Zone B, confirm you understand emergency procedures and
-                  reporting lines for this distribution center.
-                </p>
-              </Scenario>
-              <ul className="checklist">
-                <li>Mustard point: Assembly Area C (north parking row 4)</li>
-                <li>Spill hotline: x4911 · radio channel WH-2</li>
-                <li>Powered industrial trucks always yield to pedestrians</li>
-                <li>Steel-toe + hi-vis vest required past the yellow line</li>
-              </ul>
-              <div className="figure-callout">
-                <p className="figure-label">Figure 1 — Pedestrian lane (keep right, no earbuds)</p>
-                <p className="muted">Instructor-led walk occurs after this module.</p>
-              </div>
-            </Lesson>
-          ) : null}
+              {step === 0 ? (
+                <Lesson title={STEPS[0].title} lessonId={STEPS[0].id}>
+                  <Scenario>
+                    <p>
+                      Before your badge activates for Zone B, confirm emergency procedures and reporting
+                      lines for this distribution center.
+                    </p>
+                  </Scenario>
+                  <ul className="safety-checklist">
+                    <li>Mustard point: Assembly Area C (north parking row 4)</li>
+                    <li>Spill hotline: x4911 · radio channel WH-2</li>
+                    <li>Powered industrial trucks always yield to pedestrians</li>
+                    <li>Steel-toe + hi-vis vest required past the yellow line</li>
+                  </ul>
+                  <div className="figure-card">
+                    <span className="figure-badge">Figure 1</span>
+                    <p>Pedestrian lane — keep right, no earbuds. Instructor-led walk follows this module.</p>
+                  </div>
+                </Lesson>
+              ) : null}
 
-          {step === 1 ? (
-            <Lesson title={STEPS[1].title} lessonId={STEPS[1].id}>
-              <Scenario>
-                <p>
-                  PPE station 3. Confirm fit for your shift. If equipment is damaged, swap at the cage before
-                  entering the floor.
-                </p>
-              </Scenario>
-              <PpeSignOff />
-            </Lesson>
-          ) : null}
+              {step === 1 ? (
+                <Lesson title={STEPS[1].title} lessonId={STEPS[1].id}>
+                  <Scenario>
+                    <p>
+                      PPE station 3. Confirm fit for your shift. Swap damaged gear at the cage before entering
+                      the floor.
+                    </p>
+                  </Scenario>
+                  <PpeSignOff />
+                </Lesson>
+              ) : null}
 
-          {step === 2 ? (
-            <Lesson title={STEPS[2].title} lessonId={STEPS[2].id}>
-              <Scenario>
-                <p>
-                  Photo walk: three situations from yesterday’s tour. Mark whether the scene is safe as shown or
-                  needs correction.
-                </p>
-              </Scenario>
-              <HazardWalkthrough />
-            </Lesson>
-          ) : null}
+              {step === 2 ? (
+                <Lesson title={STEPS[2].title} lessonId={STEPS[2].id}>
+                  <Scenario>
+                    <p>
+                      Review three floor photos from yesterday’s tour. Mark each scene safe or needing
+                      correction.
+                    </p>
+                  </Scenario>
+                  <HazardWalkthrough />
+                </Lesson>
+              ) : null}
 
-          {step === 3 ? (
-            <Lesson title={STEPS[3].title} lessonId={STEPS[3].id}>
-              <Scenario>
-                <p>Knowledge check, then log a hypothetical near-miss the way you would on the floor.</p>
-              </Scenario>
-              <Quiz
-                checkId="safety-check"
-                question="You notice an unmarked wet floor near a blind corner. What should you do first?"
-                choices={[
-                  "Walk quickly past before someone else slips",
-                  "Barricade the area and notify your supervisor",
-                ]}
-                answer="Barricade the area and notify your supervisor"
-              />
-              <NearMissForm />
-              <Reflection prompt="Where is your assigned muster point if the fire alarm sounds?" />
-            </Lesson>
-          ) : null}
+              {step === 3 ? (
+                <Lesson title={STEPS[3].title} lessonId={STEPS[3].id}>
+                  <Scenario>
+                    <p>Knowledge check, then submit a practice near-miss report.</p>
+                  </Scenario>
+                  <Quiz
+                    checkId="safety-check"
+                    question="You notice an unmarked wet floor near a blind corner. What should you do first?"
+                    choices={[
+                      "Walk quickly past before someone else slips",
+                      "Barricade the area and notify your supervisor",
+                    ]}
+                    answer="Barricade the area and notify your supervisor"
+                  />
+                  <NearMissForm />
+                  <Reflection prompt="Where is your assigned muster point if the fire alarm sounds?" />
+                </Lesson>
+              ) : null}
+            </main>
+          </div>
         </Course>
       </div>
     </ThemeProvider>
@@ -151,8 +168,8 @@ function PpeSignOff() {
         </label>
       ))}
       {allChecked ? (
-        <p className="feedback" role="status">
-          PPE sign-off recorded for shift 06:00–14:00. Proceed to the floor walk.
+        <p className="lms-feedback lms-feedback--success" role="status">
+          PPE sign-off recorded for shift 06:00–14:00. Continue to the floor walk.
         </p>
       ) : (
         <p className="muted">Supervisor cannot release badge until all items are confirmed.</p>
@@ -202,8 +219,8 @@ function HazardWalkthrough() {
   return (
     <section className="panel" aria-label="Hazard walkthrough">
       {hazards.map((h) => (
-        <article key={h.id} className="hazard-card">
-          <p className="figure-label">{h.figure}</p>
+        <article key={h.id} className="hazard-card lms-card">
+          <span className="figure-badge">{h.figure}</span>
           <h3>{h.label}</h3>
           <p>{h.detail}</p>
           <div className="actions">
@@ -217,7 +234,7 @@ function HazardWalkthrough() {
         </article>
       ))}
       {done ? (
-        <p className="feedback" role="status">
+        <p className="lms-feedback lms-feedback--success" role="status">
           {score} of {hazards.length} correct. Near-misses include “almost” hits—report them early.
         </p>
       ) : null}
@@ -251,12 +268,12 @@ function NearMissForm() {
             disabled={submitted}
           />
         </label>
-        <button type="submit" disabled={submitted || !location.trim()}>
+        <button type="submit" className="lms-btn-primary" disabled={submitted || !location.trim()}>
           Submit practice report
         </button>
       </form>
       {submitted ? (
-        <p className="feedback" role="status">
+        <p className="lms-feedback lms-feedback--success" role="status">
           In production this creates ticket SAF-### for supervisor review within one shift.
         </p>
       ) : null}

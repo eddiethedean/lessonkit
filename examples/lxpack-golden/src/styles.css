@@ -1,123 +1,36 @@
-:root {
-  font-family: var(--lk-font-family, system-ui, sans-serif);
-  color: var(--lk-color-foreground, #111);
-  background: var(--lk-color-background, #f8fafc);
-}
-
+html,
 body {
   margin: 0;
+  height: 100%;
 }
 
-.app-shell {
-  max-width: 42rem;
-  margin: 0 auto;
-  padding: 1.5rem 1rem 3rem;
-}
-
-.course-header {
-  margin-bottom: 1rem;
-}
-
-.eyebrow {
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: var(--lk-color-primary, #2563eb);
-  margin: 0 0 0.5rem;
-}
-
-.muted {
-  color: var(--lk-color-muted, #64748b);
-  line-height: 1.55;
-}
-
-.lesson-nav {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin: 1rem 0;
-}
-
-.lesson-nav button {
-  border: 1px solid var(--lk-color-border, #cbd5e1);
-  background: var(--lk-color-panel, #fff);
-  border-radius: 8px;
-  padding: 0.5rem 0.75rem;
-  cursor: pointer;
-  font-size: 0.875rem;
-}
-
-.lesson-nav button.active {
-  border-color: var(--lk-color-primary, #2563eb);
-  background: color-mix(in srgb, var(--lk-color-primary, #2563eb) 10%, white);
-}
-
-.checklist {
-  margin: 0;
+.safety-checklist {
+  margin: 0 0 1rem;
   padding-left: 1.25rem;
-  line-height: 1.6;
+  line-height: 1.65;
+  font-size: 0.9375rem;
 }
 
-.panel {
-  margin-top: 0.75rem;
-}
-
-.hazard-card {
-  border: 1px solid var(--lk-color-border, #e2e8f0);
-  border-radius: 10px;
+.figure-card {
   padding: 1rem;
-  margin-bottom: 0.75rem;
-  background: var(--lk-color-panel, #fff);
+  border-radius: 10px;
+  border: 1px dashed #fdba74;
+  background: #fff7ed;
+}
+
+.figure-badge {
+  display: inline-block;
+  font-size: 0.6875rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #ea580c;
+  margin-bottom: 0.35rem;
 }
 
 .hazard-card h3 {
-  margin: 0 0 0.35rem;
+  margin: 0.35rem 0;
   font-size: 1rem;
-}
-
-.actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-top: 0.75rem;
-}
-
-.actions button:disabled {
-  opacity: 0.6;
-}
-
-.feedback {
-  font-weight: 600;
-  color: var(--lk-color-success, #15803d);
-}
-
-.progress-bar {
-  height: 6px;
-  background: #e2e8f0;
-  border-radius: 999px;
-  margin-top: 0.75rem;
-  overflow: hidden;
-}
-
-.progress-fill {
-  height: 100%;
-  background: linear-gradient(90deg, #ea580c, #f59e0b);
-  transition: width 0.25s ease;
-}
-
-.figure-callout {
-  margin-top: 1rem;
-  padding: 0.75rem;
-  border: 1px dashed #cbd5e1;
-  border-radius: 8px;
-}
-
-.figure-label {
-  font-size: 12px;
-  font-weight: 700;
-  margin: 0 0 4px;
-  color: #ea580c;
 }
 
 .ppe-row {
@@ -125,21 +38,25 @@ body {
   gap: 0.5rem;
   align-items: flex-start;
   margin: 0.5rem 0;
-  font-size: 14px;
+  font-size: 0.875rem;
 }
 
 .near-miss label {
   display: block;
-  font-size: 14px;
   font-weight: 600;
-  margin-bottom: 0.35rem;
+  font-size: 0.875rem;
 }
 
 .near-miss input {
   display: block;
   width: 100%;
   margin: 0.35rem 0 0.75rem;
-  padding: 0.5rem;
-  border: 1px solid #cbd5e1;
-  border-radius: 6px;
+  padding: 0.55rem 0.65rem;
+  border: 1px solid var(--lk-color-border);
+  border-radius: 8px;
+}
+
+.muted {
+  color: var(--lk-color-muted);
+  font-size: 0.875rem;
 }

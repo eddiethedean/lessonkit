@@ -1,105 +1,14 @@
-:root {
-  color-scheme: light;
-}
-
+html,
 body {
   margin: 0;
-  background: #f1f5f9;
-}
-
-.contact-center .app-shell {
-  max-width: 960px;
-  margin: 0 auto;
-  padding: 1.5rem 1rem 3rem;
-}
-
-.course-header {
-  margin-bottom: 1rem;
-}
-
-.course-eyebrow {
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: var(--lk-color-primary);
-  margin: 0 0 6px;
-}
-
-.course-intro {
-  color: var(--lk-color-muted);
-  line-height: 1.55;
-  max-width: 40rem;
-}
-
-.stepper-layout {
-  display: grid;
-  grid-template-columns: 200px 1fr;
-  gap: 1.25rem;
-}
-
-@media (max-width: 700px) {
-  .stepper-layout {
-    grid-template-columns: 1fr;
-  }
-}
-
-.stepper {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.stepper-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  text-align: left;
-  border: 1px solid var(--lk-color-border);
-  border-radius: 10px;
-  padding: 10px;
-  background: #fff;
-  cursor: pointer;
-}
-
-.stepper-active {
-  border-color: var(--lk-color-primary);
-  box-shadow: 0 0 0 1px var(--lk-color-primary);
-}
-
-.stepper-done .stepper-index {
-  background: var(--lk-color-success);
-  color: #fff;
-}
-
-.stepper-index {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  font-size: 12px;
-  font-weight: 700;
-  background: #e2e8f0;
-}
-
-.stepper-label {
-  font-size: 13px;
-  font-weight: 600;
-}
-
-.panel {
-  border: 1px solid var(--lk-color-border);
-  border-radius: 12px;
-  padding: 1rem;
-  background: #fff;
-  margin-top: 0.75rem;
+  height: 100%;
 }
 
 .channel-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1rem;
+  margin-bottom: 1rem;
 }
 
 @media (max-width: 600px) {
@@ -109,45 +18,23 @@ body {
 }
 
 .channel-card {
-  border: 1px solid #e2e8f0;
+  padding: 1rem;
+  border: 1px solid var(--lk-color-border);
   border-radius: 10px;
-  padding: 0.75rem;
+  background: var(--lk-color-background);
 }
 
 .channel-card h3 {
   margin: 0 0 0.5rem;
-  font-size: 15px;
-}
-
-.channel-card ul {
-  margin: 0;
-  padding-left: 1.1rem;
-  font-size: 14px;
-  line-height: 1.5;
+  font-size: 0.9375rem;
 }
 
 .qa-snippet blockquote {
   margin: 0.35rem 0 0.75rem;
-  padding: 0.5rem 0.75rem;
+  padding: 0.65rem 0.85rem;
   border-left: 3px solid var(--lk-color-primary);
-  background: #f8fafc;
-  font-size: 14px;
-}
-
-.muted {
-  color: var(--lk-color-muted);
-  font-size: 14px;
-}
-
-.chat-panel {
-  background: #f8fafc;
-}
-
-.chat-log {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-bottom: 1rem;
+  background: var(--lk-color-background);
+  font-size: 0.875rem;
 }
 
 .chat-row {
@@ -163,10 +50,10 @@ body {
 }
 
 .chat-bubble {
-  max-width: 85%;
-  padding: 10px 14px;
+  max-width: 90%;
+  padding: 0.65rem 0.9rem;
   border-radius: 14px;
-  font-size: 14px;
+  font-size: 0.875rem;
   line-height: 1.45;
 }
 
@@ -177,40 +64,15 @@ body {
 }
 
 .chat-agent .chat-bubble {
-  background: color-mix(in srgb, var(--lk-color-primary) 12%, #fff);
-  border: 1px solid color-mix(in srgb, var(--lk-color-primary) 30%, transparent);
+  background: color-mix(in srgb, var(--lk-color-primary) 14%, #fff);
   border-bottom-right-radius: 4px;
 }
 
-.actions {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.actions button {
-  text-align: left;
-  padding: 0.65rem 0.85rem;
-  border-radius: 8px;
-  border: 1px solid #cbd5e1;
-  background: #fff;
-  cursor: pointer;
-}
-
-.actions button:disabled {
-  opacity: 0.6;
-}
-
 .hold-timer {
-  font-size: 13px;
-  padding: 0.5rem 0.75rem;
+  padding: 0.65rem 0.85rem;
   background: #fef3c7;
   border-radius: 8px;
-  margin-bottom: 0.75rem;
-}
-
-.script {
-  font-style: italic;
+  font-size: 0.8125rem;
   margin-bottom: 0.75rem;
 }
 
@@ -219,18 +81,4 @@ body {
   width: 100%;
   text-align: left;
   margin: 0.35rem 0;
-  padding: 0.65rem;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  background: #fff;
-  cursor: pointer;
-}
-
-.callout {
-  margin-top: 0.75rem;
-  padding: 0.75rem;
-  border-radius: 8px;
-  background: #ecfdf5;
-  border: 1px solid #86efac;
-  font-size: 14px;
 }

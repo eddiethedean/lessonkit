@@ -14,17 +14,23 @@ import {
 } from "@lessonkit/react";
 import type { TelemetryEvent } from "@lessonkit/core";
 import type { XAPIStatement } from "@lessonkit/xapi";
+import {
+  CourseTopbar,
+  LessonIntro,
+  SidebarLessons,
+  type LessonMeta,
+} from "../../_shared/course-ui";
 
 const COURSE_ID = "cybersecurity-awareness";
 
-const LESSONS = [
-  { id: "assignment", title: "Assignment & policy" },
-  { id: "phishing-inbox", title: "Email triage lab" },
-  { id: "smishing-texts", title: "Smishing on mobile" },
-  { id: "urgent-requests", title: "Pressure tactics" },
-  { id: "credential-hygiene", title: "Credential hygiene" },
-  { id: "module-assessment", title: "Annual attestation" },
-] as const;
+const LESSONS: readonly LessonMeta[] = [
+  { id: "assignment", title: "Assignment & policy", duration: "2 min", type: "Reading" },
+  { id: "phishing-inbox", title: "Email triage lab", duration: "4 min", type: "Simulation" },
+  { id: "smishing-texts", title: "Smishing on mobile", duration: "3 min", type: "Simulation" },
+  { id: "urgent-requests", title: "Pressure tactics", duration: "3 min", type: "Scenario" },
+  { id: "credential-hygiene", title: "Credential hygiene", duration: "3 min", type: "Activity" },
+  { id: "module-assessment", title: "Annual attestation", duration: "2 min", type: "Assessment" },
+];
 
 export default function App() {
   const [step, setStep] = React.useState(0);
@@ -46,39 +52,57 @@ export default function App() {
     [],
   );
 
+  const last = LESSONS.length - 1;
+  const current = LESSONS[step]!;
+
   return (
     <ThemeProvider mode={themeMode} preset="brand">
-      <div className="app-shell">
+      <div className="lms-app lms-theme-security">
         <Course
           title="Cybersecurity Awareness for Employees"
           courseId={COURSE_ID}
           config={courseConfig}
         >
-          <header className="course-header">
-            <p className="course-eyebrow">InfoSec · Required annual training</p>
-            <div className="assignment-banner" role="note">
-              <span className="badge-due">Due 30 Jun</span>
-              <span className="badge-audience">All staff · Remote & on-site</span>
-            </div>
-            <p className="course-intro muted">
-              Work through realistic email, SMS, and chat scenarios based on incidents reported to our Security
-              Operations Center last quarter. Completion syncs to Workday Learning.
-            </p>
-            <ul className="objectives">
-              <li>Triage suspicious email using headers and sender context</li>
-              <li>Recognize smishing and vishing pressure patterns</li>
-              <li>Apply MFA and reporting habits without bypassing IT channels</li>
-            </ul>
-          </header>
-
-          <ProgressTracker />
-
-          <CourseNav
-            step={step}
-            setStep={setStep}
-            themeMode={themeMode}
-            onThemeModeChange={setThemeMode}
+          <CourseTopbar
+            title="Cybersecurity Awareness"
+            subtitle="InfoSec · Required annual training · Syncs to Workday Learning"
+            lessonCount={LESSONS.length}
+            estimate="~17 min"
+            chips={
+              <>
+                <span className="lms-chip lms-chip--warn">Due 30 Jun</span>
+                <span className="lms-chip">All staff</span>
+              </>
+            }
           />
+
+          <div className="lms-shell">
+            <SidebarLessons
+              lessons={LESSONS}
+              step={step}
+              setStep={setStep}
+              footer={
+                <>
+                  <div className="lms-sidebar-footer">
+                    <button type="button" onClick={() => setStep(Math.max(0, step - 1))} disabled={step === 0}>
+                      Previous
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setStep(Math.min(last, step + 1))}
+                      disabled={step === last}
+                    >
+                      Continue
+                    </button>
+                  </div>
+                  <ThemeToggle mode={themeMode} onChange={setThemeMode} />
+                </>
+              }
+            />
+
+            <main className="lms-main">
+              <ProgressTracker />
+              <LessonIntro type={current.type} title={current.title} duration={current.duration} />
 
           {step === 0 ? (
             <Lesson title={LESSONS[0].title} lessonId={LESSONS[0].id}>
@@ -158,6 +182,8 @@ export default function App() {
               <FinishCourse />
             </Lesson>
           ) : null}
+            </main>
+          </div>
         </Course>
       </div>
     </ThemeProvider>
@@ -166,65 +192,19 @@ export default function App() {
 
 function ThemeToggle(props: { mode: ThemeMode; onChange: (mode: ThemeMode) => void }) {
   return (
-    <div className="theme-toggle" role="group" aria-label="Display theme">
+    <div className="lms-theme-toggle" role="group" aria-label="Display theme">
       {(["light", "dark", "system"] as const).map((m) => (
         <button
           key={m}
           type="button"
           aria-pressed={props.mode === m}
-          className={props.mode === m ? "theme-toggle-active" : undefined}
+          className={props.mode === m ? "lms-outline-active" : undefined}
           onClick={() => props.onChange(m)}
         >
           {m === "system" ? "System" : m === "light" ? "Light" : "Dark"}
         </button>
       ))}
     </div>
-  );
-}
-
-function CourseNav(props: {
-  step: number;
-  setStep: (n: number) => void;
-  themeMode: ThemeMode;
-  onThemeModeChange: (mode: ThemeMode) => void;
-}) {
-  const { progress } = useLessonkit();
-  const completed = progress.completedLessonIds.size;
-  const last = LESSONS.length - 1;
-
-  return (
-    <aside aria-label="Course navigation" className="nav">
-      <div className="lesson-tabs" role="tablist" aria-label="Lessons">
-        {LESSONS.map((lesson, i) => (
-          <button
-            key={lesson.id}
-            type="button"
-            role="tab"
-            aria-selected={props.step === i}
-            className={props.step === i ? "tab-active" : undefined}
-            onClick={() => props.setStep(i)}
-          >
-            {i + 1}. {lesson.title}
-          </button>
-        ))}
-      </div>
-      <div className="nav-row">
-        <button type="button" onClick={() => props.setStep(Math.max(0, props.step - 1))} disabled={props.step === 0}>
-          Previous
-        </button>
-        <div className="nav-status">
-          <strong>Progress</strong> {completed} of {LESSONS.length} lessons completed
-        </div>
-        <button
-          type="button"
-          onClick={() => props.setStep(Math.min(last, props.step + 1))}
-          disabled={props.step === last}
-        >
-          Next
-        </button>
-      </div>
-      <ThemeToggle mode={props.themeMode} onChange={props.onThemeModeChange} />
-    </aside>
   );
 }
 
@@ -246,8 +226,8 @@ function AssignmentBrief() {
         I have read this excerpt and understand reporting expectations for my role.
       </label>
       {ack ? (
-        <p className="callout" role="status">
-          <strong>Ready for labs.</strong> Use Next to open the email triage simulation.
+        <p className="lms-feedback lms-feedback--success" role="status">
+          <strong>Ready for labs.</strong> Select Continue to open the email triage simulation.
         </p>
       ) : (
         <p className="muted">Check the box to unlock lab feedback in later lessons.</p>
@@ -323,7 +303,7 @@ function PhishingInbox() {
 
   return (
     <section aria-label="Inbox exercise" className="panel">
-      <div className="score-row">
+      <div className="lms-score-card">
         <div>
           <strong>Risk indicator</strong>
           <div className="score">{risk}</div>
@@ -418,7 +398,7 @@ function SmishingFeed() {
   });
 
   return (
-    <section className="panel phone-frame" aria-label="Smishing simulation">
+    <section className="panel lms-device-frame" aria-label="Smishing simulation">
       <p className="muted">Personal device — do not click unknown links; forward screenshots to phish@company.example.</p>
       <div className="sms-thread">
         {messages.map((m) => {
@@ -487,10 +467,11 @@ function UrgentRequestScenario() {
         <p className="muted">Legitimate IT teams rarely pressure you through unofficial chat links.</p>
       </div>
 
-      <div className="callout">
+      <div className="lms-chat-window">
+        <div className="lms-chat-header">Microsoft Teams · Jordan Lee</div>
+        <div className="lms-chat-body">
         <p>
-          <strong>Jordan (chat):</strong> “Can you approve this reset? Payroll locks me out in 20 minutes and
-          I’m stuck on a call.”
+          “Can you approve this reset? Payroll locks me out in 20 minutes and I’m stuck on a call.”
         </p>
         <div className="actions">
           <button type="button" onClick={() => choose("approve")} disabled={choice !== null}>
@@ -499,6 +480,7 @@ function UrgentRequestScenario() {
           <button type="button" onClick={() => choose("verify")} disabled={choice !== null}>
             Ask them to use the official IT self-service portal
           </button>
+        </div>
         </div>
       </div>
 
@@ -574,7 +556,7 @@ function FinishCourse() {
         When you have passed the assessment and visited earlier lessons, mark the module complete for your
         training record.
       </p>
-      <button type="button" onClick={() => completeCourse()} disabled={!done}>
+      <button type="button" className="lms-btn-primary" onClick={() => completeCourse()} disabled={!done}>
         Mark module complete
       </button>
       {!done ? (
