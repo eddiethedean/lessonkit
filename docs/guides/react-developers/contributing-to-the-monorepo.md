@@ -19,6 +19,7 @@ npm test
 | `npm run typecheck` | Typecheck (builds packages first) |
 | `npm run coverage` | Coverage report |
 | `npm run audit:ci` | Dependency audit |
+| `npm run test:integration` | CLI pipeline integration (Node 20+) |
 
 ## Package build order
 
@@ -57,6 +58,7 @@ npm exec -w @lessonkit/e2e -- playwright install --with-deps chromium
 
 | Command | When to run |
 |---------|-------------|
+| `npm run test:integration` | Changes to `packages/cli`, `packages/lxpack`, `lessonkit.json`, or CLI template |
 | `npm run test:e2e` | Changes to `packages/react`, `e2e/`, `examples/lxpack-golden`, or packaging |
 | `npm run test:e2e:ui` | Debugging flaky Playwright specs locally |
 | `npm run conformance:lxpack` | Changes to `@lessonkit/lxpack` or LXPack dependency pins |

@@ -19,7 +19,14 @@ export type InitOptions = {
 
 function getTemplateDir(): string {
   const thisDir = dirname(fileURLToPath(import.meta.url));
-  return resolve(thisDir, "../../template/vite-react");
+  const candidates = [
+    resolve(thisDir, "../template/vite-react"),
+    resolve(thisDir, "../../template/vite-react"),
+  ];
+  for (const candidate of candidates) {
+    if (existsSync(candidate)) return candidate;
+  }
+  return candidates[0]!;
 }
 
 function slugifyName(name: string): string {

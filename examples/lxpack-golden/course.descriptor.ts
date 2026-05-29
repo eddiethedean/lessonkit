@@ -27,5 +27,10 @@ export const goldenCourseDescriptor: LessonkitCourseDescriptor = {
     },
   ],
   theme: { preset: "brand" },
-  tracking: { completion: { threshold: 1 } },
+  tracking: {
+    completion: { threshold: 1 },
+    xapi: {
+      activityIri: "https://lessonkit.example/courses/workplace-safety-briefing",
+    },
+  },
 };

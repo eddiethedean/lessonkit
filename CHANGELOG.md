@@ -5,9 +5,16 @@ All notable changes to the LessonKit monorepo are documented here. Published pac
 
 ## [0.9.2] - 2026-05-29
 
+### Added
+
+- **`@lessonkit/integration`**: Vitest integration workspace (`npm run test:integration`) — real CLI `init` / `build` / `package` pipeline, golden target matrix, descriptor parity guards.
+- **E2E**: Playwright launch specs for SCORM 2004 (`API_1484_11` mock), xAPI, and cmi5 packages; global-setup packages all golden LMS artifacts.
+- **CI**: **Integration (Node 20)** job in [`.github/workflows/checks.yml`](.github/workflows/checks.yml).
+
 ### Changed
 
 - Monorepo packages bumped to **0.9.2**.
+- **`examples/lxpack-golden`**: `tracking.xapi.activityIri` for xAPI / cmi5 packaging and export parity.
 
 ### Fixed
 
@@ -19,6 +26,7 @@ All notable changes to the LessonKit monorepo are documented here. Published pac
 - **@lessonkit/cli**: Stricter `lessonkit.json` validation (`paths` types, `course.lessons` / `course.assessments` arrays, `course.spaDistDir` vs `paths.spaDistDir` conflict).
 - **@lessonkit/cli**: `react-vite` package target uses `INVALID_PROJECT` when `dist` is missing after build.
 - **@lessonkit/lxpack**: Reject `output` paths outside `projectRoot` when `projectRoot` is set (direct API use).
+- **@lessonkit/cli**: `lessonkit init` resolves bundled template when CLI runs from `dist/bin.js` (fixes template path for published CLI).
 
 ## [0.9.1] - 2026-05-29
 

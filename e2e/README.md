@@ -16,7 +16,7 @@ npm exec -w @lessonkit/e2e -- playwright install --with-deps chromium
 ## Commands
 
 ```bash
-# Full Playwright suite (10 tests: golden-vite + telemetry-harness projects)
+# Full Playwright suite (13 tests: golden-vite + telemetry-harness projects)
 npm run test:e2e
 
 # Force rebuild of packages, golden dist, harness, and LXPack artifacts
@@ -39,7 +39,7 @@ CONFORMANCE_TARGETS=standalone,scorm12,scorm2004 npm run conformance:golden
 
 | Project | baseURL | webServer | Specs |
 |---------|---------|-----------|-------|
-| **golden-vite** | `:4173` | `lessonkit-example-lxpack-golden` preview | `tests/vite/*`, `tests/standalone/*`, `tests/scorm12/*`, `tests/parity/*` |
+| **golden-vite** | `:4173` | `lessonkit-example-lxpack-golden` preview | `tests/vite/*`, `tests/standalone/*`, `tests/scorm12/*`, `tests/scorm2004/*`, `tests/xapi/*`, `tests/cmi5/*`, `tests/parity/*` |
 | **telemetry-harness** | `:4174` | `lessonkit-e2e-telemetry-harness` preview | `tests/telemetry-harness/*` |
 
 ## Test catalog
@@ -51,6 +51,9 @@ CONFORMANCE_TARGETS=standalone,scorm12,scorm2004 npm run conformance:golden
 | `tests/vite/smoke.spec.ts` | golden-vite | Full sign-off flow on Vite preview |
 | `tests/standalone/launch.spec.ts` | golden-vite | Standalone shell native assessments |
 | `tests/scorm12/launch.spec.ts` | golden-vite | SCORM 1.2 launch + LMS mock completion |
+| `tests/scorm2004/launch.spec.ts` | golden-vite | SCORM 2004 launch + `API_1484_11` mock completion |
+| `tests/xapi/launch.spec.ts` | golden-vite | xAPI package shell + native assessments |
+| `tests/cmi5/launch.spec.ts` | golden-vite | cmi5 package shell + native assessments |
 | `tests/parity/matrix.spec.ts` | golden-vite | Cross-surface parity checklist |
 | `tests/telemetry-harness/batching.spec.ts` | telemetry-harness | Telemetry `batchSink` coalescing |
 | `tests/telemetry-harness/xapi-queue.spec.ts` | telemetry-harness | xAPI queue + flush after transport recovery |
@@ -81,6 +84,9 @@ Use `?xapiMode=fail` to start with a failing xAPI transport.
 | `scorm12Zip` | SCORM 1.2 ZIP path |
 | `scorm12UnpackedDir` | Unzipped SCORM tree for static server |
 | `scorm12LaunchUrl` | Resolved launch file (`file://` URL) |
+| `scorm2004Zip` / `scorm2004UnpackedDir` | SCORM 2004 package + unzip tree |
+| `xapiZip` / `xapiUnpackedDir` | xAPI package + unzip tree |
+| `cmi5Zip` / `cmi5UnpackedDir` | cmi5 package + unzip tree |
 
 ## SCORM mock
 
@@ -93,4 +99,4 @@ Implementation: [`support/scorm/`](support/scorm/).
 
 ## CI
 
-The **E2E** and **Packaging smoke** jobs in [`.github/workflows/checks.yml`](../.github/workflows/checks.yml) run on Node 20. See [export parity guide](../docs/guides/react-developers/export-parity.md) for the full CI job map.
+The **Integration**, **E2E**, and **Packaging smoke** jobs in [`.github/workflows/checks.yml`](../.github/workflows/checks.yml) run on Node 20. Vitest integration tests live in [`integration/`](../integration/). See [export parity guide](../docs/guides/react-developers/export-parity.md) for the full CI job map.

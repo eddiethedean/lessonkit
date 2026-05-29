@@ -246,6 +246,7 @@ Source markdown for reference pages lives under [`docs/`](https://github.com/edd
 | `npm run typecheck` | Typecheck packages and apps |
 | `npm run coverage` | Coverage across workspaces |
 | `npm run audit:ci` | Dependency audit (CI-aligned) |
+| `npm run test:integration` | Vitest CLI pipeline integration (Node 20+) |
 | `npm run test:e2e` | Playwright export-parity tests (Node 20+; run `npm exec -w @lessonkit/e2e -- playwright install --with-deps chromium` once after `npm ci`) |
 
 Prettier is configured at the repo root. CI runs on Node 18 and 20 (see [.github/workflows/ci.yml](https://github.com/eddiethedean/lessonkit/blob/main/.github/workflows/ci.yml)).

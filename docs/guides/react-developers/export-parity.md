@@ -1,6 +1,6 @@
 # Export parity (React / Vite vs LMS)
 
-LessonKit **0.9.1** completes the **0.9.x conformance harness**: Playwright export parity, packaging matrices, and contributor docs for running them locally and in CI.
+LessonKit **0.9.2** extends the **0.9.x conformance harness** with Vitest CLI integration tests and Playwright launch coverage for SCORM 2004, xAPI, and cmi5.
 
 ## Surfaces
 
@@ -10,6 +10,8 @@ LessonKit **0.9.1** completes the **0.9.x conformance harness**: Playwright expo
 | **Telemetry harness** | Minimal React app for batch/xAPI behavior | Playwright **telemetry-harness** project on `e2e/fixtures/telemetry-harness` |
 | **Standalone** | LXPack `standalone` output (shell + SPA iframe) | Static server + Playwright |
 | **SCORM 1.2** | ZIP for LMS upload | Unzip + launch HTML with injected SCORM 1.2 `API` mock |
+| **SCORM 2004** | ZIP for LMS upload | Unzip + launch SCO with injected `API_1484_11` mock |
+| **xAPI / cmi5** | ZIP for LRS / cmi5 hosts | Unzip + static server on package `index.html` |
 
 ## Conformance matrix
 
@@ -22,10 +24,14 @@ LessonKit **0.9.1** completes the **0.9.x conformance harness**: Playwright expo
 | Vite (harness) | `tests/telemetry-harness/xapi-queue.spec.ts` | Failed transport queues statements; flush delivers after mode ok |
 | Standalone | `tests/standalone/launch.spec.ts`, `tests/parity/matrix.spec.ts` | Native assessment shell completes |
 | SCORM 1.2 | `tests/scorm12/launch.spec.ts`, `tests/parity/matrix.spec.ts` | LMS API mock receives status/score updates |
+| SCORM 2004 | `tests/scorm2004/launch.spec.ts` | `API_1484_11` mock receives completion/score updates |
+| xAPI | `tests/xapi/launch.spec.ts` | Packaged shell completes native assessments |
+| cmi5 | `tests/cmi5/launch.spec.ts` | Packaged shell completes native assessments |
+| CLI pipeline | `npm run test:integration` | Real `init` / `build` / `package` without mocks |
 | All LMS packages | `npm run conformance:lxpack` | `@lxpack/conformance` validate + build (standalone, scorm12, scorm2004, xapi, cmi5) |
 | Golden artifacts | `npm run conformance:golden` | `examples/lxpack-golden` produces standalone dir + scorm12 zip |
 
-## What is guaranteed (0.9.1)
+## What is guaranteed (0.9.2)
 
 For the reference course (`examples/lxpack-golden`):
 
@@ -33,6 +39,8 @@ For the reference course (`examples/lxpack-golden`):
 - Quiz `safety-check` accepts the correct answer and shows success feedback.
 - Knowledge check `ppe-acknowledgment` accepts the confirm choice.
 - **SCORM 1.2:** LMS API mock receives status/score `SetValue` calls after interaction (see `e2e/support/scorm/`).
+- **SCORM 2004:** `API_1484_11` mock receives completion or score updates after interaction.
+- **xAPI / cmi5:** Packaged launch HTML loads and sign-off assessments complete (same shell model as standalone).
 
 For the telemetry harness (`e2e/fixtures/telemetry-harness`):
 
@@ -41,8 +49,6 @@ For the telemetry harness (`e2e/fixtures/telemetry-harness`):
 
 ## What is not guaranteed yet
 
-- **SCORM 2004** browser launch (packaging only via `@lxpack/conformance`).
-- **xAPI / cmi5** browser launch in Playwright.
 - Bit-identical DOM or CSS across surfaces (themes should match via interchange `runtime`, but layout is shell-specific).
 - Multi-lesson `per-lesson-spa` CLI packaging (use `@lessonkit/lxpack` directly).
 
@@ -65,6 +71,7 @@ E2E resolves the launch file from `imsmanifest.xml`, injects `window.API`, then 
 ```bash
 npm ci
 npm exec -w @lessonkit/e2e -- playwright install --with-deps chromium
+npm run test:integration
 npm run test:e2e
 npm run conformance:lxpack
 npm run conformance:golden
@@ -78,6 +85,7 @@ See [`e2e/README.md`](../../../e2e/README.md) for the test catalog, artifact lay
 |--------------------|------|------------------------|
 | Checks (matrix) | 18, 20 | `npm run build`, `typecheck`, `test`, `coverage` |
 | Docs (Sphinx) | 20 | `build-docs-demos.sh`, `sphinx-build -W` |
+| Integration | 20 | `build:packages`, CLI build, `npm run test:integration` |
 | Packaging smoke | 20 | golden `package:scorm12` / `standalone`, `conformance:lxpack`, `conformance:golden` |
 | E2E (Playwright) | 20 | `playwright install`, `npm run test:e2e` |
 | Security (npm audit) | 20 | `npm run audit:ci` |

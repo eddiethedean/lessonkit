@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "name": "minimal-course",
+  "course": {
+    "courseId": "minimal-course",
+    "title": "Minimal Integration Course",
+    "layout": "single-spa",
+    "lessons": [{ "id": "lesson-1", "title": "Lesson one" }],
+    "assessments": [
+      {
+        "checkId": "ready-to-build",
+        "question": "Ready to build?",
+        "choices": ["Not yet", "Yes"],
+        "answer": "Yes",
+        "passingScore": 1
+      }
+    ],
+    "theme": { "preset": "default" }
+  },
+  "paths": {
+    "spaDistDir": "dist",
+    "lxpackOutDir": ".lxpack/course",
+    "outputBaseDir": ".lxpack/out"
+  }
+}

@@ -47,3 +47,14 @@ export async function completePackagedAssessments(page: Page): Promise<void> {
   await page.getByText(KC_CORRECT, { exact: true }).click();
   await page.getByRole("button", { name: /Submit assessment/i }).click();
 }
+
+/** SCORM 2004 multi-SCO layout: one assessment per SCO launch URL. */
+export async function completeScorm2004Assessments(page: Page, baseUrl: string): Promise<void> {
+  await page.goto(`${baseUrl}/sco/safety-check/index.html`);
+  await page.getByText(QUIZ_CORRECT, { exact: true }).click();
+  await page.getByRole("button", { name: /Submit assessment/i }).click();
+
+  await page.goto(`${baseUrl}/sco/ppe-acknowledgment/index.html`);
+  await page.getByText(KC_CORRECT, { exact: true }).click();
+  await page.getByRole("button", { name: /Submit assessment/i }).click();
+}

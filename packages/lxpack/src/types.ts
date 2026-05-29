@@ -33,6 +33,10 @@ export type LessonkitCourseDescriptor = {
     completion?: {
       threshold?: number;
     };
+    /** Required for xAPI / cmi5 export targets (`activityIri` on the course activity). */
+    xapi?: {
+      activityIri?: string;
+    };
   };
   /** Source Vite `dist` directory for `single-spa` (default: `dist`). */
   spaDistDir?: string;

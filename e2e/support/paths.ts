@@ -16,6 +16,13 @@ export type ArtifactsManifest = {
   scorm12Zip: string;
   scorm12UnpackedDir: string;
   scorm12LaunchUrl: string;
+  scorm2004Zip: string;
+  scorm2004UnpackedDir: string;
+  scorm2004LaunchUrl: string;
+  xapiZip: string;
+  xapiUnpackedDir: string;
+  cmi5Zip: string;
+  cmi5UnpackedDir: string;
 };
 
 export function readArtifactsManifest(): ArtifactsManifest {
