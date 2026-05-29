@@ -7,11 +7,13 @@ Good prompts are **specific, bounded, and testable**. Bad prompts are “make it
 Paste this once per chat session:
 
 ```text
-Project: LessonKit 0.7+ (Vite + React).
+Project: LessonKit 0.8+ (Vite + React).
 Manifest: lessonkit.json (schemaVersion 1).
 Main UI: src/App.tsx.
+Block catalog: @lessonkit/react/block-catalog.v1.json (only use listed block types).
 Rules:
 - Keep courseId, lessonId, checkId stable; sync lessonkit.json when adding lessons/quizzes.
+- Use only block types from the catalog (Course, Lesson, Scenario, Quiz, KnowledgeCheck, Reflection, ProgressTracker).
 - Use ThemeProvider with preset from lessonkit.json.
 - After edits, tell me which files changed and what to verify in the browser.
 ```

@@ -1,5 +1,7 @@
 # Components and hooks
 
+Canonical block list, props, and contracts: [Block catalog reference](../../reference/block-catalog.md).
+
 ## Components
 
 | Component | Required props | Role |

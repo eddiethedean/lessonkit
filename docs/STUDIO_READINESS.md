@@ -61,14 +61,14 @@ for:
 
 ## 0.8.x — Runtime block catalog (machine-readable)
 
-- [ ] Block catalog v1 exists (framework-owned)
-- [ ] Catalog includes per-block:
-  - [ ] allowed props/schema
-  - [ ] a11y behavior contract
-  - [ ] theming surface contract
-  - [ ] telemetry semantics
-- [ ] Catalog is exported in machine-readable form (JSON) and documented
-- [ ] `@lessonkit/react` is capable of rendering every catalog block in an example
+- [x] Block catalog v1 exists (framework-owned)
+- [x] Catalog includes per-block:
+  - [x] allowed props/schema
+  - [x] a11y behavior contract
+  - [x] theming surface contract
+  - [x] telemetry semantics
+- [x] Catalog is exported in machine-readable form (JSON) and documented
+- [x] `@lessonkit/react` is capable of rendering every catalog block in an example
 
 ## 0.9.x — Conformance harness (parity proof)
 

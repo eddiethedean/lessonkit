@@ -28,3 +28,11 @@ export type {
 export { ThemeProvider, useTheme } from "./theme/ThemeProvider";
 export type { ThemePresetName } from "@lessonkit/themes";
 
+export type { BlockCatalogEntry, BlockPropSpec } from "./blockCatalog";
+export {
+  BLOCK_CATALOG,
+  blockCatalogVersion,
+  buildBlockCatalog,
+  getBlockCatalogEntry,
+} from "./blockCatalog";
+

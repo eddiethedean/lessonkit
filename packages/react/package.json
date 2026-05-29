@@ -1,6 +1,6 @@
 {
   "name": "@lessonkit/react",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "private": false,
   "description": "React components and hooks for building learning experiences with LessonKit.",
   "license": "Apache-2.0",
@@ -31,10 +31,14 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
-    }
+    },
+    "./block-catalog.v1.json": "./block-catalog.v1.json",
+    "./block-contract.v1.json": "./block-contract.v1.json"
   },
   "files": [
-    "dist"
+    "dist",
+    "block-catalog.v1.json",
+    "block-contract.v1.json"
   ],
   "scripts": {
     "build": "tsup src/index.tsx --format esm,cjs --dts --external react --external react-dom --external @lessonkit/accessibility --external @lessonkit/lxpack --external @lessonkit/themes",
@@ -50,11 +54,11 @@
     "react-dom": ">=18"
   },
   "dependencies": {
-    "@lessonkit/accessibility": "0.7.0",
-    "@lessonkit/core": "0.7.0",
-    "@lessonkit/lxpack": "0.7.0",
-    "@lessonkit/themes": "0.7.0",
-    "@lessonkit/xapi": "0.7.0"
+    "@lessonkit/accessibility": "0.8.0",
+    "@lessonkit/core": "0.8.0",
+    "@lessonkit/lxpack": "0.8.0",
+    "@lessonkit/themes": "0.8.0",
+    "@lessonkit/xapi": "0.8.0"
   },
   "devDependencies": {
     "@testing-library/react": "^16.3.0",

@@ -7,7 +7,7 @@
 
 React components and hooks for building learning experiences in LessonKit.
 
-**Docs:** [Components & hooks](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/components-and-hooks.html) · [Quickstart](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/quickstart.html) · [Theming & accessibility](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/theming-and-accessibility.html)
+**Docs:** [Components & hooks](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/components-and-hooks.html) · [Block catalog](https://lessonkit.readthedocs.io/en/latest/reference/block-catalog.html) · [Quickstart](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/quickstart.html) · [Theming & accessibility](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/theming-and-accessibility.html)
 
 ## Install
 
@@ -59,7 +59,14 @@ export default function App() {
 }
 ```
 
-## API (0.6.0)
+## API (0.8.0)
+
+### Block catalog
+
+- **JSON:** `@lessonkit/react/block-catalog.v1.json`
+- **Schema:** `@lessonkit/react/block-contract.v1.json`
+- **API:** `buildBlockCatalog()`, `getBlockCatalogEntry(type)`, `BLOCK_CATALOG`, `blockCatalogVersion`
+- [Block catalog reference](https://lessonkit.readthedocs.io/en/latest/reference/block-catalog.html)
 
 ### Components
 
@@ -102,4 +109,4 @@ export default function App() {
 - In development, invalid `courseId` / `lessonId` / `checkId` values log a one-time `console.warn`.
 - [Accessibility reference](https://lessonkit.readthedocs.io/en/latest/reference/accessibility.html) — keyboard and screen-reader guidance.
 - [Theming reference](https://lessonkit.readthedocs.io/en/latest/reference/theming.html) — token catalog and overrides.
-- [Identity](https://lessonkit.readthedocs.io/en/latest/reference/identity.html) · [Telemetry](https://lessonkit.readthedocs.io/en/latest/reference/telemetry.html) — IDs and event catalog.
+- [Identity](https://lessonkit.readthedocs.io/en/latest/reference/identity.html) · [Telemetry](https://lessonkit.readthedocs.io/en/latest/reference/telemetry.html) · [Block catalog](https://lessonkit.readthedocs.io/en/latest/reference/block-catalog.html) — IDs, events, and supported blocks.

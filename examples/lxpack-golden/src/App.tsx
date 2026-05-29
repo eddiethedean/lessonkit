@@ -1,6 +1,7 @@
 import React from "react";
 import {
   Course,
+  KnowledgeCheck,
   Lesson,
   ProgressTracker,
   Quiz,
@@ -12,6 +13,9 @@ import {
 import { CourseTopbar, LessonIntro, SidebarLessons, type LessonMeta } from "../../_shared/course-ui";
 
 const COURSE_ID = "workplace-safety-briefing";
+
+// Canonical block-catalog coverage: Course, Lesson, Scenario, Quiz, KnowledgeCheck,
+// Reflection, ProgressTracker — see docs/reference/block-catalog.md
 
 const STEPS: readonly LessonMeta[] = [
   { id: "welcome", title: "Site orientation", duration: "3 min", type: "Reading" },
@@ -70,7 +74,7 @@ export default function App() {
 
               {step === 0 ? (
                 <Lesson title={STEPS[0].title} lessonId={STEPS[0].id}>
-                  <Scenario>
+                  <Scenario blockId="site-orientation">
                     <p>
                       Before your badge activates for Zone B, confirm emergency procedures and reporting
                       lines for this distribution center.
@@ -115,7 +119,7 @@ export default function App() {
 
               {step === 3 ? (
                 <Lesson title={STEPS[3].title} lessonId={STEPS[3].id}>
-                  <Scenario>
+                  <Scenario blockId="safety-signoff">
                     <p>Knowledge check, then submit a practice near-miss report.</p>
                   </Scenario>
                   <Quiz
@@ -127,8 +131,17 @@ export default function App() {
                     ]}
                     answer="Barricade the area and notify your supervisor"
                   />
+                  <KnowledgeCheck
+                    checkId="ppe-acknowledgment"
+                    question="I confirm my PPE is fitted and I know the muster point for this shift."
+                    choices={["Not yet", "Yes, I confirm"]}
+                    answer="Yes, I confirm"
+                  />
                   <NearMissForm />
-                  <Reflection prompt="Where is your assigned muster point if the fire alarm sounds?" />
+                  <Reflection
+                    blockId="muster-point-reflection"
+                    prompt="Where is your assigned muster point if the fire alarm sounds?"
+                  />
                 </Lesson>
               ) : null}
             </main>

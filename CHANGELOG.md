@@ -3,6 +3,20 @@
 All notable changes to the LessonKit monorepo are documented here. Published packages use the
 [`@lessonkit/*`](https://www.npmjs.com/org/lessonkit) scope.
 
+## [0.8.0] - 2026-05-28
+
+### Added
+
+- **@lessonkit/react**: Runtime block catalog v1 — `buildBlockCatalog()`, `getBlockCatalogEntry()`, `BLOCK_CATALOG`, `blockCatalogVersion`.
+- **@lessonkit/react**: Machine-readable `@lessonkit/react/block-catalog.v1.json` and JSON Schema `@lessonkit/react/block-contract.v1.json`.
+- **Docs**: [`docs/BLOCK_CATALOG.md`](docs/BLOCK_CATALOG.md) and [block catalog reference](https://lessonkit.readthedocs.io/en/latest/reference/block-catalog.html).
+- **Examples**: `examples/lxpack-golden` demonstrates every catalog block (`KnowledgeCheck`, optional `blockId` on Scenario/Reflection).
+
+### Changed
+
+- Monorepo packages bumped to **0.8.0**.
+- **Docs**: `STUDIO_READINESS.md` 0.8.x checklist complete; vibe-coding and components guides link to block catalog.
+
 ## [0.7.0] - 2026-05-28
 
 ### Added

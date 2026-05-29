@@ -3,7 +3,7 @@
 ```{raw} html
 <div class="lk-hero">
   <div class="lk-hero-badges">
-    <span class="lk-badge lk-badge--accent">v0.7.0</span>
+    <span class="lk-badge lk-badge--accent">v0.8.0</span>
     <span class="lk-badge">React-first</span>
     <span class="lk-badge">SCORM · xAPI · cmi5</span>
   </div>
@@ -109,6 +109,7 @@ reference/identity
 reference/telemetry
 reference/theming
 reference/accessibility
+reference/block-catalog
 reference/lxpack-upgrades
 ```
 

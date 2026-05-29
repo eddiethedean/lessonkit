@@ -1,0 +1,143 @@
+import React from "react";
+import { afterEach, describe, expect, it } from "vitest";
+import { cleanup, render } from "@testing-library/react";
+import catalogJson from "../block-catalog.v1.json";
+import contractJson from "../block-contract.v1.json";
+import identityContractJson from "@lessonkit/core/identity-contract.v1.json";
+import telemetryCatalogJson from "@lessonkit/core/telemetry-catalog.v1.json";
+import {
+  BLOCK_CATALOG,
+  buildBlockCatalog,
+  blockCatalogVersion,
+  getBlockCatalogEntry,
+} from "../src/blockCatalog";
+import {
+  Course,
+  KnowledgeCheck,
+  Lesson,
+  ProgressTracker,
+  Quiz,
+  Reflection,
+  Scenario,
+} from "../src";
+
+const EXPORTED_BLOCK_TYPES = [
+  "Course",
+  "Lesson",
+  "Scenario",
+  "Quiz",
+  "Reflection",
+  "ProgressTracker",
+] as const;
+
+describe("@lessonkit/react block catalog", () => {
+  afterEach(() => {
+    cleanup();
+    sessionStorage.clear();
+  });
+
+  it("block-catalog.v1.json matches buildBlockCatalog()", () => {
+    const catalog = catalogJson as { schemaVersion: number; entries: ReturnType<typeof buildBlockCatalog> };
+    expect(catalog.schemaVersion).toBe(blockCatalogVersion);
+    expect(catalog.entries).toEqual(buildBlockCatalog());
+  });
+
+  it("BLOCK_CATALOG has an entry for every exported block type", () => {
+    for (const type of EXPORTED_BLOCK_TYPES) {
+      expect(getBlockCatalogEntry(type)).toBeDefined();
+    }
+    expect(getBlockCatalogEntry("KnowledgeCheck")).toBe(getBlockCatalogEntry("Quiz"));
+  });
+
+  it("requiredIds and optionalIds align with identity-contract.v1.json", () => {
+    const identity = identityContractJson as {
+      requiredComponentIds: Record<string, string[]>;
+      optionalComponentIds: Record<string, string[]>;
+    };
+
+    for (const entry of BLOCK_CATALOG) {
+      const types = [entry.type, ...(entry.aliases ?? [])];
+      for (const type of types) {
+        const required = identity.requiredComponentIds[type];
+        const optional = identity.optionalComponentIds[type];
+        if (required) {
+          expect(entry.requiredIds).toEqual(required);
+        }
+        if (optional) {
+          expect(entry.optionalIds).toEqual(optional);
+        }
+      }
+    }
+  });
+
+  it("telemetry.emits references valid telemetry catalog event names", () => {
+    const telemetryNames = new Set(
+      (telemetryCatalogJson as { entries: { name: string }[] }).entries.map((e) => e.name),
+    );
+
+    for (const entry of BLOCK_CATALOG) {
+      for (const event of entry.telemetry.emits) {
+        expect(telemetryNames.has(event)).toBe(true);
+      }
+    }
+  });
+
+  it("block-catalog.v1.json satisfies block-contract.v1.json shape", () => {
+    const catalog = catalogJson as { schemaVersion: number; entries: unknown[] };
+    const contract = contractJson as {
+      required: string[];
+      properties: { schemaVersion: { const: number } };
+      $defs: { blockCatalogEntry: { required: string[] } };
+    };
+
+    expect(catalog.schemaVersion).toBe(contract.properties.schemaVersion.const);
+    expect(Array.isArray(catalog.entries)).toBe(true);
+    expect(catalog.entries.length).toBeGreaterThan(0);
+
+    const entryRequired = contract.$defs.blockCatalogEntry.required;
+    for (const entry of catalog.entries) {
+      for (const key of entryRequired) {
+        expect(entry).toHaveProperty(key);
+      }
+    }
+  });
+
+  it("getBlockCatalogEntry returns undefined for unknown types", () => {
+    expect(getBlockCatalogEntry("UnknownBlock")).toBeUndefined();
+  });
+
+  it("renders every catalog block type in a minimal Course/Lesson tree", () => {
+    render(
+      <Course title="Catalog smoke" courseId="catalog-smoke" config={{ xapi: { enabled: false } }}>
+        <ProgressTracker />
+        <Lesson title="Lesson one" lessonId="lesson-one">
+          <Scenario blockId="scenario-intro">
+            <p>Scenario content</p>
+          </Scenario>
+          <Reflection blockId="reflection-notes" prompt="What did you learn?" />
+          <Quiz
+            checkId="quiz-one"
+            question="Pick one"
+            choices={["A", "B"]}
+            answer="A"
+          />
+          <KnowledgeCheck
+            checkId="check-one"
+            question="Confirm"
+            choices={["Yes"]}
+            answer="Yes"
+          />
+        </Lesson>
+      </Course>,
+    );
+
+    expect(document.querySelector('[aria-label="Catalog smoke"]')).toBeTruthy();
+    expect(document.querySelector('[aria-label="Lesson one"]')).toBeTruthy();
+    expect(document.querySelector('[aria-label="Scenario"]')).toBeTruthy();
+    expect(document.querySelector('[aria-label="Reflection"]')).toBeTruthy();
+    expect(document.querySelectorAll('[aria-label="Quiz"]')).toHaveLength(2);
+    expect(document.querySelector('[aria-label="Progress"]')).toBeTruthy();
+    expect(document.querySelector('[data-lk-block-id="scenario-intro"]')).toBeTruthy();
+    expect(document.querySelector('[data-lk-check-id="quiz-one"]')).toBeTruthy();
+  });
+});

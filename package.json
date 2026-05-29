@@ -1,6 +1,6 @@
 {
   "name": "lessonkit",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "private": true,
   "packageManager": "npm@10.9.0",
   "workspaces": [
