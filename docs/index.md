@@ -42,6 +42,12 @@ Pick the path that matches how you work:
 
 ::::
 
+:::{admonition} New to React?
+:class: note
+
+LessonKit courses are React apps. If you want to learn React before the developer guides, start with **[curated free resources](guides/react-developers/index.md#new-to-react)** (react.dev, TypeScript, Vite), then follow the [quickstart](guides/react-developers/quickstart.md). Prefer to skip React? Use **[vibe coding](guides/vibe-coding/index.md)** instead.
+:::
+
 ```{raw} html
 <div class="lk-callout">
   <strong>Node.js:</strong> 18+ for dev and build · 20+ for <code>lessonkit package</code> (LMS export).

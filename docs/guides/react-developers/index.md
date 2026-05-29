@@ -8,6 +8,41 @@ Developers comfortable with **React, TypeScript, and npm** who want full control
 
 These guides assume you are comfortable with **React, TypeScript, and npm**. You will integrate LessonKit into apps you own or scaffold with the CLI.
 
+(new-to-react)=
+## New to React?
+
+LessonKit courses are **React apps** (usually **Vite + TypeScript**). You do not need to be an expert, but you should understand components, props, state, and effects before you customize navigation or wire telemetry.
+
+:::{admonition} Suggested learning order
+:class: note
+
+1. **JavaScript** (if rusty) — [MDN JavaScript guide](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide)
+2. **React** — [react.dev Learn](https://react.dev/learn) (official tutorial)
+3. **TypeScript** (basics) — [TypeScript Handbook](https://www.typescriptlang.org/docs/handbook/intro.html)
+4. **Vite** (how `lessonkit dev` works) — [Vite Getting Started](https://vite.dev/guide/)
+5. **LessonKit** — [Quickstart](quickstart.md) on this site
+:::
+
+### Curated resources
+
+| Resource | What to focus on |
+| --- | --- |
+| [react.dev — Learn React](https://react.dev/learn) | Components, JSX, props, state, rendering lists, sharing state between components |
+| [react.dev — Hooks reference](https://react.dev/reference/react) | `useState`, `useEffect`, `useMemo`, `useCallback` (used in LessonKit examples) |
+| [react.dev — Thinking in React](https://react.dev/learn/thinking-in-react) | Breaking UI into components—same mindset as structuring lessons |
+| [TypeScript Handbook](https://www.typescriptlang.org/docs/handbook/intro.html) | Types on props, `useMemo` config objects, reading package APIs |
+| [Vite guide](https://vite.dev/guide/) | Dev server, `npm run dev` / `npm run build`, project layout |
+| [Node.js docs](https://nodejs.org/en/docs/guides) | Installing Node, running `npx`, workspace scripts |
+| [React TypeScript Cheatsheet](https://react-typescript-cheatsheet.netlify.app/docs/basic/getting-started/basic_type_example) | Typing React components when TypeScript errors block you |
+
+After the basics, skim our [components & hooks](components-and-hooks.md) guide and the [react-vite example](https://github.com/eddiethedean/lessonkit/tree/main/examples/react-vite) for patterns LessonKit expects (`Course`, `Lesson`, stable IDs).
+
+:::{admonition} Prefer not to learn React?
+:class: tip
+
+Use the [Vibe coding guides](../vibe-coding/index.md) with an AI editor and the CLI—you can ship courses without studying React first.
+:::
+
 ## What LessonKit gives you
 
 - **Components** — `Course`, `Lesson`, `Scenario`, `Quiz`, `Reflection`, `ProgressTracker`

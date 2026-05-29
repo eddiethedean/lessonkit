@@ -21,7 +21,10 @@ Corporate InfoSec annual module in the security theme: policy attestation, email
 ></iframe>
 ```
 
-[Open in full tab](../_static/demos/react-vite/index.html) · [Source on GitHub](https://github.com/eddiethedean/lessonkit/tree/main/examples/react-vite)
+<p class="lk-demo-links">
+  <a href="../_static/demos/react-vite/index.html" target="_blank" rel="noopener noreferrer">Open in full tab</a>
+  · <a href="https://github.com/eddiethedean/lessonkit/tree/main/examples/react-vite">Source on GitHub</a>
+</p>
 
 ## Data privacy essentials (`examples/data-privacy`)
 
@@ -36,7 +39,10 @@ GDPR compliance track (compliance theme): lawful-basis lab, audit case files, ro
 ></iframe>
 ```
 
-[Open in full tab](../_static/demos/data-privacy/index.html) · [Source on GitHub](https://github.com/eddiethedean/lessonkit/tree/main/examples/data-privacy)
+<p class="lk-demo-links">
+  <a href="../_static/demos/data-privacy/index.html" target="_blank" rel="noopener noreferrer">Open in full tab</a>
+  · <a href="https://github.com/eddiethedean/lessonkit/tree/main/examples/data-privacy">Source on GitHub</a>
+</p>
 
 ## Customer de-escalation (`examples/customer-service`)
 
@@ -51,7 +57,10 @@ Contact-center training in the support theme: channel briefing, chat bubbles, vo
 ></iframe>
 ```
 
-[Open in full tab](../_static/demos/customer-service/index.html) · [Source on GitHub](https://github.com/eddiethedean/lessonkit/tree/main/examples/customer-service)
+<p class="lk-demo-links">
+  <a href="../_static/demos/customer-service/index.html" target="_blank" rel="noopener noreferrer">Open in full tab</a>
+  · <a href="https://github.com/eddiethedean/lessonkit/tree/main/examples/customer-service">Source on GitHub</a>
+</p>
 
 ## Workplace safety briefing (`examples/lxpack-golden`)
 
@@ -66,7 +75,10 @@ Warehouse new-hire briefing in the compact field theme: PPE sign-off, photo haza
 ></iframe>
 ```
 
-[Open in full tab](../_static/demos/lxpack-golden/index.html) · [Source on GitHub](https://github.com/eddiethedean/lessonkit/tree/main/examples/lxpack-golden)
+<p class="lk-demo-links">
+  <a href="../_static/demos/lxpack-golden/index.html" target="_blank" rel="noopener noreferrer">Open in full tab</a>
+  · <a href="https://github.com/eddiethedean/lessonkit/tree/main/examples/lxpack-golden">Source on GitHub</a>
+</p>
 
 ## Run examples locally
 

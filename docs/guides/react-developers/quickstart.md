@@ -1,5 +1,11 @@
 # Quickstart (React)
 
+:::{admonition} New to React?
+:class: tip
+
+See [Learn React first](index.md#new-to-react) for curated tutorials (react.dev, TypeScript, Vite) before customizing a full course.
+:::
+
 ## CLI scaffold
 
 ```bash
