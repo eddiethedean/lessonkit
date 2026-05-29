@@ -30,7 +30,7 @@ this repo until that gate is met.
 
 - **Framework:** **0.7.0** — `@lessonkit/cli` init/dev/build/package (dual export), `lessonkit.json` manifest
 - **Studio:** **blocked** — no implementation work until **[1.0.0 — Stable public API (framework)](#100--stable-public-api-framework)** is shipped (see [Studio development gate](#studio-development-gate))
-- **Focus (now):** block catalog (0.8.x), conformance (0.9.x), then 1.0.0
+- **Focus (now):** block catalog (0.8.x), conformance (0.9.x), docs kept in sync through 1.0.0
 
 ## Guiding principles
 
@@ -208,6 +208,11 @@ See [`docs/IDENTITY.md`](docs/IDENTITY.md) and [`docs/TELEMETRY.md`](docs/TELEME
     - telemetry semantics
 - **AI/dev readiness**:
   - catalog is **machine-readable** (JSON export) so generators can validate inputs and avoid unsupported combinations
+- **Documentation**:
+  - reference page for the runtime block catalog (`docs/reference/block-catalog.md`) — props, a11y/theming/telemetry contracts per block
+  - catalog JSON schema or export path documented for generators (linked from vibe-coding and React developer guides)
+  - update [`docs/STUDIO_READINESS.md`](docs/STUDIO_READINESS.md) 0.8.x checklist as catalog items ship
+  - examples demonstrate every catalog block (at least one reference course)
 
 ---
 
@@ -228,6 +233,11 @@ See [`docs/IDENTITY.md`](docs/IDENTITY.md) and [`docs/TELEMETRY.md`](docs/TELEME
   - asserts behavioral equivalence across export targets for the same course
 - Link the checklist:
   - `docs/STUDIO_READINESS.md` (framework readiness checklist for Studio and AI/dev workflows)
+- **Documentation**:
+  - export parity guide for authors (`docs/guides/react-developers/export-parity.md` or equivalent) — what is guaranteed across React/Vite vs LMS targets
+  - conformance matrix documented (what is tested, how to run locally, CI expectations)
+  - contributor docs for Playwright e2e and packaging smoke tests
+  - update [`docs/STUDIO_READINESS.md`](docs/STUDIO_READINESS.md) 0.9.x checklist as harness items ship
 
 ---
 
@@ -240,6 +250,11 @@ Potential plugin areas (from spec):
 - Analytics providers
 - Assessment engines
 - Custom interactions
+
+**Documentation** (as plugin API ships):
+
+- plugin architecture reference (`docs/reference/plugins.md`) — extension points, lifecycle, and constraints
+- at least one documented plugin example or cookbook entry
 
 **Studio (later):** plugin API and marketplace remain post–Studio 1.0 (see Studio future scope).
 
@@ -255,10 +270,15 @@ are met and 1.0.0 is released.
 #### Criteria to hit before 1.0 (and before Studio)
 
 - Stable component and hook APIs (semver expectations)
-- Storybook + docs site live
+- Storybook + docs site live and current with 1.0 API surface
 - Packaging documented end-to-end (React/Vite and LXPack targets)
 - Accessibility conformance documented (WCAG 2.1 AA target)
 - CI with tests + basic e2e coverage (Playwright)
+- **Documentation complete for 1.0**:
+  - all public `@lessonkit/*` APIs covered in reference pages (no undocumented exports)
+  - migration notes from 0.x → 1.0 (breaking changes, identity/CLI/catalog deltas)
+  - canonical quickstart paths verified (React developers + vibe-coding guides match `lessonkit init` output)
+  - live compiled examples on Read the Docs match current example apps
 - Framework milestones **0.1.x through 0.9.x** (and scoped **0.8.0+** plugin work planned for 1.0) delivered per this roadmap
 - **AI/dev readiness**: generator-friendly API + machine-readable catalog + deterministic exports (see `docs/STUDIO_READINESS.md`)
 
@@ -351,8 +371,10 @@ These are delivered as part of framework milestones **before** the Studio gate�
 | `lessonkit init` / `dev` / `build` | 0.7.0 |
 | `@lessonkit/lxpack` SCORM export | 0.6.0 |
 | xAPI/cmi5/standalone via LXPack | 0.6.0 |
-| Plugin hooks (as scoped) | 0.8.0+ |
-| Stable public API + docs + e2e CI | **1.0.0 (gate)** |
+| Runtime block catalog reference + generator docs | 0.8.x |
+| Export parity + conformance docs | 0.9.x |
+| Plugin hooks + extension docs (as scoped) | 0.8.0+ |
+| Stable public API + full docs + e2e CI | **1.0.0 (gate)** |
 
 ---
 
