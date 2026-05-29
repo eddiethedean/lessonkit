@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="LessonKit">
+  <circle cx="16" cy="16" r="15" fill="#0B3D91"/>
+  <ellipse
+    cx="16"
+    cy="16.5"
+    rx="9.75"
+    ry="3.85"
+    fill="none"
+    stroke="#fff"
+    stroke-width="2.35"
+    transform="rotate(-28 16 16)"
+  />
+  <path
+    fill="#FC3D21"
+    d="M19.1 8.4c4.6 1.8 7.4 6.2 6.4 10.8-.7 3.1-3.1 5.6-6.1 6.8.8-2.8 1.1-5.8-.2-8.5-1-2-2.8-3.6-5.1-4.6 1.8-1.4 4.2-2.2 5-2.2 1.5-.1 3 .2 4 .7z"
+  />
+  <g fill="#fff" transform="translate(16 17) scale(0.54) translate(-18.725 -15.75)">
+    <path d="M8.75 9.25h2.85v10.35h5.65v2.65H8.75V9.25z"/>
+    <path d="M17.85 9.25h2.9v5.15L26.35 9.25h2.35l-6.15 5.35L28.1 22.15h-2.7l-5.85-7.35H17.85V9.25z"/>
+  </g>
+</svg>

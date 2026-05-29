@@ -1,12 +1,23 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="LessonKit">
   <defs>
-    <linearGradient id="lk-favicon-grad" x1="6" y1="4" x2="26" y2="28" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#2563eb"/>
-      <stop offset="100%" stop-color="#7c3aed"/>
+    <linearGradient id="lk-bg" x1="4" y1="2" x2="28" y2="30" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#3b82f6"/>
+      <stop offset="52%" stop-color="#6366f1"/>
+      <stop offset="100%" stop-color="#a855f7"/>
     </linearGradient>
+    <linearGradient id="lk-shine" x1="16" y1="3" x2="16" y2="17" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#fff" stop-opacity="0.32"/>
+      <stop offset="100%" stop-color="#fff" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="lk-shadow" x="-25%" y="-15%" width="150%" height="160%">
+      <feDropShadow dx="0" dy="1.25" stdDeviation="1.15" flood-color="#312e81" flood-opacity="0.32"/>
+    </filter>
   </defs>
-  <rect width="32" height="32" rx="8" fill="url(#lk-favicon-grad)"/>
-  <g fill="#fff">
+  <g filter="url(#lk-shadow)">
+    <rect width="32" height="32" rx="9" fill="url(#lk-bg)"/>
+    <rect width="32" height="32" rx="9" fill="url(#lk-shine)"/>
+  </g>
+  <g fill="#fff" transform="translate(16 16.25) scale(1.18) translate(-18.725 -15.75)">
     <path d="M8.75 9.25h2.85v10.35h5.65v2.65H8.75V9.25z"/>
     <path d="M17.85 9.25h2.9v5.15L26.35 9.25h2.35l-6.15 5.35L28.1 22.15h-2.7l-5.85-7.35H17.85V9.25z"/>
   </g>
