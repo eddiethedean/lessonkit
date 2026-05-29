@@ -9,8 +9,9 @@
       <stop offset="0%" stop-color="#fff" stop-opacity="0.32"/>
       <stop offset="100%" stop-color="#fff" stop-opacity="0"/>
     </linearGradient>
-    <linearGradient id="lk-word" x1="0" y1="0" x2="1" y2="0">
+    <linearGradient id="lk-word" x1="52" y1="0" x2="178" y2="0" gradientUnits="userSpaceOnUse">
       <stop offset="0%" stop-color="#3b82f6"/>
+      <stop offset="55%" stop-color="#6366f1"/>
       <stop offset="100%" stop-color="#a855f7"/>
     </linearGradient>
     <filter id="lk-shadow" x="-25%" y="-15%" width="150%" height="160%">
@@ -30,11 +31,10 @@
   <text
     x="52"
     y="29"
+    fill="url(#lk-word)"
     font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif"
     font-size="18.5"
     font-weight="600"
     letter-spacing="-0.045em"
-  >
-    <tspan fill="currentColor">Lesson</tspan><tspan fill="url(#lk-word)">Kit</tspan>
-  </text>
+  >LessonKit</text>
 </svg>
