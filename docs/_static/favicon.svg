@@ -1,14 +1,15 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="LessonKit">
   <defs>
-    <linearGradient id="lk-favicon-grad" x1="4" y1="4" x2="28" y2="28" gradientUnits="userSpaceOnUse">
+    <linearGradient id="lk-favicon-grad" x1="6" y1="4" x2="26" y2="28" gradientUnits="userSpaceOnUse">
       <stop offset="0%" stop-color="#2563eb"/>
       <stop offset="100%" stop-color="#7c3aed"/>
     </linearGradient>
   </defs>
-  <rect width="32" height="32" rx="9" fill="url(#lk-favicon-grad)"/>
-  <path
-    fill="#fff"
-    fill-rule="nonzero"
-    d="M9.5 8.5h2.4v4.75L22.5 8.5h2.2l-8.2 4.65L23.5 24h-2.2l-7.35-6.35v6.35H9.5V8.5z"
-  />
+  <rect width="32" height="32" rx="8" fill="url(#lk-favicon-grad)"/>
+  <g fill="none" stroke="#fff" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M10 9.5v13H17"/>
+    <path d="M19.5 9.5v13"/>
+    <path d="M19.5 14.25L25 9.5"/>
+    <path d="M19.5 14.25L25 22.5"/>
+  </g>
 </svg>
