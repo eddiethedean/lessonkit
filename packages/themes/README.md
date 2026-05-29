@@ -1,10 +1,13 @@
 # `@lessonkit/themes`
 
 [![CI](https://github.com/eddiethedean/lessonkit/actions/workflows/ci.yml/badge.svg)](https://github.com/eddiethedean/lessonkit/actions/workflows/ci.yml)
+[![Documentation](https://readthedocs.org/projects/lessonkit/badge/?version=latest)](https://lessonkit.readthedocs.io/en/latest/)
 [![npm](https://img.shields.io/npm/v/@lessonkit/themes.svg)](https://www.npmjs.com/package/@lessonkit/themes)
 [![License](https://img.shields.io/github/license/eddiethedean/lessonkit)](../../LICENSE)
 
 Design tokens and theme utilities for LessonKit.
+
+**Docs:** [Theming reference](https://lessonkit.readthedocs.io/en/latest/reference/theming.html) · [Theming & accessibility guide](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/theming-and-accessibility.html)
 
 ## Install
 
@@ -25,7 +28,7 @@ npm install @lessonkit/themes
 - `defaultTheme`, `lightTheme`, `darkTheme`, `brandTheme`, `brandThemeOverrides`
 - `getPresetTheme(preset)` — `default` | `light` | `dark` | `brand` (full themes for catalog/validation)
 
-In `ThemeProvider`, `preset="default"` uses the mode palette only; `preset="brand"` merges `brandThemeOverrides` onto the active mode (see [`docs/THEMING.md`](../../docs/THEMING.md)).
+In `ThemeProvider`, `preset="default"` uses the mode palette only; `preset="brand"` merges `brandThemeOverrides` onto the active mode (see [theming reference](https://lessonkit.readthedocs.io/en/latest/reference/theming.html)).
 
 ### Utilities
 
@@ -49,4 +52,4 @@ In `ThemeProvider`, `preset="default"` uses the mode palette only; `preset="bran
 
 ## Docs
 
-See [`docs/THEMING.md`](../../docs/THEMING.md) for the CSS variable contract and override rules.
+See the [theming reference](https://lessonkit.readthedocs.io/en/latest/reference/theming.html) for the CSS variable contract and override rules.

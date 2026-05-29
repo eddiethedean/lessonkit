@@ -1,10 +1,13 @@
 # `@lessonkit/react`
 
 [![CI](https://github.com/eddiethedean/lessonkit/actions/workflows/ci.yml/badge.svg)](https://github.com/eddiethedean/lessonkit/actions/workflows/ci.yml)
+[![Documentation](https://readthedocs.org/projects/lessonkit/badge/?version=latest)](https://lessonkit.readthedocs.io/en/latest/)
 [![npm](https://img.shields.io/npm/v/@lessonkit/react.svg)](https://www.npmjs.com/package/@lessonkit/react)
 [![License](https://img.shields.io/github/license/eddiethedean/lessonkit)](../../LICENSE)
 
 React components and hooks for building learning experiences in LessonKit.
+
+**Docs:** [Components & hooks](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/components-and-hooks.html) · [Quickstart](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/quickstart.html) · [Theming & accessibility](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/theming-and-accessibility.html)
 
 ## Install
 
@@ -77,7 +80,7 @@ export default function App() {
 
 ### Theming
 
-- `ThemeProvider` — injects `--lk-*` CSS variables (see [`docs/THEMING.md`](../../docs/THEMING.md))
+- `ThemeProvider` — injects `--lk-*` CSS variables ([theming reference](https://lessonkit.readthedocs.io/en/latest/reference/theming.html))
 - Props: `preset`, `mode` (`light` | `dark` | `system`), `theme` (partial override), `target` (`document` | `element`)
 
 ## Notes
@@ -97,7 +100,6 @@ export default function App() {
 - If you omit `session.sessionId`, the provider reuses a tab-scoped id via `sessionStorage` so React
   Strict Mode remounts do not split analytics sessions in development.
 - In development, invalid `courseId` / `lessonId` / `checkId` values log a one-time `console.warn`.
-- Accessibility guidance lives in [`docs/ACCESSIBILITY.md`](../../docs/ACCESSIBILITY.md).
-- Theming and token catalog: [`docs/THEMING.md`](../../docs/THEMING.md).
-- Identity and telemetry: [`docs/IDENTITY.md`](../../docs/IDENTITY.md), [`docs/TELEMETRY.md`](../../docs/TELEMETRY.md).
-
+- [Accessibility reference](https://lessonkit.readthedocs.io/en/latest/reference/accessibility.html) — keyboard and screen-reader guidance.
+- [Theming reference](https://lessonkit.readthedocs.io/en/latest/reference/theming.html) — token catalog and overrides.
+- [Identity](https://lessonkit.readthedocs.io/en/latest/reference/identity.html) · [Telemetry](https://lessonkit.readthedocs.io/en/latest/reference/telemetry.html) — IDs and event catalog.

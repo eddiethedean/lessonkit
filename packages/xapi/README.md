@@ -1,10 +1,13 @@
 # `@lessonkit/xapi`
 
 [![CI](https://github.com/eddiethedean/lessonkit/actions/workflows/ci.yml/badge.svg)](https://github.com/eddiethedean/lessonkit/actions/workflows/ci.yml)
+[![Documentation](https://readthedocs.org/projects/lessonkit/badge/?version=latest)](https://lessonkit.readthedocs.io/en/latest/)
 [![npm](https://img.shields.io/npm/v/@lessonkit/xapi.svg)](https://www.npmjs.com/package/@lessonkit/xapi)
 [![License](https://img.shields.io/github/license/eddiethedean/lessonkit)](../../LICENSE)
 
 xAPI statement generation primitives.
+
+**Docs:** [Telemetry reference](https://lessonkit.readthedocs.io/en/latest/reference/telemetry.html) · [Telemetry & xAPI guide](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/telemetry-and-xapi.html)
 
 ## Install
 
@@ -35,5 +38,4 @@ Prefer mapping from telemetry: `telemetryEventToXAPIStatement(event)` (canonical
 - If the transport throws/rejects, statements are queued in-memory.
 - Call `await xapi.flush()` to retry queued statements.
 
-See [`docs/TELEMETRY.md`](../../docs/TELEMETRY.md).
-
+See the [telemetry reference](https://lessonkit.readthedocs.io/en/latest/reference/telemetry.html) and [identity reference](https://lessonkit.readthedocs.io/en/latest/reference/identity.html) for URNs and event mapping.

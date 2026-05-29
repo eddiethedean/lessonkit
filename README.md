@@ -1,13 +1,14 @@
 # LessonKit
 
 [![CI](https://github.com/eddiethedean/lessonkit/actions/workflows/ci.yml/badge.svg)](https://github.com/eddiethedean/lessonkit/actions/workflows/ci.yml)
+[![Documentation](https://readthedocs.org/projects/lessonkit/badge/?version=latest)](https://lessonkit.readthedocs.io/en/latest/)
 [![License](https://img.shields.io/github/license/eddiethedean/lessonkit)](LICENSE)
 
 **LessonKit** is a React-first framework for building accessible, trackable learning experiences—and shipping them to the LMS. Author courses as components, wire telemetry and xAPI, theme with design tokens, and export SCORM, standalone, xAPI, or cmi5 packages from the same codebase.
 
 **Current release:** [0.7.0](CHANGELOG.md) · Published on npm as [`@lessonkit/*`](https://www.npmjs.com/org/lessonkit)
 
-**Documentation:** [Read the Docs](https://lessonkit.readthedocs.io/) — [vibe coding guides](https://lessonkit.readthedocs.io/en/latest/guides/vibe-coding/index.html) · [React developer guides](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/index.html) (build locally: [docs/READTHEDOCS.md](docs/READTHEDOCS.md))
+**Documentation:** [lessonkit.readthedocs.io](https://lessonkit.readthedocs.io/en/latest/) — [vibe coding](https://lessonkit.readthedocs.io/en/latest/guides/vibe-coding/index.html) · [React developers](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/index.html) · [live examples](https://lessonkit.readthedocs.io/en/latest/examples/index.html) (contributors: [docs/README.md](docs/README.md) · [Read the Docs setup](docs/READTHEDOCS.md))
 
 ---
 
@@ -18,21 +19,21 @@
 | **LX / frontend developers** | Composable React primitives, TypeScript, Vite, and a real CLI (`init`, `dev`, `build`, `package`) |
 | **Learning engineering** | Canonical IDs, a telemetry catalog, and xAPI mapping aligned with LMS object URNs |
 | **Accessibility** | Semantic structure, focus utilities, reduced-motion helpers, and documented WCAG targets |
-| **Delivery** | Dual export: modern SPA via Vite plus LMS artifacts through [`@lessonkit/lxpack`](docs/PACKAGING.md) |
+| **Delivery** | Dual export: modern SPA via Vite plus LMS artifacts through [`@lessonkit/lxpack`](https://lessonkit.readthedocs.io/en/latest/reference/packaging.html) |
 
-LessonKit is developer tooling—not a timeline authoring tool. Think **React + telemetry + packaging**, not Storyline-in-a-box. A visual **LessonKit Studio** is planned after framework 1.0; see [ROADMAP.md](ROADMAP.md).
+LessonKit is developer tooling—not a timeline authoring tool. Think **React + telemetry + packaging**, not Storyline-in-a-box. A visual **LessonKit Studio** is planned after framework 1.0; see the [roadmap](https://lessonkit.readthedocs.io/en/latest/project/roadmap.html) ([ROADMAP.md](ROADMAP.md)).
 
 ---
 
 ## Features
 
 - **React authoring** — `Course`, `Lesson`, `Scenario`, `Quiz`, `Reflection`, `ProgressTracker`, and hooks for progress, tracking, and completion
-- **Identity v1** — Required `courseId`, `lessonId`, and `checkId`; stable URNs for telemetry and xAPI ([IDENTITY.md](docs/IDENTITY.md))
-- **Telemetry** — Session-aware events, optional batching, and a versioned event catalog ([TELEMETRY.md](docs/TELEMETRY.md))
-- **xAPI** — Statement generation, in-memory queueing, and transport hooks via `@lessonkit/xapi`
-- **Theming** — `ThemeProvider`, presets, and `--lk-*` CSS variables ([THEMING.md](docs/THEMING.md))
-- **LXPack export** — SCORM 1.2/2004, standalone, xAPI, cmi5 from a built Vite app ([PACKAGING.md](docs/PACKAGING.md))
-- **CLI** — Scaffold projects, run dev/build, and package with `lessonkit.json` ([CLI.md](docs/CLI.md))
+- **Identity v1** — Required `courseId`, `lessonId`, and `checkId`; stable URNs for telemetry and xAPI ([identity reference](https://lessonkit.readthedocs.io/en/latest/reference/identity.html))
+- **Telemetry** — Session-aware events, optional batching, and a versioned event catalog ([telemetry reference](https://lessonkit.readthedocs.io/en/latest/reference/telemetry.html))
+- **xAPI** — Statement generation, in-memory queueing, and transport hooks via `@lessonkit/xapi` ([telemetry & xAPI guide](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/telemetry-and-xapi.html))
+- **Theming** — `ThemeProvider`, presets, and `--lk-*` CSS variables ([theming reference](https://lessonkit.readthedocs.io/en/latest/reference/theming.html))
+- **LXPack export** — SCORM 1.2/2004, standalone, xAPI, cmi5 from a built Vite app ([packaging reference](https://lessonkit.readthedocs.io/en/latest/reference/packaging.html))
+- **CLI** — Scaffold projects, run dev/build, and package with `lessonkit.json` ([CLI reference](https://lessonkit.readthedocs.io/en/latest/reference/cli.html))
 
 ---
 
@@ -55,7 +56,7 @@ lessonkit build
 lessonkit package --target scorm12
 ```
 
-Each project includes a root [`lessonkit.json`](docs/CLI.md#project-manifest-lessonkitjson) manifest (`schemaVersion: 1`) that ties React props to the LXPack course descriptor.
+Each project includes a root [`lessonkit.json`](https://lessonkit.readthedocs.io/en/latest/reference/cli.html) manifest (`schemaVersion: 1`) that ties React props to the LXPack course descriptor. See the [packaging & CLI guide](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/packaging-and-cli.html).
 
 ### Add to an existing React app
 
@@ -75,7 +76,7 @@ npm run build
 npm test
 ```
 
-Run the interactive showcase:
+Run the interactive showcases ([live demos](https://lessonkit.readthedocs.io/en/latest/examples/index.html)):
 
 ```bash
 npm -w lessonkit-example-react-vite run dev
@@ -105,7 +106,7 @@ npm -w lessonkit-example-lxpack-golden run package:scorm12
          LMS upload
 ```
 
-At runtime, `@lessonkit/react` emits telemetry and xAPI (and can forward scores to an embedded LXPack bridge when packaged). See [docs/README.md](docs/README.md) for the full guide index.
+At runtime, `@lessonkit/react` emits telemetry and xAPI (and can forward scores to an embedded LXPack bridge when packaged). Browse the [full documentation](https://lessonkit.readthedocs.io/en/latest/) or the [components & hooks guide](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/components-and-hooks.html).
 
 ---
 
@@ -160,7 +161,7 @@ export default function SecurityTraining() {
 }
 ```
 
-Keep `courseId`, `lessonId`, and `checkId` in sync with `lessonkit.json` and your LXPack descriptor—`lessonkit init` patches the starter `App.tsx` for you.
+Keep `courseId`, `lessonId`, and `checkId` in sync with `lessonkit.json` and your LXPack descriptor—`lessonkit init` patches the starter `App.tsx` for you. See [identity](https://lessonkit.readthedocs.io/en/latest/reference/identity.html) and [project structure](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/project-structure.html).
 
 ---
 
@@ -212,25 +213,26 @@ Full site (Sphinx + Read the Docs): **[lessonkit.readthedocs.io](https://lessonk
 | React developers | [guides/react-developers](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/index.html) |
 | Live compiled examples | [examples](https://lessonkit.readthedocs.io/en/latest/examples/index.html) |
 
-### Reference (also in repo)
+### Reference
 
-| Topic | Doc |
+| Topic | Documentation |
 | --- | --- |
-| CLI & `lessonkit.json` | [docs/CLI.md](docs/CLI.md) |
-| LMS packaging | [docs/PACKAGING.md](docs/PACKAGING.md) |
-| IDs & URNs | [docs/IDENTITY.md](docs/IDENTITY.md) |
-| Telemetry events | [docs/TELEMETRY.md](docs/TELEMETRY.md) |
-| Theming | [docs/THEMING.md](docs/THEMING.md) |
-| Accessibility | [docs/ACCESSIBILITY.md](docs/ACCESSIBILITY.md) |
-| LXPack interoperability | [docs/LXPACK_UPGRADES_FOR_LESSONKIT.md](docs/LXPACK_UPGRADES_FOR_LESSONKIT.md) |
-| RTD setup | [docs/READTHEDOCS.md](docs/READTHEDOCS.md) |
+| CLI & `lessonkit.json` | [CLI reference](https://lessonkit.readthedocs.io/en/latest/reference/cli.html) |
+| LMS packaging | [Packaging reference](https://lessonkit.readthedocs.io/en/latest/reference/packaging.html) |
+| IDs & URNs | [Identity reference](https://lessonkit.readthedocs.io/en/latest/reference/identity.html) |
+| Telemetry events | [Telemetry reference](https://lessonkit.readthedocs.io/en/latest/reference/telemetry.html) |
+| Theming | [Theming reference](https://lessonkit.readthedocs.io/en/latest/reference/theming.html) |
+| Accessibility | [Accessibility reference](https://lessonkit.readthedocs.io/en/latest/reference/accessibility.html) |
+| LXPack interoperability | [LXPack upgrades](https://lessonkit.readthedocs.io/en/latest/reference/lxpack-upgrades.html) |
+
+Source markdown for reference pages lives under [`docs/`](docs/) (also see [contributing to the monorepo](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/contributing-to-the-monorepo.html)).
 
 ### Project meta
 
-- [CHANGELOG.md](CHANGELOG.md) — release history
+- [Changelog](https://lessonkit.readthedocs.io/en/latest/project/changelog.html) · [CHANGELOG.md](CHANGELOG.md) — release history
 - [RELEASING.md](RELEASING.md) — publish `@lessonkit/*` to npm
-- [SECURITY.md](SECURITY.md) — vulnerability reporting
-- [PLAN.md](PLAN.md) · [SPEC.md](SPEC.md) · [ROADMAP.md](ROADMAP.md) — vision, requirements, milestones
+- [Security](https://lessonkit.readthedocs.io/en/latest/project/security.html) · [SECURITY.md](SECURITY.md) — vulnerability reporting
+- [Roadmap](https://lessonkit.readthedocs.io/en/latest/project/roadmap.html) · [PLAN.md](PLAN.md) · [SPEC.md](SPEC.md) · [ROADMAP.md](ROADMAP.md)
 - [docs/LessonKit_Studio_PLAN.md](docs/LessonKit_Studio_PLAN.md) — future visual authoring (post–framework 1.0)
 
 ---

@@ -1,8 +1,14 @@
 # @lessonkit/lxpack
 
+[![Documentation](https://readthedocs.org/projects/lessonkit/badge/?version=latest)](https://lessonkit.readthedocs.io/en/latest/)
+[![npm](https://img.shields.io/npm/v/@lessonkit/lxpack.svg)](https://www.npmjs.com/package/@lessonkit/lxpack)
+[![License](https://img.shields.io/github/license/eddiethedean/lessonkit)](../../LICENSE)
+
 LXPack export adapter for LessonKit — write `lessonkit.json` + `course.yaml`, copy SPA builds, and package to SCORM / standalone / xAPI / cmi5 via [`@lxpack/api`](https://www.npmjs.com/package/@lxpack/api).
 
 Requires **Node.js 20+**.
+
+**Docs:** [Packaging reference](https://lessonkit.readthedocs.io/en/latest/reference/packaging.html) · [Packaging & CLI guide](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/packaging-and-cli.html) · [Live examples](https://lessonkit.readthedocs.io/en/latest/examples/index.html)
 
 ## Install
 
@@ -27,7 +33,7 @@ const result = await packageLessonkitCourse({
 if (!result.ok) throw new Error("packaging failed");
 ```
 
-See [`docs/PACKAGING.md`](../../docs/PACKAGING.md) and [`examples/lxpack-golden`](../../examples/lxpack-golden).
+See the [packaging reference](https://lessonkit.readthedocs.io/en/latest/reference/packaging.html) and the [`examples/lxpack-golden`](../../examples/lxpack-golden) course.
 
 ## Browser bridge
 
@@ -38,3 +44,5 @@ import { notifyLxpackLessonComplete } from "@lessonkit/lxpack/bridge";
 ```
 
 `@lessonkit/react` forwards `lesson_completed`, `course_completed`, and `quiz_completed` automatically when `window.parent.lxpackBridge.v1` is present (`config.lxpack.bridge: "off"` to disable).
+
+For interoperability notes, see [LXPack upgrades](https://lessonkit.readthedocs.io/en/latest/reference/lxpack-upgrades.html).

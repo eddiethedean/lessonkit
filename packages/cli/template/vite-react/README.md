@@ -1,9 +1,9 @@
 # LessonKit Vite + React template
 
-[![CI](https://github.com/eddiethedean/lessonkit/actions/workflows/ci.yml/badge.svg)](https://github.com/eddiethedean/lessonkit/actions/workflows/ci.yml)
-[![License](https://img.shields.io/github/license/eddiethedean/lessonkit)](../../LICENSE)
+[![Documentation](https://readthedocs.org/projects/lessonkit/badge/?version=latest)](https://lessonkit.readthedocs.io/en/latest/)
+[![License](https://img.shields.io/github/license/eddiethedean/lessonkit)](../../../../LICENSE)
 
-This is a starter template used by `lessonkit init`. See [`docs/CLI.md`](../../docs/CLI.md).
+Starter template bundled with `@lessonkit/cli` and copied by `lessonkit init`. See the [CLI reference](https://lessonkit.readthedocs.io/en/latest/reference/cli.html) and [React quickstart](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/quickstart.html).
 
 ## Run
 
@@ -14,6 +14,5 @@ npm run dev
 
 ## Notes
 
-- This template depends on `@lessonkit/react`.
-- It’s copied by `@lessonkit/cli` when you run `lessonkit init`.
-
+- Depends on [`@lessonkit/react`](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/components-and-hooks.html).
+- Shipped inside `@lessonkit/cli` for `lessonkit init`.
