@@ -7,7 +7,7 @@ from datetime import datetime
 project = "LessonKit"
 copyright = f"{datetime.now().year}, LessonKit contributors"
 author = "LessonKit contributors"
-release = "0.8.0"
+release = "0.9.0"
 
 extensions = [
     "myst_parser",

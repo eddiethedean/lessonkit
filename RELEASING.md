@@ -13,13 +13,15 @@ Published packages: `@lessonkit/core`, `@lessonkit/xapi`, `@lessonkit/accessibil
 
 | Item | Status |
 |------|--------|
-| `main` CI green (includes `test:e2e` and conformance scripts) | Verify latest run on `main` |
+| `main` CI green (includes `test:e2e` and conformance scripts) | Done ([CI run 26645268211](https://github.com/eddiethedean/lessonkit/actions/runs/26645268211) on `9f4b897`) |
 | All seven `@lessonkit/*` packages at `0.9.0` in `package.json` | Done |
 | `@lessonkit/react` / `@lessonkit/lxpack` / `@lessonkit/cli` depend on matching `@lessonkit/*@0.9.0` | Done |
 | `lessonkit init` template pins `^0.9.0` for `@lessonkit/*` | Done (`copy-template.mjs`) |
-| `npm run test:e2e` passes locally (Node 20) | Required |
-| `@lxpack/conformance` matrix script passes in CI | Required |
-| [CHANGELOG.md](CHANGELOG.md) `## [0.9.0]` documents conformance harness | Done |
+| `npm run test:e2e` passes locally (Node 20) | Done (2026-05-29) |
+| `conformance:lxpack` + `conformance:golden` pass locally | Done (2026-05-29) |
+| Local release prep: `build`, `test`, `typecheck`, `coverage`, golden `package:*` | Done (2026-05-29) |
+| [CHANGELOG.md](CHANGELOG.md) `## [0.9.0]` (plugins + conformance harness) | Done |
+| Sphinx `docs/conf.py` `release` matches `0.9.0` | Done |
 | No pending `.changeset/*.md` files | Done (only `config.json`) |
 | Git tag `v0.9.0` | Create when ready to publish to npm |
 
