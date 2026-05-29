@@ -5,28 +5,30 @@ Published packages: `@lessonkit/core`, `@lessonkit/xapi`, `@lessonkit/accessibil
 ## Prerequisites
 
 - `main` is green (see [CI workflow](.github/workflows/ci.yml)).
-- All `packages/*/package.json` versions match the release (e.g. `0.7.0`).
+- All `packages/*/package.json` versions match the release (e.g. `0.8.0`).
 - [CHANGELOG.md](CHANGELOG.md) documents the release.
 - No pending files in [`.changeset/`](.changeset/) that would run `changeset version` and bump versions unexpectedly (this repo publishes via **git tags**, not `changeset publish`).
 
-### 0.7.0 checklist (before tagging)
+### 0.8.0 checklist (before tagging)
 
 | Item | Status |
 |------|--------|
 | `main` CI green ([workflow](.github/workflows/ci.yml): build, typecheck, test, coverage on Node 18 + 20; packaging + CLI smoke on Node 20) | Required |
-| All seven `@lessonkit/*` packages at `0.7.0` in `package.json` | Required |
-| `@lessonkit/react` / `@lessonkit/lxpack` / `@lessonkit/cli` depend on matching `@lessonkit/*@0.7.0` | Required |
-| [CHANGELOG.md](CHANGELOG.md) `## [0.7.0]` includes Added / Changed | Required |
-| `docs/CLI.md`, `docs/PACKAGING.md`, `docs/STUDIO_READINESS.md` 0.7.x items | Done in repo |
+| All seven `@lessonkit/*` packages at `0.8.0` in `package.json` | Required |
+| `@lessonkit/react` / `@lessonkit/lxpack` / `@lessonkit/cli` depend on matching `@lessonkit/*@0.8.0` | Required |
+| `lessonkit init` template (`packages/cli/scripts/copy-template.mjs`) pins `^0.8.0` for `@lessonkit/*` | Required |
+| [CHANGELOG.md](CHANGELOG.md) `## [0.8.0]` includes Added / Changed | Required |
+| `docs/STUDIO_READINESS.md` 0.8.x block catalog items complete | Required |
+| `@lessonkit/react/block-catalog.v1.json` shipped in package `files` + `exports` | Required |
 | Golden example packages via `lessonkit package` in CI | Required |
 | `lessonkit init` template bundled in `@lessonkit/cli` | Required |
 | No pending `.changeset/*.md` files (would bump versions unexpectedly) | Required |
-| Git tag `v0.7.0` does not exist yet | Create on publish |
+| Git tag `v0.8.0` does not exist yet | Create on publish |
 | `NPM_TOKEN` secret configured on GitHub | Required for Release workflow |
 
-**Notes for 0.7.0 consumers:** `@lessonkit/cli` `package` LMS targets require **Node.js 20+** (same as `@lessonkit/lxpack`). Dev/build work on Node 18+.
+**Notes for 0.8.0 consumers:** `@lessonkit/cli` `package` LMS targets require **Node.js 20+** (same as `@lessonkit/lxpack`). Dev/build work on Node 18+. Import the block catalog via `@lessonkit/react/block-catalog.v1.json`.
 
-> **Do not create or push a `v0.7.0` git tag** until you intend to publish to npm. Tagging triggers the Release workflow.
+> **Do not create or push a `v0.8.0` git tag** until you intend to publish to npm. Tagging triggers the Release workflow.
 
 ## Publish to npm (tag-based)
 
@@ -47,8 +49,8 @@ Published packages: `@lessonkit/core`, `@lessonkit/xapi`, `@lessonkit/accessibil
 3. When ready to publish, create and push the version tag (triggers [`.github/workflows/release.yml`](.github/workflows/release.yml)):
 
    ```bash
-   git tag v0.7.0
-   git push origin v0.7.0
+   git tag v0.8.0
+   git push origin v0.8.0
    ```
 
 4. Verify the **Release** workflow on GitHub Actions and packages on [npm](https://www.npmjs.com/org/lessonkit).
@@ -57,7 +59,7 @@ The release job sets each package version from the tag, aligns `@lessonkit/*` de
 
 ## After release
 
-- Confirm npm shows `0.7.0` for each `@lessonkit/*` package.
+- Confirm npm shows `0.8.0` for each `@lessonkit/*` package.
 - Optional: create a GitHub Release from the tag with notes copied from [CHANGELOG.md](CHANGELOG.md).
 
 ## Changesets

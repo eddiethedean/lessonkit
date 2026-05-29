@@ -17,7 +17,7 @@ my-course/
 `lessonkit.json` is the contract between your React app and `@lessonkit/lxpack`:
 
 - `course.courseId`, `lessons[].id`, `assessments[].checkId` must match React props
-- `course.layout` should be `single-spa` for `lessonkit package` in 0.7.0
+- `course.layout` should be `single-spa` for `lessonkit package` (0.8.0)
 - `paths.spaDistDir` points at the Vite output (default `dist`)
 
 `lessonkit init` patches `App.tsx` `courseId` and title to match the manifest.
