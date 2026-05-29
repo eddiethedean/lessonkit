@@ -47,11 +47,12 @@ export default defineConfig({
       timeout: 120_000,
     },
     {
-      command: "npm run preview -w lessonkit-e2e-telemetry-harness -- --host 127.0.0.1 --port 4174",
+      command:
+        "npm run build -w lessonkit-e2e-telemetry-harness && npm run preview -w lessonkit-e2e-telemetry-harness -- --host 127.0.0.1 --port 4174",
       cwd: repoRoot,
       url: "http://127.0.0.1:4174",
       reuseExistingServer: !process.env.CI,
-      timeout: 120_000,
+      timeout: 180_000,
     },
   ],
 });
