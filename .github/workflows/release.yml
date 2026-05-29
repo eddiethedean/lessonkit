@@ -102,13 +102,24 @@ jobs:
 
       - name: Publish packages
         run: |
-          npm -w @lessonkit/core publish --access public
-          npm -w @lessonkit/xapi publish --access public
-          npm -w @lessonkit/react publish --access public
-          npm -w @lessonkit/accessibility publish --access public
-          npm -w @lessonkit/themes publish --access public
-          npm -w @lessonkit/lxpack publish --access public
-          npm -w @lessonkit/cli publish --access public
+          publish_workspace() {
+            local workspace="$1"
+            local name version
+            name="$(npm pkg get name -w "$workspace" | tr -d '"')"
+            version="$(npm pkg get version -w "$workspace" | tr -d '"')"
+            if npm view "${name}@${version}" version >/dev/null 2>&1; then
+              echo "Already published: ${name}@${version}"
+              return 0
+            fi
+            npm -w "$workspace" publish --access public
+          }
+          publish_workspace @lessonkit/core
+          publish_workspace @lessonkit/xapi
+          publish_workspace @lessonkit/react
+          publish_workspace @lessonkit/accessibility
+          publish_workspace @lessonkit/themes
+          publish_workspace @lessonkit/lxpack
+          publish_workspace @lessonkit/cli
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
