@@ -92,6 +92,40 @@ describe("@lessonkit/react runtime", () => {
     expect(typeof quizAnswered.sessionId).toBe("string");
   });
 
+  it("plugins wrap batchSink when batching is enabled", async () => {
+    const batches: TelemetryEvent[][] = [];
+    const dropInteractions = defineLessonkitPlugin({
+      id: "test.drop-interaction",
+      version: "1",
+      kind: "analytics",
+      onTelemetry: (event) => (event.name === "interaction" ? null : event),
+    });
+
+    render(
+      <LessonkitProvider
+        config={{
+          courseId: "course-1",
+          plugins: [dropInteractions],
+          tracking: {
+            batch: { enabled: true, flushIntervalMs: 50, maxBatchSize: 10 },
+            batchSink: (events: TelemetryEvent[]) => {
+              batches.push(events);
+            },
+          },
+        }}
+      >
+        <Lesson title="Lesson" lessonId="lesson-1">
+          <div>child</div>
+        </Lesson>
+      </LessonkitProvider>,
+    );
+
+    await waitFor(() => {
+      expect(batches.some((b) => b.some((e) => e.name === "course_started"))).toBe(true);
+    });
+    expect(batches.flat().some((e) => e.name === "interaction")).toBe(false);
+  });
+
   it("plugins can filter telemetry via onTelemetry", async () => {
     const events: TelemetryEvent[] = [];
     const dropInteractions = defineLessonkitPlugin({

@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
+import * as lxpackBridgeSdk from "@lessonkit/lxpack/bridge";
 import { buildTrackEvent, emitTelemetry } from "../src/runtime/emitTelemetry";
 import { forwardTelemetryToLxpack } from "../src/runtime/lxpackBridge";
 import { createTrackingClient } from "@lessonkit/core";
@@ -121,6 +122,44 @@ describe("lxpackBridge", () => {
     );
 
     expect(submitAssessment).not.toHaveBeenCalled();
+    vi.unstubAllGlobals();
+  });
+
+  it("ignores unknown bridge action kinds", () => {
+    const completeCourse = vi.fn();
+    vi.stubGlobal("window", {
+      parent: { lxpackBridge: { v1: { completeCourse } } },
+    } as unknown as Window);
+    vi.spyOn(lxpackBridgeSdk, "mapLessonkitTelemetryToBridgeAction").mockReturnValue({
+      kind: "unsupported",
+    } as never);
+
+    forwardTelemetryToLxpack(
+      buildTrackEvent({ name: "course_started", courseId: "c", sessionId: "s" }),
+    );
+
+    expect(completeCourse).not.toHaveBeenCalled();
+    vi.restoreAllMocks();
+    vi.unstubAllGlobals();
+  });
+
+  it("forwards generic track events to the bridge", () => {
+    const track = vi.fn();
+    vi.stubGlobal("window", {
+      parent: { lxpackBridge: { v1: { track } } },
+    } as unknown as Window);
+
+    forwardTelemetryToLxpack(
+      buildTrackEvent({
+        name: "interaction",
+        courseId: "c",
+        lessonId: "l",
+        sessionId: "s",
+        data: { type: "click", target: "btn" },
+      }),
+    );
+
+    expect(track).toHaveBeenCalled();
     vi.unstubAllGlobals();
   });
 

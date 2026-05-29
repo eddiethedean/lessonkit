@@ -22,6 +22,29 @@ describe("telemetryEventToLessonkit", () => {
     expect(action?.kind).toBe("submitAssessment");
   });
 
+  it("maps interaction and quiz_answered payloads", () => {
+    const interaction = telemetryEventToLessonkit({
+      name: "interaction",
+      courseId: "c",
+      lessonId: "l",
+      sessionId: "s",
+      timestamp: new Date().toISOString(),
+      data: { type: "click" },
+    } as TelemetryEvent);
+    expect(interaction?.data).toEqual({ type: "click" });
+
+    const answered = telemetryEventToLessonkit({
+      name: "quiz_answered",
+      courseId: "c",
+      lessonId: "l",
+      sessionId: "s",
+      timestamp: new Date().toISOString(),
+      data: { checkId: "q1", choice: "A", correct: true },
+    } as TelemetryEvent);
+    expect(answered?.assessmentId).toBe("q1");
+    expect(answered?.data).toMatchObject({ choice: "A" });
+  });
+
   it("returns null for unsupported events", () => {
     const event = {
       name: "lesson_time_on_task",

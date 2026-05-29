@@ -48,6 +48,21 @@ beforeEach(() => {
 });
 
 describe("packageLessonkitCourse errors", () => {
+  it("returns ok false when descriptor is invalid", async () => {
+    const root = await makeTempDir();
+    const result = await packageLessonkitCourse({
+      descriptor: { ...descriptor, courseId: "" },
+      outDir: join(root, "course"),
+      spaDistDir: join(root, "dist"),
+      target: "scorm12",
+    });
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.issues.some((i) => i.path === "courseId" || i.message)).toBe(true);
+    }
+  });
+
   it("returns ok false when packageLessonkit fails validation", async () => {
     packageLessonkit.mockResolvedValueOnce({
       ok: false,
@@ -69,6 +84,50 @@ describe("packageLessonkitCourse errors", () => {
 
     expect(result.ok).toBe(false);
     if (!result.ok) expect(result.issues[0]?.message).toContain("bad course");
+  });
+
+  it("returns ok false when spaDistDir is missing", async () => {
+    const root = await makeTempDir();
+    const result = await packageLessonkitCourse({
+      descriptor,
+      outDir: join(root, "course"),
+      spaDistDir: join(root, "missing-dist"),
+      target: "scorm12",
+    });
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.issues[0]?.path).toBe("spaDirs");
+      expect(result.issues[0]?.message).toContain("spaDistDir not found");
+    }
+  });
+
+  it("returns ok true and preserves external outputPath from build", async () => {
+    packageLessonkit.mockResolvedValueOnce({
+      ok: true,
+      target: "scorm12",
+      fileCount: 2,
+      outputPath: "/tmp/external.zip",
+      manifest: { title: "Test" },
+      issues: [],
+    });
+
+    const root = await makeTempDir();
+    const dist = join(root, "dist");
+    await mkdir(dist, { recursive: true });
+    await writeFile(join(dist, "index.html"), "<html></html>", "utf-8");
+
+    const result = await packageLessonkitCourse({
+      descriptor,
+      outDir: join(root, "course"),
+      spaDistDir: dist,
+      target: "scorm12",
+    });
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.outputPath).toBe("/tmp/external.zip");
+    }
   });
 
   it("returns ok false when packageLessonkit build fails", async () => {

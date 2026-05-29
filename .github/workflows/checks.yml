@@ -137,6 +137,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Build monorepo for preview and packaging
+        run: npm run build
+
       - name: Install Playwright browsers
         run: npm exec -w @lessonkit/e2e -- playwright install --with-deps chromium
 

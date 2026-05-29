@@ -36,7 +36,9 @@ export function emitTelemetryWithPlugins(opts: {
   pluginCtx: LessonkitPluginContext;
   lxpackBridge?: LxpackBridgeMode;
 }): void {
-  const next = opts.pluginHost?.runTelemetry(opts.event, opts.pluginCtx) ?? opts.event;
-  if (!next) return;
+  const next = opts.pluginHost
+    ? opts.pluginHost.runTelemetry(opts.event, opts.pluginCtx)
+    : opts.event;
+  if (next === null) return;
   emitTelemetry(opts.tracking, opts.xapi, next, { lxpackBridge: opts.lxpackBridge ?? "auto" });
 }

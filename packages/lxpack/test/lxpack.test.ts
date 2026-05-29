@@ -298,6 +298,27 @@ describe("validateDescriptor edge cases", () => {
     ).toBe(false);
   });
 
+  it("rejects invalid assessment fields", () => {
+    const bad = validateDescriptor({
+      ...baseDescriptor,
+      assessments: [
+        {
+          checkId: "bad id!",
+          question: "  ",
+          choices: ["  "],
+          answer: "missing",
+        },
+      ],
+    });
+    expect(bad.ok).toBe(false);
+
+    const passing = validateDescriptor({
+      ...baseDescriptor,
+      assessments: [{ ...baseDescriptor.assessments![0]!, passingScore: 0 }],
+    });
+    expect(passing.ok).toBe(false);
+  });
+
   it("normalizes trimmed ids and titles on success", () => {
     const result = validateDescriptor({
       ...baseDescriptor,

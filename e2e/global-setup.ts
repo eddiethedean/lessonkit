@@ -15,19 +15,24 @@ import { resolveScorm12LaunchPath, unpackScormZip } from "./support/scorm/unpack
 async function globalSetup(): Promise<void> {
   mkdirSync(ARTIFACTS_DIR, { recursive: true });
 
-  if (!process.env.E2E_FORCE_REBUILD && existsSync(ARTIFACTS_MANIFEST)) {
+  const distDir = join(GOLDEN_DIR, "dist");
+  const distReady = existsSync(join(distDir, "index.html"));
+
+  if (!process.env.E2E_FORCE_REBUILD && existsSync(ARTIFACTS_MANIFEST) && distReady) {
     console.log("e2e: reusing existing artifacts (set E2E_FORCE_REBUILD=1 to rebuild)");
     return;
   }
 
-  console.log("e2e: building packages and packaging golden artifacts…");
-  execSync("npm run build:packages", { cwd: REPO_ROOT, stdio: "inherit" });
-  execSync("npm run build -w lessonkit-example-lxpack-golden", {
-    cwd: REPO_ROOT,
-    stdio: "inherit",
-  });
+  if (!distReady) {
+    console.log("e2e: building packages and golden dist…");
+    execSync("npm run build:packages", { cwd: REPO_ROOT, stdio: "inherit" });
+    execSync("npm run build -w lessonkit-example-lxpack-golden", {
+      cwd: REPO_ROOT,
+      stdio: "inherit",
+    });
+  }
 
-  const distDir = join(GOLDEN_DIR, "dist");
+  console.log("e2e: packaging golden artifacts…");
   const courseOutDir = join(ARTIFACTS_DIR, "lxpack-course");
   const scormCourseOutDir = join(ARTIFACTS_DIR, "lxpack-course-scorm");
   const scorm12UnpackedDir = join(ARTIFACTS_DIR, "scorm12-unpacked");

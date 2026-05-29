@@ -98,6 +98,44 @@ describe("createPluginHost", () => {
     );
   });
 
+  it("warns on duplicate plugin ids in development", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    vi.stubEnv("NODE_ENV", "development");
+    try {
+      createPluginHost([
+        { id: "dup", version: "1", kind: "analytics" },
+        { id: "dup", version: "2", kind: "analytics" },
+      ]);
+      expect(warn).toHaveBeenCalledWith(expect.stringContaining("dup"));
+    } finally {
+      vi.unstubAllEnvs();
+      warn.mockRestore();
+    }
+  });
+
+  it("runs onTelemetryBatch after filtering", () => {
+    const batch = vi.fn();
+    const host = createPluginHost([
+      defineLessonkitPlugin({
+        id: "batch",
+        version: "1",
+        kind: "analytics",
+        onTelemetryBatch: batch,
+      }),
+    ]);
+    const events = [baseEvent, { ...baseEvent, name: "course_started" as const }];
+    const filtered = host.runTelemetryBatch(events, ctx);
+    expect(filtered).toHaveLength(2);
+    expect(batch).toHaveBeenCalledWith(filtered, ctx);
+  });
+
+  it("scoreAssessment returns null when no assessment plugin matches", () => {
+    const host = createPluginHost([
+      defineLessonkitPlugin({ id: "a", version: "1", kind: "analytics" }),
+    ]);
+    expect(host.scoreAssessment({ checkId: "q1", response: "x" }, ctx)).toBeNull();
+  });
+
   it("scoreAssessment returns first assessment plugin result", () => {
     const host = createPluginHost([
       defineLessonkitPlugin({
