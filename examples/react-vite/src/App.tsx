@@ -18,10 +18,12 @@ import type { XAPIStatement } from "@lessonkit/xapi";
 const COURSE_ID = "cybersecurity-awareness";
 
 const LESSONS = [
-  { id: "phishing-inbox", title: "Spotting suspicious email" },
-  { id: "urgent-requests", title: "Slow down under pressure" },
-  { id: "credential-hygiene", title: "Protecting your credentials" },
-  { id: "module-assessment", title: "Module assessment" },
+  { id: "assignment", title: "Assignment & policy" },
+  { id: "phishing-inbox", title: "Email triage lab" },
+  { id: "smishing-texts", title: "Smishing on mobile" },
+  { id: "urgent-requests", title: "Pressure tactics" },
+  { id: "credential-hygiene", title: "Credential hygiene" },
+  { id: "module-assessment", title: "Annual attestation" },
 ] as const;
 
 export default function App() {
@@ -53,15 +55,19 @@ export default function App() {
           config={courseConfig}
         >
           <header className="course-header">
-            <p className="course-eyebrow">Required annual training · ~12 minutes</p>
+            <p className="course-eyebrow">InfoSec · Required annual training</p>
+            <div className="assignment-banner" role="note">
+              <span className="badge-due">Due 30 Jun</span>
+              <span className="badge-audience">All staff · Remote & on-site</span>
+            </div>
             <p className="course-intro muted">
-              Learn to recognize phishing, resist social engineering, and protect company and personal
-              accounts. Your progress is saved automatically.
+              Work through realistic email, SMS, and chat scenarios based on incidents reported to our Security
+              Operations Center last quarter. Completion syncs to Workday Learning.
             </p>
             <ul className="objectives">
-              <li>Identify common phishing signals in email</li>
-              <li>Respond safely when someone pressures you to act quickly</li>
-              <li>Apply credential hygiene habits at work</li>
+              <li>Triage suspicious email using headers and sender context</li>
+              <li>Recognize smishing and vishing pressure patterns</li>
+              <li>Apply MFA and reporting habits without bypassing IT channels</li>
             </ul>
           </header>
 
@@ -78,11 +84,11 @@ export default function App() {
             <Lesson title={LESSONS[0].title} lessonId={LESSONS[0].id}>
               <Scenario>
                 <p>
-                  You are covering the shared inbox while a teammate is out. Three messages arrived in
-                  the last hour. Review each one and choose the safest action before moving on.
+                  Your manager assigned this module after a payroll-themed phishing wave. Acknowledge the
+                  policy summary before starting the labs.
                 </p>
               </Scenario>
-              <PhishingInbox />
+              <AssignmentBrief />
             </Lesson>
           ) : null}
 
@@ -90,7 +96,31 @@ export default function App() {
             <Lesson title={LESSONS[1].title} lessonId={LESSONS[1].id}>
               <Scenario>
                 <p>
-                  A colleague messages you on chat: their VPN token expired and payroll is due today.
+                  You are covering the shared inbox while a teammate is out. Three messages arrived in
+                  the last hour. Review authentication hints and choose the safest action for each.
+                </p>
+              </Scenario>
+              <PhishingInbox />
+            </Lesson>
+          ) : null}
+
+          {step === 2 ? (
+            <Lesson title={LESSONS[2].title} lessonId={LESSONS[2].id}>
+              <Scenario>
+                <p>
+                  During your commute, three texts arrive on your personal phone claiming to be from IT or
+                  your bank. Treat them like work incidents—report through official channels.
+                </p>
+              </Scenario>
+              <SmishingFeed />
+            </Lesson>
+          ) : null}
+
+          {step === 3 ? (
+            <Lesson title={LESSONS[3].title} lessonId={LESSONS[3].id}>
+              <Scenario>
+                <p>
+                  A colleague messages you on Teams: their VPN token expired and payroll is due today.
                   They ask you to approve a reset link they were sent. Take your time—hints appear if
                   you need them.
                 </p>
@@ -99,8 +129,8 @@ export default function App() {
             </Lesson>
           ) : null}
 
-          {step === 2 ? (
-            <Lesson title={LESSONS[2].title} lessonId={LESSONS[2].id}>
+          {step === 4 ? (
+            <Lesson title={LESSONS[4].title} lessonId={LESSONS[4].id}>
               <Scenario>
                 <p>
                   Your organization is rolling out passkeys and hardware security keys. Read the
@@ -111,14 +141,14 @@ export default function App() {
             </Lesson>
           ) : null}
 
-          {step === 3 ? (
-            <Lesson title={LESSONS[3].title} lessonId={LESSONS[3].id}>
+          {step === 5 ? (
+            <Lesson title={LESSONS[5].title} lessonId={LESSONS[5].id}>
               <Scenario>
                 <p>Confirm your understanding before returning to your LMS transcript.</p>
               </Scenario>
               <Quiz
                 checkId="module-assessment-check"
-                question="A vendor emails an invoice with a one-time payment link. What is the best first step?"
+                question="A vendor emails an invoice with a one-time payment link from an unfamiliar domain. What is the best first step?"
                 choices={[
                   "Pay immediately to avoid late fees",
                   "Verify the request through your procurement portal or known contact",
@@ -198,10 +228,39 @@ function CourseNav(props: {
   );
 }
 
+function AssignmentBrief() {
+  const [ack, setAck] = React.useState(false);
+
+  return (
+    <section className="panel" aria-label="Assignment brief">
+      <div className="callout policy-doc">
+        <h3 className="section-title">Acceptable use — excerpt</h3>
+        <p>
+          Never share credentials, approve MFA prompts you did not initiate, or use payment links from email.
+          Report suspicious messages to <strong>phish@company.example</strong> or the Outlook report button.
+        </p>
+        <p className="muted">Reference: INFOSEC-POL-014 (rev. March 2026)</p>
+      </div>
+      <label className="checkbox-row">
+        <input type="checkbox" checked={ack} onChange={(e) => setAck(e.target.checked)} />
+        I have read this excerpt and understand reporting expectations for my role.
+      </label>
+      {ack ? (
+        <p className="callout" role="status">
+          <strong>Ready for labs.</strong> Use Next to open the email triage simulation.
+        </p>
+      ) : (
+        <p className="muted">Check the box to unlock lab feedback in later lessons.</p>
+      )}
+    </section>
+  );
+}
+
 type Email = {
   id: string;
   subject: string;
   from: string;
+  authHint: string;
   body: string;
   isPhish: boolean;
 };
@@ -217,6 +276,7 @@ function PhishingInbox() {
         id: "e1",
         subject: "Action required: payroll direct deposit",
         from: "People Operations <payroll-update@hr-portal-secure.net>",
+        authHint: "SPF: fail · DMARC: none · Reply-To differs from From",
         body: "Your deposit information will expire today. Confirm your bank details using the secure form.",
         isPhish: true,
       },
@@ -224,6 +284,7 @@ function PhishingInbox() {
         id: "e2",
         subject: "Q3 facilities walkthrough — notes attached",
         from: "Jordan Lee <jlee@company.example>",
+        authHint: "SPF: pass · DMARC: pass · internal thread",
         body: "Slides from yesterday’s tour are in SharePoint. No action needed unless you spot a correction.",
         isPhish: false,
       },
@@ -231,7 +292,8 @@ function PhishingInbox() {
         id: "e3",
         subject: "Password reset requested for your account",
         from: "IT Service Desk <it-help@company.example>",
-        body: "We received a reset request. If this was not you, contact the help desk extension 2200.",
+        authHint: "SPF: pass · sent via company mail gateway",
+        body: "We received a reset request. If this was not you, contact the help desk extension 2200—do not use links in this message.",
         isPhish: false,
       },
     ],
@@ -278,6 +340,7 @@ function PhishingInbox() {
                 <div>
                   <div className="subject">{e.subject}</div>
                   <div className="meta">From: {e.from}</div>
+                  <div className="meta auth-hint">{e.authHint}</div>
                 </div>
                 <div className={`pill ${e.isPhish ? "pill-warn" : "pill-ok"}`}>
                   {e.isPhish ? "Review carefully" : "Likely legitimate"}
@@ -310,6 +373,88 @@ function PhishingInbox() {
           Review all messages to unlock feedback.
         </p>
       )}
+    </section>
+  );
+}
+
+type TextMessage = { id: string; sender: string; body: string; isSmish: boolean };
+
+function SmishingFeed() {
+  const { track } = useTracking();
+  const [handled, setHandled] = React.useState<Record<string, "block" | "tap" | "call">>({});
+
+  const messages: TextMessage[] = [
+    {
+      id: "t1",
+      sender: "ALERT-8843",
+      body: "Company IT: MFA device expired. Tap to re-register: https://it-reset-now.biz",
+      isSmish: true,
+    },
+    {
+      id: "t2",
+      sender: "Chase Fraud",
+      body: "Unusual charge $2,431. Reply YES to lock card. (Real banks never ask this way.)",
+      isSmish: true,
+    },
+    {
+      id: "t3",
+      sender: "Mom",
+      body: "Running late for dinner—can you pick up milk?",
+      isSmish: false,
+    },
+  ];
+
+  const act = (msg: TextMessage, action: "block" | "tap" | "call") => {
+    setHandled((h) => ({ ...h, [msg.id]: action }));
+    track("interaction", { kind: "smish_action", messageId: msg.id, action, isSmish: msg.isSmish });
+  };
+
+  const done = Object.keys(handled).length === messages.length;
+  const safe = messages.every((m) => {
+    const action = handled[m.id];
+    if (!action) return false;
+    if (m.isSmish) return action === "block";
+    return action !== "tap";
+  });
+
+  return (
+    <section className="panel phone-frame" aria-label="Smishing simulation">
+      <p className="muted">Personal device — do not click unknown links; forward screenshots to phish@company.example.</p>
+      <div className="sms-thread">
+        {messages.map((m) => {
+          const action = handled[m.id];
+          return (
+            <div key={m.id} className="sms-bubble">
+              <div className="sms-from">{m.sender}</div>
+              <p>{m.body}</p>
+              <div className="actions">
+                <button type="button" disabled={Boolean(action)} onClick={() => act(m, "block")}>
+                  Block & report
+                </button>
+                <button type="button" disabled={Boolean(action)} onClick={() => act(m, "tap")}>
+                  Open link
+                </button>
+                <button type="button" disabled={Boolean(action)} onClick={() => act(m, "call")}>
+                  Call number back
+                </button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      {done ? (
+        <div className="callout" role="status">
+          {safe ? (
+            <>
+              <strong>Good instincts.</strong> You avoided links on smishing texts and did not engage fraud alerts by SMS.
+            </>
+          ) : (
+            <>
+              <strong>Review SOC guidance.</strong> Treat unsolicited IT and bank texts as fraudulent; use official apps only.
+            </>
+          )}
+        </div>
+      ) : null}
     </section>
   );
 }
@@ -421,7 +566,7 @@ function CredentialHygiene() {
 function FinishCourse() {
   const { progress } = useLessonkit();
   const { completeCourse } = useCompletion();
-  const done = progress.completedLessonIds.size >= 3;
+  const done = progress.completedLessonIds.size >= 5;
 
   return (
     <section aria-label="Complete course" className="panel">
@@ -433,7 +578,7 @@ function FinishCourse() {
         Mark module complete
       </button>
       {!done ? (
-        <p className="muted">Complete the first three lessons, then pass the assessment above.</p>
+        <p className="muted">Complete the first five lessons, then pass the attestation above.</p>
       ) : null}
     </section>
   );

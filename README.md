@@ -191,10 +191,10 @@ lessonkit/
 │   ├── lxpack/          # SCORM / standalone / xAPI / cmi5 export
 │   └── cli/             # lessonkit CLI + bundled template
 ├── examples/
-│   ├── react-vite/         # cybersecurity awareness (multi-lesson)
-│   ├── data-privacy/       # GDPR-style compliance onboarding
-│   ├── customer-service/   # de-escalation & branching chat practice
-│   └── lxpack-golden/      # workplace safety + packaging smoke tests
+│   ├── react-vite/         # InfoSec annual (email, smishing, Teams)
+│   ├── data-privacy/       # GDPR compliance (outline nav, tabletop)
+│   ├── customer-service/   # contact center (stepper, chat & voice)
+│   └── lxpack-golden/      # warehouse safety + LXPack packaging
 ├── templates/
 │   └── vite-react/      # source for lessonkit init
 └── docs/                # guides (CLI, packaging, identity, …)

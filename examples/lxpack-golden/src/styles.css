@@ -91,3 +91,55 @@ body {
   font-weight: 600;
   color: var(--lk-color-success, #15803d);
 }
+
+.progress-bar {
+  height: 6px;
+  background: #e2e8f0;
+  border-radius: 999px;
+  margin-top: 0.75rem;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #ea580c, #f59e0b);
+  transition: width 0.25s ease;
+}
+
+.figure-callout {
+  margin-top: 1rem;
+  padding: 0.75rem;
+  border: 1px dashed #cbd5e1;
+  border-radius: 8px;
+}
+
+.figure-label {
+  font-size: 12px;
+  font-weight: 700;
+  margin: 0 0 4px;
+  color: #ea580c;
+}
+
+.ppe-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+  margin: 0.5rem 0;
+  font-size: 14px;
+}
+
+.near-miss label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 0.35rem;
+}
+
+.near-miss input {
+  display: block;
+  width: 100%;
+  margin: 0.35rem 0 0.75rem;
+  padding: 0.5rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+}

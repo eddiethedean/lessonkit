@@ -10,7 +10,7 @@ From the repo root, run `bash docs/scripts/build-docs-demos.sh` before `make htm
 
 ## Cybersecurity awareness (`examples/react-vite`)
 
-Annual-style security training: phishing inbox triage, urgent-request social engineering, credential hygiene, and a short assessment.
+Corporate InfoSec annual module: policy attestation, email header triage, smishing simulation, Teams social engineering, and attestation.
 
 ```{raw} html
 <iframe
@@ -25,7 +25,7 @@ Annual-style security training: phishing inbox triage, urgent-request social eng
 
 ## Data privacy essentials (`examples/data-privacy`)
 
-Compliance onboarding: case studies, data minimization on a registration form, and incident-response steps.
+GDPR compliance track with sidebar outline: lawful-basis lab, audit case files, role-based minimization, and incident tabletop.
 
 ```{raw} html
 <iframe
@@ -40,7 +40,7 @@ Compliance onboarding: case studies, data minimization on a registration form, a
 
 ## Customer de-escalation (`examples/customer-service`)
 
-Frontline support skills: reflective listening, empathy phrasing, and branching resolve-or-escalate practice.
+Contact-center training with stepper UI: channel briefing, chat bubbles, voice pacing, and branching resolution paths.
 
 ```{raw} html
 <iframe
@@ -55,7 +55,7 @@ Frontline support skills: reflective listening, empathy phrasing, and branching 
 
 ## Workplace safety briefing (`examples/lxpack-golden`)
 
-Warehouse safety course used for LXPack packaging smoke tests—same runtime, shorter three-step flow.
+Warehouse new-hire briefing with progress bar, PPE sign-off, photo hazard walk, quiz, and practice near-miss form (LXPack smoke test).
 
 ```{raw} html
 <iframe

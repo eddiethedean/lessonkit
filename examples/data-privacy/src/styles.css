@@ -294,6 +294,120 @@ input[type="radio"] {
   margin-top: var(--lk-space-md);
 }
 
+.compliance-layout {
+  max-width: 1100px;
+}
+
+.layout-grid {
+  display: grid;
+  grid-template-columns: minmax(200px, 240px) 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+@media (max-width: 720px) {
+  .layout-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.outline-nav {
+  border: 1px solid var(--lk-color-border);
+  border-radius: var(--lk-radius-lg);
+  padding: 1rem;
+  background: var(--lk-color-panel);
+  position: sticky;
+  top: 12px;
+}
+
+.outline-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 0 0 0.75rem;
+  color: var(--lk-color-muted);
+}
+
+.outline-nav ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.outline-nav li {
+  margin: 0.25rem 0;
+}
+
+.outline-nav button {
+  width: 100%;
+  text-align: left;
+  font-size: 13px;
+  background: transparent;
+}
+
+.outline-active {
+  border-color: var(--lk-color-primary) !important;
+  background: color-mix(in srgb, var(--lk-color-primary) 8%, transparent) !important;
+}
+
+.outline-progress {
+  font-size: 12px;
+  margin: 0.75rem 0;
+}
+
+.outline-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.instructor-note {
+  border-left: 4px solid #6366f1;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  background: #f5f3ff;
+  font-size: 14px;
+}
+
+.basis-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.basis-selected {
+  border-color: var(--lk-color-primary) !important;
+}
+
+.case-file .case-meta {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--lk-color-muted);
+  margin-bottom: 4px;
+}
+
+.role-switch {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.role-switch button[aria-pressed="true"] {
+  border-color: var(--lk-color-primary);
+}
+
+.timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.timeline button {
+  text-align: left;
+}
+
 .sr-only {
   position: absolute;
   width: 1px;

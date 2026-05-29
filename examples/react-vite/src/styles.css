@@ -62,6 +62,63 @@ body {
   margin: 0.35rem 0;
 }
 
+.assignment-banner {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 12px;
+}
+
+.badge-due,
+.badge-audience {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--lk-color-border);
+}
+
+.badge-due {
+  color: var(--lk-color-danger);
+  border-color: color-mix(in srgb, var(--lk-color-danger) 40%, transparent);
+}
+
+.auth-hint {
+  font-family: ui-monospace, monospace;
+  font-size: 11px;
+  opacity: 0.85;
+}
+
+.policy-doc {
+  border-left: 3px solid var(--lk-color-primary);
+}
+
+.phone-frame {
+  max-width: 22rem;
+}
+
+.sms-thread {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sms-bubble {
+  background: var(--lk-color-panel);
+  border: 1px solid var(--lk-color-border);
+  border-radius: 14px 14px 14px 4px;
+  padding: 12px;
+}
+
+.sms-from {
+  font-size: 12px;
+  font-weight: 700;
+  margin-bottom: 6px;
+  color: var(--lk-color-primary);
+}
+
 .lesson-tabs {
   display: flex;
   flex-wrap: wrap;

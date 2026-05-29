@@ -35,6 +35,8 @@ describe("example App", () => {
       const { getAllByLabelText, getAllByText, getByText, queryByText } = render(<App />);
       const nav = within(getAllByLabelText("Course navigation")[0]!);
 
+      fireEvent.click(nav.getByText("Next"));
+
       await act(async () => {
         fireEvent.click(getAllByText("Open attachment / link")[0]!);
         fireEvent.click(getAllByText("Ignore for now")[1]!);
@@ -44,6 +46,7 @@ describe("example App", () => {
       expect(getAllByText(/You chose:/)).toHaveLength(3);
       expect(queryByText(/High exposure/i)).toBeTruthy();
 
+      fireEvent.click(nav.getByText("Next"));
       fireEvent.click(nav.getByText("Next"));
 
       await act(async () => {
@@ -59,6 +62,8 @@ describe("example App", () => {
       fireEvent.click(getByText("Ask them to use the official IT self-service portal"));
       expect(getByText(/Correct approach/)).toBeDefined();
 
+      fireEvent.click(nav.getByText("Next"));
+      fireEvent.click(nav.getByText("Next"));
       fireEvent.click(nav.getByText("Next"));
       fireEvent.click(nav.getByText("Next"));
 
@@ -80,7 +85,9 @@ describe("example App", () => {
     const nav = within(getAllByLabelText("Course navigation")[0]!);
 
     fireEvent.click(nav.getByText("Next"));
-    expect(nav.getByText(/Slow down under pressure/)).toBeDefined();
+    fireEvent.click(nav.getByText("Next"));
+    fireEvent.click(nav.getByText("Next"));
+    expect(nav.getByText(/Pressure tactics/)).toBeDefined();
 
     await act(async () => {
       vi.advanceTimersByTime(6000);

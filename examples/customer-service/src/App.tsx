@@ -10,7 +10,6 @@ import {
   useCompletion,
   useLessonkit,
   useTracking,
-  type ThemeMode,
 } from "@lessonkit/react";
 import type { TelemetryEvent } from "@lessonkit/core";
 import type { XAPIStatement } from "@lessonkit/xapi";
@@ -18,15 +17,15 @@ import type { XAPIStatement } from "@lessonkit/xapi";
 const COURSE_ID = "customer-de-escalation";
 
 const LESSONS = [
-  { id: "active-listening", title: "Listen before you solve" },
-  { id: "empathy-language", title: "Words that calm" },
-  { id: "solve-or-escalate", title: "Solve or escalate" },
+  { id: "channels", title: "Channels & QA" },
+  { id: "chat-listening", title: "Live chat" },
+  { id: "phone-empathy", title: "Voice call" },
+  { id: "solve-or-escalate", title: "Resolution paths" },
   { id: "skills-check", title: "Skills check" },
 ] as const;
 
 export default function App() {
   const [step, setStep] = React.useState(0);
-  const [themeMode, setThemeMode] = React.useState<ThemeMode>("dark");
 
   const courseConfig = React.useMemo(
     () => ({
@@ -37,236 +36,253 @@ export default function App() {
   );
 
   return (
-    <ThemeProvider mode={themeMode} preset="brand">
-      <div className="app-shell">
-        <Course title="Customer De-escalation Skills" courseId={COURSE_ID} config={courseConfig}>
+    <ThemeProvider mode="light" preset="brand">
+      <div className="app-shell contact-center">
+        <Course title="Customer Care: De-escalation" courseId={COURSE_ID} config={courseConfig}>
           <header className="course-header">
-            <p className="course-eyebrow">Frontline training · ~15 minutes</p>
+            <p className="course-eyebrow">North America Support · Wave 2 cohort</p>
             <p className="course-intro muted">
-              Practice staying calm with upset customers, using empathy without over-promising, and knowing when
-              to escalate. Your responses are tracked for coaching—not graded for punishment.
+              Simulated interactions from real QA samples (identifiers changed). Your choices feed coaching
+              dashboards—not disciplinary scores.
             </p>
-            <ul className="objectives">
-              <li>Reflect customer concerns before offering solutions</li>
-              <li>Use language that acknowledges frustration</li>
-              <li>Decide when to resolve, compensate, or escalate</li>
-            </ul>
           </header>
 
-          <ProgressTracker />
+          <div className="stepper-layout">
+            <StepperNav step={step} setStep={setStep} />
 
-          <CourseNav
-            step={step}
-            setStep={setStep}
-            themeMode={themeMode}
-            onThemeModeChange={setThemeMode}
-          />
+            <div className="stepper-content">
+              <ProgressTracker />
 
-          {step === 0 ? (
-            <Lesson title={LESSONS[0].title} lessonId={LESSONS[0].id}>
-              <Scenario>
-                <p>
-                  A customer waited three days for a replacement part. They open chat angry about repeated
-                  transfers. Choose your first reply.
-                </p>
-              </Scenario>
-              <OpeningResponse />
-            </Lesson>
-          ) : null}
+              {step === 0 ? (
+                <Lesson title={LESSONS[0].title} lessonId={LESSONS[0].id}>
+                  <ChannelBriefing />
+                </Lesson>
+              ) : null}
 
-          {step === 1 ? (
-            <Lesson title={LESSONS[1].title} lessonId={LESSONS[1].id}>
-              <Scenario>
-                <p>Same customer after you acknowledged the delay. Pick the phrase that validates without blaming.</p>
-              </Scenario>
-              <EmpathyPhrases />
-            </Lesson>
-          ) : null}
+              {step === 1 ? (
+                <Lesson title={LESSONS[1].title} lessonId={LESSONS[1].id}>
+                  <Scenario>
+                    <p>Queue: <strong>Billing · Priority</strong> · Customer: Alex M. · Case #448291</p>
+                  </Scenario>
+                  <ChatOpening />
+                </Lesson>
+              ) : null}
 
-          {step === 2 ? (
-            <Lesson title={LESSONS[2].title} lessonId={LESSONS[2].id}>
-              <Scenario>
-                <p>
-                  The part ships tomorrow but missed their project deadline. Continue the conversation—your
-                  choices shape the outcome.
-                </p>
-              </Scenario>
-              <EscalationBranch />
-            </Lesson>
-          ) : null}
+              {step === 2 ? (
+                <Lesson title={LESSONS[2].title} lessonId={LESSONS[2].id}>
+                  <Scenario>
+                    <p>Voice channel — average handle time target 8:00. Customer has been on hold 4:12.</p>
+                  </Scenario>
+                  <PhoneEmpathy />
+                </Lesson>
+              ) : null}
 
-          {step === 3 ? (
-            <Lesson title={LESSONS[3].title} lessonId={LESSONS[3].id}>
-              <Scenario>
-                <p>Short assessment before returning to your queue dashboard.</p>
-              </Scenario>
-              <Quiz
-                checkId="de-escalation-check"
-                question="A customer threatens chargebacks unless you waive policy. What is the best next step?"
-                choices={[
-                  "Waive policy immediately to end the chat",
-                  "Stay calm, restate policy, and involve a supervisor if threats continue",
-                ]}
-                answer="Stay calm, restate policy, and involve a supervisor if threats continue"
-              />
-              <FinishCourse />
-            </Lesson>
-          ) : null}
+              {step === 3 ? (
+                <Lesson title={LESSONS[3].title} lessonId={LESSONS[3].id}>
+                  <Scenario>
+                    <p>Part ships tomorrow but the customer missed a client deadline. Choose how to close the loop.</p>
+                  </Scenario>
+                  <EscalationBranch />
+                </Lesson>
+              ) : null}
+
+              {step === 4 ? (
+                <Lesson title={LESSONS[4].title} lessonId={LESSONS[4].id}>
+                  <Scenario>
+                    <p>Supervisor review before returning to queue.</p>
+                  </Scenario>
+                  <Quiz
+                    checkId="de-escalation-check"
+                    question="A customer threatens chargebacks unless you waive a non-refundable policy. Best action?"
+                    choices={[
+                      "Waive immediately to protect CSAT",
+                      "Stay calm, restate policy, warm-transfer to a supervisor if threats continue",
+                    ]}
+                    answer="Stay calm, restate policy, warm-transfer to a supervisor if threats continue"
+                  />
+                  <FinishCourse />
+                </Lesson>
+              ) : null}
+            </div>
+          </div>
         </Course>
       </div>
     </ThemeProvider>
   );
 }
 
-function ThemeToggle(props: { mode: ThemeMode; onChange: (mode: ThemeMode) => void }) {
+function StepperNav(props: { step: number; setStep: (n: number) => void }) {
+  const { progress } = useLessonkit();
+
   return (
-    <div className="theme-toggle" role="group" aria-label="Display theme">
-      {(["light", "dark", "system"] as const).map((m) => (
-        <button
-          key={m}
-          type="button"
-          aria-pressed={props.mode === m}
-          className={props.mode === m ? "theme-toggle-active" : undefined}
-          onClick={() => props.onChange(m)}
-        >
-          {m === "system" ? "System" : m === "light" ? "Light" : "Dark"}
-        </button>
-      ))}
+    <nav className="stepper" aria-label="Training steps">
+      {LESSONS.map((lesson, i) => {
+        const done = progress.completedLessonIds.has(lesson.id);
+        return (
+          <button
+            key={lesson.id}
+            type="button"
+            className={`stepper-item ${props.step === i ? "stepper-active" : ""} ${done ? "stepper-done" : ""}`}
+            onClick={() => props.setStep(i)}
+          >
+            <span className="stepper-index">{i + 1}</span>
+            <span className="stepper-label">{lesson.title}</span>
+          </button>
+        );
+      })}
+    </nav>
+  );
+}
+
+function ChannelBriefing() {
+  return (
+    <section className="panel">
+      <div className="channel-grid">
+        <article className="channel-card">
+          <h3>Live chat</h3>
+          <ul>
+            <li>Target first response: 45s</li>
+            <li>Use short acknowledgments before macros</li>
+            <li>Never paste policy walls without context</li>
+          </ul>
+        </article>
+        <article className="channel-card">
+          <h3>Voice</h3>
+          <ul>
+            <li>Let silence breathe after upset statements</li>
+            <li>Name the emotion, then the next step</li>
+            <li>Warm-transfer with a 10-second bridge</li>
+          </ul>
+        </article>
+      </div>
+      <div className="qa-snippet">
+        <p className="muted">QA clip — avoid:</p>
+        <blockquote>“That’s policy. There’s nothing I can do.”</blockquote>
+        <p className="muted">Prefer:</p>
+        <blockquote>“I can see why that’s frustrating. Here’s what I <em>can</em> do right now…”</blockquote>
+      </div>
+    </section>
+  );
+}
+
+function ChatBubble(props: { who: "customer" | "agent"; children: React.ReactNode }) {
+  return (
+    <div className={`chat-row chat-${props.who}`}>
+      <div className="chat-bubble">{props.children}</div>
     </div>
   );
 }
 
-function CourseNav(props: {
-  step: number;
-  setStep: (n: number) => void;
-  themeMode: ThemeMode;
-  onThemeModeChange: (mode: ThemeMode) => void;
-}) {
-  const { progress } = useLessonkit();
-  const completed = progress.completedLessonIds.size;
-  const last = LESSONS.length - 1;
-
-  return (
-    <aside aria-label="Course navigation" className="nav">
-      <div className="lesson-tabs" role="tablist" aria-label="Lessons">
-        {LESSONS.map((lesson, i) => (
-          <button
-            key={lesson.id}
-            type="button"
-            role="tab"
-            aria-selected={props.step === i}
-            className={props.step === i ? "tab-active" : undefined}
-            onClick={() => props.setStep(i)}
-          >
-            {i + 1}. {lesson.title}
-          </button>
-        ))}
-      </div>
-      <div className="nav-row">
-        <button type="button" onClick={() => props.setStep(Math.max(0, props.step - 1))} disabled={props.step === 0}>
-          Previous
-        </button>
-        <div className="nav-status">
-          <strong>Progress</strong> {completed} of {LESSONS.length} lessons completed
-        </div>
-        <button
-          type="button"
-          onClick={() => props.setStep(Math.min(last, props.step + 1))}
-          disabled={props.step === last}
-        >
-          Next
-        </button>
-      </div>
-      <ThemeToggle mode={props.themeMode} onChange={props.onThemeModeChange} />
-    </aside>
-  );
-}
-
-function OpeningResponse() {
+function ChatOpening() {
   const { track } = useTracking();
   const [choice, setChoice] = React.useState<"deflect" | "reflect" | "blame" | null>(null);
 
   const pick = (c: "deflect" | "reflect" | "blame") => {
     setChoice(c);
-    track("interaction", { kind: "opening_response", choice: c });
+    track("interaction", { kind: "chat_opening", choice: c });
   };
 
   return (
-    <section aria-label="Opening response" className="panel">
-      <div className="callout">
-        <p>
-          <strong>Customer:</strong> “This is the fourth agent today. Nobody reads my notes. I want a supervisor
-          now.”
-        </p>
-        <div className="actions">
-          <button type="button" onClick={() => pick("deflect")} disabled={choice !== null}>
-            Our policy says replacements ship in 5–7 days—you are within window.
-          </button>
-          <button type="button" onClick={() => pick("reflect")} disabled={choice !== null}>
-            I hear you’ve been transferred several times and still don’t have the part—let me read your case notes
-            with you.
-          </button>
-          <button type="button" onClick={() => pick("blame")} disabled={choice !== null}>
-            Warehouse delays aren’t something support controls.
-          </button>
-        </div>
+    <section className="panel chat-panel" aria-label="Live chat simulation">
+      <div className="chat-log">
+        <ChatBubble who="customer">
+          This is the 4th agent today. Nobody reads my notes. I want a supervisor NOW.
+        </ChatBubble>
+        <ChatBubble who="customer">
+          Replacement part was promised Monday. It’s Thursday.
+        </ChatBubble>
+      </div>
+      <p className="muted">Your reply:</p>
+      <div className="actions">
+        <button type="button" disabled={choice !== null} onClick={() => pick("deflect")}>
+          Policy says 5–7 business days—you’re still in window.
+        </button>
+        <button type="button" disabled={choice !== null} onClick={() => pick("reflect")}>
+          I’m sorry you’ve been passed around—I’m reading case #448291 with you now.
+        </button>
+        <button type="button" disabled={choice !== null} onClick={() => pick("blame")}>
+          Warehouse delays aren’t something we control on chat.
+        </button>
       </div>
       {choice ? (
-        <div className="callout" role="status">
+        <ChatBubble who="agent">
           {choice === "reflect" ? (
             <>
-              <strong>Strong start.</strong> Reflecting frustration lowers defensiveness before problem-solving.
+              <strong>Coach:</strong> Good—reflect before policy. Offer a concrete next step within 2 messages.
             </>
           ) : (
             <>
-              <strong>Coaching note.</strong> Policy lectures or blame often increase escalation—acknowledge first.
+              <strong>Coach:</strong> Policy-first replies increased escalations 18% in last month’s QA.
             </>
           )}
-        </div>
+        </ChatBubble>
       ) : null}
     </section>
   );
 }
 
-function EmpathyPhrases() {
+function PhoneEmpathy() {
   const { track } = useTracking();
-  const [choice, setChoice] = React.useState<string | null>(null);
+  const [pace, setPace] = React.useState<"rush" | "pause" | null>(null);
+  const [phrase, setPhrase] = React.useState<string | null>(null);
 
-  const options = [
-    { id: "a", text: "Calm down and I will help you.", good: false },
-    { id: "b", text: "Missing your deadline is frustrating—I would feel the same.", good: true },
-    { id: "c", text: "You should have ordered earlier if timing was critical.", good: false },
+  const phrases = [
+    { id: "a", text: "Sir, you need to calm down so I can help.", good: false },
+    { id: "b", text: "I hear the shipment miss cost you a client—that’s serious. Let’s fix what we can today.", good: true },
+    { id: "c", text: "You should have paid for express if timing mattered.", good: false },
   ];
 
   return (
-    <section aria-label="Empathy phrases" className="panel">
-      {options.map((o) => (
-        <div key={o.id} className="card">
-          <p className="body">{o.text}</p>
-          <button
-            type="button"
-            disabled={choice !== null}
-            onClick={() => {
-              setChoice(o.id);
-              track("interaction", { kind: "empathy_phrase", id: o.id, good: o.good });
-            }}
-          >
-            Use this phrase
-          </button>
-        </div>
-      ))}
-      {choice ? (
-        <div className="callout" role="status">
-          {options.find((o) => o.id === choice)?.good ? (
-            <>
-              <strong>Validates without admitting fault.</strong> You can explore solutions next.
-            </>
-          ) : (
-            <>
-              <strong>Try again in practice.</strong> “Calm down” and blaming timelines tend to escalate tension.
-            </>
-          )}
-        </div>
+    <section className="panel phone-panel" aria-label="Voice simulation">
+      <div className="hold-timer" role="status">
+        Hold time: <strong>4:12</strong> · Target AHT 8:00
+      </div>
+      <p className="script muted">Customer (upset): “Your tracking link shows ‘label created’ for three days!”</p>
+      <p className="muted">Before looking up tracking, choose pacing:</p>
+      <div className="actions">
+        <button type="button" disabled={pace !== null} onClick={() => setPace("rush")}>
+          Jump straight to tracking while they talk
+        </button>
+        <button
+          type="button"
+          disabled={pace !== null}
+          onClick={() => {
+            setPace("pause");
+            track("interaction", { kind: "phone_pace", pace: "pause" });
+          }}
+        >
+          Pause, acknowledge, then ask permission to place on brief hold
+        </button>
+      </div>
+      {pace === "pause" ? (
+        <>
+          <p className="muted">Pick empathetic phrasing:</p>
+          {phrases.map((o) => (
+            <button
+              key={o.id}
+              type="button"
+              className="phrase-option"
+              disabled={phrase !== null}
+              onClick={() => {
+                setPhrase(o.id);
+                track("interaction", { kind: "phone_phrase", id: o.id, good: o.good });
+              }}
+            >
+              {o.text}
+            </button>
+          ))}
+        </>
+      ) : pace === "rush" ? (
+        <p className="callout" role="status">
+          Customers perceived rushing during hold—coaching recommends acknowledge-then-hold.
+        </p>
+      ) : null}
+      {phrase ? (
+        <p className="callout" role="status">
+          {phrases.find((p) => p.id === phrase)?.good
+            ? "Validates impact without admitting liability—ready for tracking review."
+            : "Avoid ‘calm down’ and blame—try the reflective option."}
+        </p>
       ) : null}
     </section>
   );
@@ -283,19 +299,17 @@ function EscalationBranch() {
 
   if (stage === "offer") {
     return (
-      <section className="panel" aria-label="Resolution branch">
-        <div className="callout">
-          <p>
-            <strong>Customer:</strong> “Tomorrow doesn’t help—I lost a client. What are you going to do?”
-          </p>
-          <div className="actions">
-            <button type="button" onClick={() => choose("credit", "shipping_credit")}>
-              Offer expedited shipping credit and confirm tracking
-            </button>
-            <button type="button" onClick={() => choose("supervisor", "supervisor_early")}>
-              Involve supervisor for compensation review
-            </button>
-          </div>
+      <section className="panel chat-panel">
+        <div className="chat-log">
+          <ChatBubble who="customer">Tomorrow doesn’t help—I lost a client. What are you going to do?</ChatBubble>
+        </div>
+        <div className="actions">
+          <button type="button" onClick={() => choose("credit", "shipping_credit")}>
+            Offer shipping credit + proactive tracking updates
+          </button>
+          <button type="button" onClick={() => choose("supervisor", "supervisor_early")}>
+            Warm-transfer to supervisor for goodwill review
+          </button>
         </div>
       </section>
     );
@@ -305,10 +319,9 @@ function EscalationBranch() {
     return (
       <section className="panel">
         <div className="callout" role="status">
-          <strong>Resolved at tier-1.</strong> You documented the credit, confirmed tracking, and set a follow-up
-          reminder—appropriate when policy allows.
+          <strong>Tier-1 resolution.</strong> Document credit code, set callback, and tag case to prevent re-queue.
         </div>
-        <Reflection prompt="What note would you leave for the next agent so the customer isn’t transferred again?" />
+        <Reflection prompt="Write the one-sentence case note the next agent should see first." />
         <button type="button" onClick={() => setStage("done")}>
           Continue
         </button>
@@ -320,8 +333,7 @@ function EscalationBranch() {
     return (
       <section className="panel">
         <div className="callout" role="status">
-          <strong>Escalated appropriately.</strong> High-impact financial harm may need supervisor approval—stay on
-          the line until handoff completes.
+          <strong>Appropriate escalation.</strong> Stay on the line until the supervisor joins—no cold transfer.
         </div>
         <button type="button" onClick={() => setStage("done")}>
           Continue
@@ -330,25 +342,20 @@ function EscalationBranch() {
     );
   }
 
-  return (
-    <p className="muted" role="status">
-      Branch complete. Move to the skills check when ready.
-    </p>
-  );
+  return <p className="muted">Resolution path complete—open the skills check.</p>;
 }
 
 function FinishCourse() {
   const { progress } = useLessonkit();
   const { completeCourse } = useCompletion();
-  const done = progress.completedLessonIds.size >= 3;
+  const done = progress.completedLessonIds.size >= 4;
 
   return (
-    <section aria-label="Complete course" className="panel">
-      <p className="muted">Complete practice lessons and pass the skills check to finish.</p>
+    <section className="panel">
       <button type="button" onClick={() => completeCourse()} disabled={!done}>
-        Mark training complete
+        Return to queue
       </button>
-      {!done ? <p className="muted">Finish lessons 1–3, then pass the assessment above.</p> : null}
+      {!done ? <p className="muted">Finish all practice steps and pass the skills check.</p> : null}
     </section>
   );
 }

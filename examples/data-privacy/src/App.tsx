@@ -10,7 +10,6 @@ import {
   useCompletion,
   useLessonkit,
   useTracking,
-  type ThemeMode,
 } from "@lessonkit/react";
 import type { TelemetryEvent } from "@lessonkit/core";
 import type { XAPIStatement } from "@lessonkit/xapi";
@@ -18,15 +17,16 @@ import type { XAPIStatement } from "@lessonkit/xapi";
 const COURSE_ID = "data-privacy-essentials";
 
 const LESSONS = [
-  { id: "why-privacy-matters", title: "Why privacy matters at work" },
-  { id: "collecting-and-using-data", title: "Collecting and using data" },
-  { id: "incidents-and-reporting", title: "Incidents and reporting" },
-  { id: "knowledge-check", title: "Knowledge check" },
+  { id: "program-overview", title: "Program overview" },
+  { id: "lawful-basis", title: "Lawful basis" },
+  { id: "case-studies", title: "Case file review" },
+  { id: "data-minimization", title: "Minimization lab" },
+  { id: "incident-tabletop", title: "Incident tabletop" },
+  { id: "certification", title: "Certification" },
 ] as const;
 
 export default function App() {
   const [step, setStep] = React.useState(0);
-  const [themeMode, setThemeMode] = React.useState<ThemeMode>("dark");
 
   const courseConfig = React.useMemo(
     () => ({
@@ -37,242 +37,336 @@ export default function App() {
   );
 
   return (
-    <ThemeProvider mode={themeMode} preset="brand">
-      <div className="app-shell">
-        <Course title="Data Privacy Essentials" courseId={COURSE_ID} config={courseConfig}>
+    <ThemeProvider mode="light" preset="default">
+      <div className="app-shell compliance-layout">
+        <Course title="Data Privacy & GDPR Essentials" courseId={COURSE_ID} config={courseConfig}>
           <header className="course-header">
-            <p className="course-eyebrow">Compliance onboarding · ~10 minutes</p>
+            <p className="course-eyebrow">Legal & Compliance · EU / UK workforce</p>
             <p className="course-intro muted">
-              Understand how your organization handles personal data, what you may collect in your role, and
-              how to report concerns. Progress saves automatically.
+              Self-paced module aligned to our Binding Corporate Rules. Estimated seat time 14 minutes. A
+              certificate generates in your LMS after certification.
             </p>
-            <ul className="objectives">
-              <li>Explain why personal data needs protection in everyday work</li>
-              <li>Apply data minimization when gathering information</li>
-              <li>Recognize when to report a possible privacy incident</li>
-            </ul>
           </header>
 
-          <ProgressTracker />
+          <div className="layout-grid">
+            <OutlineNav step={step} setStep={setStep} />
 
-          <CourseNav
-            step={step}
-            setStep={setStep}
-            themeMode={themeMode}
-            onThemeModeChange={setThemeMode}
-          />
+            <main className="lesson-main">
+              <ProgressTracker />
 
-          {step === 0 ? (
-            <Lesson title={LESSONS[0].title} lessonId={LESSONS[0].id}>
-              <Scenario>
-                <p>
-                  Three real-world situations from last quarter. For each, decide whether the handling was
-                  acceptable or should be escalated to your privacy office.
-                </p>
-              </Scenario>
-              <PrivacyCases />
-            </Lesson>
-          ) : null}
+              {step === 0 ? (
+                <Lesson title={LESSONS[0].title} lessonId={LESSONS[0].id}>
+                  <ProgramOverview />
+                </Lesson>
+              ) : null}
 
-          {step === 1 ? (
-            <Lesson title={LESSONS[1].title} lessonId={LESSONS[1].id}>
-              <Scenario>
-                <p>
-                  You are organizing a voluntary lunch-and-learn. The registration form is almost ready—trim
-                  fields so you only collect what you need.
-                </p>
-              </Scenario>
-              <RegistrationFormExercise />
-            </Lesson>
-          ) : null}
+              {step === 1 ? (
+                <Lesson title={LESSONS[1].title} lessonId={LESSONS[1].id}>
+                  <Scenario>
+                    <p>
+                      Match each processing activity to the most appropriate lawful basis under GDPR Art. 6.
+                      Your DPO reviewed these examples for onboarding.
+                    </p>
+                  </Scenario>
+                  <LawfulBasisLab />
+                </Lesson>
+              ) : null}
 
-          {step === 2 ? (
-            <Lesson title={LESSONS[2].title} lessonId={LESSONS[2].id}>
-              <Scenario>
-                <p>
-                  A contractor forwards a spreadsheet they should not have received. Walk through the first
-                  hour response.
-                </p>
-              </Scenario>
-              <IncidentSteps />
-            </Lesson>
-          ) : null}
+              {step === 2 ? (
+                <Lesson title={LESSONS[2].title} lessonId={LESSONS[2].id}>
+                  <Scenario>
+                    <p>
+                      Audit samples from Q1. Each card lists the business unit and data subjects involved.
+                    </p>
+                  </Scenario>
+                  <PrivacyCases />
+                </Lesson>
+              ) : null}
 
-          {step === 3 ? (
-            <Lesson title={LESSONS[3].title} lessonId={LESSONS[3].id}>
-              <Scenario>
-                <p>Confirm your understanding before your LMS marks the module complete.</p>
-              </Scenario>
-              <Quiz
-                checkId="privacy-knowledge-check"
-                question="A teammate asks you to export a customer list to their personal email for convenience. What should you do first?"
-                choices={[
-                  "Send the export— they are on the same team",
-                  "Decline and use approved systems; report if policy is unclear",
-                ]}
-                answer="Decline and use approved systems; report if policy is unclear"
-              />
-              <FinishCourse />
-            </Lesson>
-          ) : null}
+              {step === 3 ? (
+                <Lesson title={LESSONS[3].title} lessonId={LESSONS[3].id}>
+                  <Scenario>
+                    <p>
+                      Choose your role, then trim the event registration form. HR and Marketing have different
+                      legitimate needs.
+                    </p>
+                  </Scenario>
+                  <MinimizationLab />
+                </Lesson>
+              ) : null}
+
+              {step === 4 ? (
+                <Lesson title={LESSONS[4].title} lessonId={LESSONS[4].id}>
+                  <Scenario>
+                    <p>
+                      Tabletop: a vendor uploads a customer export to the wrong SharePoint site at 09:12. Work
+                      through the first 60 minutes.
+                    </p>
+                  </Scenario>
+                  <IncidentTabletop />
+                </Lesson>
+              ) : null}
+
+              {step === 5 ? (
+                <Lesson title={LESSONS[5].title} lessonId={LESSONS[5].id}>
+                  <Scenario>
+                    <p>Attestation for your training transcript.</p>
+                  </Scenario>
+                  <Quiz
+                    checkId="privacy-knowledge-check"
+                    question="A sales director asks for all EU prospect emails on a personal USB drive for a flight. What is the correct response?"
+                    choices={[
+                      "Export and hand off—they are a director",
+                      "Refuse; offer a governed analytics export with DPO-approved scope",
+                    ]}
+                    answer="Refuse; offer a governed analytics export with DPO-approved scope"
+                  />
+                  <FinishCourse />
+                </Lesson>
+              ) : null}
+            </main>
+          </div>
         </Course>
       </div>
     </ThemeProvider>
   );
 }
 
-function ThemeToggle(props: { mode: ThemeMode; onChange: (mode: ThemeMode) => void }) {
-  return (
-    <div className="theme-toggle" role="group" aria-label="Display theme">
-      {(["light", "dark", "system"] as const).map((m) => (
-        <button
-          key={m}
-          type="button"
-          aria-pressed={props.mode === m}
-          className={props.mode === m ? "theme-toggle-active" : undefined}
-          onClick={() => props.onChange(m)}
-        >
-          {m === "system" ? "System" : m === "light" ? "Light" : "Dark"}
-        </button>
-      ))}
-    </div>
-  );
-}
-
-function CourseNav(props: {
-  step: number;
-  setStep: (n: number) => void;
-  themeMode: ThemeMode;
-  onThemeModeChange: (mode: ThemeMode) => void;
-}) {
+function OutlineNav(props: { step: number; setStep: (n: number) => void }) {
   const { progress } = useLessonkit();
   const completed = progress.completedLessonIds.size;
-  const last = LESSONS.length - 1;
 
   return (
-    <aside aria-label="Course navigation" className="nav">
-      <div className="lesson-tabs" role="tablist" aria-label="Lessons">
+    <nav className="outline-nav" aria-label="Course outline">
+      <p className="outline-title">Outline</p>
+      <ol>
         {LESSONS.map((lesson, i) => (
-          <button
-            key={lesson.id}
-            type="button"
-            role="tab"
-            aria-selected={props.step === i}
-            className={props.step === i ? "tab-active" : undefined}
-            onClick={() => props.setStep(i)}
-          >
-            {i + 1}. {lesson.title}
-          </button>
+          <li key={lesson.id}>
+            <button
+              type="button"
+              aria-current={props.step === i ? "step" : undefined}
+              className={props.step === i ? "outline-active" : undefined}
+              onClick={() => props.setStep(i)}
+            >
+              {lesson.title}
+            </button>
+          </li>
         ))}
-      </div>
-      <div className="nav-row">
+      </ol>
+      <p className="outline-progress muted">
+        {completed} of {LESSONS.length} sections complete
+      </p>
+      <div className="outline-actions">
         <button type="button" onClick={() => props.setStep(Math.max(0, props.step - 1))} disabled={props.step === 0}>
-          Previous
+          Back
         </button>
-        <div className="nav-status">
-          <strong>Progress</strong> {completed} of {LESSONS.length} lessons completed
-        </div>
         <button
           type="button"
-          onClick={() => props.setStep(Math.min(last, props.step + 1))}
-          disabled={props.step === last}
+          onClick={() => props.setStep(Math.min(LESSONS.length - 1, props.step + 1))}
+          disabled={props.step === LESSONS.length - 1}
         >
-          Next
+          Continue
         </button>
       </div>
-      <ThemeToggle mode={props.themeMode} onChange={props.onThemeModeChange} />
-    </aside>
+    </nav>
   );
 }
 
-type CaseStudy = { id: string; title: string; detail: string; acceptable: boolean };
+function ProgramOverview() {
+  return (
+    <section className="panel">
+      <div className="instructor-note">
+        <strong>Instructor note</strong>
+        <p>This module does not replace legal advice. Contact privacy@company.example for DPIAs.</p>
+      </div>
+      <h3 className="section-title">Learning objectives</h3>
+      <ul className="objectives">
+        <li>Map everyday processing to lawful bases</li>
+        <li>Judge escalations using case context (volume, sensitivity)</li>
+        <li>Execute first-hour steps for a personal-data incident</li>
+      </ul>
+      <div className="callout">
+        <p>
+          <strong>Personal data</strong> is any information relating to an identified or identifiable person—including
+          work email, device IDs, and photos of badges.
+        </p>
+      </div>
+    </section>
+  );
+}
+
+const BASIS_OPTIONS = ["Contract", "Legitimate interest", "Consent", "Legal obligation"] as const;
+
+const BASIS_SCENARIOS = [
+  {
+    id: "b1",
+    text: "Payroll runs monthly salary transfers for employees.",
+    answer: "Contract" as const,
+  },
+  {
+    id: "b2",
+    text: "Marketing sends a newsletter only to contacts who opted in on the website form.",
+    answer: "Consent" as const,
+  },
+  {
+    id: "b3",
+    text: "Finance retains invoices for seven years per tax law.",
+    answer: "Legal obligation" as const,
+  },
+] as const;
+
+function LawfulBasisLab() {
+  const { track } = useTracking();
+  const [answers, setAnswers] = React.useState<Record<string, string>>({});
+
+  const pick = (id: string, basis: string, expected: string) => {
+    setAnswers((a) => ({ ...a, [id]: basis }));
+    track("interaction", { kind: "lawful_basis", id, basis, correct: basis === expected });
+  };
+
+  const done = Object.keys(answers).length === BASIS_SCENARIOS.length;
+  const score = BASIS_SCENARIOS.filter((s) => answers[s.id] === s.answer).length;
+
+  return (
+    <section className="panel" aria-label="Lawful basis lab">
+      {BASIS_SCENARIOS.map((s) => (
+        <article key={s.id} className="card">
+          <p className="body">{s.text}</p>
+          <div className="basis-grid">
+            {BASIS_OPTIONS.map((b) => (
+              <button
+                key={b}
+                type="button"
+                disabled={Boolean(answers[s.id])}
+                className={answers[s.id] === b ? "basis-selected" : undefined}
+                onClick={() => pick(s.id, b, s.answer)}
+              >
+                {b}
+              </button>
+            ))}
+          </div>
+        </article>
+      ))}
+      {done ? (
+        <p className="callout" role="status">
+          <strong>
+            {score}/{BASIS_SCENARIOS.length} correct.
+          </strong>{" "}
+          Misclassification can invalidate processing—when unsure, open a privacy ticket.
+        </p>
+      ) : null}
+    </section>
+  );
+}
+
+type CaseStudy = {
+  id: string;
+  title: string;
+  unit: string;
+  detail: string;
+  acceptable: boolean;
+};
 
 function PrivacyCases() {
   const { track } = useTracking();
   const [verdicts, setVerdicts] = React.useState<Record<string, "ok" | "escalate">>({});
 
-  const cases: CaseStudy[] = React.useMemo(
-    () => [
-      {
-        id: "c1",
-        title: "Wrong distribution list",
-        detail: "Marketing CC’d 200 customers on a thread meant for internal QA feedback.",
-        acceptable: false,
-      },
-      {
-        id: "c2",
-        title: "Anonymous survey",
-        detail: "HR launched a pulse survey with no names—only department and tenure band.",
-        acceptable: true,
-      },
-      {
-        id: "c3",
-        title: "Shared drive cleanup",
-        detail: "IT archived inactive project folders per retention policy after legal review.",
-        acceptable: true,
-      },
-    ],
-    [],
-  );
+  const cases: CaseStudy[] = [
+    {
+      id: "c1",
+      title: "Misdirected campaign test",
+      unit: "Marketing · 12,400 recipients",
+      detail: "A/B test email used production list instead of sandbox. Two opens logged before pause.",
+      acceptable: false,
+    },
+    {
+      id: "c2",
+      title: "Anonymised engagement metrics",
+      unit: "Product · no direct identifiers",
+      detail: "Dashboard shows aggregated click rates by region; minimum group size 50.",
+      acceptable: true,
+    },
+    {
+      id: "c3",
+      title: "Offboarding archive",
+      unit: "IT · former contractor laptops",
+      detail: "Devices wiped per SOX retention schedule after legal hold cleared.",
+      acceptable: true,
+    },
+  ];
 
   const judge = (c: CaseStudy, verdict: "ok" | "escalate") => {
     setVerdicts((prev) => ({ ...prev, [c.id]: verdict }));
-    track("interaction", { kind: "privacy_case", caseId: c.id, verdict, correct: verdict === (c.acceptable ? "ok" : "escalate") });
+    track("interaction", {
+      kind: "privacy_case",
+      caseId: c.id,
+      verdict,
+      correct: verdict === (c.acceptable ? "ok" : "escalate"),
+    });
   };
 
   const done = Object.keys(verdicts).length === cases.length;
-  const correct = cases.filter((c) => verdicts[c.id] === (c.acceptable ? "ok" : "escalate")).length;
 
   return (
-    <section aria-label="Privacy cases" className="panel">
-      <div className="inbox">
-        {cases.map((c) => {
-          const v = verdicts[c.id];
-          return (
-            <div key={c.id} className="card">
-              <div className="subject">{c.title}</div>
-              <p className="body">{c.detail}</p>
-              <div className="actions">
-                <button type="button" onClick={() => judge(c, "ok")} disabled={Boolean(v)}>
-                  Acceptable handling
-                </button>
-                <button type="button" onClick={() => judge(c, "escalate")} disabled={Boolean(v)}>
-                  Escalate to privacy office
-                </button>
-                {v ? <span className="muted">Recorded: {v === "ok" ? "acceptable" : "escalate"}</span> : null}
-              </div>
+    <section className="panel" aria-label="Case files">
+      {cases.map((c) => {
+        const v = verdicts[c.id];
+        return (
+          <div key={c.id} className="card case-file">
+            <div className="case-meta">{c.unit}</div>
+            <div className="subject">{c.title}</div>
+            <p className="body">{c.detail}</p>
+            <div className="actions">
+              <button type="button" onClick={() => judge(c, "ok")} disabled={Boolean(v)}>
+                Acceptable
+              </button>
+              <button type="button" onClick={() => judge(c, "escalate")} disabled={Boolean(v)}>
+                Escalate to DPO
+              </button>
             </div>
-          );
-        })}
-      </div>
+          </div>
+        );
+      })}
       {done ? (
-        <div className="callout" role="status" aria-live="polite">
-          <strong>
-            {correct === cases.length ? "Well done." : `${correct} of ${cases.length} aligned with policy.`}
-          </strong>{" "}
-          When in doubt, report early—your privacy team prefers prevention over cleanup.
-        </div>
-      ) : (
-        <p className="muted">Review all three situations to continue.</p>
-      )}
+        <p className="callout" role="status">
+          Document your rationale in the case system—regulators ask <em>why</em> you decided, not only <em>what</em>.
+        </p>
+      ) : null}
     </section>
   );
 }
 
-const FORM_FIELDS = [
-  { id: "name", label: "Full name", needed: true },
-  { id: "email", label: "Work email", needed: true },
-  { id: "diet", label: "Dietary restrictions", needed: true },
-  { id: "ssn", label: "Last four of SSN (for verification)", needed: false },
-  { id: "birth", label: "Date of birth", needed: false },
-  { id: "manager", label: "Manager’s personal mobile", needed: false },
-] as const;
+const ROLE_FIELDS: Record<
+  "hr" | "marketing",
+  { id: string; label: string; needed: boolean }[]
+> = {
+  hr: [
+    { id: "name", label: "Full name", needed: true },
+    { id: "email", label: "Work email", needed: true },
+    { id: "diet", label: "Dietary needs (health data—minimize)", needed: false },
+    { id: "emergency", label: "Emergency contact & relationship", needed: true },
+    { id: "ssn", label: "National ID number", needed: false },
+  ],
+  marketing: [
+    { id: "name", label: "Full name", needed: true },
+    { id: "email", label: "Work email", needed: true },
+    { id: "company", label: "Company & job title", needed: true },
+    { id: "linkedin", label: "LinkedIn profile URL", needed: false },
+    { id: "birth", label: "Date of birth", needed: false },
+  ],
+};
 
-function RegistrationFormExercise() {
+function MinimizationLab() {
   const { track } = useTracking();
+  const [role, setRole] = React.useState<"hr" | "marketing">("hr");
+  const fields = ROLE_FIELDS[role];
   const [selected, setSelected] = React.useState<Set<string>>(
-    () => new Set(["name", "email", "diet", "ssn", "birth", "manager"]),
+    () => new Set(fields.map((f) => f.id)),
   );
+
+  React.useEffect(() => {
+    setSelected(new Set(ROLE_FIELDS[role].map((f) => f.id)));
+  }, [role]);
 
   const toggle = (id: string) => {
     setSelected((prev) => {
@@ -283,90 +377,103 @@ function RegistrationFormExercise() {
     });
   };
 
-  const unnecessary = FORM_FIELDS.filter((f) => selected.has(f.id) && !f.needed).map((f) => f.id);
-  const missing = FORM_FIELDS.filter((f) => f.needed && !selected.has(f.id)).map((f) => f.id);
+  const unnecessary = fields.filter((f) => selected.has(f.id) && !f.needed).map((f) => f.id);
+  const missing = fields.filter((f) => f.needed && !selected.has(f.id)).map((f) => f.id);
   const ready = unnecessary.length === 0 && missing.length === 0;
 
   React.useEffect(() => {
-    if (ready) track("interaction", { kind: "form_minimized", fields: [...selected] });
-  }, [ready, selected, track]);
+    if (ready) track("interaction", { kind: "form_minimized", role, fields: [...selected] });
+  }, [ready, role, selected, track]);
 
   return (
-    <section aria-label="Registration form" className="panel">
-      <p className="muted">Uncheck any field you do not need for a voluntary internal event.</p>
+    <section className="panel" aria-label="Minimization lab">
+      <div className="role-switch" role="group" aria-label="Your role">
+        <button type="button" aria-pressed={role === "hr"} onClick={() => setRole("hr")}>
+          HR coordinator
+        </button>
+        <button type="button" aria-pressed={role === "marketing"} onClick={() => setRole("marketing")}>
+          Marketing events
+        </button>
+      </div>
+      <p className="muted">
+        {role === "hr"
+          ? "Wellness lunch registration—collect only what occupational health requires."
+          : "Leadership dinner—avoid social data unless there is a documented purpose."}
+      </p>
       <div className="callout">
-        {FORM_FIELDS.map((f) => (
+        {fields.map((f) => (
           <label key={f.id} className="checkbox-row">
             <input type="checkbox" checked={selected.has(f.id)} onChange={() => toggle(f.id)} />
             {f.label}
-            {!f.needed ? <span className="muted"> — optional / often unnecessary</span> : null}
           </label>
         ))}
       </div>
       {ready ? (
-        <div className="callout" role="status">
-          <strong>Good minimization.</strong> You kept name, email, and dietary needs only—enough to run the event
-          without oversharing.
-        </div>
+        <p className="callout" role="status">
+          <strong>Appropriate for {role === "hr" ? "HR" : "Marketing"}.</strong> Record the purpose in the privacy
+          register before go-live.
+        </p>
       ) : (
         <p className="muted" role="status">
           {missing.length > 0
-            ? `Add back required fields: ${missing.join(", ")}.`
-            : `Remove unnecessary fields: ${unnecessary.join(", ")}.`}
+            ? `Required: ${missing.join(", ")}`
+            : `Remove: ${unnecessary.join(", ")}`}
         </p>
       )}
     </section>
   );
 }
 
-const INCIDENT_STEPS = [
-  { id: "s1", label: "Contain access (revoke link, lock account)" },
-  { id: "s2", label: "Notify privacy / security per playbook" },
-  { id: "s3", label: "Document what data was exposed and when" },
-  { id: "s4", label: "Post details in a public channel for visibility" },
+const TABLETOP_STEPS = [
+  { id: "s1", order: 1, label: "09:15 — Revoke external sharing link" },
+  { id: "s2", order: 2, label: "09:20 — Open Sev-2 ticket with Privacy & Security" },
+  { id: "s3", order: 3, label: "09:35 — Draft affected-data inventory (subjects, fields)" },
+  { id: "s4", order: 4, label: "09:40 — Post file names in #general for transparency" },
 ] as const;
 
-function IncidentSteps() {
+function IncidentTabletop() {
   const { track } = useTracking();
-  const [picked, setPicked] = React.useState<Set<string>>(new Set());
+  const [order, setOrder] = React.useState<string[]>([]);
 
-  const toggle = (id: string) => {
-    setPicked((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
+  const pickNext = (id: string) => {
+    if (order.includes(id)) return;
+    setOrder((o) => [...o, id]);
+    track("interaction", { kind: "tabletop_step", id, position: order.length + 1 });
   };
 
-  const correctSet = new Set(["s1", "s2", "s3"]);
-  const aligned =
-    picked.size === correctSet.size && [...correctSet].every((id) => picked.has(id)) && !picked.has("s4");
-
-  React.useEffect(() => {
-    if (aligned) track("interaction", { kind: "incident_steps_complete" });
-  }, [aligned, track]);
+  const ideal = ["s1", "s2", "s3"];
+  const aligned = order.length === 3 && order.every((id, i) => id === ideal[i]);
 
   return (
-    <section aria-label="Incident response" className="panel">
-      <p className="muted">Select every action appropriate in the first hour (there may be more than one).</p>
-      <div className="callout">
-        {INCIDENT_STEPS.map((s) => (
-          <label key={s.id} className="checkbox-row">
-            <input type="checkbox" checked={picked.has(s.id)} onChange={() => toggle(s.id)} />
+    <section className="panel" aria-label="Incident tabletop">
+      <p className="muted">Select actions in the order you would perform them (first three only).</p>
+      <div className="timeline">
+        {TABLETOP_STEPS.map((s) => (
+          <button
+            key={s.id}
+            type="button"
+            disabled={order.includes(s.id) || order.length >= 3}
+            onClick={() => pickNext(s.id)}
+          >
             {s.label}
-          </label>
+          </button>
         ))}
       </div>
-      {aligned ? (
-        <>
-          <div className="callout" role="status">
-            <strong>Solid first response.</strong> Avoid discussing details in open channels until privacy advises.
-          </div>
-          <Reflection prompt="Where would you find your organization’s privacy incident hotline or ticket queue?" />
-        </>
+      {order.length === 3 ? (
+        aligned ? (
+          <>
+            <p className="callout" role="status">
+              <strong>Sequence matches playbook.</strong> Skip public channels until comms approves messaging.
+            </p>
+            <Reflection prompt="Who is your local Privacy Incident Commander (name or role)?" />
+          </>
+        ) : (
+          <p className="callout" role="status">
+            Contain → notify → document. Posting filenames publicly can worsen exposure.
+          </p>
+        )
       ) : (
-        <p className="muted">Include containment, notification, and documentation—skip public disclosure.</p>
+        <p className="muted">Selected: {order.length}/3</p>
       )}
     </section>
   );
@@ -375,15 +482,14 @@ function IncidentSteps() {
 function FinishCourse() {
   const { progress } = useLessonkit();
   const { completeCourse } = useCompletion();
-  const done = progress.completedLessonIds.size >= 3;
+  const done = progress.completedLessonIds.size >= 5;
 
   return (
-    <section aria-label="Complete course" className="panel">
-      <p className="muted">Pass the knowledge check and complete earlier lessons to finish the module.</p>
+    <section className="panel">
       <button type="button" onClick={() => completeCourse()} disabled={!done}>
-        Mark module complete
+        Record certification
       </button>
-      {!done ? <p className="muted">Complete the first three lessons, then pass the check above.</p> : null}
+      {!done ? <p className="muted">Complete all prior sections and pass the attestation.</p> : null}
     </section>
   );
 }
