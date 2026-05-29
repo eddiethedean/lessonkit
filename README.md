@@ -3,16 +3,6 @@
 [![CI](https://github.com/eddiethedean/lessonkit/actions/workflows/ci.yml/badge.svg)](https://github.com/eddiethedean/lessonkit/actions/workflows/ci.yml)
 [![License](https://img.shields.io/github/license/eddiethedean/lessonkit)](LICENSE)
 
-| Package | Version |
-| --- | --- |
-| [`@lessonkit/react`](https://www.npmjs.com/package/@lessonkit/react) | [![npm](https://img.shields.io/npm/v/@lessonkit/react.svg)](https://www.npmjs.com/package/@lessonkit/react) |
-| [`@lessonkit/core`](https://www.npmjs.com/package/@lessonkit/core) | [![npm](https://img.shields.io/npm/v/@lessonkit/core.svg)](https://www.npmjs.com/package/@lessonkit/core) |
-| [`@lessonkit/xapi`](https://www.npmjs.com/package/@lessonkit/xapi) | [![npm](https://img.shields.io/npm/v/@lessonkit/xapi.svg)](https://www.npmjs.com/package/@lessonkit/xapi) |
-| [`@lessonkit/lxpack`](https://www.npmjs.com/package/@lessonkit/lxpack) | [![npm](https://img.shields.io/npm/v/@lessonkit/lxpack.svg)](https://www.npmjs.com/package/@lessonkit/lxpack) |
-| [`@lessonkit/cli`](https://www.npmjs.com/package/@lessonkit/cli) | [![npm](https://img.shields.io/npm/v/@lessonkit/cli.svg)](https://www.npmjs.com/package/@lessonkit/cli) |
-| [`@lessonkit/accessibility`](https://www.npmjs.com/package/@lessonkit/accessibility) | [![npm](https://img.shields.io/npm/v/@lessonkit/accessibility.svg)](https://www.npmjs.com/package/@lessonkit/accessibility) |
-| [`@lessonkit/themes`](https://www.npmjs.com/package/@lessonkit/themes) | [![npm](https://img.shields.io/npm/v/@lessonkit/themes.svg)](https://www.npmjs.com/package/@lessonkit/themes) |
-
 LessonKit is a React-first framework for building accessible, trackable learning experiences with
 modern frontend tooling.
 
@@ -141,13 +131,15 @@ export default function SecurityTraining() {
 
 ## Packages
 
-- `@lessonkit/react`: authoring primitives (components + hooks)
-- `@lessonkit/core`: shared types and telemetry primitives
-- `@lessonkit/xapi`: xAPI statement generation and transports
-- `@lessonkit/accessibility`: accessibility utilities (growing)
-- `@lessonkit/themes`: theming primitives (growing)
-- `@lessonkit/lxpack`: LXPack export adapter (SCORM, standalone, xAPI, cmi5)
-- `@lessonkit/cli`: `lessonkit init`, `dev`, `build`, `package` (dual export)
+| Package | Version | Description |
+| --- | --- | --- |
+| [`@lessonkit/react`](https://www.npmjs.com/package/@lessonkit/react) | [![npm](https://img.shields.io/npm/v/@lessonkit/react.svg)](https://www.npmjs.com/package/@lessonkit/react) | Authoring primitives (components + hooks) |
+| [`@lessonkit/core`](https://www.npmjs.com/package/@lessonkit/core) | [![npm](https://img.shields.io/npm/v/@lessonkit/core.svg)](https://www.npmjs.com/package/@lessonkit/core) | Shared types and telemetry primitives |
+| [`@lessonkit/xapi`](https://www.npmjs.com/package/@lessonkit/xapi) | [![npm](https://img.shields.io/npm/v/@lessonkit/xapi.svg)](https://www.npmjs.com/package/@lessonkit/xapi) | xAPI statement generation and transports |
+| [`@lessonkit/accessibility`](https://www.npmjs.com/package/@lessonkit/accessibility) | [![npm](https://img.shields.io/npm/v/@lessonkit/accessibility.svg)](https://www.npmjs.com/package/@lessonkit/accessibility) | Accessibility utilities (growing) |
+| [`@lessonkit/themes`](https://www.npmjs.com/package/@lessonkit/themes) | [![npm](https://img.shields.io/npm/v/@lessonkit/themes.svg)](https://www.npmjs.com/package/@lessonkit/themes) | Theming primitives (growing) |
+| [`@lessonkit/lxpack`](https://www.npmjs.com/package/@lessonkit/lxpack) | [![npm](https://img.shields.io/npm/v/@lessonkit/lxpack.svg)](https://www.npmjs.com/package/@lessonkit/lxpack) | LXPack export adapter (SCORM, standalone, xAPI, cmi5) |
+| [`@lessonkit/cli`](https://www.npmjs.com/package/@lessonkit/cli) | [![npm](https://img.shields.io/npm/v/@lessonkit/cli.svg)](https://www.npmjs.com/package/@lessonkit/cli) | `lessonkit init`, `dev`, `build`, `package` (dual export) |
 
 ## Versioning
 
