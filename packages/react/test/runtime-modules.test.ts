@@ -144,6 +144,16 @@ describe("@lessonkit/react runtime modules", () => {
     expect(client).toBeNull();
   });
 
+  it("xapi: returns null when no transport or client unless enabled=true", () => {
+    const client = createXapiClientFromConfig({ courseId: "c" }, createInMemoryXAPIQueue());
+    expect(client).toBeNull();
+    const forced = createXapiClientFromConfig(
+      { courseId: "c", xapi: { enabled: true } },
+      createInMemoryXAPIQueue(),
+    );
+    expect(forced).not.toBeNull();
+  });
+
   it("xapi: returns provided client when present", () => {
     const provided = { send: () => {}, flush: async () => {}, queueSize: () => 0, startedLesson: () => {}, completeLesson: () => {}, completeCourse: () => {} };
     const client = createXapiClientFromConfig({ courseId: "c", xapi: { client: provided } }, createInMemoryXAPIQueue());

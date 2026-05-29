@@ -76,7 +76,7 @@ lessonkit init my-course --force
 |------|-------------|
 | `--here` | Initialize in the current directory instead of creating a subdirectory |
 | `--skip-install` | Skip `npm install` (CI/automation) |
-| `--force` | Overwrite into a non-empty directory |
+| `--force` | With `--here`, initialize into a non-empty current directory (merges template files; does not delete existing files) |
 
 ### `lessonkit dev`
 
@@ -122,7 +122,7 @@ lessonkit package --target scorm12 --out .lxpack/out/custom.zip
 |------|-------------|
 | `--target` | **Required.** Export target (see table above) |
 | `--cwd` | Project root (default: current directory) |
-| `--no-build` | Skip implicit Vite build for lxpack targets |
+| `--no-build` | Skip implicit Vite build when `dist/` already exists (`react-vite` and lxpack targets) |
 | `--out` | Override output artifact path |
 | `--json` | Structured JSON result on stdout (CI/codegen) |
 

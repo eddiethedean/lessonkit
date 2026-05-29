@@ -28,7 +28,7 @@ export function normalizeAssessmentScore(opts: {
     return null;
   }
   const maxScore = typeof opts.maxScore === "number" && opts.maxScore > 0 ? opts.maxScore : 1;
-  return opts.score / maxScore;
+  return Math.min(1, opts.score / maxScore);
 }
 
 /**
@@ -45,7 +45,7 @@ export function normalizeAssessmentPassingScore(opts?: {
   }
   const maxScore =
     typeof opts?.maxScore === "number" && opts.maxScore > 0 ? opts.maxScore : 1;
-  return passingScore / maxScore;
+  return Math.min(1, passingScore / maxScore);
 }
 
 function getBridge(): LxpackBridgeV1 | null {

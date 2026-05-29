@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "name": "customer-service",
+  "course": {
+    "courseId": "customer-de-escalation",
+    "title": "Customer Care: De-escalation",
+    "layout": "single-spa",
+    "spaLessonId": "channels",
+    "lessons": [{ "id": "channels", "title": "Channels & QA" }],
+    "assessments": [
+      {
+        "checkId": "de-escalation-check",
+        "question": "A customer threatens chargebacks unless you waive a non-refundable policy. Best action?",
+        "choices": [
+          "Waive immediately to protect CSAT",
+          "Stay calm, restate policy, warm-transfer to a supervisor if threats continue"
+        ],
+        "answer": "Stay calm, restate policy, warm-transfer to a supervisor if threats continue",
+        "passingScore": 1
+      }
+    ],
+    "theme": { "preset": "brand" },
+    "tracking": { "completion": { "threshold": 1 } }
+  },
+  "paths": {
+    "spaDistDir": "dist",
+    "lxpackOutDir": ".lxpack/course",
+    "outputBaseDir": ".lxpack/out"
+  }
+}

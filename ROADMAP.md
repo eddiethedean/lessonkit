@@ -28,7 +28,7 @@ this repo until that gate is met.
 
 ## Status
 
-- **Framework:** **0.8.0** — runtime block catalog v1 (`@lessonkit/react/block-catalog.v1.json`), renderer parity in golden example
+- **Framework:** **0.8.1** — runtime block catalog v1 (`@lessonkit/react/block-catalog.v1.json`), renderer parity in golden example; patch fixes for lxpack validation, packaging paths, CLI, and examples
 - **Studio:** **blocked** — no implementation work until **[1.0.0 — Stable public API (framework)](#100--stable-public-api-framework)** is shipped (see [Studio development gate](#studio-development-gate))
 - **Focus (now):** conformance harness (0.9.x), docs kept in sync through 1.0.0
 

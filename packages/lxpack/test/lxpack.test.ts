@@ -346,6 +346,25 @@ describe("validateDescriptor edge cases", () => {
     });
     expect(result.ok).toBe(false);
   });
+
+  it("accepts passingScore as absolute points (not capped by choice count)", () => {
+    const result = validateDescriptor({
+      ...baseDescriptor,
+      assessments: [
+        {
+          checkId: "multi-point",
+          question: "Select all that apply",
+          choices: ["A", "B", "C", "D"],
+          answer: "A",
+          passingScore: 2,
+        },
+      ],
+    });
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.descriptor.assessments?.[0]?.passingScore).toBe(2);
+    }
+  });
 });
 
 describe("writeLxpackProject with assessments", () => {
@@ -395,6 +414,10 @@ describe("packageLessonkitCourse", () => {
     if (result.ok) {
       expect(result.fileCount).toBeGreaterThan(0);
       expect(result.outputPath).toContain("course-scorm12.zip");
+      expect(result.outputPath).toBe(
+        "outputPath" in result.build ? result.build.outputPath : undefined,
+      );
+      expect(result.outputPath?.startsWith(outDir)).toBe(true);
     }
   }, 30_000);
 

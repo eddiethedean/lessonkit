@@ -261,4 +261,4 @@ To publish packages from this monorepo, follow [RELEASING.md](https://github.com
 
 ## License
 
-[MIT](https://github.com/eddiethedean/lessonkit/blob/main/LICENSE) — Copyright (c) LessonKit contributors.
+[Apache-2.0](https://github.com/eddiethedean/lessonkit/blob/main/LICENSE) — Copyright (c) LessonKit contributors.

@@ -206,15 +206,27 @@ export async function packageLessonkitCourse(
       return artifactPath;
     };
 
+    const remappedOutputPath = remapArtifactPath(
+      "outputPath" in build ? build.outputPath : undefined,
+    );
+    const remappedOutputDir = remapArtifactPath("outputDir" in build ? build.outputDir : undefined);
+    const remappedBuild: BuildCourseResult = { ...build };
+    if ("outputPath" in remappedBuild && remappedOutputPath !== undefined) {
+      remappedBuild.outputPath = remappedOutputPath;
+    }
+    if ("outputDir" in remappedBuild && remappedOutputDir !== undefined) {
+      remappedBuild.outputDir = remappedOutputDir;
+    }
+
     return {
       ok: true,
       courseDir: outDir,
       target,
-      outputPath: remapArtifactPath("outputPath" in build ? build.outputPath : undefined),
-      outputDir: remapArtifactPath("outputDir" in build ? build.outputDir : undefined),
+      outputPath: remappedOutputPath,
+      outputDir: remappedOutputDir,
       fileCount: build.fileCount,
       validation,
-      build,
+      build: remappedBuild,
     };
   } finally {
     if (!promoted) {

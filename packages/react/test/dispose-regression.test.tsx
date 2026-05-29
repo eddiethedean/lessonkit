@@ -310,6 +310,42 @@ describe("@lessonkit/react provider dispose regression", () => {
     );
   });
 
+  it("migrates course_started dedup when session.sessionId changes", async () => {
+    const events: TelemetryEvent[] = [];
+    const sink = (e: TelemetryEvent) => void events.push(e);
+
+    const { rerender } = render(
+      <LessonkitProvider
+        config={{
+          courseId: "course-1",
+          session: { sessionId: "session-a" },
+          tracking: { sink },
+          xapi: { enabled: false },
+        }}
+      >
+        <div>child</div>
+      </LessonkitProvider>,
+    );
+
+    await waitFor(() => expect(events.some((e) => e.name === "course_started")).toBe(true));
+    expect(events.filter((e) => e.name === "course_started")).toHaveLength(1);
+
+    rerender(
+      <LessonkitProvider
+        config={{
+          courseId: "course-1",
+          session: { sessionId: "session-b" },
+          tracking: { sink },
+          xapi: { enabled: false },
+        }}
+      >
+        <div>child</div>
+      </LessonkitProvider>,
+    );
+
+    await waitFor(() => expect(events.filter((e) => e.name === "course_started")).toHaveLength(1));
+  });
+
   it("Lesson under StrictMode does not complete until removed from the tree", async () => {
     const events: TelemetryEvent[] = [];
 

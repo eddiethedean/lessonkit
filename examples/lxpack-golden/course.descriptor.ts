@@ -18,6 +18,13 @@ export const goldenCourseDescriptor: LessonkitCourseDescriptor = {
       answer: "Barricade the area and notify your supervisor",
       passingScore: 1,
     },
+    {
+      checkId: "ppe-acknowledgment",
+      question: "I confirm my PPE is fitted and I know the muster point for this shift.",
+      choices: ["Not yet", "Yes, I confirm"],
+      answer: "Yes, I confirm",
+      passingScore: 1,
+    },
   ],
   theme: { preset: "brand" },
   tracking: { completion: { threshold: 1 } },

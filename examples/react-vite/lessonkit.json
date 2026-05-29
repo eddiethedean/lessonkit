@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "name": "react-vite",
+  "course": {
+    "courseId": "cybersecurity-awareness",
+    "title": "Cybersecurity Awareness",
+    "layout": "single-spa",
+    "spaLessonId": "assignment",
+    "lessons": [{ "id": "assignment", "title": "Assignment & policy" }],
+    "assessments": [
+      {
+        "checkId": "module-assessment-check",
+        "question": "A vendor emails an invoice with a one-time payment link from an unfamiliar domain. What is the best first step?",
+        "choices": [
+          "Pay immediately to avoid late fees",
+          "Verify the request through your procurement portal or known contact"
+        ],
+        "answer": "Verify the request through your procurement portal or known contact",
+        "passingScore": 1
+      }
+    ],
+    "theme": { "preset": "default" },
+    "tracking": { "completion": { "threshold": 1 } }
+  },
+  "paths": {
+    "spaDistDir": "dist",
+    "lxpackOutDir": ".lxpack/course",
+    "outputBaseDir": ".lxpack/out"
+  }
+}

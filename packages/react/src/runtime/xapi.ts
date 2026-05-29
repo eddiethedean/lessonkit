@@ -12,6 +12,8 @@ export function createXapiClientFromConfig(config: { courseId?: CourseId; xapi?:
   if (config.xapi?.enabled === false) return null;
   if (config.xapi?.client) return config.xapi.client;
   if (!config.courseId) return null;
+  const hasTransport = typeof config.xapi?.transport === "function";
+  if (!hasTransport && config.xapi?.enabled !== true) return null;
   return createXAPIClient({
     courseId: config.courseId,
     transport: config.xapi?.transport,

@@ -28,3 +28,16 @@ export function markCourseStarted(storage: StoragePort, sessionId: string, cours
   storage.setItem(courseStartedStorageKey(sessionId, courseId), "1");
 }
 
+/** Preserve course_started dedup when the configured session id changes mid-run. */
+export function migrateCourseStartedMark(
+  storage: StoragePort,
+  fromSessionId: string,
+  toSessionId: string,
+  courseId?: CourseId,
+): void {
+  if (!courseId || fromSessionId === toSessionId) return;
+  if (hasCourseStarted(storage, fromSessionId, courseId)) {
+    markCourseStarted(storage, toSessionId, courseId);
+  }
+}
+

@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "name": "data-privacy",
+  "course": {
+    "courseId": "data-privacy-essentials",
+    "title": "Data Privacy & GDPR Essentials",
+    "layout": "single-spa",
+    "spaLessonId": "program-overview",
+    "lessons": [{ "id": "program-overview", "title": "Program overview" }],
+    "assessments": [
+      {
+        "checkId": "privacy-knowledge-check",
+        "question": "A sales director asks for all EU prospect emails on a personal USB drive for a flight. What is the correct response?",
+        "choices": [
+          "Export and hand off—they are a director",
+          "Refuse; offer a governed analytics export with DPO-approved scope"
+        ],
+        "answer": "Refuse; offer a governed analytics export with DPO-approved scope",
+        "passingScore": 1
+      }
+    ],
+    "theme": { "preset": "default" },
+    "tracking": { "completion": { "threshold": 1 } }
+  },
+  "paths": {
+    "spaDistDir": "dist",
+    "lxpackOutDir": ".lxpack/course",
+    "outputBaseDir": ".lxpack/out"
+  }
+}

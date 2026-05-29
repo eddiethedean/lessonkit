@@ -3,5 +3,5 @@
   "compilerOptions": {
     "noEmit": true
   },
-  "include": ["src", "course.descriptor.ts", "scripts"]
+  "include": ["src", "course.descriptor.ts"]
 }

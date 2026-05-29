@@ -17,7 +17,13 @@ import type { LxpackBridgeMode } from "./runtime/lxpackBridge";
 import { createSessionStoragePort } from "./runtime/ports";
 import { createProgressController, type ProgressState } from "./runtime/progress";
 import { createXapiClientFromConfig } from "./runtime/xapi";
-import { hasCourseStarted, markCourseStarted, resolveSessionId } from "./runtime/session";
+import {
+  hasCourseStarted,
+  markCourseStarted,
+  migrateCourseStartedMark,
+  resolveSessionId,
+} from "./runtime/session";
+import { createTrackingClientFromConfig, disposeTrackingClient } from "./runtime/telemetry";
 
 export type LessonkitConfig = {
   courseId: CourseId;
@@ -69,28 +75,13 @@ export const LessonkitContext = createContext<LessonkitRuntime | null>(null);
 
 const useIsoLayoutEffect = typeof window !== "undefined" ? useLayoutEffect : useEffect;
 
-function disposeTrackingClient(client: TrackingClient | null | undefined): void {
-  client?.flush?.();
-  client?.dispose?.();
-}
-
 const defaultStorage = createSessionStoragePort();
-
-function createTrackingClientFromConfig(config: LessonkitConfig): TrackingClient {
-  if (config.tracking?.enabled === false) {
-    return createTrackingClient();
-  }
-  return createTrackingClient({
-    sink: config.tracking?.sink,
-    batchSink: config.tracking?.batchSink,
-    batch: config.tracking?.batch,
-  });
-}
 
 export function LessonkitProvider(props: { config: LessonkitConfig; children: React.ReactNode }) {
   const config = props.config;
 
   const sessionIdRef = useRef<string>(resolveSessionId(defaultStorage, config.session?.sessionId));
+  const prevConfiguredSessionIdRef = useRef<string | undefined>(config.session?.sessionId);
   if (config.session?.sessionId) sessionIdRef.current = config.session.sessionId;
 
   const attemptIdRef = useRef<string | undefined>(config.session?.attemptId);
@@ -188,7 +179,7 @@ export function LessonkitProvider(props: { config: LessonkitConfig; children: Re
 
   useIsoLayoutEffect(() => {
     const prev = trackingRef.current;
-    const next = createTrackingClientFromConfig(config);
+    const next = createTrackingClientFromConfig({ tracking: config.tracking });
     trackingRef.current = next;
     trackingClientForUnmountRef.current = next;
     setTracking(next);
@@ -344,11 +335,28 @@ export function LessonkitProvider(props: { config: LessonkitConfig; children: Re
     if (!result.didComplete) return;
     syncProgress();
     track("course_completed");
+    void trackingRef.current?.flush?.();
   }, [track, syncProgress]);
 
   const sessionUser = config.session?.user;
   const sessionAttemptId = config.session?.attemptId;
   const sessionConfiguredId = config.session?.sessionId;
+
+  useEffect(() => {
+    const nextConfigured = config.session?.sessionId;
+    const prevConfigured = prevConfiguredSessionIdRef.current;
+    if (nextConfigured === prevConfigured) return;
+    prevConfiguredSessionIdRef.current = nextConfigured;
+    if (nextConfigured && prevConfigured && prevConfigured !== nextConfigured) {
+      migrateCourseStartedMark(
+        defaultStorage,
+        prevConfigured,
+        nextConfigured,
+        courseIdRef.current,
+      );
+      sessionIdRef.current = nextConfigured;
+    }
+  }, [sessionConfiguredId, config.courseId]);
 
   const runtime = useMemo<LessonkitRuntime>(
     () => ({

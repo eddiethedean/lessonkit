@@ -7,10 +7,15 @@ All notable changes to the LessonKit monorepo are documented here. Published pac
 
 ### Fixed
 
-- **@lessonkit/lxpack/bridge**: Scale `passingScore` to 0–1 when `maxScore` is provided (matches `normalizeAssessmentScore`).
+- **@lessonkit/lxpack/bridge**: Scale `passingScore` to 0–1 when `maxScore` is provided (matches `normalizeAssessmentScore`); clamp normalized scores to 1.
 - **@lessonkit/lxpack**: Atomic promote of packaged `outDir` so a failed `rename` does not delete the previous course tree.
+- **@lessonkit/lxpack**: Validate `passingScore` as absolute points (not capped by choice count); remap nested `build.outputPath` / `outputDir` after staging promote.
 - **@lessonkit/react**: Emit `course_started` before `lesson_started` when `courseId` changes; reset xAPI queue on `courseId` change.
 - **@lessonkit/react**: Harden tracking client dispose on provider unmount.
+- **@lessonkit/react**: Skip xAPI client creation when no transport/client unless `xapi.enabled: true`; flush batched tracking on `completeCourse`; migrate `course_started` dedup when `session.sessionId` changes.
+- **@lessonkit/cli**: Honor `--no-build` for `react-vite` package target; clarify `init --force` (only with `--here`).
+- **Examples**: `lessonkit.json` for react-vite, data-privacy, and customer-service; golden `course.descriptor.ts` sync; `examples/lxpack-golden/README.md` documents `single-spa` lesson ids.
+- **Docs**: README license Apache-2.0; ROADMAP framework status 0.8.1.
 
 ## [0.8.0] - 2026-05-28
 

@@ -167,18 +167,11 @@ export function validateDescriptor(
       issues.push({ path: `${path}.answer`, message: "answer must match a choice" });
     }
     const passingScore = assessment.passingScore;
-    if (passingScore !== undefined) {
-      if (!(passingScore > 0)) {
-        issues.push({
-          path: `${path}.passingScore`,
-          message: "passingScore must be greater than 0",
-        });
-      } else if (trimmedChoices.length && passingScore > trimmedChoices.length) {
-        issues.push({
-          path: `${path}.passingScore`,
-          message: "passingScore must not exceed the number of choices",
-        });
-      }
+    if (passingScore !== undefined && !(passingScore > 0)) {
+      issues.push({
+        path: `${path}.passingScore`,
+        message: "passingScore must be greater than 0 (absolute point threshold)",
+      });
     }
   }
 

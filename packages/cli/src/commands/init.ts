@@ -95,10 +95,13 @@ export async function runInit(opts: InitOptions, logger: CliLogger): Promise<Cli
   const projectDir = opts.here ? cwd : resolve(cwd, slug);
 
   if (!opts.here && existsSync(projectDir)) {
-    throw new CliError(`Directory already exists: ${projectDir}. Use --force to initialize anyway.`, {
-      code: "INVALID_PROJECT",
-      exitCode: EXIT_INVALID_PROJECT,
-    });
+    throw new CliError(
+      `Directory already exists: ${projectDir}. Choose a different name or remove the directory.`,
+      {
+        code: "INVALID_PROJECT",
+        exitCode: EXIT_INVALID_PROJECT,
+      },
+    );
   }
 
   if (opts.here && !(await isDirEmpty(projectDir)) && !opts.force) {

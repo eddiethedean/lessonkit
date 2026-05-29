@@ -42,7 +42,9 @@ export async function runPackage(opts: PackageOptions): Promise<CliJsonResult> {
   const distDir = resolveDistDir(project);
 
   if (target === "react-vite") {
-    await runBuild({ cwd: project.root, json: opts.json });
+    if (!opts.noBuild || !existsSync(distDir)) {
+      await runBuild({ cwd: project.root, json: opts.json });
+    }
     if (!existsSync(distDir)) {
       throw new CliError(`Build completed but dist directory not found at ${distDir}.`, {
         code: "RUNTIME",
