@@ -103,7 +103,7 @@ Canonical dual-export entrypoint.
 
 | Target | Output |
 |--------|--------|
-| `react-vite` | Vite production build → `dist/` |
+| `react-vite` | Verifies `dist/` exists (runs Vite build unless `--no-build` and `dist/` is present). Does not produce an LMS artifact—use `scorm12`, `standalone`, etc. |
 | `scorm12` | SCORM 1.2 ZIP under `.lxpack/course/.lxpack/out/` |
 | `scorm2004` | SCORM 2004 ZIP |
 | `xapi` | xAPI ZIP |
@@ -123,7 +123,7 @@ lessonkit package --target scorm12 --out .lxpack/out/custom.zip
 | `--target` | **Required.** Export target (see table above) |
 | `--cwd` | Project root (default: current directory) |
 | `--no-build` | Skip implicit Vite build when `dist/` already exists (`react-vite` and lxpack targets) |
-| `--out` | Override output artifact path |
+| `--out` | Override output artifact path (must resolve inside the project root) |
 | `--json` | Structured JSON result on stdout (CI/codegen) |
 
 Lxpack targets run `packageLessonkitCourse()` from `@lessonkit/lxpack`. Output layout matches [`PACKAGING.md`](PACKAGING.md).

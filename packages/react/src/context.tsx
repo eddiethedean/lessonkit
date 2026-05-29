@@ -78,12 +78,20 @@ const useIsoLayoutEffect = typeof window !== "undefined" ? useLayoutEffect : use
 
 const defaultStorage = createSessionStoragePort();
 
+function isTrackingActive(tracking?: LessonkitConfig["tracking"]): boolean {
+  return tracking?.enabled !== false;
+}
+
 export function LessonkitProvider(props: { config: LessonkitConfig; children: React.ReactNode }) {
   const config = props.config;
 
   const sessionIdRef = useRef<string>(resolveSessionId(defaultStorage, config.session?.sessionId));
   const prevConfiguredSessionIdRef = useRef<string | undefined>(config.session?.sessionId);
-  if (config.session?.sessionId) sessionIdRef.current = config.session.sessionId;
+  if (config.session?.sessionId) {
+    sessionIdRef.current = config.session.sessionId;
+  } else if (prevConfiguredSessionIdRef.current) {
+    sessionIdRef.current = resolveSessionId(defaultStorage, undefined);
+  }
 
   const attemptIdRef = useRef<string | undefined>(config.session?.attemptId);
   const userRef = useRef<TelemetryUser | undefined>(config.session?.user);
@@ -97,6 +105,16 @@ export function LessonkitProvider(props: { config: LessonkitConfig; children: Re
   lxpackBridgeModeRef.current = config.lxpack?.bridge ?? "auto";
 
   const progressRef = useRef(createProgressController());
+  const courseStartedEmittedToSinkRef = useRef(false);
+  const prevCourseIdForProgressRef = useRef(config.courseId);
+  const pendingCourseIdResetRef = useRef(false);
+  if (prevCourseIdForProgressRef.current !== config.courseId) {
+    prevCourseIdForProgressRef.current = config.courseId;
+    progressRef.current = createProgressController();
+    pendingCourseIdResetRef.current = true;
+    courseStartedEmittedToSinkRef.current = false;
+  }
+
   const [progress, setProgress] = useState<ProgressState>(() => progressRef.current.getState());
 
   const syncProgress = useCallback(() => {
@@ -130,21 +148,19 @@ export function LessonkitProvider(props: { config: LessonkitConfig; children: Re
     if (next && !prev) {
       const sessionId = sessionIdRef.current;
       const cid = courseIdRef.current;
-      if (hasCourseStarted(defaultStorage, sessionId, cid)) {
-        try {
-          const statement = telemetryEventToXAPIStatement(
-            buildTrackEvent({
-              name: "course_started",
-              courseId: cid,
-              sessionId,
-              attemptId: attemptIdRef.current,
-              user: userRef.current,
-            }),
-          );
-          if (statement) next.send(statement);
-        } catch {
-          // xAPI mapping may skip invalid ids; ignore
-        }
+      try {
+        const statement = telemetryEventToXAPIStatement(
+          buildTrackEvent({
+            name: "course_started",
+            courseId: cid,
+            sessionId,
+            attemptId: attemptIdRef.current,
+            user: userRef.current,
+          }),
+        );
+        if (statement) next.send(statement);
+      } catch {
+        // xAPI mapping may skip invalid ids; ignore
       }
     }
 
@@ -190,7 +206,14 @@ export function LessonkitProvider(props: { config: LessonkitConfig; children: Re
 
     const sessionId = sessionIdRef.current;
     const cid = courseIdRef.current;
-    if (!hasCourseStarted(defaultStorage, sessionId, cid)) {
+    const trackingActive = isTrackingActive(config.tracking);
+
+    if (!trackingActive) {
+      courseStartedEmittedToSinkRef.current = false;
+    } else if (
+      !courseStartedEmittedToSinkRef.current &&
+      !hasCourseStarted(defaultStorage, sessionId, cid)
+    ) {
       markCourseStarted(defaultStorage, sessionId, cid);
       emitTelemetry(
         next,
@@ -204,6 +227,9 @@ export function LessonkitProvider(props: { config: LessonkitConfig; children: Re
         }),
         { lxpackBridge: lxpackBridgeModeRef.current },
       );
+      courseStartedEmittedToSinkRef.current = true;
+    } else if (trackingActive) {
+      courseStartedEmittedToSinkRef.current = true;
     }
 
     return () => {
@@ -246,18 +272,19 @@ export function LessonkitProvider(props: { config: LessonkitConfig; children: Re
     [emitWithBridge],
   );
 
-  const prevCourseIdRef = useRef(config.courseId);
-  useEffect(() => {
-    if (prevCourseIdRef.current === config.courseId) return;
-    const previousActiveLesson = progressRef.current.getState().activeLessonId;
-    prevCourseIdRef.current = config.courseId;
-
-    progressRef.current = createProgressController();
+  useLayoutEffect(() => {
+    if (!pendingCourseIdResetRef.current) return;
+    pendingCourseIdResetRef.current = false;
     syncProgress();
 
+    if (!isTrackingActive(config.tracking)) return;
+
     const sessionId = sessionIdRef.current;
-    const cid = config.courseId;
-    if (!hasCourseStarted(defaultStorage, sessionId, cid)) {
+    const cid = courseIdRef.current;
+    if (
+      !courseStartedEmittedToSinkRef.current &&
+      !hasCourseStarted(defaultStorage, sessionId, cid)
+    ) {
       markCourseStarted(defaultStorage, sessionId, cid);
       emitTelemetry(
         trackingRef.current,
@@ -271,14 +298,9 @@ export function LessonkitProvider(props: { config: LessonkitConfig; children: Re
         }),
         { lxpackBridge: lxpackBridgeModeRef.current },
       );
+      courseStartedEmittedToSinkRef.current = true;
     }
-
-    if (previousActiveLesson) {
-      progressRef.current.setActiveLesson(previousActiveLesson, Date.now());
-      syncProgress();
-      track("lesson_started", { lessonId: previousActiveLesson }, { lessonId: previousActiveLesson });
-    }
-  }, [config.courseId, syncProgress, track]);
+  }, [config.courseId, config.tracking?.enabled, syncProgress]);
 
   const emitLessonCompleted = useCallback(
     (lessonId: LessonId, durationMs?: number) => {
@@ -301,16 +323,22 @@ export function LessonkitProvider(props: { config: LessonkitConfig; children: Re
     [syncProgress, emitLessonCompleted],
   );
 
+  const unmountTimerIdsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
   useEffect(() => {
     return () => {
+      for (const id of unmountTimerIdsRef.current) clearTimeout(id);
+      unmountTimerIdsRef.current = [];
+
       const client = trackingClientForUnmountRef.current;
       void xapiRef.current?.flush();
-      setTimeout(() => {
+      const flushTimer = setTimeout(() => {
         client?.flush?.();
-        setTimeout(() => {
+        const disposeTimer = setTimeout(() => {
           client?.dispose?.();
         }, 0);
+        unmountTimerIdsRef.current.push(disposeTimer);
       }, 0);
+      unmountTimerIdsRef.current.push(flushTimer);
     };
   }, []);
 
@@ -352,8 +380,9 @@ export function LessonkitProvider(props: { config: LessonkitConfig; children: Re
     if (nextConfigured === prevConfigured) return;
     prevConfiguredSessionIdRef.current = nextConfigured;
 
+    const cid = courseIdRef.current;
+
     if (nextConfigured) {
-      const cid = courseIdRef.current;
       const fromIds = new Set<string>();
       if (prevConfigured) fromIds.add(prevConfigured);
       const tabId = getTabSessionId(defaultStorage);
@@ -364,6 +393,10 @@ export function LessonkitProvider(props: { config: LessonkitConfig; children: Re
         }
       }
       sessionIdRef.current = nextConfigured;
+    } else if (prevConfigured) {
+      const nextAuto = resolveSessionId(defaultStorage, undefined);
+      migrateCourseStartedMark(defaultStorage, prevConfigured, nextAuto, cid);
+      sessionIdRef.current = nextAuto;
     }
   }, [sessionConfiguredId, config.courseId]);
 

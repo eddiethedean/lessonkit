@@ -43,6 +43,7 @@ export function migrateCourseStartedMark(
   if (!courseId || fromSessionId === toSessionId) return;
   if (hasCourseStarted(storage, fromSessionId, courseId)) {
     markCourseStarted(storage, toSessionId, courseId);
+    storage.removeItem?.(courseStartedStorageKey(fromSessionId, courseId));
   }
 }
 

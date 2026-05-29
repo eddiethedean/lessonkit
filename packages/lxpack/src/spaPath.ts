@@ -5,8 +5,8 @@ export function isSafeRelativeSpaPath(spaPath: string): boolean {
   if (!spaPath.length || spaPath.includes("\0")) return false;
   if (spaPath.startsWith("/") || spaPath.startsWith("\\")) return false;
   if (/^[a-zA-Z]:[/\\]/.test(spaPath)) return false;
-  const segments = spaPath.split(/[/\\]/);
-  if (segments.some((s) => s === "..")) return false;
+  const segments = spaPath.split(/[/\\]/).filter((s) => s.length > 0);
+  if (segments.some((s) => s === ".." || s === ".")) return false;
   return true;
 }
 

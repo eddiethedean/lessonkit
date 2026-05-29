@@ -2,6 +2,7 @@ import { validateId } from "@lessonkit/core";
 import type { ThemePresetName } from "@lessonkit/themes";
 import type { LessonkitCourseDescriptor, SpaLayout } from "./types";
 import { isSafeRelativeSpaPath } from "./spaPath";
+import { themeToLxpackRuntime } from "./theme";
 
 const VALID_LAYOUTS: readonly SpaLayout[] = ["single-spa", "per-lesson-spa"];
 const VALID_THEME_PRESETS: readonly ThemePresetName[] = ["default", "light", "dark", "brand"];
@@ -81,6 +82,31 @@ export function validateDescriptor(
       path: "theme.preset",
       message: `unknown preset; use one of: ${VALID_THEME_PRESETS.join(", ")}`,
     });
+  }
+
+  if (input.theme?.theme) {
+    try {
+      themeToLxpackRuntime({ preset: themePreset, theme: input.theme.theme });
+    } catch (err) {
+      issues.push({
+        path: "theme.theme",
+        message: err instanceof Error ? err.message : "invalid custom theme",
+      });
+    }
+  }
+
+  const completionThreshold = input.tracking?.completion?.threshold;
+  if (completionThreshold !== undefined) {
+    if (
+      !Number.isFinite(completionThreshold) ||
+      completionThreshold < 0 ||
+      completionThreshold > 1
+    ) {
+      issues.push({
+        path: "tracking.completion.threshold",
+        message: "threshold must be a finite number between 0 and 1",
+      });
+    }
   }
 
   if (layout === "single-spa" && (input.lessons?.length ?? 0) > 1) {

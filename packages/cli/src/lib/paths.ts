@@ -1,5 +1,5 @@
 import { resolve } from "node:path";
-import type { ExportTarget } from "@lessonkit/lxpack";
+import { resolveSafePackageOutputOverride, type ExportTarget } from "@lessonkit/lxpack";
 import type { LessonkitProject } from "./project.js";
 
 export function resolveDistDir(project: LessonkitProject): string {
@@ -18,7 +18,8 @@ export function resolvePackageOutput(
   const outputBaseDir = project.paths.outputBaseDir;
 
   if (override) {
-    return { output: override, dir: target === "standalone", outputBaseDir };
+    const resolved = resolveSafePackageOutputOverride(project.root, override);
+    return { output: resolved, dir: target === "standalone", outputBaseDir };
   }
 
   if (target === "standalone") {

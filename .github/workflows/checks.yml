@@ -27,6 +27,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Verify CLI template matches source
+        run: |
+          npm run copy-template -w @lessonkit/cli
+          git diff --exit-code packages/cli/template/vite-react
+
       - name: Build
         run: npm run build
 

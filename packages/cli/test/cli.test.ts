@@ -3,6 +3,7 @@ import { mkdtemp, rm, writeFile, mkdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { createProgram, run } from "../src/index.js";
+import { runInit } from "../src/commands/init.js";
 import { formatCliError, CliError, EXIT_INVALID_PROJECT } from "../src/lib/errors.js";
 import { findProjectRoot, loadLessonkitJson } from "../src/lib/project.js";
 import { parsePackageTarget, resolvePackageOutput, resolveViteBuildArgs } from "../src/lib/paths.js";
@@ -104,6 +105,47 @@ describe("resolvePackageOutput", () => {
     expect(output).toBe("build/artifacts/course-scorm12.zip");
   });
 
+  it("resolves --out override under project root", () => {
+    const project = {
+      root: "/proj",
+      schemaVersion: 1,
+      name: "demo",
+      course: {
+        courseId: "demo",
+        title: "Demo",
+        layout: "single-spa" as const,
+        lessons: [{ id: "l1", title: "L1" }],
+      },
+      paths: {
+        spaDistDir: "dist",
+        lxpackOutDir: ".lxpack/course",
+        outputBaseDir: ".lxpack/out",
+      },
+    };
+    const { output } = resolvePackageOutput(project, "scorm12", "artifacts/course.zip");
+    expect(output).toBe("/proj/artifacts/course.zip");
+  });
+
+  it("rejects --out path traversal", () => {
+    const project = {
+      root: "/proj",
+      schemaVersion: 1,
+      name: "demo",
+      course: {
+        courseId: "demo",
+        title: "Demo",
+        layout: "single-spa" as const,
+        lessons: [{ id: "l1", title: "L1" }],
+      },
+      paths: {
+        spaDistDir: "dist",
+        lxpackOutDir: ".lxpack/course",
+        outputBaseDir: ".lxpack/out",
+      },
+    };
+    expect(() => resolvePackageOutput(project, "scorm12", "../evil.zip")).toThrow(/unsafe/);
+  });
+
   it("resolves standalone directory", () => {
     const project = {
       root: "/proj",
@@ -180,6 +222,28 @@ describe("loadLessonkitJson", () => {
     });
   });
 
+  it("rejects unsafe paths in lessonkit.json", async () => {
+    await writeFile(
+      join(dir, "lessonkit.json"),
+      JSON.stringify({
+        schemaVersion: 1,
+        name: "demo",
+        course: {
+          courseId: "demo",
+          title: "Demo",
+          layout: "single-spa",
+          lessons: [{ id: "lesson-1", title: "Lesson" }],
+        },
+        paths: { spaDistDir: "../../outside" },
+      }),
+      "utf8",
+    );
+    await expect(loadLessonkitJson(dir)).rejects.toMatchObject({
+      exitCode: EXIT_INVALID_PROJECT,
+      message: expect.stringContaining("invalid paths"),
+    });
+  });
+
   it("rejects invalid schemaVersion", async () => {
     await writeFile(
       join(dir, "lessonkit.json"),
@@ -251,12 +315,15 @@ describe("findProjectRoot", () => {
 
 describe("runInit", () => {
   let parentDir: string;
+  let originalCwd: string;
 
   beforeEach(async () => {
+    originalCwd = process.cwd();
     parentDir = await mkdtemp(join(tmpdir(), "lk-cli-init-"));
   });
 
   afterEach(async () => {
+    process.chdir(originalCwd);
     await rm(parentDir, { recursive: true, force: true });
   });
 
@@ -277,7 +344,22 @@ describe("runInit", () => {
     const appSource = await readFile(join(projectDir, "src/App.tsx"), "utf8");
     expect(appSource).toContain("@lessonkit/react");
     expect(appSource).toContain('courseId="my-demo"');
+    expect(appSource).toContain('title="my-demo"');
     expect(appSource).toContain('preset="default"');
+  });
+
+  it("rejects --here --force when the directory has non-dotfile entries", async () => {
+    const here = join(parentDir, "existing");
+    await mkdir(here, { recursive: true });
+    await writeFile(join(here, "stray.txt"), "keep", "utf8");
+    process.chdir(here);
+
+    await expect(
+      runInit({ here: true, force: true, skipInstall: true }, { log: () => {}, error: () => {} }),
+    ).rejects.toMatchObject({
+      exitCode: EXIT_INVALID_PROJECT,
+      message: expect.stringContaining("dotfiles only"),
+    });
   });
 });
 

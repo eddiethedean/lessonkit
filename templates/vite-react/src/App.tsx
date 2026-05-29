@@ -20,7 +20,7 @@ export default function App() {
   return (
     <ThemeProvider preset="default" mode="light">
       <div className="app-shell">
-        <Course title="My LessonKit Course" courseId="my-course" config={courseConfig}>
+        <Course title="{{courseTitle}}" courseId="my-course" config={courseConfig}>
           <Lesson title="My first lesson" lessonId="lesson-1">
             <Scenario>
               <p>Replace this content with your training material.</p>

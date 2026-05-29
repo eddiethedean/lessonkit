@@ -1,6 +1,7 @@
 export type StoragePort = {
   getItem: (key: string) => string | null;
   setItem: (key: string, value: string) => void;
+  removeItem?: (key: string) => void;
 };
 
 export type ClockPort = {
@@ -40,6 +41,13 @@ export function createSessionStoragePort(): StoragePort {
     setItem: (key, value) => {
       try {
         sessionStorage.setItem(key, value);
+      } catch {
+        // ignore
+      }
+    },
+    removeItem: (key) => {
+      try {
+        sessionStorage.removeItem(key);
       } catch {
         // ignore
       }

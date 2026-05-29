@@ -9,6 +9,11 @@ export type {
 
 export type { DescriptorValidationIssue, DescriptorValidationResult } from "./validateDescriptor";
 export { validateDescriptor } from "./validateDescriptor";
+export type { ProjectPathsInput } from "./validateProjectPaths";
+export {
+  resolveSafePackageOutputOverride,
+  validateProjectPaths,
+} from "./validateProjectPaths";
 
 export { mapLessonkitIds } from "./mapIds";
 

@@ -5,6 +5,7 @@ import { tmpdir } from "node:os";
 
 vi.mock("@lessonkit/lxpack", () => ({
   validateDescriptor: vi.fn((input: unknown) => ({ ok: true, descriptor: input })),
+  validateProjectPaths: vi.fn(() => []),
   packageLessonkitCourse: vi.fn(),
 }));
 

@@ -880,6 +880,113 @@ describe("@lessonkit/react runtime", () => {
     expect(courseBStartedIdx).toBeLessThan(courseBLessonStartedIdx);
   });
 
+  it("does not complete the previous active lesson under a new courseId when courseId changes", async () => {
+    const events: TelemetryEvent[] = [];
+    const sink = (e: TelemetryEvent) => {
+      events.push(e);
+    };
+
+    function Driver() {
+      const { setActiveLesson } = useLessonkit();
+      React.useEffect(() => {
+        setActiveLesson("lesson-2");
+      }, [setActiveLesson]);
+      return null;
+    }
+
+    const { rerender } = render(
+      <LessonkitProvider
+        config={{
+          courseId: "course-a",
+          tracking: { sink },
+          xapi: { enabled: false },
+        }}
+      >
+        <Lesson title="L" lessonId="lesson-1">
+          <div />
+        </Lesson>
+        <Driver />
+      </LessonkitProvider>,
+    );
+
+    await waitFor(() =>
+      expect(
+        events.some((e) => e.name === "lesson_started" && e.lessonId === "lesson-2" && e.courseId === "course-a"),
+      ).toBe(true),
+    );
+
+    rerender(
+      <LessonkitProvider
+        config={{
+          courseId: "course-b",
+          tracking: { sink },
+          xapi: { enabled: false },
+        }}
+      >
+        <Lesson title="L" lessonId="lesson-1">
+          <div />
+        </Lesson>
+        <Driver />
+      </LessonkitProvider>,
+    );
+
+    await waitFor(() => expect(events.some((e) => e.courseId === "course-b")).toBe(true));
+
+    const stray = events.filter(
+      (e) =>
+        e.name === "lesson_completed" &&
+        e.courseId === "course-b" &&
+        e.lessonId === "lesson-2",
+    );
+    expect(stray).toHaveLength(0);
+  });
+
+  it("reverts to tab session id when configured sessionId is cleared", async () => {
+    function Reader() {
+      const { session } = useLessonkit();
+      return <span data-testid="sid">{session.sessionId}</span>;
+    }
+
+    const { rerender, getByTestId } = render(
+      <LessonkitProvider config={{ courseId: "course-1", session: { sessionId: "lms-a" } }}>
+        <Reader />
+      </LessonkitProvider>,
+    );
+
+    expect(getByTestId("sid").textContent).toBe("lms-a");
+
+    rerender(
+      <LessonkitProvider config={{ courseId: "course-1" }}>
+        <Reader />
+      </LessonkitProvider>,
+    );
+
+    expect(getByTestId("sid").textContent).not.toBe("lms-a");
+  });
+
+  it("emits course_started when tracking is re-enabled after disabled mount", async () => {
+    const events: TelemetryEvent[] = [];
+
+    const { rerender } = render(
+      <LessonkitProvider config={{ courseId: "course-1", tracking: { enabled: false } }}>
+        <div>child</div>
+      </LessonkitProvider>,
+    );
+
+    rerender(
+      <LessonkitProvider
+        config={{
+          courseId: "course-1",
+          tracking: { sink: (e: TelemetryEvent) => void events.push(e) },
+        }}
+      >
+        <div>child</div>
+      </LessonkitProvider>,
+    );
+
+    await waitFor(() => expect(events.some((e) => e.name === "course_started")).toBe(true));
+  });
+
   it("drops queued xAPI when courseId changes", async () => {
     const statements: XAPIStatement[] = [];
     const failingTransport = vi.fn(async () => {

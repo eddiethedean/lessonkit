@@ -17,6 +17,7 @@ Published packages: `@lessonkit/core`, `@lessonkit/xapi`, `@lessonkit/accessibil
 | All seven `@lessonkit/*` packages at `0.8.1` in `package.json` | Required |
 | `@lessonkit/react` / `@lessonkit/lxpack` / `@lessonkit/cli` depend on matching `@lessonkit/*@0.8.1` | Required |
 | `lessonkit init` template pins `^0.8.1` for `@lessonkit/*` | Required |
+| `templates/vite-react` synced to `packages/cli/template` (`copy-template`; CI enforces) | Required |
 | [CHANGELOG.md](CHANGELOG.md) `## [0.8.1]` documents fixes | Required |
 | No pending `.changeset/*.md` files | Required |
 | Git tag `v0.8.1` | Create only when ready to publish |

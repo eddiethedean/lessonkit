@@ -7,6 +7,14 @@ All notable changes to the LessonKit monorepo are documented here. Published pac
 
 ### Fixed
 
+- **@lessonkit/react**: Reset progress synchronously on `courseId` change so child `<Lesson>` effects cannot emit completions under the wrong course id.
+- **@lessonkit/react**: Revert to tab/auto `sessionId` when `session.sessionId` is cleared from config.
+- **@lessonkit/react**: Skip `course_started` storage/delivery while `tracking.enabled` is `false`; emit when tracking is re-enabled.
+- **@lessonkit/react**: Reset `Quiz` state when `answer` or `question` changes; cancel pending dispose timers on provider remount.
+- **@lessonkit/react**: Remove stale `course_started` storage keys after session id migration.
+- **@lessonkit/cli**: Validate `lessonkit.json` `paths.*` and `package --out` stay under the project root.
+- **@lessonkit/cli**: `init --force` only allowed when the target directory is empty or contains dotfiles only; template uses `{{courseId}}` / `{{courseTitle}}` placeholders.
+- **@lessonkit/lxpack**: `validateProjectPaths`, `resolveSafePackageOutputOverride`; validate custom theme and completion threshold in `validateDescriptor`; `writeLxpackProject` resolves relative `spaDistDir` under optional `projectRoot`.
 - **@lessonkit/lxpack/bridge**: Scale `passingScore` to 0–1 when `maxScore` is provided (matches `normalizeAssessmentScore`); clamp normalized scores to 1.
 - **@lessonkit/lxpack**: Atomic promote of packaged `outDir` so a failed `rename` does not delete the previous course tree.
 - **@lessonkit/lxpack**: Validate `passingScore` as absolute points (not capped by choice count); remap nested `build.outputPath` / `outputDir` after staging promote.

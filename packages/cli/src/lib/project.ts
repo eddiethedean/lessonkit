@@ -2,7 +2,7 @@ import { readFileSync, existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { dirname, join, parse, resolve } from "node:path";
 import type { LessonkitCourseDescriptor } from "@lessonkit/lxpack";
-import { validateDescriptor } from "@lessonkit/lxpack";
+import { validateDescriptor, validateProjectPaths } from "@lessonkit/lxpack";
 import { CliError, EXIT_INVALID_PROJECT } from "./errors.js";
 
 export const LESSONKIT_JSON = "lessonkit.json";
@@ -133,6 +133,15 @@ export async function loadLessonkitJson(projectRoot: string): Promise<LessonkitP
     if (typeof p.spaDistDir === "string" && p.spaDistDir.trim()) paths.spaDistDir = p.spaDistDir;
     if (typeof p.lxpackOutDir === "string" && p.lxpackOutDir.trim()) paths.lxpackOutDir = p.lxpackOutDir;
     if (typeof p.outputBaseDir === "string" && p.outputBaseDir.trim()) paths.outputBaseDir = p.outputBaseDir;
+  }
+
+  const pathIssues = validateProjectPaths(projectRoot, paths);
+  if (pathIssues.length) {
+    throw new CliError(`${configPath}: invalid paths.`, {
+      code: "INVALID_PROJECT",
+      exitCode: EXIT_INVALID_PROJECT,
+      issues: pathIssues,
+    });
   }
 
   return {

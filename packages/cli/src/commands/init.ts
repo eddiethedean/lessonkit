@@ -37,6 +37,17 @@ async function isDirEmpty(dir: string): Promise<boolean> {
   return entries.length === 0;
 }
 
+/** True when the directory has no entries other than dotfiles (e.g. `.git`). */
+async function isDirEmptyOrDotfilesOnly(dir: string): Promise<boolean> {
+  if (!existsSync(dir)) return true;
+  const entries = await readdir(dir);
+  return entries.every((name) => name.startsWith("."));
+}
+
+function escapeJsxString(value: string): string {
+  return value.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+}
+
 async function copyTemplate(src: string, dest: string): Promise<void> {
   await mkdir(dest, { recursive: true });
   const entries = await readdir(src, { withFileTypes: true });
@@ -73,9 +84,7 @@ async function applyTemplateSubstitutions(projectDir: string, projectName: strin
   const appPath = join(projectDir, "src", "App.tsx");
   let appSource = await readFile(appPath, "utf8");
   appSource = appSource.replace(/courseId="my-course"/g, `courseId="${slug}"`);
-  appSource = appSource.replace(/title="My LessonKit Course"/g, `title="${projectName.replace(/"/g, '\\"')}"`);
-  appSource = appSource.replace(/preset="dark"/g, 'preset="default"');
-  appSource = appSource.replace(/mode="dark"/g, 'mode="light"');
+  appSource = appSource.replace(/\{\{courseTitle\}\}/g, escapeJsxString(projectName));
   await writeFile(appPath, appSource, "utf8");
 }
 
@@ -109,6 +118,16 @@ export async function runInit(opts: InitOptions, logger: CliLogger): Promise<Cli
       code: "INVALID_PROJECT",
       exitCode: EXIT_INVALID_PROJECT,
     });
+  }
+
+  if (opts.here && opts.force && !(await isDirEmptyOrDotfilesOnly(projectDir))) {
+    throw new CliError(
+      `Directory is not empty: ${projectDir}. --force only initializes when the directory is empty or contains dotfiles only (e.g. .git).`,
+      {
+        code: "INVALID_PROJECT",
+        exitCode: EXIT_INVALID_PROJECT,
+      },
+    );
   }
 
   const templateDir = getTemplateDir();

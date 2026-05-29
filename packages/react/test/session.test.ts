@@ -51,11 +51,13 @@ describe("@lessonkit/react runtime/session", () => {
     const storage = {
       getItem: (k: string) => map.get(k) ?? null,
       setItem: (k: string, v: string) => void map.set(k, v),
+      removeItem: (k: string) => void map.delete(k),
     };
 
     markCourseStarted(storage, "old-session", "course-1");
     migrateCourseStartedMark(storage, "old-session", "new-session", "course-1");
     expect(hasCourseStarted(storage, "new-session", "course-1")).toBe(true);
+    expect(hasCourseStarted(storage, "old-session", "course-1")).toBe(false);
   });
 });
 

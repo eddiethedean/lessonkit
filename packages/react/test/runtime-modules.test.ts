@@ -18,6 +18,26 @@ describe("@lessonkit/react runtime modules", () => {
     const storage = createSessionStoragePort();
     storage.setItem("k", "v");
     expect(storage.getItem("k")).toBe("v");
+    storage.removeItem?.("k");
+    expect(storage.getItem("k")).toBeNull();
+  });
+
+  it("ports: createSessionStoragePort ignores removeItem errors", () => {
+    const store: Record<string, string> = { k: "v" };
+    vi.stubGlobal("sessionStorage", {
+      getItem: (key: string) => store[key] ?? null,
+      setItem: (key: string, value: string) => {
+        store[key] = value;
+      },
+      removeItem: () => {
+        throw new Error("quota");
+      },
+    });
+    try {
+      createSessionStoragePort().removeItem!("k");
+    } finally {
+      vi.unstubAllGlobals();
+    }
   });
 
   it("ports: createSessionStoragePort falls back when unavailable", () => {
