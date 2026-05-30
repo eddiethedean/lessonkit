@@ -38,14 +38,78 @@ export { createTrackingClient } from "./trackingClient";
 export { createSessionId } from "./ids";
 export { nowIso } from "./time";
 
+export type { BuildTelemetryEventInput } from "./telemetryBuilder";
+export {
+  buildTelemetryEvent,
+  buildTrackEvent,
+  tryBuildTelemetryEvent,
+  tryBuildTrackEvent,
+  resetTelemetryBuilderWarningsForTests,
+} from "./telemetryBuilder";
+
+export type { EmitContext, TelemetryPipeline, TelemetryPipelineSink } from "./telemetryPipeline";
+export { createTelemetryPipeline, createTrackingPipelineSink } from "./telemetryPipeline";
+
+export type { StoragePort, ClockPort, TimerPort } from "./ports";
+export {
+  createDefaultClock,
+  createGlobalTimer,
+  createNoopStorage,
+  createSessionStoragePort,
+} from "./ports";
+
+export type { ProgressState, ProgressController } from "./progress";
+export { createProgressController } from "./progress";
+
+export {
+  SESSION_STORAGE_KEY,
+  getTabSessionId,
+  resolveSessionId,
+  hasCourseStarted,
+  markCourseStarted,
+  migrateCourseStartedMark,
+} from "./session";
+
 export type {
+  CourseLifecycleContext,
+  CourseLifecycleDeps,
+  LessonCompletionEmitter,
+} from "./runtime/courseLifecycle";
+export {
+  buildCourseStartedTelemetryEvent,
+  completeCourseWithTelemetry,
+  completeLessonWithTelemetry,
+  tryEmitCourseStarted,
+} from "./runtime/courseLifecycle";
+
+export type {
+  HeadlessLessonkitConfig,
+  HeadlessLessonkitRuntime,
+  HeadlessRuntimePorts,
+  LessonkitRuntimeVersion,
+} from "./runtime/createLessonkitRuntime";
+export { createLessonkitRuntime } from "./runtime/createLessonkitRuntime";
+
+export type {
+  AssessmentPlugin,
   AssessmentScoreInput,
   AssessmentScoreResult,
   InteractionBlockRegistration,
+  InteractionPlugin,
   LessonkitPlugin,
   LessonkitPluginContext,
   LessonkitPluginKind,
+  LifecyclePlugin,
   PluginHost,
+  PluginRegistry,
+  TelemetryPlugin,
 } from "./plugins";
 
-export { createPluginHost, defineLessonkitPlugin } from "./plugins";
+export {
+  createPluginHost,
+  createPluginRegistry,
+  defineAssessmentPlugin,
+  defineLifecyclePlugin,
+  defineLessonkitPlugin,
+  defineTelemetryPlugin,
+} from "./plugins";

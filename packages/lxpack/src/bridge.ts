@@ -1,3 +1,4 @@
+import type { TelemetryEvent } from "@lessonkit/core";
 import type { CheckId, LessonId } from "@lessonkit/core";
 import {
   createLxpackBridgeHost,
@@ -30,14 +31,17 @@ export {
   mapLessonkitTelemetryToBridgeAction,
   mapLessonkitTelemetryToLxpack,
 } from "@lxpack/tracking-schema";
+import { mapLessonkitTelemetryToBridgeAction } from "@lxpack/tracking-schema";
 
-export { telemetryEventToLessonkit } from "./telemetry";
+import { telemetryEventToLessonkit } from "./telemetry";
 
 type LxpackBridgeHost = {
   lxpackBridge?: { v1?: LxpackBridgeV1 };
   /** @deprecated Pre-v0.5 host alias; prefer `lxpackBridge.v1`. */
   lxpack?: LxpackBridgeV1;
 };
+
+export { telemetryEventToLessonkit };
 
 /**
  * Scale a raw quiz score to 0–1 for the LXPack parent bridge.
@@ -74,6 +78,61 @@ function getBridge(parentWindow?: Window): LxpackBridgeV1 | null {
   const parent = (parentWindow ?? window.parent) as (Window & LxpackBridgeHost) | null;
   if (!parent || parent === window) return null;
   return parent.lxpack ?? null;
+}
+
+export type LxpackBridgeMode = "auto" | "off";
+
+/** Apply a mapped bridge action to an LXPack bridge instance. */
+export function dispatchBridgeAction(
+  bridge: LxpackBridgeV1,
+  action: ReturnType<typeof mapLessonkitTelemetryToBridgeAction>,
+): void {
+  if (!action) return;
+  switch (action.kind) {
+    case "completeLesson":
+      bridge.completeLesson?.(action.lessonId);
+      return;
+    case "completeCourse":
+      bridge.completeCourse?.();
+      return;
+    case "submitAssessment": {
+      const scaled = normalizeScore({
+        score: action.score,
+        maxScore: action.maxScore,
+      });
+      if (scaled === null) return;
+      bridge.submitAssessment?.({
+        id: action.id,
+        score: scaled,
+        passingScore: normalizePassingThreshold({
+          passingScore: action.passingScore,
+          maxScore: action.maxScore,
+        }),
+        maxScore: action.maxScore,
+      });
+      return;
+    }
+    case "track":
+      bridge.track?.(action.event);
+      return;
+    default:
+      return;
+  }
+}
+
+/** Resolve bridge and dispatch a telemetry-derived action. */
+export function forwardTelemetryToBridge(
+  event: TelemetryEvent,
+  mode: LxpackBridgeMode = "auto",
+  parentWindow?: Window,
+): void {
+  if (mode === "off") return;
+  const bridge = getBridge(parentWindow);
+  if (!bridge) return;
+  const lessonkitEvent = telemetryEventToLessonkit(event);
+  if (!lessonkitEvent) return;
+  const action = mapLessonkitTelemetryToBridgeAction(lessonkitEvent);
+  dispatchBridgeAction(bridge, action);
 }
 
 export function createLxpackBridge(): LxpackBridgeV1 | null {

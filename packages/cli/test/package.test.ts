@@ -3,11 +3,15 @@ import { mkdtemp, rm, writeFile, mkdir } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 
-vi.mock("@lessonkit/lxpack", () => ({
-  validateDescriptor: vi.fn((input: unknown) => ({ ok: true, descriptor: input })),
-  validateProjectPaths: vi.fn(() => []),
-  packageLessonkitCourse: vi.fn(),
-}));
+vi.mock("@lessonkit/lxpack", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@lessonkit/lxpack")>();
+  return {
+    ...actual,
+    validateDescriptor: vi.fn((input: unknown) => ({ ok: true, descriptor: input })),
+    validateProjectPaths: vi.fn(() => []),
+    packageLessonkitCourse: vi.fn(),
+  };
+});
 
 vi.mock("../src/lib/exec.js", async (importOriginal) => {
   const actual = await importOriginal<typeof import("../src/lib/exec.js")>();

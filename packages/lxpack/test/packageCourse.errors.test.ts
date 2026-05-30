@@ -95,15 +95,20 @@ describe("packageLessonkitCourse errors", () => {
     await mkdir(dist, { recursive: true });
     await writeFile(join(dist, "index.html"), "<html></html>", "utf-8");
 
-    await expect(
-      packageLessonkitCourse({
-        descriptor,
-        outDir: join(root, "..", "outside-course"),
-        spaDistDir: dist,
-        projectRoot: root,
-        target: "scorm12",
-      }),
-    ).rejects.toThrow(/unsafe path escapes project root/);
+    const result = await packageLessonkitCourse({
+      descriptor,
+      outDir: join(root, "..", "outside-course"),
+      spaDistDir: dist,
+      projectRoot: root,
+      target: "scorm12",
+    });
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.issues.some((i) => i.message.includes("unsafe path escapes project root"))).toBe(
+        true,
+      );
+    }
   });
 
   it("returns ok false when descriptor is invalid", async () => {

@@ -12,13 +12,12 @@ export type {
   PluginIdentity,
   PluginRegistry,
   TelemetryPlugin,
-} from "./plugins/index.js";
+} from "./types";
 
+export { createPluginRegistry, createPluginHost, type PluginHost as PluginHostType } from "./registry";
 export {
-  createPluginRegistry,
-  createPluginHost,
   defineAssessmentPlugin,
   defineLifecyclePlugin,
   defineLessonkitPlugin,
   defineTelemetryPlugin,
-} from "./plugins/index.js";
+} from "./define";

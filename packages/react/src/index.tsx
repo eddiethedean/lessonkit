@@ -27,8 +27,20 @@ export type {
   LessonkitPluginContext,
   LessonkitPluginKind,
   PluginHost,
+  PluginRegistry,
+  TelemetryPipelineSink,
 } from "@lessonkit/core";
-export { createPluginHost, defineLessonkitPlugin } from "@lessonkit/core";
+export {
+  buildTelemetryEvent,
+  createLessonkitRuntime,
+  createPluginHost,
+  createPluginRegistry,
+  createTelemetryPipeline,
+  defineAssessmentPlugin,
+  defineLessonkitPlugin,
+  defineLifecyclePlugin,
+  defineTelemetryPlugin,
+} from "@lessonkit/core";
 
 export type {
   ThemeContextValue,

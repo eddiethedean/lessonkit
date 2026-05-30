@@ -9,6 +9,19 @@ Published packages: `@lessonkit/core`, `@lessonkit/xapi`, `@lessonkit/accessibil
 - [CHANGELOG.md](CHANGELOG.md) documents the release.
 - No pending files in [`.changeset/`](.changeset/) that would run `changeset version` and bump versions unexpectedly (this repo publishes via **git tags**, not `changeset publish`).
 
+> **1.0.0-beta.1** ships the SOLID refactor behind deprecated shims. See [MIGRATION-0.x-to-1.0.md](docs/MIGRATION-0.x-to-1.0.md).
+
+### 1.0.0-beta.1 checklist (before tagging)
+
+| Item | Status |
+|------|--------|
+| `main` CI green | Required |
+| All seven `@lessonkit/*` packages at `1.0.0-beta.1` | Done (local) |
+| [MIGRATION-0.x-to-1.0.md](docs/MIGRATION-0.x-to-1.0.md) | Done |
+| [CHANGELOG.md](CHANGELOG.md) `## [1.0.0-beta.1]` | Done (local) |
+| Sphinx `docs/conf.py` `release` matches `1.0.0-beta.1` | Done (local) |
+| `npm run build` + `npm test` + `npm run typecheck` | Required before tag |
+
 ### 0.9.3 checklist (before tagging)
 
 | Item | Status |

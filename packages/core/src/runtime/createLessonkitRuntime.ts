@@ -1,0 +1,148 @@
+import type { CourseId, LessonId } from "../identityTypes";
+import type { TelemetryEventName, TelemetryUser } from "../telemetryTypes";
+import type { PluginRegistry } from "../plugins/types";
+import { createDefaultClock, createSessionStoragePort, type ClockPort, type StoragePort } from "../ports";
+import { createProgressController, type ProgressController, type ProgressState } from "../progress";
+import { resolveSessionId } from "../session";
+import { tryBuildTelemetryEvent } from "../telemetryBuilder";
+
+export type LessonkitRuntimeVersion = "v1" | "v2";
+
+export type HeadlessLessonkitConfig = {
+  courseId: CourseId;
+  runtimeVersion?: LessonkitRuntimeVersion;
+  session?: {
+    sessionId?: string;
+    attemptId?: string;
+    user?: TelemetryUser;
+  };
+  plugins?: PluginRegistry | null;
+};
+
+export type HeadlessRuntimePorts = {
+  storage?: StoragePort;
+  clock?: ClockPort;
+};
+
+export type HeadlessLessonkitRuntime = {
+  readonly config: HeadlessLessonkitConfig;
+  readonly progress: ProgressController;
+  getProgressState: () => ProgressState;
+  getSession: () => { sessionId: string; attemptId?: string; user?: TelemetryUser };
+  setActiveLesson: (
+    lessonId: LessonId,
+    emit: (name: TelemetryEventName, data?: unknown, lessonId?: LessonId) => void,
+  ) => void;
+  completeLesson: (
+    lessonId: LessonId,
+    emit: (name: TelemetryEventName, data?: unknown, lessonId?: LessonId) => void,
+  ) => void;
+  completeCourse: (emit: (name: TelemetryEventName, data?: unknown, lessonId?: LessonId) => void) => void;
+  track: (
+    name: TelemetryEventName,
+    data: unknown | undefined,
+    emit: (event: ReturnType<typeof tryBuildTelemetryEvent>) => void,
+    lessonId?: LessonId,
+  ) => void;
+  resetForCourseChange: (courseId: CourseId) => void;
+};
+
+export function createLessonkitRuntime(
+  config: HeadlessLessonkitConfig,
+  ports: HeadlessRuntimePorts = {},
+): HeadlessLessonkitRuntime {
+  const storage = ports.storage ?? createSessionStoragePort();
+  const clock = ports.clock ?? createDefaultClock();
+
+  let sessionId = resolveSessionId(storage, config.session?.sessionId);
+  let attemptId = config.session?.attemptId;
+  let user = config.session?.user;
+  let courseId = config.courseId;
+
+  let progress = createProgressController();
+
+  const getSession = () => ({ sessionId, attemptId, user });
+
+  const syncSessionFromConfig = (next: HeadlessLessonkitConfig) => {
+    sessionId = resolveSessionId(storage, next.session?.sessionId);
+    attemptId = next.session?.attemptId;
+    user = next.session?.user;
+    courseId = next.courseId;
+  };
+
+  syncSessionFromConfig(config);
+
+  const track = (
+    name: TelemetryEventName,
+    data: unknown | undefined,
+    emit: (event: ReturnType<typeof tryBuildTelemetryEvent>) => void,
+    lessonId?: LessonId,
+  ) => {
+    const event = tryBuildTelemetryEvent({
+      name,
+      courseId,
+      lessonId: lessonId ?? progress.getState().activeLessonId,
+      sessionId,
+      attemptId,
+      user,
+      data,
+    });
+    if (!event) return;
+    emit(event);
+  };
+
+  const emitLessonCompleted = (
+    lessonId: LessonId,
+    durationMs: number | undefined,
+    emitFn: (name: TelemetryEventName, data?: unknown, lessonId?: LessonId) => void,
+  ) => {
+    emitFn("lesson_completed", { lessonId, durationMs }, lessonId);
+    if (durationMs !== undefined) {
+      emitFn("lesson_time_on_task", { lessonId, durationMs }, lessonId);
+    }
+  };
+
+  return {
+    config,
+    progress,
+    getProgressState: () => progress.getState(),
+    getSession,
+    setActiveLesson(lessonId, emitFn) {
+      const current = progress.getState();
+      if (current.activeLessonId === lessonId) return;
+
+      const previous = current.activeLessonId;
+      if (previous && previous !== lessonId) {
+        const completed = progress.completeLesson(previous, clock.nowMs());
+        if (completed.didComplete) {
+          emitLessonCompleted(previous, completed.durationMs, emitFn);
+        }
+      }
+
+      progress.setActiveLesson(lessonId, clock.nowMs());
+      emitFn("lesson_started", { lessonId }, lessonId);
+    },
+    completeLesson(lessonId, emitFn) {
+      const result = progress.completeLesson(lessonId, clock.nowMs());
+      if (!result.didComplete) return;
+      emitLessonCompleted(lessonId, result.durationMs, emitFn);
+    },
+    completeCourse(emitFn) {
+      const current = progress.getState();
+      if (current.activeLessonId) {
+        const lessonResult = progress.completeLesson(current.activeLessonId, clock.nowMs());
+        if (lessonResult.didComplete) {
+          emitLessonCompleted(current.activeLessonId, lessonResult.durationMs, emitFn);
+        }
+      }
+      const result = progress.completeCourse();
+      if (!result.didComplete) return;
+      emitFn("course_completed");
+    },
+    track,
+    resetForCourseChange(nextCourseId) {
+      courseId = nextCourseId;
+      progress = createProgressController();
+    },
+  };
+}

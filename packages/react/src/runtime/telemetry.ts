@@ -1,6 +1,5 @@
 import type { CourseId, LessonId, TelemetryEvent, TelemetryUser, TrackingClient } from "@lessonkit/core";
 import { createTrackingClient } from "@lessonkit/core";
-import type { ClockPort } from "./ports";
 
 export type TelemetryConfig = {
   enabled?: boolean;
@@ -35,27 +34,5 @@ export async function disposeTrackingClient(client: TrackingClient | null | unde
   } catch {
     // ignore
   }
-}
-
-export function buildTelemetryEvent(opts: {
-  clock: ClockPort;
-  name: TelemetryEvent["name"];
-  data?: TelemetryEvent["data"];
-  courseId: CourseId;
-  lessonId?: LessonId;
-  sessionId: string;
-  attemptId?: string;
-  user?: TelemetryUser;
-}): TelemetryEvent {
-  return {
-    name: opts.name,
-    timestamp: opts.clock.nowIso(),
-    courseId: opts.courseId,
-    lessonId: opts.lessonId,
-    sessionId: opts.sessionId,
-    attemptId: opts.attemptId,
-    user: opts.user,
-    data: opts.data,
-  } as TelemetryEvent;
 }
 

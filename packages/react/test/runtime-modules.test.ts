@@ -4,7 +4,8 @@ import type { TelemetryEvent, TrackingClient } from "@lessonkit/core";
 import type { XAPIStatement, XAPITransport } from "@lessonkit/xapi";
 import { createDefaultClock, createGlobalTimer, createNoopStorage, createSessionStoragePort } from "../src/runtime/ports";
 import { createProgressController } from "../src/runtime/progress";
-import { buildTelemetryEvent, createTrackingClientFromConfig, disposeTrackingClient } from "../src/runtime/telemetry";
+import { buildTelemetryEvent } from "@lessonkit/core";
+import { createTrackingClientFromConfig, disposeTrackingClient } from "../src/runtime/telemetry";
 import { createXapiClientFromConfig } from "../src/runtime/xapi";
 
 describe("@lessonkit/react runtime modules", () => {
@@ -103,28 +104,19 @@ describe("@lessonkit/react runtime modules", () => {
     expect(progress.completeCourse().didComplete).toBe(false);
   });
 
-  it("telemetry: buildTelemetryEvent uses injected clock", () => {
-    const clock = { nowMs: () => 123, nowIso: () => "T" };
+  it("telemetry: buildTelemetryEvent accepts explicit timestamp", () => {
     const evt = buildTelemetryEvent({
-      clock,
-      name: "lesson_completed",
-      data: { x: 1 },
-      courseId: "c",
-      lessonId: "l",
-      sessionId: "s",
-      attemptId: "a",
-      user: { id: "u" },
-    });
-    expect(evt).toEqual({
       name: "lesson_completed",
       timestamp: "T",
+      data: { lessonId: "l", durationMs: 1 },
       courseId: "c",
       lessonId: "l",
       sessionId: "s",
       attemptId: "a",
       user: { id: "u" },
-      data: { x: 1 },
     });
+    expect(evt.timestamp).toBe("T");
+    expect(evt.courseId).toBe("c");
   });
 
   it("telemetry: createTrackingClientFromConfig honors enabled=false", () => {

@@ -43,6 +43,29 @@ export {
 
 export type { ExportTarget } from "./packageCourse";
 
+export {
+  remapArtifactPaths,
+  validatePackageInputs,
+  type PackageValidationIssue,
+  type ValidatePackageInputsResult,
+} from "./packaging/validateInputs";
+
+export { promoteStagingToOutDir } from "./packaging/promote";
+export {
+  buildStagingPackage,
+  ensureOutDirParent,
+  type BuildStagingPackageOptions,
+  type BuildStagingPackageResult,
+} from "./packaging/staging";
+
+export type {
+  LessonkitManifest,
+  LessonkitManifestPaths,
+  ManifestParseIssue,
+  ParseManifestResult,
+} from "./manifest";
+export { loadLessonkitManifestFromFile, parseLessonkitManifest } from "./manifest";
+
 export type {
   LessonkitBridgeAction,
   LessonkitTelemetryEvent,

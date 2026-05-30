@@ -1,0 +1,89 @@
+import { describe, expect, it, vi, afterEach } from "vitest";
+import type { TelemetryEventName } from "../src/telemetryTypes";
+import {
+  buildTelemetryEvent,
+  resetTelemetryBuilderWarningsForTests,
+  tryBuildTelemetryEvent,
+} from "../src/telemetryBuilder";
+
+afterEach(() => {
+  resetTelemetryBuilderWarningsForTests();
+  vi.unstubAllEnvs();
+});
+
+describe("buildTelemetryEvent", () => {
+  it("throws when lesson lifecycle events lack lessonId", () => {
+    expect(() => buildTelemetryEvent({ name: "lesson_started", courseId: "c", data: {} })).toThrow(
+      /lessonId/,
+    );
+  });
+
+  it("lesson_completed uses opts.lessonId when data.lessonId conflicts", () => {
+    const event = buildTelemetryEvent({
+      name: "lesson_completed",
+      courseId: "c",
+      lessonId: "canonical",
+      data: { lessonId: "wrong", durationMs: 5 },
+    });
+    expect(event.lessonId).toBe("canonical");
+    if (event.name === "lesson_completed") {
+      expect(event.data.lessonId).toBe("canonical");
+      expect(event.data.durationMs).toBe(5);
+    }
+  });
+
+  it("supports interaction without lessonId", () => {
+    const event = buildTelemetryEvent({
+      name: "interaction",
+      courseId: "c",
+      data: { kind: "noop" },
+    });
+    expect(event.name).toBe("interaction");
+  });
+
+  it("default branch passes through unknown event names", () => {
+    const event = buildTelemetryEvent({
+      name: "future_event" as TelemetryEventName,
+      courseId: "c",
+    });
+    expect(event.name).toBe("future_event");
+  });
+
+  it("quiz events require active lessonId", () => {
+    expect(() =>
+      buildTelemetryEvent({
+        name: "quiz_answered",
+        courseId: "c",
+        data: { checkId: "q1", question: "Q", choice: "A", correct: false },
+      }),
+    ).toThrow(/lessonId/);
+  });
+});
+
+describe("tryBuildTelemetryEvent", () => {
+  it("returns null and warns in dev when quiz events lack lessonId", () => {
+    vi.stubEnv("NODE_ENV", "development");
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+    expect(
+      tryBuildTelemetryEvent({
+        name: "quiz_answered",
+        courseId: "c",
+        data: { checkId: "q1", question: "Q", choice: "A", correct: false },
+      }),
+    ).toBeNull();
+
+    expect(warn).toHaveBeenCalledWith(expect.stringMatching(/wrap <Quiz> in <Lesson>/));
+    warn.mockRestore();
+  });
+
+  it("returns built events for valid quiz payloads", () => {
+    const event = tryBuildTelemetryEvent({
+      name: "quiz_completed",
+      courseId: "c",
+      lessonId: "lesson-1",
+      data: { checkId: "q1", score: 1 },
+    });
+    expect(event?.name).toBe("quiz_completed");
+  });
+});

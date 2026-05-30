@@ -1,8 +1,8 @@
 import { readFileSync, existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { dirname, join, parse, resolve } from "node:path";
+import { parseLessonkitManifest } from "@lessonkit/lxpack";
 import type { LessonkitCourseDescriptor } from "@lessonkit/lxpack";
-import { validateDescriptor, validateProjectPaths } from "@lessonkit/lxpack";
 import { CliError, EXIT_INVALID_PROJECT } from "./errors.js";
 
 export const LESSONKIT_JSON = "lessonkit.json";
@@ -27,12 +27,6 @@ export type PackageJson = {
   scripts?: Record<string, string>;
   dependencies?: Record<string, string>;
   devDependencies?: Record<string, string>;
-};
-
-const DEFAULT_PATHS: LessonkitPaths = {
-  spaDistDir: "dist",
-  lxpackOutDir: ".lxpack/course",
-  outputBaseDir: ".lxpack/out",
 };
 
 function isProjectManifest(configPath: string): boolean {
@@ -75,134 +69,77 @@ export async function loadLessonkitJson(projectRoot: string): Promise<LessonkitP
     });
   }
 
-  if (!raw || typeof raw !== "object") {
-    throw new CliError(`${configPath} must be a JSON object.`, {
-      code: "INVALID_PROJECT",
-      exitCode: EXIT_INVALID_PROJECT,
-    });
+  const parsed = parseLessonkitManifest(raw, configPath, projectRoot);
+  if (!parsed.ok) {
+    throwManifestCliError(configPath, parsed.issues);
   }
 
-  const config = raw as Record<string, unknown>;
-  const schemaVersion = config.schemaVersion;
-  if (schemaVersion !== 1) {
-    throw new CliError(`${configPath}: schemaVersion must be 1 (got ${String(schemaVersion)}).`, {
-      code: "INVALID_PROJECT",
-      exitCode: EXIT_INVALID_PROJECT,
-    });
-  }
+  return {
+    root: projectRoot,
+    schemaVersion: 1,
+    name: parsed.manifest.name,
+    course: parsed.manifest.course,
+    paths: parsed.manifest.paths,
+  };
+}
 
-  const name = config.name;
-  if (typeof name !== "string" || !name.trim()) {
-    throw new CliError(`${configPath}: "name" must be a non-empty string.`, {
-      code: "INVALID_PROJECT",
-      exitCode: EXIT_INVALID_PROJECT,
-    });
-  }
-
-  const courseRaw = config.course;
-  if (!courseRaw || typeof courseRaw !== "object") {
-    throw new CliError(`${configPath}: "course" must be an object.`, {
-      code: "INVALID_PROJECT",
-      exitCode: EXIT_INVALID_PROJECT,
-    });
-  }
-
-  const courseObj = courseRaw as Record<string, unknown>;
-  if (courseObj.lessons !== undefined && !Array.isArray(courseObj.lessons)) {
-    throw new CliError(`${configPath}: "course.lessons" must be an array.`, {
-      code: "INVALID_PROJECT",
-      exitCode: EXIT_INVALID_PROJECT,
-    });
-  }
-  if (courseObj.assessments !== undefined && !Array.isArray(courseObj.assessments)) {
-    throw new CliError(`${configPath}: "course.assessments" must be an array.`, {
-      code: "INVALID_PROJECT",
-      exitCode: EXIT_INVALID_PROJECT,
-    });
-  }
-
-  const validation = validateDescriptor(courseRaw as LessonkitCourseDescriptor);
-  if (!validation.ok) {
-    throw new CliError(`${configPath}: invalid course descriptor.`, {
-      code: "INVALID_PROJECT",
-      exitCode: EXIT_INVALID_PROJECT,
-      issues: validation.issues.map((i) => ({
-        path: i.path,
-        message: i.message,
-      })),
-    });
-  }
-
-  if (validation.descriptor.layout === "per-lesson-spa") {
+function throwManifestCliError(
+  configPath: string,
+  issues: Array<{ path: string; message: string }>,
+): never {
+  const layoutIssue = issues.find((i) => i.path === "course.layout");
+  if (layoutIssue?.message.includes("per-lesson-spa")) {
     throw new CliError(
       `${configPath}: per-lesson-spa layout is not supported by lessonkit package yet. Use single-spa or package via @lessonkit/lxpack directly.`,
       { code: "INVALID_PROJECT", exitCode: EXIT_INVALID_PROJECT },
     );
   }
 
-  const pathsRaw = config.paths;
-  const paths: LessonkitPaths = { ...DEFAULT_PATHS };
-  if (pathsRaw !== undefined && (typeof pathsRaw !== "object" || pathsRaw === null)) {
-    throw new CliError(`${configPath}: "paths" must be an object.`, {
+  const lessonsIssue = issues.find((i) => i.path === "course.lessons");
+  if (lessonsIssue) {
+    throw new CliError(`${configPath}: "course.lessons" must be an array.`, {
       code: "INVALID_PROJECT",
       exitCode: EXIT_INVALID_PROJECT,
     });
   }
-  if (pathsRaw && typeof pathsRaw === "object") {
-    const p = pathsRaw as Record<string, unknown>;
-    if (p.spaDistDir !== undefined) {
-      if (typeof p.spaDistDir !== "string" || !p.spaDistDir.trim()) {
-        throw new CliError(`${configPath}: "paths.spaDistDir" must be a non-empty string.`, {
-          code: "INVALID_PROJECT",
-          exitCode: EXIT_INVALID_PROJECT,
-        });
-      }
-      paths.spaDistDir = p.spaDistDir;
-    }
-    if (p.lxpackOutDir !== undefined) {
-      if (typeof p.lxpackOutDir !== "string" || !p.lxpackOutDir.trim()) {
-        throw new CliError(`${configPath}: "paths.lxpackOutDir" must be a non-empty string.`, {
-          code: "INVALID_PROJECT",
-          exitCode: EXIT_INVALID_PROJECT,
-        });
-      }
-      paths.lxpackOutDir = p.lxpackOutDir;
-    }
-    if (p.outputBaseDir !== undefined) {
-      if (typeof p.outputBaseDir !== "string" || !p.outputBaseDir.trim()) {
-        throw new CliError(`${configPath}: "paths.outputBaseDir" must be a non-empty string.`, {
-          code: "INVALID_PROJECT",
-          exitCode: EXIT_INVALID_PROJECT,
-        });
-      }
-      paths.outputBaseDir = p.outputBaseDir;
-    }
+
+  const spaDistTypeIssue = issues.find((i) => i.path === "paths.spaDistDir");
+  if (spaDistTypeIssue && spaDistTypeIssue.message.includes("non-empty string")) {
+    throw new CliError(`${configPath}: "paths.spaDistDir" must be a non-empty string.`, {
+      code: "INVALID_PROJECT",
+      exitCode: EXIT_INVALID_PROJECT,
+    });
   }
 
-  const courseSpaDistDir = validation.descriptor.spaDistDir?.trim();
-  if (courseSpaDistDir && courseSpaDistDir !== paths.spaDistDir) {
-    throw new CliError(
-      `${configPath}: "course.spaDistDir" (${courseSpaDistDir}) differs from "paths.spaDistDir" (${paths.spaDistDir}). Use paths.spaDistDir for CLI build and package.`,
-      { code: "INVALID_PROJECT", exitCode: EXIT_INVALID_PROJECT },
-    );
+  const courseSpaIssue = issues.find((i) => i.path === "course.spaDistDir");
+  if (courseSpaIssue) {
+    throw new CliError(`${configPath}: ${courseSpaIssue.message}`, {
+      code: "INVALID_PROJECT",
+      exitCode: EXIT_INVALID_PROJECT,
+    });
   }
 
-  const pathIssues = validateProjectPaths(projectRoot, paths);
-  if (pathIssues.length) {
+  if (issues.some((i) => i.path.startsWith("paths."))) {
     throw new CliError(`${configPath}: invalid paths.`, {
       code: "INVALID_PROJECT",
       exitCode: EXIT_INVALID_PROJECT,
-      issues: pathIssues,
+      issues: issues.map((i) => ({ path: i.path, message: i.message })),
     });
   }
 
-  return {
-    root: projectRoot,
-    schemaVersion: 1,
-    name,
-    course: validation.descriptor,
-    paths,
-  };
+  const schemaIssue = issues.find((i) => i.path === "schemaVersion");
+  if (schemaIssue) {
+    throw new CliError(`${configPath}: schemaVersion must be 1 (got ${schemaIssue.message.replace(/^must be 1 \(got /, "").replace(/\)$/, "")}).`, {
+      code: "INVALID_PROJECT",
+      exitCode: EXIT_INVALID_PROJECT,
+    });
+  }
+
+  throw new CliError(`${configPath}: invalid lessonkit manifest.`, {
+    code: "INVALID_PROJECT",
+    exitCode: EXIT_INVALID_PROJECT,
+    issues: issues.map((i) => ({ path: i.path, message: i.message })),
+  });
 }
 
 export async function loadProject(cwd: string = process.cwd()): Promise<LessonkitProject> {

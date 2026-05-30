@@ -35,10 +35,14 @@ export function emitTelemetryWithPlugins(opts: {
   event: TelemetryEvent;
   pluginCtx: LessonkitPluginContext;
   lxpackBridge?: LxpackBridgeMode;
+  extraSinks?: import("@lessonkit/core").TelemetryPipelineSink[];
 }): void {
   const next = opts.pluginHost
     ? opts.pluginHost.runTelemetry(opts.event, opts.pluginCtx)
     : opts.event;
   if (next === null) return;
-  emitTelemetry(opts.tracking, opts.xapi, next, { lxpackBridge: opts.lxpackBridge ?? "auto" });
+  emitTelemetry(opts.tracking, opts.xapi, next, {
+    lxpackBridge: opts.lxpackBridge ?? "auto",
+    extraSinks: opts.extraSinks,
+  });
 }

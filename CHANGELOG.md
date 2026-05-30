@@ -3,6 +3,28 @@
 All notable changes to the LessonKit monorepo are documented here. Published packages use the
 [`@lessonkit/*`](https://www.npmjs.com/org/lessonkit) scope.
 
+## [1.0.0-beta.1] - 2026-05-29
+
+SOLID monorepo refactor: headless runtime, telemetry pipeline, segregated plugins, LXPack manifest/packaging stages.
+
+### Added
+
+- **`@lessonkit/core`**: `buildTelemetryEvent`, `TelemetryPipeline`, segregated plugin types (`TelemetryPlugin`, `AssessmentPlugin`, `LifecyclePlugin`), `createPluginRegistry`, `createLessonkitRuntime`, shared `ports` / `progress` / `session` modules.
+- **`@lessonkit/lxpack`**: `parseLessonkitManifest`, `dispatchBridgeAction`, `forwardTelemetryToBridge`, packaging stages `validatePackageInputs`, `buildStagingPackage`, `promoteStagingToOutDir`.
+- **Docs**: [MIGRATION-0.x-to-1.0.md](docs/MIGRATION-0.x-to-1.0.md).
+
+### Changed
+
+- **`@lessonkit/react`**: `LessonkitProvider` delegates to `useLessonkitProviderRuntime`; `runtimeVersion: "v2"` and `sinks` config; bridge via `@lessonkit/lxpack/bridge`.
+- **`@lessonkit/cli`**: Manifest parsing delegates to `@lessonkit/lxpack`.
+- Monorepo packages bumped to **1.0.0-beta.1**.
+
+### Deprecated (removed in 1.0.0)
+
+- `defineLessonkitPlugin` / `createPluginHost` — use segregated plugin helpers and `createPluginRegistry`.
+- React-local `buildTrackEvent` — use `buildTelemetryEvent` from core.
+- Legacy `tracking` / `xapi` split config — use `TelemetryPipelineSink[]`.
+
 ## [0.9.3] - 2026-05-29
 
 ### Changed
