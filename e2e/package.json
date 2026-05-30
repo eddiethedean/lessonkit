@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "engines": {
-    "node": ">=20"
+    "node": ">=18"
   },
   "scripts": {
     "test:e2e": "playwright test",
@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@lessonkit/lxpack": "1.0.0",
-    "@lxpack/conformance": "^0.6.0"
+    "@lxpack/conformance": "^0.6.2"
   },
   "devDependencies": {
     "@playwright/test": "^1.52.0",

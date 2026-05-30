@@ -14,7 +14,7 @@ LLMs do not know your project's current CLI flags, identity rules, or React bloc
 | Skill | When the agent should use it |
 |-------|------------------------------|
 | **lessonkit-author** | Editing `src/App.tsx`, `lessonkit.json`, Course/Lesson/Quiz blocks; running `lessonkit dev` / `build` |
-| **lessonkit-packaging** | Choosing SCORM/xAPI/cmi5 target and `lessonkit package` (Node 20+) |
+| **lessonkit-packaging** | Choosing SCORM/xAPI/cmi5 target and `lessonkit package` (Node 18+) |
 | **lessonkit-telemetry** | Telemetry sinks, xAPI transport, plugins, LXPack bridge when packaged |
 | **lessonkit-migrate** | Upgrading LessonKit 0.9.x projects to 1.0 APIs |
 

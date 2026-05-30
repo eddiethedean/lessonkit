@@ -1,6 +1,6 @@
 # @lessonkit/integration
 
-Vitest integration tests for the LessonKit CLI pipeline and descriptor parity. These tests use **real subprocesses** (no mocks for `build` / `package`) and require **Node.js 20+**.
+Vitest integration tests for the LessonKit CLI pipeline and descriptor parity. These tests use **real subprocesses** (no mocks for `build` / `package`) and require **Node.js 18+**.
 
 ## Prerequisites
 

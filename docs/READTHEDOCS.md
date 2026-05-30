@@ -40,7 +40,7 @@ Or use the Makefile (builds examples, then Sphinx):
 cd docs && make html
 ```
 
-Compiled examples are embedded under **Examples → Live examples**. The Makefile runs `docs/scripts/build-docs-demos.sh` first (Node 20+ at repo root).
+Compiled examples are embedded under **Examples → Live examples**. The Makefile runs `docs/scripts/build-docs-demos.sh` first (Node 18+ at repo root).
 
 ## Custom domain (optional)
 

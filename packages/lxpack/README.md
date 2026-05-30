@@ -6,7 +6,7 @@
 
 LXPack export adapter for LessonKit — write `lessonkit.json` + `course.yaml`, copy SPA builds, and package to SCORM / standalone / xAPI / cmi5 via [`@lxpack/api`](https://www.npmjs.com/package/@lxpack/api).
 
-Requires **Node.js 20+**.
+Requires **Node.js 18+** (LXPack `@lxpack/api` **0.6.2+**).
 
 **Docs:** [Packaging reference](https://lessonkit.readthedocs.io/en/latest/reference/packaging.html) · [Packaging & CLI guide](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/packaging-and-cli.html) · [Live examples](https://lessonkit.readthedocs.io/en/latest/examples/index.html)
 

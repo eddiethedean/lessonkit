@@ -4,7 +4,7 @@ import { runBuild } from "./dev.js";
 import type { CliJsonResult } from "../lib/errors.js";
 import { CliError, EXIT_INVALID_PROJECT, EXIT_PACKAGING } from "../lib/errors.js";
 import {
-  assertNode20ForLxpack,
+  assertNode18ForLxpack,
   loadProject,
 } from "../lib/project.js";
 import {
@@ -54,7 +54,7 @@ export async function runPackage(opts: PackageOptions): Promise<CliJsonResult> {
     return { ok: true, target, projectRoot: project.root, distDir };
   }
 
-  assertNode20ForLxpack();
+  assertNode18ForLxpack();
 
   if (!opts.noBuild || !existsSync(distDir)) {
     await runBuild({ cwd: project.root, json: opts.json });

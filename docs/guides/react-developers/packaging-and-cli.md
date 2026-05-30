@@ -9,7 +9,7 @@ lessonkit build
 lessonkit package --target scorm12
 ```
 
-Requires **Node 20+** for `package` LMS targets.
+Requires **Node 18+** for `package` LMS targets.
 
 Flags and manifest schema: [CLI reference](../../reference/cli.md).
 

@@ -10,7 +10,7 @@ npm install -g @lessonkit/cli
 npx @lessonkit/cli init my-course
 ```
 
-**Node.js:** dev/build work on Node 18+. LMS packaging targets (`scorm12`, `scorm2004`, `xapi`, `cmi5`, `standalone`) require **Node.js 20+** (see [`PACKAGING.md`](PACKAGING.md)).
+**Node.js:** dev, build, and LMS packaging targets work on Node **18+** (see [`PACKAGING.md`](PACKAGING.md)).
 
 ## Quick start
 

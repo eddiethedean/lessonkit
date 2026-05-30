@@ -2,7 +2,7 @@
 
 LessonKit authors courses in React (`@lessonkit/react`). **LXPack** validates and packages them for LMS delivery. **`@lessonkit/lxpack`** is the adapter between the two.
 
-Requires **Node.js 20+** (LXPack `@lxpack/api`).
+Requires **Node.js 18+** (LXPack `@lxpack/api` **0.6.2+**).
 
 ## Workflow
 

@@ -39,7 +39,7 @@ LessonKit is developer tooling—not a timeline authoring tool. Think **React + 
 
 ## Quick start
 
-**Requirements:** Node.js **18+** for dev/build; **20+** for LMS packaging targets.
+**Requirements:** Node.js **18+** for dev, build, and LMS packaging.
 
 ### New project (recommended)
 
@@ -172,7 +172,7 @@ Keep `courseId`, `lessonId`, and `checkId` in sync with `lessonkit.json` and you
 | [`@lessonkit/react`](https://www.npmjs.com/package/@lessonkit/react) | [![npm](https://img.shields.io/npm/v/@lessonkit/react.svg)](https://www.npmjs.com/package/@lessonkit/react) | Components, hooks, `ThemeProvider`, and runtime provider |
 | [`@lessonkit/core`](https://www.npmjs.com/package/@lessonkit/core) | [![npm](https://img.shields.io/npm/v/@lessonkit/core.svg)](https://www.npmjs.com/package/@lessonkit/core) | Types, identity helpers, telemetry catalog, and tracking client |
 | [`@lessonkit/xapi`](https://www.npmjs.com/package/@lessonkit/xapi) | [![npm](https://img.shields.io/npm/v/@lessonkit/xapi.svg)](https://www.npmjs.com/package/@lessonkit/xapi) | xAPI statements, queueing, and telemetry-to-xAPI mapping |
-| [`@lessonkit/lxpack`](https://www.npmjs.com/package/@lessonkit/lxpack) | [![npm](https://img.shields.io/npm/v/@lessonkit/lxpack.svg)](https://www.npmjs.com/package/@lessonkit/lxpack) | Course descriptors, validation, and LMS packaging (Node 20+) |
+| [`@lessonkit/lxpack`](https://www.npmjs.com/package/@lessonkit/lxpack) | [![npm](https://img.shields.io/npm/v/@lessonkit/lxpack.svg)](https://www.npmjs.com/package/@lessonkit/lxpack) | Course descriptors, validation, and LMS packaging (Node 18+) |
 | [`@lessonkit/cli`](https://www.npmjs.com/package/@lessonkit/cli) | [![npm](https://img.shields.io/npm/v/@lessonkit/cli.svg)](https://www.npmjs.com/package/@lessonkit/cli) | `lessonkit init`, `dev`, `build`, `package` |
 | [`@lessonkit/accessibility`](https://www.npmjs.com/package/@lessonkit/accessibility) | [![npm](https://img.shields.io/npm/v/@lessonkit/accessibility.svg)](https://www.npmjs.com/package/@lessonkit/accessibility) | Focus trap, roving tabindex, reduced motion, visually hidden styles |
 | [`@lessonkit/themes`](https://www.npmjs.com/package/@lessonkit/themes) | [![npm](https://img.shields.io/npm/v/@lessonkit/themes.svg)](https://www.npmjs.com/package/@lessonkit/themes) | Theme presets and design tokens |
@@ -256,11 +256,11 @@ Source markdown for reference pages lives under [`docs/`](https://github.com/edd
 | `npm run storybook` | Component gallery (`@lessonkit/react`) |
 | `npm run build-storybook` | Static Storybook build (also run in CI) |
 | `npm run audit:ci` | Local dependency audit helper (CI runs `npm audit` directly) |
-| `npm run test:integration` | Vitest CLI pipeline integration (Node 20+) |
-| `npm run test:e2e` | Playwright export-parity tests (Node 20+; run `npm exec -w @lessonkit/e2e -- playwright install --with-deps chromium` once after `npm ci`) |
-| `npm run conformance:lxpack` / `conformance:golden` | LXPack conformance scripts (Node 20+) |
+| `npm run test:integration` | Vitest CLI pipeline integration (Node 18+) |
+| `npm run test:e2e` | Playwright export-parity tests (Node 18+; run `npm exec -w @lessonkit/e2e -- playwright install --with-deps chromium` once after `npm ci`) |
+| `npm run conformance:lxpack` / `conformance:golden` | LXPack conformance scripts (Node 18+) |
 
-Prettier is configured at the repo root. CI runs on Node 18 and 20 (see [.github/workflows/ci.yml](https://github.com/eddiethedean/lessonkit/blob/main/.github/workflows/ci.yml)). LMS packaging, integration, and e2e jobs require Node 20+.
+Prettier is configured at the repo root. CI runs on Node 18 and 20 (see [.github/workflows/ci.yml](https://github.com/eddiethedean/lessonkit/blob/main/.github/workflows/ci.yml)).
 
 ---
 

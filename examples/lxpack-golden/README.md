@@ -18,4 +18,4 @@ npm run package:scorm12
 npm run package:standalone
 ```
 
-Requires Node.js 20+ for packaging targets.
+Requires Node.js 18+ for packaging targets.

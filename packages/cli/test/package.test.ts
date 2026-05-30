@@ -100,8 +100,8 @@ describe("runPackage", () => {
     });
   });
 
-  it("rejects lxpack targets on Node 18", async () => {
-    Object.defineProperty(process.versions, "node", { value: "18.0.0", configurable: true });
+  it("rejects lxpack targets on Node 16", async () => {
+    Object.defineProperty(process.versions, "node", { value: "16.20.0", configurable: true });
     await expect(runPackage({ target: "scorm12", cwd: dir, noBuild: true })).rejects.toMatchObject({
       code: "NODE_VERSION",
     });

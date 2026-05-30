@@ -33,7 +33,7 @@ lessonkit/
 │   ├── xapi/
 │   ├── accessibility/
 │   ├── themes/
-│   ├── lxpack/         # packaging adapter (Node 20+)
+│   ├── lxpack/         # packaging adapter (Node 18+)
 │   └── cli/
 ├── examples/
 │   ├── react-vite/

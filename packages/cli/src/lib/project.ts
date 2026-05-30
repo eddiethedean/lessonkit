@@ -196,11 +196,11 @@ export function resolveViteBin(projectRoot: string): string {
   );
 }
 
-export function assertNode20ForLxpack(): void {
+export function assertNode18ForLxpack(): void {
   const major = Number(process.versions.node.split(".")[0]);
-  if (major < 20) {
+  if (major < 18) {
     throw new CliError(
-      `LMS packaging requires Node.js 20+ (current: ${process.versions.node}). See docs/PACKAGING.md.`,
+      `LMS packaging requires Node.js 18+ (current: ${process.versions.node}). See docs/PACKAGING.md.`,
       { code: "NODE_VERSION", exitCode: EXIT_INVALID_PROJECT },
     );
   }

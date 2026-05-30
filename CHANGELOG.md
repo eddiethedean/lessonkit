@@ -20,7 +20,8 @@ All notable changes to the LessonKit monorepo are documented here. Published pac
 
 ### Post-release maintenance (1.0.0 line, unreleased)
 
-- **@lessonkit/react**: Normalize `courseId` / `lessonId` / `checkId` at provider and component boundaries (trimmed identity v1).
+- **@lessonkit/lxpack**: Bump `@lxpack/*` to **^0.6.2**; packaging supports Node **18+** (aligned with LXPack 0.6.2).
+- **@lessonkit/cli**: Require Node **18+** for LMS `package` targets (was 20+).
 - **@lessonkit/react**: Throw in dev when `Quiz` is outside `<Lesson>`; production shows `role="alert"` and skips quiz telemetry.
 - **@lessonkit/react**: `Lesson.autoCompleteOnUnmount` prop; dev warning when multiple `<Lesson>` trees mount concurrently.
 - **@lessonkit/react**: Quiz disables radios after pass; `ProgressTracker.totalLessons` progressbar semantics; controlled `Reflection` textarea props.

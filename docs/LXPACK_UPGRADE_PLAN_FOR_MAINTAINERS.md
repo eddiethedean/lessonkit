@@ -344,7 +344,7 @@ lxpack preview --lessonkit ./lessonkit.json --spa dist/
 
 ### P3 — Optional `@lxpack/lessonkit` meta-package
 
-**Problem:** Consumers install `@lessonkit/lxpack` + `@lxpack/api` and must understand Node 20+, interchange, bridge.
+**Problem:** Consumers install `@lessonkit/lxpack` + `@lxpack/api` and must understand Node 18+, interchange, bridge.
 
 **Proposal:**
 

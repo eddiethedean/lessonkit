@@ -6,7 +6,7 @@
 - [ ] Remove `setLxpackBridgeMode`; use `config.lxpack.bridge`
 - [ ] Confirm `lessonkit.json` `schemaVersion: 1`, `layout: "single-spa"`
 - [ ] `lessonkit build` passes
-- [ ] `lessonkit package --target scorm12` on Node 20+
+- [ ] `lessonkit package --target scorm12` on Node 18+
 - [ ] Quiz blocks inside `<Lesson>` for correct `lessonId` on telemetry
 
 ## Monorepo contributors

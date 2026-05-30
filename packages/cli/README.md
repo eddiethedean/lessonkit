@@ -17,7 +17,7 @@ npm install -g @lessonkit/cli
 npx @lessonkit/cli init my-course
 ```
 
-**Node.js:** dev/build on Node 18+. LMS packaging targets require **Node.js 20+**.
+**Node.js:** dev, build, and LMS packaging on Node **18+**.
 
 ## Quick start
 

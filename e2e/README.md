@@ -4,7 +4,7 @@ Playwright tests and packaging conformance scripts for **1.0.0** export parity (
 
 ## Prerequisites
 
-- **Node.js 20+**
+- **Node.js 18+**
 - `unzip` on `PATH` (SCORM unpack)
 - From repo root: `npm ci`
 - Playwright browsers (first time only):

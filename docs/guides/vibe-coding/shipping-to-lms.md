@@ -4,7 +4,7 @@ Packaging turns your preview app into a file your LMS can import.
 
 ## Requirements
 
-- **Node.js 20+** for `lessonkit package`
+- **Node.js 18+** for `lessonkit package`
 - A finished course that passes `lessonkit build`
 - Your LMS admin’s target format (often **SCORM 1.2**)
 

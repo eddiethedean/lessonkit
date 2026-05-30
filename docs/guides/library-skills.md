@@ -9,7 +9,7 @@ Source: [`library-skills/`](https://github.com/eddiethedean/lessonkit/tree/main/
 | Skill | Use when |
 |-------|----------|
 | **lessonkit-author** | Editing `App.tsx`, `lessonkit.json`, React blocks; `lessonkit dev` / `build` |
-| **lessonkit-packaging** | LMS export — `lessonkit package --target …` (Node 20+) |
+| **lessonkit-packaging** | LMS export — `lessonkit package --target …` (Node 18+) |
 | **lessonkit-telemetry** | Tracking, xAPI, plugins, LXPack bridge |
 | **lessonkit-migrate** | Upgrading from LessonKit 0.9.x to 1.0 |
 

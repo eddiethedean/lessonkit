@@ -19,7 +19,7 @@ npm test
 | `npm run typecheck` | Typecheck (builds packages first) |
 | `npm run coverage` | Coverage report |
 | `npm run audit:ci` | Dependency audit |
-| `npm run test:integration` | CLI pipeline integration (Node 20+) |
+| `npm run test:integration` | CLI pipeline integration (Node 18+) |
 
 ## Package build order
 
