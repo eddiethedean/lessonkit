@@ -1,10 +1,10 @@
-import { defineLessonkitPlugin, type LessonkitPlugin } from "@lessonkit/core";
+import { defineTelemetryPlugin, type LessonkitPlugin } from "@lessonkit/core";
 
 /**
  * Example analytics plugin — logs quiz completions to the console.
  * See docs/guides/react-developers/plugin-cookbook.md
  */
-export const consoleAnalyticsPlugin: LessonkitPlugin = defineLessonkitPlugin({
+export const consoleAnalyticsPlugin: LessonkitPlugin = defineTelemetryPlugin({
   id: "example.console-analytics",
   version: "1.0.0",
   kind: "analytics",

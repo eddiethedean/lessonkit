@@ -84,7 +84,7 @@ for:
 
 ## 0.8.0+ — Plugin architecture
 
-- [x] Plugin contract v1 in `@lessonkit/core` (`LessonkitPlugin`, `createPluginHost`, `defineLessonkitPlugin`)
+- [x] Plugin contract v1 in `@lessonkit/core` (`LessonkitPlugin`, `createPluginRegistry`, `defineTelemetryPlugin`)
 - [x] `@lessonkit/react` registers plugins on `LessonkitProvider` (`config.plugins`)
 - [x] Extension points: lifecycle (`setup`/`dispose`), `onTelemetry`, `wrapTrackingSink`, `scoreAssessment`, `interactionBlocks` metadata
 - [x] [Plugins reference](reference/plugins.md) and [plugin cookbook](guides/react-developers/plugin-cookbook.md)
@@ -92,13 +92,13 @@ for:
 
 ## 1.0.0 — Studio gate checklist (framework)
 
-- [ ] Public APIs for `@lessonkit/react`, `@lessonkit/core`, `@lessonkit/xapi`, `@lessonkit/themes`, `@lessonkit/accessibility` are stable and documented
-- [ ] Storybook + docs site are live and up to date
-- [ ] Accessibility conformance documented (WCAG 2.1 AA target)
-- [ ] Dual export parity is proven (conformance harness is green)
-- [ ] Packaging is documented end-to-end (React/Vite and LXPack/LMS targets)
-- [ ] **Generator-friendly API** checklist is met:
-  - [ ] predictable defaults
-  - [ ] stable prop shapes
-  - [ ] canonical reference example that is easy to scaffold and modify
+- [x] Public APIs for `@lessonkit/react`, `@lessonkit/core`, `@lessonkit/xapi`, `@lessonkit/themes`, `@lessonkit/accessibility` are stable and documented
+- [x] Storybook + docs site are live and up to date
+- [x] Accessibility conformance documented (WCAG 2.1 AA target)
+- [x] Dual export parity is proven (conformance harness is green)
+- [x] Packaging is documented end-to-end (React/Vite and LXPack/LMS targets)
+- [x] **Generator-friendly API** checklist is met:
+  - [x] predictable defaults
+  - [x] stable prop shapes
+  - [x] canonical reference example that is easy to scaffold and modify
 

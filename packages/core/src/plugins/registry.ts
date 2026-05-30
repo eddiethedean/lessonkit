@@ -128,7 +128,4 @@ export function createPluginRegistry(plugins: readonly LessonkitPlugin[] = []): 
   };
 }
 
-/** @deprecated Use `createPluginRegistry`. */
-export const createPluginHost = createPluginRegistry;
-
 export type { PluginHost };

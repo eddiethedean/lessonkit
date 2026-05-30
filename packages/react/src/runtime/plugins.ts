@@ -6,14 +6,14 @@ import type {
   TelemetryEvent,
   TrackingClient,
 } from "@lessonkit/core";
-import { createPluginHost } from "@lessonkit/core";
+import { createPluginRegistry } from "@lessonkit/core";
 import type { XAPIClient } from "@lessonkit/xapi";
 import { emitTelemetry } from "./emitTelemetry";
 import type { LxpackBridgeMode } from "./lxpackBridge";
 
 export function createReactPluginHost(plugins: readonly LessonkitPlugin[] | undefined): PluginHost | null {
   if (!plugins?.length) return null;
-  return createPluginHost(plugins);
+  return createPluginRegistry(plugins);
 }
 
 export function buildPluginContext(opts: {

@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
   defineAssessmentPlugin,
-  defineLessonkitPlugin,
   defineLifecyclePlugin,
   defineTelemetryPlugin,
 } from "../src/plugins/define";
@@ -29,6 +28,5 @@ describe("plugin define helpers", () => {
     expect(telemetry.id).toBe("t");
     expect(assessment.id).toBe("a");
     expect(lifecycle.id).toBe("l");
-    expect(defineLessonkitPlugin(telemetry).id).toBe("t");
   });
 });

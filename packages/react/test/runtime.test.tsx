@@ -2,7 +2,7 @@ import React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { Course, KnowledgeCheck, Lesson, LessonkitProvider, ProgressTracker, Quiz, Reflection, Scenario, useCompletion, useLessonkit, useProgress, useQuizState, useTracking } from "../src";
-import { defineLessonkitPlugin, type TelemetryEvent, type TelemetrySink } from "@lessonkit/core";
+import { defineAssessmentPlugin, defineTelemetryPlugin, type TelemetryEvent, type TelemetrySink } from "@lessonkit/core";
 import * as xapiModule from "@lessonkit/xapi";
 import type { XAPIStatement, XAPITransport } from "@lessonkit/xapi";
 
@@ -94,7 +94,7 @@ describe("@lessonkit/react runtime", () => {
 
   it("plugins wrap batchSink when batching is enabled", async () => {
     const batches: TelemetryEvent[][] = [];
-    const dropInteractions = defineLessonkitPlugin({
+    const dropInteractions = defineTelemetryPlugin({
       id: "test.drop-interaction",
       version: "1",
       kind: "analytics",
@@ -128,7 +128,7 @@ describe("@lessonkit/react runtime", () => {
 
   it("plugins can filter telemetry via onTelemetry", async () => {
     const events: TelemetryEvent[] = [];
-    const dropInteractions = defineLessonkitPlugin({
+    const dropInteractions = defineTelemetryPlugin({
       id: "test.drop-interaction",
       version: "1",
       kind: "analytics",
@@ -417,6 +417,108 @@ describe("@lessonkit/react runtime", () => {
     await waitFor(() => expect(events.some((e) => e.name === "lesson_completed")).toBe(true));
   });
 
+  it("runtimeVersion v1 completes previous lesson when switching active lesson", async () => {
+    const events: TelemetryEvent[] = [];
+    function Driver() {
+      const { setActiveLesson } = useLessonkit();
+      React.useEffect(() => {
+        setActiveLesson("lesson-1");
+        setActiveLesson("lesson-2");
+      }, [setActiveLesson]);
+      return null;
+    }
+
+    render(
+      <LessonkitProvider
+        config={{
+          courseId: "course-1",
+          runtimeVersion: "v1",
+          tracking: { sink: (e: TelemetryEvent) => void events.push(e) },
+        }}
+      >
+        <Driver />
+      </LessonkitProvider>,
+    );
+
+    await waitFor(() => {
+      expect(events.some((e) => e.name === "lesson_completed" && e.lessonId === "lesson-1")).toBe(
+        true,
+      );
+      expect(events.some((e) => e.name === "lesson_started" && e.lessonId === "lesson-2")).toBe(
+        true,
+      );
+    });
+  });
+
+  it("runtimeVersion v1 completeCourse uses legacy progress path", async () => {
+    const events: TelemetryEvent[] = [];
+    function Driver() {
+      const { setActiveLesson, completeCourse } = useLessonkit();
+      React.useEffect(() => {
+        setActiveLesson("lesson-1");
+        completeCourse();
+      }, [setActiveLesson, completeCourse]);
+      return null;
+    }
+
+    render(
+      <LessonkitProvider
+        config={{
+          courseId: "course-1",
+          runtimeVersion: "v1",
+          tracking: { sink: (e: TelemetryEvent) => void events.push(e) },
+        }}
+      >
+        <Driver />
+      </LessonkitProvider>,
+    );
+
+    await waitFor(() => {
+      expect(events.some((e) => e.name === "lesson_completed")).toBe(true);
+      expect(events.some((e) => e.name === "course_completed")).toBe(true);
+    });
+  });
+
+  it("runtimeVersion v1 completeLesson uses legacy progress path", async () => {
+    const events: TelemetryEvent[] = [];
+    function Driver() {
+      const { setActiveLesson, completeLesson } = useLessonkit();
+      React.useEffect(() => {
+        setActiveLesson("lesson-1");
+        completeLesson("lesson-1");
+      }, [setActiveLesson, completeLesson]);
+      return null;
+    }
+
+    render(
+      <LessonkitProvider
+        config={{
+          courseId: "course-1",
+          runtimeVersion: "v1",
+          tracking: { sink: (e: TelemetryEvent) => void events.push(e) },
+        }}
+      >
+        <Driver />
+      </LessonkitProvider>,
+    );
+
+    await waitFor(() => expect(events.some((e) => e.name === "lesson_completed")).toBe(true));
+  });
+
+  it("runtimeVersion v1 resets progress when courseId changes", () => {
+    const { rerender } = render(
+      <LessonkitProvider config={{ courseId: "course-1", runtimeVersion: "v1" }}>
+        <div>one</div>
+      </LessonkitProvider>,
+    );
+
+    rerender(
+      <LessonkitProvider config={{ courseId: "course-2", runtimeVersion: "v1" }}>
+        <div>two</div>
+      </LessonkitProvider>,
+    );
+  });
+
   it("runtimeVersion v2 resets headless runtime when courseId changes", () => {
     const { rerender } = render(
       <LessonkitProvider config={{ courseId: "course-1", runtimeVersion: "v2" }}>
@@ -459,7 +561,7 @@ describe("@lessonkit/react runtime", () => {
   it("wrapTrackingSink preserves stateful wrappers across events", async () => {
     let eventCount = 0;
     const events: TelemetryEvent[] = [];
-    const plugin = defineLessonkitPlugin({
+    const plugin = defineTelemetryPlugin({
       id: "stateful-wrap",
       version: "1",
       kind: "analytics",
@@ -1266,7 +1368,7 @@ describe("@lessonkit/react runtime", () => {
 
   it("Quiz uses scoreAssessment plugin with maxScore ratio", async () => {
     const events: TelemetryEvent[] = [];
-    const plugin = defineLessonkitPlugin({
+    const plugin = defineAssessmentPlugin({
       id: "scorer-ratio",
       version: "1",
       kind: "assessment",
@@ -1299,7 +1401,7 @@ describe("@lessonkit/react runtime", () => {
 
   it("Quiz does not complete on score-only plugin without explicit passed", async () => {
     const events: TelemetryEvent[] = [];
-    const plugin = defineLessonkitPlugin({
+    const plugin = defineAssessmentPlugin({
       id: "scorer-score",
       version: "1",
       kind: "assessment",
@@ -1330,7 +1432,7 @@ describe("@lessonkit/react runtime", () => {
   });
 
   it("Quiz feedback follows scoreAssessment passed flag", async () => {
-    const plugin = defineLessonkitPlugin({
+    const plugin = defineAssessmentPlugin({
       id: "scorer-pass",
       version: "1",
       kind: "assessment",
@@ -1362,7 +1464,7 @@ describe("@lessonkit/react runtime", () => {
   it("onTelemetryBatch receives current courseId after courseId change", async () => {
     const batchCtxCourseIds: string[] = [];
     const batches: TelemetryEvent[][] = [];
-    const plugin = defineLessonkitPlugin({
+    const plugin = defineTelemetryPlugin({
       id: "batch-ctx",
       version: "1",
       kind: "analytics",
@@ -1647,7 +1749,7 @@ describe("@lessonkit/react runtime", () => {
 
   it("falls back to base sink when wrapTrackingSink returns undefined", async () => {
     const events: TelemetryEvent[] = [];
-    const plugin = defineLessonkitPlugin({
+    const plugin = defineTelemetryPlugin({
       id: "wrap-undefined",
       version: "1",
       kind: "analytics",
@@ -1675,7 +1777,7 @@ describe("@lessonkit/react runtime", () => {
   it("wrapTrackingSink receives fresh plugin context per event", async () => {
     const ctxCourseIds: string[] = [];
     const events: TelemetryEvent[] = [];
-    const plugin = defineLessonkitPlugin({
+    const plugin = defineTelemetryPlugin({
       id: "wrap-ctx",
       version: "1",
       kind: "analytics",

@@ -16,9 +16,7 @@ export type {
 
 export {
   createPluginRegistry,
-  createPluginHost,
   defineAssessmentPlugin,
   defineLifecyclePlugin,
-  defineLessonkitPlugin,
   defineTelemetryPlugin,
 } from "./plugins/index.js";

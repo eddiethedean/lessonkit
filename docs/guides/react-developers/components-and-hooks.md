@@ -13,7 +13,17 @@ Canonical block list, props, and contracts: [Block catalog reference](../../refe
 | `Reflection` | optional `prompt`, `blockId` | Textarea reflection block |
 | `ProgressTracker` | — | Shows completed lesson count |
 
-`Course` accepts `config` for tracking/xAPI (same shape as `LessonkitProvider`).
+`Course` accepts `config` for tracking/xAPI and optional `sinks` (same shape as `LessonkitProvider`).
+
+## Storybook
+
+Run the component gallery from the monorepo:
+
+```bash
+npm run storybook
+```
+
+See [Storybook](../../storybook/README.md) for story groups (Course/Lesson layouts, Quiz states, blocks).
 
 ## Hooks
 

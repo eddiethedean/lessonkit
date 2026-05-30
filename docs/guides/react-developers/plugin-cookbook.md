@@ -6,9 +6,9 @@ This walkthrough adds a minimal **analytics** plugin to a LessonKit React course
 ## 1. Define the plugin
 
 ```ts
-import { defineLessonkitPlugin } from "@lessonkit/react";
+import { defineTelemetryPlugin } from "@lessonkit/react";
 
-export const consoleAnalyticsPlugin = defineLessonkitPlugin({
+export const consoleAnalyticsPlugin = defineTelemetryPlugin({
   id: "example.console-analytics",
   version: "1.0.0",
   kind: "analytics",

@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import * as lxpackBridgeSdk from "@lessonkit/lxpack/bridge";
-import { buildTrackEvent, emitTelemetry } from "../src/runtime/emitTelemetry";
+import { buildTelemetryEvent, emitTelemetry } from "../src/runtime/emitTelemetry";
 import { forwardTelemetryToLxpack } from "../src/runtime/lxpackBridge";
 import { createTrackingClient } from "@lessonkit/core";
 
@@ -13,10 +13,10 @@ describe("lxpackBridge", () => {
     } as unknown as Window);
 
     forwardTelemetryToLxpack(
-      buildTrackEvent({ name: "course_completed", courseId: "c", sessionId: "s" }),
+      buildTelemetryEvent({ name: "course_completed", courseId: "c", sessionId: "s" }),
     );
     forwardTelemetryToLxpack(
-      buildTrackEvent({
+      buildTelemetryEvent({
         name: "quiz_completed",
         courseId: "c",
         lessonId: "l",
@@ -42,7 +42,7 @@ describe("lxpackBridge", () => {
     } as unknown as Window);
 
     forwardTelemetryToLxpack(
-      buildTrackEvent({
+      buildTelemetryEvent({
         name: "lesson_completed",
         courseId: "c",
         lessonId: "l",
@@ -63,7 +63,7 @@ describe("lxpackBridge", () => {
     } as unknown as Window);
 
     forwardTelemetryToLxpack(
-      buildTrackEvent({
+      buildTelemetryEvent({
         name: "quiz_completed",
         courseId: "c",
         lessonId: "l",
@@ -83,7 +83,7 @@ describe("lxpackBridge", () => {
     } as unknown as Window);
 
     forwardTelemetryToLxpack(
-      buildTrackEvent({
+      buildTelemetryEvent({
         name: "quiz_completed",
         courseId: "c",
         lessonId: "l",
@@ -109,7 +109,7 @@ describe("lxpackBridge", () => {
     } as unknown as Window);
 
     forwardTelemetryToLxpack(
-      buildTrackEvent({
+      buildTelemetryEvent({
         name: "quiz_completed",
         courseId: "c",
         lessonId: "l",
@@ -118,7 +118,7 @@ describe("lxpackBridge", () => {
       }),
     );
     forwardTelemetryToLxpack(
-      buildTrackEvent({ name: "course_started", courseId: "c", sessionId: "s" }),
+      buildTelemetryEvent({ name: "course_started", courseId: "c", sessionId: "s" }),
     );
 
     expect(submitAssessment).not.toHaveBeenCalled();
@@ -135,7 +135,7 @@ describe("lxpackBridge", () => {
     } as never);
 
     forwardTelemetryToLxpack(
-      buildTrackEvent({ name: "course_started", courseId: "c", sessionId: "s" }),
+      buildTelemetryEvent({ name: "course_started", courseId: "c", sessionId: "s" }),
     );
 
     expect(completeCourse).not.toHaveBeenCalled();
@@ -150,7 +150,7 @@ describe("lxpackBridge", () => {
     } as unknown as Window);
 
     forwardTelemetryToLxpack(
-      buildTrackEvent({
+      buildTelemetryEvent({
         name: "interaction",
         courseId: "c",
         lessonId: "l",
@@ -170,7 +170,7 @@ describe("lxpackBridge", () => {
     } as unknown as Window);
 
     const tracking = createTrackingClient();
-    const event = buildTrackEvent({ name: "course_completed", courseId: "c", sessionId: "s" });
+    const event = buildTelemetryEvent({ name: "course_completed", courseId: "c", sessionId: "s" });
 
     emitTelemetry(tracking, null, event, { lxpackBridge: "off" });
     expect(completeCourse).not.toHaveBeenCalled();

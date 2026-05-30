@@ -21,7 +21,7 @@ import { createLessonkitRuntime, createTrackingClient } from "@lessonkit/core";
 import type { XAPIClient, XAPITransport } from "@lessonkit/xapi";
 import { createInMemoryXAPIQueue } from "@lessonkit/xapi";
 import { telemetryEventToXAPIStatement } from "@lessonkit/xapi";
-import { buildTrackEvent, tryBuildTrackEvent } from "../runtime/emitTelemetry";
+import { buildTelemetryEvent, tryBuildTelemetryEvent } from "../runtime/emitTelemetry";
 import type { LxpackBridgeMode } from "../runtime/lxpackBridge";
 import { createSessionStoragePort } from "../runtime/ports";
 import { createProgressController, type ProgressState } from "../runtime/progress";
@@ -73,7 +73,7 @@ function emitCourseStarted(opts: {
       pluginHost: opts.pluginHost,
       tracking: opts.tracking,
       xapi: opts.xapi,
-      event: buildTrackEvent({
+      event: buildTelemetryEvent({
         name: "course_started",
         courseId: opts.courseId,
         sessionId: opts.sessionId,
@@ -93,7 +93,7 @@ function emitCourseStarted(opts: {
 }
 
 export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitRuntime {
-  const useV2Runtime = config.runtimeVersion === "v2";
+  const useV2Runtime = config.runtimeVersion !== "v1";
   const extraSinksRef = useRef(config.sinks);
   extraSinksRef.current = config.sinks;
 
@@ -200,7 +200,7 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
       if (!trackingActive || alreadyStarted) {
         try {
           const statement = telemetryEventToXAPIStatement(
-            buildTrackEvent({
+            buildTelemetryEvent({
               name: "course_started",
               courseId: cid,
               sessionId,
@@ -346,7 +346,7 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
 
   const emitLifecycleEvent = useCallback(
     (name: TelemetryEventName, data?: unknown, lessonId?: LessonId) => {
-      const event = tryBuildTrackEvent({
+      const event = tryBuildTelemetryEvent({
         name,
         courseId: courseIdRef.current,
         lessonId: lessonId ?? activeLessonIdRef.current,
@@ -363,7 +363,7 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
 
   const track = useCallback(
     (name: TelemetryEventName, data?: unknown, opts?: { lessonId?: LessonId }) => {
-      const event = tryBuildTrackEvent({
+      const event = tryBuildTelemetryEvent({
         name,
         courseId: courseIdRef.current,
         lessonId: opts?.lessonId ?? activeLessonIdRef.current,

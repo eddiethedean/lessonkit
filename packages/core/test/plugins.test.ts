@@ -1,7 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
 import {
-  createPluginHost,
-  defineLessonkitPlugin,
+  createPluginRegistry,
+  defineAssessmentPlugin,
+  defineTelemetryPlugin,
   type LessonkitPlugin,
   type TelemetryEvent,
 } from "../src";
@@ -13,7 +14,7 @@ const baseEvent = {
   timestamp: "2026-01-01T00:00:00.000Z",
 };
 
-describe("createPluginHost", () => {
+describe("createPluginRegistry", () => {
   it("runs setup and dispose in order", () => {
     const order: string[] = [];
     const a: LessonkitPlugin = {
@@ -30,15 +31,15 @@ describe("createPluginHost", () => {
       setup: () => order.push("setup:b"),
       dispose: () => order.push("dispose:b"),
     };
-    const host = createPluginHost([a, b]);
+    const host = createPluginRegistry([a, b]);
     host.setupAll(ctx);
     host.disposeAll();
     expect(order).toEqual(["setup:a", "setup:b", "dispose:b", "dispose:a"]);
   });
 
   it("chains onTelemetry and can drop events", () => {
-    const host = createPluginHost([
-      defineLessonkitPlugin({
+    const host = createPluginRegistry([
+      defineTelemetryPlugin({
         id: "tag",
         version: "1",
         kind: "analytics",
@@ -50,7 +51,7 @@ describe("createPluginHost", () => {
           };
         },
       }),
-      defineLessonkitPlugin({
+      defineTelemetryPlugin({
         id: "drop-interaction",
         version: "1",
         kind: "analytics",
@@ -70,8 +71,8 @@ describe("createPluginHost", () => {
   });
 
   it("composes wrapTrackingSink inside-out by registration order", async () => {
-    const host = createPluginHost([
-      defineLessonkitPlugin({
+    const host = createPluginRegistry([
+      defineTelemetryPlugin({
         id: "outer",
         version: "1",
         kind: "analytics",
@@ -79,7 +80,7 @@ describe("createPluginHost", () => {
           await sink({ ...event, sessionId: `${event.sessionId ?? ""}-outer` });
         },
       }),
-      defineLessonkitPlugin({
+      defineTelemetryPlugin({
         id: "inner",
         version: "1",
         kind: "analytics",
@@ -100,8 +101,8 @@ describe("createPluginHost", () => {
 
   it("preserves stateful wrapTrackingSink across events with stable context", async () => {
     let callCount = 0;
-    const host = createPluginHost([
-      defineLessonkitPlugin({
+    const host = createPluginRegistry([
+      defineTelemetryPlugin({
         id: "counter",
         version: "1",
         kind: "analytics",
@@ -124,8 +125,8 @@ describe("createPluginHost", () => {
   it("recomposes wrapTrackingSink when context getter returns new courseId", async () => {
     const ctxCourseIds: string[] = [];
     let currentCourseId = "course-a";
-    const host = createPluginHost([
-      defineLessonkitPlugin({
+    const host = createPluginRegistry([
+      defineTelemetryPlugin({
         id: "ctx-track",
         version: "1",
         kind: "analytics",
@@ -151,7 +152,7 @@ describe("createPluginHost", () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
     vi.stubEnv("NODE_ENV", "development");
     try {
-      createPluginHost([
+      createPluginRegistry([
         { id: "dup", version: "1", kind: "analytics" },
         { id: "dup", version: "2", kind: "analytics" },
       ]);
@@ -164,8 +165,8 @@ describe("createPluginHost", () => {
 
   it("deliverTelemetryBatch runs only batch hooks without re-filtering", () => {
     const seen: TelemetryEvent[] = [];
-    const host = createPluginHost([
-      defineLessonkitPlugin({
+    const host = createPluginRegistry([
+      defineTelemetryPlugin({
         id: "once",
         version: "1",
         kind: "analytics",
@@ -184,8 +185,8 @@ describe("createPluginHost", () => {
 
   it("runs onTelemetryBatch after filtering", () => {
     const batch = vi.fn();
-    const host = createPluginHost([
-      defineLessonkitPlugin({
+    const host = createPluginRegistry([
+      defineTelemetryPlugin({
         id: "batch",
         version: "1",
         kind: "analytics",
@@ -199,21 +200,21 @@ describe("createPluginHost", () => {
   });
 
   it("scoreAssessment returns null when no assessment plugin matches", () => {
-    const host = createPluginHost([
-      defineLessonkitPlugin({ id: "a", version: "1", kind: "analytics" }),
+    const host = createPluginRegistry([
+      defineTelemetryPlugin({ id: "a", version: "1", kind: "analytics" }),
     ]);
     expect(host.scoreAssessment({ checkId: "q1", response: "x" }, ctx)).toBeNull();
   });
 
   it("scoreAssessment returns first assessment plugin result", () => {
-    const host = createPluginHost([
-      defineLessonkitPlugin({
+    const host = createPluginRegistry([
+      defineAssessmentPlugin({
         id: "noop",
         version: "1",
-        kind: "analytics",
+        kind: "assessment",
         scoreAssessment: () => null,
       }),
-      defineLessonkitPlugin({
+      defineAssessmentPlugin({
         id: "scorer",
         version: "1",
         kind: "assessment",

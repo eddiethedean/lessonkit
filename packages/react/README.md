@@ -110,3 +110,13 @@ export default function App() {
 - [Accessibility reference](https://lessonkit.readthedocs.io/en/latest/reference/accessibility.html) — keyboard and screen-reader guidance.
 - [Theming reference](https://lessonkit.readthedocs.io/en/latest/reference/theming.html) — token catalog and overrides.
 - [Identity](https://lessonkit.readthedocs.io/en/latest/reference/identity.html) · [Telemetry](https://lessonkit.readthedocs.io/en/latest/reference/telemetry.html) · [Block catalog](https://lessonkit.readthedocs.io/en/latest/reference/block-catalog.html) — IDs, events, and supported blocks.
+
+## Storybook
+
+From the monorepo root:
+
+```bash
+npm run storybook
+```
+
+Stories cover Course/Lesson layouts, Quiz states, and block primitives. See [docs/storybook/README.md](../../docs/storybook/README.md).

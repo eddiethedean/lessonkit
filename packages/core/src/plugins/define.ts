@@ -16,8 +16,3 @@ export function defineAssessmentPlugin(plugin: AssessmentPlugin): LessonkitPlugi
 export function defineLifecyclePlugin(plugin: LifecyclePlugin): LessonkitPlugin {
   return plugin;
 }
-
-/** @deprecated Prefer `defineTelemetryPlugin`, `defineAssessmentPlugin`, or `defineLifecyclePlugin`. */
-export function defineLessonkitPlugin(plugin: LessonkitPlugin): LessonkitPlugin {
-  return plugin;
-}

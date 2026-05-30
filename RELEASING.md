@@ -9,7 +9,26 @@ Published packages: `@lessonkit/core`, `@lessonkit/xapi`, `@lessonkit/accessibil
 - [CHANGELOG.md](CHANGELOG.md) documents the release.
 - No pending files in [`.changeset/`](.changeset/) that would run `changeset version` and bump versions unexpectedly (this repo publishes via **git tags**, not `changeset publish`).
 
-> **1.0.0-beta.1** ships the SOLID refactor behind deprecated shims. See [MIGRATION-0.x-to-1.0.md](docs/MIGRATION-0.x-to-1.0.md).
+> **1.0.0** is the stable public API release. See [MIGRATION-0.x-to-1.0.md](docs/MIGRATION-0.x-to-1.0.md).
+
+### 1.0.0 checklist (before tagging)
+
+| Item | Status |
+|------|--------|
+| `main` CI green (includes Storybook build) | Required |
+| All seven `@lessonkit/*` packages at `1.0.0` | Done (local) |
+| Deprecated APIs removed (`buildTrackEvent`, `defineLessonkitPlugin`, `createPluginHost`, `setLxpackBridgeMode`) | Done |
+| `runtimeVersion` defaults to `"v2"` | Done |
+| [MIGRATION-0.x-to-1.0.md](docs/MIGRATION-0.x-to-1.0.md) reviewed | Done |
+| [CHANGELOG.md](CHANGELOG.md) `## [1.0.0]` | Done (local) |
+| Sphinx `docs/conf.py` `release` matches `1.0.0` | Done (local) |
+| `npm run build-storybook` passes | Required before tag |
+| `npm run build` + `npm test` + `npm run typecheck` + `npm run coverage` | Required before tag |
+| `npm run test:integration` + `npm run test:e2e` + conformance scripts | Required before tag |
+| No pending `.changeset/*.md` files | Required |
+| Git tag `v1.0.0` | Create when ready to publish to npm |
+
+> **Do not create or push a `v1.0.0` git tag** until you intend to publish to npm.
 
 ### 1.0.0-beta.1 checklist (before tagging)
 

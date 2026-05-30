@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import type { TelemetryEvent, TelemetryEventName } from "@lessonkit/core";
 import { createTrackingClient } from "@lessonkit/core";
 import { createXAPIClient } from "@lessonkit/xapi";
-import { buildTrackEvent, emitTelemetry, tryBuildTrackEvent } from "../src/runtime/emitTelemetry";
+import { buildTelemetryEvent, emitTelemetry, tryBuildTelemetryEvent } from "../src/runtime/emitTelemetry";
 
 describe("emitTelemetry", () => {
   it("warns once in development when courseId is missing", () => {
@@ -26,7 +26,7 @@ describe("emitTelemetry", () => {
     const send = vi.fn();
     const xapi = { send, flush: async () => {}, queueSize: () => 0, startedLesson: () => {}, completeLesson: () => {}, completeCourse: () => {} };
 
-    const event = buildTrackEvent({
+    const event = buildTelemetryEvent({
       name: "course_started",
       courseId: "course-1",
       sessionId: "s1",
@@ -37,14 +37,14 @@ describe("emitTelemetry", () => {
     expect(send).toHaveBeenCalled();
   });
 
-  it("buildTrackEvent throws when lesson lifecycle events lack lessonId", () => {
+  it("buildTelemetryEvent throws when lesson lifecycle events lack lessonId", () => {
     expect(() =>
-      buildTrackEvent({ name: "lesson_started", courseId: "c", data: {} }),
+      buildTelemetryEvent({ name: "lesson_started", courseId: "c", data: {} }),
     ).toThrow(/lessonId/);
   });
 
   it("lesson_completed uses opts.lessonId when data.lessonId conflicts", () => {
-    const event = buildTrackEvent({
+    const event = buildTelemetryEvent({
       name: "lesson_completed",
       courseId: "c",
       lessonId: "canonical",
@@ -57,8 +57,8 @@ describe("emitTelemetry", () => {
     }
   });
 
-  it("buildTrackEvent supports interaction without lessonId", () => {
-    const event = buildTrackEvent({
+  it("buildTelemetryEvent supports interaction without lessonId", () => {
+    const event = buildTelemetryEvent({
       name: "interaction",
       courseId: "c",
       data: { kind: "noop" },
@@ -66,8 +66,8 @@ describe("emitTelemetry", () => {
     expect(event.name).toBe("interaction");
   });
 
-  it("buildTrackEvent default branch passes through unknown event names", () => {
-    const event = buildTrackEvent({
+  it("buildTelemetryEvent default branch passes through unknown event names", () => {
+    const event = buildTelemetryEvent({
       name: "future_event" as TelemetryEventName,
       courseId: "c",
     });
@@ -83,7 +83,7 @@ describe("emitTelemetry", () => {
     vi.stubGlobal("window", { parent } as unknown as Window);
 
     const tracking = createTrackingClient();
-    const event = buildTrackEvent({
+    const event = buildTelemetryEvent({
       name: "lesson_completed",
       courseId: "c",
       lessonId: "lesson-1",
@@ -96,9 +96,9 @@ describe("emitTelemetry", () => {
     vi.unstubAllGlobals();
   });
 
-  it("buildTrackEvent quiz events require active lessonId", () => {
+  it("buildTelemetryEvent quiz events require active lessonId", () => {
     expect(() =>
-      buildTrackEvent({
+      buildTelemetryEvent({
         name: "quiz_answered",
         courseId: "c",
         data: { checkId: "q1", question: "Q", choice: "A", correct: false },
@@ -107,13 +107,13 @@ describe("emitTelemetry", () => {
   });
 });
 
-describe("tryBuildTrackEvent", () => {
+describe("tryBuildTelemetryEvent", () => {
   it("returns null and warns in dev when quiz events lack lessonId", () => {
     vi.stubEnv("NODE_ENV", "development");
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
 
     expect(
-      tryBuildTrackEvent({
+      tryBuildTelemetryEvent({
         name: "quiz_answered",
         courseId: "c",
         data: { checkId: "q1", question: "Q", choice: "A", correct: false },
@@ -132,7 +132,7 @@ describe("tryBuildTrackEvent", () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
 
     expect(
-      tryBuildTrackEvent({
+      tryBuildTelemetryEvent({
         name: "quiz_completed",
         courseId: "c",
         data: { checkId: "q1" },
@@ -144,14 +144,14 @@ describe("tryBuildTrackEvent", () => {
     vi.unstubAllEnvs();
   });
 
-  it("rethrows when buildTrackEvent throws for non-quiz events", () => {
+  it("rethrows when buildTelemetryEvent throws for non-quiz events", () => {
     expect(() =>
-      tryBuildTrackEvent({ name: "lesson_started", courseId: "c" }),
+      tryBuildTelemetryEvent({ name: "lesson_started", courseId: "c" }),
     ).toThrow(/lessonId/);
   });
 
   it("returns built events for valid quiz payloads", () => {
-    const event = tryBuildTrackEvent({
+    const event = tryBuildTelemetryEvent({
       name: "quiz_completed",
       courseId: "c",
       lessonId: "lesson-1",

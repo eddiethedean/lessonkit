@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { defineLessonkitPlugin, type TelemetryEvent } from "@lessonkit/core";
+import { defineTelemetryPlugin, type TelemetryEvent } from "@lessonkit/core";
 import { createTrackingClient } from "@lessonkit/core";
 import {
   buildPluginContext,
@@ -22,7 +22,7 @@ describe("runtime plugins", () => {
   it("emitTelemetryWithPlugins drops events filtered by plugins", () => {
     const sink = vi.fn();
     const host = createReactPluginHost([
-      defineLessonkitPlugin({
+      defineTelemetryPlugin({
         id: "drop",
         version: "1",
         kind: "analytics",
@@ -43,7 +43,7 @@ describe("runtime plugins", () => {
     const batches: TelemetryEvent[][] = [];
     let passCount = 0;
     const host = createReactPluginHost([
-      defineLessonkitPlugin({
+      defineTelemetryPlugin({
         id: "once",
         version: "1",
         kind: "analytics",

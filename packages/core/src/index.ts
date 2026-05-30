@@ -41,9 +41,7 @@ export { nowIso } from "./time";
 export type { BuildTelemetryEventInput } from "./telemetryBuilder";
 export {
   buildTelemetryEvent,
-  buildTrackEvent,
   tryBuildTelemetryEvent,
-  tryBuildTrackEvent,
   resetTelemetryBuilderWarningsForTests,
 } from "./telemetryBuilder";
 
@@ -106,10 +104,8 @@ export type {
 } from "./plugins";
 
 export {
-  createPluginHost,
   createPluginRegistry,
   defineAssessmentPlugin,
   defineLifecyclePlugin,
-  defineLessonkitPlugin,
   defineTelemetryPlugin,
 } from "./plugins";

@@ -33,11 +33,9 @@ export type {
 export {
   buildTelemetryEvent,
   createLessonkitRuntime,
-  createPluginHost,
   createPluginRegistry,
   createTelemetryPipeline,
   defineAssessmentPlugin,
-  defineLessonkitPlugin,
   defineLifecyclePlugin,
   defineTelemetryPlugin,
 } from "@lessonkit/core";

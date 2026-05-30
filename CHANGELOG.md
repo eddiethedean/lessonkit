@@ -3,6 +3,26 @@
 All notable changes to the LessonKit monorepo are documented here. Published packages use the
 [`@lessonkit/*`](https://www.npmjs.com/org/lessonkit) scope.
 
+## [1.0.0] - 2026-05-30
+
+**Stable public API** — Studio development gate is open. See [MIGRATION-0.x-to-1.0.md](docs/MIGRATION-0.x-to-1.0.md).
+
+### Added
+
+- **Storybook** for `@lessonkit/react` (`npm run storybook`) — Course/Lesson layouts, Quiz states, block stories; CI `build-storybook` job.
+- **Docs:** [Core reference](docs/reference/core.md), [LXPack bridge reference](docs/reference/lxpack-bridge.md); updated plugins, packaging, and migration guides.
+
+### Changed
+
+- **`runtimeVersion: "v2"`** is the default headless runtime in `@lessonkit/react`.
+- Monorepo packages bumped to **1.0.0**; `lessonkit init` template pins `^1.0.0`.
+
+### Removed (breaking)
+
+- `buildTrackEvent` / `tryBuildTrackEvent` — use `buildTelemetryEvent` / `tryBuildTelemetryEvent`.
+- `defineLessonkitPlugin` / `createPluginHost` — use segregated plugin helpers and `createPluginRegistry`.
+- `setLxpackBridgeMode` — bridge mode is per-call via `@lessonkit/lxpack/bridge`.
+
 ## [1.0.0-beta.1] - 2026-05-29
 
 SOLID monorepo refactor: headless runtime, telemetry pipeline, segregated plugins, LXPack manifest/packaging stages.

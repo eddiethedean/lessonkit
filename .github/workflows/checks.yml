@@ -44,6 +44,13 @@ jobs:
       - name: Coverage
         run: npm run coverage
 
+      - name: Storybook build
+        run: npm run build-storybook
+        env:
+          STORYBOOK_DISABLE_TELEMETRY: "1"
+          STORYBOOK_ENABLE_CRASH_REPORTS: "0"
+          CI: "true"
+
   docs:
     name: Docs (Sphinx)
     runs-on: ubuntu-latest

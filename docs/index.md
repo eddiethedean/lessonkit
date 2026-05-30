@@ -3,7 +3,7 @@
 ```{raw} html
 <div class="lk-hero">
   <div class="lk-hero-badges">
-    <span class="lk-badge lk-badge--accent">v1.0.0-beta.1</span>
+    <span class="lk-badge lk-badge--accent">v1.0.0</span>
     <span class="lk-badge">React-first</span>
     <span class="lk-badge">SCORM · xAPI · cmi5</span>
   </div>
@@ -103,6 +103,7 @@ guides/react-developers/contributing-to-the-monorepo
 :caption: Reference
 
 reference/cli
+reference/core
 reference/packaging
 reference/identity
 reference/telemetry
@@ -111,6 +112,7 @@ reference/theming
 reference/accessibility
 reference/block-catalog
 reference/plugins
+reference/lxpack-bridge
 reference/lxpack-upgrades
 ```
 

@@ -26,7 +26,7 @@ import { buildTrackEvent } from "@lessonkit/react/runtime/emitTelemetry";
 import { buildTelemetryEvent } from "@lessonkit/core";
 ```
 
-Deprecated aliases `buildTrackEvent` / `tryBuildTrackEvent` remain in 1.0-beta and are removed in 1.0.
+Deprecated aliases `buildTrackEvent` / `tryBuildTrackEvent` were removed in **1.0.0**.
 
 ### Telemetry pipeline
 
@@ -52,7 +52,7 @@ defineTelemetryPlugin({ id: "x", version: "1", kind: "analytics", onTelemetry: (
 defineAssessmentPlugin({ id: "y", version: "1", kind: "assessment", scoreAssessment: () => null });
 ```
 
-`defineLessonkitPlugin` and `createPluginHost` remain as deprecated wrappers; use `createPluginRegistry`.
+`defineLessonkitPlugin` and `createPluginHost` were removed in **1.0.0**; use `defineTelemetryPlugin` (etc.) and `createPluginRegistry`.
 
 ### Headless runtime
 
@@ -66,10 +66,9 @@ const runtime = createLessonkitRuntime({ courseId: "my-course", runtimeVersion: 
 
 ### Config
 
-- `runtimeVersion: "v2"` opts into the headless runtime adapter (default `"v1"` during beta).
-- `sinks?: TelemetryPipelineSink[]` registers additional pipeline sinks.
-
-Legacy `tracking` / `xapi` config shims are deprecated in 1.0-beta and removed in 1.0.
+- `runtimeVersion: "v2"` is the default headless runtime in **1.0.0** (set `"v1"` to opt out).
+- `sinks?: TelemetryPipelineSink[]` registers additional pipeline sinks alongside `tracking` / `xapi`.
+- `tracking` and `xapi` config remain the primary ergonomics for analytics and xAPI transport.
 
 ### Bridge
 

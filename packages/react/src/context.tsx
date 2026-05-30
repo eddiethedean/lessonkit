@@ -40,9 +40,9 @@ export type LessonkitConfig = {
   };
   /** Framework plugins (analytics, LMS, assessment, interaction, AI). */
   plugins?: LessonkitPlugin[];
-  /** Runtime implementation (`v2` uses headless `createLessonkitRuntime`). Default `v1`. */
+  /** Runtime implementation (`v2` headless runtime is default; set `"v1"` to opt out). */
   runtimeVersion?: "v1" | "v2";
-  /** Optional custom telemetry pipeline sinks (1.0). When set, used alongside legacy tracking/xapi. */
+  /** Optional custom telemetry pipeline sinks (used alongside tracking/xapi). */
   sinks?: import("@lessonkit/core").TelemetryPipelineSink[];
 };
 

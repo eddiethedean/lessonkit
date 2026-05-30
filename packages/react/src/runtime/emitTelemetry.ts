@@ -1,10 +1,5 @@
 import type { TelemetryEvent, TrackingClient } from "@lessonkit/core";
-import {
-  buildTelemetryEvent,
-  buildTrackEvent,
-  tryBuildTelemetryEvent,
-  tryBuildTrackEvent,
-} from "@lessonkit/core";
+import { buildTelemetryEvent, tryBuildTelemetryEvent } from "@lessonkit/core";
 import type { XAPIClient } from "@lessonkit/xapi";
 import { forwardTelemetryToLxpack, type LxpackBridgeMode } from "./lxpackBridge";
 import { emitThroughPipeline, type LegacyEmitOptions } from "./telemetryPipeline";
@@ -16,7 +11,7 @@ function isDevEnvironment(): boolean {
   return typeof g.process !== "undefined" && g.process.env?.NODE_ENV !== "production";
 }
 
-export { buildTelemetryEvent, buildTrackEvent, tryBuildTelemetryEvent, tryBuildTrackEvent };
+export { buildTelemetryEvent, tryBuildTelemetryEvent };
 
 export function emitTelemetry(
   tracking: TrackingClient,

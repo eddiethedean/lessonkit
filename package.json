@@ -1,6 +1,6 @@
 {
   "name": "lessonkit",
-  "version": "1.0.0-beta.1",
+  "version": "1.0.0",
   "private": true,
   "packageManager": "npm@10.9.0",
   "workspaces": [
@@ -26,6 +26,8 @@
     "test:e2e:ui": "npm run test:ui -w @lessonkit/e2e",
     "conformance:lxpack": "npm run conformance:lxpack -w @lessonkit/e2e",
     "conformance:golden": "npm run conformance:golden -w @lessonkit/e2e",
+    "storybook": "npm run storybook -w @lessonkit/react",
+    "build-storybook": "npm run build-storybook -w @lessonkit/react",
     "changeset": "changeset",
     "version-packages": "changeset version",
     "release": "changeset publish"

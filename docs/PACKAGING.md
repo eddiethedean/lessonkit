@@ -146,6 +146,26 @@ lessonkit package --target standalone --json
 
 See [`docs/CLI.md`](CLI.md) for the full command reference and `lessonkit.json` schema.
 
+## Staged packaging pipeline (1.0)
+
+`packageLessonkitCourse()` delegates to staged helpers you can call directly:
+
+```typescript
+import {
+  parseLessonkitManifest,
+  validatePackageInputs,
+  remapArtifactPaths,
+  promoteStagingToOutDir,
+} from "@lessonkit/lxpack";
+
+const manifest = parseLessonkitManifest(json, "lessonkit.json", projectRoot);
+const validation = validatePackageInputs({ descriptor, spaDistDir, projectRoot });
+const paths = remapArtifactPaths({ stagingDir, spaDistDir, layout: descriptor.layout });
+await promoteStagingToOutDir(stagingDir, outDir);
+```
+
+Project manifests (`lessonkit.json` with `schemaVersion: 1`) are parsed by `parseLessonkitManifest` in `@lessonkit/lxpack`; the CLI delegates to the same module.
+
 ## Related
 
 - [`LXPACK_UPGRADES_FOR_LESSONKIT.md`](LXPACK_UPGRADES_FOR_LESSONKIT.md)

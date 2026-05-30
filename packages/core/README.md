@@ -5,9 +5,9 @@
 [![npm](https://img.shields.io/npm/v/@lessonkit/core.svg)](https://www.npmjs.com/package/@lessonkit/core)
 [![License](https://img.shields.io/github/license/eddiethedean/lessonkit)](https://github.com/eddiethedean/lessonkit/blob/main/LICENSE)
 
-Core types and runtime primitives shared across LessonKit packages.
+Core types and headless runtime primitives shared across LessonKit packages.
 
-**Docs:** [Identity reference](https://lessonkit.readthedocs.io/en/latest/reference/identity.html) · [Telemetry reference](https://lessonkit.readthedocs.io/en/latest/reference/telemetry.html) · [Telemetry & xAPI guide](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/telemetry-and-xapi.html)
+**Docs:** [Core reference](https://lessonkit.readthedocs.io/en/latest/reference/core.html) · [Identity](https://lessonkit.readthedocs.io/en/latest/reference/identity.html) · [Telemetry](https://lessonkit.readthedocs.io/en/latest/reference/telemetry.html)
 
 ## Install
 
@@ -15,11 +15,20 @@ Core types and runtime primitives shared across LessonKit packages.
 npm install @lessonkit/core
 ```
 
-## What's inside (0.6.0)
+## What's inside (1.0.0)
 
-- Identity helpers: `validateId`, `slugifyId`, `deriveId`, `buildLessonkitUrn`
-- Typed telemetry events (`TelemetryEvent`) and `telemetry-catalog.v1.json`
-- Tracking client (`createTrackingClient`) with optional batching
-- Session id helper (`createSessionId`)
+- **Identity:** `validateId`, `slugifyId`, `deriveId`, `buildLessonkitUrn`
+- **Telemetry:** `buildTelemetryEvent`, `createTelemetryPipeline`, `createTrackingClient`
+- **Runtime:** `createLessonkitRuntime`, progress/session helpers
+- **Plugins:** `createPluginRegistry`, `defineTelemetryPlugin`, `defineAssessmentPlugin`
 
-See the [identity](https://lessonkit.readthedocs.io/en/latest/reference/identity.html) and [telemetry](https://lessonkit.readthedocs.io/en/latest/reference/telemetry.html) references on Read the Docs.
+```typescript
+import {
+  buildTelemetryEvent,
+  createLessonkitRuntime,
+  createPluginRegistry,
+  defineTelemetryPlugin,
+} from "@lessonkit/core";
+```
+
+See the [core reference](https://lessonkit.readthedocs.io/en/latest/reference/core.html) on Read the Docs.

@@ -14,9 +14,7 @@ Studio is not a replacement for code-first authoring—it shares the same runtim
 export targets, and accessibility/telemetry goals. Packaging and LMS delivery lean on **LXPack** once
 the framework adapter exists (see 0.6.0).
 
-**Studio does not start until framework 1.0.0 ships.** All framework milestones (0.1.x through 0.8.0+
-and **1.0.0 — Stable public API**) must be complete first. No Studio spikes, packages, or apps in
-this repo until that gate is met.
+**Studio does not start until framework 1.0.0 ships.** Framework **1.0.0 — Stable public API** is complete; Studio milestones below may begin.
 
 ## Key references
 
@@ -28,9 +26,9 @@ this repo until that gate is met.
 
 ## Status
 
-- **Framework:** **0.9.3** — bugfix pass (init slug validation, plugin sink stability, Quiz passingScore, completeCourse lifecycle); LXPack **0.6.0** packaging; block catalog v1
-- **Studio:** **blocked** — no implementation work until **[1.0.0 — Stable public API (framework)](#100--stable-public-api-framework)** is shipped (see [Studio development gate](#studio-development-gate))
-- **Focus (now):** 1.0.0 stable API and docs gate
+- **Framework:** **1.0.0** — stable public API (SOLID refactor, Storybook, reference docs, v2 runtime default)
+- **Studio:** **unblocked** — framework gate met; see [Studio milestones](#lessonkit-studio-milestones)
+- **Focus (now):** LessonKit Studio 0.1.x planning and implementation
 
 ## Guiding principles
 
@@ -254,12 +252,10 @@ See [`docs/IDENTITY.md`](docs/IDENTITY.md) and [`docs/TELEMETRY.md`](docs/TELEME
 
 ---
 
-### 1.0.0 — Stable public API (framework)
+### 1.0.0 — Stable public API (framework) — **shipped**
 
 **Major blocker for LessonKit Studio.** Framework **1.0.0 must ship before any Studio development
-begins**—including schema spikes, renderer prototypes, or `lessonkit-studio` packages. Studio milestones
-below are **planned sequencing only**; they are not in active development until this section’s criteria
-are met and 1.0.0 is released.
+begins**—including schema spikes, renderer prototypes, or `lessonkit-studio` packages. **This gate is met as of 1.0.0 (2026-05-30).**
 
 #### Criteria to hit before 1.0 (and before Studio)
 

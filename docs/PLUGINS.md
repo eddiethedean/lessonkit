@@ -33,15 +33,15 @@ LessonKit plugins extend the runtime without forking `@lessonkit/react`. They re
 Types and helpers live in `@lessonkit/core` (re-exported from `@lessonkit/react`):
 
 - `LessonkitPlugin`, `LessonkitPluginKind`, `LessonkitPluginContext`
-- `createPluginHost()`, `defineLessonkitPlugin()`
-- `useLessonkit().plugins` — the active `PluginHost` (or `null`)
+- `createPluginRegistry()`, `defineTelemetryPlugin()`, `defineAssessmentPlugin()`, `defineLifecyclePlugin()`
+- `useLessonkit().plugins` — the active `PluginRegistry` (or `null`)
 
 ## Example
 
 ```ts
-import { defineLessonkitPlugin } from "@lessonkit/react";
+import { defineTelemetryPlugin } from "@lessonkit/react";
 
-const myAnalytics = defineLessonkitPlugin({
+const myAnalytics = defineTelemetryPlugin({
   id: "com.example.analytics",
   version: "1.0.0",
   kind: "analytics",

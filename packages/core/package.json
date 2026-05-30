@@ -1,6 +1,6 @@
 {
   "name": "@lessonkit/core",
-  "version": "1.0.0-beta.1",
+  "version": "1.0.0",
   "private": false,
   "description": "Shared types and telemetry primitives for LessonKit.",
   "license": "Apache-2.0",

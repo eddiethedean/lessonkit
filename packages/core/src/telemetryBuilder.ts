@@ -115,9 +115,3 @@ export function tryBuildTelemetryEvent(opts: BuildTelemetryEventInput): Telemetr
   }
   return buildTelemetryEvent(opts);
 }
-
-/** @deprecated Use `buildTelemetryEvent` — alias for migration from react runtime. */
-export const buildTrackEvent = buildTelemetryEvent;
-
-/** @deprecated Use `tryBuildTelemetryEvent` — alias for migration from react runtime. */
-export const tryBuildTrackEvent = tryBuildTelemetryEvent;
