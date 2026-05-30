@@ -173,11 +173,12 @@ export function Quiz(props: {
                 });
                 if (correct && !completedRef.current) {
                   completedRef.current = true;
+                  const maxScore = custom?.maxScore ?? 1;
                   quiz.complete({
                     checkId: props.checkId,
                     score: custom?.score ?? 1,
-                    maxScore: custom?.maxScore ?? 1,
-                    passingScore: props.passingScore ?? 1,
+                    maxScore,
+                    passingScore: props.passingScore ?? maxScore,
                   });
                 }
               }}

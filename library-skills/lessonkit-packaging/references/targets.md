@@ -18,7 +18,9 @@ Optional: `--cwd`, `--json` for automation.
 |-------|---------|------|
 | `paths.spaDistDir` | `dist` | Vite build output copied into package |
 | `paths.lxpackOutDir` | `.lxpack/course` | Staging LXPack project |
-| `paths.outputBaseDir` | `.lxpack/out` | Final ZIP / standalone folder |
+| `paths.outputBaseDir` | `.lxpack/out` | Final ZIP / standalone folder (relative to LXPack project dir) |
+
+Example SCORM 1.2 artifact path (default layout): `.lxpack/course/.lxpack/out/course-scorm12.zip` — the CLI prints the resolved path after packaging.
 
 ## xAPI / cmi5
 

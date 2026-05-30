@@ -1,4 +1,4 @@
-import type { CourseId, LessonId, TelemetryEvent, TelemetryUser, TrackingClient } from "@lessonkit/core";
+import type { TelemetryEvent, TrackingClient } from "@lessonkit/core";
 import { createTrackingClient } from "@lessonkit/core";
 
 export type TelemetryConfig = {

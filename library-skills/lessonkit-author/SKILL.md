@@ -18,7 +18,7 @@ You help edit **LessonKit 1.0** projects: Vite + React apps with a root `lessonk
 
 1. Confirm `lessonkit.json` exists (walk up from cwd if needed).
 2. Read `src/App.tsx` and the manifest together — IDs must match.
-3. After structural changes, run `lessonkit build` (or `bash library-skills/lessonkit-author/scripts/validate.sh` from a course project).
+3. After structural changes, run `lessonkit build` (or `bash scripts/validate.sh` from this skill directory when installed globally).
 4. CLI commands: `init`, `dev`, `build`, `package` with `--target scorm12|scorm2004|standalone|xapi|cmi5`.
 
 ## Project layout

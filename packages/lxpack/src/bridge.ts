@@ -1,7 +1,6 @@
 import type { TelemetryEvent } from "@lessonkit/core";
 import type { CheckId, LessonId } from "@lessonkit/core";
 import {
-  createLxpackBridgeHost,
   getLxpackBridge as getLxpackBridgeFromParent,
   normalizePassingThreshold,
   normalizeScore,

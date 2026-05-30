@@ -36,6 +36,17 @@ export async function promoteStagingToOutDir(stagingDir: string, outDir: string)
           restoreError instanceof Error ? restoreError.message : restoreError,
         );
       }
+    } else {
+      try {
+        await fsp.rename(tmpPromote, stagingDir);
+      } catch (restoreError) {
+        console.warn(
+          `[lessonkit/lxpack] failed to restore ${stagingDir} after promote error:`,
+          restoreError instanceof Error ? restoreError.message : restoreError,
+        );
+        await fsp.rm(tmpPromote, { recursive: true, force: true }).catch(() => undefined);
+      }
+      throw promoteError;
     }
     await fsp.rm(tmpPromote, { recursive: true, force: true }).catch(() => undefined);
     throw promoteError;

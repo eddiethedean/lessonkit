@@ -19,7 +19,7 @@
     "test": "npm run --workspaces --if-present test",
     "coverage": "npm run --workspaces --if-present test:coverage",
     "audit:ci": "npm audit --omit=dev --audit-level=high && npm audit --audit-level=high",
-    "lint": "npm run --workspaces --if-present lint",
+    "lint": "eslint --max-warnings 0 .",
     "typecheck": "npm run build:packages && npm run --workspaces --if-present typecheck",
     "test:integration": "npm run test:integration -w @lessonkit/integration",
     "test:e2e": "npm run test:e2e -w @lessonkit/e2e",
@@ -34,8 +34,12 @@
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.7",
+    "@eslint/js": "^9.39.1",
     "@vitest/coverage-v8": "^3.2.4",
+    "eslint": "^9.39.1",
+    "eslint-plugin-react-hooks": "^7.0.1",
     "prettier": "^3.6.2",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^8.46.4"
   }
 }

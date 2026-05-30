@@ -3,7 +3,9 @@ import { createNoopStorage } from "../src/ports";
 import {
   getTabSessionId,
   hasCourseStarted,
+  hasCourseStartedEmittedToTracking,
   markCourseStarted,
+  markCourseStartedEmittedToTracking,
   migrateCourseStartedMark,
   resolveSessionId,
   SESSION_STORAGE_KEY,
@@ -85,5 +87,46 @@ describe("session", () => {
     expect(hasCourseStarted(storage, "old", "c1")).toBe(false);
     migrateCourseStartedMark(storage, "new", "new", "c1");
     migrateCourseStartedMark(storage, "a", "b", undefined);
+  });
+
+  it("tracking emitted marks are scoped to courseId", () => {
+    const store: Record<string, string> = {};
+    const storage = {
+      getItem: (k: string) => store[k] ?? null,
+      setItem: (k: string, v: string) => {
+        store[k] = v;
+      },
+      removeItem: (k: string) => {
+        delete store[k];
+      },
+    };
+
+    expect(hasCourseStartedEmittedToTracking(storage, "s", "c1")).toBe(false);
+    markCourseStartedEmittedToTracking(storage, "s", "c1");
+    expect(hasCourseStartedEmittedToTracking(storage, "s", "c1")).toBe(true);
+    expect(hasCourseStartedEmittedToTracking(storage, "s", "c2")).toBe(false);
+    expect(hasCourseStartedEmittedToTracking(storage, "s")).toBe(false);
+    markCourseStartedEmittedToTracking(storage, "s", undefined);
+  });
+
+  it("migrateCourseStartedMark moves tracking dedupe between session ids", () => {
+    const store: Record<string, string> = {};
+    const storage = {
+      getItem: (k: string) => store[k] ?? null,
+      setItem: (k: string, v: string) => {
+        store[k] = v;
+      },
+      removeItem: (k: string) => {
+        delete store[k];
+      },
+    };
+
+    markCourseStarted(storage, "old", "c1");
+    markCourseStartedEmittedToTracking(storage, "old", "c1");
+    migrateCourseStartedMark(storage, "old", "new", "c1");
+    expect(hasCourseStarted(storage, "new", "c1")).toBe(true);
+    expect(hasCourseStartedEmittedToTracking(storage, "new", "c1")).toBe(true);
+    expect(hasCourseStarted(storage, "old", "c1")).toBe(false);
+    expect(hasCourseStartedEmittedToTracking(storage, "old", "c1")).toBe(false);
   });
 });

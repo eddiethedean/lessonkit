@@ -9,6 +9,7 @@ export function getTabSessionId(storage: StoragePort): string | null {
 }
 
 const COURSE_STARTED_PREFIX = "lessonkit:course_started:";
+const COURSE_STARTED_TRACKING_PREFIX = "lessonkit:course_started_tracking:";
 
 export function resolveSessionId(storage: StoragePort, provided?: string): string {
   if (provided) return provided;
@@ -23,6 +24,10 @@ function courseStartedStorageKey(sessionId: string, courseId?: CourseId): string
   return `${COURSE_STARTED_PREFIX}${sessionId}:${courseId ?? ""}`;
 }
 
+function courseStartedTrackingStorageKey(sessionId: string, courseId?: CourseId): string {
+  return `${COURSE_STARTED_TRACKING_PREFIX}${sessionId}:${courseId ?? ""}`;
+}
+
 export function hasCourseStarted(storage: StoragePort, sessionId: string, courseId?: CourseId): boolean {
   if (!courseId) return false;
   return storage.getItem(courseStartedStorageKey(sessionId, courseId)) === "1";
@@ -31,6 +36,24 @@ export function hasCourseStarted(storage: StoragePort, sessionId: string, course
 export function markCourseStarted(storage: StoragePort, sessionId: string, courseId?: CourseId): void {
   if (!courseId) return;
   storage.setItem(courseStartedStorageKey(sessionId, courseId), "1");
+}
+
+export function hasCourseStartedEmittedToTracking(
+  storage: StoragePort,
+  sessionId: string,
+  courseId?: CourseId,
+): boolean {
+  if (!courseId) return false;
+  return storage.getItem(courseStartedTrackingStorageKey(sessionId, courseId)) === "1";
+}
+
+export function markCourseStartedEmittedToTracking(
+  storage: StoragePort,
+  sessionId: string,
+  courseId?: CourseId,
+): void {
+  if (!courseId) return;
+  storage.setItem(courseStartedTrackingStorageKey(sessionId, courseId), "1");
 }
 
 export function migrateCourseStartedMark(
@@ -43,5 +66,9 @@ export function migrateCourseStartedMark(
   if (hasCourseStarted(storage, fromSessionId, courseId)) {
     markCourseStarted(storage, toSessionId, courseId);
     storage.removeItem?.(courseStartedStorageKey(fromSessionId, courseId));
+  }
+  if (hasCourseStartedEmittedToTracking(storage, fromSessionId, courseId)) {
+    markCourseStartedEmittedToTracking(storage, toSessionId, courseId);
+    storage.removeItem?.(courseStartedTrackingStorageKey(fromSessionId, courseId));
   }
 }

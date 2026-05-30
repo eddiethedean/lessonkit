@@ -38,7 +38,8 @@ Read `references/targets.md` for xAPI/cmi5 notes and output paths.
 
 ## Output
 
-- Packaged artifacts under `.lxpack/out/` (or path printed by CLI)
+- Packaged artifacts are written under the LXPack project tree (often `.lxpack/course/.lxpack/out/`, e.g. `course-scorm12.zip`)
+- The CLI prints the final artifact path — use `--json` for automation
 - Do not commit `.lxpack/` as source — rebuild from `dist/` + `lessonkit.json`
 
 ## Workflow

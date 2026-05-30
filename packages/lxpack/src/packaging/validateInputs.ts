@@ -1,6 +1,11 @@
-import { join, resolve } from "node:path";
+import { join, resolve, win32 } from "node:path";
 import type { ExportTarget } from "@lxpack/api";
-import { assertResolvedPathUnderRoot, isSafeRelativeSpaPath } from "../spaPath";
+import {
+  assertResolvedPathUnderRoot,
+  isResolvedPathUnderRoot,
+  isSafeRelativeSpaPath,
+  resolveComparablePath,
+} from "../spaPath";
 import type { PackageLessonkitCourseOptions } from "../packageCourse";
 
 export type PackageValidationIssue = { path?: string; message: string; severity?: string };
@@ -64,9 +69,16 @@ export function remapArtifactPaths(
   artifactPath: string | undefined,
 ): string | undefined {
   if (!artifactPath) return undefined;
-  const resolved = resolve(artifactPath);
-  if (resolved === stagingRoot || resolved.startsWith(`${stagingRoot}/`)) {
-    return join(outDir, resolved.slice(stagingRoot.length + 1));
+  const resolved = resolveComparablePath(artifactPath);
+  if (!isResolvedPathUnderRoot(stagingRoot, resolved)) {
+    return artifactPath;
   }
-  return artifactPath;
+  const stagingResolved = resolveComparablePath(stagingRoot);
+  const relative =
+    resolved === stagingResolved ? "" : resolved.slice(stagingResolved.length).replace(/^[/\\]/, "");
+  if (!relative) return outDir;
+  if (/^[a-zA-Z]:[/\\]/.test(outDir)) {
+    return win32.join(outDir, relative.replace(/\//g, win32.sep));
+  }
+  return join(outDir, relative);
 }

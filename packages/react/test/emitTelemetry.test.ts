@@ -1,7 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import type { TelemetryEvent, TelemetryEventName } from "@lessonkit/core";
 import { createTrackingClient } from "@lessonkit/core";
-import { createXAPIClient } from "@lessonkit/xapi";
 import { buildTelemetryEvent, emitTelemetry, tryBuildTelemetryEvent } from "../src/runtime/emitTelemetry";
 
 describe("emitTelemetry", () => {

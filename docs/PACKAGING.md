@@ -160,7 +160,7 @@ import {
 
 const manifest = parseLessonkitManifest(json, "lessonkit.json", projectRoot);
 const validation = validatePackageInputs({ descriptor, spaDistDir, projectRoot });
-const paths = remapArtifactPaths({ stagingDir, spaDistDir, layout: descriptor.layout });
+const remappedZip = remapArtifactPaths(stagingRoot, outDir, staged.outputPath);
 await promoteStagingToOutDir(stagingDir, outDir);
 ```
 

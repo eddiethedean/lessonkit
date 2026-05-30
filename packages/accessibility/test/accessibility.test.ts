@@ -143,7 +143,7 @@ describe("@lessonkit/accessibility", () => {
   });
 
   it("trapFocus focuses container when no focusable descendants", () => {
-    document.body.innerHTML = `<div id=\"modal\" tabindex=\"-1\"></div>`;
+    document.body.innerHTML = `<div id="modal" tabindex="-1"></div>`;
     const modal = document.getElementById("modal") as HTMLDivElement;
     const focusSpy = vi.spyOn(modal, "focus");
     const trap = trapFocus(modal);

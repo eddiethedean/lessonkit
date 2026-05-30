@@ -38,6 +38,9 @@ jobs:
       - name: Typecheck
         run: npm run typecheck
 
+      - name: Lint
+        run: npm run lint
+
       - name: Test
         run: npm test
 
@@ -98,6 +101,13 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Library skills install and validate smoke
+        run: |
+          bash -n library-skills/install.sh library-skills/lessonkit-author/scripts/validate.sh
+          npm run build:packages
+          ./library-skills/install.sh --project -C integration/fixtures/minimal-course
+          bash integration/fixtures/minimal-course/.cursor/skills/lessonkit-author/scripts/validate.sh integration/fixtures/minimal-course
 
       - name: Build packages and golden example
         run: |

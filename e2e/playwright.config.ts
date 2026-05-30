@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 
 const e2eRoot = dirname(fileURLToPath(import.meta.url));
 const repoRoot = join(e2eRoot, "..");
-const harnessDir = join(e2eRoot, "fixtures/telemetry-harness");
+const _harnessDir = join(e2eRoot, "fixtures/telemetry-harness");
 
 export default defineConfig({
   testDir: "./tests",

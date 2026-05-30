@@ -1,4 +1,3 @@
-import React from "react";
 import type { LessonkitConfig } from "../src/context";
 
 /** Minimal provider config for Storybook — telemetry and xAPI disabled. */

@@ -90,4 +90,29 @@ describe("promoteStagingToOutDir", () => {
     );
     warn.mockRestore();
   });
+
+  it("preserves staged content when outDir is new and promote fails", async () => {
+    const actualFsp = await vi.importActual<typeof import("node:fs/promises")>("node:fs/promises");
+
+    const root = await makeTempDir();
+    const outDir = join(root, "course");
+    const stagingDir = join(root, "staging");
+    await mkdir(stagingDir, { recursive: true });
+    await writeFile(join(stagingDir, "course.yaml"), "title: New package", "utf-8");
+
+    fspMocks.rename.mockImplementation(async (src, dest) => {
+      const srcStr = String(src);
+      const destStr = String(dest);
+      if (srcStr.endsWith(".tmp-promote") && destStr === outDir) {
+        throw new Error("simulated promote failure");
+      }
+      return actualFsp.rename(src, dest);
+    });
+
+    await expect(promoteStagingToOutDir(stagingDir, outDir)).rejects.toThrow(
+      "simulated promote failure",
+    );
+
+    expect(await readFile(join(stagingDir, "course.yaml"), "utf-8")).toBe("title: New package");
+  });
 });

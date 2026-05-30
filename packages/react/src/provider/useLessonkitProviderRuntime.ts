@@ -1,4 +1,4 @@
-import React, {
+import {
   useCallback,
   useEffect,
   useLayoutEffect,
@@ -9,7 +9,6 @@ import React, {
 import type {
   CourseId,
   LessonId,
-  LessonkitPlugin,
   TelemetryEvent,
   TelemetryEventName,
   TelemetryUser,
@@ -18,7 +17,7 @@ import type {
   HeadlessLessonkitRuntime,
 } from "@lessonkit/core";
 import { createLessonkitRuntime, createTrackingClient } from "@lessonkit/core";
-import type { XAPIClient, XAPITransport } from "@lessonkit/xapi";
+import type { XAPIClient } from "@lessonkit/xapi";
 import { createInMemoryXAPIQueue } from "@lessonkit/xapi";
 import { telemetryEventToXAPIStatement } from "@lessonkit/xapi";
 import { buildTelemetryEvent, tryBuildTelemetryEvent } from "../runtime/emitTelemetry";
@@ -29,7 +28,9 @@ import { createXapiClientFromConfig } from "../runtime/xapi";
 import {
   getTabSessionId,
   hasCourseStarted,
+  hasCourseStartedEmittedToTracking,
   markCourseStarted,
+  markCourseStartedEmittedToTracking,
   migrateCourseStartedMark,
   resolveSessionId,
 } from "../runtime/session";
@@ -85,9 +86,48 @@ function emitCourseStarted(opts: {
       extraSinks: opts.extraSinks,
     });
     markCourseStarted(opts.storage, opts.sessionId, opts.courseId);
+    markCourseStartedEmittedToTracking(opts.storage, opts.sessionId, opts.courseId);
     return true;
   } catch {
     /* v8 ignore next -- sink/xAPI failures leave dedupe unmarked so a later effect can retry */
+    return false;
+  }
+}
+
+/** Emit course_started to tracking/bridge when xAPI bootstrap already marked session storage. */
+function emitCourseStartedToTrackingOnly(opts: {
+  pluginHost: PluginHost | null;
+  tracking: TrackingClient;
+  sessionId: string;
+  courseId: CourseId;
+  attemptId?: string;
+  user?: TelemetryUser;
+  lxpackBridge: LxpackBridgeMode;
+  extraSinks?: import("@lessonkit/core").TelemetryPipelineSink[];
+}): boolean {
+  const pluginCtx = buildPluginContext({
+    courseId: opts.courseId,
+    sessionId: opts.sessionId,
+    attemptId: opts.attemptId,
+  });
+  try {
+    emitTelemetryWithPlugins({
+      pluginHost: opts.pluginHost,
+      tracking: opts.tracking,
+      xapi: null,
+      event: buildTelemetryEvent({
+        name: "course_started",
+        courseId: opts.courseId,
+        sessionId: opts.sessionId,
+        attemptId: opts.attemptId,
+        user: opts.user,
+      }),
+      pluginCtx,
+      lxpackBridge: opts.lxpackBridge,
+      extraSinks: opts.extraSinks,
+    });
+    return true;
+  } catch {
     return false;
   }
 }
@@ -316,20 +356,34 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
       courseStartedEmittedToSinkRef.current = false;
     } else if (
       !courseStartedEmittedToSinkRef.current &&
-      !hasCourseStarted(defaultStorage, sessionId, cid)
+      !hasCourseStartedEmittedToTracking(defaultStorage, sessionId, cid)
     ) {
-      const emitted = emitCourseStarted({
-        pluginHost: pluginHostRef.current,
-        tracking: next,
-        xapi: xapiRef.current,
-        storage: defaultStorage,
-        sessionId,
-        courseId: cid,
-        attemptId: attemptIdRef.current,
-        user: userRef.current,
-        lxpackBridge: lxpackBridgeModeRef.current,
-        extraSinks: extraSinksRef.current,
-      });
+      const emitted = hasCourseStarted(defaultStorage, sessionId, cid)
+        ? emitCourseStartedToTrackingOnly({
+            pluginHost: pluginHostRef.current,
+            tracking: next,
+            sessionId,
+            courseId: cid,
+            attemptId: attemptIdRef.current,
+            user: userRef.current,
+            lxpackBridge: lxpackBridgeModeRef.current,
+            extraSinks: extraSinksRef.current,
+          })
+        : emitCourseStarted({
+            pluginHost: pluginHostRef.current,
+            tracking: next,
+            xapi: xapiRef.current,
+            storage: defaultStorage,
+            sessionId,
+            courseId: cid,
+            attemptId: attemptIdRef.current,
+            user: userRef.current,
+            lxpackBridge: lxpackBridgeModeRef.current,
+            extraSinks: extraSinksRef.current,
+          });
+      if (emitted) {
+        markCourseStartedEmittedToTracking(defaultStorage, sessionId, cid);
+      }
       courseStartedEmittedToSinkRef.current = emitted;
     } else if (trackingActive) {
       courseStartedEmittedToSinkRef.current = true;

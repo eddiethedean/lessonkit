@@ -15,7 +15,7 @@ Usage: ./library-skills/install.sh [--global] [--project] [--directory PATH]
   --project             Install to .cursor/skills and .claude/skills under a project dir
   --directory, -C PATH  Project root (default: current directory for --project)
 
-If neither flag is given, installs --global and --project (current dir) when run interactively.
+If neither flag is given, installs to global skill paths only (`--global`).
 
 Examples:
   ./library-skills/install.sh --global
@@ -38,8 +38,6 @@ done
 
 if ! $INSTALL_GLOBAL && ! $INSTALL_PROJECT; then
   INSTALL_GLOBAL=true
-  INSTALL_PROJECT=true
-  PROJECT_DIR="${PROJECT_DIR:-$(pwd)}"
 fi
 
 if $INSTALL_PROJECT && [[ -z "$PROJECT_DIR" ]]; then

@@ -4,5 +4,7 @@ export {
   resolveSessionId,
   hasCourseStarted,
   markCourseStarted,
+  hasCourseStartedEmittedToTracking,
+  markCourseStartedEmittedToTracking,
   migrateCourseStartedMark,
 } from "@lessonkit/core";

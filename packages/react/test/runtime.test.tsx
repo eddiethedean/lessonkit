@@ -1422,6 +1422,7 @@ describe("@lessonkit/react runtime", () => {
 
   it("sends one course-level initialized when tracking disabled then enabled with xapi", async () => {
     const statements: XAPIStatement[] = [];
+    const events: TelemetryEvent[] = [];
     const transport: XAPITransport = async (s) => {
       statements.push(s);
     };
@@ -1448,7 +1449,7 @@ describe("@lessonkit/react runtime", () => {
       <LessonkitProvider
         config={{
           courseId: "course-1",
-          tracking: { sink: () => {} },
+          tracking: { sink: (e: TelemetryEvent) => void events.push(e) },
           xapi: { transport },
         }}
       >
@@ -1457,6 +1458,104 @@ describe("@lessonkit/react runtime", () => {
     );
 
     await waitFor(() => expect(statements.filter(isCourseInit)).toHaveLength(1));
+    await waitFor(() => expect(events.filter((e) => e.name === "course_started")).toHaveLength(1));
+  });
+
+  it("warns when tracking sink and batchSink are both configured in development", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    vi.stubEnv("NODE_ENV", "development");
+
+    const config = {
+      courseId: "course-1" as const,
+      tracking: {
+        sink: () => {},
+        batchSink: async () => {},
+        batch: { enabled: true, flushIntervalMs: 60_000 },
+      },
+      xapi: { enabled: false as const },
+    };
+
+    try {
+      const { rerender } = render(
+        <LessonkitProvider config={config}>
+          <div>child</div>
+        </LessonkitProvider>,
+      );
+
+      await waitFor(() =>
+        expect(warn).toHaveBeenCalledWith(
+          expect.stringMatching(/tracking\.sink and tracking\.batchSink/),
+        ),
+      );
+
+      rerender(
+        <LessonkitProvider config={config}>
+          <div>child</div>
+        </LessonkitProvider>,
+      );
+      expect(warn).toHaveBeenCalledTimes(1);
+    } finally {
+      vi.unstubAllEnvs();
+      warn.mockRestore();
+    }
+  });
+
+  it("retries course_started to tracking after xAPI bootstrap when sink fails once", async () => {
+    const events: TelemetryEvent[] = [];
+    let shouldThrow = true;
+    const transport: XAPITransport = async () => {};
+
+    const { rerender } = render(
+      <LessonkitProvider
+        config={{
+          courseId: "course-1",
+          tracking: { enabled: false },
+          xapi: { transport },
+        }}
+      >
+        <div>child</div>
+      </LessonkitProvider>,
+    );
+
+    await waitFor(() =>
+      expect(
+        Object.keys(sessionStorage).some((k) => k.startsWith("lessonkit:course_started:")),
+      ).toBe(true),
+    );
+
+    rerender(
+      <LessonkitProvider
+        config={{
+          courseId: "course-1",
+          tracking: {
+            sink: (e: TelemetryEvent) => {
+              if (e.name === "course_started" && shouldThrow) throw new Error("sink failed");
+              events.push(e);
+            },
+          },
+          xapi: { transport },
+        }}
+      >
+        <div>child</div>
+      </LessonkitProvider>,
+    );
+
+    expect(events.filter((e) => e.name === "course_started")).toHaveLength(0);
+
+    shouldThrow = false;
+    rerender(
+      <LessonkitProvider
+        config={{
+          courseId: "course-1",
+          tracking: { sink: (e: TelemetryEvent) => void events.push(e) },
+          xapi: { transport },
+        }}
+      >
+        <div>child</div>
+      </LessonkitProvider>,
+    );
+
+    await waitFor(() => expect(events.some((e) => e.name === "course_started")).toBe(true));
   });
 
   it("flushes batched telemetry when setActiveLesson completes the previous lesson", async () => {
@@ -1532,6 +1631,45 @@ describe("@lessonkit/react runtime", () => {
     );
   });
 
+  it("Quiz defaults passingScore to plugin maxScore when prop is omitted", async () => {
+    const events: TelemetryEvent[] = [];
+    const plugin = defineAssessmentPlugin({
+      id: "scorer-max-four",
+      version: "1",
+      kind: "assessment",
+      scoreAssessment: () => ({ score: 4, maxScore: 4, passed: true }),
+    });
+
+    const { getByLabelText } = render(
+      <Course
+        title="Course"
+        courseId="course-1"
+        config={{
+          plugins: [plugin],
+          tracking: { sink: (e) => void events.push(e) },
+          xapi: { enabled: false },
+        }}
+      >
+        <Lesson title="Lesson" lessonId="lesson-1">
+          <Quiz checkId="check-1" question="Q?" choices={["wrong", "right"]} answer="right" />
+        </Lesson>
+      </Course>,
+    );
+
+    fireEvent.click(getByLabelText("right"));
+    await waitFor(() =>
+      expect(
+        events.some(
+          (e) =>
+            e.name === "quiz_completed" &&
+            e.data?.checkId === "check-1" &&
+            e.data?.maxScore === 4 &&
+            e.data?.passingScore === 4,
+        ),
+      ).toBe(true),
+    );
+  });
+
   it("Quiz does not complete on score-only plugin without explicit passed", async () => {
     const events: TelemetryEvent[] = [];
     const plugin = defineAssessmentPlugin({
@@ -1541,7 +1679,7 @@ describe("@lessonkit/react runtime", () => {
       scoreAssessment: () => ({ score: 1, maxScore: 0 }),
     });
 
-    const { getByLabelText, getByRole } = render(
+    const { getByLabelText } = render(
       <Course
         title="Course"
         courseId="course-1"

@@ -1,7 +1,7 @@
 import type { TelemetryEvent, TrackingClient } from "@lessonkit/core";
 import { buildTelemetryEvent, tryBuildTelemetryEvent } from "@lessonkit/core";
 import type { XAPIClient } from "@lessonkit/xapi";
-import { forwardTelemetryToLxpack, type LxpackBridgeMode } from "./lxpackBridge";
+import type { LxpackBridgeMode } from "./lxpackBridge";
 import { emitThroughPipeline, type LegacyEmitOptions } from "./telemetryPipeline";
 
 let warnedMissingCourseId = false;

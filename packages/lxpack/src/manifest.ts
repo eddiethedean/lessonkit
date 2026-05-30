@@ -1,6 +1,6 @@
 import type { LessonkitCourseDescriptor } from "./types";
 import { validateDescriptor } from "./validateDescriptor";
-import { validateProjectPaths, type ProjectPathsInput } from "./validateProjectPaths";
+import { validateProjectPaths } from "./validateProjectPaths";
 
 export type LessonkitManifestPaths = {
   spaDistDir: string;

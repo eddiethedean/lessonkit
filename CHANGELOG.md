@@ -9,6 +9,14 @@ All notable changes to the LessonKit monorepo are documented here. Published pac
 
 ### Fixed
 
+- **@lessonkit/react**: Emit `course_started` to the tracking sink when xAPI bootstraps first and tracking is enabled later (without duplicating xAPI statements).
+- **@lessonkit/core**: Track `course_started` delivery to the tracking sink separately from xAPI/session dedupe marks.
+- **@lessonkit/xapi**: Coalesce concurrent `flush()` calls so queued statements are not sent twice.
+- **@lessonkit/react**: Default `Quiz` `passingScore` to the assessment plugin `maxScore` when the prop is omitted.
+- **@lessonkit/lxpack**: Fix cross-platform `remapArtifactPaths` prefix checks and Windows output path joining.
+- **@lessonkit/lxpack**: Restore staged package content when promote fails and `outDir` did not exist yet.
+- **library-skills**: Fix `install.sh` default (global only), `validate.sh` path in `lessonkit-author`, and packaging output path notes.
+- **Tooling**: Add ESLint (flat config) with CI lint step and library-skills install/validate smoke in packaging CI.
 - **@lessonkit/react**: `wrapTrackingSink` now applies on batched flushes when `tracking.batchSink` is configured.
 - **@lessonkit/react**: `Quiz` / `KnowledgeCheck` telemetry uses the enclosing `<Lesson>` `lessonId` (not only `activeLessonId`) when multiple lessons are mounted.
 - **@lessonkit/react**: Plugin `setup` / `dispose` re-run when `session.user` changes.

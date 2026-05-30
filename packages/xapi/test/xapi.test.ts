@@ -150,6 +150,34 @@ describe("@lessonkit/xapi", () => {
     await expect(client.flush()).resolves.toBeUndefined();
   });
 
+  it("coalesces concurrent flush calls so each statement is sent once", async () => {
+    const queue = createInMemoryXAPIQueue();
+    queue.enqueue({ id: "1", timestamp: "t", verb: "v", object: { id: "o1" } });
+    queue.enqueue({ id: "2", timestamp: "t", verb: "v", object: { id: "o2" } });
+
+    const delivered: string[] = [];
+    let release!: () => void;
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+
+    const transport = vi.fn(async (statement: XAPIStatement) => {
+      delivered.push(statement.id);
+      if (delivered.length === 1) {
+        await gate;
+      }
+    });
+
+    const first = queue.flush(transport);
+    const second = queue.flush(transport);
+    release();
+    await Promise.all([first, second]);
+
+    expect(delivered).toEqual(["1", "2"]);
+    expect(transport).toHaveBeenCalledTimes(2);
+    expect(queue.size()).toBe(0);
+  });
+
   it("lifecycle helpers noop without courseId", async () => {
     const transport = vi.fn(async () => {});
     const client = createXAPIClient({ transport });
