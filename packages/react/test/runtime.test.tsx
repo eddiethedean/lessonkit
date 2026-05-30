@@ -1688,6 +1688,48 @@ describe("@lessonkit/react runtime", () => {
     expect(pipelineEvents.filter((e) => e.name === "course_started")).toHaveLength(1);
   });
 
+  it("returns false from tracking-only bootstrap when bridge pipeline throws after tracking succeeds", async () => {
+    const trackingEvents: TelemetryEvent[] = [];
+    const emitSpy = vi.spyOn(emitTelemetryModule, "emitTelemetry").mockImplementation(() => {
+      throw new Error("pipeline failed");
+    });
+
+    const { rerender } = render(
+      <LessonkitProvider
+        config={{
+          courseId: "course-1",
+          tracking: { enabled: false },
+          xapi: { transport: async () => {} },
+        }}
+      >
+        <div>child</div>
+      </LessonkitProvider>,
+    );
+
+    await waitFor(() =>
+      expect(
+        Object.keys(sessionStorage).some((k) => k.startsWith("lessonkit:course_started:")),
+      ).toBe(true),
+    );
+
+    rerender(
+      <LessonkitProvider
+        config={{
+          courseId: "course-1",
+          tracking: { sink: (e) => void trackingEvents.push(e) },
+          xapi: { transport: async () => {} },
+        }}
+      >
+        <div>child</div>
+      </LessonkitProvider>,
+    );
+
+    await waitFor(() => expect(trackingEvents.some((e) => e.name === "course_started")).toBe(true));
+    expect(trackingEvents.filter((e) => e.name === "course_started")).toHaveLength(1);
+
+    emitSpy.mockRestore();
+  });
+
   it("emitCourseStarted returns early when plugin filters course_started", () => {
     const filterPlugin = defineTelemetryPlugin({
       id: "filter-start",
