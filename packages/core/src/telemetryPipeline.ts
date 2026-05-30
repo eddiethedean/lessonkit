@@ -27,25 +27,16 @@ function invokeSink(
   event: TelemetryEvent,
   emitCtx: EmitContext,
 ): void {
-  try {
-    const result = sink.emit(event, emitCtx);
-    if (result != null && typeof (result as Promise<void>).catch === "function") {
-      void (result as Promise<void>).catch((err) => {
-        if (isDevEnvironment()) {
-          console.warn(
-            `[lessonkit] telemetry sink "${sink.id}" failed:`,
-            err instanceof Error ? err.message : err,
-          );
-        }
-      });
-    }
-  } catch (err) {
-    if (isDevEnvironment()) {
-      console.warn(
-        `[lessonkit] telemetry sink "${sink.id}" failed:`,
-        err instanceof Error ? err.message : err,
-      );
-    }
+  const result = sink.emit(event, emitCtx);
+  if (result != null && typeof (result as Promise<void>).catch === "function") {
+    void (result as Promise<void>).catch((err) => {
+      if (isDevEnvironment()) {
+        console.warn(
+          `[lessonkit] telemetry sink "${sink.id}" failed:`,
+          err instanceof Error ? err.message : err,
+        );
+      }
+    });
   }
 }
 
