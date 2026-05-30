@@ -2,7 +2,13 @@ import React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { Course, KnowledgeCheck, Lesson, LessonkitProvider, ProgressTracker, Quiz, Reflection, Scenario, useCompletion, useLessonkit, useProgress, useQuizState, useTracking } from "../src";
-import { defineAssessmentPlugin, defineTelemetryPlugin, type TelemetryEvent, type TelemetrySink } from "@lessonkit/core";
+import {
+  defineAssessmentPlugin,
+  defineLifecyclePlugin,
+  defineTelemetryPlugin,
+  type TelemetryEvent,
+  type TelemetrySink,
+} from "@lessonkit/core";
 import * as xapiModule from "@lessonkit/xapi";
 import type { XAPIStatement, XAPITransport } from "@lessonkit/xapi";
 
@@ -90,6 +96,50 @@ describe("@lessonkit/react runtime", () => {
     expect(quizAnswered.courseId).toBe("course-1");
     expect(quizAnswered.lessonId).toBe("lesson-1");
     expect(typeof quizAnswered.sessionId).toBe("string");
+  });
+
+  it("Quiz telemetry uses enclosing Lesson when multiple lessons are mounted", async () => {
+    const events: TelemetryEvent[] = [];
+
+    const { getByLabelText } = render(
+      <Course
+        title="Course"
+        courseId="course-1"
+        config={{
+          tracking: {
+            sink: (e: TelemetryEvent) => {
+              events.push(e);
+            },
+          },
+          xapi: { enabled: false },
+        }}
+      >
+        <Lesson title="Lesson A" lessonId="lesson-a">
+          <Quiz checkId="shared-check" question="Q in A" choices={["A1", "A2"]} answer="A2" />
+        </Lesson>
+        <Lesson title="Lesson B" lessonId="lesson-b">
+          <div>lesson b body</div>
+        </Lesson>
+      </Course>,
+    );
+
+    await waitFor(() => {
+      expect(events.some((e) => e.name === "lesson_started" && e.lessonId === "lesson-b")).toBe(true);
+    });
+
+    fireEvent.click(getByLabelText("A2"));
+
+    await waitFor(() => {
+      expect(events.some((e) => e.name === "quiz_completed")).toBe(true);
+    });
+
+    const quizEvents = events.filter(
+      (e) => e.name === "quiz_answered" || e.name === "quiz_completed",
+    );
+    expect(quizEvents.length).toBeGreaterThan(0);
+    for (const e of quizEvents) {
+      expect(e.lessonId).toBe("lesson-a");
+    }
   });
 
   it("plugins wrap batchSink when batching is enabled", async () => {
@@ -588,6 +638,89 @@ describe("@lessonkit/react runtime", () => {
 
     await waitFor(() => expect(events.length).toBeGreaterThanOrEqual(2));
     expect(eventCount).toBeGreaterThanOrEqual(2);
+  });
+
+  it("re-runs plugin setup and dispose when session.user changes", async () => {
+    const log: string[] = [];
+    const plugin = defineLifecyclePlugin({
+      id: "lifecycle-user",
+      version: "1",
+      kind: "lms",
+      setup() {
+        log.push("setup");
+      },
+      dispose() {
+        log.push("dispose");
+      },
+    });
+
+    const { rerender } = render(
+      <LessonkitProvider
+        config={{
+          courseId: "course-1",
+          plugins: [plugin],
+          session: { user: { id: "user-a" } },
+          xapi: { enabled: false },
+        }}
+      >
+        <div>child</div>
+      </LessonkitProvider>,
+    );
+
+    await waitFor(() => expect(log).toEqual(["setup"]));
+
+    rerender(
+      <LessonkitProvider
+        config={{
+          courseId: "course-1",
+          plugins: [plugin],
+          session: { user: { id: "user-b" } },
+          xapi: { enabled: false },
+        }}
+      >
+        <div>child</div>
+      </LessonkitProvider>,
+    );
+
+    await waitFor(() => expect(log).toEqual(["setup", "dispose", "setup"]));
+  });
+
+  it("wrapTrackingSink applies to batched flushes when batchSink is configured", async () => {
+    let wrapCount = 0;
+    const batches: TelemetryEvent[][] = [];
+    const plugin = defineTelemetryPlugin({
+      id: "stateful-wrap-batch",
+      version: "1",
+      kind: "analytics",
+      wrapTrackingSink: (sink) => (event) => {
+        wrapCount += 1;
+        return sink(event);
+      },
+    });
+
+    render(
+      <LessonkitProvider
+        config={{
+          courseId: "course-1",
+          plugins: [plugin],
+          tracking: {
+            batch: { enabled: true, flushIntervalMs: 50, maxBatchSize: 10 },
+            batchSink: (events) => {
+              batches.push(events);
+            },
+          },
+          xapi: { enabled: false },
+        }}
+      >
+        <Lesson title="L" lessonId="lesson-1">
+          <div>content</div>
+        </Lesson>
+      </LessonkitProvider>,
+    );
+
+    await waitFor(() => expect(batches.length).toBeGreaterThan(0));
+    expect(wrapCount).toBeGreaterThan(0);
+    expect(batches.flat().length).toBeGreaterThan(0);
   });
 
   it("tracking disabled does not invoke sink", async () => {

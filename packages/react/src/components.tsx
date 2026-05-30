@@ -3,6 +3,7 @@ import { visuallyHiddenStyle } from "@lessonkit/accessibility";
 import type { AssessmentScoreResult, BlockId, CheckId, CourseId, LessonId } from "@lessonkit/core";
 import { LessonkitProvider } from "./context";
 import { useCompletion, useLessonkit, useQuizState } from "./hooks";
+import { LessonContext, useEnclosingLessonId } from "./lessonContext";
 import { buildPluginContext } from "./runtime/plugins";
 import { warnInvalidComponentId } from "./runtime/validateComponentId";
 
@@ -50,10 +51,12 @@ export function Lesson(props: { title: string; lessonId: LessonId; children: Rea
   }, [id, config.courseId, setActiveLesson, completeLesson]);
 
   return (
-    <article aria-label={props.title}>
-      <h2>{props.title}</h2>
-      <div>{props.children}</div>
-    </article>
+    <LessonContext.Provider value={id}>
+      <article aria-label={props.title}>
+        <h2>{props.title}</h2>
+        <div>{props.children}</div>
+      </article>
+    </LessonContext.Provider>
   );
 }
 
@@ -108,18 +111,20 @@ export function Quiz(props: {
 }) {
   warnInvalidComponentId(props.checkId, "checkId");
 
-  const quiz = useQuizState();
-  const { plugins, config, progress, session } = useLessonkit();
+  const enclosingLessonId = useEnclosingLessonId();
+  const quiz = useQuizState(enclosingLessonId);
+  const { plugins, config, session } = useLessonkit();
   const [selected, setSelected] = useState<string | null>(null);
   const [selectionCorrect, setSelectionCorrect] = useState<boolean | null>(null);
   const completedRef = useRef(false);
   const questionId = useId();
+  const choicesKey = props.choices.join("\0");
 
   useEffect(() => {
     completedRef.current = false;
     setSelected(null);
     setSelectionCorrect(null);
-  }, [props.checkId, props.answer, props.question, config.courseId]);
+  }, [props.checkId, props.answer, props.question, config.courseId, enclosingLessonId, choicesKey]);
 
   const isChoiceCorrect = (choice: string, custom: AssessmentScoreResult | null): boolean => {
     if (!custom) return choice === props.answer;
@@ -153,7 +158,7 @@ export function Quiz(props: {
                   plugins?.scoreAssessment(
                     {
                       checkId: props.checkId,
-                      lessonId: progress.activeLessonId,
+                      lessonId: enclosingLessonId,
                       response: c,
                     },
                     pluginCtx,

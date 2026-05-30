@@ -7,8 +7,7 @@ for:
 - **AI code generators** producing LessonKit code (Claude/Cursor-style workflows)
 - **LessonKit Studio** (a non-coder layer built on top, post–framework 1.0.0)
 
-> Studio development gate remains: **no `@lessonkit-studio/*` implementation until framework 1.0.0**
-> is shipped (see [`ROADMAP.md`](../ROADMAP.md)).
+> **Framework 1.0.0 has shipped** — the Studio development gate is met. Studio implementation may begin per [`ROADMAP.md`](../ROADMAP.md).
 
 ## Readiness principles
 

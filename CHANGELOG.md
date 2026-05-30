@@ -7,6 +7,13 @@ All notable changes to the LessonKit monorepo are documented here. Published pac
 
 **Stable public API** — Studio development gate is open. See [MIGRATION-0.x-to-1.0.md](docs/MIGRATION-0.x-to-1.0.md).
 
+### Fixed
+
+- **@lessonkit/react**: `wrapTrackingSink` now applies on batched flushes when `tracking.batchSink` is configured.
+- **@lessonkit/react**: `Quiz` / `KnowledgeCheck` telemetry uses the enclosing `<Lesson>` `lessonId` (not only `activeLessonId`) when multiple lessons are mounted.
+- **@lessonkit/react**: Plugin `setup` / `dispose` re-run when `session.user` changes.
+- **@lessonkit/react**: Quiz UI state resets when enclosing `lessonId` or `choices` change.
+
 ### Added
 
 - **Storybook** for `@lessonkit/react` (`npm run storybook`) — Course/Lesson layouts, Quiz states, block stories; CI `build-storybook` job.

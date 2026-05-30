@@ -96,5 +96,5 @@ Workflow: [`.github/workflows/checks.yml`](https://github.com/eddiethedean/lesso
 
 - [Packaging and CLI](packaging-and-cli.md)
 - [Contributing — E2E and conformance](contributing-to-the-monorepo.md#e2e-and-conformance)
-- [STUDIO_READINESS.md](../../STUDIO_READINESS.md) — 0.9.x checklist
+- [STUDIO_READINESS.md](../../STUDIO_READINESS.md) — framework and Studio readiness checklists
 - [LXPack upgrade plan](../../LXPACK_UPGRADE_PLAN_FOR_MAINTAINERS.md)

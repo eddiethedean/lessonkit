@@ -1,6 +1,6 @@
 # LessonKit E2E / conformance
 
-Playwright tests and packaging conformance scripts for **0.9.x** export parity (completed in **0.9.1**).
+Playwright tests and packaging conformance scripts for **1.0.0** export parity (extends the **0.9.x** conformance harness).
 
 ## Prerequisites
 

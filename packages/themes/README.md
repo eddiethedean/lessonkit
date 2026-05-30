@@ -15,7 +15,7 @@ Design tokens and theme utilities for LessonKit.
 npm install @lessonkit/themes
 ```
 
-## API (0.6.0)
+## API (1.0.0)
 
 ### Types
 

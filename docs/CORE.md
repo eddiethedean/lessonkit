@@ -7,7 +7,7 @@ Headless runtime, telemetry pipeline, plugins, identity, and session helpers sha
 - `validateId`, `assertValidId`, `slugifyId`, `deriveId`, `buildLessonkitUrn`
 - Machine-readable contract: `@lessonkit/core/identity-contract.v1.json`
 
-See [Identity reference](IDENTITY.md).
+See [Identity reference](reference/identity.md).
 
 ## Telemetry
 
@@ -70,7 +70,7 @@ const client = createTrackingClient({
 - `TELEMETRY_EVENT_CATALOG`, `buildTelemetryCatalog()`, `telemetryCatalogVersion`
 - JSON: `@lessonkit/core/telemetry-catalog.v1.json`
 
-See [Telemetry reference](TELEMETRY.md).
+See [Telemetry reference](reference/telemetry.md).
 
 ## Headless runtime
 
@@ -114,7 +114,7 @@ const registry = createPluginRegistry([
 ]);
 ```
 
-See [Plugins reference](PLUGINS.md).
+See [Plugins reference](PLUGINS.md) and [LXPack bridge reference](LXPACK_BRIDGE.md).
 
 ## Ports
 

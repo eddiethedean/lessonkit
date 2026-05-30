@@ -6,7 +6,7 @@
 
 **LessonKit** is a React-first framework for building accessible, trackable learning experiences—and shipping them to the LMS. Author courses as components, wire telemetry and xAPI, theme with design tokens, and export SCORM, standalone, xAPI, or cmi5 packages from the same codebase.
 
-**Current release:** [0.9.3](https://github.com/eddiethedean/lessonkit/blob/main/CHANGELOG.md) · Published on npm as [`@lessonkit/*`](https://www.npmjs.com/org/lessonkit)
+**Current release:** [1.0.0](https://github.com/eddiethedean/lessonkit/blob/main/CHANGELOG.md) · Published on npm as [`@lessonkit/*`](https://www.npmjs.com/org/lessonkit)
 
 **Documentation:** [lessonkit.readthedocs.io](https://lessonkit.readthedocs.io/en/latest/) — [vibe coding](https://lessonkit.readthedocs.io/en/latest/guides/vibe-coding/index.html) · [React developers](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/index.html) · [live examples](https://lessonkit.readthedocs.io/en/latest/examples/index.html) (contributors: [docs/README.md](https://github.com/eddiethedean/lessonkit/blob/main/docs/README.md) · [Read the Docs setup](https://github.com/eddiethedean/lessonkit/blob/main/docs/READTHEDOCS.md))
 
@@ -21,7 +21,7 @@
 | **Accessibility** | Semantic structure, focus utilities, reduced-motion helpers, and documented WCAG targets |
 | **Delivery** | Dual export: modern SPA via Vite plus LMS artifacts through [`@lessonkit/lxpack`](https://lessonkit.readthedocs.io/en/latest/reference/packaging.html) |
 
-LessonKit is developer tooling—not a timeline authoring tool. Think **React + telemetry + packaging**, not Storyline-in-a-box. A visual **LessonKit Studio** is planned after framework 1.0; see the [roadmap](https://lessonkit.readthedocs.io/en/latest/project/roadmap.html) ([ROADMAP.md](https://github.com/eddiethedean/lessonkit/blob/main/ROADMAP.md)).
+LessonKit is developer tooling—not a timeline authoring tool. Think **React + telemetry + packaging**, not Storyline-in-a-box. **LessonKit Studio** (visual authoring) is unblocked after framework 1.0; see the [roadmap](https://lessonkit.readthedocs.io/en/latest/project/roadmap.html) ([ROADMAP.md](https://github.com/eddiethedean/lessonkit/blob/main/ROADMAP.md)).
 
 ---
 
@@ -218,7 +218,10 @@ Full site (Sphinx + Read the Docs): **[lessonkit.readthedocs.io](https://lessonk
 | Topic | Documentation |
 | --- | --- |
 | CLI & `lessonkit.json` | [CLI reference](https://lessonkit.readthedocs.io/en/latest/reference/cli.html) |
+| Core runtime & telemetry pipeline | [Core reference](https://lessonkit.readthedocs.io/en/latest/reference/core.html) |
+| Plugins | [Plugins](https://lessonkit.readthedocs.io/en/latest/reference/plugins.html) |
 | LMS packaging | [Packaging reference](https://lessonkit.readthedocs.io/en/latest/reference/packaging.html) |
+| LXPack bridge (embedded LMS) | [LXPack bridge](https://lessonkit.readthedocs.io/en/latest/reference/lxpack-bridge.html) |
 | IDs & URNs | [Identity reference](https://lessonkit.readthedocs.io/en/latest/reference/identity.html) |
 | Telemetry events | [Telemetry reference](https://lessonkit.readthedocs.io/en/latest/reference/telemetry.html) |
 | Theming | [Theming reference](https://lessonkit.readthedocs.io/en/latest/reference/theming.html) |
@@ -233,7 +236,7 @@ Source markdown for reference pages lives under [`docs/`](https://github.com/edd
 - [RELEASING.md](https://github.com/eddiethedean/lessonkit/blob/main/RELEASING.md) — publish `@lessonkit/*` to npm
 - [Security](https://lessonkit.readthedocs.io/en/latest/project/security.html) · [SECURITY.md](https://github.com/eddiethedean/lessonkit/blob/main/SECURITY.md) — vulnerability reporting
 - [Roadmap](https://lessonkit.readthedocs.io/en/latest/project/roadmap.html) · [PLAN.md](https://github.com/eddiethedean/lessonkit/blob/main/PLAN.md) · [SPEC.md](https://github.com/eddiethedean/lessonkit/blob/main/SPEC.md) · [ROADMAP.md](https://github.com/eddiethedean/lessonkit/blob/main/ROADMAP.md)
-- [docs/LessonKit_Studio_PLAN.md](https://github.com/eddiethedean/lessonkit/blob/main/docs/LessonKit_Studio_PLAN.md) — future visual authoring (post–framework 1.0)
+- [docs/LessonKit_Studio_PLAN.md](https://github.com/eddiethedean/lessonkit/blob/main/docs/LessonKit_Studio_PLAN.md) — visual authoring (framework 1.0 gate met)
 
 ---
 
@@ -255,7 +258,7 @@ Prettier is configured at the repo root. CI runs on Node 18 and 20 (see [.github
 
 ## Versioning
 
-LessonKit follows [semver](https://semver.org/). The **0.x** line evolves quickly; see [CHANGELOG.md](https://github.com/eddiethedean/lessonkit/blob/main/CHANGELOG.md) for breaking changes (notably identity requirements in **0.5.0**).
+LessonKit follows [semver](https://semver.org/). The **1.0** line is the stable public API; see [CHANGELOG.md](https://github.com/eddiethedean/lessonkit/blob/main/CHANGELOG.md) and [MIGRATION-0.x-to-1.0.md](https://github.com/eddiethedean/lessonkit/blob/main/docs/MIGRATION-0.x-to-1.0.md) for breaking changes from 0.9.x.
 
 To publish packages from this monorepo, follow [RELEASING.md](https://github.com/eddiethedean/lessonkit/blob/main/RELEASING.md).
 

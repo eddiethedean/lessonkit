@@ -12,7 +12,7 @@
     "conformance:golden": "node scripts/run-golden-package-matrix.mjs"
   },
   "dependencies": {
-    "@lessonkit/lxpack": "0.9.3",
+    "@lessonkit/lxpack": "1.0.0",
     "@lxpack/conformance": "^0.6.0"
   },
   "devDependencies": {

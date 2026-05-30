@@ -5,7 +5,7 @@ Published packages: `@lessonkit/core`, `@lessonkit/xapi`, `@lessonkit/accessibil
 ## Prerequisites
 
 - `main` is green (see [CI workflow](.github/workflows/ci.yml)).
-- All `packages/*/package.json` versions match the release (e.g. `0.9.1`).
+- All `packages/*/package.json` versions match the release (e.g. `1.0.0`).
 - [CHANGELOG.md](CHANGELOG.md) documents the release.
 - No pending files in [`.changeset/`](.changeset/) that would run `changeset version` and bump versions unexpectedly (this repo publishes via **git tags**, not `changeset publish`).
 
@@ -48,7 +48,7 @@ Published packages: `@lessonkit/core`, `@lessonkit/xapi`, `@lessonkit/accessibil
 | `main` CI green (includes `test:e2e` with telemetry-harness project) | Required — verify on push |
 | All seven `@lessonkit/*` packages at `0.9.3` in `package.json` | Done (local) |
 | `@lessonkit/react` / `@lessonkit/lxpack` / `@lessonkit/cli` depend on matching `@lessonkit/*@0.9.3` | Done (local) |
-| `lessonkit init` template pins `^0.9.3` for `@lessonkit/*` | Done (`copy-template.mjs`) |
+| `lessonkit init` template pins `^0.9.3` for `@lessonkit/*` | Historical (1.0 uses `^1.0.0` in `copy-template.mjs`) |
 | [CHANGELOG.md](CHANGELOG.md) `## [0.9.3]` (bugfix pass) | Done (local) |
 | Sphinx `docs/conf.py` `release` matches `0.9.3` | Done |
 | `npm run build` + `npm test` + `npm run typecheck` + `npm run audit:ci` | Done (local, 2026-05-29) |
@@ -156,8 +156,8 @@ Published packages: `@lessonkit/core`, `@lessonkit/xapi`, `@lessonkit/accessibil
 3. When ready to publish, create and push the version tag (triggers [`.github/workflows/release.yml`](.github/workflows/release.yml)):
 
    ```bash
-   git tag v0.9.0
-   git push origin v0.9.0
+   git tag v1.0.0
+   git push origin v1.0.0
    ```
 
 4. Verify the **Release** workflow on GitHub Actions and packages on [npm](https://www.npmjs.com/org/lessonkit).
@@ -166,7 +166,7 @@ The release job sets each package version from the tag, aligns `@lessonkit/*` de
 
 ## After release
 
-- Confirm npm shows `0.9.0` for each `@lessonkit/*` package.
+- Confirm npm shows `1.0.0` for each `@lessonkit/*` package.
 - Optional: create a GitHub Release from the tag with notes copied from [CHANGELOG.md](CHANGELOG.md).
 
 ## Changesets

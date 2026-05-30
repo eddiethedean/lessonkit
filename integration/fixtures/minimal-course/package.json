@@ -10,16 +10,16 @@
     "package:standalone": "lessonkit package --target standalone"
   },
   "dependencies": {
-    "@lessonkit/core": "0.9.3",
-    "@lessonkit/react": "0.9.3",
-    "@lessonkit/themes": "0.9.3",
-    "@lessonkit/xapi": "0.9.3",
+    "@lessonkit/core": "^1.0.0",
+    "@lessonkit/react": "^1.0.0",
+    "@lessonkit/themes": "^1.0.0",
+    "@lessonkit/xapi": "^1.0.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
-    "@lessonkit/cli": "0.9.3",
-    "@lessonkit/lxpack": "0.9.3",
+    "@lessonkit/cli": "^1.0.0",
+    "@lessonkit/lxpack": "^1.0.0",
     "@types/react": "^18.3.23",
     "@types/react-dom": "^18.3.7",
     "@vitejs/plugin-react": "^4.6.0",

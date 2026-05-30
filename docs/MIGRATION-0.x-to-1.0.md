@@ -78,6 +78,18 @@ Import bridge utilities from `@lessonkit/lxpack/bridge` instead of duplicating i
 import { forwardTelemetryToBridge, dispatchBridgeAction } from "@lessonkit/lxpack/bridge";
 ```
 
+`setLxpackBridgeMode` (global) was removed in **1.0.0**. Use provider config and per-call bridge mode instead:
+
+```typescript
+// Provider (default "auto")
+<Course
+  courseId="my-course"
+  config={{ lxpack: { bridge: "auto" } }} // or "off"
+>
+```
+
+For manual forwarding outside the provider pipeline, pass mode to `forwardTelemetryToBridge(event, mode)` from `@lessonkit/lxpack/bridge`. See [LXPack bridge reference](LXPACK_BRIDGE.md).
+
 ## `@lessonkit/lxpack`
 
 ### Manifest loading

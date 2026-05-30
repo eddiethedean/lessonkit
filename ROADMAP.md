@@ -292,21 +292,17 @@ begins**—including schema spikes, renderer prototypes, or `lessonkit-studio` p
 
 ## LessonKit Studio milestones
 
-> **Studio development gate:** Do not start Studio implementation until **framework 1.0.0** is
-> released. The milestones in this section describe the **intended order after the gate**; they are
-> not parallel workstreams with the framework.
+> **Studio development gate:** Framework **1.0.0** has shipped. Studio milestones below may proceed; see [Status](#status).
 
 Studio is a **visual learning experience builder** on LessonKit + LXPack: drag-and-drop authoring,
 Git-backed projects, live preview, and export to React/Vite, LXPack, SCORM, xAPI, cmi5, and standalone
 web builds. Full detail: [`docs/LessonKit_Studio_PLAN.md`](docs/LessonKit_Studio_PLAN.md), [`docs/LessonKit_Studio_SPEC.md`](docs/LessonKit_Studio_SPEC.md).
 
-### Studio development gate
+### Studio development gate (met)
 
-1. Ship every **framework** milestone in [Framework milestones](#framework-milestones) through **1.0.0**.
-2. Verify the [gate checklist](#gate-checklist-framework-complete--studio-may-start).
-3. Only then begin **Studio 0.1.0** (schema and shared renderer).
-
-Until step 3, Studio remains **design/docs only** (`LessonKit_Studio_PLAN.md`, `LessonKit_Studio_SPEC.md`).
+1. Ship every **framework** milestone in [Framework milestones](#framework-milestones) through **1.0.0** — **done**.
+2. Verify the [gate checklist](#gate-checklist-framework-complete--studio-may-start) — **done**.
+3. Begin **Studio 0.1.x** (schema and shared renderer) — **in progress / planned**.
 
 ### Architecture (target)
 

@@ -92,6 +92,18 @@ function emitCourseStarted(opts: {
   }
 }
 
+let warnedSinkAndBatchSink = false;
+
+function warnTrackingSinkAndBatchSinkTogether(): void {
+  const g = globalThis as typeof globalThis & { process?: { NODE_ENV?: string } };
+  if (typeof g.process !== "undefined" && g.process.env?.NODE_ENV === "production") return;
+  if (warnedSinkAndBatchSink) return;
+  warnedSinkAndBatchSink = true;
+  console.warn(
+    "[lessonkit] tracking.sink and tracking.batchSink are both set; flushed batches only use batchSink",
+  );
+}
+
 export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitRuntime {
   const useV2Runtime = config.runtimeVersion !== "v1";
   const extraSinksRef = useRef(config.sinks);
@@ -263,20 +275,32 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
   useIsoLayoutEffect(() => {
     const prev = trackingRef.current;
     const baseSink = config.tracking?.sink;
+    const userBatchSink = config.tracking?.batchSink;
+    if (baseSink && userBatchSink) {
+      warnTrackingSinkAndBatchSinkTogether();
+    }
     const sink =
       pluginHostRef.current && baseSink
         ? (pluginHostRef.current.composeTrackingSink(baseSink, buildCurrentPluginCtx) ?? baseSink)
         : baseSink;
     const batchSink =
-      pluginHostRef.current && config.tracking?.batchSink
-        ? (events: TelemetryEvent[]) => {
-            const delivered = pluginHostRef.current!.deliverTelemetryBatch(
-              events,
-              buildCurrentPluginCtx(),
-            );
-            return config.tracking!.batchSink!(delivered);
+      pluginHostRef.current && userBatchSink
+        ? async (events: TelemetryEvent[]) => {
+            const host = pluginHostRef.current!;
+            const ctx = buildCurrentPluginCtx();
+            const delivered = host.deliverTelemetryBatch(events, ctx);
+            const perEventForBatch: TelemetryEvent[] = [];
+            const collector: (event: TelemetryEvent) => void = (event) => {
+              perEventForBatch.push(event);
+            };
+            const composedPerEvent =
+              host.composeTrackingSink(collector, buildCurrentPluginCtx) ?? collector;
+            for (const event of delivered) {
+              await Promise.resolve(composedPerEvent(event));
+            }
+            return userBatchSink(perEventForBatch);
           }
-        : config.tracking?.batchSink;
+        : userBatchSink;
     const next = createTrackingClientFromConfig({
       tracking: { ...config.tracking, sink, batchSink },
     });
@@ -520,6 +544,10 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
   }, [track, syncProgress, emitLessonCompleted, useV2Runtime, emitLifecycleEvent]);
 
   const sessionUser = config.session?.user;
+  const sessionUserKey = useMemo(
+    () => (sessionUser ? JSON.stringify(sessionUser) : ""),
+    [sessionUser],
+  );
   const sessionAttemptId = config.session?.attemptId;
   const sessionConfiguredId = config.session?.sessionId;
 
@@ -534,7 +562,7 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
     return () => {
       pluginHost.disposeAll();
     };
-  }, [pluginHost, config.courseId, sessionAttemptId, sessionConfiguredId]);
+  }, [pluginHost, config.courseId, sessionAttemptId, sessionConfiguredId, sessionUserKey]);
 
   useEffect(() => {
     const nextConfigured = config.session?.sessionId;
