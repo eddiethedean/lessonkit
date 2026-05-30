@@ -1,14 +1,19 @@
 # Templates
 
-LessonKit maintains two Vite + React template trees:
+Two Vite + React trees serve different purposes:
 
 | Path | Purpose |
 | --- | --- |
-| [`templates/vite-react/`](vite-react/) | Monorepo development — depends on workspace packages via `file:../../packages/*` |
-| [`packages/cli/template/vite-react/`](../packages/cli/template/vite-react/) | Published scaffold — depends on npm `^1.0.0` and ships with `@lessonkit/cli init` |
+| [`vite-react/`](https://github.com/eddiethedean/lessonkit/tree/main/templates/vite-react) | Monorepo dev — `file:../../packages/*` deps |
+| [`packages/cli/template/vite-react/`](https://github.com/eddiethedean/lessonkit/tree/main/packages/cli/template/vite-react) | Published scaffold — npm `^1.0.0`, shipped with `lessonkit init` |
 
-The CLI copies from `packages/cli/template/vite-react/` when you run `lessonkit init`. The monorepo template is for contributors running examples against local packages.
+`src/` and `lessonkit.json` must match between both trees.
 
-**Keep in sync:** `src/` and `lessonkit.json` must match between both trees.
+After editing `templates/vite-react/`:
 
-After editing [`templates/vite-react/`](vite-react/), run `npm run copy-template -w @lessonkit/cli` and commit the updated [`packages/cli/template/vite-react/`](../packages/cli/template/vite-react/) tree. CI runs `copy-template` and diffs both trees on every PR.
+```bash
+npm run copy-template -w @lessonkit/cli
+git add packages/cli/template/vite-react
+```
+
+CI verifies parity on every PR.

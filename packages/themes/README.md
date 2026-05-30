@@ -1,13 +1,10 @@
-# `@lessonkit/themes`
+# @lessonkit/themes
 
-[![CI](https://github.com/eddiethedean/lessonkit/actions/workflows/ci.yml/badge.svg)](https://github.com/eddiethedean/lessonkit/actions/workflows/ci.yml)
-[![Documentation](https://readthedocs.org/projects/lessonkit/badge/?version=latest)](https://lessonkit.readthedocs.io/en/latest/)
 [![npm](https://img.shields.io/npm/v/@lessonkit/themes.svg)](https://www.npmjs.com/package/@lessonkit/themes)
+[![Documentation](https://readthedocs.org/projects/lessonkit/badge/?version=latest)](https://lessonkit.readthedocs.io/en/latest/reference/theming.html)
 [![License](https://img.shields.io/github/license/eddiethedean/lessonkit)](https://github.com/eddiethedean/lessonkit/blob/main/LICENSE)
 
-Design tokens and theme utilities for LessonKit.
-
-**Docs:** [Theming reference](https://lessonkit.readthedocs.io/en/latest/reference/theming.html) · [Theming & accessibility guide](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/theming-and-accessibility.html)
+Design tokens, presets, and CSS variable utilities for LessonKit.
 
 ## Install
 
@@ -15,41 +12,27 @@ Design tokens and theme utilities for LessonKit.
 npm install @lessonkit/themes
 ```
 
-## API (1.0.0)
+## Usage
 
-### Types
+```typescript
+import { getPresetTheme, mergeThemes, themeToCssVariables } from "@lessonkit/themes";
 
-- `LessonkitThemeV1` — full token schema v1
-- `LessonkitTheme` — alias for `LessonkitThemeV1`
-- `PartialLessonkitThemeV1` — partial overrides for merge / `ThemeProvider`
-
-### Presets
-
-- `defaultTheme`, `lightTheme`, `darkTheme`, `brandTheme`, `brandThemeOverrides`
-- `getPresetTheme(preset)` — `default` | `light` | `dark` | `brand` (full themes for catalog/validation)
-
-In `ThemeProvider`, `preset="default"` uses the mode palette only; `preset="brand"` merges `brandThemeOverrides` onto the active mode (see [theming reference](https://lessonkit.readthedocs.io/en/latest/reference/theming.html)).
-
-### Utilities
-
-- `validateTheme(input)` — validate unknown input
-- `mergeThemes(base, ...overrides)` — deep merge, last writer wins
-- `themeToCssVariables(theme)` — flat `--lk-*` map (sorted keys)
-- `themeToCssDeclarationBlock(theme)` — `:root { ... }` text
-- `buildThemeCatalog()` — enumerable token metadata
-
-### Machine-readable exports
-
-```json
-{
-  "imports": {
-    "@lessonkit/themes/theme-contract.v1.json": "./theme-contract.v1.json",
-    "@lessonkit/themes/theme-catalog.v1.json": "./theme-catalog.v1.json",
-    "@lessonkit/themes/base.css": "./base.css"
-  }
-}
+const theme = mergeThemes(getPresetTheme("light"), { colors: { primary: "#0066cc" } });
+const vars = themeToCssVariables(theme); // { "--lk-color-primary": "#0066cc", ... }
 ```
+
+**Presets:** `default`, `light`, `dark`, `brand` via `getPresetTheme()`
+
+**Utilities:** `validateTheme()`, `mergeThemes()`, `themeToCssDeclarationBlock()`, `buildThemeCatalog()`
+
+**Assets:** `theme-contract.v1.json`, `theme-catalog.v1.json`, `base.css`
+
+Pair with `ThemeProvider` from `@lessonkit/react` for runtime theming.
 
 ## Docs
 
-See the [theming reference](https://lessonkit.readthedocs.io/en/latest/reference/theming.html) for the CSS variable contract and override rules.
+[Theming reference](https://lessonkit.readthedocs.io/en/latest/reference/theming.html)
+
+## License
+
+Apache-2.0

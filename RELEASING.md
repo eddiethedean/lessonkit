@@ -15,18 +15,20 @@ Published packages: `@lessonkit/core`, `@lessonkit/xapi`, `@lessonkit/accessibil
 
 | Item | Status |
 |------|--------|
-| `main` CI green (includes Storybook build) | Required |
-| All seven `@lessonkit/*` packages at `1.0.0` | Done (local) |
+| `main` CI green (includes Storybook build) | Done — [CI run 26691621420](https://github.com/eddiethedean/lessonkit/actions/runs/26691621420) (2026-05-30) |
+| All seven `@lessonkit/*` packages at `1.0.0` | Done |
 | Deprecated APIs removed (`buildTrackEvent`, `defineLessonkitPlugin`, `createPluginHost`, `setLxpackBridgeMode`) | Done |
 | `runtimeVersion` defaults to `"v2"` | Done |
 | [MIGRATION-0.x-to-1.0.md](docs/MIGRATION-0.x-to-1.0.md) reviewed | Done |
-| [CHANGELOG.md](CHANGELOG.md) `## [1.0.0]` | Done (local) |
-| Sphinx `docs/conf.py` `release` matches `1.0.0` | Done (local) |
-| `npm run build-storybook` passes | Required before tag |
-| `npm run build` + `npm test` + `npm run typecheck` + `npm run coverage` | Required before tag |
-| `npm run test:integration` + `npm run test:e2e` + conformance scripts | Required before tag |
-| No pending `.changeset/*.md` files | Required |
-| Git tag `v1.0.0` | Create when ready to publish to npm |
+| [CHANGELOG.md](CHANGELOG.md) `## [1.0.0]` (+ maintenance entries on `main`) | Done |
+| Sphinx `docs/conf.py` `release` matches `1.0.0` | Done |
+| `npm run build-storybook` passes | Done (local, 2026-05-30) |
+| `npm run build` + `npm test` + `npm run typecheck` + `npm run coverage` | Done (local, 2026-05-30) |
+| `npm run test:integration` + `npm run test:e2e` + conformance scripts | Done (local, 2026-05-30) |
+| No pending `.changeset/*.md` files | Done (only `config.json`) |
+| `NPM_TOKEN` secret configured on GitHub | Done |
+| npm latest is still **0.9.3** (1.0.0 not published yet) | Verified 2026-05-30 |
+| Git tag `v1.0.0` | **Not created** — create when ready to publish to npm |
 
 > **Do not create or push a `v1.0.0` git tag** until you intend to publish to npm.
 

@@ -1,32 +1,26 @@
 # Storybook
 
-[![Documentation](https://readthedocs.org/projects/lessonkit/badge/?version=latest)](https://lessonkit.readthedocs.io/en/latest/)
-[![License](https://img.shields.io/github/license/eddiethedean/lessonkit)](https://github.com/eddiethedean/lessonkit/blob/main/LICENSE)
+Interactive component gallery for `@lessonkit/react`.
 
-Component gallery for `@lessonkit/react`, linked from the [components & hooks guide](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/components-and-hooks.html).
+## Commands
 
-## Run locally
-
-From the monorepo root:
+From repo root:
 
 ```bash
-npm run storybook
+npm run storybook           # dev server
+npm run build-storybook     # static export → packages/react/storybook-static/
 ```
 
-Build a static export (also run in CI):
-
-```bash
-npm run build-storybook
-```
-
-Output: `packages/react/storybook-static/`.
+CI runs `build-storybook` on every PR.
 
 ## Stories
 
-| Group | File | Covers |
-|-------|------|--------|
-| Layouts | `packages/react/stories/CourseLesson.stories.tsx` | Course/Lesson shells, progress tracker |
-| Quiz | `packages/react/stories/Quiz.stories.tsx` | Unanswered, correct, incorrect states |
-| Blocks | `packages/react/stories/Blocks.stories.tsx` | Scenario, Reflection, KnowledgeCheck |
+| Group | Covers |
+| --- | --- |
+| Layouts | Course/Lesson shells, progress tracker |
+| Quiz | Unanswered, correct, incorrect states |
+| Blocks | Scenario, Reflection, KnowledgeCheck |
 
-Configuration: `packages/react/.storybook/`. Telemetry is disabled in stories via `storyConfig` helpers.
+Config: `packages/react/.storybook/`. Stories disable telemetry via `storyConfig` helpers.
+
+Linked from [components & hooks guide](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/components-and-hooks.html).

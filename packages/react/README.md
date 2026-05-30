@@ -1,13 +1,10 @@
-# `@lessonkit/react`
+# @lessonkit/react
 
-[![CI](https://github.com/eddiethedean/lessonkit/actions/workflows/ci.yml/badge.svg)](https://github.com/eddiethedean/lessonkit/actions/workflows/ci.yml)
-[![Documentation](https://readthedocs.org/projects/lessonkit/badge/?version=latest)](https://lessonkit.readthedocs.io/en/latest/)
 [![npm](https://img.shields.io/npm/v/@lessonkit/react.svg)](https://www.npmjs.com/package/@lessonkit/react)
+[![Documentation](https://readthedocs.org/projects/lessonkit/badge/?version=latest)](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/components-and-hooks.html)
 [![License](https://img.shields.io/github/license/eddiethedean/lessonkit)](https://github.com/eddiethedean/lessonkit/blob/main/LICENSE)
 
-React components and hooks for building learning experiences in LessonKit.
-
-**Docs:** [Components & hooks](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/components-and-hooks.html) · [Block catalog](https://lessonkit.readthedocs.io/en/latest/reference/block-catalog.html) · [Quickstart](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/quickstart.html) · [Theming & accessibility](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/theming-and-accessibility.html)
+React components and hooks for authoring LessonKit courses.
 
 ## Install
 
@@ -15,108 +12,53 @@ React components and hooks for building learning experiences in LessonKit.
 npm install @lessonkit/react react react-dom
 ```
 
-## Quick example
+Optional: `@lessonkit/xapi`, `@lessonkit/themes`, `@lessonkit/accessibility`
+
+## Usage
 
 ```tsx
 import { useMemo } from "react";
-import type { TelemetryEvent } from "@lessonkit/core";
-import { Course, Lesson, Quiz, Scenario, ProgressTracker, ThemeProvider } from "@lessonkit/react";
-import type { XAPIStatement } from "@lessonkit/xapi";
+import { Course, Lesson, Quiz, ProgressTracker, ThemeProvider } from "@lessonkit/react";
 
 export default function App() {
-  const config = useMemo(
-    () => ({
-      tracking: {
-        sink: (event: TelemetryEvent) => console.log(event),
-      },
-      xapi: {
-        transport: (statement: XAPIStatement) => console.log(statement),
-      },
-    }),
-    [],
-  );
+  const config = useMemo(() => ({ tracking: { sink: console.log } }), []);
 
   return (
     <ThemeProvider mode="light">
-    <Course title="Cybersecurity Basics" courseId="cyber-basics" config={config}>
-      <ProgressTracker />
-
-      <Lesson title="Phishing Awareness" lessonId="phishing-101">
-        <Scenario>
-          <p>You receive a suspicious email.</p>
-        </Scenario>
-
-        <Quiz
-          checkId="first-step"
-          question="What should you do first?"
-          choices={["Open attachment", "Verify sender"]}
-          answer="Verify sender"
-        />
-      </Lesson>
-    </Course>
+      <Course title="My Course" courseId="my-course" config={config}>
+        <ProgressTracker />
+        <Lesson title="Lesson 1" lessonId="lesson-1">
+          <Quiz
+            checkId="check-1"
+            question="Ready?"
+            choices={["No", "Yes"]}
+            answer="Yes"
+          />
+        </Lesson>
+      </Course>
     </ThemeProvider>
   );
 }
 ```
 
-## API (1.0.0)
+## API
 
-### Block catalog
+**Components:** `Course`, `Lesson`, `Scenario`, `Quiz`, `KnowledgeCheck`, `Reflection`, `ProgressTracker`, `ThemeProvider`
 
-- **JSON:** `@lessonkit/react/block-catalog.v1.json`
-- **Schema:** `@lessonkit/react/block-contract.v1.json`
-- **API:** `buildBlockCatalog()`, `getBlockCatalogEntry(type)`, `BLOCK_CATALOG`, `blockCatalogVersion`
-- [Block catalog reference](https://lessonkit.readthedocs.io/en/latest/reference/block-catalog.html)
+**Hooks:** `useProgress`, `useTracking`, `useQuizState`, `useCompletion`, `useTheme`
 
-### Components
+**Catalog:** `@lessonkit/react/block-catalog.v1.json` · `buildBlockCatalog()`, `getBlockCatalogEntry()`
 
-- `Course` — requires `courseId`
-- `Lesson` — requires `lessonId`
-- `Scenario` — optional `blockId`
-- `Quiz` / `KnowledgeCheck` — require `checkId`
-- `Reflection` — optional `blockId`
-- `ProgressTracker`
+## Tips
 
-### Hooks
+- Hoist `config` with `useMemo` so tracking/xAPI clients are not recreated every render.
+- xAPI is on by default; provide `xapi.transport` or statements queue in memory.
+- Lessons complete on unmount or when another lesson becomes active via `setActiveLesson`.
 
-- `useProgress`
-- `useTracking`
-- `useQuizState`
-- `useCompletion`
-- `useTheme`
+## Docs
 
-### Theming
+[Components & hooks](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/components-and-hooks.html) · [Block catalog](https://lessonkit.readthedocs.io/en/latest/reference/block-catalog.html) · [Theming](https://lessonkit.readthedocs.io/en/latest/reference/theming.html) · [Storybook](https://github.com/eddiethedean/lessonkit/blob/main/docs/storybook/README.md) (`npm run storybook` from repo root)
 
-- `ThemeProvider` — injects `--lk-*` CSS variables ([theming reference](https://lessonkit.readthedocs.io/en/latest/reference/theming.html))
-- Props: `preset`, `mode` (`light` | `dark` | `system`), `theme` (partial override), `target` (`document` | `element`)
+## License
 
-## Notes
-
-- `@lessonkit/react` ships **framework primitives**, not content. You bring your own layout/content
-  and compose interactions as React components.
-- `Course` accepts a `config` prop that is passed through to `LessonkitProvider` (tracking sink,
-  optional `xapi.transport` or custom `xapi.client`, session metadata). Hoist `config` with `useMemo`
-  so tracking/xAPI clients are not recreated every render.
-- xAPI is enabled by default unless `xapi.enabled: false`. Provide `xapi.transport` or `xapi.client`
-  or statements are queued in memory and never sent (dev warns once).
-- A lesson is marked complete when its `<Lesson>` unmounts (for example, wizard navigation) or when
-  another lesson becomes active via `setActiveLesson`. Use stable `lessonId` values so completion and
-  time-on-task telemetry stay consistent.
-- `<Lesson>` defers completion on unmount so React Strict Mode remounts in development do not emit
-  spurious `lesson_completed` events; completion runs after the component leaves the tree.
-- If you omit `session.sessionId`, the provider reuses a tab-scoped id via `sessionStorage` so React
-  Strict Mode remounts do not split analytics sessions in development.
-- In development, invalid `courseId` / `lessonId` / `checkId` values log a one-time `console.warn`.
-- [Accessibility reference](https://lessonkit.readthedocs.io/en/latest/reference/accessibility.html) — keyboard and screen-reader guidance.
-- [Theming reference](https://lessonkit.readthedocs.io/en/latest/reference/theming.html) — token catalog and overrides.
-- [Identity](https://lessonkit.readthedocs.io/en/latest/reference/identity.html) · [Telemetry](https://lessonkit.readthedocs.io/en/latest/reference/telemetry.html) · [Block catalog](https://lessonkit.readthedocs.io/en/latest/reference/block-catalog.html) — IDs, events, and supported blocks.
-
-## Storybook
-
-From the monorepo root:
-
-```bash
-npm run storybook
-```
-
-Stories cover Course/Lesson layouts, Quiz states, and block primitives. See [docs/storybook/README.md](../../docs/storybook/README.md).
+Apache-2.0

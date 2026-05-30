@@ -1,55 +1,41 @@
-# `@lessonkit/cli`
+# @lessonkit/cli
 
-[![CI](https://github.com/eddiethedean/lessonkit/actions/workflows/ci.yml/badge.svg)](https://github.com/eddiethedean/lessonkit/actions/workflows/ci.yml)
-[![Documentation](https://readthedocs.org/projects/lessonkit/badge/?version=latest)](https://lessonkit.readthedocs.io/en/latest/)
 [![npm](https://img.shields.io/npm/v/@lessonkit/cli.svg)](https://www.npmjs.com/package/@lessonkit/cli)
+[![Documentation](https://readthedocs.org/projects/lessonkit/badge/?version=latest)](https://lessonkit.readthedocs.io/en/latest/reference/cli.html)
 [![License](https://img.shields.io/github/license/eddiethedean/lessonkit)](https://github.com/eddiethedean/lessonkit/blob/main/LICENSE)
 
-LessonKit CLI — scaffold, dev, build, and package learning experiences.
-
-**Docs:** [CLI reference](https://lessonkit.readthedocs.io/en/latest/reference/cli.html) · [Packaging & CLI guide](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/packaging-and-cli.html) · [Vibe coding: shipping to LMS](https://lessonkit.readthedocs.io/en/latest/guides/vibe-coding/shipping-to-lms.html)
+Scaffold, develop, build, and package LessonKit courses. Node.js **18+**.
 
 ## Install
 
 ```bash
 npm install -g @lessonkit/cli
-# or
+# or one-shot:
 npx @lessonkit/cli init my-course
-```
-
-**Node.js:** dev, build, and LMS packaging on Node **18+**.
-
-## Quick start
-
-```bash
-lessonkit init my-course
-cd my-course
-lessonkit dev
-lessonkit build
-lessonkit package --target scorm12
 ```
 
 ## Commands
 
-| Command | Description |
-|---------|-------------|
-| `lessonkit init [name]` | Scaffold a Vite + React project |
-| `lessonkit dev` | Run Vite dev server |
-| `lessonkit build` | Production Vite build |
-| `lessonkit package --target <target>` | Build or package for web / LMS |
-| `lessonkit publish` | Stub — see [`RELEASING.md`](https://github.com/eddiethedean/lessonkit/blob/main/RELEASING.md) |
+```bash
+lessonkit init my-course    # scaffold Vite + React project
+lessonkit dev               # Vite dev server
+lessonkit build             # production build → dist/
+lessonkit package --target scorm12   # LMS artifact
+```
 
-### Package targets
+| Target | Output |
+| --- | --- |
+| `react-vite` | Vite build only |
+| `scorm12`, `scorm2004` | SCORM package |
+| `standalone` | Self-contained web bundle |
+| `xapi`, `cmi5` | xAPI / cmi5 packages |
 
-- `react-vite` — Vite production build → `dist/`
-- `scorm12`, `scorm2004`, `xapi`, `cmi5`, `standalone` — via `@lessonkit/lxpack`
+Every project includes a root `lessonkit.json` manifest (`schemaVersion: 1`).
 
-## Project manifest
+## Docs
 
-Projects include a `lessonkit.json` at the root. See the [CLI reference](https://lessonkit.readthedocs.io/en/latest/reference/cli.html) for the schema, flags, exit codes, and JSON output mode.
+[CLI reference](https://lessonkit.readthedocs.io/en/latest/reference/cli.html) · [Packaging guide](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/packaging-and-cli.html) · [Template source](https://github.com/eddiethedean/lessonkit/tree/main/templates/vite-react)
 
-## Related
+## License
 
-- [Packaging reference](https://lessonkit.readthedocs.io/en/latest/reference/packaging.html) — LXPack output layout
-- [React quickstart](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/quickstart.html)
-- [`templates/vite-react`](https://github.com/eddiethedean/lessonkit/tree/main/templates/vite-react) — source for the bundled `template/vite-react` scaffold
+Apache-2.0

@@ -1,14 +1,14 @@
 # LXPack golden example
 
-End-to-end reference for `lessonkit build`, `lessonkit package`, and programmatic `@lessonkit/lxpack` packaging.
+Reference course for `lessonkit build`, `lessonkit package`, and programmatic `@lessonkit/lxpack` usage. Used by CI e2e and conformance tests.
 
-## `single-spa` manifest vs in-app steps
+## single-spa layout
 
-This course uses `layout: "single-spa"`. The root [`lessonkit.json`](lessonkit.json) lists **one** LMS lesson (`welcome`) because LXPack hosts a single SPA shell.
+`lessonkit.json` lists **one** LMS lesson (`welcome`) — LXPack hosts a single SPA shell.
 
-The React app ([`src/App.tsx`](src/App.tsx)) navigates additional in-SPA steps (`ppe-check`, `hazard-walkthrough`, `safety-signoff`). Those step ids are **not** separate entries in `lessonkit.json` lessons; only React routing knows them. Assessments (`safety-check`, `ppe-acknowledgment`) are declared in the manifest for LMS scoring.
+The React app adds in-SPA steps (`ppe-check`, `hazard-walkthrough`, `safety-signoff`) that exist only in routing, not in the manifest. Assessments (`safety-check`, `ppe-acknowledgment`) are declared for LMS scoring.
 
-Keep [`course.descriptor.ts`](course.descriptor.ts) in sync with `lessonkit.json` when using programmatic packaging.
+Keep [`course.descriptor.ts`](https://github.com/eddiethedean/lessonkit/blob/main/examples/lxpack-golden/course.descriptor.ts) in sync with `lessonkit.json` for programmatic packaging.
 
 ## Commands
 
@@ -18,4 +18,4 @@ npm run package:scorm12
 npm run package:standalone
 ```
 
-Requires Node.js 18+ for packaging targets.
+Node.js **18+** for packaging targets.
