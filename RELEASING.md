@@ -9,23 +9,25 @@ Published packages: `@lessonkit/core`, `@lessonkit/xapi`, `@lessonkit/accessibil
 - [CHANGELOG.md](CHANGELOG.md) documents the release.
 - No pending files in [`.changeset/`](.changeset/) that would run `changeset version` and bump versions unexpectedly (this repo publishes via **git tags**, not `changeset publish`).
 
-### 0.9.2 checklist (before tagging)
+### 0.9.3 checklist (before tagging)
 
 | Item | Status |
 |------|--------|
 | `main` CI green (includes `test:e2e` with telemetry-harness project) | Required — verify on push |
-| All seven `@lessonkit/*` packages at `0.9.2` in `package.json` | Done (local) |
-| `@lessonkit/react` / `@lessonkit/lxpack` / `@lessonkit/cli` depend on matching `@lessonkit/*@0.9.2` | Done (local) |
-| `lessonkit init` template pins `^0.9.2` for `@lessonkit/*` | Done (`copy-template.mjs`) |
-| [CHANGELOG.md](CHANGELOG.md) `## [0.9.2]` (integration + e2e LMS launch) | Done (local) |
-| Sphinx `docs/conf.py` `release` matches `0.9.2` | Done |
-| `integration/` workspace + `npm run test:integration` in CI | Done (local) |
+| All seven `@lessonkit/*` packages at `0.9.3` in `package.json` | Done (local) |
+| `@lessonkit/react` / `@lessonkit/lxpack` / `@lessonkit/cli` depend on matching `@lessonkit/*@0.9.3` | Done (local) |
+| `lessonkit init` template pins `^0.9.3` for `@lessonkit/*` | Done (`copy-template.mjs`) |
+| [CHANGELOG.md](CHANGELOG.md) `## [0.9.3]` (bugfix pass) | Done (local) |
+| Sphinx `docs/conf.py` `release` matches `0.9.3` | Done |
 | `npm run build` + `npm test` + `npm run typecheck` + `npm run audit:ci` | Done (local, 2026-05-29) |
 | `npm run test:integration` + `npm run test:e2e` (13 specs) + conformance scripts | Done (local, 2026-05-29) |
 | No pending `.changeset/*.md` files | Done (only `config.json`) |
-| Git tag `v0.9.2` | Create when ready to publish to npm |
+| Commit all release changes on `main` | Required before tag |
+| Git tag `v0.9.3` | Create when ready to publish to npm |
 
-> **Do not create or push a `v0.9.2` git tag** until you intend to publish to npm.
+> **Do not create or push a `v0.9.3` git tag** until you intend to publish to npm.
+
+### 0.9.2 checklist (shipped)
 
 ### 0.9.1 checklist (before tagging)
 

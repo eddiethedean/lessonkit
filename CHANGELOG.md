@@ -3,6 +3,23 @@
 All notable changes to the LessonKit monorepo are documented here. Published packages use the
 [`@lessonkit/*`](https://www.npmjs.com/org/lessonkit) scope.
 
+## [0.9.3] - 2026-05-29
+
+### Changed
+
+- Monorepo packages bumped to **0.9.3**.
+- **`Quiz` / `KnowledgeCheck`**: Optional `passingScore` prop (default `1`) forwarded to telemetry and the LXPack bridge.
+
+### Fixed
+
+- **@lessonkit/cli**: `lessonkit init` uses `@lessonkit/core` `slugifyId()` so numeric or invalid directory names produce valid `courseId` values (e.g. `9th-grade` → `id-9th-grade`).
+- **@lessonkit/core**: `composeTrackingSink` preserves stateful wrapper closures across events while still refreshing context when `courseId` / session changes.
+- **@lessonkit/react**: `wrapTrackingSink` no longer re-composes the sink on every telemetry event (fixes broken stateful analytics wrappers).
+- **@lessonkit/react**: `Quiz` resets answer state when `courseId` changes in-app.
+- **@lessonkit/react**: Provider unmount captures the xAPI client before async flush (avoids remount race).
+- **@lessonkit/react**: `completeCourse()` completes the active in-progress lesson before marking the course complete.
+- **@lessonkit/lxpack**: `per-lesson-spa` `lessonSpaDirs` paths are validated under `projectRoot` when set.
+
 ## [0.9.2] - 2026-05-29
 
 ### Added

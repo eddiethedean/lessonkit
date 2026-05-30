@@ -1,6 +1,6 @@
 {
   "name": "@lessonkit/accessibility",
-  "version": "0.9.2",
+  "version": "0.9.3",
   "private": false,
   "description": "Accessibility utilities for LessonKit packages and apps.",
   "license": "Apache-2.0",

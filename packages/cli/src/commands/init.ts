@@ -1,3 +1,4 @@
+import { slugifyId } from "@lessonkit/core";
 import { cp, mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { basename, dirname, join, resolve } from "node:path";
@@ -27,15 +28,6 @@ function getTemplateDir(): string {
     if (existsSync(candidate)) return candidate;
   }
   return candidates[0]!;
-}
-
-function slugifyName(name: string): string {
-  return name
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 64) || "my-course";
 }
 
 async function isDirEmpty(dir: string): Promise<boolean> {
@@ -103,7 +95,7 @@ async function applyTemplateSubstitutions(projectDir: string, projectName: strin
 
 export async function runInit(opts: InitOptions, logger: CliLogger): Promise<CliJsonResult> {
   const cwd = process.cwd();
-  const rawName = opts.name ?? (opts.here ? slugifyName(basename(process.cwd()) || "my-course") : undefined);
+  const rawName = opts.name ?? (opts.here ? slugifyId(basename(process.cwd()) || "my-course") : undefined);
 
   if (!rawName && !opts.here) {
     throw new CliError("Project name is required. Usage: lessonkit init <name> or lessonkit init --here", {
@@ -112,7 +104,7 @@ export async function runInit(opts: InitOptions, logger: CliLogger): Promise<Cli
     });
   }
 
-  const slug = slugifyName(rawName ?? "my-course");
+  const slug = slugifyId(rawName ?? "my-course");
   const projectName = rawName ?? slug;
   const projectDir = opts.here ? cwd : resolve(cwd, slug);
 

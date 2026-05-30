@@ -73,7 +73,7 @@ export type PluginHost = {
   deliverTelemetryBatch: (events: TelemetryEvent[], ctx: LessonkitPluginContext) => TelemetryEvent[];
   composeTrackingSink: (
     sink: TelemetrySink | undefined,
-    ctx: LessonkitPluginContext,
+    ctx: LessonkitPluginContext | (() => LessonkitPluginContext),
   ) => TelemetrySink | undefined;
   scoreAssessment: (
     input: AssessmentScoreInput,
@@ -142,13 +142,42 @@ export function createPluginHost(plugins: readonly LessonkitPlugin[] = []): Plug
 
   const composeTrackingSink = (
     sink: TelemetrySink | undefined,
-    ctx: LessonkitPluginContext,
+    ctxSource: LessonkitPluginContext | (() => LessonkitPluginContext),
   ): TelemetrySink | undefined => {
-    let composed = sink;
+    if (!sink) return undefined;
+
+    const resolveCtx = (): LessonkitPluginContext =>
+      typeof ctxSource === "function" ? ctxSource() : ctxSource;
+
+    const ctxKey = (ctx: LessonkitPluginContext): string =>
+      `${ctx.courseId}\0${ctx.sessionId ?? ""}\0${ctx.attemptId ?? ""}`;
+
+    type Layer = {
+      plugin: LessonkitPlugin;
+      inner: TelemetrySink;
+      wrapped: TelemetrySink | null;
+      lastCtxKey: string;
+    };
+
+    const layers: Layer[] = [];
+    let composed: TelemetrySink = sink;
+
     for (const plugin of list) {
-      if (!plugin.wrapTrackingSink || !composed) continue;
-      composed = plugin.wrapTrackingSink(composed, ctx);
+      if (!plugin.wrapTrackingSink) continue;
+      const inner = composed;
+      const layer: Layer = { plugin, inner, wrapped: null, lastCtxKey: "" };
+      layers.push(layer);
+      composed = (event) => {
+        const ctx = resolveCtx();
+        const key = ctxKey(ctx);
+        if (!layer.wrapped || layer.lastCtxKey !== key) {
+          layer.wrapped = layer.plugin.wrapTrackingSink!(layer.inner, ctx) ?? layer.inner;
+          layer.lastCtxKey = key;
+        }
+        return layer.wrapped(event);
+      };
     }
+
     return composed;
   };
 

@@ -98,6 +98,55 @@ describe("createPluginHost", () => {
     );
   });
 
+  it("preserves stateful wrapTrackingSink across events with stable context", async () => {
+    let callCount = 0;
+    const host = createPluginHost([
+      defineLessonkitPlugin({
+        id: "counter",
+        version: "1",
+        kind: "analytics",
+        wrapTrackingSink: (sink) => async (event) => {
+          callCount += 1;
+          await sink(event);
+        },
+      }),
+    ]);
+
+    const sink = vi.fn(async () => {});
+    const wrapped = host.composeTrackingSink(sink, ctx)!;
+    await wrapped(baseEvent);
+    await wrapped(baseEvent);
+
+    expect(callCount).toBe(2);
+    expect(sink).toHaveBeenCalledTimes(2);
+  });
+
+  it("recomposes wrapTrackingSink when context getter returns new courseId", async () => {
+    const ctxCourseIds: string[] = [];
+    let currentCourseId = "course-a";
+    const host = createPluginHost([
+      defineLessonkitPlugin({
+        id: "ctx-track",
+        version: "1",
+        kind: "analytics",
+        wrapTrackingSink: (sink, pluginCtx) => (event) => {
+          ctxCourseIds.push(pluginCtx.courseId);
+          return sink(event);
+        },
+      }),
+    ]);
+
+    const sink = vi.fn(async () => {});
+    const wrapped = host.composeTrackingSink(sink, () => ({
+      courseId: currentCourseId,
+    }))!;
+    await wrapped(baseEvent);
+    currentCourseId = "course-b";
+    await wrapped(baseEvent);
+
+    expect(ctxCourseIds).toEqual(["course-a", "course-b"]);
+  });
+
   it("warns on duplicate plugin ids in development", () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
     vi.stubEnv("NODE_ENV", "development");

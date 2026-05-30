@@ -68,4 +68,23 @@ describe("resolveSpaDirs", () => {
       }),
     ).rejects.toThrow(/lessonSpaDirs missing/);
   });
+
+  it("rejects per-lesson-spa paths that escape projectRoot", async () => {
+    const root = await mkdtemp(join(tmpdir(), "lk-spa-"));
+    tempDirs.push(root);
+
+    await expect(
+      resolveSpaDirs({
+        descriptor: {
+          courseId: "c",
+          title: "T",
+          layout: "per-lesson-spa",
+          lessons: [{ id: "a", title: "A" }],
+          assessments: [],
+        },
+        lessonSpaDirs: { a: "../outside" },
+        projectRoot: root,
+      }),
+    ).rejects.toThrow(/unsafe path escapes project root/);
+  });
 });

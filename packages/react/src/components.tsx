@@ -86,6 +86,7 @@ export function KnowledgeCheck(props: {
   question: string;
   choices: string[];
   answer: string;
+  passingScore?: number;
 }) {
   return (
     <Quiz
@@ -93,6 +94,7 @@ export function KnowledgeCheck(props: {
       question={props.question}
       choices={props.choices}
       answer={props.answer}
+      passingScore={props.passingScore}
     />
   );
 }
@@ -102,6 +104,7 @@ export function Quiz(props: {
   question: string;
   choices: string[];
   answer: string;
+  passingScore?: number;
 }) {
   warnInvalidComponentId(props.checkId, "checkId");
 
@@ -116,7 +119,7 @@ export function Quiz(props: {
     completedRef.current = false;
     setSelected(null);
     setSelectionCorrect(null);
-  }, [props.checkId, props.answer, props.question]);
+  }, [props.checkId, props.answer, props.question, config.courseId]);
 
   const isChoiceCorrect = (choice: string, custom: AssessmentScoreResult | null): boolean => {
     if (!custom) return choice === props.answer;
@@ -169,7 +172,7 @@ export function Quiz(props: {
                     checkId: props.checkId,
                     score: custom?.score ?? 1,
                     maxScore: custom?.maxScore ?? 1,
-                    passingScore: 1,
+                    passingScore: props.passingScore ?? 1,
                   });
                 }
               }}

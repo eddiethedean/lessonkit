@@ -291,12 +291,7 @@ export function LessonkitProvider(props: { config: LessonkitConfig; children: Re
     const baseSink = config.tracking?.sink;
     const sink =
       pluginHostRef.current && baseSink
-        ? (event: TelemetryEvent) => {
-            const composed =
-              pluginHostRef.current!.composeTrackingSink(baseSink, buildCurrentPluginCtx()) ??
-              baseSink;
-            return composed(event);
-          }
+        ? (pluginHostRef.current.composeTrackingSink(baseSink, buildCurrentPluginCtx) ?? baseSink)
         : baseSink;
     const batchSink =
       pluginHostRef.current && config.tracking?.batchSink
@@ -454,9 +449,10 @@ export function LessonkitProvider(props: { config: LessonkitConfig; children: Re
   useEffect(() => {
     return () => {
       const client = trackingClientForUnmountRef.current;
+      const xapi = xapiRef.current;
       void (async () => {
         try {
-          await xapiRef.current?.flush();
+          await xapi?.flush();
         } catch {
           // ignore
         }
@@ -496,12 +492,20 @@ export function LessonkitProvider(props: { config: LessonkitConfig; children: Re
   );
 
   const completeCourse = useCallback(() => {
+    const current = progressRef.current.getState();
+    if (current.activeLessonId) {
+      const lessonResult = progressRef.current.completeLesson(current.activeLessonId, Date.now());
+      if (lessonResult.didComplete) {
+        emitLessonCompleted(current.activeLessonId, lessonResult.durationMs);
+      }
+    }
+
     const result = progressRef.current.completeCourse();
     if (!result.didComplete) return;
     syncProgress();
     track("course_completed");
     void trackingRef.current?.flush?.();
-  }, [track, syncProgress]);
+  }, [track, syncProgress, emitLessonCompleted]);
 
   const sessionUser = config.session?.user;
   const sessionAttemptId = config.session?.attemptId;

@@ -414,6 +414,20 @@ describe("runInit", () => {
     expect(appSource).toContain('preset="default"');
   });
 
+  it("slugifies numeric project names to valid courseId values", async () => {
+    const log = vi.fn();
+    process.chdir(parentDir);
+    process.exitCode = 0;
+
+    await run(["node", "lessonkit", "init", "9th-grade", "--skip-install"], { log, error: () => {} });
+
+    const projectDir = join(parentDir, "id-9th-grade");
+    const lessonkit = JSON.parse(await readFile(join(projectDir, "lessonkit.json"), "utf8"));
+    expect(lessonkit.course.courseId).toBe("id-9th-grade");
+    const appSource = await readFile(join(projectDir, "src/App.tsx"), "utf8");
+    expect(appSource).toContain('courseId="id-9th-grade"');
+  });
+
   it("rejects --here --force when the directory has non-dotfile entries", async () => {
     const here = join(parentDir, "existing");
     await mkdir(here, { recursive: true });

@@ -362,6 +362,63 @@ describe("@lessonkit/react runtime", () => {
     expect(events.some((e) => e.name === "course_completed")).toBe(true);
   });
 
+  it("completeCourse completes the active lesson first", async () => {
+    const events: TelemetryEvent[] = [];
+    function Driver() {
+      const { completeCourse } = useCompletion();
+      React.useEffect(() => {
+        completeCourse();
+      }, [completeCourse]);
+      return <div>driver</div>;
+    }
+
+    render(
+      <LessonkitProvider
+        config={{ courseId: "course-1", tracking: { sink: (e: TelemetryEvent) => void events.push(e) } }}
+      >
+        <Lesson title="L" lessonId="lesson-1">
+          <div>content</div>
+        </Lesson>
+        <Driver />
+      </LessonkitProvider>,
+    );
+
+    await waitFor(() => expect(events.some((e) => e.name === "lesson_completed")).toBe(true));
+    await waitFor(() => expect(events.some((e) => e.name === "course_completed")).toBe(true));
+  });
+
+  it("wrapTrackingSink preserves stateful wrappers across events", async () => {
+    let eventCount = 0;
+    const events: TelemetryEvent[] = [];
+    const plugin = defineLessonkitPlugin({
+      id: "stateful-wrap",
+      version: "1",
+      kind: "analytics",
+      wrapTrackingSink: (sink) => (event) => {
+        eventCount += 1;
+        return sink(event);
+      },
+    });
+
+    render(
+      <LessonkitProvider
+        config={{
+          courseId: "course-1",
+          plugins: [plugin],
+          tracking: { sink: (e) => void events.push(e) },
+          xapi: { enabled: false },
+        }}
+      >
+        <Lesson title="L" lessonId="lesson-1">
+          <div>content</div>
+        </Lesson>
+      </LessonkitProvider>,
+    );
+
+    await waitFor(() => expect(events.length).toBeGreaterThanOrEqual(2));
+    expect(eventCount).toBeGreaterThanOrEqual(2);
+  });
+
   it("tracking disabled does not invoke sink", async () => {
     const events: TelemetryEvent[] = [];
     function Driver() {

@@ -45,7 +45,11 @@ export async function resolveSpaDirs(
     if (!src) {
       throw new Error(`lessonSpaDirs missing build output for lesson "${lesson.id}"`);
     }
-    dirs[lesson.id] = resolve(src);
+    const resolved = projectRoot ? resolve(projectRoot, src) : resolve(src);
+    if (projectRoot) {
+      assertResolvedPathUnderRoot(resolve(projectRoot), resolved);
+    }
+    dirs[lesson.id] = resolved;
   }
   return dirs;
 }

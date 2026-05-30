@@ -61,7 +61,7 @@ Emit no new lessonIds; keep existing lessonId on the Lesson component.
 | “Rewrite everything” | Hard to review; breaks IDs |
 | “Remove TypeScript errors by using any” | Hides real mistakes |
 | “Delete lessonkit.json” | Packaging will fail |
-| “Use per-lesson-spa layout” | Not supported by `lessonkit package` (0.9.2) |
+| “Use per-lesson-spa layout” | Not supported by `lessonkit package` (0.9.3) |
 
 ## If the AI suggests wrong packages
 

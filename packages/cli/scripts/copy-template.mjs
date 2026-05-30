@@ -26,7 +26,7 @@ pkg.scripts = {
   "test:coverage": "vitest run --coverage --passWithNoTests=false",
 };
 
-const lessonkitVersion = "^0.9.2";
+const lessonkitVersion = "^0.9.3";
 pkg.dependencies = {
   "@lessonkit/core": lessonkitVersion,
   "@lessonkit/react": lessonkitVersion,
