@@ -35,6 +35,22 @@ describe("createLessonkitRuntime", () => {
     });
   });
 
+  it("updateConfig updates courseId and runtimeVersion on config snapshot", () => {
+    const runtime = createLessonkitRuntime({ courseId: "c", runtimeVersion: "v2" });
+    runtime.updateConfig({ courseId: "c2", runtimeVersion: "v1" });
+    expect(runtime.config.courseId).toBe("c2");
+    expect(runtime.config.runtimeVersion).toBe("v1");
+  });
+
+  it("progress getter reflects controller replacement after resetForCourseChange", () => {
+    const runtime = createLessonkitRuntime({ courseId: "c" });
+    const initialProgress = runtime.progress;
+    runtime.setActiveLesson("lesson-1", () => {});
+    runtime.resetForCourseChange("c2");
+    expect(runtime.progress).not.toBe(initialProgress);
+    expect(runtime.getProgressState().activeLessonId).toBeUndefined();
+  });
+
   it("completeLesson emits via callback", () => {
     const events: string[] = [];
     const runtime = createLessonkitRuntime({ courseId: "c" });
