@@ -63,7 +63,6 @@ describe("promoteStagingToOutDir", () => {
 
   it("warns when restore fails after promote error", async () => {
     const actualFsp = await vi.importActual<typeof import("node:fs/promises")>("node:fs/promises");
-    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
 
     const root = await makeTempDir();
     const outDir = join(root, "course");
@@ -85,13 +84,8 @@ describe("promoteStagingToOutDir", () => {
     });
 
     await expect(promoteStagingToOutDir(stagingDir, outDir)).rejects.toThrow(
-      "simulated promote failure",
+      /could not restore.*Recovery: previous output may be in .*\.bak/,
     );
-    expect(warn).toHaveBeenCalledWith(
-      expect.stringMatching(/failed to restore/),
-      expect.any(String),
-    );
-    warn.mockRestore();
   });
 
   it("preserves staged content when outDir is new and promote fails", async () => {

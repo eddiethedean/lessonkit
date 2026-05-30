@@ -25,8 +25,8 @@ describe("runDev", () => {
       "utf8",
     );
     await writeFile(join(dir, "package.json"), JSON.stringify({ devDependencies: { vite: "^7" } }), "utf8");
-    await mkdir(join(dir, "node_modules", ".bin"), { recursive: true });
-    await writeFile(join(dir, "node_modules", ".bin", "vite"), "", "utf8");
+    await mkdir(join(dir, "node_modules", "vite", "bin"), { recursive: true });
+    await writeFile(join(dir, "node_modules", "vite", "bin", "vite.js"), "", "utf8");
   });
 
   afterEach(async () => {
@@ -42,9 +42,24 @@ describe("runDev", () => {
     expect(result.ok).toBe(true);
     expect(result).toMatchObject({ command: "dev", projectRoot: dir });
     expect(runCommand).toHaveBeenCalledWith(
-      expect.stringContaining("node_modules/.bin/vite"),
-      [],
+      process.execPath,
+      [join(dir, "node_modules", "vite", "bin", "vite.js")],
       expect.objectContaining({ cwd: dir }),
     );
+  });
+
+  it("launches vite via node on win32", async () => {
+    const platformSpy = vi.spyOn(process, "platform", "get").mockReturnValue("win32");
+    const runCommand = vi.spyOn(exec, "runCommand").mockResolvedValue(undefined);
+
+    const result = await runDev({ cwd: dir, json: true });
+
+    expect(result.ok).toBe(true);
+    expect(runCommand).toHaveBeenCalledWith(
+      process.execPath,
+      [join(dir, "node_modules", "vite", "bin", "vite.js")],
+      expect.objectContaining({ cwd: dir }),
+    );
+    platformSpy.mockRestore();
   });
 });

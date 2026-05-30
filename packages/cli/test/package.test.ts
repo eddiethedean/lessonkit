@@ -48,8 +48,8 @@ describe("runPackage", () => {
       "utf8",
     );
     await writeFile(join(dir, "package.json"), JSON.stringify({ devDependencies: { vite: "^7" } }), "utf8");
-    await mkdir(join(dir, "node_modules", ".bin"), { recursive: true });
-    await writeFile(join(dir, "node_modules", ".bin", "vite"), "", "utf8");
+    await mkdir(join(dir, "node_modules", "vite", "bin"), { recursive: true });
+    await writeFile(join(dir, "node_modules", "vite", "bin", "vite.js"), "", "utf8");
     await mkdir(join(dir, "dist"), { recursive: true });
     await writeFile(join(dir, "dist", "index.html"), "<html></html>", "utf8");
     Object.defineProperty(process.versions, "node", { value: "20.0.0", configurable: true });

@@ -534,8 +534,8 @@ describe("runBuild", () => {
       JSON.stringify({ devDependencies: { vite: "^7.0.0" } }),
       "utf8",
     );
-    await mkdir(join(dir, "node_modules", ".bin"), { recursive: true });
-    await writeFile(join(dir, "node_modules", ".bin", "vite"), "", "utf8");
+    await mkdir(join(dir, "node_modules", "vite", "bin"), { recursive: true });
+    await writeFile(join(dir, "node_modules", "vite", "bin", "vite.js"), "", "utf8");
     process.chdir(dir);
   });
 
@@ -551,8 +551,11 @@ describe("runBuild", () => {
     await run(["node", "lessonkit", "build", "--json"], { log: () => {}, error: () => {} });
 
     expect(runCommand).toHaveBeenCalledWith(
-      expect.stringContaining("node_modules/.bin/vite"),
-      ["build"],
+      process.execPath,
+      expect.arrayContaining([
+        expect.stringContaining("node_modules/vite/bin/vite.js"),
+        "build",
+      ]),
       expect.objectContaining({ cwd: expect.stringMatching(/lk-cli-build/) }),
     );
   });

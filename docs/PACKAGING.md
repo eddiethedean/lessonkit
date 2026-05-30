@@ -155,14 +155,23 @@ See [`docs/CLI.md`](CLI.md) for the full command reference and `lessonkit.json` 
 import {
   parseLessonkitManifest,
   validatePackageInputs,
-  remapArtifactPaths,
+  buildStagingPackage,
   promoteStagingToOutDir,
 } from "@lessonkit/lxpack";
 
 const manifest = parseLessonkitManifest(json, "lessonkit.json", projectRoot);
-const validation = validatePackageInputs({ descriptor, spaDistDir, projectRoot });
-const remappedZip = remapArtifactPaths(stagingRoot, outDir, staged.outputPath);
-await promoteStagingToOutDir(stagingDir, outDir);
+if (!manifest.ok) throw new Error("invalid manifest");
+
+const validation = validatePackageInputs({
+  target: "scorm12",
+  outDir: join(projectRoot, manifest.manifest.paths.lxpackOutDir),
+  projectRoot,
+  outputBaseDir: manifest.manifest.paths.outputBaseDir,
+});
+if (!validation.ok) throw new Error("invalid package inputs");
+
+const staged = await buildStagingPackage({ /* descriptor, spaDistDir, target, … */ });
+await promoteStagingToOutDir(staged.stagingDir, validation.outDir);
 ```
 
 Project manifests (`lessonkit.json` with `schemaVersion: 1`) are parsed by `parseLessonkitManifest` in `@lessonkit/lxpack`; the CLI delegates to the same module.

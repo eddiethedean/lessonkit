@@ -47,6 +47,15 @@ export function validatePackageInputs(
     };
   }
 
+  if (output && !projectRoot && !isSafeRelativeSpaPath(output)) {
+    return {
+      ok: false,
+      courseDir: outDir,
+      target,
+      issues: [{ path: "output", message: `unsafe output: ${output}` }],
+    };
+  }
+
   if (projectRoot && outputBaseDir) {
     const resolvedOutputBase = resolve(projectRoot, outputBaseDir);
     try {

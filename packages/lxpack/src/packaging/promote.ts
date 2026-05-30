@@ -42,9 +42,19 @@ export async function promoteStagingToOutDir(stagingDir: string, outDir: string)
       try {
         await renameOrCopy(backup, outDir);
       } catch (restoreError) {
-        console.warn(
-          `[lessonkit/lxpack] failed to restore ${outDir} after promote error:`,
-          restoreError instanceof Error ? restoreError.message : restoreError,
+        const failedPromote = `${outDir}.failed-promote-${Date.now()}`;
+        try {
+          await renameOrCopy(tmpPromote, failedPromote);
+        } catch {
+          await fsp.rm(tmpPromote, { recursive: true, force: true }).catch(() => undefined);
+        }
+        const promoteMsg =
+          promoteError instanceof Error ? promoteError.message : String(promoteError);
+        const restoreMsg =
+          restoreError instanceof Error ? restoreError.message : String(restoreError);
+        throw new Error(
+          `[lessonkit/lxpack] promote failed (${promoteMsg}) and could not restore ${outDir} (${restoreMsg}). ` +
+            `Recovery: previous output may be in ${backup}; staged package may be in ${failedPromote}.`,
         );
       }
     } else {

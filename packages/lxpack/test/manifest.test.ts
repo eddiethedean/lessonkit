@@ -131,6 +131,54 @@ describe("parseLessonkitManifest", () => {
     expect(result.ok).toBe(false);
   });
 
+  it("trims whitespace from paths values", () => {
+    const result = parseLessonkitManifest({
+      schemaVersion: 1,
+      name: "demo",
+      course: {
+        courseId: "demo",
+        title: "Demo",
+        layout: "single-spa",
+        lessons: [{ id: "lesson-1", title: "Lesson" }],
+      },
+      paths: { spaDistDir: " build " },
+    });
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.manifest.paths.spaDistDir).toBe("build");
+    }
+  });
+
+  it("loadLessonkitManifestFromFile validates paths when projectRoot is set", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "lk-manifest-root-"));
+    try {
+      const { loadLessonkitManifestFromFile } = await import("../src/manifest");
+      const result = await loadLessonkitManifestFromFile(
+        async () => ({
+          schemaVersion: 1,
+          name: "demo",
+          course: {
+            courseId: "demo",
+            title: "Demo",
+            layout: "single-spa",
+            lessons: [{ id: "lesson-1", title: "Lesson" }],
+          },
+          paths: { spaDistDir: "../../../evil" },
+        }),
+        "lessonkit.json",
+        dir,
+      );
+
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.issues.some((i) => i.path === "paths.spaDistDir")).toBe(true);
+      }
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  });
+
   it("loads from file via loadLessonkitManifestFromFile", async () => {
     const dir = await mkdtemp(join(tmpdir(), "lk-manifest-file-"));
     try {

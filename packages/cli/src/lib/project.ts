@@ -169,7 +169,8 @@ export function assertViteProject(pkg: PackageJson, projectRoot: string): void {
   const vite =
     pkg.devDependencies?.vite ??
     pkg.dependencies?.vite ??
-    (existsSync(join(projectRoot, "node_modules", ".bin", "vite")) ||
+    (existsSync(join(projectRoot, "node_modules", "vite", "bin", "vite.js")) ||
+    existsSync(join(projectRoot, "node_modules", ".bin", "vite")) ||
     existsSync(join(projectRoot, "node_modules", ".bin", "vite.cmd"))
       ? "present"
       : undefined);
@@ -182,24 +183,26 @@ export function assertViteProject(pkg: PackageJson, projectRoot: string): void {
   }
 }
 
-export function resolveViteBin(projectRoot: string): string {
+export function resolveViteJs(projectRoot: string): string {
   let dir = resolve(projectRoot);
   const fsRoot = parse(dir).root;
 
   while (true) {
-    const binDir = join(dir, "node_modules", ".bin");
-    const bin = join(binDir, "vite");
-    if (existsSync(bin)) return bin;
-    const binCmd = join(binDir, "vite.cmd");
-    if (existsSync(binCmd)) return binCmd;
+    const viteJs = join(dir, "node_modules", "vite", "bin", "vite.js");
+    if (existsSync(viteJs)) return viteJs;
     if (dir === fsRoot) break;
     dir = dirname(dir);
   }
 
   throw new CliError(
-    `Vite binary not found near ${projectRoot}. Run npm install in the project first.`,
+    `Vite not found near ${projectRoot}. Run npm install in the project first.`,
     { code: "INVALID_PROJECT", exitCode: EXIT_INVALID_PROJECT },
   );
+}
+
+/** @deprecated Use {@link resolveViteJs} with `process.execPath` for cross-platform spawning. */
+export function resolveViteBin(projectRoot: string): string {
+  return resolveViteJs(projectRoot);
 }
 
 export function assertNode18ForLxpack(): void {

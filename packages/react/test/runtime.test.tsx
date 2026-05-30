@@ -1588,8 +1588,104 @@ describe("@lessonkit/react runtime", () => {
     expect(
       Object.keys(sessionStorage).some((k) => k.startsWith("lessonkit:course_started:")),
     ).toBe(false);
+    expect(
+      Object.keys(sessionStorage).some((k) => k.startsWith("lessonkit:course_started_tracking:")),
+    ).toBe(true);
 
     emitSpy.mockRestore();
+  });
+
+  it("does not duplicate course_started tracking when pipeline fails then retries", async () => {
+    const events: TelemetryEvent[] = [];
+    let shouldThrow = true;
+    const sinkA: TelemetrySink = (e) => void events.push(e);
+    const sinkB: TelemetrySink = (e) => void events.push(e);
+    const emitSpy = vi.spyOn(emitTelemetryModule, "emitTelemetry").mockImplementation(() => {
+      if (shouldThrow) throw new Error("xapi pipeline failed");
+    });
+
+    const { rerender } = render(
+      <LessonkitProvider
+        config={{
+          courseId: "course-1",
+          tracking: { sink: sinkA },
+          xapi: { transport: async () => {} },
+        }}
+      >
+        <div>child</div>
+      </LessonkitProvider>,
+    );
+
+    await waitFor(() => expect(events.some((e) => e.name === "course_started")).toBe(true));
+    expect(events.filter((e) => e.name === "course_started")).toHaveLength(1);
+
+    shouldThrow = false;
+    rerender(
+      <LessonkitProvider
+        config={{
+          courseId: "course-1",
+          tracking: { sink: sinkB },
+          xapi: { transport: async () => {} },
+        }}
+      >
+        <div>child</div>
+      </LessonkitProvider>,
+    );
+
+    await waitFor(() =>
+      expect(
+        Object.keys(sessionStorage).some((k) => k.startsWith("lessonkit:course_started:")),
+      ).toBe(true),
+    );
+    expect(events.filter((e) => e.name === "course_started")).toHaveLength(1);
+
+    emitSpy.mockRestore();
+  });
+
+  it("forwards course_started to extraSinks when tracking enables after xAPI bootstrap", async () => {
+    const pipelineEvents: TelemetryEvent[] = [];
+    const extraSink = {
+      id: "extra",
+      emit: (e: TelemetryEvent) => void pipelineEvents.push(e),
+    };
+    const trackingEvents: TelemetryEvent[] = [];
+
+    const { rerender } = render(
+      <LessonkitProvider
+        config={{
+          courseId: "course-1",
+          tracking: { enabled: false },
+          xapi: { transport: async () => {} },
+          sinks: [extraSink],
+        }}
+      >
+        <div>child</div>
+      </LessonkitProvider>,
+    );
+
+    await waitFor(() =>
+      expect(
+        Object.keys(sessionStorage).some((k) => k.startsWith("lessonkit:course_started:")),
+      ).toBe(true),
+    );
+    expect(pipelineEvents.filter((e) => e.name === "course_started")).toHaveLength(0);
+
+    rerender(
+      <LessonkitProvider
+        config={{
+          courseId: "course-1",
+          tracking: { sink: (e) => void trackingEvents.push(e) },
+          xapi: { transport: async () => {} },
+          sinks: [extraSink],
+        }}
+      >
+        <div>child</div>
+      </LessonkitProvider>,
+    );
+
+    await waitFor(() => expect(trackingEvents.some((e) => e.name === "course_started")).toBe(true));
+    expect(trackingEvents.filter((e) => e.name === "course_started")).toHaveLength(1);
+    expect(pipelineEvents.filter((e) => e.name === "course_started")).toHaveLength(1);
   });
 
   it("emitCourseStarted returns early when plugin filters course_started", () => {

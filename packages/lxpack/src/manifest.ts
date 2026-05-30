@@ -54,12 +54,10 @@ export function parseLessonkitManifest(
   const courseRaw = config.course;
   if (Array.isArray(courseRaw)) {
     issues.push({ path: "course", message: "must be an object, not an array" });
-    if (issues.length) return { ok: false, issues };
     return { ok: false, issues };
   }
   if (!courseRaw || typeof courseRaw !== "object") {
     issues.push({ path: "course", message: "must be an object" });
-    if (issues.length) return { ok: false, issues };
     return { ok: false, issues };
   }
 
@@ -100,7 +98,7 @@ export function parseLessonkitManifest(
         if (typeof p[key] !== "string" || !(p[key] as string).trim()) {
           issues.push({ path: `paths.${key}`, message: "must be a non-empty string" });
         } else {
-          paths[key] = p[key] as string;
+          paths[key] = (p[key] as string).trim();
         }
       }
     }
@@ -140,9 +138,10 @@ export function parseLessonkitManifest(
 export async function loadLessonkitManifestFromFile(
   readJson: () => Promise<unknown>,
   label = "lessonkit.json",
+  projectRoot?: string,
 ): Promise<ParseManifestResult> {
   try {
-    return parseLessonkitManifest(await readJson(), label);
+    return parseLessonkitManifest(await readJson(), label, projectRoot);
   } catch {
     return { ok: false, issues: [{ path: label, message: "failed to read or parse JSON" }] };
   }

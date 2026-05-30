@@ -38,6 +38,12 @@ Shipped on `main` without a semver bump (packages remain **1.0.0**): Node **18+*
 - **@lessonkit/xapi**: Skip duplicate in-flight `send()` calls for the same statement `id`.
 - **@lessonkit/cli**: Clarify `--force` help text; README points at bundled template source.
 - **@lessonkit/xapi**: Add Node **18+** `engines`; README notes header aligned with 1.0.0.
+- **@lessonkit/react**: Split `course_started` bootstrap so tracking dedupe is marked before xAPI/bridge pipeline retries (no duplicate tracking events on partial failure).
+- **@lessonkit/react**: Forward `course_started` to lxpack bridge and `extraSinks` when tracking enables after xAPI bootstrap.
+- **@lessonkit/cli**: Launch Vite via `node …/vite/bin/vite.js` so `dev` and `build` work on Windows (no `.cmd` spawn).
+- **@lessonkit/lxpack**: `loadLessonkitManifestFromFile` accepts optional `projectRoot` for path validation; trim manifest `paths.*` values; reject unsafe relative `output` without `projectRoot`.
+- **@lessonkit/lxpack**: Promote double-failure throws a recovery message listing `.bak` and `.failed-promote-*` paths.
+- **Docs**: Fix staged packaging example in `docs/PACKAGING.md` for 1.0 `validatePackageInputs` API.
 
 ### Added
 
