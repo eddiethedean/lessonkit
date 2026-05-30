@@ -184,7 +184,7 @@ describe("packageLessonkitCourse errors", () => {
     }
   });
 
-  it("returns ok true and preserves external outputPath from build", async () => {
+  it("returns ok false when build outputPath is outside staging", async () => {
     packageLessonkit.mockResolvedValueOnce({
       ok: true,
       target: "scorm12",
@@ -206,9 +206,49 @@ describe("packageLessonkitCourse errors", () => {
       target: "scorm12",
     });
 
-    expect(result.ok).toBe(true);
-    if (result.ok) {
-      expect(result.outputPath).toBe("/tmp/external.zip");
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.issues.some((i) => i.path === "outputPath")).toBe(true);
+    }
+  });
+
+  it("returns ok false when promote fails without deleting staging", async () => {
+    packageLessonkit.mockImplementationOnce(async (opts) => {
+      const { realpath } = await import("node:fs/promises");
+      const stagingRoot = await realpath(String(opts.courseDir));
+      return {
+        ok: true,
+        target: "scorm12",
+        fileCount: 1,
+        outputPath: join(stagingRoot, ".lxpack/out/course-scorm12.zip"),
+        manifest: { title: "Test" },
+        issues: [],
+      };
+    });
+
+    const promoteModule = await import("../src/packaging/promote");
+    const promoteSpy = vi
+      .spyOn(promoteModule, "promoteStagingToOutDir")
+      .mockRejectedValueOnce(new Error("promote failed"));
+
+    const root = await makeTempDir();
+    const dist = join(root, "dist");
+    await mkdir(dist, { recursive: true });
+    await writeFile(join(dist, "index.html"), "<html></html>", "utf-8");
+
+    const result = await packageLessonkitCourse({
+      descriptor,
+      outDir: join(root, "course"),
+      spaDistDir: dist,
+      target: "scorm12",
+    });
+
+    promoteSpy.mockRestore();
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.issues[0]?.path).toBe("promote");
+      expect(result.issues[0]?.message).toContain("promote failed");
     }
   });
 

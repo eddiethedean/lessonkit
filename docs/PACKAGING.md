@@ -46,6 +46,7 @@ One build output per lesson (multi-SCO friendly).
 - Set `layout: "per-lesson-spa"`.
 - Each lesson needs `spaPath` (e.g. `dist/lessons/intro`).
 - Pass `lessonSpaDirs: { intro: "/abs/path/to/build" }` to `writeLxpackProject` / `packageLessonkitCourse`.
+- **`lessonkit package` does not accept `per-lesson-spa` in 1.0.0** — call `packageLessonkitCourse()` from `@lessonkit/lxpack` (or wire your own script) for multi-SCO exports.
 
 ### `spaPath` safety
 

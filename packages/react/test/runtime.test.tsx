@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { Course, KnowledgeCheck, Lesson, LessonkitProvider, ProgressTracker, Quiz, Reflection, Scenario, resetQuizWarningsForTests, useCompletion, useLessonkit, useProgress, useQuizState, useTracking } from "../src";
@@ -2280,6 +2280,71 @@ describe("@lessonkit/react runtime", () => {
       await Promise.resolve();
     });
     expect(events.some((e) => e.name === "lesson_completed")).toBe(false);
+  });
+
+  it("duplicate Lesson unmount does not steal active lesson from another lesson", async () => {
+    const events: TelemetryEvent[] = [];
+
+    function ActiveLessonProbe() {
+      const { progress } = useLessonkit();
+      return <div data-testid="active-lesson">{progress.activeLessonId ?? "none"}</div>;
+    }
+
+    function Harness() {
+      const [showFirstA, setShowFirstA] = useState(true);
+      return (
+        <Course
+          title="Course"
+          courseId="course-1"
+          config={{
+            tracking: {
+              sink: (e: TelemetryEvent) => {
+                events.push(e);
+              },
+            },
+            xapi: { enabled: false },
+          }}
+        >
+          <ActiveLessonProbe />
+          {showFirstA ? (
+            <Lesson title="A1" lessonId="lesson-a">
+              <div>a1</div>
+            </Lesson>
+          ) : null}
+          <Lesson title="A2" lessonId="lesson-a">
+            <div>a2</div>
+          </Lesson>
+          <Lesson title="B" lessonId="lesson-b">
+            <div>b</div>
+          </Lesson>
+          <button type="button" onClick={() => setShowFirstA(false)}>
+            remove first A
+          </button>
+        </Course>
+      );
+    }
+
+    const { getByRole, getByTestId } = render(<Harness />);
+
+    await waitFor(() => {
+      expect(getByTestId("active-lesson").textContent).toBe("lesson-b");
+    });
+
+    const startedForB = events.filter((e) => e.name === "lesson_started" && e.lessonId === "lesson-b").length;
+    const startedForA = events.filter((e) => e.name === "lesson_started" && e.lessonId === "lesson-a").length;
+
+    fireEvent.click(getByRole("button", { name: "remove first A" }));
+
+    await waitFor(() => {
+      expect(getByTestId("active-lesson").textContent).toBe("lesson-b");
+    });
+
+    expect(events.filter((e) => e.name === "lesson_started" && e.lessonId === "lesson-b").length).toBe(
+      startedForB,
+    );
+    expect(events.filter((e) => e.name === "lesson_started" && e.lessonId === "lesson-a").length).toBe(
+      startedForA,
+    );
   });
 
   it("warns in dev when multiple lessons mount concurrently", async () => {

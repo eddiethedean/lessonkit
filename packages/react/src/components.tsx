@@ -60,7 +60,6 @@ export function Lesson(props: {
     return () => {
       unregister();
       if (getLessonMountCount(lessonId) > 0) {
-        setActiveLesson(lessonId);
         return;
       }
       if (!autoComplete) return;

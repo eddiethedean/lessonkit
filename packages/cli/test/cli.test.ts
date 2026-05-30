@@ -398,6 +398,20 @@ describe("findProjectRoot", () => {
 
     expect(findProjectRoot(nested)).toBe(dir);
   });
+
+  it("skips lessonkit.json when course is an array", async () => {
+    await writeFile(
+      join(dir, "lessonkit.json"),
+      JSON.stringify({
+        schemaVersion: 1,
+        name: "bad",
+        course: [{ courseId: "not-valid" }],
+      }),
+      "utf8",
+    );
+
+    expect(() => findProjectRoot(dir)).toThrow(/Could not find lessonkit\.json/);
+  });
 });
 
 describe("runInit", () => {

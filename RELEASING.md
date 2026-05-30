@@ -133,7 +133,7 @@ Published packages: `@lessonkit/core`, `@lessonkit/xapi`, `@lessonkit/accessibil
 | Git tag `v0.8.0` does not exist yet | Create on publish |
 | `NPM_TOKEN` secret configured on GitHub | Required for Release workflow |
 
-**Notes for 0.8.0 consumers:** `@lessonkit/cli` `package` LMS targets require **Node.js 20+** (same as `@lessonkit/lxpack`). Dev/build work on Node 18+. Import the block catalog via `@lessonkit/react/block-catalog.v1.json`.
+**Notes for 0.8.0 consumers:** `@lessonkit/cli` `package` LMS targets required **Node.js 20+** (same as `@lessonkit/lxpack` at that release). **1.0.0+** requires **Node.js 18+** for LMS packaging. Dev/build work on Node 18+ across releases. Import the block catalog via `@lessonkit/react/block-catalog.v1.json`.
 
 > **Do not create or push a `v0.8.0` git tag** until you intend to publish to npm. Tagging triggers the Release workflow.
 

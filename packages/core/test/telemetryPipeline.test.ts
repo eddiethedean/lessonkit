@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import type { TelemetryEvent } from "@lessonkit/core";
 import { createTelemetryPipeline, createTrackingPipelineSink } from "../src/telemetryPipeline";
 
@@ -55,5 +55,38 @@ describe("createTelemetryPipeline", () => {
       { courseId: "c", sessionId: "s" },
     );
     expect(tracked).toEqual(["course_completed"]);
+  });
+
+  it("swallows async sink rejections without throwing", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const prevEnv = process.env.NODE_ENV;
+    process.env.NODE_ENV = "development";
+
+    const pipeline = createTelemetryPipeline([
+      {
+        id: "async-fail",
+        emit: async () => {
+          throw new Error("sink failed");
+        },
+      },
+    ]);
+
+    expect(() =>
+      pipeline.emit({
+        name: "course_started",
+        timestamp: "t",
+        courseId: "c",
+        sessionId: "s",
+      }),
+    ).not.toThrow();
+
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(warn).toHaveBeenCalledWith(
+      expect.stringContaining('telemetry sink "async-fail" failed'),
+      "sink failed",
+    );
+
+    process.env.NODE_ENV = prevEnv;
+    warn.mockRestore();
   });
 });

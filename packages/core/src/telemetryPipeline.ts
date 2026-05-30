@@ -17,6 +17,38 @@ export type TelemetryPipeline = {
   emit(event: TelemetryEvent, ctx?: EmitContext): void | Promise<void>;
 };
 
+function isDevEnvironment(): boolean {
+  const g = globalThis as typeof globalThis & { process?: { NODE_ENV?: string } };
+  return typeof g.process !== "undefined" && g.process.env?.NODE_ENV !== "production";
+}
+
+function invokeSink(
+  sink: TelemetryPipelineSink,
+  event: TelemetryEvent,
+  emitCtx: EmitContext,
+): void {
+  try {
+    const result = sink.emit(event, emitCtx);
+    if (result != null && typeof (result as Promise<void>).catch === "function") {
+      void (result as Promise<void>).catch((err) => {
+        if (isDevEnvironment()) {
+          console.warn(
+            `[lessonkit] telemetry sink "${sink.id}" failed:`,
+            err instanceof Error ? err.message : err,
+          );
+        }
+      });
+    }
+  } catch (err) {
+    if (isDevEnvironment()) {
+      console.warn(
+        `[lessonkit] telemetry sink "${sink.id}" failed:`,
+        err instanceof Error ? err.message : err,
+      );
+    }
+  }
+}
+
 export function createTelemetryPipeline(sinks: TelemetryPipelineSink[]): TelemetryPipeline {
   const list = [...sinks];
 
@@ -29,7 +61,7 @@ export function createTelemetryPipeline(sinks: TelemetryPipelineSink[]): Telemet
         attemptId: event.attemptId,
       };
       for (const sink of list) {
-        void sink.emit(event, emitCtx);
+        invokeSink(sink, event, emitCtx);
       }
     },
   };

@@ -37,7 +37,7 @@ Re-run after `git pull` to refresh skills.
 
 ## Requirements
 
-- Node.js **18+** for dev/build; **20+** for `lessonkit package`
+- Node.js **18+** for dev, build, and `lessonkit package`
 - `@lessonkit/cli` on `PATH` or via `npx @lessonkit/cli`
 - An agent product that discovers `SKILL.md` files
 

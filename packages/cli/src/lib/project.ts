@@ -32,7 +32,13 @@ export type PackageJson = {
 function isProjectManifest(configPath: string): boolean {
   try {
     const raw = JSON.parse(readFileSync(configPath, "utf8")) as Record<string, unknown>;
-    return raw.schemaVersion === 1 && typeof raw.name === "string" && raw.course !== null && typeof raw.course === "object";
+    return (
+      raw.schemaVersion === 1 &&
+      typeof raw.name === "string" &&
+      raw.course !== null &&
+      typeof raw.course === "object" &&
+      !Array.isArray(raw.course)
+    );
   } catch {
     return false;
   }

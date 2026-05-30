@@ -54,6 +54,18 @@ export async function resolveSpaDirs(
     if (projectRoot) {
       assertResolvedPathUnderRoot(resolve(projectRoot), resolved);
     }
+    try {
+      await access(resolved);
+    } catch {
+      throw new Error(`lessonSpaDirs path not found for lesson "${lesson.id}": ${resolved}`);
+    }
+    try {
+      await access(join(resolved, "index.html"));
+    } catch {
+      throw new Error(
+        `lessonSpaDirs must contain index.html for lesson "${lesson.id}": ${join(resolved, "index.html")}`,
+      );
+    }
     dirs[lesson.id] = resolved;
   }
   return dirs;

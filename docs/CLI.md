@@ -35,8 +35,21 @@ Every LessonKit project includes a `lessonkit.json` at the project root. The CLI
     "title": "My LessonKit Course",
     "layout": "single-spa",
     "lessons": [{ "id": "lesson-1", "title": "My first lesson" }],
-    "assessments": [],
-    "theme": { "preset": "default" }
+    "assessments": [
+      {
+        "checkId": "ready-to-build",
+        "question": "Ready to build?",
+        "choices": ["Not yet", "Yes"],
+        "answer": "Yes",
+        "passingScore": 1
+      }
+    ],
+    "theme": { "preset": "default" },
+    "tracking": {
+      "xapi": {
+        "activityIri": "https://example.com/courses/my-course"
+      }
+    }
   },
   "paths": {
     "spaDistDir": "dist",
@@ -57,7 +70,7 @@ Every LessonKit project includes a `lessonkit.json` at the project root. The CLI
 
 Keep `course.courseId`, `course.lessons[].id`, and `course.assessments[].checkId` aligned with your React component props. `lessonkit init` updates `lessonkit.json` and patches `src/App.tsx` `courseId` / course title for you. See [`IDENTITY.md`](IDENTITY.md).
 
-The CLI only recognizes project manifests with `schemaVersion: 1` (not the interchange `lessonkit.json` written under `.lxpack/course`). `per-lesson-spa` layout is not supported by `lessonkit package` (1.0.0) — use `single-spa`. SPA build output is controlled by `paths.spaDistDir` (not `course.spaDistDir`).
+The CLI only recognizes project manifests with `schemaVersion: 1` (not the interchange `lessonkit.json` written under `.lxpack/course`). `per-lesson-spa` layout is not supported by `lessonkit package` (1.0.0) — use `single-spa`. Use `@lessonkit/lxpack` directly if you need `per-lesson-spa`. SPA build output is controlled by `paths.spaDistDir` (not `course.spaDistDir`).
 
 ## Commands
 

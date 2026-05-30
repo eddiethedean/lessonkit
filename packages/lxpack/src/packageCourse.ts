@@ -10,7 +10,11 @@ import {
 } from "@lxpack/api";
 import { validateDescriptor } from "./validateDescriptor";
 import type { WriteLxpackProjectOptions } from "./writeProject";
-import { remapArtifactPaths, validatePackageInputs } from "./packaging/validateInputs";
+import {
+  remapArtifactPaths,
+  validateArtifactInStaging,
+  validatePackageInputs,
+} from "./packaging/validateInputs";
 import { promoteStagingToOutDir } from "./packaging/promote";
 import { buildStagingPackage, ensureOutDirParent } from "./packaging/staging";
 
@@ -162,44 +166,69 @@ export async function packageLessonkitCourse(
   }
 
   const { stagingDir, build } = staged;
-  let promoted = false;
 
-  try {
-    const validation: ValidateCourseResult = {
-      ok: true,
-      manifest: build.manifest,
-      issues: build.issues,
-    };
+  const stagingRoot = await fsp.realpath(stagingDir);
+  const artifactIssues = [
+    validateArtifactInStaging(stagingRoot, staged.outputPath, "outputPath"),
+    validateArtifactInStaging(stagingRoot, staged.outputDir, "outputDir"),
+  ].filter((issue): issue is NonNullable<typeof issue> => issue != null);
 
-    const stagingRoot = await fsp.realpath(stagingDir);
-    const remappedOutputPath = remapArtifactPaths(stagingRoot, outDir, staged.outputPath);
-    const remappedOutputDir = remapArtifactPaths(stagingRoot, outDir, staged.outputDir);
-
-    await ensureOutDirParent(outDir);
-    await promoteStagingToOutDir(stagingDir, outDir);
-    promoted = true;
-
-    const remappedBuild: BuildCourseResult = { ...build };
-    if ("outputPath" in remappedBuild && remappedOutputPath !== undefined) {
-      remappedBuild.outputPath = remappedOutputPath;
-    }
-    if ("outputDir" in remappedBuild && remappedOutputDir !== undefined) {
-      remappedBuild.outputDir = remappedOutputDir;
-    }
-
+  if (artifactIssues.length > 0) {
+    await fsp.rm(stagingDir, { recursive: true, force: true }).catch(() => undefined);
     return {
-      ok: true,
+      ok: false,
       courseDir: outDir,
       target,
-      outputPath: remappedOutputPath,
-      outputDir: remappedOutputDir,
-      fileCount: build.fileCount,
-      validation,
-      build: remappedBuild,
+      validation: { ok: true, manifest: build.manifest, issues: build.issues },
+      build,
+      issues: artifactIssues,
     };
-  } finally {
-    if (!promoted) {
-      await fsp.rm(stagingDir, { recursive: true, force: true }).catch(() => undefined);
-    }
   }
+
+  const remappedOutputPath = remapArtifactPaths(stagingRoot, outDir, staged.outputPath);
+  const remappedOutputDir = remapArtifactPaths(stagingRoot, outDir, staged.outputDir);
+
+  const validation: ValidateCourseResult = {
+    ok: true,
+    manifest: build.manifest,
+    issues: build.issues,
+  };
+
+  try {
+    await ensureOutDirParent(outDir);
+    await promoteStagingToOutDir(stagingDir, outDir);
+  } catch (err) {
+    return {
+      ok: false,
+      courseDir: outDir,
+      target,
+      validation,
+      build,
+      issues: [
+        {
+          path: "promote",
+          message: err instanceof Error ? err.message : String(err),
+        },
+      ],
+    };
+  }
+
+  const remappedBuild: BuildCourseResult = { ...build };
+  if ("outputPath" in remappedBuild && remappedOutputPath !== undefined) {
+    remappedBuild.outputPath = remappedOutputPath;
+  }
+  if ("outputDir" in remappedBuild && remappedOutputDir !== undefined) {
+    remappedBuild.outputDir = remappedOutputDir;
+  }
+
+  return {
+    ok: true,
+    courseDir: outDir,
+    target,
+    outputPath: remappedOutputPath,
+    outputDir: remappedOutputDir,
+    fileCount: build.fileCount,
+    validation,
+    build: remappedBuild,
+  };
 }

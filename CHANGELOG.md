@@ -31,6 +31,16 @@ All notable changes to the LessonKit monorepo are documented here. Published pac
 - **@lessonkit/xapi**: Dedupe queued statements by `id` on transport failure re-queue.
 - **CI**: Diff `templates/vite-react/` against CLI template source; CLI template assessment ID parity test.
 
+### Fixed (unreleased maintenance)
+
+- **@lessonkit/lxpack**: Return structured `{ ok: false }` when promote fails; preserve staging after restore (no `finally` cleanup wipe).
+- **@lessonkit/lxpack**: Reject build artifact paths outside the staging directory.
+- **@lessonkit/lxpack**: Validate `index.html` exists for each `per-lesson-spa` lesson directory.
+- **@lessonkit/cli**: Reject `lessonkit.json` manifests whose `course` field is an array during project discovery.
+- **@lessonkit/react**: Duplicate `<Lesson>` unmount no longer steals active lesson from another lesson.
+- **@lessonkit/core**: Catch async telemetry sink rejections (dev warning) instead of unhandled promise rejections.
+- **Docs / library-skills**: Align Node **18+** guidance for `lessonkit package`; fix packaging skill and CLI manifest examples.
+
 - **@lessonkit/react**: `wrapTrackingSink` now applies on batched flushes when `tracking.batchSink` is configured.
 - **@lessonkit/react**: `Quiz` / `KnowledgeCheck` telemetry uses the enclosing `<Lesson>` `lessonId` (not only `activeLessonId`) when multiple lessons are mounted.
 - **@lessonkit/react**: Plugin `setup` / `dispose` re-run when `session.user` changes.

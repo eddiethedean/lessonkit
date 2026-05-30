@@ -47,7 +47,7 @@ LessonKit courses are React apps. If you want to learn React before the develope
 
 ```{raw} html
 <div class="lk-callout">
-  <strong>Node.js:</strong> 18+ for dev and build · 20+ for <code>lessonkit package</code> (LMS export).
+  <strong>Node.js:</strong> 18+ for dev, build, and <code>lessonkit package</code> (LMS export).
 </div>
 ```
 
@@ -56,7 +56,7 @@ LessonKit courses are React apps. If you want to learn React before the develope
 | Task | Node.js |
 | --- | --- |
 | Create a course, run `lessonkit dev`, build | **18+** |
-| Package for LMS (`lessonkit package`) | **20+** |
+| Package for LMS (`lessonkit package`) | **18+** |
 
 Release notes: [changelog](project/changelog.md) on this site · [GitHub](https://github.com/eddiethedean/lessonkit).
 

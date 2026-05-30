@@ -10,7 +10,7 @@ These guides are for **instructional designers, trainers, and builders who do no
 
 You do not need to understand TypeScript, hooks, or bundlers. You **do** need to:
 
-- Install **Node.js 18+** (20+ when packaging for an LMS)
+- Install **Node.js 18+** (required for dev, build, and LMS packaging)
 - Follow prompts carefully and paste suggested commands into a terminal
 - Review AI-generated changes before publishing
 
@@ -18,7 +18,7 @@ You do not need to understand TypeScript, hooks, or bundlers. You **do** need to
 
 1. **Describe** what you want in plain language (“a 3-lesson phishing course with a quiz at the end”).
 2. **Let the AI** edit `src/App.tsx`, `lessonkit.json`, and styles under your direction.
-3. **Run** `lessonkit dev` to preview, then `lessonkit build` and `lessonkit package` to export.
+3. **Run** `lessonkit dev` to preview, then `lessonkit build` and `lessonkit package --target scorm12` to export.
 4. **Upload** the ZIP (or folder) your LMS admin gives you.
 
 The AI is your implementation partner; LessonKit is the structure it should follow. For repeatable agent behavior, install [Library Skills](../library-skills.md) from the repo (`./library-skills/install.sh --global` or `--project`).

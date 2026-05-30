@@ -2,7 +2,7 @@
 
 ## 1. Install Node.js
 
-Download **Node.js 20 LTS** from [nodejs.org](https://nodejs.org/) if you plan to export SCORM packages. Node 18 works for previewing only.
+Download **Node.js 18 LTS or newer** from [nodejs.org](https://nodejs.org/) for dev, build, and SCORM export.
 
 Check in a terminal:
 

@@ -55,7 +55,7 @@ Re-run install after `git pull` to refresh skills from upstream.
 
 ## Requirements
 
-- Node.js **18+** for `lessonkit dev` / `build`; **20+** for `lessonkit package` — [CLI reference](https://lessonkit.readthedocs.io/en/latest/reference/cli.html)
+- Node.js **18+** for `lessonkit dev`, `build`, and `lessonkit package` — [CLI reference](https://lessonkit.readthedocs.io/en/latest/reference/cli.html)
 - Agent product that discovers `SKILL.md` (Cursor Skills, Claude Code skills, etc.)
 
 ## Related documentation

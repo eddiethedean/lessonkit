@@ -26,6 +26,8 @@ npm run test:integration
 | `cli-package-targets.test.ts` | Golden example: CLI `package` for all LMS targets via `--no-build` |
 | `descriptor-parity.test.ts` | `lessonkit.json` vs `course.descriptor.ts` vs golden `App.tsx` IDs |
 | `cli-failures.test.ts` | Negative paths (missing dist, invalid manifest) |
+| `showcase-parity.test.ts` | Example apps: `lessonkit.json` IDs match `App.tsx` props |
+| `activity-iri.test.ts` | xAPI/cmi5 targets require `tracking.xapi.activityIri` in descriptors |
 
 ## Fixtures
 

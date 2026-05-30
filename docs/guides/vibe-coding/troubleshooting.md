@@ -45,7 +45,7 @@ Run commands from the project root (where `lessonkit.json` lives), not a parent 
 Install Node 18+, then:
 
 ```bash
-node -v   # should be v20.x or v22.x
+node -v   # should be v18.x, v20.x, or v22.x
 lessonkit package --target scorm12
 ```
 

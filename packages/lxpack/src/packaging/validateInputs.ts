@@ -63,6 +63,22 @@ export function validatePackageInputs(
   return { ok: true, outDir, projectRoot };
 }
 
+export function validateArtifactInStaging(
+  stagingRoot: string,
+  artifactPath: string | undefined,
+  field: "outputPath" | "outputDir",
+): PackageValidationIssue | null {
+  if (!artifactPath) return null;
+  const resolved = resolveComparablePath(artifactPath);
+  if (!isResolvedPathUnderRoot(stagingRoot, resolved)) {
+    return {
+      path: field,
+      message: `${field} is outside the staging directory: ${artifactPath}`,
+    };
+  }
+  return null;
+}
+
 export function remapArtifactPaths(
   stagingRoot: string,
   outDir: string,

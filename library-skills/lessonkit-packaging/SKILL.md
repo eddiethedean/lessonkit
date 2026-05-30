@@ -59,6 +59,6 @@ Packaged SCORM/xAPI shells expose `window.parent.lxpackBridge.v1`. React apps us
 
 ## Do not
 
-- Run `lessonkit package` on Node 18 (engine check fails)
+- Run `lessonkit package` on Node versions below 18 (engine check fails)
 - Use `per-lesson-spa` layout with CLI package in 1.0.0
 - Edit generated ZIP contents manually — fix source and rebuild

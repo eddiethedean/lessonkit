@@ -195,7 +195,7 @@ Canonical mapping: `telemetryEventToXAPIStatement()` from `@lessonkit/xapi` (see
 lessonkit init
 lessonkit dev
 lessonkit build
-lessonkit package
+lessonkit package --target scorm12
 lessonkit publish
 ```
 
