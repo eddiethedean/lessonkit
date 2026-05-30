@@ -29,8 +29,8 @@ lessonkit/
 
 ## Documentation
 
-- Storybook
-- Docusaurus
+- Storybook (`@lessonkit/react`)
+- [Read the Docs](https://lessonkit.readthedocs.io/) (Sphinx; source in `docs/`)
 
 ## Testing
 

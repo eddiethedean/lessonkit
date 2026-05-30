@@ -16,7 +16,7 @@ import type {
   TrackingClient,
   HeadlessLessonkitRuntime,
 } from "@lessonkit/core";
-import { createLessonkitRuntime, createTrackingClient } from "@lessonkit/core";
+import { createLessonkitRuntime, createTrackingClient, assertValidId } from "@lessonkit/core";
 import type { XAPIClient } from "@lessonkit/xapi";
 import { createInMemoryXAPIQueue } from "@lessonkit/xapi";
 import { telemetryEventToXAPIStatement } from "@lessonkit/xapi";
@@ -68,6 +68,7 @@ function emitCourseStarted(opts: {
     courseId: opts.courseId,
     sessionId: opts.sessionId,
     attemptId: opts.attemptId,
+    user: opts.user,
   });
   try {
     emitTelemetryWithPlugins({
@@ -109,6 +110,7 @@ function emitCourseStartedToTrackingOnly(opts: {
     courseId: opts.courseId,
     sessionId: opts.sessionId,
     attemptId: opts.attemptId,
+    user: opts.user,
   });
   try {
     emitTelemetryWithPlugins({
@@ -132,63 +134,69 @@ function emitCourseStartedToTrackingOnly(opts: {
   }
 }
 
-let warnedSinkAndBatchSink = false;
-
-function warnTrackingSinkAndBatchSinkTogether(): void {
+function assertTrackingSinkConfig(tracking?: LessonkitConfig["tracking"]): void {
+  if (!tracking?.sink || !tracking?.batchSink) return;
   const g = globalThis as typeof globalThis & { process?: { NODE_ENV?: string } };
   if (typeof g.process !== "undefined" && g.process.env?.NODE_ENV === "production") return;
-  if (warnedSinkAndBatchSink) return;
-  warnedSinkAndBatchSink = true;
-  console.warn(
-    "[lessonkit] tracking.sink and tracking.batchSink are both set; flushed batches only use batchSink",
+  throw new Error(
+    "[lessonkit] tracking.sink and tracking.batchSink cannot both be set; use batchSink alone for batched delivery",
   );
 }
 
 export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitRuntime {
-  const useV2Runtime = config.runtimeVersion !== "v1";
-  const extraSinksRef = useRef(config.sinks);
-  extraSinksRef.current = config.sinks;
+  const normalizedCourseId = useMemo(
+    () => assertValidId(config.courseId, "courseId") as CourseId,
+    [config.courseId],
+  );
+  const normalizedConfig = useMemo(
+    () => ({ ...config, courseId: normalizedCourseId }),
+    [config, normalizedCourseId],
+  );
+
+  const useV2Runtime = normalizedConfig.runtimeVersion !== "v1";
+  const extraSinksRef = useRef(normalizedConfig.sinks);
+  extraSinksRef.current = normalizedConfig.sinks;
 
   const headlessRef = useRef<HeadlessLessonkitRuntime | null>(null);
   if (useV2Runtime && !headlessRef.current) {
     headlessRef.current = createLessonkitRuntime({
-      courseId: config.courseId,
+      courseId: normalizedCourseId,
       runtimeVersion: "v2",
-      session: config.session,
+      session: normalizedConfig.session,
     });
   }
 
-  const sessionIdRef = useRef<string>(resolveSessionId(defaultStorage, config.session?.sessionId));
-  const prevConfiguredSessionIdRef = useRef<string | undefined>(config.session?.sessionId);
-  if (config.session?.sessionId) {
-    sessionIdRef.current = config.session.sessionId;
+  const sessionIdRef = useRef<string>(resolveSessionId(defaultStorage, normalizedConfig.session?.sessionId));
+  const prevConfiguredSessionIdRef = useRef<string | undefined>(normalizedConfig.session?.sessionId);
+  if (normalizedConfig.session?.sessionId) {
+    sessionIdRef.current = normalizedConfig.session.sessionId;
   } else if (prevConfiguredSessionIdRef.current) {
     sessionIdRef.current = resolveSessionId(defaultStorage, undefined);
   }
 
-  const attemptIdRef = useRef<string | undefined>(config.session?.attemptId);
-  const userRef = useRef<TelemetryUser | undefined>(config.session?.user);
-  attemptIdRef.current = config.session?.attemptId;
-  userRef.current = config.session?.user;
+  const attemptIdRef = useRef<string | undefined>(normalizedConfig.session?.attemptId);
+  const userRef = useRef<TelemetryUser | undefined>(normalizedConfig.session?.user);
+  attemptIdRef.current = normalizedConfig.session?.attemptId;
+  userRef.current = normalizedConfig.session?.user;
 
-  const courseIdRef = useRef<CourseId>(config.courseId);
-  courseIdRef.current = config.courseId;
+  const courseIdRef = useRef<CourseId>(normalizedCourseId);
+  courseIdRef.current = normalizedCourseId;
 
-  const lxpackBridgeModeRef = useRef<LxpackBridgeMode>(config.lxpack?.bridge ?? "auto");
-  lxpackBridgeModeRef.current = config.lxpack?.bridge ?? "auto";
+  const lxpackBridgeModeRef = useRef<LxpackBridgeMode>(normalizedConfig.lxpack?.bridge ?? "auto");
+  lxpackBridgeModeRef.current = normalizedConfig.lxpack?.bridge ?? "auto";
 
-  const pluginHost = useMemo(() => createReactPluginHost(config.plugins), [config.plugins]);
+  const pluginHost = useMemo(() => createReactPluginHost(normalizedConfig.plugins), [normalizedConfig.plugins]);
   const pluginHostRef = useRef(pluginHost);
   pluginHostRef.current = pluginHost;
 
   const progressRef = useRef(createProgressController());
   const courseStartedEmittedToSinkRef = useRef(false);
-  const prevCourseIdForProgressRef = useRef(config.courseId);
+  const prevCourseIdForProgressRef = useRef(normalizedCourseId);
   const pendingCourseIdResetRef = useRef(false);
-  if (prevCourseIdForProgressRef.current !== config.courseId) {
-    prevCourseIdForProgressRef.current = config.courseId;
+  if (prevCourseIdForProgressRef.current !== normalizedCourseId) {
+    prevCourseIdForProgressRef.current = normalizedCourseId;
     if (useV2Runtime && headlessRef.current) {
-      headlessRef.current.resetForCourseChange(config.courseId);
+      headlessRef.current.resetForCourseChange(normalizedCourseId);
       progressRef.current = headlessRef.current.progress;
     } else {
       progressRef.current = createProgressController();
@@ -213,18 +221,18 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
   const xapiQueueRef = useRef(createInMemoryXAPIQueue());
   const xapiRef = useRef<XAPIClient | null>(null);
   const [xapi, setXapi] = useState<XAPIClient | null>(null);
-  const prevXapiCourseIdRef = useRef(config.courseId);
+  const prevXapiCourseIdRef = useRef(normalizedCourseId);
 
-  const xapiEnabled = config.xapi?.enabled;
-  const xapiClient = config.xapi?.client;
-  const xapiTransport = config.xapi?.transport;
-  const courseId = config.courseId;
-  const trackingEnabled = config.tracking?.enabled;
+  const xapiEnabled = normalizedConfig.xapi?.enabled;
+  const xapiClient = normalizedConfig.xapi?.client;
+  const xapiTransport = normalizedConfig.xapi?.transport;
+  const courseId = normalizedCourseId;
+  const trackingEnabled = normalizedConfig.tracking?.enabled;
 
   useIsoLayoutEffect(() => {
     const courseChanged = prevXapiCourseIdRef.current !== courseId;
     if (courseChanged) {
-      if (config.xapi?.client) {
+      if (normalizedConfig.xapi?.client) {
         const g = globalThis as typeof globalThis & { process?: { NODE_ENV?: string } };
         if (typeof g.process !== "undefined" && g.process.env?.NODE_ENV !== "production") {
           console.warn(
@@ -238,14 +246,14 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
     }
 
     const prev = xapiRef.current;
-    const next = createXapiClientFromConfig(config, xapiQueueRef.current);
+    const next = createXapiClientFromConfig(normalizedConfig, xapiQueueRef.current);
     xapiRef.current = next;
     setXapi(next);
 
     if (next && !prev) {
       const sessionId = sessionIdRef.current;
       const cid = courseIdRef.current;
-      const trackingActive = isTrackingActive(config.tracking);
+      const trackingActive = isTrackingActive(normalizedConfig.tracking);
       const alreadyStarted = hasCourseStarted(defaultStorage, sessionId, cid);
       // When tracking is on, course_started (and xAPI) normally flow through emitTelemetry.
       // Bootstrap here only for xAPI-only apps, or when transport is enabled after course_started.
@@ -296,11 +304,11 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
   const trackingClientForUnmountRef = useRef<TrackingClient>(trackingRef.current);
   const [tracking, setTracking] = useState<TrackingClient>(() => trackingRef.current);
 
-  const trackingSink = config.tracking?.sink;
-  const trackingBatchSink = config.tracking?.batchSink;
-  const batchEnabled = config.tracking?.batch?.enabled;
-  const batchFlushIntervalMs = config.tracking?.batch?.flushIntervalMs;
-  const batchMaxBatchSize = config.tracking?.batch?.maxBatchSize;
+  const trackingSink = normalizedConfig.tracking?.sink;
+  const trackingBatchSink = normalizedConfig.tracking?.batchSink;
+  const batchEnabled = normalizedConfig.tracking?.batch?.enabled;
+  const batchFlushIntervalMs = normalizedConfig.tracking?.batch?.flushIntervalMs;
+  const batchMaxBatchSize = normalizedConfig.tracking?.batch?.maxBatchSize;
 
   const buildCurrentPluginCtx = useCallback(
     () =>
@@ -308,17 +316,16 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
         courseId: courseIdRef.current,
         sessionId: sessionIdRef.current,
         attemptId: attemptIdRef.current,
+        user: userRef.current,
       }),
     [],
   );
 
   useIsoLayoutEffect(() => {
     const prev = trackingRef.current;
-    const baseSink = config.tracking?.sink;
-    const userBatchSink = config.tracking?.batchSink;
-    if (baseSink && userBatchSink) {
-      warnTrackingSinkAndBatchSinkTogether();
-    }
+    const baseSink = normalizedConfig.tracking?.sink;
+    const userBatchSink = normalizedConfig.tracking?.batchSink;
+    assertTrackingSinkConfig(normalizedConfig.tracking);
     const sink =
       pluginHostRef.current && baseSink
         ? (pluginHostRef.current.composeTrackingSink(baseSink, buildCurrentPluginCtx) ?? baseSink)
@@ -342,7 +349,7 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
           }
         : userBatchSink;
     const next = createTrackingClientFromConfig({
-      tracking: { ...config.tracking, sink, batchSink },
+      tracking: { ...normalizedConfig.tracking, sink, batchSink },
     });
     trackingRef.current = next;
     trackingClientForUnmountRef.current = next;
@@ -350,7 +357,7 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
 
     const sessionId = sessionIdRef.current;
     const cid = courseIdRef.current;
-    const trackingActive = isTrackingActive(config.tracking);
+    const trackingActive = isTrackingActive(normalizedConfig.tracking);
 
     if (!trackingActive) {
       courseStartedEmittedToSinkRef.current = false;
@@ -401,8 +408,8 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
     batchEnabled,
     batchFlushIntervalMs,
     batchMaxBatchSize,
-    config.plugins,
-    config.courseId,
+    normalizedConfig.plugins,
+    normalizedCourseId,
     buildCurrentPluginCtx,
   ]);
 
@@ -416,6 +423,7 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
         courseId: courseIdRef.current,
         sessionId: sessionIdRef.current,
         attemptId: attemptIdRef.current,
+        user: userRef.current,
       }),
       lxpackBridge: lxpackBridgeModeRef.current,
       extraSinks: extraSinksRef.current,
@@ -461,7 +469,7 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
     pendingCourseIdResetRef.current = false;
     syncProgress();
 
-    if (!isTrackingActive(config.tracking)) return;
+    if (!isTrackingActive(normalizedConfig.tracking)) return;
 
     const sessionId = sessionIdRef.current;
     const cid = courseIdRef.current;
@@ -495,7 +503,7 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
       }
       /* v8 ignore stop */
     })();
-  }, [config.courseId, config.tracking?.enabled, syncProgress]);
+  }, [normalizedCourseId, normalizedConfig.tracking?.enabled, syncProgress]);
 
   const emitLessonCompleted = useCallback(
     (lessonId: LessonId, durationMs?: number) => {
@@ -597,13 +605,22 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
     void trackingRef.current?.flush?.();
   }, [track, syncProgress, emitLessonCompleted, useV2Runtime, emitLifecycleEvent]);
 
-  const sessionUser = config.session?.user;
+  const sessionUser = normalizedConfig.session?.user;
   const sessionUserKey = useMemo(
     () => (sessionUser ? JSON.stringify(sessionUser) : ""),
     [sessionUser],
   );
-  const sessionAttemptId = config.session?.attemptId;
-  const sessionConfiguredId = config.session?.sessionId;
+  const sessionAttemptId = normalizedConfig.session?.attemptId;
+  const sessionConfiguredId = normalizedConfig.session?.sessionId;
+
+  useEffect(() => {
+    if (useV2Runtime && headlessRef.current) {
+      headlessRef.current.updateConfig({
+        courseId: normalizedCourseId,
+        session: normalizedConfig.session,
+      });
+    }
+  }, [useV2Runtime, normalizedCourseId, sessionAttemptId, sessionConfiguredId, sessionUserKey, normalizedConfig.session]);
 
   useEffect(() => {
     if (!pluginHost) return;
@@ -611,15 +628,16 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
       courseId: courseIdRef.current,
       sessionId: sessionIdRef.current,
       attemptId: attemptIdRef.current,
+      user: userRef.current,
     });
     pluginHost.setupAll(ctx);
     return () => {
       pluginHost.disposeAll();
     };
-  }, [pluginHost, config.courseId, sessionAttemptId, sessionConfiguredId, sessionUserKey]);
+  }, [pluginHost, normalizedCourseId, sessionAttemptId, sessionConfiguredId, sessionUserKey]);
 
   useEffect(() => {
-    const nextConfigured = config.session?.sessionId;
+    const nextConfigured = normalizedConfig.session?.sessionId;
     const prevConfigured = prevConfiguredSessionIdRef.current;
     if (nextConfigured === prevConfigured) return;
     prevConfiguredSessionIdRef.current = nextConfigured;
@@ -642,11 +660,11 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
       migrateCourseStartedMark(defaultStorage, prevConfigured, nextAuto, cid);
       sessionIdRef.current = nextAuto;
     }
-  }, [sessionConfiguredId, config.courseId]);
+  }, [sessionConfiguredId, normalizedCourseId]);
 
   const runtime = useMemo<LessonkitRuntime>(
     () => ({
-      config,
+      config: normalizedConfig,
       tracking,
       xapi,
       session: { sessionId: sessionIdRef.current, attemptId: attemptIdRef.current, user: userRef.current },
@@ -658,7 +676,7 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
       plugins: pluginHost,
     }),
     [
-      config,
+      normalizedConfig,
       tracking,
       xapi,
       progress,

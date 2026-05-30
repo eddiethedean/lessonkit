@@ -89,6 +89,21 @@ describe("@lessonkit/xapi", () => {
     expect(statements[0]).toMatchObject({ id: "1" });
   });
 
+  it("does not duplicate queued statements with the same id on transport failure", async () => {
+    const queue = createInMemoryXAPIQueue();
+    const transport = vi.fn(async () => {
+      throw new Error("network");
+    });
+    const client = createXAPIClient({ transport, courseId, queue });
+    const statement = { id: "dup-1", timestamp: "t", verb: "v", object: { id: "o" } };
+
+    client.send(statement);
+    client.send(statement);
+    await new Promise((r) => setTimeout(r, 0));
+
+    expect(client.queueSize()).toBe(1);
+  });
+
   it("queue flush stops on first transport error and keeps remainder queued", async () => {
     const queue = createInMemoryXAPIQueue();
     queue.enqueue({ id: "1", timestamp: "t", verb: "v", object: { id: "o" } });

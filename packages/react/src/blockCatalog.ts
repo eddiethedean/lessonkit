@@ -73,6 +73,12 @@ export const BLOCK_CATALOG: BlockCatalogEntry[] = [
     props: [
       { name: "title", type: "string", required: true, description: "Lesson title shown in the h2." },
       { name: "lessonId", type: "LessonId", required: true, description: "Stable lesson identifier for telemetry and packaging." },
+      {
+        name: "autoCompleteOnUnmount",
+        type: "boolean",
+        required: false,
+        description: "When false, unmount does not emit lesson_completed (default true).",
+      },
       { name: "children", type: "ReactNode", required: true, description: "Scenario, Quiz, Reflection, and other blocks." },
     ],
     requiredIds: ["lessonId"],
@@ -125,6 +131,9 @@ export const BLOCK_CATALOG: BlockCatalogEntry[] = [
     props: [
       { name: "blockId", type: "BlockId", required: false, description: "Optional stable block id for interaction telemetry URNs." },
       { name: "prompt", type: "string", required: false, description: "Reflection question or instruction." },
+      { name: "hint", type: "string", required: false, description: "Optional hint linked via aria-describedby." },
+      { name: "value", type: "string", required: false, description: "Controlled textarea value." },
+      { name: "onChange", type: "(value: string) => void", required: false, description: "Called when the learner edits the textarea." },
       { name: "children", type: "ReactNode", required: false, description: "Optional content above the textarea." },
     ],
     requiredIds: [],
@@ -143,6 +152,7 @@ export const BLOCK_CATALOG: BlockCatalogEntry[] = [
     },
     telemetry: {
       emits: [],
+      requiresActiveLesson: true,
       manualTracking: "useTracking().track('interaction', { kind, blockId, payload }) on submit or blur",
     },
   },
@@ -180,7 +190,14 @@ export const BLOCK_CATALOG: BlockCatalogEntry[] = [
     type: "ProgressTracker",
     category: "chrome",
     description: "Displays count of completed lessons from runtime progress state.",
-    props: [],
+    props: [
+      {
+        name: "totalLessons",
+        type: "number",
+        required: false,
+        description: "When set, renders role=progressbar with aria-valuenow/max.",
+      },
+    ],
     requiredIds: [],
     parentConstraints: ["Course"],
     a11y: {

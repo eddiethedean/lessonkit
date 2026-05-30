@@ -69,6 +69,12 @@
           "description": "Stable lesson identifier for telemetry and packaging."
         },
         {
+          "name": "autoCompleteOnUnmount",
+          "type": "boolean",
+          "required": false,
+          "description": "When false, unmount does not emit lesson_completed (default true)."
+        },
+        {
           "name": "children",
           "type": "ReactNode",
           "required": true,
@@ -160,6 +166,24 @@
           "description": "Reflection question or instruction."
         },
         {
+          "name": "hint",
+          "type": "string",
+          "required": false,
+          "description": "Optional hint linked via aria-describedby."
+        },
+        {
+          "name": "value",
+          "type": "string",
+          "required": false,
+          "description": "Controlled textarea value."
+        },
+        {
+          "name": "onChange",
+          "type": "(value: string) => void",
+          "required": false,
+          "description": "Called when the learner edits the textarea."
+        },
+        {
           "name": "children",
           "type": "ReactNode",
           "required": false,
@@ -188,6 +212,7 @@
       },
       "telemetry": {
         "emits": [],
+        "requiresActiveLesson": true,
         "manualTracking": "useTracking().track('interaction', { kind, blockId, payload }) on submit or blur"
       }
     },
@@ -256,7 +281,14 @@
       "type": "ProgressTracker",
       "category": "chrome",
       "description": "Displays count of completed lessons from runtime progress state.",
-      "props": [],
+      "props": [
+        {
+          "name": "totalLessons",
+          "type": "number",
+          "required": false,
+          "description": "When set, renders role=progressbar with aria-valuenow/max."
+        }
+      ],
       "requiredIds": [],
       "parentConstraints": [
         "Course"

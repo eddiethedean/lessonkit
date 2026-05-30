@@ -17,6 +17,19 @@ All notable changes to the LessonKit monorepo are documented here. Published pac
 - **@lessonkit/lxpack**: Restore staged package content when promote fails and `outDir` did not exist yet.
 - **library-skills**: Fix `install.sh` default (global only), `validate.sh` path in `lessonkit-author`, and packaging output path notes.
 - **Tooling**: Add ESLint (flat config) with CI lint step and library-skills install/validate smoke in packaging CI.
+
+### Post-release maintenance (1.0.0 line, unreleased)
+
+- **@lessonkit/react**: Normalize `courseId` / `lessonId` / `checkId` at provider and component boundaries (trimmed identity v1).
+- **@lessonkit/react**: Throw in dev when `Quiz` is outside `<Lesson>`; production shows `role="alert"` and skips quiz telemetry.
+- **@lessonkit/react**: `Lesson.autoCompleteOnUnmount` prop; dev warning when multiple `<Lesson>` trees mount concurrently.
+- **@lessonkit/react**: Quiz disables radios after pass; `ProgressTracker.totalLessons` progressbar semantics; controlled `Reflection` textarea props.
+- **@lessonkit/react**: Throw in dev when both `tracking.sink` and `tracking.batchSink` are set.
+- **@lessonkit/core**: `createLessonkitRuntime.updateConfig()` syncs session; `resetForCourseChange` updates `config.courseId`.
+- **@lessonkit/core**: `LessonkitPluginContext.user` for plugin access to learner identity.
+- **@lessonkit/xapi**: Dedupe queued statements by `id` on transport failure re-queue.
+- **CI**: Diff `templates/vite-react/` against CLI template source; CLI template assessment ID parity test.
+
 - **@lessonkit/react**: `wrapTrackingSink` now applies on batched flushes when `tracking.batchSink` is configured.
 - **@lessonkit/react**: `Quiz` / `KnowledgeCheck` telemetry uses the enclosing `<Lesson>` `lessonId` (not only `activeLessonId`) when multiple lessons are mounted.
 - **@lessonkit/react**: Plugin `setup` / `dispose` re-run when `session.user` changes.

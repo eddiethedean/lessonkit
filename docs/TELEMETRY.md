@@ -50,4 +50,19 @@ Without `blockId`, interaction events are tracked but do not emit xAPI.
 
 ## Identity
 
-All events require `courseId`. Lesson-scoped events require `lessonId`. See [`IDENTITY.md`](IDENTITY.md).
+All events require `courseId`. Lesson-scoped events require `lessonId`. Component ids are **trimmed** at the React provider boundary (`assertValidId`) so telemetry payloads and xAPI URNs stay aligned. See [`IDENTITY.md`](IDENTITY.md).
+
+### `course_started` dedupe
+
+The runtime uses separate session-storage marks:
+
+| Key pattern | Purpose |
+|-------------|---------|
+| `lessonkit:course_started:{sessionId}:{courseId}` | xAPI / session bootstrap (may fire before tracking sink is ready) |
+| `lessonkit:course_started_tracking:{sessionId}:{courseId}` | Tracking sink delivery (retries when sink fails) |
+
+When `config.session.sessionId` changes, `migrateCourseStartedMark` moves dedupe state to the new session id so learners do not receive duplicate `course_started` events after LMS handoff.
+
+### Quiz telemetry
+
+Built-in `Quiz` / `KnowledgeCheck` must be wrapped in `<Lesson>`. Events without an enclosing `lessonId` are dropped by `tryBuildTelemetryEvent`.

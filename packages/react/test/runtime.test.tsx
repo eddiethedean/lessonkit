@@ -1,7 +1,8 @@
 import React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { Course, KnowledgeCheck, Lesson, LessonkitProvider, ProgressTracker, Quiz, Reflection, Scenario, useCompletion, useLessonkit, useProgress, useQuizState, useTracking } from "../src";
+import { Course, KnowledgeCheck, Lesson, LessonkitProvider, ProgressTracker, Quiz, Reflection, Scenario, resetQuizWarningsForTests, useCompletion, useLessonkit, useProgress, useQuizState, useTracking } from "../src";
+import { resetLessonMountRegistryForTests } from "../src/runtime/lessonMountRegistry";
 import {
   defineAssessmentPlugin,
   defineLifecyclePlugin,
@@ -16,28 +17,27 @@ describe("@lessonkit/react runtime", () => {
   afterEach(() => {
     cleanup();
     sessionStorage.clear();
+    resetQuizWarningsForTests();
+    resetLessonMountRegistryForTests();
   });
 
-  it("warns in dev when courseId is invalid", async () => {
-    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+  it("throws in dev when courseId is invalid", async () => {
     vi.stubEnv("NODE_ENV", "development");
 
     try {
-      render(
-        <Course
-          title="Course"
-          courseId={"1bad" as "course-1"}
-          config={{ xapi: { enabled: false } }}
-        >
-          <div>child</div>
-        </Course>,
-      );
-      await waitFor(() =>
-        expect(warn).toHaveBeenCalledWith(expect.stringMatching(/invalid courseId/)),
-      );
+      expect(() =>
+        render(
+          <Course
+            title="Course"
+            courseId={"1bad" as "course-1"}
+            config={{ xapi: { enabled: false } }}
+          >
+            <div>child</div>
+          </Course>,
+        ),
+      ).toThrow(/courseId/);
     } finally {
       vi.unstubAllEnvs();
-      warn.mockRestore();
     }
   });
 
@@ -1091,13 +1091,33 @@ describe("@lessonkit/react runtime", () => {
     await waitFor(() => expect(events.filter((e) => e.name === "course_started").length).toBe(2));
   });
 
-  it("Quiz outside Lesson warns in dev and does not throw", async () => {
-    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+  it("Quiz outside Lesson throws in dev", () => {
     vi.stubEnv("NODE_ENV", "development");
+
+    try {
+      expect(() =>
+        render(
+          <Course
+            title="Course"
+            courseId="course-1"
+            config={{ tracking: { sink: () => {} } }}
+          >
+            <Quiz checkId="check-1" question="Q" choices={["A", "B"]} answer="B" />
+          </Course>,
+        ),
+      ).toThrow(/must be wrapped in <Lesson>/);
+    } finally {
+      vi.unstubAllEnvs();
+    }
+  });
+
+  it("Quiz outside Lesson shows alert and skips telemetry in production", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    const error = vi.spyOn(console, "error").mockImplementation(() => {});
     const events: TelemetryEvent[] = [];
 
     try {
-      const { getByLabelText } = render(
+      const { getByRole } = render(
         <Course
           title="Course"
           courseId="course-1"
@@ -1107,12 +1127,12 @@ describe("@lessonkit/react runtime", () => {
         </Course>,
       );
 
-      fireEvent.click(getByLabelText("B"));
-      await waitFor(() => expect(warn).toHaveBeenCalled());
+      expect(getByRole("alert").textContent).toMatch(/inside a Lesson/i);
       expect(events.some((e) => e.name === "quiz_answered")).toBe(false);
+      expect(error).toHaveBeenCalledWith(expect.stringMatching(/must be wrapped in <Lesson>/));
     } finally {
       vi.unstubAllEnvs();
-      warn.mockRestore();
+      error.mockRestore();
     }
   });
 
@@ -1461,8 +1481,7 @@ describe("@lessonkit/react runtime", () => {
     await waitFor(() => expect(events.filter((e) => e.name === "course_started")).toHaveLength(1));
   });
 
-  it("warns when tracking sink and batchSink are both configured in development", async () => {
-    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+  it("throws when tracking sink and batchSink are both configured in development", () => {
     vi.stubEnv("NODE_ENV", "development");
 
     const config = {
@@ -1476,27 +1495,15 @@ describe("@lessonkit/react runtime", () => {
     };
 
     try {
-      const { rerender } = render(
-        <LessonkitProvider config={config}>
-          <div>child</div>
-        </LessonkitProvider>,
-      );
-
-      await waitFor(() =>
-        expect(warn).toHaveBeenCalledWith(
-          expect.stringMatching(/tracking\.sink and tracking\.batchSink/),
+      expect(() =>
+        render(
+          <LessonkitProvider config={config}>
+            <div>child</div>
+          </LessonkitProvider>,
         ),
-      );
-
-      rerender(
-        <LessonkitProvider config={config}>
-          <div>child</div>
-        </LessonkitProvider>,
-      );
-      expect(warn).toHaveBeenCalledTimes(1);
+      ).toThrow(/tracking\.sink and tracking\.batchSink/);
     } finally {
       vi.unstubAllEnvs();
-      warn.mockRestore();
     }
   });
 
@@ -2172,6 +2179,99 @@ describe("@lessonkit/react runtime", () => {
     expect(legend).toBeTruthy();
     expect(legend?.className).not.toContain("sr-only");
     expect(legend?.getAttribute("style")).toContain("position: absolute");
+  });
+
+  it("normalizes padded courseId in telemetry payloads", async () => {
+    const events: TelemetryEvent[] = [];
+
+    render(
+      <Course
+        title="Course"
+        courseId={" my-course " as "my-course"}
+        config={{ tracking: { sink: (e) => void events.push(e) } }}
+      >
+        <Lesson title="Lesson" lessonId=" lesson-1 ">
+          <Quiz checkId=" check-1 " question="Q" choices={["A", "B"]} answer="B" />
+        </Lesson>
+      </Course>,
+    );
+
+    await waitFor(() => expect(events.some((e) => e.name === "course_started")).toBe(true));
+    const started = events.find((e) => e.name === "course_started");
+    expect(started?.courseId).toBe("my-course");
+  });
+
+  it("Lesson autoCompleteOnUnmount=false skips lesson_completed on unmount", async () => {
+    const events: TelemetryEvent[] = [];
+
+    const { unmount } = render(
+      <Course
+        title="Course"
+        courseId="course-1"
+        config={{ tracking: { sink: (e) => void events.push(e) } }}
+      >
+        <Lesson title="A" lessonId="lesson-a" autoCompleteOnUnmount={false}>
+          <div>content</div>
+        </Lesson>
+      </Course>,
+    );
+
+    await waitFor(() => expect(events.some((e) => e.name === "lesson_started")).toBe(true));
+    unmount();
+    await act(async () => {
+      await Promise.resolve();
+    });
+    expect(events.some((e) => e.name === "lesson_completed")).toBe(false);
+  });
+
+  it("warns in dev when multiple lessons mount concurrently", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    vi.stubEnv("NODE_ENV", "development");
+
+    try {
+      render(
+        <Course title="Course" courseId="course-1">
+          <Lesson title="A" lessonId="lesson-a">
+            <div>a</div>
+          </Lesson>
+          <Lesson title="B" lessonId="lesson-b">
+            <div>b</div>
+          </Lesson>
+        </Course>,
+      );
+
+      await waitFor(() =>
+        expect(warn).toHaveBeenCalledWith(expect.stringMatching(/Multiple <Lesson>/)),
+      );
+    } finally {
+      vi.unstubAllEnvs();
+      warn.mockRestore();
+    }
+  });
+
+  it("ProgressTracker exposes progressbar semantics when totalLessons is set", () => {
+    render(
+      <Course title="Course" courseId="course-1">
+        <ProgressTracker totalLessons={3} />
+      </Course>,
+    );
+    const bar = screen.getByRole("progressbar");
+    expect(bar.getAttribute("aria-valuemax")).toBe("3");
+    expect(bar.getAttribute("aria-valuenow")).toBe("0");
+  });
+
+  it("Quiz disables choices after a correct answer", async () => {
+    const { getByLabelText } = render(
+      <Course title="Course" courseId="course-1">
+        <Lesson title="Lesson" lessonId="lesson-1">
+          <Quiz checkId="check-1" question="Q" choices={["A", "B"]} answer="B" />
+        </Lesson>
+      </Course>,
+    );
+
+    fireEvent.click(getByLabelText("B"));
+    await waitFor(() => expect((getByLabelText("B") as HTMLInputElement).disabled).toBe(true));
+    expect((getByLabelText("A") as HTMLInputElement).disabled).toBe(true);
   });
 });
 

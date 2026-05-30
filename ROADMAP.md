@@ -58,20 +58,11 @@ the framework adapter exists (see 0.6.0).
 - **Hooks**: `useProgress`, `useTracking`, `useQuizState`, `useCompletion`
 - **xAPI primitives**: statement generation + transport hooks (`@lessonkit/xapi`)
 - **Examples/templates**: Vite React example + template
-- **Docs placeholders**: Storybook + Docusaurus stubs
+- **Docs placeholders**: Storybook + Read the Docs (Sphinx) — **shipped in 1.0.0**
 
-#### Next steps (recommended)
+#### Status (1.0.0)
 
-- Add **basic unit tests** for:
-  - `Quiz` interactions (answer tracking)
-  - `Lesson` lifecycle (start/complete events)
-  - xAPI statement shape + transport invocation
-- Add **Storybook** for `@lessonkit/react` and at least:
-  - `Course/Lesson` layouts
-  - `Quiz` states (unanswered / correct / incorrect)
-- Decide on a **stable identity model** (blocks Studio export and telemetry consistency):
-  - `courseId` / `lessonId` required vs optional
-  - how IDs flow into telemetry/xAPI consistently
+The 0.1.x deliverables above are **complete**. Identity v1 (`courseId`, `lessonId`, `checkId`) is required and normalized at runtime. Unit tests, Storybook, and the block catalog ship in the monorepo. See [CHANGELOG.md](CHANGELOG.md).
 
 ---
 

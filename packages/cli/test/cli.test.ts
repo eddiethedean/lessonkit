@@ -1,7 +1,8 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 import { mkdtemp, rm, writeFile, mkdir, readFile } from "node:fs/promises";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 import { tmpdir } from "node:os";
+import { fileURLToPath } from "node:url";
 import { createProgram, run } from "../src/index.js";
 import { runInit } from "../src/commands/init.js";
 import { formatCliError, CliError, EXIT_INVALID_PROJECT } from "../src/lib/errors.js";
@@ -10,6 +11,26 @@ import { parsePackageTarget, resolvePackageOutput, resolveViteBuildArgs } from "
 import * as exec from "../src/lib/exec.js";
 
 describe("@lessonkit/cli program", () => {
+  it("CLI template App.tsx ids match lessonkit.json", async () => {
+    const templateDir = join(dirname(fileURLToPath(import.meta.url)), "../template/vite-react");
+    const lessonkit = JSON.parse(await readFile(join(templateDir, "lessonkit.json"), "utf8")) as {
+      course: {
+        courseId: string;
+        lessons: { id: string }[];
+        assessments?: { checkId: string }[];
+      };
+    };
+    const appSource = await readFile(join(templateDir, "src/App.tsx"), "utf8");
+
+    expect(appSource).toContain(`courseId="${lessonkit.course.courseId}"`);
+    for (const lesson of lessonkit.course.lessons) {
+      expect(appSource).toContain(`lessonId="${lesson.id}"`);
+    }
+    for (const assessment of lessonkit.course.assessments ?? []) {
+      expect(appSource).toContain(`checkId="${assessment.checkId}"`);
+    }
+  });
+
   it("createProgram wires basic metadata", () => {
     const program = createProgram({ log: () => {}, error: () => {} });
     expect(program.name()).toBe("lessonkit");

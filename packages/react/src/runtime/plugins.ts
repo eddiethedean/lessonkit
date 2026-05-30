@@ -4,6 +4,7 @@ import type {
   LessonkitPluginContext,
   PluginHost,
   TelemetryEvent,
+  TelemetryUser,
   TrackingClient,
 } from "@lessonkit/core";
 import { createPluginRegistry } from "@lessonkit/core";
@@ -20,11 +21,13 @@ export function buildPluginContext(opts: {
   courseId: CourseId;
   sessionId: string;
   attemptId?: string;
+  user?: TelemetryUser;
 }): LessonkitPluginContext {
   return {
     courseId: opts.courseId,
     sessionId: opts.sessionId,
     attemptId: opts.attemptId,
+    user: opts.user,
   };
 }
 

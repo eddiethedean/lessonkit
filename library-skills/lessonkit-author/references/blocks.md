@@ -30,6 +30,8 @@ export default function App() {
 
 ## Multiple lessons mounted
 
-All `<Lesson>` children may be mounted (tabs, scroll). Quiz events use the **enclosing** lesson’s `lessonId`.
+- `<Quiz>` and `<KnowledgeCheck>` **must** be inside `<Lesson>` (required for telemetry; throws in dev if missing).
+- All `<Lesson>` children may be mounted (tabs, scroll). Quiz events use the **enclosing** lesson’s `lessonId`.
+- Only one `<Lesson>` should be active at a time; use `autoCompleteOnUnmount={false}` for routed layouts.
 
 Human reference: https://lessonkit.readthedocs.io/en/latest/guides/react-developers/components-and-hooks.html

@@ -17,11 +17,22 @@ describe("createLessonkitRuntime", () => {
     expect(runtime.getProgressState().courseCompleted).toBe(true);
   });
 
-  it("resetForCourseChange clears progress", () => {
+  it("resetForCourseChange clears progress and updates config.courseId", () => {
     const runtime = createLessonkitRuntime({ courseId: "c" });
     runtime.setActiveLesson("lesson-1", () => {});
     runtime.resetForCourseChange("c2");
     expect(runtime.getProgressState().activeLessonId).toBeUndefined();
+    expect(runtime.config.courseId).toBe("c2");
+  });
+
+  it("updateConfig syncs session fields for getSession", () => {
+    const runtime = createLessonkitRuntime({ courseId: "c", session: { sessionId: "s1" } });
+    runtime.updateConfig({ session: { sessionId: "s2", attemptId: "a1", user: { id: "u1" } } });
+    expect(runtime.getSession()).toEqual({
+      sessionId: "s2",
+      attemptId: "a1",
+      user: { id: "u1" },
+    });
   });
 
   it("completeLesson emits via callback", () => {

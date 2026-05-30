@@ -44,13 +44,9 @@ as the **default packaging toolchain** and focus on building a thin, well-tested
 Recommended LessonKit next steps:
 
 1. ~~Create `@lessonkit/lxpack`~~ — **done** (0.6.0).
-2. Decide a stable mapping for identities:
-   - `courseId` ↔ LXPack course/activity id
-   - `lessonId` ↔ LXPack lesson id / SCO id
-   - quiz ids ↔ LXPack assessment ids
-3. Add at least one end-to-end example:
-   - LessonKit authored course → LXPack build → SCORM 1.2 ZIP importable into an LMS
-4. Add a CI smoke test that runs LXPack packaging for that example.
+2. ~~Decide a stable mapping for identities~~ — **done** (identity v1; see [`IDENTITY.md`](IDENTITY.md)).
+3. ~~Add at least one end-to-end example~~ — **done** ([`examples/lxpack-golden/`](../examples/lxpack-golden/)).
+4. ~~Add a CI smoke test that runs LXPack packaging for that example~~ — **done** (`.github/workflows/checks.yml` packaging job; [`integration/`](../integration/); [`e2e/`](../e2e/)).
 
 ---
 

@@ -29,6 +29,7 @@ export type HeadlessLessonkitRuntime = {
   readonly progress: ProgressController;
   getProgressState: () => ProgressState;
   getSession: () => { sessionId: string; attemptId?: string; user?: TelemetryUser };
+  updateConfig: (next: Partial<HeadlessLessonkitConfig>) => void;
   setActiveLesson: (
     lessonId: LessonId,
     emit: (name: TelemetryEventName, data?: unknown, lessonId?: LessonId) => void,
@@ -54,10 +55,12 @@ export function createLessonkitRuntime(
   const storage = ports.storage ?? createSessionStoragePort();
   const clock = ports.clock ?? createDefaultClock();
 
-  let sessionId = resolveSessionId(storage, config.session?.sessionId);
-  let attemptId = config.session?.attemptId;
-  let user = config.session?.user;
-  let courseId = config.courseId;
+  const configSnapshot: HeadlessLessonkitConfig = { ...config };
+
+  let sessionId = resolveSessionId(storage, configSnapshot.session?.sessionId);
+  let attemptId = configSnapshot.session?.attemptId;
+  let user = configSnapshot.session?.user;
+  let courseId = configSnapshot.courseId;
 
   let progress = createProgressController();
 
@@ -70,7 +73,7 @@ export function createLessonkitRuntime(
     courseId = next.courseId;
   };
 
-  syncSessionFromConfig(config);
+  syncSessionFromConfig(configSnapshot);
 
   const track = (
     name: TelemetryEventName,
@@ -103,10 +106,23 @@ export function createLessonkitRuntime(
   };
 
   return {
-    config,
-    progress,
+    get config() {
+      return configSnapshot;
+    },
+    get progress() {
+      return progress;
+    },
     getProgressState: () => progress.getState(),
     getSession,
+    updateConfig(next) {
+      if (next.courseId !== undefined) configSnapshot.courseId = next.courseId;
+      if (next.runtimeVersion !== undefined) configSnapshot.runtimeVersion = next.runtimeVersion;
+      if (next.plugins !== undefined) configSnapshot.plugins = next.plugins;
+      if (next.session !== undefined) {
+        configSnapshot.session = { ...configSnapshot.session, ...next.session };
+      }
+      syncSessionFromConfig(configSnapshot);
+    },
     setActiveLesson(lessonId, emitFn) {
       const current = progress.getState();
       if (current.activeLessonId === lessonId) return;
@@ -141,6 +157,7 @@ export function createLessonkitRuntime(
     },
     track,
     resetForCourseChange(nextCourseId) {
+      configSnapshot.courseId = nextCourseId;
       courseId = nextCourseId;
       progress = createProgressController();
     },

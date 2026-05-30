@@ -6,6 +6,7 @@ export {
   Quiz,
   Reflection,
   Scenario,
+  resetQuizWarningsForTests,
 } from "./components";
 
 export {

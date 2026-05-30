@@ -102,14 +102,16 @@ This requires:
 
 # Long-Term Roadmap
 
+> **Status:** Phases 1–3 shipped in **framework 1.0.0** (React components, LXPack packaging, CLI). Phase 4–5 remain future work (Studio, enterprise ecosystem).
+
 ## Phase 1
-React component library
+React component library — **shipped (1.0.0)**
 
 ## Phase 2
-Exports and packaging parity (web + LMS targets)
+Exports and packaging parity (web + LMS targets) — **shipped (1.0.0)**
 
 ## Phase 3
-CLI tooling and automation-friendly workflows
+CLI tooling and automation-friendly workflows — **shipped (1.0.0)**
 
 ## Phase 4
 AI-friendly authoring (generator-friendly APIs, machine-readable catalog, deterministic exports)

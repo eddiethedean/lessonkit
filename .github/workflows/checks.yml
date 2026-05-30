@@ -32,6 +32,11 @@ jobs:
           npm run copy-template -w @lessonkit/cli
           git diff --exit-code packages/cli/template/vite-react
 
+      - name: Verify monorepo template matches CLI template source
+        run: |
+          diff -rq templates/vite-react/src packages/cli/template/vite-react/src
+          diff templates/vite-react/lessonkit.json packages/cli/template/vite-react/lessonkit.json
+
       - name: Build
         run: npm run build
 

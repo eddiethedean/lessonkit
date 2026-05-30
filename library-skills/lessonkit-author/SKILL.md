@@ -84,5 +84,5 @@ Use bounded prompts; see `references/vibe-prompts.md` or the human [vibe coding 
 
 - Invent CLI subcommands beyond `init`, `dev`, `build`, `package`
 - Use removed APIs: `buildTrackEvent`, `defineLessonkitPlugin`, `setLxpackBridgeMode`
-- Put quizzes outside `<Lesson>` without expecting dev warnings and missing `lessonId` on events
+- Put `<Quiz>` / `<KnowledgeCheck>` outside `<Lesson>` — throws in development; production shows an alert and skips quiz telemetry
 - Change `courseId` in React without resetting quiz state (component handles this; avoid duplicate checkIds across lessons without remounting)

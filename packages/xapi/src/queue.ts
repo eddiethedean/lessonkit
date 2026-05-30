@@ -19,6 +19,7 @@ export function createInMemoryXAPIQueue(): XAPIQueue {
 
   return {
     enqueue: (statement) => {
+      if (statement.id && buffer.some((s) => s.id === statement.id)) return;
       buffer.push(statement);
     },
     size: () => buffer.length,
