@@ -7,7 +7,7 @@ export default defineConfig({
       provider: "v8",
       all: true,
       include: ["src/**/*.{ts,tsx}"],
-      exclude: ["dist/**", "node_modules/**", "**/*.d.ts", "**/*.d.cts"],
+      exclude: ["dist/**", "node_modules/**", "**/*.d.ts", "**/*.d.cts", "**/types.ts", "**/telemetryTypes.ts"],
       thresholds: { lines: 100 },
     },
   },

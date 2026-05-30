@@ -15,7 +15,7 @@ vi.mock("node:fs/promises", async (importOriginal) => {
   };
 });
 
-import { promoteStagingToOutDir } from "../src/packageCourse";
+import { promoteStagingToOutDir } from "../src/packaging/promote";
 
 const tempDirs: string[] = [];
 
@@ -56,5 +56,38 @@ describe("promoteStagingToOutDir", () => {
     );
 
     expect(await readFile(join(outDir, "preserve-me.txt"), "utf-8")).toBe("original");
+  });
+
+  it("warns when restore fails after promote error", async () => {
+    const actualFsp = await vi.importActual<typeof import("node:fs/promises")>("node:fs/promises");
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+    const root = await makeTempDir();
+    const outDir = join(root, "course");
+    const stagingDir = join(root, "staging");
+    await mkdir(outDir, { recursive: true });
+    await writeFile(join(outDir, "preserve-me.txt"), "original", "utf-8");
+    await mkdir(stagingDir, { recursive: true });
+
+    fspMocks.rename.mockImplementation(async (src, dest) => {
+      const srcStr = String(src);
+      const destStr = String(dest);
+      if (srcStr.endsWith(".tmp-promote") && destStr === outDir) {
+        throw new Error("simulated promote failure");
+      }
+      if (destStr === outDir && srcStr.endsWith(".bak")) {
+        throw new Error("restore failed");
+      }
+      return actualFsp.rename(src, dest);
+    });
+
+    await expect(promoteStagingToOutDir(stagingDir, outDir)).rejects.toThrow(
+      "simulated promote failure",
+    );
+    expect(warn).toHaveBeenCalledWith(
+      expect.stringMatching(/failed to restore/),
+      expect.any(String),
+    );
+    warn.mockRestore();
   });
 });

@@ -23,4 +23,39 @@ describe("createLessonkitRuntime", () => {
     runtime.resetForCourseChange("c2");
     expect(runtime.getProgressState().activeLessonId).toBeUndefined();
   });
+
+  it("completeLesson emits via callback", () => {
+    const events: string[] = [];
+    const runtime = createLessonkitRuntime({ courseId: "c" });
+    runtime.setActiveLesson("lesson-1", (name) => events.push(name));
+    runtime.completeLesson("lesson-1", (name) => events.push(name));
+    expect(events.filter((e) => e === "lesson_completed").length).toBeGreaterThan(0);
+  });
+
+  it("track emits built events", () => {
+    const runtime = createLessonkitRuntime({ courseId: "c" });
+    const names: string[] = [];
+    runtime.track("course_started", undefined, (event) => {
+      if (event) names.push(event.name);
+    });
+    expect(names).toEqual(["course_started"]);
+  });
+
+  it("track skips invalid events", () => {
+    const runtime = createLessonkitRuntime({ courseId: "c" });
+    const emitted: unknown[] = [];
+    runtime.track("quiz_answered", { checkId: "q", question: "Q", choice: "A", correct: false }, (e) =>
+      emitted.push(e),
+    );
+    expect(emitted).toHaveLength(0);
+  });
+
+  it("setActiveLesson completes previous lesson when switching", () => {
+    const events: string[] = [];
+    const runtime = createLessonkitRuntime({ courseId: "c" });
+    runtime.setActiveLesson("lesson-1", (name) => events.push(name));
+    runtime.setActiveLesson("lesson-2", (name) => events.push(name));
+    expect(events).toContain("lesson_started");
+    expect(events.filter((e) => e === "lesson_completed").length).toBe(1);
+  });
 });

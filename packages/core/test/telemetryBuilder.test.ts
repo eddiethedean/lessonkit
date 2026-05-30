@@ -41,12 +41,47 @@ describe("buildTelemetryEvent", () => {
     expect(event.name).toBe("interaction");
   });
 
+  it("builds course lifecycle events", () => {
+    expect(buildTelemetryEvent({ name: "course_started", courseId: "c" }).name).toBe("course_started");
+    expect(buildTelemetryEvent({ name: "course_completed", courseId: "c" }).name).toBe("course_completed");
+    expect(
+      buildTelemetryEvent({
+        name: "lesson_started",
+        courseId: "c",
+        lessonId: "l1",
+      }).lessonId,
+    ).toBe("l1");
+    expect(
+      buildTelemetryEvent({
+        name: "quiz_completed",
+        courseId: "c",
+        lessonId: "l1",
+        data: { checkId: "q1", score: 1 },
+      }).name,
+    ).toBe("quiz_completed");
+  });
+
+  it("lesson_started throws without lessonId", () => {
+    expect(() => buildTelemetryEvent({ name: "lesson_started", courseId: "c" })).toThrow(/lessonId/);
+  });
+
   it("default branch passes through unknown event names", () => {
     const event = buildTelemetryEvent({
       name: "future_event" as TelemetryEventName,
       courseId: "c",
     });
     expect(event.name).toBe("future_event");
+  });
+
+  it("builds quiz_answered with lessonId", () => {
+    const event = buildTelemetryEvent({
+      name: "quiz_answered",
+      courseId: "c",
+      lessonId: "l1",
+      data: { checkId: "q1", question: "Q", choice: "A", correct: true },
+    });
+    expect(event.name).toBe("quiz_answered");
+    expect(event.lessonId).toBe("l1");
   });
 
   it("quiz events require active lessonId", () => {

@@ -70,6 +70,34 @@ describe("parseLessonkitManifest", () => {
     }
   });
 
+  it("rejects course.spaDistDir mismatch", () => {
+    const result = parseLessonkitManifest({
+      schemaVersion: 1,
+      name: "demo",
+      course: {
+        courseId: "demo",
+        title: "Demo",
+        layout: "single-spa",
+        spaDistDir: "build/spa",
+        lessons: [{ id: "lesson-1", title: "Lesson" }],
+      },
+      paths: { spaDistDir: "dist" },
+    });
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.issues.some((i) => i.path === "course.spaDistDir")).toBe(true);
+    }
+  });
+
+  it("loadLessonkitManifestFromFile handles read errors", async () => {
+    const { loadLessonkitManifestFromFile } = await import("../src/manifest");
+    const result = await loadLessonkitManifestFromFile(async () => {
+      throw new Error("read failed");
+    });
+    expect(result.ok).toBe(false);
+  });
+
   it("loads from file via loadLessonkitManifestFromFile", async () => {
     const dir = await mkdtemp(join(tmpdir(), "lk-manifest-file-"));
     try {

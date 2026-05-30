@@ -7,6 +7,7 @@ import { createProgressController } from "../src/runtime/progress";
 import { buildTelemetryEvent } from "@lessonkit/core";
 import { createTrackingClientFromConfig, disposeTrackingClient } from "../src/runtime/telemetry";
 import { createXapiClientFromConfig } from "../src/runtime/xapi";
+import { emitThroughPipeline, createPipelineFromLegacyConfig } from "../src/runtime/telemetryPipeline";
 
 describe("@lessonkit/react runtime modules", () => {
   it("ports: createDefaultClock returns stable shapes", () => {
@@ -192,6 +193,29 @@ describe("@lessonkit/react runtime modules", () => {
     const queue = createInMemoryXAPIQueue();
     const client = createXapiClientFromConfig({ xapi: { transport: async () => {} } }, queue);
     expect(client).toBeNull();
+  });
+
+  it("telemetryPipeline: emitThroughPipeline invokes extra sinks", () => {
+    const tracked: string[] = [];
+    const tracking = { track: (e: TelemetryEvent) => tracked.push(e.name) } as TrackingClient;
+    emitThroughPipeline(
+      {
+        name: "course_started",
+        timestamp: "t",
+        courseId: "c",
+        sessionId: "s",
+      },
+      { tracking, xapi: null, lxpackBridge: "off" },
+      [{ id: "custom", emit: () => tracked.push("custom") }],
+    );
+    expect(tracked).toContain("course_started");
+    expect(tracked).toContain("custom");
+  });
+
+  it("telemetryPipeline: createPipelineFromLegacyConfig builds pipeline", () => {
+    const tracking = { track: vi.fn() } as TrackingClient;
+    const pipeline = createPipelineFromLegacyConfig({ tracking, xapi: null, lxpackBridge: "off" });
+    expect(pipeline.sinks.length).toBeGreaterThan(0);
   });
 });
 

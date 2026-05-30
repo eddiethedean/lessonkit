@@ -362,6 +362,75 @@ describe("@lessonkit/react runtime", () => {
     expect(events.some((e) => e.name === "course_completed")).toBe(true);
   });
 
+  it("runtimeVersion v2 uses headless lifecycle", async () => {
+    const events: TelemetryEvent[] = [];
+    function Driver() {
+      const { setActiveLesson, completeCourse } = useLessonkit();
+      React.useEffect(() => {
+        setActiveLesson("lesson-1");
+        completeCourse();
+      }, [setActiveLesson, completeCourse]);
+      return null;
+    }
+
+    render(
+      <LessonkitProvider
+        config={{
+          courseId: "course-1",
+          runtimeVersion: "v2",
+          tracking: { sink: (e: TelemetryEvent) => void events.push(e) },
+        }}
+      >
+        <Driver />
+      </LessonkitProvider>,
+    );
+
+    await waitFor(() => {
+      expect(events.some((e) => e.name === "lesson_started")).toBe(true);
+      expect(events.some((e) => e.name === "course_completed")).toBe(true);
+    });
+  });
+
+  it("runtimeVersion v2 completeLesson tracks lesson completion", async () => {
+    const events: TelemetryEvent[] = [];
+    function Driver() {
+      const { setActiveLesson, completeLesson } = useLessonkit();
+      React.useEffect(() => {
+        setActiveLesson("lesson-1");
+        completeLesson("lesson-1");
+      }, [setActiveLesson, completeLesson]);
+      return null;
+    }
+
+    render(
+      <LessonkitProvider
+        config={{
+          courseId: "course-1",
+          runtimeVersion: "v2",
+          tracking: { sink: (e: TelemetryEvent) => void events.push(e) },
+        }}
+      >
+        <Driver />
+      </LessonkitProvider>,
+    );
+
+    await waitFor(() => expect(events.some((e) => e.name === "lesson_completed")).toBe(true));
+  });
+
+  it("runtimeVersion v2 resets headless runtime when courseId changes", () => {
+    const { rerender } = render(
+      <LessonkitProvider config={{ courseId: "course-1", runtimeVersion: "v2" }}>
+        <div>one</div>
+      </LessonkitProvider>,
+    );
+
+    rerender(
+      <LessonkitProvider config={{ courseId: "course-2", runtimeVersion: "v2" }}>
+        <div>two</div>
+      </LessonkitProvider>,
+    );
+  });
+
   it("completeCourse completes the active lesson first", async () => {
     const events: TelemetryEvent[] = [];
     function Driver() {

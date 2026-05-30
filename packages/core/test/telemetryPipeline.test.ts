@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import type { TelemetryEvent } from "@lessonkit/core";
-import { createTelemetryPipeline, createTrackingPipelineSink } from "@lessonkit/core";
+import { createTelemetryPipeline, createTrackingPipelineSink } from "../src/telemetryPipeline";
 
 describe("createTelemetryPipeline", () => {
   it("invokes all sinks in registration order", () => {
@@ -40,5 +40,17 @@ describe("createTelemetryPipeline", () => {
     });
 
     expect(ctxs).toEqual(["course-1"]);
+  });
+
+  it("createTrackingPipelineSink forwards events to track fn", () => {
+    const tracked: string[] = [];
+    const sink = createTrackingPipelineSink("t", (event) => tracked.push(event.name));
+    sink.emit({
+      name: "course_completed",
+      timestamp: "t",
+      courseId: "c",
+      sessionId: "s",
+    });
+    expect(tracked).toEqual(["course_completed"]);
   });
 });
