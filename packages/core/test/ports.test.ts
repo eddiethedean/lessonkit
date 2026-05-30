@@ -20,11 +20,25 @@ describe("ports", () => {
   });
 
   it("createSessionStoragePort reads and writes when available", () => {
-    const storage = createSessionStoragePort();
-    storage.setItem("k", "v");
-    expect(storage.getItem("k")).toBe("v");
-    storage.removeItem?.("k");
-    expect(storage.getItem("k")).toBeNull();
+    const store: Record<string, string> = {};
+    vi.stubGlobal("sessionStorage", {
+      getItem: (k: string) => store[k] ?? null,
+      setItem: (k: string, v: string) => {
+        store[k] = v;
+      },
+      removeItem: (k: string) => {
+        delete store[k];
+      },
+    });
+    try {
+      const storage = createSessionStoragePort();
+      storage.setItem("k", "v");
+      expect(storage.getItem("k")).toBe("v");
+      storage.removeItem?.("k");
+      expect(storage.getItem("k")).toBeNull();
+    } finally {
+      vi.unstubAllGlobals();
+    }
   });
 
   it("createSessionStoragePort ignores storage errors", () => {
