@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { Course, KnowledgeCheck, Lesson, LessonkitProvider, ProgressTracker, Quiz, Reflection, Scenario, resetQuizWarningsForTests, useCompletion, useLessonkit, useProgress, useQuizState, useTracking } from "../src";
 import { resetLessonMountRegistryForTests } from "../src/runtime/lessonMountRegistry";
+import { resetLessonkitProviderStorageForTests } from "../src/provider/useLessonkitProviderRuntime";
 import {
   defineAssessmentPlugin,
   defineLifecyclePlugin,
@@ -19,6 +20,7 @@ describe("@lessonkit/react runtime", () => {
     sessionStorage.clear();
     resetQuizWarningsForTests();
     resetLessonMountRegistryForTests();
+    resetLessonkitProviderStorageForTests();
   });
 
   it("throws in dev when courseId is invalid", async () => {
@@ -96,6 +98,62 @@ describe("@lessonkit/react runtime", () => {
     expect(quizAnswered.courseId).toBe("course-1");
     expect(quizAnswered.lessonId).toBe("lesson-1");
     expect(typeof quizAnswered.sessionId).toBe("string");
+  });
+
+  it("keeps active lesson when duplicate lessonId unmounts", async () => {
+    const events: TelemetryEvent[] = [];
+
+    function ActiveLessonProbe() {
+      const { progress } = useLessonkit();
+      return (
+        <div data-testid="active-lesson">{progress.activeLessonId ?? "none"}</div>
+      );
+    }
+
+    function TwinLessons(props: { showFirst: boolean }) {
+      return (
+        <Course
+          title="Course"
+          courseId="course-1"
+          config={{
+            tracking: {
+              sink: (e: TelemetryEvent) => {
+                events.push(e);
+              },
+            },
+            xapi: { enabled: false },
+          }}
+        >
+          <ActiveLessonProbe />
+          {props.showFirst ? (
+            <Lesson title="First" lessonId="lesson-1">
+              <div>first</div>
+            </Lesson>
+          ) : null}
+          <Lesson title="Second" lessonId="lesson-1">
+            <div>second</div>
+          </Lesson>
+        </Course>
+      );
+    }
+
+    const { rerender, getByTestId } = render(<TwinLessons showFirst={true} />);
+
+    await waitFor(() => {
+      expect(getByTestId("active-lesson").textContent).toBe("lesson-1");
+    });
+
+    const completedBefore = events.filter((e) => e.name === "lesson_completed" && e.lessonId === "lesson-1").length;
+
+    rerender(<TwinLessons showFirst={false} />);
+
+    await waitFor(() => {
+      expect(getByTestId("active-lesson").textContent).toBe("lesson-1");
+    });
+
+    expect(events.filter((e) => e.name === "lesson_completed" && e.lessonId === "lesson-1").length).toBe(
+      completedBefore,
+    );
   });
 
   it("Quiz telemetry uses enclosing Lesson when multiple lessons are mounted", async () => {

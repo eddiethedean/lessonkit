@@ -70,6 +70,24 @@ describe("parseLessonkitManifest", () => {
     }
   });
 
+  it("prefixes descriptor validation paths with course.", () => {
+    const result = parseLessonkitManifest({
+      schemaVersion: 1,
+      name: "demo",
+      course: {
+        courseId: "",
+        title: "Demo",
+        layout: "single-spa",
+        lessons: [{ id: "lesson-1", title: "Lesson" }],
+      },
+    });
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.issues.some((i) => i.path === "course.courseId")).toBe(true);
+    }
+  });
+
   it("rejects course.spaDistDir mismatch", () => {
     const result = parseLessonkitManifest({
       schemaVersion: 1,

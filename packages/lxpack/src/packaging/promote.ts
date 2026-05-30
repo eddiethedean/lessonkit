@@ -9,6 +9,17 @@ async function pathExists(path: string): Promise<boolean> {
   }
 }
 
+async function renameOrCopy(from: string, to: string): Promise<void> {
+  try {
+    await fsp.rename(from, to);
+  } catch (err) {
+    const code = err && typeof err === "object" && "code" in err ? String((err as NodeJS.ErrnoException).code) : "";
+    if (code !== "EXDEV") throw err;
+    await fsp.cp(from, to, { recursive: true });
+    await fsp.rm(from, { recursive: true, force: true });
+  }
+}
+
 /**
  * Atomically replace `outDir` with the packaged tree at `stagingDir`.
  * Restores the previous `outDir` when promote fails after a backup rename.
@@ -17,19 +28,19 @@ export async function promoteStagingToOutDir(stagingDir: string, outDir: string)
   const tmpPromote = `${outDir}.tmp-promote`;
   const backup = `${outDir}.bak`;
 
-  await fsp.rename(stagingDir, tmpPromote);
+  await renameOrCopy(stagingDir, tmpPromote);
 
   const hadOutDir = await pathExists(outDir);
   if (hadOutDir) {
-    await fsp.rename(outDir, backup);
+    await renameOrCopy(outDir, backup);
   }
 
   try {
-    await fsp.rename(tmpPromote, outDir);
+    await renameOrCopy(tmpPromote, outDir);
   } catch (promoteError) {
     if (hadOutDir) {
       try {
-        await fsp.rename(backup, outDir);
+        await renameOrCopy(backup, outDir);
       } catch (restoreError) {
         console.warn(
           `[lessonkit/lxpack] failed to restore ${outDir} after promote error:`,
@@ -38,7 +49,7 @@ export async function promoteStagingToOutDir(stagingDir: string, outDir: string)
       }
     } else {
       try {
-        await fsp.rename(tmpPromote, stagingDir);
+        await renameOrCopy(tmpPromote, stagingDir);
       } catch (restoreError) {
         console.warn(
           `[lessonkit/lxpack] failed to restore ${stagingDir} after promote error:`,

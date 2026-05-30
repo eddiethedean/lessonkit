@@ -226,6 +226,8 @@ Full site (Sphinx + Read the Docs): **[lessonkit.readthedocs.io](https://lessonk
 | LXPack bridge (embedded LMS) | [LXPack bridge](https://lessonkit.readthedocs.io/en/latest/reference/lxpack-bridge.html) |
 | IDs & URNs | [Identity reference](https://lessonkit.readthedocs.io/en/latest/reference/identity.html) |
 | Telemetry events | [Telemetry reference](https://lessonkit.readthedocs.io/en/latest/reference/telemetry.html) |
+| xAPI | [xAPI reference](https://lessonkit.readthedocs.io/en/latest/reference/xapi.html) |
+| Block catalog | [Block catalog reference](https://lessonkit.readthedocs.io/en/latest/reference/block-catalog.html) |
 | Theming | [Theming reference](https://lessonkit.readthedocs.io/en/latest/reference/theming.html) |
 | Accessibility | [Accessibility reference](https://lessonkit.readthedocs.io/en/latest/reference/accessibility.html) |
 | LXPack interoperability | [LXPack upgrades](https://lessonkit.readthedocs.io/en/latest/reference/lxpack-upgrades.html) |
@@ -247,14 +249,18 @@ Source markdown for reference pages lives under [`docs/`](https://github.com/edd
 | Script | Purpose |
 | --- | --- |
 | `npm run build` | Build all packages and example apps |
+| `npm run lint` | ESLint across the monorepo |
 | `npm test` | Run workspace tests |
-| `npm run typecheck` | Typecheck packages and apps |
+| `npm run typecheck` | Rebuild packages, then typecheck workspaces |
 | `npm run coverage` | Coverage across workspaces |
-| `npm run audit:ci` | Dependency audit (CI-aligned) |
+| `npm run storybook` | Component gallery (`@lessonkit/react`) |
+| `npm run build-storybook` | Static Storybook build (also run in CI) |
+| `npm run audit:ci` | Local dependency audit helper (CI runs `npm audit` directly) |
 | `npm run test:integration` | Vitest CLI pipeline integration (Node 20+) |
 | `npm run test:e2e` | Playwright export-parity tests (Node 20+; run `npm exec -w @lessonkit/e2e -- playwright install --with-deps chromium` once after `npm ci`) |
+| `npm run conformance:lxpack` / `conformance:golden` | LXPack conformance scripts (Node 20+) |
 
-Prettier is configured at the repo root. CI runs on Node 18 and 20 (see [.github/workflows/ci.yml](https://github.com/eddiethedean/lessonkit/blob/main/.github/workflows/ci.yml)).
+Prettier is configured at the repo root. CI runs on Node 18 and 20 (see [.github/workflows/ci.yml](https://github.com/eddiethedean/lessonkit/blob/main/.github/workflows/ci.yml)). LMS packaging, integration, and e2e jobs require Node 20+.
 
 ---
 

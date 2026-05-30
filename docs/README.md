@@ -41,5 +41,5 @@ Edit the source markdown files; Sphinx pulls them in via `reference/*` wrappers.
 
 ## Other folders
 
-- [storybook/](https://github.com/eddiethedean/lessonkit/tree/main/docs/storybook) — planned component gallery
+- [storybook/](https://github.com/eddiethedean/lessonkit/tree/main/docs/storybook) — component gallery (`npm run storybook` from repo root)
 - [site/](https://github.com/eddiethedean/lessonkit/tree/main/docs/site) — legacy Docusaurus placeholder (superseded by Read the Docs)

@@ -1,4 +1,4 @@
-# Theming (0.4.x)
+# Theming (1.0+)
 
 LessonKit uses a **token-based theme contract** shared across React apps, templates, and (in a future release) LXPack-packaged artifacts.
 

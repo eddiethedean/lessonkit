@@ -52,6 +52,27 @@ describe("resolveSpaDirs", () => {
     ).rejects.toThrow(/spaDistDir not found/);
   });
 
+  it("throws when spaDistDir exists but index.html is missing", async () => {
+    const root = await mkdtemp(join(tmpdir(), "lk-spa-"));
+    tempDirs.push(root);
+    const dist = join(root, "dist");
+    await mkdir(dist, { recursive: true });
+
+    await expect(
+      resolveSpaDirs({
+        descriptor: {
+          courseId: "c",
+          title: "T",
+          layout: "single-spa",
+          lessons: [{ id: "main", title: "Main" }],
+          assessments: [],
+        },
+        spaDistDir: "dist",
+        projectRoot: root,
+      }),
+    ).rejects.toThrow(/index\.html/);
+  });
+
   it("requires lessonSpaDirs for multi-lesson layout", async () => {
     await expect(
       resolveSpaDirs({

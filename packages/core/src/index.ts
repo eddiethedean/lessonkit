@@ -54,6 +54,7 @@ export {
   createGlobalTimer,
   createNoopStorage,
   createSessionStoragePort,
+  resetStoragePortForTests,
 } from "./ports";
 
 export type { ProgressState, ProgressController } from "./progress";

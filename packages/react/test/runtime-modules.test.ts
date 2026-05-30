@@ -42,10 +42,9 @@ describe("@lessonkit/react runtime modules", () => {
     }
   });
 
-  it("ports: createSessionStoragePort falls back when unavailable", () => {
+  it("ports: createSessionStoragePort uses in-memory store when sessionStorage is missing", () => {
     const original = Object.getOwnPropertyDescriptor(globalThis, "sessionStorage");
     try {
-      // jsdom defines sessionStorage; force it to appear missing for this test
       Object.defineProperty(globalThis, "sessionStorage", {
         value: undefined,
         configurable: true,
@@ -53,7 +52,7 @@ describe("@lessonkit/react runtime modules", () => {
 
       const storage = createSessionStoragePort();
       storage.setItem("k", "v");
-      expect(storage.getItem("k")).toBeNull();
+      expect(storage.getItem("k")).toBe("v");
     } finally {
       if (original) Object.defineProperty(globalThis, "sessionStorage", original);
     }

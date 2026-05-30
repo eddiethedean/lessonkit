@@ -22,7 +22,7 @@ import { createInMemoryXAPIQueue } from "@lessonkit/xapi";
 import { telemetryEventToXAPIStatement } from "@lessonkit/xapi";
 import { buildTelemetryEvent, tryBuildTelemetryEvent } from "../runtime/emitTelemetry";
 import type { LxpackBridgeMode } from "../runtime/lxpackBridge";
-import { createSessionStoragePort } from "../runtime/ports";
+import { createSessionStoragePort, resetStoragePortForTests } from "../runtime/ports";
 import { createProgressController, type ProgressState } from "../runtime/progress";
 import { createXapiClientFromConfig } from "../runtime/xapi";
 import {
@@ -47,6 +47,11 @@ export type { LessonkitConfig, LessonkitRuntime };
 const useIsoLayoutEffect = typeof window !== "undefined" ? useLayoutEffect : useEffect;
 
 const defaultStorage = createSessionStoragePort();
+
+/** @internal Reset provider session dedupe between tests. */
+export function resetLessonkitProviderStorageForTests(): void {
+  resetStoragePortForTests(defaultStorage);
+}
 
 function isTrackingActive(tracking?: LessonkitConfig["tracking"]): boolean {
   return tracking?.enabled !== false;
@@ -136,8 +141,6 @@ function emitCourseStartedToTrackingOnly(opts: {
 
 function assertTrackingSinkConfig(tracking?: LessonkitConfig["tracking"]): void {
   if (!tracking?.sink || !tracking?.batchSink) return;
-  const g = globalThis as typeof globalThis & { process?: { NODE_ENV?: string } };
-  if (typeof g.process !== "undefined" && g.process.env?.NODE_ENV === "production") return;
   throw new Error(
     "[lessonkit] tracking.sink and tracking.batchSink cannot both be set; use batchSink alone for batched delivery",
   );

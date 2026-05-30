@@ -193,7 +193,7 @@ export function validateDescriptor(
       issues.push({ path: `${path}.answer`, message: "answer must match a choice" });
     }
     const passingScore = assessment.passingScore;
-    if (passingScore !== undefined && !(passingScore > 0)) {
+    if (passingScore !== undefined && !(Number.isFinite(passingScore) && passingScore > 0)) {
       issues.push({
         path: `${path}.passingScore`,
         message: "passingScore must be greater than 0 (absolute point threshold)",

@@ -88,7 +88,7 @@ import { forwardTelemetryToBridge, dispatchBridgeAction } from "@lessonkit/lxpac
 >
 ```
 
-For manual forwarding outside the provider pipeline, pass mode to `forwardTelemetryToBridge(event, mode)` from `@lessonkit/lxpack/bridge`. See [LXPack bridge reference](LXPACK_BRIDGE.md).
+For manual forwarding outside the provider pipeline, pass mode to `forwardTelemetryToBridge(event, mode)` from `@lessonkit/lxpack/bridge`. See [LXPack bridge reference](reference/lxpack-bridge.md).
 
 ## `@lessonkit/lxpack`
 

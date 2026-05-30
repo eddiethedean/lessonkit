@@ -2,6 +2,8 @@ export type StoragePort = {
   getItem: (key: string) => string | null;
   setItem: (key: string, value: string) => void;
   removeItem?: (key: string) => void;
+  /** @internal Test helper to clear in-memory fallback state. */
+  resetForTests?: () => void;
 };
 
 export type ClockPort = {
@@ -28,31 +30,76 @@ export function createNoopStorage(): StoragePort {
   };
 }
 
-export function createSessionStoragePort(): StoragePort {
-  if (typeof sessionStorage === "undefined") return createNoopStorage();
+function createMemoryBackedSessionStorage(
+  session: Pick<Storage, "getItem" | "setItem" | "removeItem">,
+): StoragePort {
+  const memory = new Map<string, string>();
+  let warnedPersistFailure = false;
+
+  const warnPersistFailure = () => {
+    if (warnedPersistFailure) return;
+    warnedPersistFailure = true;
+    if (typeof process !== "undefined" && process.env?.NODE_ENV === "development") {
+      console.warn(
+        "[lessonkit] sessionStorage is unavailable or failed; using in-memory session dedupe for this tab (may reset on full reload).",
+      );
+    }
+  };
+
   return {
     getItem: (key) => {
+      if (memory.has(key)) return memory.get(key)!;
       try {
-        return sessionStorage.getItem(key);
+        const value = session.getItem(key);
+        if (value !== null) memory.set(key, value);
+        return value;
       } catch {
-        return null;
+        return memory.get(key) ?? null;
       }
     },
     setItem: (key, value) => {
+      memory.set(key, value);
       try {
-        sessionStorage.setItem(key, value);
+        session.setItem(key, value);
       } catch {
-        // ignore
+        warnPersistFailure();
       }
     },
     removeItem: (key) => {
+      memory.delete(key);
       try {
-        sessionStorage.removeItem(key);
+        session.removeItem(key);
       } catch {
-        // ignore
+        warnPersistFailure();
       }
     },
+    resetForTests: () => {
+      memory.clear();
+    },
   };
+}
+
+export function resetStoragePortForTests(storage: StoragePort): void {
+  storage.resetForTests?.();
+}
+
+export function createSessionStoragePort(): StoragePort {
+  if (typeof sessionStorage === "undefined") {
+    const memory = new Map<string, string>();
+    return {
+      getItem: (key) => memory.get(key) ?? null,
+      setItem: (key, value) => {
+        memory.set(key, value);
+      },
+      removeItem: (key) => {
+        memory.delete(key);
+      },
+      resetForTests: () => {
+        memory.clear();
+      },
+    };
+  }
+  return createMemoryBackedSessionStorage(sessionStorage);
 }
 
 export function createGlobalTimer(): TimerPort {

@@ -5,7 +5,7 @@ import type { AssessmentScoreResult, BlockId, CheckId, CourseId, LessonId } from
 import { LessonkitProvider } from "./context";
 import { useCompletion, useLessonkit, useQuizState } from "./hooks";
 import { LessonContext, useEnclosingLessonId } from "./lessonContext";
-import { registerLessonMount } from "./runtime/lessonMountRegistry";
+import { getLessonMountCount, registerLessonMount } from "./runtime/lessonMountRegistry";
 import { buildPluginContext } from "./runtime/plugins";
 import { isDevEnvironment, normalizeComponentId } from "./runtime/validateComponentId";
 
@@ -59,6 +59,10 @@ export function Lesson(props: {
     setActiveLesson(lessonId);
     return () => {
       unregister();
+      if (getLessonMountCount(lessonId) > 0) {
+        setActiveLesson(lessonId);
+        return;
+      }
       if (!autoComplete) return;
       queueMicrotask(() => {
         if (lessonMountGenerationRef.current !== generation) return;
@@ -281,17 +285,19 @@ export function ProgressTracker(props: { totalLessons?: number }) {
   const completed = progress.completedLessonIds.size;
 
   if (props.totalLessons != null) {
+    const total = props.totalLessons;
+    const displayed = Math.min(completed, total);
     return (
       <aside aria-label="Progress">
         <div
           role="progressbar"
           aria-valuemin={0}
-          aria-valuemax={props.totalLessons}
-          aria-valuenow={completed}
+          aria-valuemax={total}
+          aria-valuenow={displayed}
           aria-label="Lessons completed"
         >
           <p>
-            Lessons completed: {completed} of {props.totalLessons}
+            Lessons completed: {displayed} of {total}
           </p>
         </div>
       </aside>

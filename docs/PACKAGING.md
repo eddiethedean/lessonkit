@@ -1,4 +1,4 @@
-# Packaging with LXPack (0.6+)
+# Packaging with LXPack (1.0+)
 
 LessonKit authors courses in React (`@lessonkit/react`). **LXPack** validates and packages them for LMS delivery. **`@lessonkit/lxpack`** is the adapter between the two.
 
@@ -133,7 +133,7 @@ Import `examples/lxpack-golden/.lxpack/course/.lxpack/out/course-scorm12.zip` in
 
 LessonKit ids are used as-is in LXPack (`courseId`, `lessonId`, `checkId`). See [`IDENTITY.md`](IDENTITY.md).
 
-## CLI (0.7+)
+## CLI (1.0+)
 
 Use `lessonkit package` as the canonical dual-export entrypoint:
 

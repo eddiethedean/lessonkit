@@ -3,11 +3,13 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, render, waitFor } from "@testing-library/react";
 import type { TelemetryEvent } from "@lessonkit/core";
 import { Lesson, LessonkitProvider, useLessonkit } from "../src";
+import { resetLessonkitProviderStorageForTests } from "../src/provider/useLessonkitProviderRuntime";
 
 describe("@lessonkit/react provider dispose regression", () => {
   afterEach(() => {
     cleanup();
     sessionStorage.clear();
+    resetLessonkitProviderStorageForTests();
     vi.unmock("@lessonkit/core");
     vi.resetModules();
   });

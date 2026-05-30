@@ -119,6 +119,24 @@ export async function packageLessonkitCourse(
   }
 
   const descriptor = descriptorValidation.descriptor;
+
+  if (target === "xapi" || target === "cmi5") {
+    const activityIri = descriptor.tracking?.xapi?.activityIri?.trim();
+    if (!activityIri) {
+      return {
+        ok: false,
+        courseDir: outDir,
+        target,
+        issues: [
+          {
+            path: "course.tracking.xapi.activityIri",
+            message: "tracking.xapi.activityIri is required for xapi and cmi5 export targets",
+          },
+        ],
+      };
+    }
+  }
+
   const staged = await buildStagingPackage({
     ...writeOpts,
     descriptor,

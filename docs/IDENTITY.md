@@ -1,6 +1,6 @@
 # Identity model (v1)
 
-LessonKit **0.5.0** requires explicit, stable identifiers for courses, lessons, and knowledge checks.
+LessonKit **1.0.0** requires explicit, stable identifiers for courses, lessons, and knowledge checks.
 Generators and authors must supply IDs in source — the runtime does not invent lesson or check IDs.
 
 ## Required props
@@ -57,6 +57,16 @@ Machine-readable rules: `@lessonkit/core/identity-contract.v1.json`.
 | `checkId` | Assessment `id` in `assessments/*.yaml` and injected build data |
 
 Ids are **not rewritten** — use the same slugs in React props and in your `LessonkitCourseDescriptor`.
+
+## Single-spa manifest vs in-app steps
+
+When `course.layout` is `single-spa`, `lessonkit.json` typically lists **one** LMS shell lesson (the SPA entry). The React app may define additional in-SPA step ids (`lessonId` on `<Lesson>`) for navigation and telemetry that are **not** duplicated in `course.lessons[]`. Always keep `courseId` and assessment `checkId`s aligned with the manifest; keep shell lesson ids aligned when they represent the packaged SPA lesson.
+
+See [`examples/lxpack-golden/README.md`](../examples/lxpack-golden/README.md) for a full walkthrough.
+
+## History (0.4.x → 0.5.x)
+
+For older migration steps from pre-0.5 runtimes, see [Migration from 0.4.x](#migration-from-04x) below and [MIGRATION-0.x-to-1.0.md](MIGRATION-0.x-to-1.0.md).
 
 See [`PACKAGING.md`](PACKAGING.md).
 

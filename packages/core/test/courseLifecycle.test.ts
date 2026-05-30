@@ -44,7 +44,13 @@ describe("courseLifecycle", () => {
   });
 
   it("tryEmitCourseStarted skips when already marked", () => {
-    const storage = createNoopStorage();
+    const store: Record<string, string> = {};
+    const storage = {
+      getItem: (k: string) => store[k] ?? null,
+      setItem: (k: string, v: string) => {
+        store[k] = v;
+      },
+    };
     const ctx = {
       courseId: "c" as const,
       sessionId: "s",
@@ -57,6 +63,29 @@ describe("courseLifecycle", () => {
     const second = tryEmitCourseStarted(ctx, { emitCourseStartedEvent: emit }, first.emitted);
     expect(second.emitted).toBe(true);
     expect(emit).toHaveBeenCalledTimes(1);
+  });
+
+  it("tryEmitCourseStarted reports not emitted when storage is marked but sink has not received event", () => {
+    const store: Record<string, string> = {};
+    const storage = {
+      getItem: (k: string) => store[k] ?? null,
+      setItem: (k: string, v: string) => {
+        store[k] = v;
+      },
+    };
+    storage.setItem("lessonkit:course_started:s:c", "1");
+    const ctx = {
+      courseId: "c" as const,
+      sessionId: "s",
+      storage,
+      pluginHost: null,
+      lxpackBridge: "auto" as const,
+    };
+    const emit = vi.fn(() => true);
+    const result = tryEmitCourseStarted(ctx, { emitCourseStartedEvent: emit }, false);
+    expect(result.emitted).toBe(false);
+    expect(result.marked).toBe(true);
+    expect(emit).not.toHaveBeenCalled();
   });
 
   it("completeLessonWithTelemetry emits when progress completes", () => {

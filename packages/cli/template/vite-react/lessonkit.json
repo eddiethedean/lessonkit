@@ -15,7 +15,12 @@
         "passingScore": 1
       }
     ],
-    "theme": { "preset": "default" }
+    "theme": { "preset": "default" },
+    "tracking": {
+      "xapi": {
+        "activityIri": "https://example.com/courses/my-course"
+      }
+    }
   },
   "paths": {
     "spaDistDir": "dist",

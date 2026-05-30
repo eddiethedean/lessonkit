@@ -14,6 +14,8 @@ export function createTrackingClient(opts?: {
   const batchEnabled = opts?.batch?.enabled ?? Boolean(batchSink);
   const flushIntervalMs = opts?.batch?.flushIntervalMs ?? 5000;
   const maxBatchSize = opts?.batch?.maxBatchSize ?? 25;
+  const maxBufferSize = 1000;
+  let warnedBufferCap = false;
 
   if (!batchEnabled) {
     let disposed = false;
@@ -93,6 +95,15 @@ export function createTrackingClient(opts?: {
   return {
     track: (event) => {
       if (disposed || disposing) return;
+      if (buffer.length >= maxBufferSize) {
+        buffer.shift();
+        if (!warnedBufferCap && typeof process !== "undefined" && process.env?.NODE_ENV === "development") {
+          warnedBufferCap = true;
+          console.warn(
+            `[lessonkit] telemetry batch buffer capped at ${maxBufferSize} events; oldest events are dropped while the sink is unavailable.`,
+          );
+        }
+      }
       buffer.push(event);
       if (buffer.length >= maxBatchSize) void flush();
     },

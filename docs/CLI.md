@@ -1,4 +1,4 @@
-# LessonKit CLI (0.7+)
+# LessonKit CLI (1.0+)
 
 The `@lessonkit/cli` package provides the developer workflow for LessonKit projects: scaffold, dev, build, and dual export packaging.
 

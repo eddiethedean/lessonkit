@@ -98,14 +98,27 @@ export function createProgram(baseLogger: CliLogger = console): Command {
     .action(async (opts: { target: string; cwd?: string; build?: boolean; out?: string; json?: boolean }) => {
       const logger = createLogger({ json: opts.json });
       await handleCommand(
-        () =>
-          runPackage({
+        async () => {
+          const result = await runPackage({
             target: opts.target,
             cwd: opts.cwd,
             noBuild: opts.build === false,
             out: opts.out,
             json: opts.json,
-          }),
+          });
+          if (!opts.json && result.ok) {
+            if (result.target === "react-vite" && "distDir" in result) {
+              logger.log(`Built react-vite → ${result.distDir as string}`);
+            } else if ("outputPath" in result || "outputDir" in result) {
+              const dest = (result.outputPath as string | undefined) ?? (result.outputDir as string | undefined);
+              const count = "fileCount" in result ? (result.fileCount as number) : undefined;
+              logger.log(
+                `Packaged ${result.target}${dest ? ` → ${dest}` : ""}${count != null ? ` (${count} files)` : ""}`,
+              );
+            }
+          }
+          return result;
+        },
         logger,
         Boolean(opts.json),
       );

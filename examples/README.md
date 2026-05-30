@@ -14,7 +14,7 @@ Browse **[live compiled demos](https://lessonkit.readthedocs.io/en/latest/exampl
 | `customer-service/` | Customer Care: De-escalation | Support (light) · channel briefing, live-chat coaching, branching resolution |
 | `lxpack-golden/` | Workplace Safety: Warehouse Briefing | Field (compact) · PPE sign-off, hazard photos, near-miss form |
 
-Each example includes a root [`lessonkit.json`](https://lessonkit.readthedocs.io/en/latest/reference/cli.html) so you can run `lessonkit build` from that directory. Demos with multiple in-app steps use `layout: "single-spa"` with one LMS shell lesson in the manifest; additional step ids live only in React (see [`lxpack-golden/README.md`](lxpack-golden/README.md)). Full LMS packaging smoke tests target `lxpack-golden`; other demos are primarily UI showcases but can use `lessonkit package` after `lessonkit build` (Node 20+).
+Each example includes a root [`lessonkit.json`](https://lessonkit.readthedocs.io/en/latest/reference/cli.html). In the monorepo, build with `npm run build -w lessonkit-example-<name>` or `node ../../packages/cli/dist/bin.js build` from an example directory after `npm run build:packages`. Demos with multiple in-app steps use `layout: "single-spa"` with one LMS shell lesson in the manifest; additional step ids live only in React (see [`lxpack-golden/README.md`](lxpack-golden/README.md)). Full LMS packaging smoke tests target `lxpack-golden`; other demos are primarily UI showcases but can use `lessonkit package` after a production build (Node 20+).
 
 ## Run locally
 

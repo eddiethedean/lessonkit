@@ -134,6 +134,6 @@ No props.
 
 1. Import `@lessonkit/react/block-catalog.v1.json` and reject unknown block types.
 2. Validate required props and IDs per entry (`requiredIds`, `props`).
-3. Keep `courseId`, `lessonId`, `checkId` in sync with `lessonkit.json`.
+3. Keep `courseId` and every `checkId` in sync with `lessonkit.json`. For `single-spa` layouts, manifest `lessons[].id` lists LMS shell lesson(s) only; additional in-app `lessonId`s may exist only in React (see [Identity](IDENTITY.md#single-spa-manifest-vs-in-app-steps)).
 4. Nest blocks per `parentConstraints` (Quiz inside Lesson, etc.).
 5. Do not invent Studio-only blocks (`text`, `heading`, …) until they ship in a future catalog version.

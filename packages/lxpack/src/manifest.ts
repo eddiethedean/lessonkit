@@ -71,7 +71,10 @@ export function parseLessonkitManifest(
   const validation = validateDescriptor(courseRaw as LessonkitCourseDescriptor);
   if (!validation.ok) {
     for (const i of validation.issues) {
-      issues.push({ path: i.path, message: i.message });
+      issues.push({
+        path: i.path.startsWith("course.") ? i.path : `course.${i.path}`,
+        message: i.message,
+      });
     }
   } else if (validation.descriptor.layout === "per-lesson-spa") {
     issues.push({

@@ -39,10 +39,17 @@ export async function patchPackageJsonForMonorepo(pkgPath: string): Promise<void
 }
 
 export async function installProjectDeps(projectDir: string): Promise<void> {
-  const install = runNpm(["install", "--no-audit", "--no-fund"], {
-    cwd: projectDir,
-    timeoutMs: 300_000,
-  });
+  const npmCache = join(projectDir, ".npm-cache");
+  const install = runNpm(
+    ["install", "--no-audit", "--no-fund", "--legacy-peer-deps", "--cache", npmCache],
+    {
+      cwd: projectDir,
+      timeoutMs: 300_000,
+      env: {
+        npm_config_cache: npmCache,
+      },
+    },
+  );
   if (install.exitCode !== 0) {
     throw new Error(
       `npm install failed in ${projectDir}:\n${install.stdout}\n${install.stderr}`,

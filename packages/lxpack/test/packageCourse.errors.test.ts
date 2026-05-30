@@ -149,6 +149,25 @@ describe("packageLessonkitCourse errors", () => {
     if (!result.ok) expect(result.issues[0]?.message).toContain("bad course");
   });
 
+  it("returns ok false when activityIri is missing for xapi target", async () => {
+    const root = await makeTempDir();
+    const dist = join(root, "dist");
+    await mkdir(dist, { recursive: true });
+    await writeFile(join(dist, "index.html"), "<html></html>", "utf-8");
+
+    const result = await packageLessonkitCourse({
+      descriptor,
+      outDir: join(root, "course"),
+      spaDistDir: dist,
+      target: "xapi",
+    });
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.issues.some((i) => i.path === "course.tracking.xapi.activityIri")).toBe(true);
+    }
+  });
+
   it("returns ok false when spaDistDir is missing", async () => {
     const root = await makeTempDir();
     const result = await packageLessonkitCourse({

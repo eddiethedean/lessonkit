@@ -39,10 +39,10 @@ my-course/
 ## Identity rules (required)
 
 - `courseId`, `lessonId`, `checkId` must match `^[a-zA-Z][a-zA-Z0-9_-]{0,63}$` (start with letter).
-- React props **must match** `lessonkit.json`:
-  - `<Course courseId="…">` ↔ `course.courseId`
-  - `<Lesson lessonId="…">` ↔ `course.lessons[].id`
-  - `<Quiz checkId="…">` ↔ `course.assessments[].checkId`
+- React props **must match** `lessonkit.json` for packaging and telemetry:
+  - `<Course courseId="…">` ↔ `course.courseId` (always)
+  - `<Quiz checkId="…">` ↔ `course.assessments[].checkId` (always)
+  - `<Lesson lessonId="…">` ↔ `course.lessons[].id` when each lesson is a separate LMS entry; with `layout: "single-spa"`, only shell lesson ids need manifest entries — extra in-app step ids may live only in React
 - Quiz telemetry uses the **enclosing** `<Lesson>` `lessonId`, not only navigation “active” lesson.
 
 Details: `references/identity.md`

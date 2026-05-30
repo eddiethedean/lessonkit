@@ -25,8 +25,12 @@ export function tryEmitCourseStarted(
   deps: CourseLifecycleDeps,
   alreadyEmittedToSink: boolean,
 ): { emitted: boolean; marked: boolean } {
-  if (alreadyEmittedToSink || hasCourseStarted(ctx.storage, ctx.sessionId, ctx.courseId)) {
-    return { emitted: true, marked: hasCourseStarted(ctx.storage, ctx.sessionId, ctx.courseId) };
+  const marked = hasCourseStarted(ctx.storage, ctx.sessionId, ctx.courseId);
+  if (alreadyEmittedToSink) {
+    return { emitted: true, marked };
+  }
+  if (marked) {
+    return { emitted: false, marked: true };
   }
   const emitted = deps.emitCourseStartedEvent(ctx);
   if (emitted) {

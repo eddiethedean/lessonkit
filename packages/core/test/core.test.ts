@@ -172,6 +172,28 @@ describe("@lessonkit/core", () => {
     expect(sink).not.toHaveBeenCalled();
   });
 
+  it("drops oldest events when the batch buffer exceeds the cap", () => {
+    vi.stubEnv("NODE_ENV", "development");
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const batchSink = vi.fn(async () => {
+      throw new Error("down");
+    });
+
+    const client = createTrackingClient({
+      batchSink,
+      batch: { enabled: true, flushIntervalMs: 60_000, maxBatchSize: 10_000 },
+    });
+
+    for (let i = 0; i < 1002; i++) {
+      client.track(interactionEvent(`t${i}`));
+    }
+
+    expect(warn).toHaveBeenCalledTimes(1);
+    expect(warn.mock.calls[0]?.[0]).toContain("telemetry batch buffer capped");
+    vi.unstubAllEnvs();
+    warn.mockRestore();
+  });
+
   it("delivers all events when tracking during a slow in-flight flush", async () => {
     let resolveFlush!: () => void;
     const batchSink = vi.fn<(events: TelemetryEvent[]) => Promise<void>>(

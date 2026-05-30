@@ -1,5 +1,5 @@
 import { access } from "node:fs/promises";
-import { resolve } from "node:path";
+import { join, resolve } from "node:path";
 import { resolveSpaLessons } from "./interchange";
 import { assertResolvedPathUnderRoot } from "./spaPath";
 import type { LessonkitCourseDescriptor } from "./types";
@@ -33,6 +33,11 @@ export async function resolveSpaDirs(
       await access(srcDist);
     } catch {
       throw new Error(`spaDistDir not found: ${srcDist}`);
+    }
+    try {
+      await access(join(srcDist, "index.html"));
+    } catch {
+      throw new Error(`spaDistDir must contain index.html: ${join(srcDist, "index.html")}`);
     }
     const lessonId = spaLessons[0]?.id ?? "main";
     return { [lessonId]: srcDist };

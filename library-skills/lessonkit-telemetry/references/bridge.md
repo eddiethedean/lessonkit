@@ -12,6 +12,6 @@ LessonKit forwards `quiz_completed`, `course_completed`, and related events when
 
 | 0.9.x | 1.0.0 |
 |-------|--------|
-| `setLxpackBridgeMode("off")` | `config: { lxpack: { bridge: "off" } }` |
+| `setLxpackBridgeMode("off")` *(removed)* | `config: { lxpack: { bridge: "off" } }` on `Course` / `LessonkitProvider` |
 
 Human reference: https://lessonkit.readthedocs.io/en/latest/reference/lxpack-bridge.html

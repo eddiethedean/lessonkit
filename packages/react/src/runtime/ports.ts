@@ -4,4 +4,5 @@ export {
   createGlobalTimer,
   createNoopStorage,
   createSessionStoragePort,
+  resetStoragePortForTests,
 } from "@lessonkit/core";
