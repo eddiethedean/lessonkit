@@ -2273,5 +2273,22 @@ describe("@lessonkit/react runtime", () => {
     await waitFor(() => expect((getByLabelText("B") as HTMLInputElement).disabled).toBe(true));
     expect((getByLabelText("A") as HTMLInputElement).disabled).toBe(true);
   });
+
+  it("Reflection supports uncontrolled textarea changes and optional hint", () => {
+    const onChange = vi.fn();
+    const { getByLabelText } = render(
+      <Course title="Course" courseId="course-1">
+        <Lesson title="Lesson" lessonId="lesson-1">
+          <Reflection prompt="Reflect" hint="Optional hint" onChange={onChange} />
+        </Lesson>
+      </Course>,
+    );
+
+    const textarea = getByLabelText("Reflect") as HTMLTextAreaElement;
+    expect(textarea.getAttribute("aria-describedby")).toBeTruthy();
+    fireEvent.change(textarea, { target: { value: "My notes" } });
+    expect(onChange).toHaveBeenCalledWith("My notes");
+    expect(textarea.value).toBe("My notes");
+  });
 });
 
