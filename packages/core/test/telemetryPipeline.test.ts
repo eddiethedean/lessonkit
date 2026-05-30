@@ -45,12 +45,15 @@ describe("createTelemetryPipeline", () => {
   it("createTrackingPipelineSink forwards events to track fn", () => {
     const tracked: string[] = [];
     const sink = createTrackingPipelineSink("t", (event) => tracked.push(event.name));
-    sink.emit({
-      name: "course_completed",
-      timestamp: "t",
-      courseId: "c",
-      sessionId: "s",
-    });
+    sink.emit(
+      {
+        name: "course_completed",
+        timestamp: "t",
+        courseId: "c",
+        sessionId: "s",
+      },
+      { courseId: "c", sessionId: "s" },
+    );
     expect(tracked).toEqual(["course_completed"]);
   });
 });

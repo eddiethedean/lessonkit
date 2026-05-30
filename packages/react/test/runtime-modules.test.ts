@@ -206,7 +206,7 @@ describe("@lessonkit/react runtime modules", () => {
         sessionId: "s",
       },
       { tracking, xapi: null, lxpackBridge: "off" },
-      [{ id: "custom", emit: () => tracked.push("custom") }],
+      [{ id: "custom", emit: () => void tracked.push("custom") }],
     );
     expect(tracked).toContain("course_started");
     expect(tracked).toContain("custom");
