@@ -191,6 +191,7 @@ lessonkit/
 │   ├── themes/
 │   ├── lxpack/          # SCORM / standalone / xAPI / cmi5 export
 │   └── cli/             # lessonkit CLI + bundled template
+├── library-skills/      # Agent Skills (SKILL.md) for Cursor, Claude Code, etc.
 ├── examples/
 │   ├── react-vite/         # InfoSec annual (email, smishing, Teams)
 │   ├── data-privacy/       # GDPR compliance (outline nav, tabletop)
@@ -210,6 +211,7 @@ Full site (Sphinx + Read the Docs): **[lessonkit.readthedocs.io](https://lessonk
 | Audience | Start |
 | --- | --- |
 | Vibe coding (AI-assisted, no React required) | [guides/vibe-coding](https://lessonkit.readthedocs.io/en/latest/guides/vibe-coding/index.html) |
+| AI agent skills (Cursor, Claude Code) | [library-skills](https://github.com/eddiethedean/lessonkit/tree/main/library-skills) · [docs](https://lessonkit.readthedocs.io/en/latest/guides/library-skills.html) |
 | React developers | [guides/react-developers](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/index.html) |
 | Live compiled examples | [examples](https://lessonkit.readthedocs.io/en/latest/examples/index.html) |
 

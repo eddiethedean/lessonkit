@@ -7,7 +7,7 @@ Good prompts are **specific, bounded, and testable**. Bad prompts are “make it
 Paste this once per chat session:
 
 ```text
-Project: LessonKit 0.8+ (Vite + React).
+Project: LessonKit 1.0 (Vite + React). Optional: install library-skills (see guides/library-skills.md).
 Manifest: lessonkit.json (schemaVersion 1).
 Main UI: src/App.tsx.
 Block catalog: @lessonkit/react/block-catalog.v1.json (only use listed block types).

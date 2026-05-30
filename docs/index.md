@@ -80,6 +80,7 @@ guides/vibe-coding/your-first-course
 guides/vibe-coding/prompting-and-workflows
 guides/vibe-coding/shipping-to-lms
 guides/vibe-coding/troubleshooting
+guides/library-skills
 ```
 
 ```{toctree}

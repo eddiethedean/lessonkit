@@ -21,7 +21,7 @@ You do not need to understand TypeScript, hooks, or bundlers. You **do** need to
 3. **Run** `lessonkit dev` to preview, then `lessonkit build` and `lessonkit package` to export.
 4. **Upload** the ZIP (or folder) your LMS admin gives you.
 
-The AI is your implementation partner; LessonKit is the structure it should follow.
+The AI is your implementation partner; LessonKit is the structure it should follow. For repeatable agent behavior, install [Library Skills](../library-skills.md) from the repo (`./library-skills/install.sh --global` or `--project`).
 
 ## Guide outline
 
@@ -32,6 +32,7 @@ The AI is your implementation partner; LessonKit is the structure it should foll
 | 3 | [Prompting and workflows](prompting-and-workflows.md) — prompts that work well |
 | 4 | [Shipping to an LMS](shipping-to-lms.md) — build, package, hand off |
 | 5 | [Troubleshooting](troubleshooting.md) — common fixes |
+| Optional | [Library Skills](../library-skills.md) — install `SKILL.md` packs for Cursor / Claude Code |
 
 ## Golden rules for AI edits
 

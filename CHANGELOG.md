@@ -16,6 +16,7 @@ All notable changes to the LessonKit monorepo are documented here. Published pac
 
 ### Added
 
+- **Library Skills** (`library-skills/`) — Agent Skills (`SKILL.md`) for Cursor, Claude Code, and compatible agents: `lessonkit-author`, `lessonkit-packaging`, `lessonkit-telemetry`, `lessonkit-migrate`; `install.sh` and [docs/guides/library-skills.md](docs/guides/library-skills.md).
 - **Storybook** for `@lessonkit/react` (`npm run storybook`) — Course/Lesson layouts, Quiz states, block stories; CI `build-storybook` job.
 - **Docs:** [Core reference](docs/reference/core.md), [LXPack bridge reference](docs/reference/lxpack-bridge.md); updated plugins, packaging, and migration guides.
 
