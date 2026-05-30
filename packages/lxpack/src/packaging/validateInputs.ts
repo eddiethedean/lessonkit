@@ -1,6 +1,7 @@
 import { join, resolve, win32 } from "node:path";
 import type { ExportTarget } from "@lxpack/api";
 import {
+  assertRealPathUnderRoot,
   assertResolvedPathUnderRoot,
   isResolvedPathUnderRoot,
   isSafeRelativeSpaPath,
@@ -44,6 +45,25 @@ export function validatePackageInputs(
       target,
       issues: [{ path: "outputBaseDir", message: `unsafe outputBaseDir: ${outputBaseDir}` }],
     };
+  }
+
+  if (projectRoot && outputBaseDir) {
+    const resolvedOutputBase = resolve(projectRoot, outputBaseDir);
+    try {
+      assertRealPathUnderRoot(projectRoot, resolvedOutputBase);
+    } catch (err) {
+      return {
+        ok: false,
+        courseDir: outDir,
+        target,
+        issues: [
+          {
+            path: "outputBaseDir",
+            message: err instanceof Error ? err.message : String(err),
+          },
+        ],
+      };
+    }
   }
 
   if (projectRoot && output) {

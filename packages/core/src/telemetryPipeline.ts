@@ -22,21 +22,29 @@ function isDevEnvironment(): boolean {
   return typeof g.process !== "undefined" && g.process.env?.NODE_ENV !== "production";
 }
 
+function warnSinkFailure(sinkId: string, err: unknown): void {
+  if (isDevEnvironment()) {
+    console.warn(
+      `[lessonkit] telemetry sink "${sinkId}" failed:`,
+      err instanceof Error ? err.message : err,
+    );
+  }
+}
+
 function invokeSink(
   sink: TelemetryPipelineSink,
   event: TelemetryEvent,
   emitCtx: EmitContext,
 ): void {
-  const result = sink.emit(event, emitCtx);
+  let result: void | Promise<void>;
+  try {
+    result = sink.emit(event, emitCtx);
+  } catch (err) {
+    warnSinkFailure(sink.id, err);
+    return;
+  }
   if (result != null && typeof (result as Promise<void>).catch === "function") {
-    void (result as Promise<void>).catch((err) => {
-      if (isDevEnvironment()) {
-        console.warn(
-          `[lessonkit] telemetry sink "${sink.id}" failed:`,
-          err instanceof Error ? err.message : err,
-        );
-      }
-    });
+    void (result as Promise<void>).catch((err) => warnSinkFailure(sink.id, err));
   }
 }
 

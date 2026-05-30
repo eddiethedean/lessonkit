@@ -81,8 +81,30 @@ function getBridge(parentWindow?: Window): LxpackBridgeV1 | null {
 
 export type LxpackBridgeMode = "auto" | "off";
 
+function isDevEnvironment(): boolean {
+  const g = globalThis as typeof globalThis & { process?: { NODE_ENV?: string } };
+  return typeof g.process !== "undefined" && g.process.env?.NODE_ENV !== "production";
+}
+
 /** Apply a mapped bridge action to an LXPack bridge instance. */
 export function dispatchBridgeAction(
+  bridge: LxpackBridgeV1,
+  action: ReturnType<typeof mapLessonkitTelemetryToBridgeAction>,
+): void {
+  if (!action) return;
+  try {
+    dispatchBridgeActionInner(bridge, action);
+  } catch (err) {
+    if (isDevEnvironment()) {
+      console.warn(
+        "[lessonkit/lxpack] lxpack bridge action failed:",
+        err instanceof Error ? err.message : err,
+      );
+    }
+  }
+}
+
+function dispatchBridgeActionInner(
   bridge: LxpackBridgeV1,
   action: ReturnType<typeof mapLessonkitTelemetryToBridgeAction>,
 ): void {

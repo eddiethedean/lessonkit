@@ -1,7 +1,7 @@
 import { access } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { resolveSpaLessons } from "./interchange";
-import { assertResolvedPathUnderRoot } from "./spaPath";
+import { assertRealPathUnderRoot } from "./spaPath";
 import type { LessonkitCourseDescriptor } from "./types";
 import type { WriteLxpackProjectOptions } from "./writeProject";
 
@@ -27,7 +27,7 @@ export async function resolveSpaDirs(
       ? resolve(projectRoot, spaDistRelative)
       : resolve(spaDistRelative);
     if (projectRoot) {
-      assertResolvedPathUnderRoot(resolve(projectRoot), srcDist);
+      assertRealPathUnderRoot(resolve(projectRoot), srcDist);
     }
     try {
       await access(srcDist);
@@ -52,7 +52,7 @@ export async function resolveSpaDirs(
     }
     const resolved = projectRoot ? resolve(projectRoot, src) : resolve(src);
     if (projectRoot) {
-      assertResolvedPathUnderRoot(resolve(projectRoot), resolved);
+      assertRealPathUnderRoot(resolve(projectRoot), resolved);
     }
     try {
       await access(resolved);

@@ -52,4 +52,4 @@ Projects include a `lessonkit.json` at the root. See the [CLI reference](https:/
 
 - [Packaging reference](https://lessonkit.readthedocs.io/en/latest/reference/packaging.html) — LXPack output layout
 - [React quickstart](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/quickstart.html)
-- [`templates/vite-react`](https://github.com/eddiethedean/lessonkit/tree/main/templates/vite-react) — starter template
+- [`templates/vite-react`](https://github.com/eddiethedean/lessonkit/tree/main/templates/vite-react) — source for the bundled `template/vite-react` scaffold

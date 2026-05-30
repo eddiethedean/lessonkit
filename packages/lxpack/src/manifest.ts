@@ -52,6 +52,11 @@ export function parseLessonkitManifest(
   }
 
   const courseRaw = config.course;
+  if (Array.isArray(courseRaw)) {
+    issues.push({ path: "course", message: "must be an object, not an array" });
+    if (issues.length) return { ok: false, issues };
+    return { ok: false, issues };
+  }
   if (!courseRaw || typeof courseRaw !== "object") {
     issues.push({ path: "course", message: "must be an object" });
     if (issues.length) return { ok: false, issues };

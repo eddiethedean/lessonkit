@@ -19,6 +19,7 @@ export function createXAPIClient(opts?: {
   const queue = opts?.queue ?? createInMemoryXAPIQueue();
   let warnedNoTransport = false;
   let warnedTransportFailure = false;
+  const inflightById = new Map<string, Promise<void>>();
 
   const sendOrQueue = (statement: XAPIStatement) => {
     if (!transport) {
@@ -31,7 +32,10 @@ export function createXAPIClient(opts?: {
       }
       return;
     }
-    void Promise.resolve()
+    const existing = inflightById.get(statement.id);
+    if (existing) return;
+
+    const flight = Promise.resolve()
       .then(() => transport(statement))
       .catch(() => {
         queue.enqueue(statement);
@@ -41,7 +45,12 @@ export function createXAPIClient(opts?: {
             "[lessonkit] xAPI transport failed; statement re-queued. Check your LRS endpoint or transport implementation.",
           );
         }
+      })
+      .finally(() => {
+        inflightById.delete(statement.id);
       });
+    inflightById.set(statement.id, flight);
+    void flight;
   };
 
   const emit = (event: Parameters<typeof telemetryEventToXAPIStatement>[0]) => {

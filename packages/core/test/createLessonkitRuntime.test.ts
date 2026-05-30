@@ -77,6 +77,16 @@ describe("createLessonkitRuntime", () => {
     expect(emitted).toHaveLength(0);
   });
 
+  it("setActiveLesson does not re-emit lesson_started for a completed lesson", () => {
+    const events: string[] = [];
+    const runtime = createLessonkitRuntime({ courseId: "c" });
+    runtime.setActiveLesson("lesson-1", (name) => events.push(name));
+    runtime.completeLesson("lesson-1", (name) => events.push(name));
+    const startedBefore = events.filter((e) => e === "lesson_started").length;
+    runtime.setActiveLesson("lesson-1", (name) => events.push(name));
+    expect(events.filter((e) => e === "lesson_started").length).toBe(startedBefore);
+  });
+
   it("setActiveLesson completes previous lesson when switching", () => {
     const events: string[] = [];
     const runtime = createLessonkitRuntime({ courseId: "c" });

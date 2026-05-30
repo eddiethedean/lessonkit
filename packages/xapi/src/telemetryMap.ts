@@ -59,10 +59,15 @@ export function telemetryEventToXAPIStatement(event: TelemetryEvent): XAPIStatem
     case "quiz_answered": {
       const lessonId = event.lessonId;
       const checkId = event.data.checkId;
+      const result: Record<string, unknown> = {};
+      if (typeof event.data.correct === "boolean") {
+        result.success = event.data.correct;
+      }
       return statementFor(
         buildLessonkitUrn({ courseId, lessonId, checkId }),
         XAPIVerbs.answered,
         event.timestamp,
+        { result: Object.keys(result).length ? result : undefined },
       );
     }
     case "quiz_completed": {

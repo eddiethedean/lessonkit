@@ -24,6 +24,21 @@ describe("parseLessonkitManifest", () => {
     }
   });
 
+  it("rejects course when it is an array", () => {
+    const result = parseLessonkitManifest({
+      schemaVersion: 1,
+      name: "demo",
+      course: [{ courseId: "demo" }],
+    });
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.issues.some((i) => i.path === "course" && i.message.includes("array"))).toBe(
+        true,
+      );
+    }
+  });
+
   it("rejects per-lesson-spa layout", () => {
     const result = parseLessonkitManifest({
       schemaVersion: 1,

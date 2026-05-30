@@ -57,6 +57,8 @@ function isTrackingActive(tracking?: LessonkitConfig["tracking"]): boolean {
   return tracking?.enabled !== false;
 }
 
+const noopTrackingClient: TrackingClient = { track: () => {} };
+
 function emitCourseStarted(opts: {
   pluginHost: PluginHost | null;
   tracking: TrackingClient;
@@ -75,18 +77,29 @@ function emitCourseStarted(opts: {
     attemptId: opts.attemptId,
     user: opts.user,
   });
+  const built = buildTelemetryEvent({
+    name: "course_started",
+    courseId: opts.courseId,
+    sessionId: opts.sessionId,
+    attemptId: opts.attemptId,
+    user: opts.user,
+  });
+  const event = opts.pluginHost ? opts.pluginHost.runTelemetry(built, pluginCtx) : built;
+  if (event === null) return true;
+
+  try {
+    opts.tracking.track(event);
+  } catch {
+    /* v8 ignore next -- tracking sink failure leaves dedupe unmarked so a later effect can retry */
+    return false;
+  }
+
   try {
     emitTelemetryWithPlugins({
-      pluginHost: opts.pluginHost,
-      tracking: opts.tracking,
+      pluginHost: null,
+      tracking: noopTrackingClient,
       xapi: opts.xapi,
-      event: buildTelemetryEvent({
-        name: "course_started",
-        courseId: opts.courseId,
-        sessionId: opts.sessionId,
-        attemptId: opts.attemptId,
-        user: opts.user,
-      }),
+      event,
       pluginCtx,
       lxpackBridge: opts.lxpackBridge,
       extraSinks: opts.extraSinks,
@@ -95,7 +108,7 @@ function emitCourseStarted(opts: {
     markCourseStartedEmittedToTracking(opts.storage, opts.sessionId, opts.courseId);
     return true;
   } catch {
-    /* v8 ignore next -- sink/xAPI failures leave dedupe unmarked so a later effect can retry */
+    /* v8 ignore next -- xAPI/bridge failures leave session dedupe unmarked so a later effect can retry */
     return false;
   }
 }
@@ -117,22 +130,18 @@ function emitCourseStartedToTrackingOnly(opts: {
     attemptId: opts.attemptId,
     user: opts.user,
   });
+  const built = buildTelemetryEvent({
+    name: "course_started",
+    courseId: opts.courseId,
+    sessionId: opts.sessionId,
+    attemptId: opts.attemptId,
+    user: opts.user,
+  });
+  const event = opts.pluginHost ? opts.pluginHost.runTelemetry(built, pluginCtx) : built;
+  if (event === null) return true;
+
   try {
-    emitTelemetryWithPlugins({
-      pluginHost: opts.pluginHost,
-      tracking: opts.tracking,
-      xapi: null,
-      event: buildTelemetryEvent({
-        name: "course_started",
-        courseId: opts.courseId,
-        sessionId: opts.sessionId,
-        attemptId: opts.attemptId,
-        user: opts.user,
-      }),
-      pluginCtx,
-      lxpackBridge: opts.lxpackBridge,
-      extraSinks: opts.extraSinks,
-    });
+    opts.tracking.track(event);
     return true;
   } catch {
     return false;
@@ -161,13 +170,6 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
   extraSinksRef.current = normalizedConfig.sinks;
 
   const headlessRef = useRef<HeadlessLessonkitRuntime | null>(null);
-  if (useV2Runtime && !headlessRef.current) {
-    headlessRef.current = createLessonkitRuntime({
-      courseId: normalizedCourseId,
-      runtimeVersion: "v2",
-      session: normalizedConfig.session,
-    });
-  }
 
   const sessionIdRef = useRef<string>(resolveSessionId(defaultStorage, normalizedConfig.session?.sessionId));
   const prevConfiguredSessionIdRef = useRef<string | undefined>(normalizedConfig.session?.sessionId);
@@ -196,6 +198,32 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
   const courseStartedEmittedToSinkRef = useRef(false);
   const prevCourseIdForProgressRef = useRef(normalizedCourseId);
   const pendingCourseIdResetRef = useRef(false);
+  const prevUseV2RuntimeRef = useRef(useV2Runtime);
+  const xapiCourseStartedSentOnClientRef = useRef(false);
+
+  if (prevUseV2RuntimeRef.current !== useV2Runtime) {
+    prevUseV2RuntimeRef.current = useV2Runtime;
+    if (useV2Runtime) {
+      headlessRef.current = createLessonkitRuntime({
+        courseId: normalizedCourseId,
+        runtimeVersion: "v2",
+        session: normalizedConfig.session,
+      });
+      progressRef.current = headlessRef.current.progress;
+    } else {
+      headlessRef.current = null;
+      progressRef.current = createProgressController();
+    }
+    pendingCourseIdResetRef.current = true;
+    courseStartedEmittedToSinkRef.current = false;
+  } else if (useV2Runtime && !headlessRef.current) {
+    headlessRef.current = createLessonkitRuntime({
+      courseId: normalizedCourseId,
+      runtimeVersion: "v2",
+      session: normalizedConfig.session,
+    });
+  }
+
   if (prevCourseIdForProgressRef.current !== normalizedCourseId) {
     prevCourseIdForProgressRef.current = normalizedCourseId;
     if (useV2Runtime && headlessRef.current) {
@@ -246,6 +274,7 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
       }
       xapiQueueRef.current = createInMemoryXAPIQueue();
       prevXapiCourseIdRef.current = courseId;
+      xapiCourseStartedSentOnClientRef.current = false;
     }
 
     const prev = xapiRef.current;
@@ -253,14 +282,19 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
     xapiRef.current = next;
     setXapi(next);
 
-    if (next && !prev) {
+    if (next) {
       const sessionId = sessionIdRef.current;
       const cid = courseIdRef.current;
       const trackingActive = isTrackingActive(normalizedConfig.tracking);
       const alreadyStarted = hasCourseStarted(defaultStorage, sessionId, cid);
-      // When tracking is on, course_started (and xAPI) normally flow through emitTelemetry.
-      // Bootstrap here only for xAPI-only apps, or when transport is enabled after course_started.
-      if (!trackingActive || alreadyStarted) {
+      const clientChanged = !prev || prev !== next;
+      // When tracking is on, course_started (and xAPI) normally flow through emitTelemetry on first start.
+      const skipBootstrap = trackingActive && !alreadyStarted;
+      const needsBootstrap =
+        !skipBootstrap &&
+        !xapiCourseStartedSentOnClientRef.current &&
+        (!alreadyStarted || clientChanged);
+      if (needsBootstrap) {
         try {
           const statement = telemetryEventToXAPIStatement(
             buildTelemetryEvent({
@@ -273,7 +307,10 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
           );
           if (statement) {
             next.send(statement);
-            markCourseStarted(defaultStorage, sessionId, cid);
+            if (!alreadyStarted) {
+              markCourseStarted(defaultStorage, sessionId, cid);
+            }
+            xapiCourseStartedSentOnClientRef.current = true;
           }
         } catch {
           // xAPI mapping may skip invalid ids; ignore
@@ -569,6 +606,11 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
       }
       const current = progressRef.current.getState();
       if (current.activeLessonId === lessonId) return;
+      if (current.completedLessonIds.has(lessonId)) {
+        progressRef.current.setActiveLesson(lessonId, Date.now());
+        syncProgress();
+        return;
+      }
 
       const previous = current.activeLessonId;
       if (previous && previous !== lessonId) {

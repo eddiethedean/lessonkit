@@ -21,6 +21,9 @@
     "training",
     "lrs"
   ],
+  "engines": {
+    "node": ">=18"
+  },
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",

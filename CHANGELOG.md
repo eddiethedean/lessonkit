@@ -18,33 +18,26 @@ All notable changes to the LessonKit monorepo are documented here. Published pac
 - **library-skills**: Fix `install.sh` default (global only), `validate.sh` path in `lessonkit-author`, and packaging output path notes.
 - **Tooling**: Add ESLint (flat config) with CI lint step and library-skills install/validate smoke in packaging CI.
 
-### Post-release maintenance (1.0.0 line, unreleased)
+### Post-release maintenance (1.0.0 line)
 
-- **@lessonkit/lxpack**: Bump `@lxpack/*` to **^0.6.2**; packaging supports Node **18+** (aligned with LXPack 0.6.2).
-- **@lessonkit/cli**: Require Node **18+** for LMS `package` targets (was 20+).
-- **@lessonkit/react**: Throw in dev when `Quiz` is outside `<Lesson>`; production shows `role="alert"` and skips quiz telemetry.
-- **@lessonkit/react**: `Lesson.autoCompleteOnUnmount` prop; dev warning when multiple `<Lesson>` trees mount concurrently.
-- **@lessonkit/react**: Quiz disables radios after pass; `ProgressTracker.totalLessons` progressbar semantics; controlled `Reflection` textarea props.
-- **@lessonkit/react**: Throw in dev when both `tracking.sink` and `tracking.batchSink` are set.
-- **@lessonkit/core**: `createLessonkitRuntime.updateConfig()` syncs session; `resetForCourseChange` updates `config.courseId`.
-- **@lessonkit/core**: `LessonkitPluginContext.user` for plugin access to learner identity.
-- **@lessonkit/xapi**: Dedupe queued statements by `id` on transport failure re-queue.
-- **CI**: Diff `templates/vite-react/` against CLI template source; CLI template assessment ID parity test.
+Shipped on `main` without a semver bump (packages remain **1.0.0**): Node **18+** for LMS packaging; quiz/lesson/provider hardening; LXPack staging validation; library-skills and CI template parity; items previously listed here through the first 1.0.0 release.
 
-### Fixed (unreleased maintenance)
+### Fixed (1.0.0 maintenance)
 
-- **@lessonkit/lxpack**: Return structured `{ ok: false }` when promote fails; preserve staging after restore (no `finally` cleanup wipe).
-- **@lessonkit/lxpack**: Reject build artifact paths outside the staging directory.
-- **@lessonkit/lxpack**: Validate `index.html` exists for each `per-lesson-spa` lesson directory.
-- **@lessonkit/cli**: Reject `lessonkit.json` manifests whose `course` field is an array during project discovery.
-- **@lessonkit/react**: Duplicate `<Lesson>` unmount no longer steals active lesson from another lesson.
-- **@lessonkit/core**: Catch async telemetry sink rejections (dev warning) instead of unhandled promise rejections.
-- **Docs / library-skills**: Align Node **18+** guidance for `lessonkit package`; fix packaging skill and CLI manifest examples.
-
-- **@lessonkit/react**: `wrapTrackingSink` now applies on batched flushes when `tracking.batchSink` is configured.
-- **@lessonkit/react**: `Quiz` / `KnowledgeCheck` telemetry uses the enclosing `<Lesson>` `lessonId` (not only `activeLessonId`) when multiple lessons are mounted.
-- **@lessonkit/react**: Plugin `setup` / `dispose` re-run when `session.user` changes.
-- **@lessonkit/react**: Quiz UI state resets when enclosing `lessonId` or `choices` change.
+- **@lessonkit/core**: Isolate sync and async telemetry sink failures so one sink cannot block others or crash callers.
+- **@lessonkit/core**: Catch async rejections from non-batch `tracking.sink` (dev warning).
+- **@lessonkit/core**: Skip duplicate `lesson_started` when re-activating an already completed lesson (headless runtime).
+- **@lessonkit/react**: Bootstrap xAPI `course_started` on new clients after remount (Strict Mode / transport swap).
+- **@lessonkit/react**: Reset headless runtime and progress when `runtimeVersion` toggles between v1 and v2.
+- **@lessonkit/react**: Skip duplicate `lesson_started` when remounting a completed lesson (v1 progress path).
+- **@lessonkit/lxpack**: Reject `course` arrays in `parseLessonkitManifest` (clear validation message).
+- **@lessonkit/lxpack**: Preserve failed promote builds as `*.failed-promote-*` when `outDir` already exists.
+- **@lessonkit/lxpack**: Resolve SPA and `outputBaseDir` paths with `realpath` under `projectRoot`.
+- **@lessonkit/lxpack**: Swallow host bridge throws when forwarding telemetry (dev warning).
+- **@lessonkit/xapi**: Map `quiz_answered.correct` to xAPI `result.success`.
+- **@lessonkit/xapi**: Skip duplicate in-flight `send()` calls for the same statement `id`.
+- **@lessonkit/cli**: Clarify `--force` help text; README points at bundled template source.
+- **@lessonkit/xapi**: Add Node **18+** `engines`; README notes header aligned with 1.0.0.
 
 ### Added
 

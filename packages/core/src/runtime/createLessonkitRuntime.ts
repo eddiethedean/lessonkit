@@ -126,6 +126,10 @@ export function createLessonkitRuntime(
     setActiveLesson(lessonId, emitFn) {
       const current = progress.getState();
       if (current.activeLessonId === lessonId) return;
+      if (current.completedLessonIds.has(lessonId)) {
+        progress.setActiveLesson(lessonId, clock.nowMs());
+        return;
+      }
 
       const previous = current.activeLessonId;
       if (previous && previous !== lessonId) {

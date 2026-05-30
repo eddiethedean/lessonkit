@@ -29,6 +29,42 @@ describe("@lessonkit/core", () => {
     vi.unstubAllGlobals();
   });
 
+  it("rethrows sync sink errors when batching is disabled", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const prevEnv = process.env.NODE_ENV;
+    process.env.NODE_ENV = "development";
+
+    const sink = vi.fn(() => {
+      throw new Error("sync failed");
+    });
+    const client = createTrackingClient({ sink, batch: { enabled: false } });
+    expect(() => client.track(interactionEvent("t"))).toThrow("sync failed");
+    expect(warn).toHaveBeenCalled();
+
+    process.env.NODE_ENV = prevEnv;
+    warn.mockRestore();
+  });
+
+  it("swallows async sink rejections without throwing when batching is disabled", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const prevEnv = process.env.NODE_ENV;
+    process.env.NODE_ENV = "development";
+
+    const sink = vi.fn(async () => {
+      throw new Error("sink failed");
+    });
+    const client = createTrackingClient({ sink, batch: { enabled: false } });
+    expect(() => client.track(interactionEvent("t"))).not.toThrow();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(warn).toHaveBeenCalledWith(
+      expect.stringContaining("tracking sink failed"),
+      "sink failed",
+    );
+
+    process.env.NODE_ENV = prevEnv;
+    warn.mockRestore();
+  });
+
   it("tracks via sink when batching is disabled", async () => {
     const sink = vi.fn(async () => {});
     const client = createTrackingClient({ sink, batch: { enabled: false } });

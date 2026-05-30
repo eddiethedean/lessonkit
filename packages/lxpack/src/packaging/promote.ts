@@ -59,7 +59,12 @@ export async function promoteStagingToOutDir(stagingDir: string, outDir: string)
       }
       throw promoteError;
     }
-    await fsp.rm(tmpPromote, { recursive: true, force: true }).catch(() => undefined);
+    const failedPromote = `${outDir}.failed-promote-${Date.now()}`;
+    try {
+      await renameOrCopy(tmpPromote, failedPromote);
+    } catch {
+      await fsp.rm(tmpPromote, { recursive: true, force: true }).catch(() => undefined);
+    }
     throw promoteError;
   }
 

@@ -45,6 +45,7 @@ describe("telemetryEventToXAPIStatement", () => {
     expect(telemetryEventToXAPIStatement(answered)?.object.id).toBe(
       "urn:lessonkit:course:cyber-basics:lesson:phishing-101:check:verify-sender",
     );
+    expect(telemetryEventToXAPIStatement(answered)?.result?.success).toBe(true);
   });
 
   it("returns null for lesson_time_on_task", () => {

@@ -13,6 +13,7 @@ import {
 } from "@lessonkit/core";
 import * as xapiModule from "@lessonkit/xapi";
 import type { XAPIStatement, XAPITransport } from "@lessonkit/xapi";
+import * as emitTelemetryModule from "../src/runtime/emitTelemetry";
 
 describe("@lessonkit/react runtime", () => {
   afterEach(() => {
@@ -1565,6 +1566,57 @@ describe("@lessonkit/react runtime", () => {
     }
   });
 
+  it("emitCourseStarted skips storage marks when xAPI pipeline throws after tracking succeeds", async () => {
+    const events: TelemetryEvent[] = [];
+    const emitSpy = vi.spyOn(emitTelemetryModule, "emitTelemetry").mockImplementation(() => {
+      throw new Error("xapi pipeline failed");
+    });
+
+    render(
+      <LessonkitProvider
+        config={{
+          courseId: "course-1",
+          tracking: { sink: (e) => void events.push(e) },
+          xapi: { transport: async () => {} },
+        }}
+      >
+        <div>child</div>
+      </LessonkitProvider>,
+    );
+
+    await waitFor(() => expect(events.some((e) => e.name === "course_started")).toBe(true));
+    expect(
+      Object.keys(sessionStorage).some((k) => k.startsWith("lessonkit:course_started:")),
+    ).toBe(false);
+
+    emitSpy.mockRestore();
+  });
+
+  it("emitCourseStarted returns early when plugin filters course_started", () => {
+    const filterPlugin = defineTelemetryPlugin({
+      id: "filter-start",
+      version: "1",
+      kind: "analytics",
+      onTelemetry: (event) => (event.name === "course_started" ? null : event),
+    });
+
+    const events: TelemetryEvent[] = [];
+    render(
+      <LessonkitProvider
+        config={{
+          courseId: "course-1",
+          plugins: [filterPlugin],
+          tracking: { sink: (e) => void events.push(e) },
+          xapi: { enabled: false },
+        }}
+      >
+        <div>child</div>
+      </LessonkitProvider>,
+    );
+
+    expect(events.filter((e) => e.name === "course_started")).toHaveLength(0);
+  });
+
   it("retries course_started to tracking after xAPI bootstrap when sink fails once", async () => {
     const events: TelemetryEvent[] = [];
     let shouldThrow = true;
@@ -2395,6 +2447,152 @@ describe("@lessonkit/react runtime", () => {
     fireEvent.click(getByLabelText("B"));
     await waitFor(() => expect((getByLabelText("B") as HTMLInputElement).disabled).toBe(true));
     expect((getByLabelText("A") as HTMLInputElement).disabled).toBe(true);
+  });
+
+  it("runtimeVersion toggle resets progress when switching v1 to v2", async () => {
+    const events: TelemetryEvent[] = [];
+    function ToggleRuntime() {
+      const [version, setVersion] = useState<"v1" | "v2">("v1");
+      return (
+        <>
+          <button type="button" onClick={() => setVersion("v2")}>
+            use-v2
+          </button>
+          <LessonkitProvider
+            config={{
+              courseId: "course-toggle-v2",
+              runtimeVersion: version,
+              tracking: { sink: (e) => void events.push(e) },
+            }}
+          >
+            <Lesson title="L" lessonId="lesson-1">
+              <div>content</div>
+            </Lesson>
+          </LessonkitProvider>
+        </>
+      );
+    }
+
+    const { getByRole } = render(<ToggleRuntime />);
+    await waitFor(() => expect(events.some((e) => e.name === "lesson_started")).toBe(true));
+    fireEvent.click(getByRole("button", { name: "use-v2" }));
+    await waitFor(() => {
+      expect(
+        events.filter((e) => e.name === "lesson_started" && e.lessonId === "lesson-1").length,
+      ).toBe(2);
+    });
+  });
+
+  it("runtimeVersion v1 skips lesson_started when remounting a completed lesson", async () => {
+    const events: TelemetryEvent[] = [];
+    function RemountLesson() {
+      const [mounted, setMounted] = useState(true);
+      return (
+        <>
+          <button type="button" onClick={() => setMounted(false)}>
+            unmount
+          </button>
+          <button type="button" onClick={() => setMounted(true)}>
+            remount
+          </button>
+          <LessonkitProvider
+            config={{
+              courseId: "course-remount-v1",
+              runtimeVersion: "v1",
+              tracking: { sink: (e) => void events.push(e) },
+            }}
+          >
+            {mounted ? (
+              <Lesson title="L" lessonId="lesson-1">
+                <div>content</div>
+              </Lesson>
+            ) : null}
+          </LessonkitProvider>
+        </>
+      );
+    }
+
+    const { getByRole } = render(<RemountLesson />);
+    await waitFor(() => expect(events.some((e) => e.name === "lesson_started")).toBe(true));
+    fireEvent.click(getByRole("button", { name: "unmount" }));
+    await waitFor(() => expect(events.some((e) => e.name === "lesson_completed")).toBe(true));
+    const startedCount = events.filter((e) => e.name === "lesson_started").length;
+    fireEvent.click(getByRole("button", { name: "remount" }));
+    await waitFor(() =>
+      expect(events.filter((e) => e.name === "lesson_started").length).toBe(startedCount),
+    );
+  });
+
+  it("runtimeVersion toggle resets progress when switching v2 to v1", async () => {
+    const events: TelemetryEvent[] = [];
+    function ToggleRuntime() {
+      const [version, setVersion] = useState<"v1" | "v2">("v2");
+      return (
+        <>
+          <button type="button" onClick={() => setVersion("v1")}>
+            use-v1
+          </button>
+          <LessonkitProvider
+            config={{
+              courseId: "course-toggle",
+              runtimeVersion: version,
+              tracking: { sink: (e) => void events.push(e) },
+            }}
+          >
+            <Lesson title="L" lessonId="lesson-1">
+              <div>content</div>
+            </Lesson>
+          </LessonkitProvider>
+        </>
+      );
+    }
+
+    const { getByRole } = render(<ToggleRuntime />);
+    await waitFor(() => expect(events.some((e) => e.name === "lesson_started")).toBe(true));
+    fireEvent.click(getByRole("button", { name: "use-v1" }));
+    await waitFor(() => {
+      const startedAfterToggle = events.filter(
+        (e) => e.name === "lesson_started" && e.lessonId === "lesson-1",
+      ).length;
+      expect(startedAfterToggle).toBe(2);
+    });
+  });
+
+  it("does not emit lesson_started again when remounting a completed lesson", async () => {
+    const events: TelemetryEvent[] = [];
+    function RemountLesson() {
+      const [mounted, setMounted] = useState(true);
+      return (
+        <>
+          <button type="button" onClick={() => setMounted(false)}>
+            unmount
+          </button>
+          <button type="button" onClick={() => setMounted(true)}>
+            remount
+          </button>
+          <LessonkitProvider
+            config={{
+              courseId: "course-remount",
+              tracking: { sink: (e) => void events.push(e) },
+            }}
+          >
+            {mounted ? (
+              <Lesson title="L" lessonId="lesson-1">
+                <div>content</div>
+              </Lesson>
+            ) : null}
+          </LessonkitProvider>
+        </>
+      );
+    }
+
+    const { getByRole } = render(<RemountLesson />);
+    await waitFor(() => expect(events.some((e) => e.name === "lesson_started")).toBe(true));
+    fireEvent.click(getByRole("button", { name: "unmount" }));
+    await waitFor(() => expect(events.some((e) => e.name === "lesson_completed")).toBe(true));
+    const startedCount = events.filter((e) => e.name === "lesson_started").length;
+    fireEvent.click(getByRole("button", { name: "remount" }));
+    await waitFor(() => expect(events.filter((e) => e.name === "lesson_started").length).toBe(startedCount));
   });
 
   it("Reflection supports uncontrolled textarea changes and optional hint", () => {

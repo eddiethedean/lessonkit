@@ -45,7 +45,10 @@ export function createProgram(baseLogger: CliLogger = console): Command {
     .argument("[name]", "Project directory name")
     .option("--here", "Initialize in the current directory")
     .option("--skip-install", "Skip npm install")
-    .option("--force", "Initialize into a non-empty directory")
+    .option(
+      "--force",
+      "With --here, allow init when the directory is empty or contains only dotfiles",
+    )
     .option("--json", "Emit structured JSON result")
     .action(async (name: string | undefined, opts: { here?: boolean; skipInstall?: boolean; force?: boolean; json?: boolean }) => {
       const logger = createLogger({ json: opts.json });

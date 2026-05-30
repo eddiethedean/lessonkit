@@ -1,4 +1,4 @@
-import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -56,6 +56,9 @@ describe("promoteStagingToOutDir", () => {
     );
 
     expect(await readFile(join(outDir, "preserve-me.txt"), "utf-8")).toBe("original");
+
+    const entries = await readdir(root);
+    expect(entries.some((name) => name.startsWith("course.failed-promote-"))).toBe(true);
   });
 
   it("warns when restore fails after promote error", async () => {

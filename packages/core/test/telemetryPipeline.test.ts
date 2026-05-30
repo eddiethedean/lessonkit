@@ -57,6 +57,41 @@ describe("createTelemetryPipeline", () => {
     expect(tracked).toEqual(["course_completed"]);
   });
 
+  it("swallows sync sink throws and still invokes later sinks", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const prevEnv = process.env.NODE_ENV;
+    process.env.NODE_ENV = "development";
+    const order: string[] = [];
+
+    const pipeline = createTelemetryPipeline([
+      {
+        id: "sync-fail",
+        emit: () => {
+          throw new Error("sync sink failed");
+        },
+      },
+      { id: "after", emit: () => void order.push("after") },
+    ]);
+
+    expect(() =>
+      pipeline.emit({
+        name: "course_started",
+        timestamp: "t",
+        courseId: "c",
+        sessionId: "s",
+      }),
+    ).not.toThrow();
+
+    expect(order).toEqual(["after"]);
+    expect(warn).toHaveBeenCalledWith(
+      expect.stringContaining('telemetry sink "sync-fail" failed'),
+      "sync sink failed",
+    );
+
+    process.env.NODE_ENV = prevEnv;
+    warn.mockRestore();
+  });
+
   it("swallows async sink rejections without throwing", async () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
     const prevEnv = process.env.NODE_ENV;

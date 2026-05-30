@@ -142,6 +142,36 @@ describe("@lessonkit/react provider dispose regression", () => {
     );
   });
 
+  it("bootstraps xAPI course_started once under StrictMode when tracking is disabled", async () => {
+    const statements: import("@lessonkit/xapi").XAPIStatement[] = [];
+    const transport: import("@lessonkit/xapi").XAPITransport = async (statement) => {
+      statements.push(statement);
+    };
+
+    render(
+      <React.StrictMode>
+        <LessonkitProvider
+          config={{
+            courseId: "course-xapi-only",
+            tracking: { enabled: false },
+            xapi: { transport },
+          }}
+        >
+          <div>xapi-only</div>
+        </LessonkitProvider>
+      </React.StrictMode>,
+    );
+
+    await waitFor(() => {
+      const courseInit = statements.filter(
+        (s) =>
+          s.verb === "http://adlnet.gov/expapi/verbs/initialized" &&
+          s.object.id === "urn:lessonkit:course:course-xapi-only",
+      );
+      expect(courseInit.length).toBe(1);
+    });
+  });
+
   it("emits course_started once and keeps sessionId across StrictMode remount", async () => {
     const events: TelemetryEvent[] = [];
     const sessionIds = new Set<string>();

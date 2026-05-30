@@ -89,6 +89,28 @@ describe("@lessonkit/xapi", () => {
     expect(statements[0]).toMatchObject({ id: "1" });
   });
 
+  it("does not send duplicate in-flight statements with the same id", async () => {
+    const statements: XAPIStatement[] = [];
+    let release!: () => void;
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const transport = vi.fn(async (statement: XAPIStatement) => {
+      await gate;
+      statements.push(statement);
+    });
+    const client = createXAPIClient({ transport, courseId });
+    const statement = { id: "inflight-1", timestamp: "t", verb: "v", object: { id: "o" } };
+
+    client.send(statement);
+    client.send(statement);
+    release();
+    await new Promise((r) => setTimeout(r, 0));
+
+    expect(transport).toHaveBeenCalledTimes(1);
+    expect(statements).toHaveLength(1);
+  });
+
   it("does not duplicate queued statements with the same id on transport failure", async () => {
     const queue = createInMemoryXAPIQueue();
     const transport = vi.fn(async () => {
