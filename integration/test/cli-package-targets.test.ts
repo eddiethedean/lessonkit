@@ -19,9 +19,9 @@ type PackageJson = {
 const LMS_TARGETS = ["standalone", "scorm12", "scorm2004", "xapi", "cmi5"] as const;
 
 describe("CLI package targets (golden example)", () => {
-  beforeAll(() => {
+  beforeAll(async () => {
     ensurePackagesBuilt();
-    ensureGoldenBuilt();
+    await ensureGoldenBuilt();
   });
 
   for (const target of LMS_TARGETS) {
