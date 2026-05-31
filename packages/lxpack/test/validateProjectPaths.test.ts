@@ -29,6 +29,12 @@ describe("validateProjectPaths", () => {
     const issues = validateProjectPaths(root, { spaDistDir: "../../etc" });
     expect(issues.some((i) => i.path === "paths.spaDistDir")).toBe(true);
   });
+
+  it("rejects spaDistDir of only a dot segment", () => {
+    const root = resolve("/tmp/my-project");
+    const issues = validateProjectPaths(root, { spaDistDir: "." });
+    expect(issues.some((i) => i.path === "paths.spaDistDir")).toBe(true);
+  });
 });
 
 describe("resolveSafePackageOutputOverride", () => {

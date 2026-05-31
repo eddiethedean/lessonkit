@@ -5,11 +5,24 @@ Published packages: `@lessonkit/core`, `@lessonkit/xapi`, `@lessonkit/accessibil
 ## Prerequisites
 
 - `main` is green (see [CI workflow](.github/workflows/ci.yml)).
-- All `packages/*/package.json` versions match the release (e.g. `1.0.0`).
+- All `packages/*/package.json` versions match the release (e.g. `1.0.1`).
 - [CHANGELOG.md](CHANGELOG.md) documents the release.
 - No pending files in [`.changeset/`](.changeset/) that would run `changeset version` and bump versions unexpectedly (this repo publishes via **git tags**, not `changeset publish`).
 
 > **1.0.0** is the stable public API release. See [MIGRATION-0.x-to-1.0.md](docs/MIGRATION-0.x-to-1.0.md).
+
+### 1.0.1 checklist (maintenance — no tag required unless publishing)
+
+| Item | Status |
+|------|--------|
+| All seven `@lessonkit/*` packages at `1.0.1` | Done |
+| Sphinx `docs/conf.py` `release` matches `1.0.1` | Done |
+| `lessonkit init` template pins `^1.0.1` (`copy-template.mjs`) | Done |
+| [CHANGELOG.md](CHANGELOG.md) `## [1.0.1]` documents typing + bugfix pass | Done |
+| `npm run lint` + `typecheck` + `test` + `test:integration` + `test:e2e` | Run before merge |
+| Git tag `v1.0.1` | **Optional** — only when publishing to npm |
+
+> **Do not create or push a `v1.0.1` git tag** unless you intend to publish that version to npm.
 
 ### 1.0.0 checklist (before tagging)
 

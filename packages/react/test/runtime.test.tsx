@@ -1753,6 +1753,61 @@ describe("@lessonkit/react runtime", () => {
     );
 
     expect(events.filter((e) => e.name === "course_started")).toHaveLength(0);
+    expect(
+      Object.keys(sessionStorage).some((k) => k.startsWith("lessonkit:course_started_tracking:")),
+    ).toBe(false);
+  });
+
+  it("retries course_started to tracking when plugin filter is removed after xAPI bootstrap", async () => {
+    const filterPlugin = defineTelemetryPlugin({
+      id: "filter-start",
+      version: "1",
+      kind: "analytics",
+      onTelemetry: (event) => (event.name === "course_started" ? null : event),
+    });
+
+    const trackingEvents: TelemetryEvent[] = [];
+
+    const { rerender } = render(
+      <LessonkitProvider
+        config={{
+          courseId: "course-1",
+          plugins: [filterPlugin],
+          tracking: { enabled: false },
+          xapi: { transport: async () => {} },
+        }}
+      >
+        <div>child</div>
+      </LessonkitProvider>,
+    );
+
+    await waitFor(() =>
+      expect(
+        Object.keys(sessionStorage).some((k) => k.startsWith("lessonkit:course_started:")),
+      ).toBe(true),
+    );
+    expect(
+      Object.keys(sessionStorage).some((k) => k.startsWith("lessonkit:course_started_tracking:")),
+    ).toBe(false);
+
+    rerender(
+      <LessonkitProvider
+        config={{
+          courseId: "course-1",
+          plugins: [],
+          tracking: { sink: (e) => void trackingEvents.push(e) },
+          xapi: { transport: async () => {} },
+        }}
+      >
+        <div>child</div>
+      </LessonkitProvider>,
+    );
+
+    await waitFor(() => expect(trackingEvents.some((e) => e.name === "course_started")).toBe(true));
+    expect(trackingEvents.filter((e) => e.name === "course_started")).toHaveLength(1);
+    expect(
+      Object.keys(sessionStorage).some((k) => k.startsWith("lessonkit:course_started_tracking:")),
+    ).toBe(true);
   });
 
   it("retries course_started to tracking after xAPI bootstrap when sink fails once", async () => {

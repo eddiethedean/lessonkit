@@ -1,5 +1,5 @@
 import { realpathSync } from "node:fs";
-import { relative, resolve, sep, win32 } from "node:path";
+import { isAbsolute, relative, resolve, sep, win32 } from "node:path";
 
 /** Resolve absolute paths, including Windows drive paths when running on other OSes. */
 export function resolveComparablePath(p: string): string {
@@ -14,9 +14,10 @@ export function isSafeRelativeSpaPath(spaPath: string): boolean {
   if (!spaPath.length || spaPath.includes("\0")) return false;
   if (spaPath.startsWith("/") || spaPath.startsWith("\\")) return false;
   if (/^[a-zA-Z]:[/\\]/.test(spaPath)) return false;
-  const segments = spaPath.split(/[/\\]/).filter((s) => s.length > 0);
+  if (spaPath === "." || spaPath === "./") return false;
+  const segments = spaPath.split(/[/\\]/).filter((s) => s.length > 0 && s !== ".");
   if (segments.some((s) => s === "..")) return false;
-  return true;
+  return segments.length > 0;
 }
 
 export function assertResolvedPathUnderRoot(root: string, target: string): void {
@@ -58,12 +59,26 @@ export function assertRealPathUnderRoot(root: string, target: string): void {
   assertResolvedPathUnderRoot(rootReal, targetCheck);
 }
 
+function normalizePathForComparison(p: string): string {
+  const resolved = resolveComparablePath(p);
+  return /^[a-zA-Z]:[/\\]/.test(resolved) ? resolved.toLowerCase() : resolved;
+}
+
+/** Relative path from `root` to `target` when `target` is under `root`. */
+export function relativePathUnderRoot(root: string, target: string): string {
+  const rootResolved = normalizePathForComparison(root);
+  const targetResolved = normalizePathForComparison(target);
+  if (/^[a-zA-Z]:[/\\]/.test(rootResolved)) {
+    return win32.relative(rootResolved, targetResolved);
+  }
+  return relative(rootResolved, targetResolved);
+}
+
 export function isResolvedPathUnderRoot(root: string, target: string): boolean {
-  const rootResolved = resolveComparablePath(root);
-  const targetResolved = resolveComparablePath(target);
+  const rootResolved = normalizePathForComparison(root);
+  const targetResolved = normalizePathForComparison(target);
   if (targetResolved === rootResolved) return true;
-  const prefix = rootResolved.endsWith(sep) ? rootResolved : rootResolved + sep;
-  const win32Prefix =
-    rootResolved.endsWith(win32.sep) ? rootResolved : rootResolved + win32.sep;
-  return targetResolved.startsWith(prefix) || targetResolved.startsWith(win32Prefix);
+  const rel = relativePathUnderRoot(root, target);
+  if (!rel) return true;
+  return !rel.startsWith("..") && !isAbsolute(rel);
 }

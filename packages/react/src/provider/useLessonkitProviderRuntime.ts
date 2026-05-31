@@ -71,6 +71,13 @@ type CourseStartedEmitOpts = {
   extraSinks?: import("@lessonkit/core").TelemetryPipelineSink[];
 };
 
+/** Result of a course_started emit attempt (internal). */
+type CourseStartedEmitResult = "emitted" | "filtered" | "failed";
+
+function isCourseStartedSinkSettled(result: CourseStartedEmitResult): boolean {
+  return result === "emitted";
+}
+
 function buildCourseStartedEvent(opts: CourseStartedEmitOpts): TelemetryEvent | null {
   const pluginCtx = buildPluginContext({
     courseId: opts.courseId,
@@ -94,7 +101,7 @@ function emitCourseStartedPipelineOnly(
     storage: ReturnType<typeof createSessionStoragePort>;
     event: TelemetryEvent;
   },
-): boolean {
+): CourseStartedEmitResult {
   const pluginCtx = buildPluginContext({
     courseId: opts.courseId,
     sessionId: opts.sessionId,
@@ -112,10 +119,10 @@ function emitCourseStartedPipelineOnly(
       extraSinks: opts.extraSinks,
     });
     markCourseStarted(opts.storage, opts.sessionId, opts.courseId);
-    return true;
+    return "emitted";
   } catch {
     /* v8 ignore next -- xAPI/bridge failures leave session dedupe unmarked so a later effect can retry */
-    return false;
+    return "failed";
   }
 }
 
@@ -123,9 +130,9 @@ function emitCourseStarted(opts: CourseStartedEmitOpts & {
   tracking: TrackingClient;
   xapi: XAPIClient | null;
   storage: ReturnType<typeof createSessionStoragePort>;
-}): boolean {
+}): CourseStartedEmitResult {
   const event = buildCourseStartedEvent(opts);
-  if (event === null) return true;
+  if (event === null) return "filtered";
 
   const trackingAlreadyEmitted = hasCourseStartedEmittedToTracking(
     opts.storage,
@@ -139,7 +146,7 @@ function emitCourseStarted(opts: CourseStartedEmitOpts & {
       markCourseStartedEmittedToTracking(opts.storage, opts.sessionId, opts.courseId);
     } catch {
       /* v8 ignore next -- tracking sink failure leaves dedupe unmarked so a later effect can retry */
-      return false;
+      return "failed";
     }
   }
 
@@ -152,9 +159,9 @@ function emitCourseStartedToTrackingOnly(
     tracking: TrackingClient;
     storage: ReturnType<typeof createSessionStoragePort>;
   },
-): boolean {
+): CourseStartedEmitResult {
   const event = buildCourseStartedEvent(opts);
-  if (event === null) return true;
+  if (event === null) return "filtered";
 
   const trackingAlreadyEmitted = hasCourseStartedEmittedToTracking(
     opts.storage,
@@ -167,7 +174,7 @@ function emitCourseStartedToTrackingOnly(
       opts.tracking.track(event);
       markCourseStartedEmittedToTracking(opts.storage, opts.sessionId, opts.courseId);
     } catch {
-      return false;
+      return "failed";
     }
   }
 
@@ -187,9 +194,9 @@ function emitCourseStartedToTrackingOnly(
       lxpackBridge: opts.lxpackBridge,
       extraSinks: opts.extraSinks,
     });
-    return true;
+    return "emitted";
   } catch {
-    return false;
+    return "failed";
   }
 }
 
@@ -197,7 +204,7 @@ function emitPendingCourseStarted(opts: CourseStartedEmitOpts & {
   tracking: TrackingClient;
   xapi: XAPIClient | null;
   storage: ReturnType<typeof createSessionStoragePort>;
-}): boolean {
+}): CourseStartedEmitResult {
   const trackingEmitted = hasCourseStartedEmittedToTracking(
     opts.storage,
     opts.sessionId,
@@ -210,13 +217,13 @@ function emitPendingCourseStarted(opts: CourseStartedEmitOpts & {
   }
   if (trackingEmitted && !sessionStarted) {
     const event = buildCourseStartedEvent(opts);
-    if (event === null) return true;
+    if (event === null) return "filtered";
     return emitCourseStartedPipelineOnly({ ...opts, event });
   }
   if (!trackingEmitted && !sessionStarted) {
     return emitCourseStarted(opts);
   }
-  return true;
+  return "emitted";
 }
 
 function assertTrackingSinkConfig(tracking?: LessonkitConfig["tracking"]): void {
@@ -473,7 +480,7 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
     if (!trackingActive) {
       courseStartedEmittedToSinkRef.current = false;
     } else if (!courseStartedEmittedToSinkRef.current) {
-      const emitted = emitPendingCourseStarted({
+      const result = emitPendingCourseStarted({
         pluginHost: pluginHostRef.current,
         tracking: next,
         xapi: xapiRef.current,
@@ -485,10 +492,7 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
         lxpackBridge: lxpackBridgeModeRef.current,
         extraSinks: extraSinksRef.current,
       });
-      if (emitted) {
-        markCourseStartedEmittedToTracking(defaultStorage, sessionId, cid);
-      }
-      courseStartedEmittedToSinkRef.current = emitted;
+      courseStartedEmittedToSinkRef.current = isCourseStartedSinkSettled(result);
     } else if (trackingActive) {
       courseStartedEmittedToSinkRef.current = true;
     }
@@ -585,7 +589,7 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
 
       /* v8 ignore start -- backup emit when tracking effect did not mark course_started */
       if (!courseStartedEmittedToSinkRef.current) {
-        const emitted = emitPendingCourseStarted({
+        const result = emitPendingCourseStarted({
           pluginHost: pluginHostRef.current,
           tracking: trackingRef.current,
           xapi: xapiRef.current,
@@ -597,7 +601,7 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
           lxpackBridge: lxpackBridgeModeRef.current,
           extraSinks: extraSinksRef.current,
         });
-        courseStartedEmittedToSinkRef.current = emitted;
+        courseStartedEmittedToSinkRef.current = isCourseStartedSinkSettled(result);
       }
       /* v8 ignore stop */
     })();

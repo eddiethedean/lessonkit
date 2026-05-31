@@ -39,15 +39,20 @@ export function parseLessonkitManifest(
   const config = raw as Record<string, unknown>;
   const issues: ManifestParseIssue[] = [];
 
-  if (config.schemaVersion !== 1) {
+  let schemaVersion = config.schemaVersion;
+  if (schemaVersion === "1") {
+    schemaVersion = 1;
+  }
+  if (schemaVersion !== 1) {
     issues.push({
       path: "schemaVersion",
       message: `must be 1 (got ${String(config.schemaVersion)})`,
     });
   }
 
-  const name = config.name;
-  if (typeof name !== "string" || !name.trim()) {
+  const nameRaw = config.name;
+  const name = typeof nameRaw === "string" ? nameRaw.trim() : "";
+  if (!name) {
     issues.push({ path: "name", message: "must be a non-empty string" });
   }
 
@@ -128,7 +133,7 @@ export function parseLessonkitManifest(
     ok: true,
     manifest: {
       schemaVersion: 1,
-      name: name as string,
+      name,
       course: validation.descriptor,
       paths,
     },

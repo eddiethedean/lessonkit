@@ -1,4 +1,6 @@
 import * as fsp from "node:fs/promises";
+import { randomUUID } from "node:crypto";
+import { dirname, join } from "node:path";
 
 async function pathExists(path: string): Promise<boolean> {
   try {
@@ -20,29 +22,45 @@ async function renameOrCopy(from: string, to: string): Promise<void> {
   }
 }
 
+async function assertNoLegacyPromoteArtifacts(outDir: string): Promise<void> {
+  const legacyTmp = `${outDir}.tmp-promote`;
+  const legacyBak = `${outDir}.bak`;
+  const stale: string[] = [];
+  if (await pathExists(legacyTmp)) stale.push(legacyTmp);
+  if (await pathExists(legacyBak)) stale.push(legacyBak);
+  if (stale.length) {
+    throw new Error(
+      `[lessonkit/lxpack] cannot promote: remove stale packaging artifacts from a previous failed run: ${stale.join(", ")}`,
+    );
+  }
+}
+
 /**
  * Atomically replace `outDir` with the packaged tree at `stagingDir`.
  * Restores the previous `outDir` when promote fails after a backup rename.
  */
 export async function promoteStagingToOutDir(stagingDir: string, outDir: string): Promise<void> {
-  const tmpPromote = `${outDir}.tmp-promote`;
-  const backup = `${outDir}.bak`;
+  await assertNoLegacyPromoteArtifacts(outDir);
+
+  const parent = dirname(outDir);
+  const tmpPromote = await fsp.mkdtemp(join(parent, ".lk-promote-"));
 
   await renameOrCopy(stagingDir, tmpPromote);
 
   const hadOutDir = await pathExists(outDir);
-  if (hadOutDir) {
+  const backup = hadOutDir ? await fsp.mkdtemp(join(parent, ".lk-backup-")) : undefined;
+  if (hadOutDir && backup) {
     await renameOrCopy(outDir, backup);
   }
 
   try {
     await renameOrCopy(tmpPromote, outDir);
   } catch (promoteError) {
-    if (hadOutDir) {
+    if (hadOutDir && backup) {
       try {
         await renameOrCopy(backup, outDir);
       } catch (restoreError) {
-        const failedPromote = `${outDir}.failed-promote-${Date.now()}`;
+        const failedPromote = join(parent, `.lk-failed-promote-${randomUUID()}`);
         try {
           await renameOrCopy(tmpPromote, failedPromote);
         } catch {
@@ -69,7 +87,7 @@ export async function promoteStagingToOutDir(stagingDir: string, outDir: string)
       }
       throw promoteError;
     }
-    const failedPromote = `${outDir}.failed-promote-${Date.now()}`;
+    const failedPromote = join(parent, `.lk-failed-promote-${randomUUID()}`);
     try {
       await renameOrCopy(tmpPromote, failedPromote);
     } catch {
@@ -78,7 +96,7 @@ export async function promoteStagingToOutDir(stagingDir: string, outDir: string)
     throw promoteError;
   }
 
-  if (hadOutDir) {
+  if (backup) {
     await fsp.rm(backup, { recursive: true, force: true }).catch(() => undefined);
   }
 }

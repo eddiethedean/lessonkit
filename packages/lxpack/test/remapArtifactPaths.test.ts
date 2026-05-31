@@ -46,4 +46,13 @@ describe("remapArtifactPaths", () => {
     const outside = resolve("/elsewhere/pkg.zip");
     expect(remapArtifactPaths(resolve("/staging"), resolve("/out"), outside)).toBe(outside);
   });
+
+  it("remaps when staging root differs only by drive letter casing on win32 paths", () => {
+    const stagingRoot = pathWin32.resolve("c:\\lxpack\\staging");
+    const outDir = pathWin32.resolve("C:\\lxpack\\out");
+    const artifact = pathWin32.resolve("C:\\lxpack\\staging\\course-scorm12.zip");
+    expect(remapArtifactPaths(stagingRoot, outDir, artifact)).toBe(
+      pathWin32.join(outDir, "course-scorm12.zip"),
+    );
+  });
 });

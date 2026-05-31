@@ -5,6 +5,24 @@ import { tmpdir } from "node:os";
 import { parseLessonkitManifest } from "../src/manifest";
 
 describe("parseLessonkitManifest", () => {
+  it("accepts schemaVersion as string \"1\"", () => {
+    const result = parseLessonkitManifest({
+      schemaVersion: "1",
+      name: "  demo  ",
+      course: {
+        courseId: "demo",
+        title: "Demo",
+        layout: "single-spa",
+        lessons: [{ id: "l1", title: "L1" }],
+      },
+    });
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.manifest.schemaVersion).toBe(1);
+      expect(result.manifest.name).toBe("demo");
+    }
+  });
+
   it("parses a valid manifest", () => {
     const result = parseLessonkitManifest({
       schemaVersion: 1,

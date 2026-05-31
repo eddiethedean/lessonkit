@@ -1,10 +1,11 @@
-import { join, resolve, win32 } from "node:path";
+import { isAbsolute, join, resolve, win32 } from "node:path";
 import type { ExportTarget } from "@lxpack/api";
 import {
   assertRealPathUnderRoot,
   assertResolvedPathUnderRoot,
   isResolvedPathUnderRoot,
   isSafeRelativeSpaPath,
+  relativePathUnderRoot,
   resolveComparablePath,
 } from "../spaPath";
 import type { PackageLessonkitCourseOptions } from "../packageCourse";
@@ -27,7 +28,7 @@ export function validatePackageInputs(
 
   if (projectRoot) {
     try {
-      assertResolvedPathUnderRoot(projectRoot, outDir);
+      assertRealPathUnderRoot(projectRoot, outDir);
     } catch (err) {
       return {
         ok: false,
@@ -118,12 +119,13 @@ export function remapArtifactPaths(
   if (!isResolvedPathUnderRoot(stagingRoot, resolved)) {
     return artifactPath;
   }
-  const stagingResolved = resolveComparablePath(stagingRoot);
-  const relative =
-    resolved === stagingResolved ? "" : resolved.slice(stagingResolved.length).replace(/^[/\\]/, "");
-  if (!relative) return outDir;
-  if (/^[a-zA-Z]:[/\\]/.test(outDir)) {
-    return win32.join(outDir, relative.replace(/\//g, win32.sep));
+  const rel = relativePathUnderRoot(stagingRoot, resolved);
+  if (rel.startsWith("..") || isAbsolute(rel)) {
+    return artifactPath;
   }
-  return join(outDir, relative);
+  if (!rel) return outDir;
+  if (/^[a-zA-Z]:[/\\]/.test(outDir)) {
+    return win32.join(outDir, rel.replace(/\//g, win32.sep));
+  }
+  return join(outDir, rel);
 }

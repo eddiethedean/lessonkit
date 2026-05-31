@@ -1,6 +1,6 @@
 import { isAbsolute, resolve } from "node:path";
 import type { DescriptorValidationIssue } from "./validateDescriptor";
-import { assertResolvedPathUnderRoot, isSafeRelativeSpaPath } from "./spaPath";
+import { assertRealPathUnderRoot, isSafeRelativeSpaPath } from "./spaPath";
 
 export type ProjectPathsInput = {
   spaDistDir?: string;
@@ -22,7 +22,7 @@ function validatePathField(
     return;
   }
   try {
-    assertResolvedPathUnderRoot(projectRoot, resolve(projectRoot, value));
+    assertRealPathUnderRoot(projectRoot, resolve(projectRoot, value));
   } catch {
     issues.push({
       path: fieldPath,
@@ -66,13 +66,13 @@ export function resolveSafePackageOutputOverride(
   }
   if (isAbsolute(trimmed)) {
     const resolved = resolve(trimmed);
-    assertResolvedPathUnderRoot(root, resolved);
+    assertRealPathUnderRoot(root, resolved);
     return resolved;
   }
   if (!isSafeRelativeSpaPath(trimmed)) {
     throw new Error(`unsafe output path: ${override}`);
   }
   const resolved = resolve(root, trimmed);
-  assertResolvedPathUnderRoot(root, resolved);
+  assertRealPathUnderRoot(root, resolved);
   return resolved;
 }

@@ -45,7 +45,7 @@ describe("promoteStagingToOutDir", () => {
     fspMocks.rename.mockImplementation(async (src, dest) => {
       const srcStr = String(src);
       const destStr = String(dest);
-      if (srcStr.endsWith(".tmp-promote") && destStr === outDir) {
+      if (srcStr.includes(".lk-promote-") && destStr === outDir) {
         throw new Error("simulated promote failure");
       }
       return actualFsp.rename(src, dest);
@@ -58,7 +58,7 @@ describe("promoteStagingToOutDir", () => {
     expect(await readFile(join(outDir, "preserve-me.txt"), "utf-8")).toBe("original");
 
     const entries = await readdir(root);
-    expect(entries.some((name) => name.startsWith("course.failed-promote-"))).toBe(true);
+    expect(entries.some((name) => name.startsWith(".lk-failed-promote-"))).toBe(true);
   });
 
   it("warns when restore fails after promote error", async () => {
@@ -74,17 +74,17 @@ describe("promoteStagingToOutDir", () => {
     fspMocks.rename.mockImplementation(async (src, dest) => {
       const srcStr = String(src);
       const destStr = String(dest);
-      if (srcStr.endsWith(".tmp-promote") && destStr === outDir) {
+      if (srcStr.includes(".lk-promote-") && destStr === outDir) {
         throw new Error("simulated promote failure");
       }
-      if (destStr === outDir && srcStr.endsWith(".bak")) {
+      if (destStr === outDir && srcStr.includes(".lk-backup-")) {
         throw new Error("restore failed");
       }
       return actualFsp.rename(src, dest);
     });
 
     await expect(promoteStagingToOutDir(stagingDir, outDir)).rejects.toThrow(
-      /could not restore.*Recovery: previous output may be in .*\.bak/,
+      /could not restore.*Recovery: previous output may be in .*\.lk-backup-/,
     );
   });
 
@@ -100,7 +100,7 @@ describe("promoteStagingToOutDir", () => {
     fspMocks.rename.mockImplementation(async (src, dest) => {
       const srcStr = String(src);
       const destStr = String(dest);
-      if (srcStr.endsWith(".tmp-promote") && destStr === outDir) {
+      if (srcStr.includes(".lk-promote-") && destStr === outDir) {
         throw new Error("simulated promote failure");
       }
       return actualFsp.rename(src, dest);
@@ -111,5 +111,18 @@ describe("promoteStagingToOutDir", () => {
     );
 
     expect(await readFile(join(stagingDir, "course.yaml"), "utf-8")).toBe("title: New package");
+  });
+
+  it("rejects promote when legacy .bak or .tmp-promote artifacts exist", async () => {
+    const root = await makeTempDir();
+    const outDir = join(root, "course");
+    const stagingDir = join(root, "staging");
+    await mkdir(outDir, { recursive: true });
+    await mkdir(stagingDir, { recursive: true });
+    await writeFile(`${outDir}.bak`, "stale", "utf-8");
+
+    await expect(promoteStagingToOutDir(stagingDir, outDir)).rejects.toThrow(
+      /remove stale packaging artifacts/,
+    );
   });
 });

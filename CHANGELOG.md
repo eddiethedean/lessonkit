@@ -7,6 +7,13 @@ All notable changes to the LessonKit monorepo are documented here. Published pac
 
 Patch release: stronger TypeScript typing across the monorepo with no intended runtime API breaks.
 
+### Fixed
+
+- **@lessonkit/react**: Do not mark `course_started` as delivered to the tracking sink when a telemetry plugin filters the event; retries when tracking enables after xAPI bootstrap or when the filter is removed.
+- **@lessonkit/lxpack**: Validate `outDir`, manifest paths, and absolute `--out` overrides with `realpath` (blocks symlink escapes); harden promote with unique temp dirs and clear errors for legacy `.bak` / `.tmp-promote` artifacts.
+- **@lessonkit/lxpack**: Coerce manifest `schemaVersion: "1"` (string); trim manifest `name`; reject `paths.spaDistDir` of `.` only.
+- **@lessonkit/lxpack**: Case-insensitive path-under-root checks and `path.relative` remapping for Windows-style artifact paths.
+
 ### Changed
 
 - **All `@lessonkit/*` packages**: Discriminated telemetry/CLI result types, ID parse helpers, `validateDescriptor(unknown)`, stricter theme validation, exported component prop types, and `@typescript-eslint/no-explicit-any` enforcement.
