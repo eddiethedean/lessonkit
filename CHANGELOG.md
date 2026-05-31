@@ -17,6 +17,7 @@ Patch release: stronger TypeScript typing across the monorepo with no intended r
 - **@lessonkit/lxpack**: Case-insensitive path-under-root checks and `path.relative` remapping for Windows-style artifact paths.
 - **@lessonkit/cli**: Forward extra Vite CLI args on `lessonkit build`; `package --no-build` fails fast when `dist/` is missing; `--force` requires `--here`.
 - **@lessonkit/core**: `hasCourseStartedPipelineDelivered` / `markCourseStartedPipelineDelivered` session helpers (used by React provider retries).
+- **Integration tests**: Await golden-example Vite build in `beforeAll` so `lessonkit package --target standalone` does not race a missing `dist/`.
 
 ### Changed
 

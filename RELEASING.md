@@ -11,18 +11,24 @@ Published packages: `@lessonkit/core`, `@lessonkit/xapi`, `@lessonkit/accessibil
 
 > **1.0.0** is the stable public API release. See [MIGRATION-0.x-to-1.0.md](docs/MIGRATION-0.x-to-1.0.md).
 
-### 1.0.1 checklist (maintenance — no tag required unless publishing)
+### 1.0.1 checklist (ready to publish)
 
 | Item | Status |
 |------|--------|
 | All seven `@lessonkit/*` packages at `1.0.1` | Done |
+| Internal `@lessonkit/*` workspace deps pinned to `1.0.1` | Done |
 | Sphinx `docs/conf.py` `release` matches `1.0.1` | Done |
 | `lessonkit init` template pins `^1.0.1` (`copy-template.mjs`) | Done |
-| [CHANGELOG.md](CHANGELOG.md) `## [1.0.1]` documents typing + bugfix pass | Done |
-| `npm run lint` + `typecheck` + `test` + `test:integration` + `test:e2e` | Run before merge |
-| Git tag `v1.0.1` | **Optional** — only when publishing to npm |
+| [CHANGELOG.md](CHANGELOG.md) `## [1.0.1]` documents the patch | Done |
+| No pending `.changeset/*.md` files | Done (only `config.json`) |
+| `main` CI green | Done — [CI run 26723716648](https://github.com/eddiethedean/lessonkit/actions/runs/26723716648) (2026-05-31) |
+| `npm run lint` + `typecheck` + `test` + `coverage` | Verified locally (2026-05-31) |
+| `npm run test:integration` + `test:e2e` + `build-storybook` | Verified locally (2026-05-31) |
+| `npm run conformance:lxpack` + `conformance:golden` | Verified locally (2026-05-31) |
+| `npm audit --omit=dev --audit-level=high` | 0 vulnerabilities (2026-05-31) |
+| Git tag `v1.0.1` | **Create when ready** — triggers npm publish |
 
-> **Do not create or push a `v1.0.1` git tag** unless you intend to publish that version to npm.
+> **Do not create or push a `v1.0.1` git tag** until you intend to publish that version to npm.
 
 ### 1.0.0 checklist (before tagging)
 
@@ -171,8 +177,8 @@ Published packages: `@lessonkit/core`, `@lessonkit/xapi`, `@lessonkit/accessibil
 3. When ready to publish, create and push the version tag (triggers [`.github/workflows/release.yml`](.github/workflows/release.yml)):
 
    ```bash
-   git tag v1.0.0
-   git push origin v1.0.0
+   git tag v1.0.1
+   git push origin v1.0.1
    ```
 
 4. Verify the **Release** workflow on GitHub Actions and packages on [npm](https://www.npmjs.com/org/lessonkit).
@@ -181,7 +187,7 @@ The release job sets each package version from the tag, aligns `@lessonkit/*` de
 
 ## After release
 
-- Confirm npm shows `1.0.0` for each `@lessonkit/*` package.
+- Confirm npm shows `1.0.1` for each `@lessonkit/*` package.
 - Optional: create a GitHub Release from the tag with notes copied from [CHANGELOG.md](CHANGELOG.md).
 
 ## Changesets
