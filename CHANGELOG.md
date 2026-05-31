@@ -3,6 +3,15 @@
 All notable changes to the LessonKit monorepo are documented here. Published packages use the
 [`@lessonkit/*`](https://www.npmjs.com/org/lessonkit) scope.
 
+## [1.0.1] - 2026-05-31
+
+Patch release: stronger TypeScript typing across the monorepo with no intended runtime API breaks.
+
+### Changed
+
+- **All `@lessonkit/*` packages**: Discriminated telemetry/CLI result types, ID parse helpers, `validateDescriptor(unknown)`, stricter theme validation, exported component prop types, and `@typescript-eslint/no-explicit-any` enforcement.
+- **`lessonkit init` template**: Pins `^1.0.1` for `@lessonkit/*`.
+
 ## [1.0.0] - 2026-05-30
 
 **Stable public API** — Studio development gate is open. See [MIGRATION-0.x-to-1.0.md](docs/MIGRATION-0.x-to-1.0.md).

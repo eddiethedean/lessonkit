@@ -11,7 +11,7 @@ Developer tooling, not a timeline authoring tool: **React + telemetry + packagin
 
 | | |
 | --- | --- |
-| **Release** | [1.0.0](https://github.com/eddiethedean/lessonkit/blob/main/CHANGELOG.md) — stable public API |
+| **Release** | [1.0.1](https://github.com/eddiethedean/lessonkit/blob/main/CHANGELOG.md) — stable public API |
 | **npm** | [`@lessonkit/*`](https://www.npmjs.com/org/lessonkit) |
 | **Docs** | [lessonkit.readthedocs.io](https://lessonkit.readthedocs.io/en/latest/) |
 | **Node.js** | 18+ (dev, build, LMS packaging) |
