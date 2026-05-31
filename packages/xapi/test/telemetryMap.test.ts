@@ -99,14 +99,14 @@ describe("telemetryEventToXAPIStatement", () => {
     ).toBe("urn:lessonkit:course:cyber-basics:lesson:phishing-101:block:intro");
   });
 
-  it("returns null for unknown event names", () => {
-    expect(
+  it("throws for unknown event names", () => {
+    expect(() =>
       telemetryEventToXAPIStatement({
         name: "unknown" as "course_started",
         courseId: base.courseId,
         timestamp: base.timestamp,
       }),
-    ).toBeNull();
+    ).toThrow(/Unhandled telemetry event/);
   });
 
   it("createXAPIClient uses mapper URNs", async () => {

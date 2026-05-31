@@ -9,12 +9,14 @@ import {
 import type {
   CourseId,
   LessonId,
+  TelemetryDataFor,
   TelemetryEvent,
   TelemetryEventName,
   TelemetryUser,
   PluginHost,
   TrackingClient,
   HeadlessLessonkitRuntime,
+  TelemetryEmitFn,
 } from "@lessonkit/core";
 import { createLessonkitRuntime, createTrackingClient, assertValidId } from "@lessonkit/core";
 import type { XAPIClient } from "@lessonkit/xapi";
@@ -226,7 +228,7 @@ function assertTrackingSinkConfig(tracking?: LessonkitConfig["tracking"]): void 
 
 export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitRuntime {
   const normalizedCourseId = useMemo(
-    () => assertValidId(config.courseId, "courseId") as CourseId,
+    () => assertValidId(config.courseId, "courseId"),
     [config.courseId],
   );
   const normalizedConfig = useMemo(
@@ -525,8 +527,8 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
     });
   }, []);
 
-  const emitLifecycleEvent = useCallback(
-    (name: TelemetryEventName, data?: unknown, lessonId?: LessonId) => {
+  const emitLifecycleEvent: TelemetryEmitFn = useCallback(
+    (name, data, lessonId) => {
       const event = tryBuildTelemetryEvent({
         name,
         courseId: courseIdRef.current,
@@ -535,7 +537,7 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
         attemptId: attemptIdRef.current,
         user: userRef.current,
         data,
-      });
+      } as Parameters<typeof tryBuildTelemetryEvent>[0]);
       if (!event) return;
       emitWithBridge(trackingRef.current, event);
     },
@@ -543,7 +545,11 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
   );
 
   const track = useCallback(
-    (name: TelemetryEventName, data?: unknown, opts?: { lessonId?: LessonId }) => {
+    <N extends TelemetryEventName>(
+      name: N,
+      data?: TelemetryDataFor<N>,
+      opts?: { lessonId?: LessonId },
+    ) => {
       const event = tryBuildTelemetryEvent({
         name,
         courseId: courseIdRef.current,
@@ -552,7 +558,7 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
         attemptId: attemptIdRef.current,
         user: userRef.current,
         data,
-      });
+      } as Parameters<typeof tryBuildTelemetryEvent>[0]);
       if (!event) return;
       emitWithBridge(trackingRef.current, event);
     },

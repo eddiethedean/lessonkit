@@ -3,7 +3,7 @@ import { Command } from "commander";
 import { runInit } from "./commands/init.js";
 import { runBuild, runDev } from "./commands/dev.js";
 import { runPackage } from "./commands/package.js";
-import { formatCliError } from "./lib/errors.js";
+import { formatCliError, type CliJsonResult } from "./lib/errors.js";
 import type { CliLogger } from "./lib/logger.js";
 import { createLogger } from "./lib/logger.js";
 import { PACKAGE_TARGETS } from "./lib/paths.js";
@@ -13,8 +13,8 @@ const { version } = require("../package.json") as { version: string };
 
 export type { CliLogger } from "./lib/logger.js";
 
-async function handleCommand(
-  fn: () => Promise<{ ok: boolean } & Record<string, unknown>>,
+async function handleCommand<T extends CliJsonResult>(
+  fn: () => Promise<T>,
   logger: CliLogger,
   json: boolean,
 ): Promise<void> {
@@ -110,13 +110,12 @@ export function createProgram(baseLogger: CliLogger = console): Command {
             json: opts.json,
           });
           if (!opts.json && result.ok) {
-            if (result.target === "react-vite" && "distDir" in result) {
-              logger.log(`Built react-vite → ${result.distDir as string}`);
-            } else if ("outputPath" in result || "outputDir" in result) {
-              const dest = (result.outputPath as string | undefined) ?? (result.outputDir as string | undefined);
-              const count = "fileCount" in result ? (result.fileCount as number) : undefined;
+            if (result.command === "package" && result.target === "react-vite") {
+              logger.log(`Built react-vite → ${result.distDir}`);
+            } else if (result.command === "package") {
+              const dest = result.outputPath ?? result.outputDir;
               logger.log(
-                `Packaged ${result.target}${dest ? ` → ${dest}` : ""}${count != null ? ` (${count} files)` : ""}`,
+                `Packaged ${result.target}${dest ? ` → ${dest}` : ""} (${result.fileCount} files)`,
               );
             }
           }

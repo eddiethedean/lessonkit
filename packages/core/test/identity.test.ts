@@ -8,6 +8,10 @@ import {
   deriveId,
   ID_MAX_LENGTH,
   ID_PATTERN,
+  parseBlockId,
+  parseCheckId,
+  parseCourseId,
+  parseLessonId,
   slugifyId,
   validateId,
 } from "../src";
@@ -28,6 +32,24 @@ describe("@lessonkit/core identity", () => {
 
   it("assertValidId throws with message", () => {
     expect(() => assertValidId("!!!")).toThrow(/letter/);
+  });
+
+  it("parse helpers return narrowed ids or null", () => {
+    expect(parseCourseId("course-a")).toBe("course-a");
+    expect(parseCourseId("1bad")).toBeNull();
+    expect(parseLessonId("lesson-a")).toBe("lesson-a");
+    expect(parseLessonId(null)).toBeNull();
+    expect(parseCheckId("check-a")).toBe("check-a");
+    expect(parseCheckId("")).toBeNull();
+    expect(parseBlockId("block-a")).toBe("block-a");
+    expect(parseBlockId("!!!")).toBeNull();
+  });
+
+  it("assertValidId overloads return typed ids", () => {
+    expect(assertValidId("course-a", "courseId")).toBe("course-a");
+    expect(assertValidId("lesson-a", "lessonId")).toBe("lesson-a");
+    expect(assertValidId("check-a", "checkId")).toBe("check-a");
+    expect(assertValidId("block-a", "blockId")).toBe("block-a");
   });
 
   it("slugifyId produces valid ids", () => {

@@ -38,10 +38,12 @@
       "types": "./dist/bridge.d.ts",
       "import": "./dist/bridge.js",
       "require": "./dist/bridge.cjs"
-    }
+    },
+    "./lessonkit-manifest.v1.json": "./lessonkit-manifest.v1.json"
   },
   "files": [
-    "dist"
+    "dist",
+    "lessonkit-manifest.v1.json"
   ],
   "scripts": {
     "build": "tsup src/index.ts src/bridge.ts --format esm,cjs --dts",

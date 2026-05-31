@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lessonkit.dev/schemas/lessonkit-manifest.v1.json",
+  "title": "LessonkitManifestV1",
+  "description": "Root lessonkit.json project manifest (schemaVersion 1)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "name", "course", "paths"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "name": { "type": "string", "minLength": 1 },
+    "course": { "$ref": "#/$defs/LessonkitCourseDescriptor" },
+    "paths": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["spaDistDir", "lxpackOutDir", "outputBaseDir"],
+      "properties": {
+        "spaDistDir": { "type": "string", "minLength": 1 },
+        "lxpackOutDir": { "type": "string", "minLength": 1 },
+        "outputBaseDir": { "type": "string", "minLength": 1 }
+      }
+    }
+  },
+  "$defs": {
+    "LessonkitId": {
+      "type": "string",
+      "pattern": "^[a-zA-Z][a-zA-Z0-9_-]{0,63}$",
+      "maxLength": 64
+    },
+    "LessonkitCourseDescriptor": {
+      "type": "object",
+      "required": ["courseId", "title", "layout", "lessons"],
+      "properties": {
+        "courseId": { "$ref": "#/$defs/LessonkitId" },
+        "title": { "type": "string", "minLength": 1 },
+        "version": { "type": "string" },
+        "layout": { "enum": ["single-spa", "per-lesson-spa"] },
+        "lessons": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/LessonDescriptor" }
+        },
+        "assessments": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/AssessmentDescriptor" }
+        },
+        "theme": {
+          "type": "object",
+          "properties": {
+            "preset": { "enum": ["default", "light", "dark", "brand"] },
+            "theme": { "type": "object" }
+          }
+        },
+        "tracking": {
+          "type": "object",
+          "properties": {
+            "completion": {
+              "type": "object",
+              "properties": {
+                "threshold": { "type": "number", "minimum": 0, "maximum": 1 }
+              }
+            },
+            "xapi": {
+              "type": "object",
+              "properties": {
+                "activityIri": { "type": "string", "minLength": 1 }
+              }
+            }
+          }
+        },
+        "spaDistDir": { "type": "string", "minLength": 1 },
+        "spaLessonId": { "$ref": "#/$defs/LessonkitId" }
+      }
+    },
+    "LessonDescriptor": {
+      "type": "object",
+      "required": ["id", "title"],
+      "properties": {
+        "id": { "$ref": "#/$defs/LessonkitId" },
+        "title": { "type": "string", "minLength": 1 },
+        "spaPath": { "type": "string", "minLength": 1 }
+      }
+    },
+    "AssessmentDescriptor": {
+      "type": "object",
+      "required": ["checkId", "question", "choices", "answer"],
+      "properties": {
+        "checkId": { "$ref": "#/$defs/LessonkitId" },
+        "question": { "type": "string", "minLength": 1 },
+        "choices": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "answer": { "type": "string", "minLength": 1 },
+        "passingScore": { "type": "number", "exclusiveMinimum": 0 }
+      }
+    }
+  }
+}

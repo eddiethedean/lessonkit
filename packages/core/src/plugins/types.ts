@@ -1,4 +1,4 @@
-import type { CourseId, TelemetryEvent, TelemetrySink, TelemetryUser } from "../telemetryTypes";
+import type { CheckId, CourseId, LessonId, TelemetryEvent, TelemetrySink, TelemetryUser } from "../telemetryTypes";
 
 /** Plugin category — aligns with roadmap extension areas. */
 export type LessonkitPluginKind =
@@ -16,8 +16,8 @@ export type LessonkitPluginContext = {
 };
 
 export type AssessmentScoreInput = {
-  checkId: string;
-  lessonId?: string;
+  checkId: CheckId;
+  lessonId?: LessonId;
   response: unknown;
 };
 

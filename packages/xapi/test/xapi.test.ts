@@ -83,7 +83,7 @@ describe("@lessonkit/xapi", () => {
       },
     });
 
-    client.send({ id: "1", timestamp: "t", verb: "v", object: { id: "o" } });
+    client.send({ id: "1", timestamp: "t", verb: "http://adlnet.gov/expapi/verbs/experienced", object: { id: "o" } });
     await Promise.resolve();
     expect(statements).toHaveLength(1);
     expect(statements[0]).toMatchObject({ id: "1" });
@@ -100,7 +100,7 @@ describe("@lessonkit/xapi", () => {
       statements.push(statement);
     });
     const client = createXAPIClient({ transport, courseId });
-    const statement = { id: "inflight-1", timestamp: "t", verb: "v", object: { id: "o" } };
+    const statement: XAPIStatement = { id: "inflight-1", timestamp: "t", verb: "http://adlnet.gov/expapi/verbs/experienced", object: { id: "o" } };
 
     client.send(statement);
     client.send(statement);
@@ -117,7 +117,12 @@ describe("@lessonkit/xapi", () => {
       throw new Error("network");
     });
     const client = createXAPIClient({ transport, courseId, queue });
-    const statement = { id: "dup-1", timestamp: "t", verb: "v", object: { id: "o" } };
+    const statement: XAPIStatement = {
+      id: "dup-1",
+      timestamp: "t",
+      verb: "http://adlnet.gov/expapi/verbs/experienced",
+      object: { id: "o" },
+    };
 
     client.send(statement);
     client.send(statement);
@@ -128,8 +133,8 @@ describe("@lessonkit/xapi", () => {
 
   it("queue flush stops on first transport error and keeps remainder queued", async () => {
     const queue = createInMemoryXAPIQueue();
-    queue.enqueue({ id: "1", timestamp: "t", verb: "v", object: { id: "o" } });
-    queue.enqueue({ id: "2", timestamp: "t", verb: "v", object: { id: "o" } });
+    queue.enqueue({ id: "1", timestamp: "t", verb: "http://adlnet.gov/expapi/verbs/experienced", object: { id: "o" } });
+    queue.enqueue({ id: "2", timestamp: "t", verb: "http://adlnet.gov/expapi/verbs/experienced", object: { id: "o" } });
 
     const transport = vi
       .fn<(statement: unknown) => Promise<void>>(async (_statement: unknown) => {})
@@ -189,8 +194,8 @@ describe("@lessonkit/xapi", () => {
 
   it("coalesces concurrent flush calls so each statement is sent once", async () => {
     const queue = createInMemoryXAPIQueue();
-    queue.enqueue({ id: "1", timestamp: "t", verb: "v", object: { id: "o1" } });
-    queue.enqueue({ id: "2", timestamp: "t", verb: "v", object: { id: "o2" } });
+    queue.enqueue({ id: "1", timestamp: "t", verb: "http://adlnet.gov/expapi/verbs/experienced", object: { id: "o1" } });
+    queue.enqueue({ id: "2", timestamp: "t", verb: "http://adlnet.gov/expapi/verbs/experienced", object: { id: "o2" } });
 
     const delivered: string[] = [];
     let release!: () => void;

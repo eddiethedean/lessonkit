@@ -85,7 +85,7 @@ describe("resolvePackageOutput", () => {
   it("resolves scorm zip path relative to lxpack project", () => {
     const project = {
       root: "/proj",
-      schemaVersion: 1,
+      schemaVersion: 1 as const,
       name: "demo",
       course: {
         courseId: "demo",
@@ -108,7 +108,7 @@ describe("resolvePackageOutput", () => {
   it("uses custom outputBaseDir from project paths", () => {
     const project = {
       root: "/proj",
-      schemaVersion: 1,
+      schemaVersion: 1 as const,
       name: "demo",
       course: {
         courseId: "demo",
@@ -129,7 +129,7 @@ describe("resolvePackageOutput", () => {
   it("resolves --out override under project root", () => {
     const project = {
       root: "/proj",
-      schemaVersion: 1,
+      schemaVersion: 1 as const,
       name: "demo",
       course: {
         courseId: "demo",
@@ -150,7 +150,7 @@ describe("resolvePackageOutput", () => {
   it("rejects --out path traversal", () => {
     const project = {
       root: "/proj",
-      schemaVersion: 1,
+      schemaVersion: 1 as const,
       name: "demo",
       course: {
         courseId: "demo",
@@ -170,7 +170,7 @@ describe("resolvePackageOutput", () => {
   it("resolves standalone directory", () => {
     const project = {
       root: "/proj",
-      schemaVersion: 1,
+      schemaVersion: 1 as const,
       name: "demo",
       course: {
         courseId: "demo",
@@ -205,7 +205,7 @@ describe("loadLessonkitJson", () => {
     await writeFile(
       join(dir, "lessonkit.json"),
       JSON.stringify({
-        schemaVersion: 1,
+        schemaVersion: 1 as const,
         name: "demo",
         course: {
           courseId: "demo",
@@ -226,7 +226,7 @@ describe("loadLessonkitJson", () => {
     await writeFile(
       join(dir, "lessonkit.json"),
       JSON.stringify({
-        schemaVersion: 1,
+        schemaVersion: 1 as const,
         name: "demo",
         course: {
           courseId: "demo",
@@ -247,7 +247,7 @@ describe("loadLessonkitJson", () => {
     await writeFile(
       join(dir, "lessonkit.json"),
       JSON.stringify({
-        schemaVersion: 1,
+        schemaVersion: 1 as const,
         name: "demo",
         course: {
           courseId: "demo",
@@ -269,7 +269,7 @@ describe("loadLessonkitJson", () => {
     await writeFile(
       join(dir, "lessonkit.json"),
       JSON.stringify({
-        schemaVersion: 1,
+        schemaVersion: 1 as const,
         name: "demo",
         course: {
           courseId: "demo",
@@ -290,7 +290,7 @@ describe("loadLessonkitJson", () => {
     await writeFile(
       join(dir, "lessonkit.json"),
       JSON.stringify({
-        schemaVersion: 1,
+        schemaVersion: 1 as const,
         name: "demo",
         course: {
           courseId: "demo",
@@ -312,7 +312,7 @@ describe("loadLessonkitJson", () => {
     await writeFile(
       join(dir, "lessonkit.json"),
       JSON.stringify({
-        schemaVersion: 1,
+        schemaVersion: 1 as const,
         name: "demo",
         course: {
           courseId: "demo",
@@ -358,7 +358,7 @@ describe("findProjectRoot", () => {
     await writeFile(
       join(dir, "lessonkit.json"),
       JSON.stringify({
-        schemaVersion: 1,
+        schemaVersion: 1 as const,
         name: "demo",
         course: {
           courseId: "demo",
@@ -384,7 +384,7 @@ describe("findProjectRoot", () => {
     await writeFile(
       join(dir, "lessonkit.json"),
       JSON.stringify({
-        schemaVersion: 1,
+        schemaVersion: 1 as const,
         name: "demo",
         course: {
           courseId: "demo",
@@ -403,7 +403,7 @@ describe("findProjectRoot", () => {
     await writeFile(
       join(dir, "lessonkit.json"),
       JSON.stringify({
-        schemaVersion: 1,
+        schemaVersion: 1 as const,
         name: "bad",
         course: [{ courseId: "not-valid" }],
       }),
@@ -481,7 +481,7 @@ describe("runInit", () => {
 describe("resolveViteBuildArgs", () => {
   const baseProject = {
     root: "/proj",
-    schemaVersion: 1,
+    schemaVersion: 1 as const,
     name: "demo",
     course: {
       courseId: "demo",
@@ -518,7 +518,7 @@ describe("runBuild", () => {
     await writeFile(
       join(dir, "lessonkit.json"),
       JSON.stringify({
-        schemaVersion: 1,
+        schemaVersion: 1 as const,
         name: "demo",
         course: {
           courseId: "demo",

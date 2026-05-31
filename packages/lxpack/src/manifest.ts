@@ -71,7 +71,7 @@ export function parseLessonkitManifest(
 
   if (issues.length) return { ok: false, issues };
 
-  const validation = validateDescriptor(courseRaw as LessonkitCourseDescriptor);
+  const validation = validateDescriptor(courseRaw);
   if (!validation.ok) {
     for (const i of validation.issues) {
       issues.push({

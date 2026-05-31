@@ -2,24 +2,14 @@ import { readFileSync, existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { dirname, join, parse, resolve } from "node:path";
 import { parseLessonkitManifest } from "@lessonkit/lxpack";
-import type { LessonkitCourseDescriptor } from "@lessonkit/lxpack";
+import type { LessonkitManifest } from "@lessonkit/lxpack";
 import { CliError, EXIT_INVALID_PROJECT } from "./errors.js";
 
 export const LESSONKIT_JSON = "lessonkit.json";
 export const PACKAGE_JSON = "package.json";
 
-export type LessonkitPaths = {
-  spaDistDir: string;
-  lxpackOutDir: string;
-  outputBaseDir: string;
-};
-
-export type LessonkitProject = {
+export type LessonkitProject = LessonkitManifest & {
   root: string;
-  schemaVersion: number;
-  name: string;
-  course: LessonkitCourseDescriptor;
-  paths: LessonkitPaths;
 };
 
 export type PackageJson = {
@@ -81,11 +71,8 @@ export async function loadLessonkitJson(projectRoot: string): Promise<LessonkitP
   }
 
   return {
+    ...parsed.manifest,
     root: projectRoot,
-    schemaVersion: 1,
-    name: parsed.manifest.name,
-    course: parsed.manifest.course,
-    paths: parsed.manifest.paths,
   };
 }
 

@@ -1,20 +1,103 @@
 import { validateId } from "@lessonkit/core";
-import type { ThemePresetName } from "@lessonkit/themes";
-import type { LessonkitCourseDescriptor, SpaLayout } from "./types";
+import type { ExportTarget } from "@lxpack/api";
+import type { LessonkitThemeV1, ThemePresetName } from "@lessonkit/themes";
+import type { AssessmentDescriptor, LessonDescriptor, LessonkitCourseDescriptor, SpaLayout } from "./types";
 import { isSafeRelativeSpaPath } from "./spaPath";
 import { themeToLxpackRuntime } from "./theme";
+import type { ValidationIssue } from "./validationIssue";
 
 const VALID_LAYOUTS: readonly SpaLayout[] = ["single-spa", "per-lesson-spa"];
-const VALID_THEME_PRESETS: readonly ThemePresetName[] = ["default", "light", "dark", "brand"];
+const VALID_THEME_PRESETS = ["default", "light", "dark", "brand"] as const satisfies readonly ThemePresetName[];
 
-export type DescriptorValidationIssue = {
-  path: string;
-  message: string;
-};
+export type DescriptorValidationIssue = ValidationIssue;
 
 export type DescriptorValidationResult =
   | { ok: true; descriptor: LessonkitCourseDescriptor }
   | { ok: false; issues: DescriptorValidationIssue[] };
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function parseLessonDescriptor(raw: unknown): LessonDescriptor {
+  if (!isRecord(raw)) {
+    return { id: "", title: "" };
+  }
+  return {
+    id: typeof raw.id === "string" ? raw.id : "",
+    title: typeof raw.title === "string" ? raw.title : "",
+    spaPath: typeof raw.spaPath === "string" ? raw.spaPath : undefined,
+  };
+}
+
+function parseAssessmentDescriptor(raw: unknown): AssessmentDescriptor {
+  if (!isRecord(raw)) {
+    return { checkId: "", question: "", choices: [], answer: "" };
+  }
+  return {
+    checkId: typeof raw.checkId === "string" ? raw.checkId : "",
+    question: typeof raw.question === "string" ? raw.question : "",
+    choices: Array.isArray(raw.choices)
+      ? raw.choices.filter((c): c is string => typeof c === "string")
+      : [],
+    answer: typeof raw.answer === "string" ? raw.answer : "",
+    passingScore: typeof raw.passingScore === "number" ? raw.passingScore : undefined,
+  };
+}
+
+function parseCourseDescriptorInput(input: unknown): LessonkitCourseDescriptor | null {
+  if (!isRecord(input)) return null;
+
+  const trackingRaw = input.tracking;
+  let tracking: LessonkitCourseDescriptor["tracking"];
+  if (isRecord(trackingRaw)) {
+    const completionRaw = trackingRaw.completion;
+    const xapiRaw = trackingRaw.xapi;
+    tracking = {
+      completion: isRecord(completionRaw)
+        ? {
+            threshold:
+              typeof completionRaw.threshold === "number" ? completionRaw.threshold : undefined,
+          }
+        : undefined,
+      xapi: isRecord(xapiRaw)
+        ? {
+            activityIri:
+              typeof xapiRaw.activityIri === "string" ? xapiRaw.activityIri : undefined,
+          }
+        : undefined,
+    };
+  }
+
+  const themeRaw = input.theme;
+  let theme: LessonkitCourseDescriptor["theme"];
+  if (isRecord(themeRaw)) {
+    theme = {
+      preset:
+        typeof themeRaw.preset === "string"
+          ? (themeRaw.preset as ThemePresetName)
+          : undefined,
+    };
+    if (isRecord(themeRaw.theme)) {
+      theme.theme = themeRaw.theme as LessonkitThemeV1;
+    }
+  }
+
+  return {
+    courseId: typeof input.courseId === "string" ? input.courseId : "",
+    title: typeof input.title === "string" ? input.title : "",
+    version: typeof input.version === "string" ? input.version : undefined,
+    layout: (typeof input.layout === "string" ? input.layout : undefined) as SpaLayout,
+    lessons: Array.isArray(input.lessons) ? input.lessons.map(parseLessonDescriptor) : [],
+    assessments: Array.isArray(input.assessments)
+      ? input.assessments.map(parseAssessmentDescriptor)
+      : undefined,
+    theme,
+    tracking,
+    spaDistDir: typeof input.spaDistDir === "string" ? input.spaDistDir : undefined,
+    spaLessonId: typeof input.spaLessonId === "string" ? input.spaLessonId : undefined,
+  };
+}
 
 function normalizeDescriptor(input: LessonkitCourseDescriptor): LessonkitCourseDescriptor {
   const course = validateId(input.courseId, "courseId");
@@ -50,9 +133,38 @@ function normalizeDescriptor(input: LessonkitCourseDescriptor): LessonkitCourseD
   };
 }
 
-export function validateDescriptor(
-  input: LessonkitCourseDescriptor,
+export function validateDescriptor(input: unknown): DescriptorValidationResult {
+  const parsed = parseCourseDescriptorInput(input);
+  if (parsed === null) {
+    return { ok: false, issues: [{ path: "course", message: "must be an object" }] };
+  }
+  return validateDescriptorParsed(parsed);
+}
+
+export function validateDescriptorForTarget(
+  input: unknown,
+  target?: ExportTarget,
 ): DescriptorValidationResult {
+  const result = validateDescriptor(input);
+  if (!result.ok || !target) return result;
+  if (target !== "xapi" && target !== "cmi5") return result;
+
+  const activityIri = result.descriptor.tracking?.xapi?.activityIri?.trim();
+  if (!activityIri) {
+    return {
+      ok: false,
+      issues: [
+        {
+          path: "course.tracking.xapi.activityIri",
+          message: "tracking.xapi.activityIri is required for xapi and cmi5 export targets",
+        },
+      ],
+    };
+  }
+  return result;
+}
+
+function validateDescriptorParsed(input: LessonkitCourseDescriptor): DescriptorValidationResult {
   const issues: DescriptorValidationIssue[] = [];
 
   const course = validateId(input.courseId, "courseId");

@@ -66,6 +66,14 @@ export type TelemetryEvent =
   | (TelemetryEventBase & { name: "quiz_completed"; lessonId: LessonId; data: QuizCompletedData })
   | (TelemetryEventBase & { name: "interaction"; lessonId?: LessonId; data?: InteractionData });
 
+/** Payload shape for a telemetry event name. */
+export type TelemetryDataFor<N extends TelemetryEventName> = Extract<
+  TelemetryEvent,
+  { name: N }
+> extends { data?: infer D }
+  ? D
+  : never;
+
 export type TelemetrySink = (event: TelemetryEvent) => void | Promise<void>;
 export type TelemetryBatchSink = (events: TelemetryEvent[]) => void | Promise<void>;
 

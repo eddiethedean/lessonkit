@@ -1,3 +1,4 @@
+import { assertNever } from "./assertNever";
 import type {
   CourseId,
   InteractionData,
@@ -6,21 +7,51 @@ import type {
   QuizAnsweredData,
   QuizCompletedData,
   TelemetryEvent,
-  TelemetryEventName,
   TelemetryUser,
 } from "./telemetryTypes";
 import { nowIso } from "./time";
 
-export type BuildTelemetryEventInput = {
-  name: TelemetryEventName;
+export type BuildTelemetryEventContext = {
   courseId: CourseId;
-  lessonId?: LessonId;
   sessionId?: string;
   attemptId?: string;
   user?: TelemetryUser;
-  data?: unknown;
   timestamp?: string;
 };
+
+export type BuildTelemetryEventInput =
+  | (BuildTelemetryEventContext & { name: "course_started"; lessonId?: LessonId; data?: undefined })
+  | (BuildTelemetryEventContext & { name: "course_completed"; lessonId?: LessonId; data?: undefined })
+  | (BuildTelemetryEventContext & {
+      name: "lesson_started";
+      lessonId?: LessonId;
+      data?: LessonLifecycleData;
+    })
+  | (BuildTelemetryEventContext & {
+      name: "lesson_completed";
+      lessonId?: LessonId;
+      data?: LessonLifecycleData;
+    })
+  | (BuildTelemetryEventContext & {
+      name: "lesson_time_on_task";
+      lessonId?: LessonId;
+      data?: LessonLifecycleData;
+    })
+  | (BuildTelemetryEventContext & {
+      name: "quiz_answered";
+      lessonId?: LessonId;
+      data: QuizAnsweredData;
+    })
+  | (BuildTelemetryEventContext & {
+      name: "quiz_completed";
+      lessonId?: LessonId;
+      data: QuizCompletedData;
+    })
+  | (BuildTelemetryEventContext & {
+      name: "interaction";
+      lessonId?: LessonId;
+      data?: InteractionData;
+    });
 
 let warnedMissingQuizLesson = false;
 
@@ -32,6 +63,15 @@ function isDevEnvironment(): boolean {
 /** Reset dev-warning state (tests only). */
 export function resetTelemetryBuilderWarningsForTests(): void {
   warnedMissingQuizLesson = false;
+}
+
+function resolveLessonId(
+  opts: { lessonId?: LessonId; data?: LessonLifecycleData },
+  eventName: string,
+): LessonId {
+  const lessonId = opts.lessonId ?? opts.data?.lessonId;
+  if (!lessonId) throw new Error(`${eventName} requires lessonId`);
+  return lessonId;
 }
 
 /**
@@ -53,49 +93,43 @@ export function buildTelemetryEvent(opts: BuildTelemetryEventInput): TelemetryEv
     case "course_completed":
       return { name: "course_completed", ...base };
     case "lesson_started": {
-      const data = opts.data as LessonLifecycleData | undefined;
-      const lessonId = opts.lessonId ?? data?.lessonId;
-      if (!lessonId) throw new Error("lesson_started requires lessonId");
+      const lessonId = resolveLessonId(opts, "lesson_started");
       return {
         name: "lesson_started",
         ...base,
         lessonId,
-        data: { ...data, lessonId },
+        data: { ...opts.data, lessonId },
       };
     }
     case "lesson_completed":
     case "lesson_time_on_task": {
-      const data = opts.data as LessonLifecycleData | undefined;
-      const lessonId = opts.lessonId ?? data?.lessonId;
-      if (!lessonId) throw new Error(`${opts.name} requires lessonId`);
+      const lessonId = resolveLessonId(opts, opts.name);
       return {
         name: opts.name,
         ...base,
         lessonId,
-        data: { ...data, lessonId },
+        data: { ...opts.data, lessonId },
       };
     }
     case "quiz_answered": {
-      const data = opts.data as QuizAnsweredData;
       const lessonId = opts.lessonId;
       if (!lessonId) throw new Error("quiz_answered requires active lessonId");
-      return { name: "quiz_answered", ...base, lessonId, data };
+      return { name: "quiz_answered", ...base, lessonId, data: opts.data };
     }
     case "quiz_completed": {
-      const data = opts.data as QuizCompletedData;
       const lessonId = opts.lessonId;
       if (!lessonId) throw new Error("quiz_completed requires active lessonId");
-      return { name: "quiz_completed", ...base, lessonId, data };
+      return { name: "quiz_completed", ...base, lessonId, data: opts.data };
     }
     case "interaction":
       return {
         name: "interaction",
         ...base,
         lessonId: opts.lessonId,
-        data: opts.data as InteractionData | undefined,
+        data: opts.data,
       };
     default:
-      return { name: opts.name, ...base } as TelemetryEvent;
+      return assertNever(opts);
   }
 }
 

@@ -1,7 +1,33 @@
 export type Focusable = { focus: () => void };
 
+export type VisuallyHiddenStyle = {
+  position: "absolute";
+  width: string;
+  height: string;
+  padding: number;
+  margin: string;
+  overflow: "hidden";
+  clip: string;
+  whiteSpace: "nowrap";
+  border: number;
+};
+
+export type TrapFocusOptions = {
+  initialFocus?: HTMLElement | "first";
+  restoreFocus?: boolean;
+  allowOutsideClick?: boolean;
+};
+
+export type RovingTabIndexOptions = {
+  itemCount: number;
+  getId?: (index: number) => string;
+  orientation?: "horizontal" | "vertical" | "both";
+  loop?: boolean;
+  initialIndex?: number;
+};
+
 /** Screen-reader-only styles (no external CSS required). */
-export const visuallyHiddenStyle: Record<string, string | number> = {
+export const visuallyHiddenStyle: VisuallyHiddenStyle = {
   position: "absolute",
   width: "1px",
   height: "1px",
@@ -76,11 +102,7 @@ export function getFocusableElements(container: Element): HTMLElement[] {
 
 export function trapFocus(
   container: HTMLElement,
-  opts?: {
-    initialFocus?: HTMLElement | "first";
-    restoreFocus?: boolean;
-    allowOutsideClick?: boolean;
-  },
+  opts?: TrapFocusOptions,
 ): { activate: () => void; deactivate: () => void } {
   const restoreFocus = opts?.restoreFocus ?? true;
   const allowOutsideClick = opts?.allowOutsideClick ?? false;
@@ -176,13 +198,7 @@ export function trapFocus(
   return { activate, deactivate };
 }
 
-export function createRovingTabIndex(opts: {
-  itemCount: number;
-  getId?: (index: number) => string;
-  orientation?: "horizontal" | "vertical" | "both";
-  loop?: boolean;
-  initialIndex?: number;
-}): {
+export function createRovingTabIndex(opts: RovingTabIndexOptions): {
   get activeIndex(): number;
   setActiveIndex: (next: number) => void;
   getItemProps: (index: number) => {

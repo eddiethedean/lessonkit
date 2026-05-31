@@ -1,14 +1,40 @@
 import type { LessonId } from "@lessonkit/core";
 
+export type XAPIVerbIri =
+  | "http://adlnet.gov/expapi/verbs/initialized"
+  | "http://adlnet.gov/expapi/verbs/completed"
+  | "http://adlnet.gov/expapi/verbs/answered"
+  | "http://adlnet.gov/expapi/verbs/experienced";
+
+export type XAPIScore = {
+  raw?: number;
+  max?: number;
+  min?: number;
+  scaled?: number;
+};
+
+export type XAPIResult = {
+  duration?: string;
+  success?: boolean;
+  score?: XAPIScore;
+  completion?: boolean;
+};
+
+export type XAPIObjectDefinition = {
+  name?: Record<string, string>;
+  description?: Record<string, string>;
+  type?: string;
+};
+
 export type XAPIStatement = {
   id: string;
   timestamp: string;
-  verb: string;
+  verb: XAPIVerbIri;
   object: {
     id: string;
-    definition?: Record<string, unknown>;
+    definition?: XAPIObjectDefinition;
   };
-  result?: Record<string, unknown>;
+  result?: XAPIResult;
   context?: Record<string, unknown>;
 };
 
@@ -34,4 +60,3 @@ export type XAPIClient = {
   }) => void;
   completeCourse: () => void;
 };
-

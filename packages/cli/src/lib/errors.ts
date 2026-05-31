@@ -1,3 +1,5 @@
+import type { PackageTarget } from "./targetTypes.js";
+
 export const EXIT_SUCCESS = 0;
 export const EXIT_RUNTIME = 1;
 export const EXIT_INVALID_PROJECT = 2;
@@ -33,24 +35,30 @@ export class CliError extends Error {
   }
 }
 
-export type CliJsonResult =
+export type CliSuccessResult =
+  | { ok: true; command: "init"; projectRoot: string }
+  | { ok: true; command: "dev"; projectRoot: string }
+  | { ok: true; command: "build"; projectRoot: string }
+  | { ok: true; command: "package"; target: "react-vite"; projectRoot: string; distDir: string }
   | {
       ok: true;
-      command?: string;
-      target?: string;
-      projectRoot?: string;
+      command: "package";
+      target: Exclude<PackageTarget, "react-vite">;
+      projectRoot: string;
       outputPath?: string;
       outputDir?: string;
-      distDir?: string;
-      fileCount?: number;
-    }
-  | {
-      ok: false;
-      code: CliErrorCode;
-      message: string;
-      exitCode: number;
-      issues?: CliIssue[];
+      fileCount: number;
     };
+
+export type CliFailureResult = {
+  ok: false;
+  code: CliErrorCode;
+  message: string;
+  exitCode: number;
+  issues?: CliIssue[];
+};
+
+export type CliJsonResult = CliSuccessResult | CliFailureResult;
 
 export function formatCliError(error: unknown): { message: string; exitCode: number; json: CliJsonResult } {
   if (error instanceof CliError) {

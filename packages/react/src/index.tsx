@@ -9,6 +9,16 @@ export {
   resetQuizWarningsForTests,
 } from "./components";
 
+export type {
+  CourseProps,
+  KnowledgeCheckProps,
+  LessonProps,
+  ProgressTrackerProps,
+  QuizProps,
+  ReflectionProps,
+  ScenarioProps,
+} from "./components";
+
 export {
   useCompletion,
   useLessonkit,
@@ -17,7 +27,7 @@ export {
   useTracking,
 } from "./hooks";
 
-export type { LessonkitConfig, LessonkitRuntime } from "./context";
+export type { LessonkitConfig, LessonkitProviderProps, LessonkitRuntime } from "./context";
 export { LessonkitProvider } from "./context";
 
 export type {

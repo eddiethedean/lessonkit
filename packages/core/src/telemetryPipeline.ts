@@ -1,7 +1,7 @@
-import type { TelemetryEvent } from "./telemetryTypes";
+import type { CourseId, TelemetryEvent } from "./telemetryTypes";
 
 export type EmitContext = {
-  courseId: string;
+  courseId: CourseId;
   sessionId?: string;
   attemptId?: string;
 };

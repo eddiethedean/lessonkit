@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, afterEach } from "vitest";
-import type { TelemetryEventName } from "../src/telemetryTypes";
+import type { BuildTelemetryEventInput } from "../src/telemetryBuilder";
 import {
   buildTelemetryEvent,
   resetTelemetryBuilderWarningsForTests,
@@ -13,7 +13,7 @@ afterEach(() => {
 
 describe("buildTelemetryEvent", () => {
   it("throws when lesson lifecycle events lack lessonId", () => {
-    expect(() => buildTelemetryEvent({ name: "lesson_started", courseId: "c", data: {} })).toThrow(
+    expect(() => buildTelemetryEvent({ name: "lesson_started", courseId: "c" })).toThrow(
       /lessonId/,
     );
   });
@@ -65,12 +65,13 @@ describe("buildTelemetryEvent", () => {
     expect(() => buildTelemetryEvent({ name: "lesson_started", courseId: "c" })).toThrow(/lessonId/);
   });
 
-  it("default branch passes through unknown event names", () => {
-    const event = buildTelemetryEvent({
-      name: "future_event" as TelemetryEventName,
-      courseId: "c",
-    });
-    expect(event.name).toBe("future_event");
+  it("default branch rejects unknown event names", () => {
+    expect(() =>
+      buildTelemetryEvent({
+        name: "future_event",
+        courseId: "c",
+      } as unknown as BuildTelemetryEventInput),
+    ).toThrow(/Unexpected value/);
   });
 
   it("builds quiz_answered with lessonId", () => {

@@ -3,12 +3,14 @@ import type {
   CourseId,
   LessonId,
   LessonkitPlugin,
+  TelemetryDataFor,
   TelemetryEventName,
   TelemetryUser,
   PluginHost,
   TrackingClient,
 } from "@lessonkit/core";
 import type { XAPIClient, XAPITransport } from "@lessonkit/xapi";
+import type { LxpackBridgeMode } from "@lessonkit/lxpack/bridge";
 import type { ProgressState } from "./runtime/progress";
 import { useLessonkitProviderRuntime } from "./provider/useLessonkitProviderRuntime";
 
@@ -36,7 +38,7 @@ export type LessonkitConfig = {
   };
   lxpack?: {
     /** Forward completion events to `window.parent.lxpackBridge.v1` when embedded (default `auto`). */
-    bridge?: "auto" | "off";
+    bridge?: LxpackBridgeMode;
   };
   /** Framework plugins (analytics, LMS, assessment, interaction, AI). */
   plugins?: LessonkitPlugin[];
@@ -47,6 +49,11 @@ export type LessonkitConfig = {
 };
 
 export type { ProgressState };
+
+export type LessonkitProviderProps = {
+  config: LessonkitConfig;
+  children: React.ReactNode;
+};
 
 export type LessonkitRuntime = {
   config: LessonkitConfig;
@@ -61,13 +68,17 @@ export type LessonkitRuntime = {
   setActiveLesson: (lessonId: LessonId) => void;
   completeLesson: (lessonId: LessonId) => void;
   completeCourse: () => void;
-  track: (name: TelemetryEventName, data?: unknown, opts?: { lessonId?: LessonId }) => void;
+  track: <N extends TelemetryEventName>(
+    name: N,
+    data?: TelemetryDataFor<N>,
+    opts?: { lessonId?: LessonId },
+  ) => void;
   plugins: PluginHost | null;
 };
 
 export const LessonkitContext = createContext<LessonkitRuntime | null>(null);
 
-export function LessonkitProvider(props: { config: LessonkitConfig; children: React.ReactNode }) {
+export function LessonkitProvider(props: LessonkitProviderProps) {
   const runtime = useLessonkitProviderRuntime(props.config);
   return <LessonkitContext.Provider value={runtime}>{props.children}</LessonkitContext.Provider>;
 }

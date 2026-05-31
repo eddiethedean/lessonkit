@@ -135,6 +135,19 @@ function validateColorsExtra(value: unknown, issues: ThemeValidationIssue[]): Re
   return extra;
 }
 
+function rejectUnknownKeys(
+  obj: Record<string, unknown>,
+  allowed: readonly string[],
+  path: string,
+  issues: ThemeValidationIssue[],
+): void {
+  for (const key of Object.keys(obj)) {
+    if (!allowed.includes(key)) {
+      issues.push({ path: path ? `${path}.${key}` : key, message: "unknown property" });
+    }
+  }
+}
+
 /** Validate a value as a complete `LessonkitThemeV1`. */
 export function validateTheme(input: unknown): ThemeValidationResult {
   const issues: ThemeValidationIssue[] = [];
@@ -144,6 +157,7 @@ export function validateTheme(input: unknown): ThemeValidationResult {
   }
 
   const raw = input as Record<string, unknown>;
+  rejectUnknownKeys(raw, ["name", "colors", "spacing", "typography", "radius", "shadows"], "", issues);
 
   if (!isNonEmptyString(raw.name)) {
     issues.push({ path: "name", message: "required non-empty string" });
@@ -152,13 +166,27 @@ export function validateTheme(input: unknown): ThemeValidationResult {
   const colorsBase = validateRequiredGroup("colors", raw.colors, COLOR_KEYS, issues);
   let colorsExtra: Record<string, string> | undefined;
   if (raw.colors !== null && typeof raw.colors === "object" && !Array.isArray(raw.colors)) {
-    colorsExtra = validateColorsExtra((raw.colors as Record<string, unknown>).extra, issues);
+    const colorsObj = raw.colors as Record<string, unknown>;
+    rejectUnknownKeys(colorsObj, [...COLOR_KEYS, "extra"], "colors", issues);
+    colorsExtra = validateColorsExtra(colorsObj.extra, issues);
   }
 
   const spacing = validateRequiredGroup("spacing", raw.spacing, SPACING_KEYS, issues);
+  if (raw.spacing !== null && typeof raw.spacing === "object" && !Array.isArray(raw.spacing)) {
+    rejectUnknownKeys(raw.spacing as Record<string, unknown>, SPACING_KEYS, "spacing", issues);
+  }
   const typography = validateRequiredGroup("typography", raw.typography, TYPOGRAPHY_KEYS, issues);
+  if (raw.typography !== null && typeof raw.typography === "object" && !Array.isArray(raw.typography)) {
+    rejectUnknownKeys(raw.typography as Record<string, unknown>, TYPOGRAPHY_KEYS, "typography", issues);
+  }
   const radius = validateRequiredGroup("radius", raw.radius, RADIUS_KEYS, issues);
+  if (raw.radius !== null && typeof raw.radius === "object" && !Array.isArray(raw.radius)) {
+    rejectUnknownKeys(raw.radius as Record<string, unknown>, RADIUS_KEYS, "radius", issues);
+  }
   const shadows = validateRequiredGroup("shadows", raw.shadows, SHADOW_KEYS, issues);
+  if (raw.shadows !== null && typeof raw.shadows === "object" && !Array.isArray(raw.shadows)) {
+    rejectUnknownKeys(raw.shadows as Record<string, unknown>, SHADOW_KEYS, "shadows", issues);
+  }
 
   if (issues.length > 0) {
     return { ok: false, issues };

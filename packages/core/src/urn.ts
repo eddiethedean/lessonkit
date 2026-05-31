@@ -1,4 +1,4 @@
-import type { BlockId, CheckId, CourseId, LessonId } from "./identityTypes";
+import type { BlockId, CheckId, CourseId, LessonId, LessonkitUrn } from "./identityTypes";
 import { assertValidId } from "./validateId";
 
 export type LessonkitUrnParts = {
@@ -12,7 +12,7 @@ export type LessonkitUrnParts = {
  * Build a stable LessonKit URN for courses, lessons, checks, and blocks.
  * Segments are validated and encoded in path order.
  */
-export function buildLessonkitUrn(parts: LessonkitUrnParts): string {
+export function buildLessonkitUrn(parts: LessonkitUrnParts): LessonkitUrn {
   const courseId = assertValidId(parts.courseId, "courseId");
   let urn = `urn:lessonkit:course:${courseId}`;
 

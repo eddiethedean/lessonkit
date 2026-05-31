@@ -21,6 +21,16 @@ npm test
 | `npm run audit:ci` | Dependency audit |
 | `npm run test:integration` | CLI pipeline integration (Node 18+) |
 
+## TypeScript conventions
+
+The monorepo uses `strict: true` via [`tsconfig.base.json`](https://github.com/eddiethedean/lessonkit/blob/main/tsconfig.base.json). When adding or changing types:
+
+- **Validators take `unknown`** — parse JSON and narrow with guards before asserting domain types. Do not cast `as LessonkitCourseDescriptor` (or similar) before validation completes.
+- **Discriminated unions at boundaries** — CLI JSON output, manifest parse results, and telemetry events should narrow on a tag field (`ok`, `command`, `name`, etc.).
+- **Exhaustive switches** — use `assertNever` from `@lessonkit/core` in `default` branches when switching on a closed union.
+- **No explicit `any`** — ESLint enforces `@typescript-eslint/no-explicit-any` on production `src/`; tests and e2e may stay relaxed.
+- **Identity IDs** — `CourseId`, `LessonId`, and `CheckId` are string aliases in 1.x; use `validateId` / `assertValidId` at trust boundaries. True opaque branded IDs are planned for 2.0.
+
 ## Package build order
 
 Root `build:packages` builds `core` → `xapi` → `accessibility` → `themes` → `lxpack` → `react` → `cli`.

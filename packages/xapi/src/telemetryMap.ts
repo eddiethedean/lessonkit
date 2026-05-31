@@ -1,6 +1,7 @@
 import type { TelemetryEvent } from "@lessonkit/core";
+import { assertNever } from "@lessonkit/core";
 import { buildLessonkitUrn } from "@lessonkit/core";
-import type { XAPIStatement } from "./types";
+import type { XAPIResult, XAPIStatement, XAPIVerbIri } from "./types";
 import { cryptoRandomId } from "./id";
 import { formatDurationMs } from "./duration";
 
@@ -9,7 +10,7 @@ const XAPIVerbs = {
   completed: "http://adlnet.gov/expapi/verbs/completed",
   answered: "http://adlnet.gov/expapi/verbs/answered",
   experienced: "http://adlnet.gov/expapi/verbs/experienced",
-} as const;
+} as const satisfies Record<string, XAPIVerbIri>;
 
 /**
  * Map a LessonKit telemetry event to an xAPI statement, or null if the event should not emit xAPI.
@@ -34,7 +35,7 @@ export function telemetryEventToXAPIStatement(event: TelemetryEvent): XAPIStatem
     case "lesson_completed": {
       const lessonId = event.lessonId;
       const data = event.data;
-      const result: Record<string, unknown> = {};
+      const result: XAPIResult = {};
       if (typeof data?.durationMs === "number") {
         result.duration = formatDurationMs(data.durationMs);
       }
@@ -59,7 +60,7 @@ export function telemetryEventToXAPIStatement(event: TelemetryEvent): XAPIStatem
     case "quiz_answered": {
       const lessonId = event.lessonId;
       const checkId = event.data.checkId;
-      const result: Record<string, unknown> = {};
+      const result: XAPIResult = {};
       if (typeof event.data.correct === "boolean") {
         result.success = event.data.correct;
       }
@@ -74,7 +75,7 @@ export function telemetryEventToXAPIStatement(event: TelemetryEvent): XAPIStatem
       const lessonId = event.lessonId;
       const checkId = event.data.checkId;
       const { score, maxScore } = event.data;
-      const result: Record<string, unknown> = {};
+      const result: XAPIResult = {};
       if (typeof score === "number" || typeof maxScore === "number") {
         const max = typeof maxScore === "number" ? maxScore : undefined;
         const raw = typeof score === "number" ? score : undefined;
@@ -104,13 +105,13 @@ export function telemetryEventToXAPIStatement(event: TelemetryEvent): XAPIStatem
       );
     }
     default:
-      return null;
+      return assertNever(event, "Unhandled telemetry event");
   }
 }
 
 function statementFor(
   objectId: string,
-  verb: string,
+  verb: XAPIVerbIri,
   timestamp: string,
   extra?: Pick<XAPIStatement, "result" | "context">,
 ): XAPIStatement {

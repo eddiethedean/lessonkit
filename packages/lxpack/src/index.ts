@@ -8,7 +8,8 @@ export type {
 } from "./types";
 
 export type { DescriptorValidationIssue, DescriptorValidationResult } from "./validateDescriptor";
-export { validateDescriptor } from "./validateDescriptor";
+export { validateDescriptor, validateDescriptorForTarget } from "./validateDescriptor";
+export type { ValidationIssue } from "./validationIssue";
 export type { ProjectPathsInput } from "./validateProjectPaths";
 export {
   resolveSafePackageOutputOverride,

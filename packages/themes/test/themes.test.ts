@@ -38,6 +38,16 @@ describe("@lessonkit/themes", () => {
   it("validateTheme rejects non-objects and invalid extras", () => {
     expect(validateTheme(null).ok).toBe(false);
     expect(validateTheme([]).ok).toBe(false);
+    const unknownRoot = validateTheme({ ...defaultTheme, typo: true });
+    expect(unknownRoot.ok).toBe(false);
+    if (!unknownRoot.ok) {
+      expect(unknownRoot.issues.some((i) => i.message === "unknown property")).toBe(true);
+    }
+    const unknownColorKey = validateTheme({
+      ...defaultTheme,
+      colors: { ...defaultTheme.colors, typo: "#000" },
+    });
+    expect(unknownColorKey.ok).toBe(false);
     const missingName = validateTheme({ ...defaultTheme, name: "" });
     expect(missingName.ok).toBe(false);
     const badExtra = validateTheme({

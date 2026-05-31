@@ -51,7 +51,7 @@ export async function runPackage(opts: PackageOptions): Promise<CliJsonResult> {
         exitCode: EXIT_INVALID_PROJECT,
       });
     }
-    return { ok: true, target, projectRoot: project.root, distDir };
+    return { ok: true, command: "package", target, projectRoot: project.root, distDir };
   }
 
   assertNode18ForLxpack();
@@ -91,6 +91,7 @@ export async function runPackage(opts: PackageOptions): Promise<CliJsonResult> {
 
   return {
     ok: true,
+    command: "package",
     target,
     projectRoot: project.root,
     outputPath: result.outputPath,

@@ -8,8 +8,14 @@ import { buildTelemetryEvent } from "@lessonkit/core";
 import { createTrackingClientFromConfig, disposeTrackingClient } from "../src/runtime/telemetry";
 import { createXapiClientFromConfig } from "../src/runtime/xapi";
 import { emitThroughPipeline, createPipelineFromLegacyConfig } from "../src/runtime/telemetryPipeline";
+import { normalizeComponentId } from "../src/runtime/validateComponentId";
 
 describe("@lessonkit/react runtime modules", () => {
+  it("normalizeComponentId validates generic id paths", () => {
+    expect(normalizeComponentId("block-a", "blockId")).toBe("block-a");
+    expect(normalizeComponentId("custom-id", "customField")).toBe("custom-id");
+  });
+
   it("ports: createDefaultClock returns stable shapes", () => {
     const clock = createDefaultClock();
     expect(typeof clock.nowMs()).toBe("number");

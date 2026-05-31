@@ -2,6 +2,9 @@ import { resolve } from "node:path";
 import { resolveSafePackageOutputOverride, type ExportTarget } from "@lessonkit/lxpack";
 import { CliError, EXIT_INVALID_PROJECT } from "./errors.js";
 import type { LessonkitProject } from "./project.js";
+import { PACKAGE_TARGETS, type PackageTarget } from "./targetTypes.js";
+
+export { PACKAGE_TARGETS, type PackageTarget } from "./targetTypes.js";
 
 export function resolveDistDir(project: LessonkitProject): string {
   return resolve(project.root, project.paths.spaDistDir);
@@ -43,17 +46,6 @@ export function resolveViteBuildArgs(project: LessonkitProject): string[] {
   }
   return args;
 }
-
-export const PACKAGE_TARGETS = [
-  "react-vite",
-  "scorm12",
-  "scorm2004",
-  "xapi",
-  "cmi5",
-  "standalone",
-] as const;
-
-export type PackageTarget = (typeof PACKAGE_TARGETS)[number];
 
 export function parsePackageTarget(value: string | undefined): PackageTarget {
   if (!value) {

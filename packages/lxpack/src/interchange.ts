@@ -1,3 +1,4 @@
+import type { LessonId } from "@lessonkit/core";
 import type { LessonkitInterchangeV1 } from "@lxpack/validators";
 import { extractAssessments } from "./assessments";
 import { mapLessonkitIds } from "./mapIds";
@@ -7,10 +8,29 @@ import type { LessonkitCourseDescriptor } from "./types";
 export type { LessonkitInterchangeV1 } from "@lxpack/validators";
 
 export type SpaLessonEntry = {
-  id: string;
+  id: LessonId;
   title: string;
   path: string;
 };
+
+function mapDescriptorTracking(
+  tracking: LessonkitCourseDescriptor["tracking"],
+): LessonkitInterchangeV1["tracking"] | undefined {
+  if (!tracking) return undefined;
+
+  const mapped: NonNullable<LessonkitInterchangeV1["tracking"]> = {};
+
+  if (tracking.completion?.threshold !== undefined) {
+    mapped.completion = { threshold: tracking.completion.threshold };
+  }
+
+  const activityIri = tracking.xapi?.activityIri?.trim();
+  if (activityIri) {
+    mapped.xapi = { activityIri };
+  }
+
+  return Object.keys(mapped).length > 0 ? mapped : undefined;
+}
 
 export function resolveSpaLessons(descriptor: LessonkitCourseDescriptor): SpaLessonEntry[] {
   const mapped = mapLessonkitIds(descriptor);
@@ -57,7 +77,7 @@ export function descriptorToInterchange(
       type: "spa",
       path: l.path,
     })),
-    tracking: descriptor.tracking as LessonkitInterchangeV1["tracking"],
+    tracking: mapDescriptorTracking(descriptor.tracking),
     runtime: runtime
       ? {
           theme: runtime.theme,

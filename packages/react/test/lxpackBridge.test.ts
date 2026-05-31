@@ -108,15 +108,14 @@ describe("lxpackBridge", () => {
       parent: { lxpack: { completeLesson, submitAssessment } },
     } as unknown as Window);
 
-    forwardTelemetryToLxpack(
-      buildTelemetryEvent({
-        name: "quiz_completed",
-        courseId: "c",
-        lessonId: "l",
-        sessionId: "s",
-        data: {},
-      }),
-    );
+    forwardTelemetryToLxpack({
+      name: "quiz_completed",
+      timestamp: "2026-01-01T00:00:00.000Z",
+      courseId: "c",
+      lessonId: "l",
+      sessionId: "s",
+      data: {} as import("@lessonkit/core").QuizCompletedData,
+    });
     forwardTelemetryToLxpack(
       buildTelemetryEvent({ name: "course_started", courseId: "c", sessionId: "s" }),
     );

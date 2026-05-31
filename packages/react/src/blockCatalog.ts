@@ -35,7 +35,7 @@ export type BlockCatalogEntry = {
   };
 };
 
-export const BLOCK_CATALOG: BlockCatalogEntry[] = [
+export const BLOCK_CATALOG = [
   {
     type: "Course",
     category: "container",
@@ -166,6 +166,12 @@ export const BLOCK_CATALOG: BlockCatalogEntry[] = [
       { name: "question", type: "string", required: true, description: "Question text shown above choices." },
       { name: "choices", type: "string[]", required: true, description: "Radio button choice labels." },
       { name: "answer", type: "string", required: true, description: "Correct choice value (must match one choice)." },
+      {
+        name: "passingScore",
+        type: "number",
+        required: false,
+        description: "Minimum score required to pass (defaults to maxScore when omitted).",
+      },
     ],
     requiredIds: ["checkId"],
     parentConstraints: ["Lesson"],
@@ -214,7 +220,7 @@ export const BLOCK_CATALOG: BlockCatalogEntry[] = [
       emits: [],
     },
   },
-];
+] satisfies BlockCatalogEntry[];
 
 export function buildBlockCatalog(): BlockCatalogEntry[] {
   return BLOCK_CATALOG.map((entry) => ({

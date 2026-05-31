@@ -247,6 +247,12 @@
           "type": "string",
           "required": true,
           "description": "Correct choice value (must match one choice)."
+        },
+        {
+          "name": "passingScore",
+          "type": "number",
+          "required": false,
+          "description": "Minimum score required to pass (defaults to maxScore when omitted)."
         }
       ],
       "requiredIds": [

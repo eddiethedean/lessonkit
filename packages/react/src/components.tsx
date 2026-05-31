@@ -1,8 +1,9 @@
 import React, { useEffect, useId, useMemo, useRef, useState } from "react";
 import type { ChangeEvent } from "react";
 import { visuallyHiddenStyle } from "@lessonkit/accessibility";
-import type { AssessmentScoreResult, BlockId, CheckId, CourseId, LessonId } from "@lessonkit/core";
-import { LessonkitProvider } from "./context";
+import type { AssessmentScoreResult, BlockId, CourseId, LessonId } from "@lessonkit/core";
+import type { AssessmentDescriptor } from "@lessonkit/lxpack";
+import { LessonkitProvider, type LessonkitConfig } from "./context";
 import { useCompletion, useLessonkit, useQuizState } from "./hooks";
 import { LessonContext, useEnclosingLessonId } from "./lessonContext";
 import { getLessonMountCount, registerLessonMount } from "./runtime/lessonMountRegistry";
@@ -16,13 +17,45 @@ export function resetQuizWarningsForTests(): void {
   warnedQuizOutsideLesson = false;
 }
 
-export function Course(props: {
+export type CourseProps = {
   title: string;
   courseId: CourseId;
-  config?: Omit<React.ComponentProps<typeof LessonkitProvider>["config"], "courseId">;
+  config?: Omit<LessonkitConfig, "courseId">;
   children: React.ReactNode;
-}) {
-  const courseId = useMemo(() => normalizeComponentId(props.courseId, "courseId") as CourseId, [props.courseId]);
+};
+
+export type LessonProps = {
+  title: string;
+  lessonId: LessonId;
+  /** When false, unmount does not emit lesson_completed (for routed multi-pane layouts). Default true. */
+  autoCompleteOnUnmount?: boolean;
+  children: React.ReactNode;
+};
+
+export type ScenarioProps = {
+  blockId?: BlockId;
+  children: React.ReactNode;
+};
+
+export type ReflectionProps = {
+  blockId?: BlockId;
+  prompt?: string;
+  hint?: string;
+  value?: string;
+  onChange?: (value: string) => void;
+  children?: React.ReactNode;
+};
+
+export type QuizProps = AssessmentDescriptor;
+
+export type KnowledgeCheckProps = AssessmentDescriptor;
+
+export type ProgressTrackerProps = {
+  totalLessons?: number;
+};
+
+export function Course(props: CourseProps) {
+  const courseId = useMemo(() => normalizeComponentId(props.courseId, "courseId"), [props.courseId]);
 
   const providerConfig = useMemo(
     () => ({ ...props.config, courseId }),
@@ -39,14 +72,8 @@ export function Course(props: {
   );
 }
 
-export function Lesson(props: {
-  title: string;
-  lessonId: LessonId;
-  /** When false, unmount does not emit lesson_completed (for routed multi-pane layouts). Default true. */
-  autoCompleteOnUnmount?: boolean;
-  children: React.ReactNode;
-}) {
-  const lessonId = useMemo(() => normalizeComponentId(props.lessonId, "lessonId") as LessonId, [props.lessonId]);
+export function Lesson(props: LessonProps) {
+  const lessonId = useMemo(() => normalizeComponentId(props.lessonId, "lessonId"), [props.lessonId]);
   const autoComplete = props.autoCompleteOnUnmount !== false;
 
   const { setActiveLesson, config } = useLessonkit();
@@ -80,9 +107,9 @@ export function Lesson(props: {
   );
 }
 
-export function Scenario(props: { blockId?: BlockId; children: React.ReactNode }) {
+export function Scenario(props: ScenarioProps) {
   const blockId = useMemo(
-    () => (props.blockId !== undefined ? (normalizeComponentId(props.blockId, "blockId") as BlockId) : undefined),
+    () => (props.blockId !== undefined ? normalizeComponentId(props.blockId, "blockId") : undefined),
     [props.blockId],
   );
   return (
@@ -92,16 +119,9 @@ export function Scenario(props: { blockId?: BlockId; children: React.ReactNode }
   );
 }
 
-export function Reflection(props: {
-  blockId?: BlockId;
-  prompt?: string;
-  hint?: string;
-  value?: string;
-  onChange?: (value: string) => void;
-  children?: React.ReactNode;
-}) {
+export function Reflection(props: ReflectionProps) {
   const blockId = useMemo(
-    () => (props.blockId !== undefined ? (normalizeComponentId(props.blockId, "blockId") as BlockId) : undefined),
+    () => (props.blockId !== undefined ? normalizeComponentId(props.blockId, "blockId") : undefined),
     [props.blockId],
   );
   const promptId = useId();
@@ -135,13 +155,7 @@ export function Reflection(props: {
   );
 }
 
-export function KnowledgeCheck(props: {
-  checkId: CheckId;
-  question: string;
-  choices: string[];
-  answer: string;
-  passingScore?: number;
-}) {
+export function KnowledgeCheck(props: KnowledgeCheckProps) {
   return (
     <Quiz
       checkId={props.checkId}
@@ -153,14 +167,8 @@ export function KnowledgeCheck(props: {
   );
 }
 
-export function Quiz(props: {
-  checkId: CheckId;
-  question: string;
-  choices: string[];
-  answer: string;
-  passingScore?: number;
-}) {
-  const checkId = useMemo(() => normalizeComponentId(props.checkId, "checkId") as CheckId, [props.checkId]);
+export function Quiz(props: QuizProps) {
+  const checkId = useMemo(() => normalizeComponentId(props.checkId, "checkId"), [props.checkId]);
   const enclosingLessonId = useEnclosingLessonId();
   const missingLesson = enclosingLessonId === undefined;
 
@@ -279,7 +287,7 @@ export function Quiz(props: {
   );
 }
 
-export function ProgressTracker(props: { totalLessons?: number }) {
+export function ProgressTracker(props: ProgressTrackerProps) {
   const { progress } = useLessonkit();
   const completed = progress.completedLessonIds.size;
 

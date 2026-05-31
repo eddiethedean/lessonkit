@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import type { TelemetryEvent, TelemetryEventName } from "@lessonkit/core";
+import type { TelemetryEvent } from "@lessonkit/core";
 import { createTrackingClient } from "@lessonkit/core";
 import { buildTelemetryEvent, emitTelemetry, tryBuildTelemetryEvent } from "../src/runtime/emitTelemetry";
 
@@ -38,7 +38,7 @@ describe("emitTelemetry", () => {
 
   it("buildTelemetryEvent throws when lesson lifecycle events lack lessonId", () => {
     expect(() =>
-      buildTelemetryEvent({ name: "lesson_started", courseId: "c", data: {} }),
+      buildTelemetryEvent({ name: "lesson_started", courseId: "c" }),
     ).toThrow(/lessonId/);
   });
 
@@ -65,13 +65,13 @@ describe("emitTelemetry", () => {
     expect(event.name).toBe("interaction");
   });
 
-  it("buildTelemetryEvent default branch passes through unknown event names", () => {
-    const event = buildTelemetryEvent({
-      name: "future_event" as TelemetryEventName,
-      courseId: "c",
-    });
-    expect(event.name).toBe("future_event");
-    expect(event.courseId).toBe("c");
+  it("buildTelemetryEvent default branch rejects unknown event names", () => {
+    expect(() =>
+      buildTelemetryEvent({
+        name: "future_event",
+        courseId: "c",
+      } as unknown as import("@lessonkit/core").BuildTelemetryEventInput),
+    ).toThrow(/Unexpected value/);
   });
 
   it("forwards lesson_completed to lxpackBridge when embedded", () => {

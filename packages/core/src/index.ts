@@ -3,13 +3,24 @@ export type {
   CheckId,
   CourseId,
   LessonId,
+  LessonkitUrn,
+  IdentityIdPath,
   IdentityValidationIssue,
   IdentityValidationResult,
 } from "./identityTypes";
 
 export { ID_MAX_LENGTH, ID_PATTERN } from "./identityTypes";
 
-export { validateId, assertValidId } from "./validateId";
+export { assertNever } from "./assertNever";
+
+export {
+  validateId,
+  assertValidId,
+  parseCourseId,
+  parseLessonId,
+  parseCheckId,
+  parseBlockId,
+} from "./validateId";
 export { slugifyId, deriveId } from "./slugify";
 export { buildLessonkitUrn, type LessonkitUrnParts } from "./urn";
 
@@ -24,6 +35,7 @@ export type {
   TelemetryEventName,
   TelemetrySink,
   TelemetryUser,
+  TelemetryDataFor,
   TrackingClient,
 } from "./telemetryTypes";
 
@@ -88,6 +100,7 @@ export type {
   HeadlessLessonkitRuntime,
   HeadlessRuntimePorts,
   LessonkitRuntimeVersion,
+  TelemetryEmitFn,
 } from "./runtime/createLessonkitRuntime";
 export { createLessonkitRuntime } from "./runtime/createLessonkitRuntime";
 
@@ -102,6 +115,7 @@ export type {
   LessonkitPluginKind,
   LifecyclePlugin,
   PluginHost,
+  PluginIdentity,
   PluginRegistry,
   TelemetryPlugin,
 } from "./plugins";

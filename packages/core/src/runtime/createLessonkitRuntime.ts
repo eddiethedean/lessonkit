@@ -1,10 +1,11 @@
 import type { CourseId, LessonId } from "../identityTypes";
-import type { TelemetryEventName, TelemetryUser } from "../telemetryTypes";
+import type { TelemetryEvent, TelemetryEventName, TelemetryUser } from "../telemetryTypes";
 import type { PluginRegistry } from "../plugins/types";
 import { createDefaultClock, createSessionStoragePort, type ClockPort, type StoragePort } from "../ports";
 import { createProgressController, type ProgressController, type ProgressState } from "../progress";
 import { resolveSessionId } from "../session";
 import { tryBuildTelemetryEvent } from "../telemetryBuilder";
+import type { TelemetryDataFor } from "../telemetryTypes";
 
 export type LessonkitRuntimeVersion = "v1" | "v2";
 
@@ -24,25 +25,27 @@ export type HeadlessRuntimePorts = {
   clock?: ClockPort;
 };
 
+export type TelemetryEmitFn = {
+  <N extends TelemetryEventName>(
+    name: N,
+    data?: TelemetryDataFor<N>,
+    lessonId?: LessonId,
+  ): void;
+};
+
 export type HeadlessLessonkitRuntime = {
   readonly config: HeadlessLessonkitConfig;
   readonly progress: ProgressController;
   getProgressState: () => ProgressState;
   getSession: () => { sessionId: string; attemptId?: string; user?: TelemetryUser };
   updateConfig: (next: Partial<HeadlessLessonkitConfig>) => void;
-  setActiveLesson: (
-    lessonId: LessonId,
-    emit: (name: TelemetryEventName, data?: unknown, lessonId?: LessonId) => void,
-  ) => void;
-  completeLesson: (
-    lessonId: LessonId,
-    emit: (name: TelemetryEventName, data?: unknown, lessonId?: LessonId) => void,
-  ) => void;
-  completeCourse: (emit: (name: TelemetryEventName, data?: unknown, lessonId?: LessonId) => void) => void;
-  track: (
-    name: TelemetryEventName,
-    data: unknown | undefined,
-    emit: (event: ReturnType<typeof tryBuildTelemetryEvent>) => void,
+  setActiveLesson: (lessonId: LessonId, emit: TelemetryEmitFn) => void;
+  completeLesson: (lessonId: LessonId, emit: TelemetryEmitFn) => void;
+  completeCourse: (emit: TelemetryEmitFn) => void;
+  track: <N extends TelemetryEventName>(
+    name: N,
+    data: TelemetryDataFor<N> | undefined,
+    emit: (event: TelemetryEvent) => void,
     lessonId?: LessonId,
   ) => void;
   resetForCourseChange: (courseId: CourseId) => void;
@@ -75,10 +78,10 @@ export function createLessonkitRuntime(
 
   syncSessionFromConfig(configSnapshot);
 
-  const track = (
-    name: TelemetryEventName,
-    data: unknown | undefined,
-    emit: (event: ReturnType<typeof tryBuildTelemetryEvent>) => void,
+  const track = <N extends TelemetryEventName>(
+    name: N,
+    data: TelemetryDataFor<N> | undefined,
+    emit: (event: TelemetryEvent) => void,
     lessonId?: LessonId,
   ) => {
     const event = tryBuildTelemetryEvent({
@@ -89,7 +92,7 @@ export function createLessonkitRuntime(
       attemptId,
       user,
       data,
-    });
+    } as Parameters<typeof tryBuildTelemetryEvent>[0]);
     if (!event) return;
     emit(event);
   };
@@ -97,7 +100,7 @@ export function createLessonkitRuntime(
   const emitLessonCompleted = (
     lessonId: LessonId,
     durationMs: number | undefined,
-    emitFn: (name: TelemetryEventName, data?: unknown, lessonId?: LessonId) => void,
+    emitFn: TelemetryEmitFn,
   ) => {
     emitFn("lesson_completed", { lessonId, durationMs }, lessonId);
     if (durationMs !== undefined) {
