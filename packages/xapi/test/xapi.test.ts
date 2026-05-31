@@ -192,6 +192,34 @@ describe("@lessonkit/xapi", () => {
     await expect(client.flush()).resolves.toBeUndefined();
   });
 
+  it("flush awaits in-flight direct sends before resolving", async () => {
+    const delivered: XAPIStatement[] = [];
+    let releaseTransport!: () => void;
+    const gate = new Promise<void>((resolve) => {
+      releaseTransport = resolve;
+    });
+    const transport = vi.fn(async (statement: XAPIStatement) => {
+      await gate;
+      delivered.push(statement);
+    });
+    const client = createXAPIClient({ transport });
+    client.send({
+      id: "inflight-1",
+      timestamp: "2020-01-01T00:00:00Z",
+      verb: "http://adlnet.gov/expapi/verbs/experienced",
+      object: { id: "urn:example:activity" },
+    });
+
+    const flushPromise = client.flush();
+    await Promise.resolve();
+    expect(delivered).toHaveLength(0);
+
+    releaseTransport();
+    await flushPromise;
+    expect(delivered).toHaveLength(1);
+    expect(transport).toHaveBeenCalledTimes(1);
+  });
+
   it("coalesces concurrent flush calls so each statement is sent once", async () => {
     const queue = createInMemoryXAPIQueue();
     queue.enqueue({ id: "1", timestamp: "t", verb: "http://adlnet.gov/expapi/verbs/experienced", object: { id: "o1" } });

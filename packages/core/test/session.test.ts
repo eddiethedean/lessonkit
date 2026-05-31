@@ -6,6 +6,8 @@ import {
   hasCourseStartedEmittedToTracking,
   markCourseStarted,
   markCourseStartedEmittedToTracking,
+  hasCourseStartedPipelineDelivered,
+  markCourseStartedPipelineDelivered,
   migrateCourseStartedMark,
   resolveSessionId,
   SESSION_STORAGE_KEY,
@@ -109,6 +111,23 @@ describe("session", () => {
     markCourseStartedEmittedToTracking(storage, "s", undefined);
   });
 
+  it("tracks pipeline delivery separately from session and tracking marks", () => {
+    const store: Record<string, string> = {};
+    const storage = {
+      getItem: (k: string) => store[k] ?? null,
+      setItem: (k: string, v: string) => {
+        store[k] = v;
+      },
+      removeItem: (k: string) => {
+        delete store[k];
+      },
+    };
+
+    expect(hasCourseStartedPipelineDelivered(storage, "s", "c1")).toBe(false);
+    markCourseStartedPipelineDelivered(storage, "s", "c1");
+    expect(hasCourseStartedPipelineDelivered(storage, "s", "c1")).toBe(true);
+  });
+
   it("migrateCourseStartedMark moves tracking dedupe between session ids", () => {
     const store: Record<string, string> = {};
     const storage = {
@@ -123,10 +142,13 @@ describe("session", () => {
 
     markCourseStarted(storage, "old", "c1");
     markCourseStartedEmittedToTracking(storage, "old", "c1");
+    markCourseStartedPipelineDelivered(storage, "old", "c1");
     migrateCourseStartedMark(storage, "old", "new", "c1");
     expect(hasCourseStarted(storage, "new", "c1")).toBe(true);
     expect(hasCourseStartedEmittedToTracking(storage, "new", "c1")).toBe(true);
+    expect(hasCourseStartedPipelineDelivered(storage, "new", "c1")).toBe(true);
     expect(hasCourseStarted(storage, "old", "c1")).toBe(false);
     expect(hasCourseStartedEmittedToTracking(storage, "old", "c1")).toBe(false);
+    expect(hasCourseStartedPipelineDelivered(storage, "old", "c1")).toBe(false);
   });
 });

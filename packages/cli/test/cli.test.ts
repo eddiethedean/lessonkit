@@ -463,6 +463,18 @@ describe("runInit", () => {
     expect(appSource).toContain('courseId="id-9th-grade"');
   });
 
+  it("rejects --force without --here", async () => {
+    await expect(
+      runInit(
+        { name: "my-course", force: true, skipInstall: true },
+        { log: () => {}, error: () => {} },
+      ),
+    ).rejects.toMatchObject({
+      exitCode: EXIT_INVALID_PROJECT,
+      message: expect.stringContaining("--force requires --here"),
+    });
+  });
+
   it("rejects --here --force when the directory has non-dotfile entries", async () => {
     const here = join(parentDir, "existing");
     await mkdir(here, { recursive: true });

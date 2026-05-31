@@ -10,6 +10,7 @@ export function getTabSessionId(storage: StoragePort): string | null {
 
 const COURSE_STARTED_PREFIX = "lessonkit:course_started:";
 const COURSE_STARTED_TRACKING_PREFIX = "lessonkit:course_started_tracking:";
+const COURSE_STARTED_PIPELINE_PREFIX = "lessonkit:course_started_pipeline:";
 
 export function resolveSessionId(storage: StoragePort, provided?: string): string {
   if (provided) return provided;
@@ -26,6 +27,10 @@ function courseStartedStorageKey(sessionId: string, courseId?: CourseId): string
 
 function courseStartedTrackingStorageKey(sessionId: string, courseId?: CourseId): string {
   return `${COURSE_STARTED_TRACKING_PREFIX}${sessionId}:${courseId ?? ""}`;
+}
+
+function courseStartedPipelineStorageKey(sessionId: string, courseId?: CourseId): string {
+  return `${COURSE_STARTED_PIPELINE_PREFIX}${sessionId}:${courseId ?? ""}`;
 }
 
 export function hasCourseStarted(storage: StoragePort, sessionId: string, courseId?: CourseId): boolean {
@@ -56,6 +61,24 @@ export function markCourseStartedEmittedToTracking(
   storage.setItem(courseStartedTrackingStorageKey(sessionId, courseId), "1");
 }
 
+export function hasCourseStartedPipelineDelivered(
+  storage: StoragePort,
+  sessionId: string,
+  courseId?: CourseId,
+): boolean {
+  if (!courseId) return false;
+  return storage.getItem(courseStartedPipelineStorageKey(sessionId, courseId)) === "1";
+}
+
+export function markCourseStartedPipelineDelivered(
+  storage: StoragePort,
+  sessionId: string,
+  courseId?: CourseId,
+): void {
+  if (!courseId) return;
+  storage.setItem(courseStartedPipelineStorageKey(sessionId, courseId), "1");
+}
+
 export function migrateCourseStartedMark(
   storage: StoragePort,
   fromSessionId: string,
@@ -70,5 +93,9 @@ export function migrateCourseStartedMark(
   if (hasCourseStartedEmittedToTracking(storage, fromSessionId, courseId)) {
     markCourseStartedEmittedToTracking(storage, toSessionId, courseId);
     storage.removeItem?.(courseStartedTrackingStorageKey(fromSessionId, courseId));
+  }
+  if (hasCourseStartedPipelineDelivered(storage, fromSessionId, courseId)) {
+    markCourseStartedPipelineDelivered(storage, toSessionId, courseId);
+    storage.removeItem?.(courseStartedPipelineStorageKey(fromSessionId, courseId));
   }
 }

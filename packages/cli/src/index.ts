@@ -47,7 +47,7 @@ export function createProgram(baseLogger: CliLogger = console): Command {
     .option("--skip-install", "Skip npm install")
     .option(
       "--force",
-      "With --here, allow init when the directory is empty or contains only dotfiles",
+      "Requires --here: allow init when the directory is empty or contains only dotfiles",
     )
     .option("--json", "Emit structured JSON result")
     .action(async (name: string | undefined, opts: { here?: boolean; skipInstall?: boolean; force?: boolean; json?: boolean }) => {
@@ -78,7 +78,13 @@ export function createProgram(baseLogger: CliLogger = console): Command {
     );
   });
 
-  addCwdAndJson(program.command("build").description("Production Vite build")).action(
+  addCwdAndJson(
+    program
+      .command("build")
+      .description("Production Vite build")
+      .allowUnknownOption()
+      .allowExcessArguments(),
+  ).action(
     async (opts: { cwd?: string; json?: boolean }, command: Command) => {
       const logger = createLogger({ json: opts.json });
       const viteArgs = command.args;

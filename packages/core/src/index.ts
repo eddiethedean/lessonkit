@@ -81,6 +81,8 @@ export {
   migrateCourseStartedMark,
   hasCourseStartedEmittedToTracking,
   markCourseStartedEmittedToTracking,
+  hasCourseStartedPipelineDelivered,
+  markCourseStartedPipelineDelivered,
 } from "./session";
 
 export type {

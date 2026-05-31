@@ -41,8 +41,18 @@ export async function runPackage(opts: PackageOptions): Promise<CliJsonResult> {
   const project = await loadProject(opts.cwd ?? process.cwd());
   const distDir = resolveDistDir(project);
 
+  if (opts.noBuild && !existsSync(distDir)) {
+    throw new CliError(
+      `dist directory not found at ${distDir}. Run lessonkit build before packaging with --no-build.`,
+      {
+        code: "INVALID_PROJECT",
+        exitCode: EXIT_INVALID_PROJECT,
+      },
+    );
+  }
+
   if (target === "react-vite") {
-    if (!opts.noBuild || !existsSync(distDir)) {
+    if (!opts.noBuild) {
       await runBuild({ cwd: project.root, json: opts.json });
     }
     if (!existsSync(distDir)) {
@@ -56,7 +66,7 @@ export async function runPackage(opts: PackageOptions): Promise<CliJsonResult> {
 
   assertNode18ForLxpack();
 
-  if (!opts.noBuild || !existsSync(distDir)) {
+  if (!opts.noBuild) {
     await runBuild({ cwd: project.root, json: opts.json });
   }
 

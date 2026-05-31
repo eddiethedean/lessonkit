@@ -31,11 +31,14 @@ import {
   getTabSessionId,
   hasCourseStarted,
   hasCourseStartedEmittedToTracking,
+  hasCourseStartedPipelineDelivered,
   markCourseStarted,
   markCourseStartedEmittedToTracking,
+  markCourseStartedPipelineDelivered,
   migrateCourseStartedMark,
   resolveSessionId,
 } from "../runtime/session";
+import { emitCourseStartedNonTrackingPipeline } from "../runtime/courseStartedPipeline";
 import {
   buildPluginContext,
   createReactPluginHost,
@@ -59,8 +62,6 @@ function isTrackingActive(tracking?: LessonkitConfig["tracking"]): boolean {
   return tracking?.enabled !== false;
 }
 
-const noopTrackingClient: TrackingClient = { track: () => {} };
-
 type CourseStartedEmitOpts = {
   pluginHost: PluginHost | null;
   sessionId: string;
@@ -69,6 +70,8 @@ type CourseStartedEmitOpts = {
   user?: TelemetryUser;
   lxpackBridge: LxpackBridgeMode;
   extraSinks?: import("@lessonkit/core").TelemetryPipelineSink[];
+  skipXapi?: boolean;
+  onXapiStatementSent?: () => void;
 };
 
 /** Result of a course_started emit attempt (internal). */
@@ -100,28 +103,26 @@ function emitCourseStartedPipelineOnly(
     xapi: XAPIClient | null;
     storage: ReturnType<typeof createSessionStoragePort>;
     event: TelemetryEvent;
+    skipXapi?: boolean;
+    onXapiStatementSent?: () => void;
   },
 ): CourseStartedEmitResult {
-  const pluginCtx = buildPluginContext({
-    courseId: opts.courseId,
-    sessionId: opts.sessionId,
-    attemptId: opts.attemptId,
-    user: opts.user,
-  });
   try {
-    emitTelemetryWithPlugins({
-      pluginHost: null,
-      tracking: noopTrackingClient,
-      xapi: opts.xapi,
+    const { xapiStatementSent } = emitCourseStartedNonTrackingPipeline({
       event: opts.event,
-      pluginCtx,
+      xapi: opts.xapi,
       lxpackBridge: opts.lxpackBridge,
       extraSinks: opts.extraSinks,
+      skipXapi: opts.skipXapi,
     });
     markCourseStarted(opts.storage, opts.sessionId, opts.courseId);
+    markCourseStartedPipelineDelivered(opts.storage, opts.sessionId, opts.courseId);
+    if (xapiStatementSent) {
+      opts.onXapiStatementSent?.();
+    }
     return "emitted";
   } catch {
-    /* v8 ignore next -- xAPI/bridge failures leave session dedupe unmarked so a later effect can retry */
+    /* v8 ignore next -- xAPI/bridge/extraSink failures leave pipeline dedupe unmarked so a later effect can retry */
     return "failed";
   }
 }
@@ -150,7 +151,12 @@ function emitCourseStarted(opts: CourseStartedEmitOpts & {
     }
   }
 
-  return emitCourseStartedPipelineOnly({ ...opts, event });
+  return emitCourseStartedPipelineOnly({
+    ...opts,
+    event,
+    skipXapi: opts.skipXapi,
+    onXapiStatementSent: opts.onXapiStatementSent,
+  });
 }
 
 /** Emit course_started to tracking/bridge when xAPI bootstrap already marked session storage. */
@@ -178,22 +184,15 @@ function emitCourseStartedToTrackingOnly(
     }
   }
 
-  const pluginCtx = buildPluginContext({
-    courseId: opts.courseId,
-    sessionId: opts.sessionId,
-    attemptId: opts.attemptId,
-    user: opts.user,
-  });
   try {
-    emitTelemetryWithPlugins({
-      pluginHost: null,
-      tracking: noopTrackingClient,
-      xapi: null,
+    emitCourseStartedNonTrackingPipeline({
       event,
-      pluginCtx,
+      xapi: null,
       lxpackBridge: opts.lxpackBridge,
       extraSinks: opts.extraSinks,
+      skipXapi: true,
     });
+    markCourseStartedPipelineDelivered(opts.storage, opts.sessionId, opts.courseId);
     return "emitted";
   } catch {
     return "failed";
@@ -204,6 +203,8 @@ function emitPendingCourseStarted(opts: CourseStartedEmitOpts & {
   tracking: TrackingClient;
   xapi: XAPIClient | null;
   storage: ReturnType<typeof createSessionStoragePort>;
+  skipXapi?: boolean;
+  onXapiStatementSent?: () => void;
 }): CourseStartedEmitResult {
   const trackingEmitted = hasCourseStartedEmittedToTracking(
     opts.storage,
@@ -222,6 +223,21 @@ function emitPendingCourseStarted(opts: CourseStartedEmitOpts & {
   }
   if (!trackingEmitted && !sessionStarted) {
     return emitCourseStarted(opts);
+  }
+  const pipelineDelivered = hasCourseStartedPipelineDelivered(
+    opts.storage,
+    opts.sessionId,
+    opts.courseId,
+  );
+  if (sessionStarted && trackingEmitted && !pipelineDelivered) {
+    const event = buildCourseStartedEvent(opts);
+    if (event === null) return "filtered";
+    return emitCourseStartedPipelineOnly({
+      ...opts,
+      event,
+      skipXapi: opts.skipXapi,
+      onXapiStatementSent: opts.onXapiStatementSent,
+    });
   }
   return "emitted";
 }
@@ -374,21 +390,25 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
         (!alreadyStarted || clientChanged);
       if (needsBootstrap) {
         try {
-          const statement = telemetryEventToXAPIStatement(
-            buildTelemetryEvent({
-              name: "course_started",
-              courseId: cid,
-              sessionId,
-              attemptId: attemptIdRef.current,
-              user: userRef.current,
-            }),
-          );
-          if (statement) {
-            next.send(statement);
-            if (!alreadyStarted) {
-              markCourseStarted(defaultStorage, sessionId, cid);
+          const event = buildCourseStartedEvent({
+            pluginHost: pluginHostRef.current,
+            courseId: cid,
+            sessionId,
+            attemptId: attemptIdRef.current,
+            user: userRef.current,
+            lxpackBridge: lxpackBridgeModeRef.current,
+          });
+          if (event === null) {
+            // Plugin filtered course_started; do not bootstrap xAPI or session marks.
+          } else {
+            const statement = telemetryEventToXAPIStatement(event);
+            if (statement) {
+              next.send(statement);
+              if (!alreadyStarted) {
+                markCourseStarted(defaultStorage, sessionId, cid);
+              }
+              xapiCourseStartedSentOnClientRef.current = true;
             }
-            xapiCourseStartedSentOnClientRef.current = true;
           }
         } catch {
           // xAPI mapping may skip invalid ids; ignore
@@ -491,6 +511,10 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
         user: userRef.current,
         lxpackBridge: lxpackBridgeModeRef.current,
         extraSinks: extraSinksRef.current,
+        skipXapi: xapiCourseStartedSentOnClientRef.current,
+        onXapiStatementSent: () => {
+          xapiCourseStartedSentOnClientRef.current = true;
+        },
       });
       courseStartedEmittedToSinkRef.current = isCourseStartedSinkSettled(result);
     } else if (trackingActive) {

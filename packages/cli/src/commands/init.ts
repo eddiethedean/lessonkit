@@ -104,6 +104,13 @@ export async function runInit(opts: InitOptions, logger: CliLogger): Promise<Cli
     });
   }
 
+  if (opts.force && !opts.here) {
+    throw new CliError("--force requires --here (initialize in the current directory).", {
+      code: "INVALID_PROJECT",
+      exitCode: EXIT_INVALID_PROJECT,
+    });
+  }
+
   const slug = slugifyId(rawName ?? "my-course");
   const projectName = rawName ?? slug;
   const projectDir = opts.here ? cwd : resolve(cwd, slug);

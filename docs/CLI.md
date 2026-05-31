@@ -135,7 +135,7 @@ lessonkit package --target scorm12 --out .lxpack/out/custom.zip
 |------|-------------|
 | `--target` | **Required.** Export target (see table above) |
 | `--cwd` | Project root (default: current directory) |
-| `--no-build` | Skip implicit Vite build when `dist/` already exists (`react-vite` and lxpack targets) |
+| `--no-build` | Skip the implicit Vite build; requires an existing `dist/` (fails fast if `dist/` is missing) |
 | `--out` | Override output artifact path (must resolve inside the project root) |
 | `--json` | Structured JSON result on stdout (CI/codegen) |
 

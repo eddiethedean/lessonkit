@@ -10,9 +10,13 @@ Patch release: stronger TypeScript typing across the monorepo with no intended r
 ### Fixed
 
 - **@lessonkit/react**: Do not mark `course_started` as delivered to the tracking sink when a telemetry plugin filters the event; retries when tracking enables after xAPI bootstrap or when the filter is removed.
-- **@lessonkit/lxpack**: Validate `outDir`, manifest paths, and absolute `--out` overrides with `realpath` (blocks symlink escapes); harden promote with unique temp dirs and clear errors for legacy `.bak` / `.tmp-promote` artifacts.
-- **@lessonkit/lxpack**: Coerce manifest `schemaVersion: "1"` (string); trim manifest `name`; reject `paths.spaDistDir` of `.` only.
+- **@lessonkit/react**: Strict `course_started` delivery for lxpack bridge and `extraSinks` with a pipeline dedupe flag; retry bridge/`extraSinks` when session and tracking marks are set but pipeline delivery failed; honor telemetry plugins in xAPI bootstrap; avoid duplicate xAPI bootstrap after pipeline delivery.
+- **@lessonkit/xapi**: `flush()` awaits in-flight direct transport sends, not only the queued batch.
+- **@lessonkit/lxpack**: Validate `outDir`, manifest paths, `output`, and absolute `--out` overrides with `realpath` (blocks symlink escapes); harden promote with unique temp dirs and clear errors for legacy `.bak` / `.tmp-promote` artifacts.
+- **@lessonkit/lxpack**: Reject Windows drive-relative SPA paths (`C:foo`); coerce manifest `schemaVersion: "1"` (string); trim manifest `name`; reject `paths.spaDistDir` of `.` only.
 - **@lessonkit/lxpack**: Case-insensitive path-under-root checks and `path.relative` remapping for Windows-style artifact paths.
+- **@lessonkit/cli**: Forward extra Vite CLI args on `lessonkit build`; `package --no-build` fails fast when `dist/` is missing; `--force` requires `--here`.
+- **@lessonkit/core**: `hasCourseStartedPipelineDelivered` / `markCourseStartedPipelineDelivered` session helpers (used by React provider retries).
 
 ### Changed
 
@@ -47,7 +51,7 @@ Shipped on `main` without a semver bump (packages remain **1.0.0**): Node **18+*
 - **@lessonkit/react**: Reset headless runtime and progress when `runtimeVersion` toggles between v1 and v2.
 - **@lessonkit/react**: Skip duplicate `lesson_started` when remounting a completed lesson (v1 progress path).
 - **@lessonkit/lxpack**: Reject `course` arrays in `parseLessonkitManifest` (clear validation message).
-- **@lessonkit/lxpack**: Preserve failed promote builds as `*.failed-promote-*` when `outDir` already exists.
+- **@lessonkit/lxpack**: Preserve failed promote builds as `.lk-failed-promote-*` when `outDir` already exists.
 - **@lessonkit/lxpack**: Resolve SPA and `outputBaseDir` paths with `realpath` under `projectRoot`.
 - **@lessonkit/lxpack**: Swallow host bridge throws when forwarding telemetry (dev warning).
 - **@lessonkit/xapi**: Map `quiz_answered.correct` to xAPI `result.success`.
@@ -58,7 +62,7 @@ Shipped on `main` without a semver bump (packages remain **1.0.0**): Node **18+*
 - **@lessonkit/react**: Forward `course_started` to lxpack bridge and `extraSinks` when tracking enables after xAPI bootstrap.
 - **@lessonkit/cli**: Launch Vite via `node …/vite/bin/vite.js` so `dev` and `build` work on Windows (no `.cmd` spawn).
 - **@lessonkit/lxpack**: `loadLessonkitManifestFromFile` accepts optional `projectRoot` for path validation; trim manifest `paths.*` values; reject unsafe relative `output` without `projectRoot`.
-- **@lessonkit/lxpack**: Promote double-failure throws a recovery message listing `.bak` and `.failed-promote-*` paths.
+- **@lessonkit/lxpack**: Promote double-failure throws a recovery message listing `.lk-backup-*` and `.lk-failed-promote-*` paths.
 - **Docs**: Fix staged packaging example in `docs/PACKAGING.md` for 1.0 `validatePackageInputs` API.
 
 ### Added

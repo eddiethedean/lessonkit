@@ -6,5 +6,7 @@ export {
   markCourseStarted,
   hasCourseStartedEmittedToTracking,
   markCourseStartedEmittedToTracking,
+  hasCourseStartedPipelineDelivered,
+  markCourseStartedPipelineDelivered,
   migrateCourseStartedMark,
 } from "@lessonkit/core";

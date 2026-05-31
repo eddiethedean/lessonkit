@@ -13,7 +13,7 @@ export function resolveComparablePath(p: string): string {
 export function isSafeRelativeSpaPath(spaPath: string): boolean {
   if (!spaPath.length || spaPath.includes("\0")) return false;
   if (spaPath.startsWith("/") || spaPath.startsWith("\\")) return false;
-  if (/^[a-zA-Z]:[/\\]/.test(spaPath)) return false;
+  if (/^[a-zA-Z]:/.test(spaPath)) return false;
   if (spaPath === "." || spaPath === "./") return false;
   const segments = spaPath.split(/[/\\]/).filter((s) => s.length > 0 && s !== ".");
   if (segments.some((s) => s === "..")) return false;
@@ -35,7 +35,6 @@ export function assertResolvedPathUnderRoot(root: string, target: string): void 
   }
 }
 
-/** True when `target` resolves to `root` or a path under `root` (cross-platform). */
 /** Resolve symlinks on `root` and ensure `target` stays under it (including non-existent paths). */
 export function assertRealPathUnderRoot(root: string, target: string): void {
   const rootResolved = resolveComparablePath(root);

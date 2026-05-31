@@ -66,6 +66,10 @@ export function createXAPIClient(opts?: {
     flush: async () => {
       if (!transport) return;
       await queue.flush(transport);
+      const flights = [...inflightById.values()];
+      if (flights.length > 0) {
+        await Promise.allSettled(flights);
+      }
     },
     startedLesson: ({ lessonId }: { lessonId: LessonId }) => {
       if (!courseId) return;

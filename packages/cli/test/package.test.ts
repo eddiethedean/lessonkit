@@ -80,6 +80,14 @@ describe("runPackage", () => {
     );
   });
 
+  it("rejects --no-build when dist is missing", async () => {
+    await rm(join(dir, "dist"), { recursive: true, force: true });
+    await expect(runPackage({ target: "scorm12", cwd: dir, noBuild: true })).rejects.toMatchObject({
+      code: "INVALID_PROJECT",
+      message: expect.stringContaining("dist directory not found"),
+    });
+  });
+
   it("returns dist path for react-vite", async () => {
     const result = await runPackage({ target: "react-vite", cwd: dir, json: true });
     expect(result.ok).toBe(true);

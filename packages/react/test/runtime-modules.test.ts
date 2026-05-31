@@ -7,6 +7,7 @@ import { createProgressController } from "../src/runtime/progress";
 import { buildTelemetryEvent } from "@lessonkit/core";
 import { createTrackingClientFromConfig, disposeTrackingClient } from "../src/runtime/telemetry";
 import { createXapiClientFromConfig } from "../src/runtime/xapi";
+import * as xapiMapModule from "@lessonkit/xapi";
 import { emitThroughPipeline, createPipelineFromLegacyConfig } from "../src/runtime/telemetryPipeline";
 import { normalizeComponentId } from "../src/runtime/validateComponentId";
 
@@ -221,6 +222,98 @@ describe("@lessonkit/react runtime modules", () => {
     const tracking = { track: vi.fn() } as TrackingClient;
     const pipeline = createPipelineFromLegacyConfig({ tracking, xapi: null, lxpackBridge: "off" });
     expect(pipeline.sinks.length).toBeGreaterThan(0);
+  });
+
+  it("telemetryPipeline: warns in dev when xAPI mapping throws", () => {
+    vi.stubEnv("NODE_ENV", "development");
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    vi.spyOn(xapiMapModule, "telemetryEventToXAPIStatement").mockImplementation(() => {
+      throw new Error("bad mapping");
+    });
+    try {
+      const tracking = { track: vi.fn() } as TrackingClient;
+      const xapi = {
+        send: vi.fn(),
+        flush: async () => {},
+        queueSize: () => 0,
+        startedLesson: () => {},
+        completeLesson: () => {},
+        completeCourse: () => {},
+      };
+      emitThroughPipeline(
+        { name: "interaction", timestamp: "t", courseId: "c" },
+        { tracking, xapi, lxpackBridge: "off" },
+      );
+      expect(warn).toHaveBeenCalledWith(
+        "[lessonkit] xAPI mapping skipped:",
+        "bad mapping",
+      );
+    } finally {
+      vi.restoreAllMocks();
+      vi.unstubAllEnvs();
+    }
+  });
+
+  it("telemetryPipeline: swallows mapping errors in production without warning", () => {
+    vi.stubEnv("NODE_ENV", "production");
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    vi.spyOn(xapiMapModule, "telemetryEventToXAPIStatement").mockImplementation(() => {
+      throw new Error("bad mapping");
+    });
+    try {
+      const tracking = { track: vi.fn() } as TrackingClient;
+      const xapi = {
+        send: vi.fn(),
+        flush: async () => {},
+        queueSize: () => 0,
+        startedLesson: () => {},
+        completeLesson: () => {},
+        completeCourse: () => {},
+      };
+      emitThroughPipeline(
+        { name: "interaction", timestamp: "t", courseId: "c" },
+        { tracking, xapi, lxpackBridge: "off" },
+      );
+      expect(warn).not.toHaveBeenCalled();
+      expect(xapi.send).not.toHaveBeenCalled();
+    } finally {
+      vi.restoreAllMocks();
+      vi.unstubAllEnvs();
+    }
+  });
+
+  it("telemetryPipeline: swallows mapping errors when process is unavailable", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    vi.spyOn(xapiMapModule, "telemetryEventToXAPIStatement").mockImplementation(() => {
+      throw new Error("bad mapping");
+    });
+    const proc = (globalThis as typeof globalThis & { process?: { env?: Record<string, string> } })
+      .process;
+    try {
+      Reflect.deleteProperty(globalThis as object, "process");
+      const tracking = { track: vi.fn() } as TrackingClient;
+      emitThroughPipeline(
+        { name: "interaction", timestamp: "t", courseId: "c" },
+        {
+          tracking,
+          xapi: {
+            send: vi.fn(),
+            flush: async () => {},
+            queueSize: () => 0,
+            startedLesson: () => {},
+            completeLesson: () => {},
+            completeCourse: () => {},
+          },
+          lxpackBridge: "off",
+        },
+      );
+      expect(warn).not.toHaveBeenCalled();
+    } finally {
+      if (proc !== undefined) {
+        (globalThis as typeof globalThis & { process?: typeof proc }).process = proc;
+      }
+      vi.restoreAllMocks();
+    }
   });
 });
 

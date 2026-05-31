@@ -11,6 +11,13 @@ describe("spaPath", () => {
     expect(isSafeRelativeSpaPath("../dist")).toBe(false);
   });
 
+  it("rejects Windows drive-relative and absolute drive paths", () => {
+    expect(isSafeRelativeSpaPath("C:foo")).toBe(false);
+    expect(isSafeRelativeSpaPath("C:")).toBe(false);
+    expect(isSafeRelativeSpaPath("C:\\dist")).toBe(false);
+    expect(isSafeRelativeSpaPath("C:/dist")).toBe(false);
+  });
+
   it("assertResolvedPathUnderRoot throws when target escapes root", () => {
     const root = resolve("/tmp/project");
     expect(() => assertResolvedPathUnderRoot(root, resolve("/tmp/other"))).toThrow(

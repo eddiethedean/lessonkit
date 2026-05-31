@@ -50,7 +50,13 @@ One build output per lesson (multi-SCO friendly).
 
 ### `spaPath` safety
 
-`spaPath` must be a **relative** path under the LXPack project root: no `..` segments, no leading `/` or drive letters. `validateDescriptor` rejects unsafe values; `writeLxpackProject` also verifies the resolved copy destination stays inside `outDir`.
+`spaPath` must be a **relative** path under the LXPack project root: no `..` segments, no leading `/` or drive letters (including Windows drive-relative paths like `C:foo`). `validateDescriptor` rejects unsafe values; `writeLxpackProject` also verifies the resolved copy destination stays inside `outDir`.
+
+### Path containment (`projectRoot`)
+
+`validatePackageInputs()` and `parseLessonkitManifest(..., projectRoot)` resolve `outDir`, `outputBaseDir`, `output`, and manifest `paths.*` with `realpath` when `projectRoot` is set (blocks symlink escapes). **Always pass `projectRoot`** for CLI-equivalent validation in custom scripts; without it, only lexical checks apply. Path validation is best-effort at check time (not a substitute for TOCTOU-safe file open on hostile filesystems).
+
+Failed promotes may leave recovery dirs next to `outDir`: `.lk-backup-*`, `.lk-failed-promote-*` (remove before re-running).
 
 ## Assessments and passing scores
 

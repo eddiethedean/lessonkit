@@ -2,7 +2,6 @@ import { isAbsolute, join, resolve, win32 } from "node:path";
 import type { ExportTarget } from "@lxpack/api";
 import {
   assertRealPathUnderRoot,
-  assertResolvedPathUnderRoot,
   isResolvedPathUnderRoot,
   isSafeRelativeSpaPath,
   relativePathUnderRoot,
@@ -79,7 +78,7 @@ export function validatePackageInputs(
   if (projectRoot && output) {
     const resolvedOutput = resolve(projectRoot, output);
     try {
-      assertResolvedPathUnderRoot(projectRoot, resolvedOutput);
+      assertRealPathUnderRoot(projectRoot, resolvedOutput);
     } catch (err) {
       return {
         ok: false,
