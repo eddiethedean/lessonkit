@@ -101,6 +101,13 @@ guides/react-developers/contributing-to-the-monorepo
 
 ```{toctree}
 :maxdepth: 1
+:caption: Guides — Studio
+
+guides/studio/project-format-v1
+```
+
+```{toctree}
+:maxdepth: 1
 :caption: Reference
 
 reference/cli

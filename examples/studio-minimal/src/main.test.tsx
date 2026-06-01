@@ -37,7 +37,11 @@ describe("studio-minimal main", () => {
         xapi: { transport: (statement: XAPIStatement) => void };
       };
     };
-    const event = { type: "course_started", courseId: "studio-minimal" } as TelemetryEvent;
+    const event: TelemetryEvent = {
+      name: "course_started",
+      courseId: "studio-minimal",
+      timestamp: new Date().toISOString(),
+    };
     const statement = { id: "stmt-1" } as XAPIStatement;
     config.tracking.sink(event);
     config.xapi.transport(statement);
