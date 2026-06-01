@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "course": {
+    "courseId": "studio-minimal",
+    "title": "Studio minimal preview"
+  },
+  "pages": [
+    {
+      "id": "lesson-1",
+      "title": "Getting started",
+      "blocks": [
+        {
+          "type": "heading",
+          "id": "heading-welcome",
+          "level": 2,
+          "text": "Welcome to LessonKit Studio"
+        },
+        {
+          "type": "text",
+          "id": "text-intro",
+          "text": "This example loads src/project.json and renders it with @lessonkit-studio/renderer."
+        },
+        {
+          "type": "scenario",
+          "id": "scenario-main",
+          "blockId": "intro-scenario",
+          "blocks": [
+            {
+              "type": "text",
+              "id": "scenario-text",
+              "text": "Scenario content uses the same @lessonkit/react Scenario component as hand-authored courses."
+            }
+          ]
+        },
+        {
+          "type": "quiz",
+          "id": "quiz-ready",
+          "checkId": "ready-check",
+          "question": "Is the shared renderer working?",
+          "choices": ["Not yet", "Yes"],
+          "answer": "Yes"
+        }
+      ]
+    }
+  ]
+}

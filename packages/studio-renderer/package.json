@@ -1,0 +1,49 @@
+{
+  "name": "@lessonkit-studio/renderer",
+  "version": "0.1.0",
+  "private": true,
+  "description": "React renderer for LessonKit Studio project documents.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsup src/index.tsx --format esm,cjs --dts --external react --external react-dom --external @lessonkit/react --external @lessonkit/themes --external @lessonkit/core --external @lessonkit-studio/schema",
+    "dev": "tsup src/index.tsx --format esm,cjs --dts --watch --external react --external react-dom --external @lessonkit/react --external @lessonkit/themes --external @lessonkit/core --external @lessonkit-studio/schema",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "lint": "echo \"(no lint configured yet)\""
+  },
+  "dependencies": {
+    "@lessonkit-studio/schema": "file:../studio-schema",
+    "@lessonkit/core": "file:../core",
+    "@lessonkit/react": "file:../react",
+    "@lessonkit/themes": "file:../themes"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0 || ^19.0.0",
+    "react-dom": "^18.0.0 || ^19.0.0"
+  },
+  "devDependencies": {
+    "@testing-library/react": "^16.3.0",
+    "@types/react": "^18.3.23",
+    "@types/react-dom": "^18.3.7",
+    "@types/node": "^22.13.10",
+    "jsdom": "^26.1.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "tsup": "^8.5.0",
+    "typescript": "^5.8.3",
+    "vitest": "^4.1.8"
+  }
+}

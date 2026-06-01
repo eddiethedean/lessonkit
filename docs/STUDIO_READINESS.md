@@ -101,3 +101,12 @@ for:
   - [x] stable prop shapes
   - [x] canonical reference example that is easy to scaffold and modify
 
+## Studio 0.1.0 — Schema and shared renderer
+
+- [x] `@lessonkit-studio/schema` in monorepo (`packages/studio-schema`) with `schemaVersion: 1`, parse / validate / normalize / migrate / load
+- [x] `studio-project.v1.json` and `studio-block-catalog.v1.json` exported; catalog matches `buildStudioBlockCatalog()` in tests
+- [x] `@lessonkit-studio/renderer` maps Studio blocks to `@lessonkit/react` (`Course`, `Lesson`, `Quiz`, `Scenario`) plus presentational primitives
+- [x] Initial block types: text, heading, image, button, input, container, quiz, scenario (checklist / video: schema + stub renderer)
+- [x] Example [`examples/studio-minimal`](../examples/studio-minimal) loads `src/project.json` via shared renderer
+- [x] [Studio project format v1](guides/studio/project-format-v1.md) documented
+

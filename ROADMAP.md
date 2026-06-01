@@ -293,7 +293,7 @@ web builds. Full detail: [`docs/LessonKit_Studio_PLAN.md`](docs/LessonKit_Studio
 
 1. Ship every **framework** milestone in [Framework milestones](#framework-milestones) through **1.0.0** — **done**.
 2. Verify the [gate checklist](#gate-checklist-framework-complete--studio-may-start) — **done**.
-3. Begin **Studio 0.1.x** (schema and shared renderer) — **in progress / planned**.
+3. Begin **Studio 0.1.x** (schema and shared renderer) — **done** (see [Studio 0.1.0](#studio-010--schema-and-shared-renderer)).
 
 ### Architecture (target)
 
@@ -357,21 +357,23 @@ These are delivered as part of framework milestones **before** the Studio gate�
 
 ### Studio 0.1.0 — Schema and shared renderer
 
+**Status:** Shipped in monorepo (workspace packages `@lessonkit-studio/schema` and `@lessonkit-studio/renderer` at **0.1.0**, private).
+
 #### Goals
 
 - Define the project format and validation pipeline; render schema documents with the same components as exported apps.
 
 #### Deliverables
 
-- **Project layout** (Git-backed):
-  - `lessonkit.json`, `src/`, `assets/`, `themes/`
-- **`@lessonkit-studio/schema`**:
-  - `schemaVersion` (start at **1**); migration hooks (v1 → v2 transforms, validation before render, normalization)
+- **Project layout** (Git-backed): [`docs/guides/studio/project-format-v1.md`](docs/guides/studio/project-format-v1.md)
+  - `lessonkit.json`, `src/project.json`, `assets/`, `themes/`
+- **`@lessonkit-studio/schema`** ([`packages/studio-schema`](packages/studio-schema)):
+  - `schemaVersion` **1**; `migrateStudioProject` / `loadStudioProject`; validation + normalization
   - JSON document model: `pages[]` with `id` and `blocks[]`
-- **`@lessonkit-studio/renderer`**:
-  - maps blocks to `@lessonkit/react` (and shared runtime blocks)
-  - used by live preview and export (no duplicate render paths)
-- **Initial block types** (renderer support): text, heading, image, button, input, container, quiz, scenario (checklist, video stubbed or phased)
+- **`@lessonkit-studio/renderer`** ([`packages/studio-renderer`](packages/studio-renderer)):
+  - `StudioRenderer` → `@lessonkit/react` (`Course`, `Lesson`, `Quiz`, `Scenario`)
+  - Example: [`examples/studio-minimal`](examples/studio-minimal)
+- **Initial block types:** text, heading, image, button, input, container, quiz, scenario; checklist / video stubbed
 
 ---
 

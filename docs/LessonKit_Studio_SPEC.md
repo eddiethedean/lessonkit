@@ -61,14 +61,18 @@ Example:
 ```json
 {
   "schemaVersion": 1,
+  "course": { "courseId": "my-course", "title": "My course" },
   "pages": [
     {
-      "id": "home",
+      "id": "lesson-1",
+      "title": "Lesson one",
       "blocks": []
     }
   ]
 }
 ```
+
+Implementation reference: [`guides/studio/project-format-v1.md`](guides/studio/project-format-v1.md).
 
 ---
 
