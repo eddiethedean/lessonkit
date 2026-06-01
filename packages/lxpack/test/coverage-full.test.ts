@@ -513,7 +513,7 @@ describe("coverage-full lxpack", () => {
           sessionId: "s",
           timestamp: new Date().toISOString(),
           data: { notCheckId: true },
-        } as TelemetryEvent),
+        } as unknown as TelemetryEvent),
       ).toMatchObject({ name: "quiz_completed", lessonId: "l" });
     });
 

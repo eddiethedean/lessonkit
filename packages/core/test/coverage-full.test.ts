@@ -181,7 +181,7 @@ describe("coverage-full", () => {
         id: "null-wrap",
         version: "1",
         kind: "analytics",
-        wrapTrackingSink: () => null,
+        wrapTrackingSink: () => null as unknown as import("../src/index.js").TelemetrySink,
       }),
     ]);
     expect(host.composeTrackingSink(undefined, ctx)).toBeUndefined();

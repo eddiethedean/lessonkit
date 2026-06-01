@@ -5,6 +5,7 @@ import type { DragEndEvent, DragStartEvent } from "@dnd-kit/core";
 import type { StudioProjectV1 } from "@lessonkit/studio-schema";
 import { createEditorStore } from "@lessonkit/studio-builder";
 import { EditorDndShell } from "../src/EditorDndShell";
+import { dragEndEventStub, dragStartStub } from "./dndTestUtils";
 
 const project: StudioProjectV1 = {
   schemaVersion: 1,
@@ -29,19 +30,18 @@ vi.mock("@dnd-kit/core", async (importOriginal) => {
         <button
           type="button"
           data-testid="mock-drag-start"
-          onClick={() => onDragStart?.({ active: { id: "palette:text" } } as DragStartEvent)}
+          onClick={() => onDragStart?.(dragStartStub({ id: "palette:text" }))}
         />
         <button
           type="button"
           data-testid="mock-drag-end"
           onClick={() =>
-            onDragEnd?.({
-              active: {
-                id: "palette:text",
-                data: { current: { source: "palette", blockType: "text" } },
-              },
-              over: { id: "drop__lesson-1__root" },
-            } as DragEndEvent)
+            onDragEnd?.(
+              dragEndEventStub(
+                { id: "palette:text", data: { current: { source: "palette", blockType: "text" } } },
+                { id: "drop__lesson-1__root" },
+              ),
+            )
           }
         />
         {children}

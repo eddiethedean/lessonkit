@@ -555,6 +555,8 @@ describe("coverage-full CLI", () => {
         { name: "slash\\brace{}\\n\\rtitle", skipInstall: true },
         { log: () => {}, error: () => {} },
       );
+      expect(result.ok).toBe(true);
+      if (!result.ok) throw new Error("expected init success");
       const appSource = await readFile(join(result.projectRoot, "src", "App.tsx"), "utf8");
       expect(appSource).toContain("\\\\");
       expect(appSource).toContain("\\{");
@@ -567,6 +569,8 @@ describe("coverage-full CLI", () => {
         { name: "line\rbreak", skipInstall: true },
         { log: () => {}, error: () => {} },
       );
+      expect(result.ok).toBe(true);
+      if (!result.ok) throw new Error("expected init success");
       const appSource = await readFile(join(result.projectRoot, "src", "App.tsx"), "utf8");
       expect(appSource).toContain("\\n");
     });

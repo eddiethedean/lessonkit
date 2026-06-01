@@ -100,7 +100,7 @@ describe("coverage-full", () => {
         title="Course"
         courseId="course-1"
         config={{
-          tracking: { sink: (e) => events.push(e) },
+          tracking: { sink: (e) => { events.push(e); } },
           xapi: { enabled: false },
         }}
       >
@@ -136,7 +136,7 @@ describe("coverage-full", () => {
       <LessonkitProvider
         config={{
           courseId: "course-a",
-          tracking: { sink: (e) => events.push(e) },
+          tracking: { sink: (e) => { events.push(e); } },
           xapi: { enabled: false },
         }}
       >
@@ -154,7 +154,7 @@ describe("coverage-full", () => {
       <LessonkitProvider
         config={{
           courseId: "course-b",
-          tracking: { sink: (e) => events.push(e) },
+          tracking: { sink: (e) => { events.push(e); } },
           xapi: { enabled: false },
         }}
       >
@@ -264,7 +264,7 @@ describe("coverage-full", () => {
         config={{
           courseId: "course-1",
           session: { sessionId },
-          tracking: { sink: (e) => events.push(e) },
+          tracking: { sink: (e) => { events.push(e); } },
           xapi: { enabled: false },
         }}
       >
@@ -349,7 +349,7 @@ describe("coverage-full", () => {
         config={{
           courseId: "course-1",
           runtimeVersion: "v1",
-          tracking: { sink: (e) => events.push(e) },
+          tracking: { sink: (e) => { events.push(e); } },
           xapi: { enabled: false },
         }}
       >
@@ -406,7 +406,7 @@ describe("coverage-full", () => {
               id: "null-wrap",
               version: "1",
               kind: "analytics",
-              wrapTrackingSink: () => null,
+              wrapTrackingSink: () => null as unknown as import("@lessonkit/core").TelemetrySink,
             }),
           ],
           tracking: {
@@ -439,7 +439,7 @@ describe("coverage-full", () => {
               wrapTrackingSink: (sink) => async (event) => sink(event),
             }),
           ],
-          tracking: { sink: (e) => events.push(e) },
+          tracking: { sink: (e) => { events.push(e); } },
           xapi: { enabled: false },
         }}
       >
@@ -459,7 +459,7 @@ describe("coverage-full", () => {
         config={{
           courseId: "course-1",
           session: { sessionId },
-          tracking: { sink: (e) => events.push(e) },
+          tracking: { sink: (e) => { events.push(e); } },
           xapi: { enabled: false },
         }}
       >
@@ -473,7 +473,7 @@ describe("coverage-full", () => {
       <LessonkitProvider
         config={{
           courseId: "course-1",
-          tracking: { sink: (e) => events.push(e) },
+          tracking: { sink: (e) => { events.push(e); } },
           xapi: { enabled: false },
         }}
       >
@@ -566,7 +566,7 @@ describe("coverage-full", () => {
       <LessonkitProvider
         config={{
           courseId: "course-1",
-          tracking: { sink: (e) => events.push(e) },
+          tracking: { sink: (e) => { events.push(e); } },
           xapi: { enabled: false },
         }}
       >
@@ -623,7 +623,7 @@ describe("coverage-full", () => {
         config={{
           courseId: "course-1",
           runtimeVersion: "v1",
-          tracking: { sink: (e) => events.push(e) },
+          tracking: { sink: (e) => { events.push(e); } },
           xapi: { enabled: false },
         }}
       >
@@ -654,7 +654,7 @@ describe("coverage-full", () => {
         config={{
           courseId: "course-1",
           runtimeVersion: "v1",
-          tracking: { sink: (e) => events.push(e) },
+          tracking: { sink: (e) => { events.push(e); } },
           xapi: { enabled: false },
         }}
       >
@@ -683,7 +683,7 @@ describe("coverage-full", () => {
         config={{
           courseId: "course-1",
           runtimeVersion: "v1",
-          tracking: { sink: (e) => events.push(e) },
+          tracking: { sink: (e) => { events.push(e); } },
           xapi: { enabled: false },
         }}
       >

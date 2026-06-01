@@ -55,11 +55,14 @@ describe("telemetryEventToXAPIStatement", () => {
     );
     expect(telemetryEventToXAPIStatement(answered)?.result?.success).toBe(true);
 
-    const unanswered: TelemetryEvent = {
+    const unanswered = {
       name: "quiz_answered",
-      ...base,
+      courseId: base.courseId,
+      lessonId: base.lessonId,
+      sessionId: base.sessionId,
+      timestamp: base.timestamp,
       data: { checkId: "verify-sender", question: "Q", choice: "A" },
-    };
+    } as TelemetryEvent;
     expect(telemetryEventToXAPIStatement(unanswered)?.result).toBeUndefined();
   });
 

@@ -52,7 +52,7 @@ describe("BlockPalette", () => {
       listeners: {},
       setNodeRef: vi.fn(),
       isDragging: true,
-    } as ReturnType<typeof useDraggable>);
+    } as unknown as ReturnType<typeof useDraggable>);
     const store = createEditorStore(project);
     render(<BlockPalette store={store} />);
     const button = screen.getByRole("button", { name: "text" });

@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { renderToString } from "react-dom/server";
-import type { StudioProjectV1 } from "@lessonkit/studio-schema";
+import type { StudioBlock, StudioProjectV1 } from "@lessonkit/studio-schema";
 import { createEditorStore } from "@lessonkit/studio-builder";
 import { StudioEditor } from "../src/StudioEditor";
 import { DragOverlayContent } from "../src/DragOverlayContent";
@@ -16,7 +16,7 @@ import {
   parseDropZoneId,
   resolveInsertTarget,
 } from "../src/dndTargets";
-import type { DragEndEvent, DragStartEvent } from "@dnd-kit/core";
+import { dragEndEventStub, dragEndStub, dragStartStub } from "./dndTestUtils";
 
 const baseProject: StudioProjectV1 = {
   schemaVersion: 1,
@@ -52,19 +52,14 @@ describe("studio-ui coverage", () => {
   it("createEditorDndHandlers wires drag start and end", () => {
     const store = createEditorStore(baseProject);
     const handlers = createEditorDndHandlers(store, "lesson-1");
-    expect(handlers.onDragStart({ active: { id: "palette:text" } } as DragStartEvent)).toBe(
-      "palette:text",
-    );
+    expect(handlers.onDragStart(dragStartStub({ id: "palette:text" }))).toBe("palette:text");
     let drag: string | null = "palette:text";
     const dispatch = vi.spyOn(store.getState(), "dispatch");
     handlers.onDragEnd(
-      {
-        active: {
-          id: "palette:image",
-          data: { current: { source: "palette", blockType: "image" } },
-        } as DragEndEvent["active"],
-        over: { id: "text-1" } as DragEndEvent["over"],
-      },
+      dragEndEventStub(
+        { id: "palette:image", data: { current: { source: "palette", blockType: "image" } } },
+        { id: "text-1" },
+      ),
       (id) => {
         drag = id;
       },
@@ -80,10 +75,7 @@ describe("studio-ui coverage", () => {
     const store = createEditorStore(baseProject);
     const dispatch = vi.spyOn(store.getState(), "dispatch");
     applyDragEnd(
-      {
-        active: { id: "text-1", data: { current: { source: "canvas" } } } as DragEndEvent["active"],
-        over: { id: "text-1" } as DragEndEvent["over"],
-      },
+      dragEndStub({ id: "text-1", data: { current: { source: "canvas" } } }, { id: "text-1" }),
       {
         activePageId: "lesson-1",
         project: store.getState().project,
@@ -94,10 +86,10 @@ describe("studio-ui coverage", () => {
     expect(dispatch).not.toHaveBeenCalled();
 
     applyDragEnd(
-      {
-        active: { id: "x", data: { current: { source: "palette", blockType: "text" } } } as DragEndEvent["active"],
-        over: { id: "y" } as DragEndEvent["over"],
-      },
+      dragEndStub(
+        { id: "x", data: { current: { source: "palette", blockType: "text" } } },
+        { id: "y" },
+      ),
       {
         activePageId: "missing",
         project: store.getState().project,
@@ -252,7 +244,14 @@ describe("studio-ui coverage", () => {
     });
     const badProject = badQuizStore.getState().project;
     const badPage = badProject.pages[0]!;
-    badPage.blocks[0] = { ...badPage.blocks[0]!, choices: "not-array" as unknown as string[] };
+    badPage.blocks[0] = {
+      type: "quiz",
+      id: "quiz-bad",
+      checkId: "check-bad",
+      question: "Q?",
+      choices: "not-array",
+      answer: "A",
+    } as unknown as StudioBlock;
     badQuizStore.setState({ project: { ...badProject, pages: [badPage] } });
     badQuizStore.getState().dispatch({
       type: "setSelection",

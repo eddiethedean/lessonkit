@@ -70,7 +70,7 @@ describe("EditorCanvas", () => {
       transform: null,
       transition: undefined,
       isDragging: true,
-    } as ReturnType<typeof useSortable>);
+    } as unknown as ReturnType<typeof useSortable>);
     const store = createEditorStore(project);
     render(<EditorCanvas store={store} />);
     const block = screen.getByText("Body").closest(".lk-studio-block-wrap") as HTMLElement;

@@ -8,6 +8,7 @@ import {
   parseDropZoneId,
   resolveInsertTarget,
 } from "../src/dndTargets";
+import { dragEndEventStub, dragEndStub } from "./dndTestUtils";
 
 const project: StudioProjectV1 = {
   schemaVersion: 1,
@@ -81,13 +82,10 @@ describe("dndTargets", () => {
     const dispatch = vi.spyOn(store.getState(), "dispatch");
 
     applyDragEnd(
-      {
-        active: {
-          id: "palette:heading",
-          data: { current: { source: "palette", blockType: "heading" } },
-        } as DragEndEvent["active"],
-        over: { id: dropZoneId("lesson-1", []) } as DragEndEvent["over"],
-      },
+      dragEndStub(
+        { id: "palette:heading", data: { current: { source: "palette", blockType: "heading" } } },
+        { id: dropZoneId("lesson-1", []) },
+      ),
       {
         activePageId: "lesson-1",
         project: store.getState().project,
@@ -104,13 +102,13 @@ describe("dndTargets", () => {
     const withHeading = store.getState().project;
 
     applyDragEnd(
-      {
-        active: {
+      dragEndStub(
+        {
           id: "text-1",
           data: { current: { source: "canvas", blockId: "text-1", pageId: "lesson-1" } },
-        } as DragEndEvent["active"],
-        over: { id: "box-1" } as DragEndEvent["over"],
-      },
+        },
+        { id: "box-1" },
+      ),
       {
         activePageId: "lesson-1",
         project: withHeading,
@@ -128,13 +126,13 @@ describe("dndTargets", () => {
     const store = createEditorStore(project);
     const dispatch = vi.spyOn(store.getState(), "dispatch");
     applyDragEnd(
-      {
-        active: {
+      dragEndStub(
+        {
           id: "text-1",
           data: { current: { source: "canvas", blockId: "text-1", pageId: "lesson-1" } },
-        } as DragEndEvent["active"],
-        over: { id: "missing-target" } as DragEndEvent["over"],
-      },
+        },
+        { id: "missing-target" },
+      ),
       {
         activePageId: "lesson-1",
         project: store.getState().project,
@@ -149,13 +147,13 @@ describe("dndTargets", () => {
     const store = createEditorStore(project);
     const dispatch = vi.spyOn(store.getState(), "dispatch");
     applyDragEnd(
-      {
-        active: {
+      dragEndStub(
+        {
           id: "text-1",
           data: { current: { source: "canvas", blockId: "text-1", pageId: "lesson-1" } },
-        } as DragEndEvent["active"],
-        over: { id: "text-1" } as DragEndEvent["over"],
-      },
+        },
+        { id: "text-1" },
+      ),
       {
         activePageId: "lesson-1",
         project: store.getState().project,
@@ -170,13 +168,10 @@ describe("dndTargets", () => {
     const store = createEditorStore(project);
     const dispatch = vi.spyOn(store.getState(), "dispatch");
     applyDragEnd(
-      {
-        active: {
-          id: "palette:text",
-          data: { current: { source: "palette", blockType: "text" } },
-        } as DragEndEvent["active"],
-        over: { id: "missing-target" } as DragEndEvent["over"],
-      },
+      dragEndStub(
+        { id: "palette:text", data: { current: { source: "palette", blockType: "text" } } },
+        { id: "missing-target" },
+      ),
       {
         activePageId: "lesson-1",
         project: store.getState().project,
@@ -191,7 +186,7 @@ describe("dndTargets", () => {
     const store = createEditorStore(project);
     const dispatch = vi.spyOn(store.getState(), "dispatch");
 
-    applyDragEnd({ active: { id: "x" } as DragEndEvent["active"], over: null }, {
+    applyDragEnd(dragEndStub({ id: "x" }, null), {
       activePageId: "lesson-1",
       project: store.getState().project,
       collectBlockIds: () => store.getState().collectBlockIds(),
@@ -206,13 +201,10 @@ describe("dndTargets", () => {
     const handlers = createEditorDndHandlers(store, "lesson-1");
     let drag: string | null = "x";
     handlers.onDragEnd(
-      {
-        active: {
-          id: "palette:text",
-          data: { current: { source: "palette", blockType: "text" } },
-        } as DragEndEvent["active"],
-        over: { id: "text-1" } as DragEndEvent["over"],
-      },
+      dragEndEventStub(
+        { id: "palette:text", data: { current: { source: "palette", blockType: "text" } } },
+        { id: "text-1" },
+      ),
       (id) => {
         drag = id;
       },
