@@ -2,7 +2,6 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import type { StudioProjectV1 } from "@lessonkit/studio-schema";
 import { StudioEditor } from "../src/StudioEditor";
-import { createEditorStore } from "@lessonkit/studio-builder";
 
 const project: StudioProjectV1 = {
   schemaVersion: 1,
