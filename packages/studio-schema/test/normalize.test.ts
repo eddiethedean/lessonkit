@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { loadStudioProject, normalizeStudioProject, parseStudioProject } from "../src";
 
-describe("@lessonkit-studio/schema normalize", () => {
+describe("@lessonkit/studio-schema normalize", () => {
   it("normalizes all block variants", () => {
     const parsed = parseStudioProject({
       schemaVersion: 1,

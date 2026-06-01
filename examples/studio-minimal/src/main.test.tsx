@@ -6,7 +6,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 describe("studio-minimal main", () => {
   afterEach(() => {
     vi.resetModules();
-    vi.doUnmock("@lessonkit-studio/schema");
+    vi.doUnmock("@lessonkit/studio-schema");
     vi.doUnmock("react-dom/client");
     document.getElementById("root")?.remove();
   });
@@ -52,7 +52,7 @@ describe("studio-minimal main", () => {
   });
 
   it("throws when project.json fails validation", async () => {
-    vi.doMock("@lessonkit-studio/schema", () => ({
+    vi.doMock("@lessonkit/studio-schema", () => ({
       loadStudioProject: () => ({
         ok: false,
         issues: [{ path: "course.title", message: "required" }],

@@ -5,7 +5,7 @@ import type {
   StudioImageBlock,
   StudioInputBlock,
   StudioTextBlock,
-} from "@lessonkit-studio/schema";
+} from "@lessonkit/studio-schema";
 
 const blockAttrs = (id: string) => ({
   "data-lk-studio-block": true,

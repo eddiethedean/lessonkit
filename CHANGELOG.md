@@ -3,7 +3,7 @@
 All notable changes to the LessonKit monorepo are documented here.
 
 - [`@lessonkit/*`](https://www.npmjs.com/org/lessonkit) — core platform (tag `v*.*.*`)
-- [`@lessonkit-studio/*`](https://www.npmjs.com/org/lessonkit-studio) — Studio authoring (tag `studio-v*`)
+- [`@lessonkit/studio-schema`](https://www.npmjs.com/package/@lessonkit/studio-schema), [`@lessonkit/studio-renderer`](https://www.npmjs.com/package/@lessonkit/studio-renderer) — Studio authoring (tag `studio-v*`, same `@lessonkit` org)
 
 ## [studio-v0.1.0] - 2026-06-01
 
@@ -11,8 +11,8 @@ First public preview of LessonKit Studio packages. Requires **@lessonkit/core**,
 
 ### Added
 
-- **@lessonkit-studio/schema**: `schemaVersion: 1` project model; `parseStudioProject`, `validateStudioProject`, `normalizeStudioProject`, `migrateStudioProject`, `loadStudioProject`, `buildStudioBlockCatalog`; shipped `studio-project.v1.json` and `studio-block-catalog.v1.json`.
-- **@lessonkit-studio/renderer**: `StudioRenderer` mapping Studio blocks to `@lessonkit/react` (`Course`, `Lesson`, `Quiz`, `Scenario`) and presentational primitives; checklist/video stubs.
+- **@lessonkit/studio-schema**: `schemaVersion: 1` project model; `parseStudioProject`, `validateStudioProject`, `normalizeStudioProject`, `migrateStudioProject`, `loadStudioProject`, `buildStudioBlockCatalog`; shipped `studio-project.v1.json` and `studio-block-catalog.v1.json`.
+- **@lessonkit/studio-renderer**: `StudioRenderer` mapping Studio blocks to `@lessonkit/react` (`Course`, `Lesson`, `Quiz`, `Scenario`) and presentational primitives; checklist/video stubs.
 - **Monorepo**: `examples/studio-minimal`, [Studio project format v1](docs/guides/studio/project-format-v1.md), [Studio Release](.github/workflows/studio-release.yml) workflow (`studio-v*` tags).
 
 > **Not included in 0.1.0:** visual editor app, `lessonkit-studio` CLI, builder/codegen packages (planned 0.2+). See [STUDIO_READINESS.md](docs/STUDIO_READINESS.md).

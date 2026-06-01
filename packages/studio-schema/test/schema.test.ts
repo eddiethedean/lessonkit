@@ -37,7 +37,7 @@ const goldenProject = {
   ],
 };
 
-describe("@lessonkit-studio/schema", () => {
+describe("@lessonkit/studio-schema", () => {
   it("buildStudioBlockCatalog matches studio-block-catalog.v1.json", () => {
     expect(buildStudioBlockCatalog()).toEqual(catalogJson);
   });

@@ -1,7 +1,7 @@
 import React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, render, screen } from "@testing-library/react";
-import { loadStudioProject } from "@lessonkit-studio/schema";
+import { loadStudioProject } from "@lessonkit/studio-schema";
 import { StudioRenderer } from "../src";
 
 afterEach(() => {
@@ -9,7 +9,7 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-describe("@lessonkit-studio/renderer blocks", () => {
+describe("@lessonkit/studio-renderer blocks", () => {
   it("renders primitive blocks and stubs", () => {
     const loaded = loadStudioProject({
       schemaVersion: 1,

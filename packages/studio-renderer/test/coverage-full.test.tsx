@@ -1,7 +1,7 @@
 import React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, render, screen } from "@testing-library/react";
-import { loadStudioProject } from "@lessonkit-studio/schema";
+import { loadStudioProject } from "@lessonkit/studio-schema";
 import { StudioRenderer, renderBlock, renderPageBlocks } from "../src";
 
 afterEach(() => {
@@ -9,7 +9,7 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-describe("@lessonkit-studio/renderer coverage", () => {
+describe("@lessonkit/studio-renderer coverage", () => {
   it("renders container, button link, and heading levels", () => {
     const loaded = loadStudioProject({
       schemaVersion: 1,

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { parseStudioProject, validateStudioProject } from "../src";
 
-describe("@lessonkit-studio/schema validate extras", () => {
+describe("@lessonkit/studio-schema validate extras", () => {
   it("rejects duplicate block ids and invalid checkId", () => {
     const parsed = parseStudioProject({
       schemaVersion: 1,

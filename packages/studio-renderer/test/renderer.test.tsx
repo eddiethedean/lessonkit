@@ -1,7 +1,7 @@
 import React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, render, screen } from "@testing-library/react";
-import { loadStudioProject } from "@lessonkit-studio/schema";
+import { loadStudioProject } from "@lessonkit/studio-schema";
 import { StudioRenderer } from "../src";
 
 const goldenRaw = {
@@ -33,7 +33,7 @@ const goldenRaw = {
   ],
 };
 
-describe("@lessonkit-studio/renderer", () => {
+describe("@lessonkit/studio-renderer", () => {
   afterEach(() => {
     cleanup();
     vi.restoreAllMocks();

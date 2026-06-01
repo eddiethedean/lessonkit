@@ -181,7 +181,7 @@ Keep `courseId`, `lessonId`, and `checkId` in sync with `lessonkit.json`—`less
 | [`@lessonkit/themes`](https://github.com/eddiethedean/lessonkit/tree/main/packages/themes) | [![npm](https://img.shields.io/npm/v/@lessonkit/themes.svg)](https://www.npmjs.com/package/@lessonkit/themes) | Theme presets and design tokens |
 | [`@lessonkit/accessibility`](https://github.com/eddiethedean/lessonkit/tree/main/packages/accessibility) | [![npm](https://img.shields.io/npm/v/@lessonkit/accessibility.svg)](https://www.npmjs.com/package/@lessonkit/accessibility) | Focus trap, roving tabindex, reduced motion |
 
-**LessonKit Studio** (preview, separate scope — publish with `studio-v*` tags): [`@lessonkit-studio/schema`](packages/studio-schema) · [`@lessonkit-studio/renderer`](packages/studio-renderer) · [project format v1](docs/guides/studio/project-format-v1.md)
+**LessonKit Studio** (preview, publish with `studio-v*` tags): [`@lessonkit/studio-schema`](packages/studio-schema) · [`@lessonkit/studio-renderer`](packages/studio-renderer) · [project format v1](docs/guides/studio/project-format-v1.md)
 
 ---
 

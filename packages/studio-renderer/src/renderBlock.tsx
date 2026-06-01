@@ -1,6 +1,6 @@
 import React from "react";
 import { Quiz, Scenario } from "@lessonkit/react";
-import type { StudioBlock } from "@lessonkit-studio/schema";
+import type { StudioBlock } from "@lessonkit/studio-schema";
 import {
   ButtonBlock,
   ContainerBlock,

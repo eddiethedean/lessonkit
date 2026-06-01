@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
 import type { LessonId } from "@lessonkit/core";
-import { validateStudioProject, type StudioProjectV1 } from "@lessonkit-studio/schema";
+import { validateStudioProject, type StudioProjectV1 } from "@lessonkit/studio-schema";
 import { Course, Lesson, ThemeProvider, type LessonkitConfig } from "@lessonkit/react";
 import type { ThemePresetName } from "@lessonkit/themes";
 import { renderPageBlocks } from "./renderBlock";

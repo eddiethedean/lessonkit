@@ -7,7 +7,7 @@ const base = {
   pages: [{ id: "lesson-1", title: "Lesson", blocks: [] as unknown[] }],
 };
 
-describe("@lessonkit-studio/schema parse blocks", () => {
+describe("@lessonkit/studio-schema parse blocks", () => {
   it("parses primitive and layout blocks", () => {
     const result = parseStudioProject({
       ...base,

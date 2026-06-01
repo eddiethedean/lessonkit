@@ -1,7 +1,7 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
-import { loadStudioProject } from "@lessonkit-studio/schema";
-import { StudioRenderer } from "@lessonkit-studio/renderer";
+import { loadStudioProject } from "@lessonkit/studio-schema";
+import { StudioRenderer } from "@lessonkit/studio-renderer";
 import type { TelemetryEvent } from "@lessonkit/core";
 import type { XAPIStatement } from "@lessonkit/xapi";
 import projectRaw from "./project.json";

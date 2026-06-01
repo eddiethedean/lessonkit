@@ -1,5 +1,5 @@
 {
-  "name": "@lessonkit-studio/renderer",
+  "name": "@lessonkit/studio-renderer",
   "version": "0.1.0",
   "private": false,
   "description": "React renderer for LessonKit Studio project documents.",
@@ -39,8 +39,8 @@
   },
   "files": ["dist", "README.md"],
   "scripts": {
-    "build": "tsup src/index.tsx --format esm,cjs --dts --external react --external react-dom --external @lessonkit/react --external @lessonkit/themes --external @lessonkit/core --external @lessonkit-studio/schema",
-    "dev": "tsup src/index.tsx --format esm,cjs --dts --watch --external react --external react-dom --external @lessonkit/react --external @lessonkit/themes --external @lessonkit/core --external @lessonkit-studio/schema",
+    "build": "tsup src/index.tsx --format esm,cjs --dts --external react --external react-dom --external @lessonkit/react --external @lessonkit/themes --external @lessonkit/core --external @lessonkit/studio-schema",
+    "dev": "tsup src/index.tsx --format esm,cjs --dts --watch --external react --external react-dom --external @lessonkit/react --external @lessonkit/themes --external @lessonkit/core --external @lessonkit/studio-schema",
     "prepublishOnly": "npm run build",
     "typecheck": "tsc -p tsconfig.json",
     "test": "vitest run",
@@ -48,7 +48,7 @@
     "lint": "echo \"(no lint configured yet)\""
   },
   "dependencies": {
-    "@lessonkit-studio/schema": "file:../studio-schema",
+    "@lessonkit/studio-schema": "file:../studio-schema",
     "@lessonkit/core": "file:../core",
     "@lessonkit/react": "file:../react",
     "@lessonkit/themes": "file:../themes"

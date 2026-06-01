@@ -304,17 +304,17 @@ web builds. Full detail: [`docs/LessonKit_Studio_PLAN.md`](docs/LessonKit_Studio
            |
            v
 +----------------------+
-| Project Schema Layer |  @lessonkit-studio/schema
+| Project Schema Layer |  @lessonkit/studio-schema
 +----------------------+
            |
            v
 +----------------------+
-| React Renderer       |  @lessonkit-studio/renderer â†’ @lessonkit/react
+| React Renderer       |  @lessonkit/studio-renderer â†’ @lessonkit/react
 +----------------------+
            |
            v
 +----------------------+
-| LXPack Integration   |  @lessonkit-studio/codegen â†’ @lessonkit/lxpack
+| LXPack Integration   |  @lessonkit/studio-codegen â†’ @lessonkit/lxpack
 +----------------------+
 ```
 
@@ -357,7 +357,7 @@ These are delivered as part of framework milestones **before** the Studio gateâ€
 
 ### Studio 0.1.0 â€” Schema and shared renderer
 
-**Status:** Shipped in monorepo (workspace packages `@lessonkit-studio/schema` and `@lessonkit-studio/renderer` at **0.1.0**, private).
+**Status:** Shipped in monorepo (workspace packages `@lessonkit/studio-schema` and `@lessonkit/studio-renderer` at **0.1.0**, private).
 
 #### Goals
 
@@ -367,10 +367,10 @@ These are delivered as part of framework milestones **before** the Studio gateâ€
 
 - **Project layout** (Git-backed): [`docs/guides/studio/project-format-v1.md`](docs/guides/studio/project-format-v1.md)
   - `lessonkit.json`, `src/project.json`, `assets/`, `themes/`
-- **`@lessonkit-studio/schema`** ([`packages/studio-schema`](packages/studio-schema)):
+- **`@lessonkit/studio-schema`** ([`packages/studio-schema`](packages/studio-schema)):
   - `schemaVersion` **1**; `migrateStudioProject` / `loadStudioProject`; validation + normalization
   - JSON document model: `pages[]` with `id` and `blocks[]`
-- **`@lessonkit-studio/renderer`** ([`packages/studio-renderer`](packages/studio-renderer)):
+- **`@lessonkit/studio-renderer`** ([`packages/studio-renderer`](packages/studio-renderer)):
   - `StudioRenderer` â†’ `@lessonkit/react` (`Course`, `Lesson`, `Quiz`, `Scenario`)
   - Example: [`examples/studio-minimal`](examples/studio-minimal)
 - **Initial block types:** text, heading, image, button, input, container, quiz, scenario; checklist / video stubbed
@@ -385,7 +385,7 @@ These are delivered as part of framework milestones **before** the Studio gateâ€
 
 #### Deliverables
 
-- **`@lessonkit-studio/builder`** + **`@lessonkit-studio/ui`**:
+- **`@lessonkit/studio-builder`** + **`@lessonkit/studio-ui`**:
   - canvas (pages, blocks, layouts, interactions) using real React components
   - **drag/drop**: [dnd-kit](https://dndkit.com/) â€” nested containers, reorder, snap zones, insertion previews
   - **state**: [Zustand](https://zustand-demo.pmnd.rs/) â€” patch history, schema validation on change
@@ -411,7 +411,7 @@ These are delivered as part of framework milestones **before** the Studio gateâ€
 
 #### Deliverables
 
-- **`@lessonkit-studio/codegen`**:
+- **`@lessonkit/studio-codegen`**:
   - **React/Vite**: `App.tsx`, `components/`, `assets/`, `styles/`
   - **LXPack**: `course.yaml`, lesson assets, metadata (via `@lessonkit/lxpack`)
   - **Static HTML package** (where applicable)
@@ -431,7 +431,7 @@ These are delivered as part of framework milestones **before** the Studio gateâ€
 
 #### Deliverables
 
-- **`@lessonkit-studio/github`**:
+- **`@lessonkit/studio-github`**:
   - **GitHub App** authentication (create repos, clone templates, commit, branches)
   - project sync: pull latest, autosave â†’ push, branch support
 - **Persistent history** (complements in-memory undo):
@@ -448,7 +448,7 @@ These are delivered as part of framework milestones **before** the Studio gateâ€
 
 #### Deliverables
 
-- **`@lessonkit-studio/ai`** workflows:
+- **`@lessonkit/studio-ai`** workflows:
   - lesson generation from prompts
   - quiz and branching scenario generation
   - storyboard â†’ course conversion

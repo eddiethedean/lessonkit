@@ -3,7 +3,7 @@
 Published packages:
 
 - **LessonKit** (`v*.*.*` tag → [Release](.github/workflows/release.yml)): `@lessonkit/core`, `@lessonkit/xapi`, `@lessonkit/accessibility`, `@lessonkit/react`, `@lessonkit/themes`, `@lessonkit/lxpack`, `@lessonkit/cli`
-- **Studio** (`studio-v*` tag → [Studio Release](.github/workflows/studio-release.yml)): `@lessonkit-studio/schema`, `@lessonkit-studio/renderer`
+- **Studio** (`studio-v*` tag → [Studio Release](.github/workflows/studio-release.yml)): `@lessonkit/studio-schema`, `@lessonkit/studio-renderer`
 
 Normal `v1.0.3` tags **do not** publish or re-version Studio packages. Studio uses its own semver line (e.g. `0.1.0`) and tag prefix.
 
@@ -20,15 +20,15 @@ Normal `v1.0.3` tags **do not** publish or re-version Studio packages. Studio us
 
 | Item | Status |
 |------|--------|
-| `@lessonkit-studio/schema` and `@lessonkit-studio/renderer` at `0.1.0` | Done |
+| `@lessonkit/studio-schema` and `@lessonkit/studio-renderer` at `0.1.0` | Done |
 | `private: false`, `publishConfig`, `prepublishOnly`, README on both packages | Done |
 | [CHANGELOG.md](CHANGELOG.md) `## [studio-v0.1.0]` | Done |
 | [studio-release.yml](.github/workflows/studio-release.yml) + [prepare-publish.mjs](scripts/release/prepare-publish.mjs) | Done |
 | `packages/core` at `1.0.2` (Studio publish pins `@lessonkit/*` to this version) | Done |
 | `main` CI green | Verify before tag |
 | `npm run lint` + `typecheck` + `test` + `coverage` | Verify before tag |
-| `@lessonkit-studio` npm org exists; `NPM_TOKEN` can publish the scope | **Required** — [create org](https://www.npmjs.com/org/create) (`lessonkit-studio`) |
-| Local pack smoke: `node scripts/release/prepare-publish.mjs studio 0.1.0 && npm run build:packages && npm pack -w @lessonkit-studio/schema --dry-run` (then `git checkout -- packages/studio-*/package.json`) | Optional |
+| `NPM_TOKEN` can publish `@lessonkit` (same org as core/react) | Done — Studio uses `@lessonkit/studio-schema` and `@lessonkit/studio-renderer` |
+| Local pack smoke: `node scripts/release/prepare-publish.mjs studio 0.1.0 && npm run build:packages && npm pack -w @lessonkit/studio-schema --dry-run` (then `git checkout -- packages/studio-*/package.json`) | Optional |
 | Git tag `studio-v0.1.0` | **Create when ready** — triggers Studio npm publish |
 
 > **Do not create or push `studio-v0.1.0`** until you intend to publish to npm. Normal `v*` tags do not publish Studio.
@@ -224,15 +224,15 @@ Normal `v1.0.3` tags **do not** publish or re-version Studio packages. Studio us
 
 4. Verify the **Release** workflow on GitHub Actions and packages on [npm](https://www.npmjs.com/org/lessonkit).
 
-The release job sets each **LessonKit** package version from the tag, aligns `@lessonkit/*` dependency ranges, builds, and runs `npm publish` for all seven packages. Requires the `NPM_TOKEN` repository secret (must be able to publish `@lessonkit` and `@lessonkit-studio` scopes).
+The release job sets each **LessonKit** package version from the tag, aligns `@lessonkit/*` dependency ranges, builds, and runs `npm publish` for all seven packages. Requires the `NPM_TOKEN` repository secret (publish access to the `@lessonkit` org).
 
 ## Publish Studio packages to npm (`studio-v*` tags)
 
 Studio versions are **independent** of LessonKit tags. When you push `studio-v0.1.0`:
 
 1. [Studio Release](.github/workflows/studio-release.yml) runs CI checks, then `node scripts/release/prepare-publish.mjs studio 0.1.0`.
-2. That sets `@lessonkit-studio/*` to the tag version and pins `@lessonkit/*` in Studio packages to the version in `packages/core/package.json` on that commit (e.g. `1.0.2`).
-3. Publishes **schema** first, then **renderer**.
+2. That sets `@lessonkit/studio-*` to the tag version and pins other `@lessonkit/*` deps in Studio packages to the version in `packages/core/package.json` on that commit (e.g. `1.0.2`).
+3. Publishes **`@lessonkit/studio-schema`** first, then **`@lessonkit/studio-renderer`** (same npm org as `@lessonkit/react`).
 
 ```bash
 # After CI is green on main and Studio package.json versions match the release:
@@ -240,41 +240,7 @@ git tag studio-v0.1.0
 git push origin studio-v0.1.0
 ```
 
-### First-time: create the `@lessonkit-studio` npm organization
-
-The [Studio Release run](https://github.com/eddiethedean/lessonkit/actions/runs/26775955520) failed with:
-
-`404 Scope not found — PUT @lessonkit-studio/schema`
-
-That means the **`lessonkit-studio` organization does not exist on npm** yet (or `NPM_TOKEN` is not allowed to publish that scope). The workflow and packages are fine; this is registry setup.
-
-1. **Create the org** (must match the scope in package names):
-   - [Create an npm organization](https://www.npmjs.com/org/create)
-   - Organization name: **`lessonkit-studio`** (appears as `@lessonkit-studio` on packages)
-
-2. **Grant publish access to CI**:
-   - Open the org → **Members** → invite the npm user that owns `NPM_TOKEN`, **or**
-   - Generate a new [granular access token](https://www.npmjs.com/settings/~tokens) with **Publish** on the `lessonkit-studio` org and update the GitHub **`NPM_TOKEN`** secret.
-
-3. **Verify locally** (optional):
-
-   ```bash
-   npm whoami
-   npm access get status @lessonkit-studio
-   # should include read-write for your user/token
-   ```
-
-4. **Re-run publish** (no new tag required if `studio-v0.1.0` is unchanged):
-   - GitHub → **Actions** → **Studio Release** → failed run → **Re-run failed jobs**
-
-   Or delete and re-push the tag only if you prefer a fresh run:
-
-   ```bash
-   git push origin :refs/tags/studio-v0.1.0
-   git tag -d studio-v0.1.0
-   git tag studio-v0.1.0 9c01e25
-   git push origin studio-v0.1.0
-   ```
+Re-run a failed publish: **Actions** → **Studio Release** → **Re-run failed jobs** (no new tag needed if the tag already points at a commit with these package names).
 
 ## After release
 

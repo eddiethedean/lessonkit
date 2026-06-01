@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import type { StudioChecklistBlock, StudioVideoBlock } from "@lessonkit-studio/schema";
+import type { StudioChecklistBlock, StudioVideoBlock } from "@lessonkit/studio-schema";
 
 function isDevEnvironment(): boolean {
   return typeof process !== "undefined" && process.env.NODE_ENV !== "production";

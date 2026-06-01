@@ -82,17 +82,24 @@ function prepareLessonkitPublish(version) {
   ]);
 }
 
+function isStudioScopedPackage(name) {
+  return name.startsWith("@lessonkit/studio-");
+}
+
 function prepareStudioPublish(studioVersion) {
   const lessonkitVersion = lessonkitVersionFromRepo();
   for (const dir of STUDIO_DIRS) {
     setVersion(dir, studioVersion);
   }
   alignDepsWithRules(STUDIO_DIRS, [
-    { match: (name) => name.startsWith("@lessonkit-studio/"), value: studioVersion },
-    { match: (name) => name.startsWith("@lessonkit/"), value: lessonkitVersion },
+    { match: (name) => isStudioScopedPackage(name), value: studioVersion },
+    {
+      match: (name) => name.startsWith("@lessonkit/") && !isStudioScopedPackage(name),
+      value: lessonkitVersion,
+    },
   ]);
-  console.log(`Studio publish: @lessonkit-studio/* @ ${studioVersion}`);
-  console.log(`Pinned @lessonkit/* dependencies to ${lessonkitVersion} (from packages/core)`);
+  console.log(`Studio publish: @lessonkit/studio-* @ ${studioVersion}`);
+  console.log(`Pinned other @lessonkit/* dependencies to ${lessonkitVersion} (from packages/core)`);
 }
 
 const mode = process.argv[2];

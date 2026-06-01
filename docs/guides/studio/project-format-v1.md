@@ -50,8 +50,8 @@ my-course/
 
 Machine-readable catalogs:
 
-- `@lessonkit-studio/schema/studio-block-catalog.v1.json`
-- `@lessonkit-studio/schema/studio-project.v1.json` (JSON Schema)
+- `@lessonkit/studio-schema/studio-block-catalog.v1.json`
+- `@lessonkit/studio-schema/studio-project.v1.json` (JSON Schema)
 
 ## TypeScript API
 
@@ -62,7 +62,7 @@ import {
   validateStudioProject,
   normalizeStudioProject,
   migrateStudioProject,
-} from "@lessonkit-studio/schema";
+} from "@lessonkit/studio-schema";
 
 const result = loadStudioProject(rawJson);
 if (!result.ok) {
@@ -75,7 +75,7 @@ if (!result.ok) {
 ## React renderer
 
 ```tsx
-import { StudioRenderer } from "@lessonkit-studio/renderer";
+import { StudioRenderer } from "@lessonkit/studio-renderer";
 
 <StudioRenderer
   project={project}

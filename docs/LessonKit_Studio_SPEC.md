@@ -302,13 +302,13 @@ npx lessonkit-studio dev
 # Suggested Packages
 
 ```text
-@lessonkit-studio/schema
-@lessonkit-studio/builder
-@lessonkit-studio/renderer
-@lessonkit-studio/codegen
-@lessonkit-studio/github
-@lessonkit-studio/ai
-@lessonkit-studio/ui
+@lessonkit/studio-schema
+@lessonkit/studio-builder
+@lessonkit/studio-renderer
+@lessonkit/studio-codegen
+@lessonkit/studio-github
+@lessonkit/studio-ai
+@lessonkit/studio-ui
 ```
 
 ---

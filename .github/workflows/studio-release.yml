@@ -37,32 +37,13 @@ jobs:
         with:
           node-version: 20
           registry-url: https://registry.npmjs.org
+          scope: "@lessonkit"
           cache: npm
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Verify npm authentication
         run: npm whoami
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      - name: Verify @lessonkit-studio npm org access
-        run: |
-          set -euo pipefail
-          if npm access get status @lessonkit-studio 2>/dev/null | grep -q read-write; then
-            echo "NPM_TOKEN has read-write access to @lessonkit-studio"
-            exit 0
-          fi
-          echo "::error::Cannot publish to @lessonkit-studio (npm returned Scope not found or no access)."
-          echo ""
-          echo "Create the npm organization first:"
-          echo "  1. https://www.npmjs.com/org/create — organization name: lessonkit-studio"
-          echo "  2. Add the npm user behind NPM_TOKEN as a member with publish rights"
-          echo "     (or use an automation token created while logged into that org)"
-          echo "  3. Re-run this workflow (Actions → Studio Release → Re-run failed jobs)"
-          echo ""
-          echo "See RELEASING.md § Publish Studio packages to npm"
-          exit 1
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
@@ -103,14 +84,11 @@ jobs:
               rm -f "$err"
               return 0
             fi
-            if grep -q 'Scope not found' "$err"; then
-              echo "::error::npm org @lessonkit-studio does not exist. Create it at https://www.npmjs.com/org/create then re-run."
-            fi
             cat "$err" >&2
             rm -f "$err"
             return 1
           }
-          publish_workspace @lessonkit-studio/schema
-          publish_workspace @lessonkit-studio/renderer
+          publish_workspace @lessonkit/studio-schema
+          publish_workspace @lessonkit/studio-renderer
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

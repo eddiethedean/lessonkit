@@ -18,7 +18,7 @@
         {
           "type": "text",
           "id": "text-intro",
-          "text": "This example loads src/project.json and renders it with @lessonkit-studio/renderer."
+          "text": "This example loads src/project.json and renders it with @lessonkit/studio-renderer."
         },
         {
           "type": "scenario",

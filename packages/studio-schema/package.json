@@ -1,5 +1,5 @@
 {
-  "name": "@lessonkit-studio/schema",
+  "name": "@lessonkit/studio-schema",
   "version": "0.1.0",
   "private": false,
   "description": "LessonKit Studio project schema, validation, and normalization (v1).",

@@ -10,7 +10,7 @@ const base = {
   pages: [{ id: "lesson-1", title: "Lesson", blocks: [] as unknown[] }],
 };
 
-describe("@lessonkit-studio/schema coverage", () => {
+describe("@lessonkit/studio-schema coverage", () => {
   it("parseUtils handles optional and invalid values", () => {
     const issues: StudioValidationIssue[] = [];
     expect(parseString(undefined, "p", issues, { required: false })).toBeUndefined();
