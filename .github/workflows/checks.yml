@@ -49,10 +49,13 @@ jobs:
       - name: Test
         run: npm test
 
+      # Vitest 4 @vitest/coverage-v8 uses node:inspector/promises (Node 20+).
       - name: Coverage
+        if: matrix.node-version == '20'
         run: npm run coverage
 
       - name: Storybook build
+        if: matrix.node-version == '20'
         run: npm run build-storybook
         env:
           STORYBOOK_DISABLE_TELEMETRY: "1"
