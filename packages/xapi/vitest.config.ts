@@ -5,7 +5,6 @@ export default defineConfig({
     environment: "node",
     coverage: {
       provider: "v8",
-      all: true,
       include: ["src/**/*.{ts,tsx}"],
       exclude: ["dist/**", "node_modules/**", "**/*.d.ts", "**/*.d.cts"],
       thresholds: { lines: 100 },

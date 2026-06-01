@@ -9,7 +9,7 @@ import type {
 } from "./types";
 
 function warnDuplicatePlugin(id: string): void {
-  const g = globalThis as typeof globalThis & { process?: { NODE_ENV?: string } };
+  const g = globalThis as typeof globalThis & { process?: { env?: { NODE_ENV?: string } } };
   if (typeof g.process !== "undefined" && g.process.env?.NODE_ENV === "production") return;
   console.warn(`[lessonkit] plugin id "${id}" was registered more than once; using the latest definition`);
 }

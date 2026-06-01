@@ -126,6 +126,36 @@ describe("example App", () => {
     spy.mockRestore();
   });
 
+  it("sidebar Previous is enabled after advancing and disabled on the first lesson", () => {
+    const spy = vi.spyOn(console, "log").mockImplementation(() => {});
+    const { getAllByLabelText, getByRole } = render(<App />);
+    const nav = within(getAllByLabelText("Course curriculum")[0]!);
+
+    const previous = getByRole("button", { name: "Previous" }) as HTMLButtonElement;
+    expect(previous.disabled).toBe(true);
+    fireEvent.click(nav.getByText("Continue"));
+    expect(previous.disabled).toBe(false);
+    fireEvent.click(previous);
+    expect(previous.disabled).toBe(true);
+    spy.mockRestore();
+  });
+
+  it("credential hygiene acknowledgment checkbox updates state", () => {
+    const spy = vi.spyOn(console, "log").mockImplementation(() => {});
+    const { getAllByLabelText, getByRole } = render(<App />);
+    const nav = within(getAllByLabelText("Course curriculum")[0]!);
+
+    for (let i = 0; i < 4; i += 1) {
+      fireEvent.click(nav.getByText("Continue"));
+    }
+    const mfaCheckbox = getByRole("checkbox", {
+      name: /I will enable MFA on my primary work account this week/i,
+    });
+    expect(mfaCheckbox).toBeDefined();
+    fireEvent.click(mfaCheckbox);
+    spy.mockRestore();
+  });
+
   it("covers the risky urgent-request branch", async () => {
     const spy = vi.spyOn(console, "log").mockImplementation(() => {});
     vi.useFakeTimers();

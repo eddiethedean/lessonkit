@@ -1,7 +1,7 @@
 import type { TelemetryBatchSink, TelemetryEvent, TelemetrySink, TrackingClient } from "./telemetryTypes";
 
 function isDevEnvironment(): boolean {
-  const g = globalThis as typeof globalThis & { process?: { NODE_ENV?: string } };
+  const g = globalThis as typeof globalThis & { process?: { env?: { NODE_ENV?: string } } };
   return typeof g.process !== "undefined" && g.process.env?.NODE_ENV !== "production";
 }
 
@@ -127,7 +127,7 @@ export function createTrackingClient(opts?: {
       if (disposed || disposing) return;
       if (buffer.length >= maxBufferSize) {
         buffer.shift();
-        if (!warnedBufferCap && typeof process !== "undefined" && process.env?.NODE_ENV === "development") {
+        if (!warnedBufferCap && isDevEnvironment()) {
           warnedBufferCap = true;
           console.warn(
             `[lessonkit] telemetry batch buffer capped at ${maxBufferSize} events; oldest events are dropped while the sink is unavailable.`,

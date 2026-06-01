@@ -56,7 +56,7 @@ export type BuildTelemetryEventInput =
 let warnedMissingQuizLesson = false;
 
 function isDevEnvironment(): boolean {
-  const g = globalThis as typeof globalThis & { process?: { NODE_ENV?: string } };
+  const g = globalThis as typeof globalThis & { process?: { env?: { NODE_ENV?: string } } };
   return typeof g.process !== "undefined" && g.process.env?.NODE_ENV !== "production";
 }
 

@@ -15,7 +15,7 @@ npm test
 | Command | Purpose |
 | --- | --- |
 | `npm run build` | Packages + examples |
-| `npm test` | All workspace tests |
+| `npm test` | All workspace tests (runs `pretest` → `build:packages` first so `@lessonkit/*` dist matches source) |
 | `npm run typecheck` | Typecheck (builds packages first) |
 | `npm run coverage` | Coverage report |
 | `npm run audit:ci` | Dependency audit |

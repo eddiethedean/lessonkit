@@ -3,6 +3,21 @@
 All notable changes to the LessonKit monorepo are documented here. Published packages use the
 [`@lessonkit/*`](https://www.npmjs.com/org/lessonkit) scope.
 
+## [1.0.2] - 2026-06-01
+
+Patch release: contributor DX, integration test determinism, session storage hardening, and Vitest 4 security upgrade.
+
+### Fixed
+
+- **@lessonkit/core**: `createSessionStoragePort()` falls back to in-memory storage when `sessionStorage` is `null` or throws on access (embedded / restricted contexts).
+- **Integration tests**: `package --no-build` failure test removes copied `dist/` so a local fixture build cannot make the test pass spuriously.
+
+### Changed
+
+- **Monorepo**: Root `pretest` runs `build:packages` before `npm test` so workspace tests use current `@lessonkit/*` dist artifacts.
+- **DevDependencies**: Vitest and `@vitest/coverage-v8` upgraded to **4.1.8** (addresses GHSA-5xrq-8626); removed deprecated `coverage.all` from Vitest configs.
+- **`lessonkit init` template**: Pins `^1.0.2` for `@lessonkit/*`.
+
 ## [1.0.1] - 2026-05-31
 
 Patch release: stronger TypeScript typing across the monorepo with no intended runtime API breaks.

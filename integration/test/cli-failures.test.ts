@@ -19,6 +19,7 @@ describe("CLI failure paths", () => {
     const projectDir = await createTempDir();
     tempDirs.push(projectDir);
     await copyMinimalFixture(projectDir);
+    await rm(join(projectDir, "dist"), { recursive: true, force: true });
     const result = runCli(
       ["package", "--target", "scorm12", "--no-build", "--json"],
       { cwd: projectDir },

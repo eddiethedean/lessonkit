@@ -358,7 +358,7 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
     const courseChanged = prevXapiCourseIdRef.current !== courseId;
     if (courseChanged) {
       if (normalizedConfig.xapi?.client) {
-        const g = globalThis as typeof globalThis & { process?: { NODE_ENV?: string } };
+        const g = globalThis as typeof globalThis & { process?: { env?: { NODE_ENV?: string } } };
         if (typeof g.process !== "undefined" && g.process.env?.NODE_ENV !== "production") {
           console.warn(
             "[lessonkit] courseId changed while using config.xapi.client; flush the client between courses or use config.xapi.transport so the provider can manage the queue.",

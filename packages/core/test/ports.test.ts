@@ -118,6 +118,35 @@ describe("ports", () => {
     if (original) Object.defineProperty(globalThis, "sessionStorage", original);
   });
 
+  it("createSessionStoragePort uses in-memory store when sessionStorage is null", () => {
+    const original = Object.getOwnPropertyDescriptor(globalThis, "sessionStorage");
+    Object.defineProperty(globalThis, "sessionStorage", { value: null, configurable: true });
+    try {
+      const storage = createSessionStoragePort();
+      storage.setItem("k", "v");
+      expect(storage.getItem("k")).toBe("v");
+    } finally {
+      if (original) Object.defineProperty(globalThis, "sessionStorage", original);
+    }
+  });
+
+  it("createSessionStoragePort uses in-memory store when sessionStorage access throws", () => {
+    const original = Object.getOwnPropertyDescriptor(globalThis, "sessionStorage");
+    Object.defineProperty(globalThis, "sessionStorage", {
+      configurable: true,
+      get: () => {
+        throw new Error("SecurityError");
+      },
+    });
+    try {
+      const storage = createSessionStoragePort();
+      storage.setItem("k", "v");
+      expect(storage.getItem("k")).toBe("v");
+    } finally {
+      if (original) Object.defineProperty(globalThis, "sessionStorage", original);
+    }
+  });
+
   it("resetStoragePortForTests clears memory-backed ports", () => {
     vi.stubGlobal("sessionStorage", {
       getItem: () => null,

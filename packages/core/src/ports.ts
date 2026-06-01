@@ -39,7 +39,8 @@ function createMemoryBackedSessionStorage(
   const warnPersistFailure = () => {
     if (warnedPersistFailure) return;
     warnedPersistFailure = true;
-    if (typeof process !== "undefined" && process.env?.NODE_ENV === "development") {
+    const g = globalThis as typeof globalThis & { process?: { env?: { NODE_ENV?: string } } };
+    if (typeof g.process !== "undefined" && g.process.env?.NODE_ENV === "development") {
       console.warn(
         "[lessonkit] sessionStorage is unavailable or failed; using in-memory session dedupe for this tab (may reset on full reload).",
       );
@@ -83,23 +84,39 @@ export function resetStoragePortForTests(storage: StoragePort): void {
   storage.resetForTests?.();
 }
 
-export function createSessionStoragePort(): StoragePort {
-  if (typeof sessionStorage === "undefined") {
-    const memory = new Map<string, string>();
-    return {
-      getItem: (key) => memory.get(key) ?? null,
-      setItem: (key, value) => {
-        memory.set(key, value);
-      },
-      removeItem: (key) => {
-        memory.delete(key);
-      },
-      resetForTests: () => {
-        memory.clear();
-      },
-    };
+function createInMemorySessionStoragePort(): StoragePort {
+  const memory = new Map<string, string>();
+  return {
+    getItem: (key) => memory.get(key) ?? null,
+    setItem: (key, value) => {
+      memory.set(key, value);
+    },
+    removeItem: (key) => {
+      memory.delete(key);
+    },
+    resetForTests: () => {
+      memory.clear();
+    },
+  };
+}
+
+function resolveBrowserSessionStorage(): Storage | null {
+  try {
+    if (typeof sessionStorage === "undefined" || sessionStorage == null) {
+      return null;
+    }
+    return sessionStorage;
+  } catch {
+    return null;
   }
-  return createMemoryBackedSessionStorage(sessionStorage);
+}
+
+export function createSessionStoragePort(): StoragePort {
+  const session = resolveBrowserSessionStorage();
+  if (!session) {
+    return createInMemorySessionStoragePort();
+  }
+  return createMemoryBackedSessionStorage(session);
 }
 
 export function createGlobalTimer(): TimerPort {

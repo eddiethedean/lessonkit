@@ -26,7 +26,7 @@ the framework adapter exists (see 0.6.0).
 
 ## Status
 
-- **Framework:** **1.0.1** — stable public API (typing hardening, packaging path safety, telemetry delivery fixes)
+- **Framework:** **1.0.2** — stable public API (contributor DX, session storage hardening, Vitest 4)
 - **Studio:** **unblocked** — framework gate met; see [Studio milestones](#lessonkit-studio-milestones)
 - **Focus (now):** LessonKit Studio 0.1.x planning and implementation
 

@@ -1,6 +1,6 @@
 {
   "name": "@lessonkit/cli",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "private": false,
   "description": "LessonKit CLI — init, dev, build, and package learning experiences.",
   "license": "Apache-2.0",
@@ -42,8 +42,8 @@
     "lint": "echo \"(no lint configured yet)\""
   },
   "dependencies": {
-    "@lessonkit/core": "1.0.1",
-    "@lessonkit/lxpack": "1.0.1",
+    "@lessonkit/core": "1.0.2",
+    "@lessonkit/lxpack": "1.0.2",
     "commander": "^14.0.1"
   },
   "engines": {
@@ -53,6 +53,6 @@
     "@types/node": "^24.0.0",
     "tsup": "^8.5.0",
     "typescript": "^5.8.3",
-    "vitest": "^3.2.4"
+    "vitest": "^4.1.8"
   }
 }
