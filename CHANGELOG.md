@@ -1,7 +1,21 @@
 # Changelog
 
-All notable changes to the LessonKit monorepo are documented here. Published packages use the
-[`@lessonkit/*`](https://www.npmjs.com/org/lessonkit) scope.
+All notable changes to the LessonKit monorepo are documented here.
+
+- [`@lessonkit/*`](https://www.npmjs.com/org/lessonkit) — core platform (tag `v*.*.*`)
+- [`@lessonkit-studio/*`](https://www.npmjs.com/org/lessonkit-studio) — Studio authoring (tag `studio-v*`)
+
+## [studio-v0.1.0] - 2026-06-01
+
+First public preview of LessonKit Studio packages. Requires **@lessonkit/core**, **@lessonkit/react**, and **@lessonkit/themes** at **1.0.2** (pinned at publish time from `packages/core` on the release commit).
+
+### Added
+
+- **@lessonkit-studio/schema**: `schemaVersion: 1` project model; `parseStudioProject`, `validateStudioProject`, `normalizeStudioProject`, `migrateStudioProject`, `loadStudioProject`, `buildStudioBlockCatalog`; shipped `studio-project.v1.json` and `studio-block-catalog.v1.json`.
+- **@lessonkit-studio/renderer**: `StudioRenderer` mapping Studio blocks to `@lessonkit/react` (`Course`, `Lesson`, `Quiz`, `Scenario`) and presentational primitives; checklist/video stubs.
+- **Monorepo**: `examples/studio-minimal`, [Studio project format v1](docs/guides/studio/project-format-v1.md), [Studio Release](.github/workflows/studio-release.yml) workflow (`studio-v*` tags).
+
+> **Not included in 0.1.0:** visual editor app, `lessonkit-studio` CLI, builder/codegen packages (planned 0.2+). See [STUDIO_READINESS.md](docs/STUDIO_READINESS.md).
 
 ## [1.0.2] - 2026-06-01
 

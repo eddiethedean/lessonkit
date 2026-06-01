@@ -109,4 +109,5 @@ for:
 - [x] Initial block types: text, heading, image, button, input, container, quiz, scenario (checklist / video: schema + stub renderer)
 - [x] Example [`examples/studio-minimal`](../examples/studio-minimal) loads `src/project.json` via shared renderer
 - [x] [Studio project format v1](guides/studio/project-format-v1.md) documented
+- [x] npm publish path: `studio-v*` tag → [Studio Release](../.github/workflows/studio-release.yml) (see [RELEASING.md](../RELEASING.md))
 
