@@ -272,6 +272,35 @@ describe("packageLessonkitCourse errors", () => {
     }
   });
 
+  it("returns ok false when build outputDir is outside staging", async () => {
+    packageLessonkit.mockResolvedValueOnce({
+      ok: true,
+      target: "standalone",
+      fileCount: 1,
+      outputDir: "/tmp/external-standalone",
+      manifest: { title: "T" },
+      issues: [],
+    });
+
+    const root = await makeTempDir();
+    const dist = join(root, "dist");
+    await mkdir(dist, { recursive: true });
+    await writeFile(join(dist, "index.html"), "<html></html>", "utf-8");
+
+    const result = await packageLessonkitCourse({
+      descriptor,
+      outDir: join(root, "course"),
+      spaDistDir: dist,
+      target: "standalone",
+      dir: true,
+    });
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.issues.some((i) => i.path === "outputDir")).toBe(true);
+    }
+  });
+
   it("returns ok false when packageLessonkit build fails", async () => {
     packageLessonkit.mockResolvedValueOnce({
       ok: false,

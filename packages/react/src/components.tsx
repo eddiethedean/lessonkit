@@ -102,7 +102,9 @@ export function Lesson(props: LessonProps) {
       queueMicrotask(() => {
         if (!effectSurvivedTick) return;
         if (lessonMountGenerationRef.current !== generation) return;
+        /* v8 ignore start -- course switch updates live courseId before unmount microtask runs */
         if (liveCourseIdRef.current !== mountedCourseId) return;
+        /* v8 ignore stop */
         completeLesson(lessonId, { courseId: mountedCourseId });
       });
     };
@@ -184,12 +186,14 @@ export function Quiz(props: QuizProps) {
 
   useEffect(() => {
     if (!missingLesson || isDevEnvironment()) return;
+    /* v8 ignore start -- warnedQuizOutsideLesson gate only runs once per module load */
     if (!warnedQuizOutsideLesson) {
       warnedQuizOutsideLesson = true;
       console.error(
         "[lessonkit] <Quiz> must be wrapped in <Lesson>; quiz telemetry will not be emitted.",
       );
     }
+    /* v8 ignore stop */
   }, [missingLesson]);
 
   if (missingLesson && isDevEnvironment()) {

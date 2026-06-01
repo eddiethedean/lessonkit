@@ -32,6 +32,15 @@ describe("@lessonkit/accessibility", () => {
     expect(getReducedMotionPreference()).toBe("unknown");
   });
 
+  it("getReducedMotionPreference returns no-preference when motion is allowed", () => {
+    vi.stubGlobal("window", {
+      matchMedia: vi.fn(() => ({ matches: false })),
+    });
+    expect(getReducedMotionPreference()).toBe("no-preference");
+    expect(prefersReducedMotion()).toBe(false);
+    expect(shouldAnimate()).toBe(true);
+  });
+
   it("shouldAnimate returns false when prefers reduced motion", () => {
     vi.stubGlobal("window", {
       matchMedia: vi.fn(() => ({ matches: true })),
@@ -47,6 +56,11 @@ describe("@lessonkit/accessibility", () => {
 
   it("focusFirst returns false for null container", () => {
     expect(focusFirst(null)).toBe(false);
+  });
+
+  it("focusFirst returns false when no focusable element exists", () => {
+    const container = { querySelector: () => null };
+    expect(focusFirst(container)).toBe(false);
   });
 
   it("visuallyHiddenStyle clips content for screen readers only", () => {
@@ -264,6 +278,8 @@ describe("@lessonkit/accessibility", () => {
     const horizontal = createRovingTabIndex({ itemCount: 2, orientation: "horizontal", initialIndex: 0 });
     horizontal.getItemProps(0).onKeyDown({ key: "ArrowUp", preventDefault: () => {} });
     expect(horizontal.activeIndex).toBe(0);
+    horizontal.getItemProps(0).onKeyDown({ key: "ArrowDown", preventDefault: () => {} });
+    expect(horizontal.activeIndex).toBe(0);
 
     const vertical = createRovingTabIndex({ itemCount: 2, orientation: "vertical", initialIndex: 0 });
     vertical.getItemProps(0).onKeyDown({ key: "ArrowLeft", preventDefault: () => {} });
@@ -308,5 +324,224 @@ describe("@lessonkit/accessibility", () => {
     outside.dispatchEvent(ev);
     expect(ev.defaultPrevented).toBe(true);
     trap.deactivate();
+  });
+
+  it("trapFocus ignores inside clicks and non-element mousedown targets", () => {
+    document.body.innerHTML = `
+      <div id="modal">
+        <button id="first">First</button>
+      </div>
+    `;
+    const modal = document.getElementById("modal") as HTMLDivElement;
+    const first = document.getElementById("first") as HTMLButtonElement;
+    const trap = trapFocus(modal, { initialFocus: "first" });
+    trap.activate();
+
+    const inside = new MouseEvent("mousedown", { bubbles: true, cancelable: true });
+    Object.defineProperty(inside, "target", { value: first });
+    first.dispatchEvent(inside);
+    expect(inside.defaultPrevented).toBe(false);
+
+    const nonElement = new MouseEvent("mousedown", { bubbles: true, cancelable: true });
+    Object.defineProperty(nonElement, "target", { value: document });
+    document.dispatchEvent(nonElement);
+    expect(nonElement.defaultPrevented).toBe(false);
+
+    trap.deactivate();
+  });
+
+  it("trapFocus no-ops on repeated activate/deactivate and skips restore when disabled", () => {
+    document.body.innerHTML = `
+      <button id="outside">Outside</button>
+      <div id="modal">
+        <button id="first">First</button>
+      </div>
+    `;
+    const outside = document.getElementById("outside") as HTMLButtonElement;
+    const modal = document.getElementById("modal") as HTMLDivElement;
+    const first = document.getElementById("first") as HTMLButtonElement;
+
+    outside.focus();
+    const trap = trapFocus(modal, { initialFocus: "first", restoreFocus: false });
+    trap.activate();
+    trap.activate();
+    expect(document.activeElement).toBe(first);
+
+    trap.deactivate();
+    expect(document.activeElement).toBe(first);
+    trap.deactivate();
+  });
+
+  it("trapFocus Tab wraps forward when focus is outside container", () => {
+    document.body.innerHTML = `
+      <button id="outside">Outside</button>
+      <div id="modal">
+        <button id="first">First</button>
+        <button id="last">Last</button>
+      </div>
+    `;
+    const outside = document.getElementById("outside") as HTMLButtonElement;
+    const modal = document.getElementById("modal") as HTMLDivElement;
+    const first = document.getElementById("first") as HTMLButtonElement;
+
+    const trap = trapFocus(modal, { initialFocus: "first" });
+    trap.activate();
+    outside.focus();
+    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Tab" }));
+    expect(document.activeElement).toBe(first);
+    trap.deactivate();
+  });
+
+  it("trapFocus ignores Tab when inactive or focus is between endpoints", () => {
+    document.body.innerHTML = `
+      <div id="modal">
+        <button id="first">First</button>
+        <button id="middle">Middle</button>
+        <button id="last">Last</button>
+      </div>
+    `;
+    const modal = document.getElementById("modal") as HTMLDivElement;
+    const middle = document.getElementById("middle") as HTMLButtonElement;
+    const trap = trapFocus(modal, { initialFocus: "first" });
+    trap.activate();
+
+    middle.focus();
+    const shiftTab = new KeyboardEvent("keydown", { key: "Tab", shiftKey: true, bubbles: true, cancelable: true });
+    document.dispatchEvent(shiftTab);
+    expect(shiftTab.defaultPrevented).toBe(false);
+
+    const tab = new KeyboardEvent("keydown", { key: "Tab", bubbles: true, cancelable: true });
+    document.dispatchEvent(tab);
+    expect(tab.defaultPrevented).toBe(false);
+
+    trap.deactivate();
+    const inactiveTab = new KeyboardEvent("keydown", { key: "Tab", bubbles: true, cancelable: true });
+    document.dispatchEvent(inactiveTab);
+    expect(inactiveTab.defaultPrevented).toBe(false);
+  });
+
+  it("trapFocus shift+Tab from first focusable wraps to last", () => {
+    document.body.innerHTML = `
+      <div id="modal">
+        <button id="first">First</button>
+        <button id="last">Last</button>
+      </div>
+    `;
+    const modal = document.getElementById("modal") as HTMLDivElement;
+    const first = document.getElementById("first") as HTMLButtonElement;
+    const last = document.getElementById("last") as HTMLButtonElement;
+    const trap = trapFocus(modal, { initialFocus: "first" });
+    trap.activate();
+    expect(document.activeElement).toBe(first);
+
+    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Tab", shiftKey: true }));
+    expect(document.activeElement).toBe(last);
+    trap.deactivate();
+  });
+
+  it("trapFocus redirects focusin to container when no focusables exist", () => {
+    document.body.innerHTML = `<div id="modal" tabindex="-1"></div><button id="outside">Outside</button>`;
+    const modal = document.getElementById("modal") as HTMLDivElement;
+    const outside = document.getElementById("outside") as HTMLButtonElement;
+    const focusSpy = vi.spyOn(modal, "focus");
+    const trap = trapFocus(modal);
+    trap.activate();
+
+    outside.focus();
+    const ev = new FocusEvent("focusin", { bubbles: true });
+    Object.defineProperty(ev, "target", { value: outside });
+    document.dispatchEvent(ev);
+    expect(focusSpy).toHaveBeenCalled();
+    trap.deactivate();
+  });
+
+  it("trapFocus ignores focusin and mousedown after deactivate", () => {
+    document.body.innerHTML = `
+      <button id="outside">Outside</button>
+      <div id="modal">
+        <button id="first">First</button>
+      </div>
+    `;
+    const outside = document.getElementById("outside") as HTMLButtonElement;
+    const modal = document.getElementById("modal") as HTMLDivElement;
+    const trap = trapFocus(modal, { initialFocus: "first" });
+    trap.activate();
+    trap.deactivate();
+
+    const focusEv = new FocusEvent("focusin", { bubbles: true });
+    Object.defineProperty(focusEv, "target", { value: outside });
+    document.dispatchEvent(focusEv);
+
+    const mouseEv = new MouseEvent("mousedown", { bubbles: true, cancelable: true });
+    Object.defineProperty(mouseEv, "target", { value: outside });
+    outside.dispatchEvent(mouseEv);
+    expect(mouseEv.defaultPrevented).toBe(false);
+  });
+
+  it("trapFocus skips invalid initialFocus values", () => {
+    document.body.innerHTML = `
+      <div id="modal">
+        <button id="first">First</button>
+      </div>
+    `;
+    const modal = document.getElementById("modal") as HTMLDivElement;
+    const first = document.getElementById("first") as HTMLButtonElement;
+    const trap = trapFocus(modal, { initialFocus: {} as unknown as HTMLElement });
+    trap.activate();
+    expect(document.activeElement).not.toBe(first);
+    trap.deactivate();
+  });
+
+  it("trapFocus ignores focusin events with non-element targets", () => {
+    document.body.innerHTML = `
+      <div id="modal">
+        <button id="first">First</button>
+      </div>
+    `;
+    const modal = document.getElementById("modal") as HTMLDivElement;
+    const first = document.getElementById("first") as HTMLButtonElement;
+    const trap = trapFocus(modal, { initialFocus: "first" });
+    trap.activate();
+
+    const ev = new FocusEvent("focusin", { bubbles: true });
+    Object.defineProperty(ev, "target", { value: document });
+    document.dispatchEvent(ev);
+    expect(document.activeElement).toBe(first);
+    trap.deactivate();
+  });
+
+  it("trapFocus handlers no-op when inactive", () => {
+    document.body.innerHTML = `
+      <button id="outside">Outside</button>
+      <div id="modal">
+        <button id="first">First</button>
+      </div>
+    `;
+    const outside = document.getElementById("outside") as HTMLButtonElement;
+    const modal = document.getElementById("modal") as HTMLDivElement;
+    const handlers = new Map<string, EventListener>();
+    const addListener = document.addEventListener.bind(document);
+    vi.spyOn(document, "addEventListener").mockImplementation((type, listener, options) => {
+      handlers.set(type, listener as EventListener);
+      addListener(type, listener as EventListener, options);
+    });
+
+    const trap = trapFocus(modal, { initialFocus: "first", allowOutsideClick: false });
+    trap.activate();
+
+    const nonTab = new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true });
+    document.dispatchEvent(nonTab);
+    expect(nonTab.defaultPrevented).toBe(false);
+
+    trap.deactivate();
+
+    handlers.get("keydown")?.call(document, new KeyboardEvent("keydown", { key: "Tab" }));
+    const focusEv = new FocusEvent("focusin", { bubbles: true });
+    Object.defineProperty(focusEv, "target", { value: outside });
+    handlers.get("focusin")?.call(document, focusEv);
+    const outsideClick = new MouseEvent("mousedown", { bubbles: true, cancelable: true });
+    Object.defineProperty(outsideClick, "target", { value: outside });
+    handlers.get("mousedown")?.call(document, outsideClick);
+    expect(outsideClick.defaultPrevented).toBe(false);
   });
 });

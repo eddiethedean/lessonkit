@@ -23,6 +23,9 @@ describe("@lessonkit/studio-schema coverage", () => {
     const issues3: StudioValidationIssue[] = [];
     expect(parseString("  ", "p", issues3, { required: false, trim: true })).toBe("");
 
+    const issuesTrimOff: StudioValidationIssue[] = [];
+    expect(parseString("  x  ", "p", issuesTrimOff, { trim: false })).toBe("  x  ");
+
     const issues4: StudioValidationIssue[] = [];
     expect(parsePositiveInt(1.5, "p", issues4, [1, 2, 3])).toBeUndefined();
     const issues5: StudioValidationIssue[] = [];
@@ -161,6 +164,124 @@ describe("@lessonkit/studio-schema coverage", () => {
       ],
     });
     expect(checklistEmpty.ok).toBe(false);
+
+    const missingBlockId = parseStudioProject({
+      ...base,
+      pages: [{ id: "lesson-1", title: "L", blocks: [{ type: "text", text: "x" }] }],
+    });
+    expect(missingBlockId.ok).toBe(false);
+
+    const missingImageSrc = parseStudioProject({
+      ...base,
+      pages: [{ id: "lesson-1", title: "L", blocks: [{ type: "image", id: "i1", alt: "A" }] }],
+    });
+    expect(missingImageSrc.ok).toBe(false);
+
+    const imageNoAlt = parseStudioProject({
+      ...base,
+      pages: [{ id: "lesson-1", title: "L", blocks: [{ type: "image", id: "i1", src: "/a.png" }] }],
+    });
+    expect(imageNoAlt.ok).toBe(true);
+    if (imageNoAlt.ok) {
+      const block = imageNoAlt.project.pages[0]!.blocks[0];
+      expect(block?.type).toBe("image");
+      if (block?.type === "image") expect(block.alt).toBe("");
+    }
+
+    const missingButtonLabel = parseStudioProject({
+      ...base,
+      pages: [{ id: "lesson-1", title: "L", blocks: [{ type: "button", id: "b1" }] }],
+    });
+    expect(missingButtonLabel.ok).toBe(false);
+
+    const buttonNoHref = parseStudioProject({
+      ...base,
+      pages: [{ id: "lesson-1", title: "L", blocks: [{ type: "button", id: "b1", label: "Go" }] }],
+    });
+    expect(buttonNoHref.ok).toBe(true);
+    if (buttonNoHref.ok) {
+      const block = buttonNoHref.project.pages[0]!.blocks[0];
+      expect(block?.type).toBe("button");
+      if (block?.type === "button") expect(block.href).toBeUndefined();
+    }
+
+    const missingInputLabel = parseStudioProject({
+      ...base,
+      pages: [{ id: "lesson-1", title: "L", blocks: [{ type: "input", id: "in1" }] }],
+    });
+    expect(missingInputLabel.ok).toBe(false);
+
+    const inputNoPlaceholder = parseStudioProject({
+      ...base,
+      pages: [{ id: "lesson-1", title: "L", blocks: [{ type: "input", id: "in1", label: "L" }] }],
+    });
+    expect(inputNoPlaceholder.ok).toBe(true);
+    if (inputNoPlaceholder.ok) {
+      const block = inputNoPlaceholder.project.pages[0]!.blocks[0];
+      expect(block?.type).toBe("input");
+      if (block?.type === "input") expect(block.placeholder).toBeUndefined();
+    }
+
+    const quizMissingFields = parseStudioProject({
+      ...base,
+      pages: [
+        {
+          id: "lesson-1",
+          title: "L",
+          blocks: [{ type: "quiz", id: "q1", question: "Q", choices: ["A"], answer: "A" }],
+        },
+      ],
+    });
+    expect(quizMissingFields.ok).toBe(false);
+
+    const scenarioNoBlockId = parseStudioProject({
+      ...base,
+      pages: [
+        {
+          id: "lesson-1",
+          title: "L",
+          blocks: [{ type: "scenario", id: "s1", blocks: [] }],
+        },
+      ],
+    });
+    expect(scenarioNoBlockId.ok).toBe(true);
+    if (scenarioNoBlockId.ok) {
+      const block = scenarioNoBlockId.project.pages[0]!.blocks[0];
+      expect(block?.type).toBe("scenario");
+      if (block?.type === "scenario") expect(block.blockId).toBeUndefined();
+    }
+
+    const missingVideoSrc = parseStudioProject({
+      ...base,
+      pages: [{ id: "lesson-1", title: "L", blocks: [{ type: "video", id: "v1" }] }],
+    });
+    expect(missingVideoSrc.ok).toBe(false);
+
+    const videoNoTitle = parseStudioProject({
+      ...base,
+      pages: [{ id: "lesson-1", title: "L", blocks: [{ type: "video", id: "v1", src: "/v.mp4" }] }],
+    });
+    expect(videoNoTitle.ok).toBe(true);
+    if (videoNoTitle.ok) {
+      const block = videoNoTitle.project.pages[0]!.blocks[0];
+      expect(block?.type).toBe("video");
+      if (block?.type === "video") expect(block.title).toBeUndefined();
+    }
+
+    const missingPageId = parseStudioProject({
+      ...base,
+      pages: [{ title: "L", blocks: [] }],
+    });
+    expect(missingPageId.ok).toBe(false);
+
+    const missingPageTitle = parseStudioProject({
+      ...base,
+      pages: [{ id: "lesson-1", blocks: [] }],
+    });
+    expect(missingPageTitle.ok).toBe(false);
+
+    const stringSchemaVersion = parseStudioProject({ ...base, schemaVersion: "1" });
+    expect(stringSchemaVersion.ok).toBe(true);
   });
 
   it("loadStudioProject returns validation issues after parse", () => {
@@ -259,6 +380,52 @@ describe("@lessonkit/studio-schema coverage", () => {
     }
   });
 
+  it("normalizeStudioProject omits optional fields and derives ids", () => {
+    const parsed = parseStudioProject({
+      schemaVersion: 1,
+      course: { courseId: "course-a", title: "Course" },
+      pages: [
+        {
+          id: "lesson-1",
+          title: "Page",
+          blocks: [
+            { type: "button", id: "b1", label: "Go" },
+            { type: "input", id: "in1", label: "L" },
+            { type: "scenario", id: "s1", blocks: [] },
+            { type: "video", id: "v1", src: "/v.mp4" },
+          ],
+        },
+      ],
+    });
+    expect(parsed.ok).toBe(true);
+    if (!parsed.ok) return;
+    const normalized = normalizeStudioProject(parsed.project);
+    const blocks = normalized.pages[0]!.blocks;
+    expect(blocks[0]?.type).toBe("button");
+    if (blocks[0]?.type === "button") expect(blocks[0].href).toBeUndefined();
+    expect(blocks[1]?.type).toBe("input");
+    if (blocks[1]?.type === "input") expect(blocks[1].placeholder).toBeUndefined();
+    expect(blocks[2]?.type).toBe("scenario");
+    if (blocks[2]?.type === "scenario") expect(blocks[2].blockId).toBeUndefined();
+    expect(blocks[3]?.type).toBe("video");
+    if (blocks[3]?.type === "video") expect(blocks[3].title).toBeUndefined();
+  });
+
+  it("normalizeStudioProject derives page id from title when blank", () => {
+    const parsed = parseStudioProject({
+      schemaVersion: 1,
+      course: { courseId: "course-a", title: "Course" },
+      pages: [{ id: "lesson-1", title: "My Page", blocks: [] }],
+    });
+    expect(parsed.ok).toBe(true);
+    if (!parsed.ok) return;
+    const normalized = normalizeStudioProject({
+      ...parsed.project,
+      pages: [{ ...parsed.project.pages[0]!, id: "" as "lesson-1" }],
+    });
+    expect(normalized.pages[0]!.id).toMatch(/^[a-z]/);
+  });
+
   it("normalizeStudioProject derives courseId from title when blank", () => {
     const parsed = parseStudioProject({
       schemaVersion: 1,
@@ -272,6 +439,38 @@ describe("@lessonkit/studio-schema coverage", () => {
       course: { courseId: "", title: "Fallback Title" },
     });
     expect(normalized.course.courseId).toMatch(/^[a-z]/);
+  });
+
+  it("normalizeStudioProject falls back to course when title is blank", () => {
+    const parsed = parseStudioProject({
+      schemaVersion: 1,
+      course: { courseId: "course-a", title: "Course" },
+      pages: [{ id: "lesson-1", title: "L", blocks: [] }],
+    });
+    expect(parsed.ok).toBe(true);
+    if (!parsed.ok) return;
+    const normalized = normalizeStudioProject({
+      ...parsed.project,
+      course: { courseId: "", title: "" },
+    });
+    expect(normalized.course.courseId).toMatch(/^[a-z]/);
+  });
+
+  it("validateStudioProject accepts scenario without blockId", () => {
+    const parsed = parseStudioProject({
+      schemaVersion: 1,
+      course: { courseId: "course-a", title: "C" },
+      pages: [
+        {
+          id: "lesson-1",
+          title: "L",
+          blocks: [{ type: "scenario", id: "s1", blocks: [{ type: "text", id: "t1", text: "x" }] }],
+        },
+      ],
+    });
+    expect(parsed.ok).toBe(true);
+    if (!parsed.ok) return;
+    expect(validateStudioProject(parsed.project).ok).toBe(true);
   });
 
   it("buildStudioBlockCatalog is exported", () => {

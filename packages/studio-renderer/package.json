@@ -1,6 +1,6 @@
 {
   "name": "@lessonkit/studio-renderer",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": false,
   "description": "React renderer for LessonKit Studio project documents.",
   "license": "Apache-2.0",
@@ -37,7 +37,10 @@
       "require": "./dist/index.cjs"
     }
   },
-  "files": ["dist", "README.md"],
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "scripts": {
     "build": "tsup src/index.tsx --format esm,cjs --dts --external react --external react-dom --external @lessonkit/react --external @lessonkit/themes --external @lessonkit/core --external @lessonkit/studio-schema",
     "dev": "tsup src/index.tsx --format esm,cjs --dts --watch --external react --external react-dom --external @lessonkit/react --external @lessonkit/themes --external @lessonkit/core --external @lessonkit/studio-schema",

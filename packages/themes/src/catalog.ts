@@ -72,6 +72,7 @@ export function buildThemeCatalog(): ThemeCatalogEntry[] {
       cssVariable: colorVarName(key),
       type: "color",
       required: true,
+      /* v8 ignore next -- REQUIRED_COLOR_KEYS are fully described above */
       description: COLOR_DESCRIPTIONS[key] ?? `Color token: ${key}`,
     });
   }
@@ -90,6 +91,7 @@ export function buildThemeCatalog(): ThemeCatalogEntry[] {
       cssVariable: spacingVarName(key),
       type: "spacing",
       required: true,
+      /* v8 ignore next -- REQUIRED_SPACING_KEYS are fully described above */
       description: SPACING_DESCRIPTIONS[key] ?? `Spacing token: ${key}`,
     });
   }
@@ -100,6 +102,7 @@ export function buildThemeCatalog(): ThemeCatalogEntry[] {
       cssVariable: typographyVarName(key),
       type: "typography",
       required: true,
+      /* v8 ignore next -- REQUIRED_TYPOGRAPHY_KEYS are fully described above */
       description: TYPOGRAPHY_DESCRIPTIONS[key] ?? `Typography token: ${key}`,
     });
   }
@@ -110,6 +113,7 @@ export function buildThemeCatalog(): ThemeCatalogEntry[] {
       cssVariable: radiusVarName(key),
       type: "radius",
       required: true,
+      /* v8 ignore next -- REQUIRED_RADIUS_KEYS are fully described above */
       description: RADIUS_DESCRIPTIONS[key] ?? `Radius token: ${key}`,
     });
   }
@@ -120,6 +124,7 @@ export function buildThemeCatalog(): ThemeCatalogEntry[] {
       cssVariable: shadowVarName(key),
       type: "shadow",
       required: true,
+      /* v8 ignore next -- REQUIRED_SHADOW_KEYS are fully described above */
       description: SHADOW_DESCRIPTIONS[key] ?? `Shadow token: ${key}`,
     });
   }

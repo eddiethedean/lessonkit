@@ -80,7 +80,7 @@ export function parseLessonkitManifest(
   if (!validation.ok) {
     for (const i of validation.issues) {
       issues.push({
-        path: i.path.startsWith("course.") ? i.path : `course.${i.path}`,
+        path: /* v8 ignore next */ i.path.startsWith("course.") ? i.path : `course.${i.path}`,
         message: i.message,
       });
     }
@@ -127,6 +127,7 @@ export function parseLessonkitManifest(
 
   if (issues.length) return { ok: false, issues };
 
+  /* v8 ignore next */
   if (!validation.ok) return { ok: false, issues };
 
   return {

@@ -51,7 +51,8 @@ describe("@lessonkit/studio-renderer", () => {
     expect(screen.getByRole("heading", { level: 2, name: "Welcome" })).toBeTruthy();
     expect(screen.getByText("Body copy")).toBeTruthy();
     expect(screen.getByText("Ready?")).toBeTruthy();
-    expect(screen.getByText("Checklist (coming soon)")).toBeTruthy();
+    expect(screen.getByLabelText("Checklist")).toBeTruthy();
+    expect(screen.getByText("Item A")).toBeTruthy();
   });
 
   it("filters to activePageId when set", () => {

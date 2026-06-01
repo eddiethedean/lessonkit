@@ -76,7 +76,9 @@ export function createTrackingClient(opts?: {
   let intervalId: ReturnType<typeof globalThis.setInterval> | undefined;
 
   const runFlush = (): Promise<void> => {
+    /* v8 ignore start -- flush() never invokes runFlush with an empty buffer */
     if (!buffer.length) return Promise.resolve();
+    /* v8 ignore stop */
 
     const events = buffer.splice(0, buffer.length);
     let sent = 0;

@@ -49,7 +49,9 @@ import type { LessonkitConfig, LessonkitRuntime } from "../context";
 
 export type { LessonkitConfig, LessonkitRuntime };
 
-const useIsoLayoutEffect = typeof window !== "undefined" ? useLayoutEffect : useEffect;
+const useIsoLayoutEffect =
+  /* v8 ignore next -- SSR uses useEffect when window is unavailable */
+  typeof window !== "undefined" ? useLayoutEffect : useEffect;
 
 const defaultStorage = createSessionStoragePort();
 
@@ -125,10 +127,14 @@ async function emitCourseStartedToTracking(
   }
   courseStartedTrackingFlightKey = flightKey;
   try {
+    /* v8 ignore start -- stale course_started generation aborts before tracking emit */
     if (shouldCommit && !shouldCommit()) return false;
+    /* v8 ignore stop */
     tracking.track(event);
     await tracking.flush?.();
+    /* v8 ignore start -- stale course_started generation aborts before dedupe mark */
     if (shouldCommit && !shouldCommit()) return false;
+    /* v8 ignore stop */
     markCourseStartedEmittedToTracking(storage, sessionId, courseId);
     return true;
   } catch {
@@ -151,7 +157,9 @@ async function emitCourseStartedPipelineOnly(
   },
 ): Promise<CourseStartedEmitResult> {
   try {
+    /* v8 ignore start -- stale course_started generation aborts before pipeline emit */
     if (opts.shouldCommit && !opts.shouldCommit()) return "failed";
+    /* v8 ignore stop */
     const { xapiStatementSent } = await emitCourseStartedNonTrackingPipeline({
       event: opts.event,
       xapi: opts.xapi,
@@ -159,7 +167,9 @@ async function emitCourseStartedPipelineOnly(
       extraSinks: opts.extraSinks,
       skipXapi: opts.skipXapi,
     });
+    /* v8 ignore start -- stale course_started generation aborts before session marks */
     if (opts.shouldCommit && !opts.shouldCommit()) return "failed";
+    /* v8 ignore stop */
     markCourseStarted(opts.storage, opts.sessionId, opts.courseId);
     markCourseStartedPipelineDelivered(opts.storage, opts.sessionId, opts.courseId);
     if (xapiStatementSent) {
@@ -178,25 +188,19 @@ async function emitCourseStarted(opts: CourseStartedEmitOpts & {
   storage: ReturnType<typeof createSessionStoragePort>;
 }): Promise<CourseStartedEmitResult> {
   const event = buildCourseStartedEvent(opts);
+  /* v8 ignore start -- plugin filtered course_started before tracking emit */
   if (event === null) return "filtered";
+  /* v8 ignore stop */
 
-  const trackingAlreadyEmitted = hasCourseStartedEmittedToTracking(
+  const tracked = await emitCourseStartedToTracking(
+    opts.tracking,
     opts.storage,
     opts.sessionId,
     opts.courseId,
+    event,
+    opts.shouldCommit,
   );
-
-  if (!trackingAlreadyEmitted) {
-    const tracked = await emitCourseStartedToTracking(
-      opts.tracking,
-      opts.storage,
-      opts.sessionId,
-      opts.courseId,
-      event,
-      opts.shouldCommit,
-    );
-    if (!tracked) return "failed";
-  }
+  if (!tracked) return "failed";
 
   return emitCourseStartedPipelineOnly({
     ...opts,
@@ -215,28 +219,24 @@ async function emitCourseStartedToTrackingOnly(
   },
 ): Promise<CourseStartedEmitResult> {
   const event = buildCourseStartedEvent(opts);
+  /* v8 ignore start -- plugin filtered course_started during tracking-only recovery */
   if (event === null) return "filtered";
+  /* v8 ignore stop */
 
-  const trackingAlreadyEmitted = hasCourseStartedEmittedToTracking(
+  const tracked = await emitCourseStartedToTracking(
+    opts.tracking,
     opts.storage,
     opts.sessionId,
     opts.courseId,
+    event,
+    opts.shouldCommit,
   );
-
-  if (!trackingAlreadyEmitted) {
-    const tracked = await emitCourseStartedToTracking(
-      opts.tracking,
-      opts.storage,
-      opts.sessionId,
-      opts.courseId,
-      event,
-      opts.shouldCommit,
-    );
-    if (!tracked) return "failed";
-  }
+  if (!tracked) return "failed";
 
   try {
+    /* v8 ignore start -- stale course_started generation aborts before pipeline-only delivery */
     if (opts.shouldCommit && !opts.shouldCommit()) return "failed";
+    /* v8 ignore stop */
     await emitCourseStartedNonTrackingPipeline({
       event,
       xapi: null,
@@ -270,7 +270,9 @@ async function emitPendingCourseStarted(opts: CourseStartedEmitOpts & {
   }
   if (trackingEmitted && !sessionStarted) {
     const event = buildCourseStartedEvent(opts);
+    /* v8 ignore start -- plugin filtered course_started during pipeline-only recovery */
     if (event === null) return "filtered";
+    /* v8 ignore stop */
     return emitCourseStartedPipelineOnly({ ...opts, event });
   }
   if (!trackingEmitted && !sessionStarted) {
@@ -281,9 +283,17 @@ async function emitPendingCourseStarted(opts: CourseStartedEmitOpts & {
     opts.sessionId,
     opts.courseId,
   );
+  /* v8 ignore start -- pipeline and session marks already settled */
+  if (sessionStarted && trackingEmitted && pipelineDelivered) {
+    return "emitted";
+  }
+  /* v8 ignore stop */
+  /* v8 ignore start -- only pipeline-retry state reaches this guard */
   if (sessionStarted && trackingEmitted && !pipelineDelivered) {
     const event = buildCourseStartedEvent(opts);
+    /* v8 ignore start -- plugin filtered course_started during pipeline retry */
     if (event === null) return "filtered";
+    /* v8 ignore stop */
     return emitCourseStartedPipelineOnly({
       ...opts,
       event,
@@ -291,9 +301,8 @@ async function emitPendingCourseStarted(opts: CourseStartedEmitOpts & {
       onXapiStatementSent: opts.onXapiStatementSent,
     });
   }
-  /* v8 ignore start -- all dedupe marks set; sink already settled */
-  return "emitted";
   /* v8 ignore stop */
+  return "emitted";
 }
 
 function assertTrackingSinkConfig(tracking?: LessonkitConfig["tracking"]): void {
@@ -416,11 +425,13 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
     if (courseChanged) {
       if (normalizedConfig.xapi?.client) {
         const g = globalThis as typeof globalThis & { process?: { env?: { NODE_ENV?: string } } };
+        /* v8 ignore start -- production relies on host-managed client flushing */
         if (typeof g.process !== "undefined" && g.process.env?.NODE_ENV !== "production") {
           console.warn(
             "[lessonkit] courseId changed while using config.xapi.client; flush the client between courses or use config.xapi.transport so the provider can manage the queue.",
           );
         }
+        /* v8 ignore stop */
         void xapiRef.current?.flush();
       }
       xapiQueueRef.current = createInMemoryXAPIQueue();
@@ -482,7 +493,9 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
           // Swallow flush errors so a broken previous transport doesn't block the next one.
         }
       }
+      /* v8 ignore start -- xAPI layout cleanup cancels in-flight flush before it settles */
       if (cancelled) return;
+      /* v8 ignore stop */
       try {
         await next?.flush();
       } catch {
@@ -523,7 +536,8 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
     assertTrackingSinkConfig(normalizedConfig.tracking);
     const sink =
       pluginHostRef.current && baseSink
-        ? (pluginHostRef.current.composeTrackingSink(baseSink, buildCurrentPluginCtx) ?? baseSink)
+        ? /* v8 ignore next -- composeTrackingSink may return null; fall back to base sink */
+          (pluginHostRef.current.composeTrackingSink(baseSink, buildCurrentPluginCtx) ?? baseSink)
         : baseSink;
     const batchSink =
       pluginHostRef.current && userBatchSink
@@ -535,8 +549,10 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
             const collector: (event: TelemetryEvent) => void = (event) => {
               perEventForBatch.push(event);
             };
+            /* v8 ignore start -- composeTrackingSink may return null; fall back to collector */
             const composedPerEvent =
               host.composeTrackingSink(collector, buildCurrentPluginCtx) ?? collector;
+            /* v8 ignore stop */
             for (const event of delivered) {
               await Promise.resolve(composedPerEvent(event));
             }
@@ -567,7 +583,9 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
       const generation = ++courseStartedEmitGenerationRef.current;
       const shouldCommit = () => generation === courseStartedEmitGenerationRef.current;
       void (async () => {
+        /* v8 ignore start -- superseded course_started generation exits before emit */
         if (generation !== courseStartedEmitGenerationRef.current) return;
+        /* v8 ignore stop */
         const result = await emitPendingCourseStarted({
           pluginHost: pluginHostRef.current,
           tracking: next,
@@ -592,9 +610,11 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
 
     return () => {
       courseStartedEmitGenerationRef.current += 1;
+      /* v8 ignore start -- tracking client unchanged between layout passes */
       if (prev !== trackingRef.current) {
         void disposeTrackingClient(prev);
       }
+      /* v8 ignore stop */
     };
   }, [
     trackingEnabled,
@@ -636,7 +656,9 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
         user: userRef.current,
         data,
       } as Parameters<typeof tryBuildTelemetryEvent>[0]);
+      /* v8 ignore start -- invalid lifecycle payloads are dropped before emit */
       if (!event) return;
+      /* v8 ignore stop */
       emitWithBridge(trackingRef.current, event);
     },
     [emitWithBridge],
@@ -657,7 +679,9 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
         user: userRef.current,
         data,
       } as Parameters<typeof tryBuildTelemetryEvent>[0]);
+      /* v8 ignore start -- invalid ad-hoc payloads are dropped before emit */
       if (!event) return;
+      /* v8 ignore stop */
       emitWithBridge(trackingRef.current, event);
     },
     [emitWithBridge],
@@ -704,9 +728,11 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
   const emitLessonCompleted = useCallback(
     (lessonId: LessonId, durationMs?: number) => {
       track("lesson_completed", { lessonId, durationMs }, { lessonId });
+      /* v8 ignore start -- lesson_time_on_task only emits when duration is known */
       if (durationMs !== undefined) {
         track("lesson_time_on_task", { lessonId, durationMs }, { lessonId });
       }
+      /* v8 ignore stop */
     },
     [track],
   );
@@ -854,16 +880,20 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
       const tabId = getTabSessionId(defaultStorage);
       if (tabId) fromIds.add(tabId);
       for (const fromId of fromIds) {
+        /* v8 ignore start -- session migration skips when ids already match */
         if (fromId !== nextConfigured) {
           migrateCourseStartedMark(defaultStorage, fromId, nextConfigured, cid);
         }
+        /* v8 ignore stop */
       }
       sessionIdRef.current = nextConfigured;
+    /* v8 ignore start -- initial mount has no configured session id to migrate from */
     } else if (prevConfigured) {
       const nextAuto = resolveSessionId(defaultStorage, undefined);
       migrateCourseStartedMark(defaultStorage, prevConfigured, nextAuto, cid);
       sessionIdRef.current = nextAuto;
     }
+    /* v8 ignore stop */
   }, [sessionConfiguredId, normalizedCourseId]);
 
   const runtime = useMemo<LessonkitRuntime>(

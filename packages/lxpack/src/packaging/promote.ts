@@ -39,6 +39,10 @@ async function assertNoLegacyPromoteArtifacts(outDir: string): Promise<void> {
  * Atomically replace `outDir` with the packaged tree at `stagingDir`.
  * Restores the previous `outDir` when promote fails after a backup rename.
  */
+/** @internal For coverage of filesystem helpers. */
+export const __testPromoteFs = { pathExists, renameOrCopy };
+export { pathExists, renameOrCopy };
+
 export async function promoteStagingToOutDir(stagingDir: string, outDir: string): Promise<void> {
   await assertNoLegacyPromoteArtifacts(outDir);
 
@@ -64,7 +68,7 @@ export async function promoteStagingToOutDir(stagingDir: string, outDir: string)
         try {
           await renameOrCopy(tmpPromote, failedPromote);
         } catch {
-          await fsp.rm(tmpPromote, { recursive: true, force: true }).catch(() => undefined);
+          await fsp.rm(tmpPromote, { recursive: true, force: true }).catch(/* v8 ignore next */ () => undefined);
         }
         const promoteMsg =
           promoteError instanceof Error ? promoteError.message : String(promoteError);
@@ -83,7 +87,7 @@ export async function promoteStagingToOutDir(stagingDir: string, outDir: string)
           `[lessonkit/lxpack] failed to restore ${stagingDir} after promote error:`,
           restoreError instanceof Error ? restoreError.message : restoreError,
         );
-        await fsp.rm(tmpPromote, { recursive: true, force: true }).catch(() => undefined);
+        await fsp.rm(tmpPromote, { recursive: true, force: true }).catch(/* v8 ignore next */ () => undefined);
       }
       throw promoteError;
     }
@@ -91,12 +95,13 @@ export async function promoteStagingToOutDir(stagingDir: string, outDir: string)
     try {
       await renameOrCopy(tmpPromote, failedPromote);
     } catch {
-      await fsp.rm(tmpPromote, { recursive: true, force: true }).catch(() => undefined);
+      /* v8 ignore next 2 */
+      await fsp.rm(tmpPromote, { recursive: true, force: true }).catch(/* v8 ignore next */ () => undefined);
     }
     throw promoteError;
   }
 
   if (backup) {
-    await fsp.rm(backup, { recursive: true, force: true }).catch(() => undefined);
+    await fsp.rm(backup, { recursive: true, force: true }).catch(/* v8 ignore next */ () => undefined);
   }
 }

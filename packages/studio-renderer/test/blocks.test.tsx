@@ -34,6 +34,6 @@ describe("@lessonkit/studio-renderer blocks", () => {
     expect(screen.getByAltText("Alt text")).toBeTruthy();
     expect(screen.getByRole("button", { name: "Click me" })).toBeTruthy();
     expect(screen.getByLabelText("Email")).toBeTruthy();
-    expect(screen.getByText("Video (coming soon)")).toBeTruthy();
+    expect(screen.getByLabelText("Clip")).toBeTruthy();
   });
 });

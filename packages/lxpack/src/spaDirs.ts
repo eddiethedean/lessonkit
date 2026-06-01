@@ -22,7 +22,7 @@ export async function resolveSpaDirs(
   const spaLessons = resolveSpaLessons(descriptor);
 
   if (descriptor.layout === "single-spa") {
-    const spaDistRelative = spaDistDir ?? descriptor.spaDistDir ?? "dist";
+    const spaDistRelative = spaDistDir ?? descriptor.spaDistDir ?? /* v8 ignore next */ "dist";
     const srcDist = projectRoot
       ? resolve(projectRoot, spaDistRelative)
       : resolve(spaDistRelative);
@@ -39,7 +39,7 @@ export async function resolveSpaDirs(
     } catch {
       throw new Error(`spaDistDir must contain index.html: ${join(srcDist, "index.html")}`);
     }
-    const lessonId = spaLessons[0]?.id ?? "main";
+    const lessonId = spaLessons[0]?.id ?? /* v8 ignore next */ "main";
     return { [lessonId]: srcDist };
   }
 

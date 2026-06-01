@@ -85,6 +85,19 @@ describe("example App", () => {
     15000,
   );
 
+  it("inbox exercise rewards reporting a phishing email", () => {
+    const spy = vi.spyOn(console, "log").mockImplementation(() => {});
+    const { getAllByLabelText, getAllByText, getByText } = render(<App />);
+    const nav = within(getAllByLabelText("Course curriculum")[0]!);
+
+    fireEvent.click(nav.getByText("Continue"));
+    fireEvent.click(getAllByText("Report as phishing")[0]!);
+    fireEvent.click(getAllByText("Ignore for now")[1]!);
+    fireEvent.click(getAllByText("Ignore for now")[2]!);
+    expect(getByText(/Strong judgment/)).toBeDefined();
+    spy.mockRestore();
+  });
+
   it("inbox exercise can land on needs-review risk band", async () => {
     const spy = vi.spyOn(console, "log").mockImplementation(() => {});
     const { getAllByLabelText, getAllByText, getByText } = render(<App />);

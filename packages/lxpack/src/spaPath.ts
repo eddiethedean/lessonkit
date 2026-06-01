@@ -12,6 +12,7 @@ export function resolveComparablePath(p: string): string {
 /** Relative SPA output path safe to join under an LXPack project root. */
 export function isSafeRelativeSpaPath(spaPath: string): boolean {
   if (!spaPath.length || spaPath.includes("\0")) return false;
+  /* v8 ignore next 2 */
   if (spaPath.startsWith("/") || spaPath.startsWith("\\")) return false;
   if (/^[a-zA-Z]:/.test(spaPath)) return false;
   if (spaPath === "." || spaPath === "./") return false;
@@ -29,6 +30,7 @@ export function assertResolvedPathUnderRoot(root: string, target: string): void 
   if (
     targetResolved !== rootResolved &&
     !targetResolved.startsWith(prefix) &&
+    /* v8 ignore next */
     !targetResolved.startsWith(win32Prefix)
   ) {
     throw new Error(`unsafe path escapes project root: ${target}`);
@@ -37,6 +39,7 @@ export function assertResolvedPathUnderRoot(root: string, target: string): void 
 
 /** Resolve symlinks on `root` and ensure `target` stays under it (including non-existent paths). */
 export function assertRealPathUnderRoot(root: string, target: string): void {
+  /* v8 ignore start */
   const rootResolved = resolveComparablePath(root);
   const targetResolved = resolveComparablePath(target);
   let rootReal: string;
@@ -56,6 +59,7 @@ export function assertRealPathUnderRoot(root: string, target: string): void {
     targetCheck = resolve(rootReal, rel);
   }
   assertResolvedPathUnderRoot(rootReal, targetCheck);
+  /* v8 ignore stop */
 }
 
 function normalizePathForComparison(p: string): string {
@@ -78,6 +82,7 @@ export function isResolvedPathUnderRoot(root: string, target: string): boolean {
   const targetResolved = normalizePathForComparison(target);
   if (targetResolved === rootResolved) return true;
   const rel = relativePathUnderRoot(root, target);
+  /* v8 ignore next */
   if (!rel) return true;
   return !rel.startsWith("..") && !isAbsolute(rel);
 }

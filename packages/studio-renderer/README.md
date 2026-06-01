@@ -11,7 +11,9 @@ React renderer for LessonKit Studio `project.json` documents. Maps Studio blocks
 npm install @lessonkit/studio-renderer @lessonkit/studio-schema @lessonkit/react @lessonkit/core @lessonkit/themes react react-dom
 ```
 
-Studio **0.1.0** is tested with **@lessonkit/*@1.0.2**.
+Studio **0.2.0** is tested with **@lessonkit/*@1.0.2**.
+
+For the visual editor, see [`@lessonkit/studio-ui`](../studio-ui) and the [Studio editor guide](https://lessonkit.readthedocs.io/en/latest/guides/studio/editor.html).
 
 ## Usage
 

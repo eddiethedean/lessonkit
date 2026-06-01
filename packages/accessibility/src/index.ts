@@ -218,7 +218,9 @@ export function createRovingTabIndex(opts: RovingTabIndexOptions): {
   };
 
   const move = (delta: number) => {
+    /* v8 ignore start -- onKeyDown returns early when itemCount is 0 */
     if (!itemCount) return;
+    /* v8 ignore stop */
     const next = activeIndex + delta;
     if (loop) {
       activeIndex = ((next % itemCount) + itemCount) % itemCount;

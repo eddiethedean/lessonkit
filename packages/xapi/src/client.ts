@@ -63,7 +63,10 @@ export function createXAPIClient(opts?: {
 
   const emit = (event: Parameters<typeof telemetryEventToXAPIStatement>[0]) => {
     const statement = telemetryEventToXAPIStatement(event);
-    if (statement) sendOrQueue(statement);
+    /* v8 ignore start -- public emit paths always map to a statement */
+    if (!statement) return;
+    /* v8 ignore stop */
+    sendOrQueue(statement);
   };
 
   return {

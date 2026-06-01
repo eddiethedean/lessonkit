@@ -3,7 +3,7 @@
 Published packages:
 
 - **LessonKit** (`v*.*.*` tag → [Release](.github/workflows/release.yml)): `@lessonkit/core`, `@lessonkit/xapi`, `@lessonkit/accessibility`, `@lessonkit/react`, `@lessonkit/themes`, `@lessonkit/lxpack`, `@lessonkit/cli`
-- **Studio** (`studio-v*` tag → [Studio Release](.github/workflows/studio-release.yml)): `@lessonkit/studio-schema`, `@lessonkit/studio-renderer`
+- **Studio** (`studio-v*` tag → [Studio Release](.github/workflows/studio-release.yml)): `@lessonkit/studio-schema`, `@lessonkit/studio-renderer`, `@lessonkit/studio-builder`, `@lessonkit/studio-ui`
 
 Normal `v1.0.3` tags **do not** publish or re-version Studio packages. Studio uses its own semver line (e.g. `0.1.0`) and tag prefix.
 
@@ -15,6 +15,21 @@ Normal `v1.0.3` tags **do not** publish or re-version Studio packages. Studio us
 - No pending files in [`.changeset/`](.changeset/) that would run `changeset version` and bump versions unexpectedly (this repo publishes via **git tags**, not `changeset publish`).
 
 > **1.0.0** is the stable public API release. See [MIGRATION-0.x-to-1.0.md](docs/MIGRATION-0.x-to-1.0.md).
+
+### Studio 0.2.0 checklist (ready to publish)
+
+| Item | Status |
+|------|--------|
+| Studio packages at `0.2.0` (`studio-schema`, `studio-renderer`, `studio-builder`, `studio-ui`) | Done |
+| [CHANGELOG.md](CHANGELOG.md) `## [studio-v0.2.0]` | Done |
+| [studio-release.yml](.github/workflows/studio-release.yml) publishes all four packages | Done |
+| `apps/studio-web` in `build:apps` (CI smoke) | Done |
+| [Studio editor guide](docs/guides/studio/editor.md) + [STUDIO_READINESS.md](docs/STUDIO_READINESS.md) 0.2 section | Done |
+| `main` CI green | Verify before tag |
+| Local pack smoke (optional): [Publish Studio packages](#publish-studio-packages-to-npm-studiov-tags) | Optional |
+| Git tag `studio-v0.2.0` | **Create when ready** |
+
+> **Do not create or push `studio-v0.2.0`** until you intend to publish to npm. Normal `v*` tags do not publish Studio.
 
 ### Studio 0.1.0 checklist (ready to publish)
 
@@ -228,16 +243,28 @@ The release job sets each **LessonKit** package version from the tag, aligns `@l
 
 ## Publish Studio packages to npm (`studio-v*` tags)
 
-Studio versions are **independent** of LessonKit tags. When you push `studio-v0.1.0`:
+Studio versions are **independent** of LessonKit tags. When you push `studio-v0.2.0` (or any `studio-v*` tag):
 
-1. [Studio Release](.github/workflows/studio-release.yml) runs CI checks, then `node scripts/release/prepare-publish.mjs studio 0.1.0`.
-2. That sets `@lessonkit/studio-*` to the tag version and pins other `@lessonkit/*` deps in Studio packages to the version in `packages/core/package.json` on that commit (e.g. `1.0.2`).
-3. Publishes **`@lessonkit/studio-schema`** first, then **`@lessonkit/studio-renderer`** (same npm org as `@lessonkit/react`).
+1. [Studio Release](.github/workflows/studio-release.yml) runs full CI (`checks.yml`), then `node scripts/release/prepare-publish.mjs studio <version>`.
+2. That sets all `@lessonkit/studio-*` packages to the tag version and pins other `@lessonkit/*` deps in Studio packages to the version in `packages/core/package.json` on that commit (e.g. `1.0.2`).
+3. Publishes, in order: **`@lessonkit/studio-schema`**, **`@lessonkit/studio-builder`**, **`@lessonkit/studio-renderer`**, **`@lessonkit/studio-ui`** (same `@lessonkit` npm org as core/react).
 
 ```bash
-# After CI is green on main and Studio package.json versions match the release:
-git tag studio-v0.1.0
-git push origin studio-v0.1.0
+# After CI is green on main and packages/studio-*/package.json are at the release version:
+git tag studio-v0.2.0
+git push origin studio-v0.2.0
+```
+
+**Local pack smoke (optional):**
+
+```bash
+node scripts/release/prepare-publish.mjs studio 0.2.0
+npm run build:packages
+npm pack -w @lessonkit/studio-schema --dry-run
+npm pack -w @lessonkit/studio-builder --dry-run
+npm pack -w @lessonkit/studio-renderer --dry-run
+npm pack -w @lessonkit/studio-ui --dry-run
+git checkout -- packages/studio-*/package.json
 ```
 
 Re-run a failed publish: **Actions** → **Studio Release** → **Re-run failed jobs** (no new tag needed if the tag already points at a commit with these package names).

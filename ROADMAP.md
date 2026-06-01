@@ -357,7 +357,7 @@ These are delivered as part of framework milestones **before** the Studio gate�
 
 ### Studio 0.1.0 — Schema and shared renderer
 
-**Status:** Shipped in monorepo (workspace packages `@lessonkit/studio-schema` and `@lessonkit/studio-renderer` at **0.1.0**, private).
+**Status:** Shipped on npm (`studio-v0.1.0`): `@lessonkit/studio-schema` and `@lessonkit/studio-renderer` at **0.1.0** (superseded by **0.2.0** on the same packages).
 
 #### Goals
 
@@ -379,27 +379,23 @@ These are delivered as part of framework milestones **before** the Studio gate�
 
 ### Studio 0.2.0 — Visual editor MVP
 
+**Status:** Ready to publish (`studio-v0.2.0`): `@lessonkit/studio-schema`, `studio-renderer`, `studio-builder`, and `studio-ui` at **0.2.0**; local app [`apps/studio-web`](apps/studio-web).
+
 #### Goals
 
 - Ship a usable canvas: drag/drop, property editing, undo/redo, autosave hooks, live preview.
 
-#### Deliverables
+#### Deliverables (done)
 
-- **`@lessonkit/studio-builder`** + **`@lessonkit/studio-ui`**:
-  - canvas (pages, blocks, layouts, interactions) using real React components
-  - **drag/drop**: [dnd-kit](https://dndkit.com/) — nested containers, reorder, snap zones, insertion previews
-  - **state**: [Zustand](https://zustand-demo.pmnd.rs/) — patch history, schema validation on change
-  - **undo/redo**: command/patch stack in-memory (editor-level)
-  - property editor for layout, styling, quiz config, basic branching
-  - live preview pane (shared renderer)
-- **Builder feature set (MVP)**:
-  - drag/drop, property editor, undo/redo, autosave (debounced; semantic grouping TBD until GitHub sync)
-  - navigation between pages/lessons in preview
+- **`@lessonkit/studio-builder`**: Zustand store, commands, undo/redo, validation on commit, debounced autosave subscription.
+- **`@lessonkit/studio-ui`**: `StudioEditor` — palette, dnd-kit canvas (nested containers), property inspector, live preview.
+- **`apps/studio-web`**: Vite shell, `localStorage` autosave, import/export JSON.
+- **Renderer**: checklist and video blocks use minimal real preview UI (no longer stubs).
+- **Docs**: [Studio editor guide](docs/guides/studio/editor.md), [STUDIO_READINESS.md](docs/STUDIO_READINESS.md) 0.2 checklist.
 
-#### Technology (from spec)
+#### Out of scope (0.3+)
 
-- React, TypeScript, Vite, Tailwind CSS
-- Backend for hosted mode: Node.js + Fastify or NestJS (when `lessonkit.app` needs server APIs)
+- `@lessonkit/studio-codegen`, GitHub sync, hosted `lessonkit.app`, `lessonkit-studio` CLI, Tauri desktop, schema v2.
 
 ---
 

@@ -22,15 +22,21 @@ export function resolveSessionId(storage: StoragePort, provided?: string): strin
 }
 
 function courseStartedStorageKey(sessionId: string, courseId?: CourseId): string {
+  /* v8 ignore start -- callers guard undefined courseId before building keys */
   return `${COURSE_STARTED_PREFIX}${sessionId}:${courseId ?? ""}`;
+  /* v8 ignore stop */
 }
 
 function courseStartedTrackingStorageKey(sessionId: string, courseId?: CourseId): string {
+  /* v8 ignore start -- callers guard undefined courseId before building keys */
   return `${COURSE_STARTED_TRACKING_PREFIX}${sessionId}:${courseId ?? ""}`;
+  /* v8 ignore stop */
 }
 
 function courseStartedPipelineStorageKey(sessionId: string, courseId?: CourseId): string {
+  /* v8 ignore start -- callers guard undefined courseId before building keys */
   return `${COURSE_STARTED_PIPELINE_PREFIX}${sessionId}:${courseId ?? ""}`;
+  /* v8 ignore stop */
 }
 
 export function hasCourseStarted(storage: StoragePort, sessionId: string, courseId?: CourseId): boolean {

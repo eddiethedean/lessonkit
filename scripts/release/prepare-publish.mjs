@@ -22,7 +22,7 @@ const LESSONKIT_DIRS = [
   "cli",
 ];
 
-const STUDIO_DIRS = ["studio-schema", "studio-renderer"];
+const STUDIO_DIRS = ["studio-schema", "studio-renderer", "studio-builder", "studio-ui"];
 
 const DEP_FIELDS = [
   "dependencies",

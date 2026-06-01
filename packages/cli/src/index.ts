@@ -115,10 +115,10 @@ export function createProgram(baseLogger: CliLogger = console): Command {
             out: opts.out,
             json: opts.json,
           });
-          if (!opts.json && result.ok) {
-            if (result.command === "package" && result.target === "react-vite") {
+          if (!opts.json && result.ok && result.command === "package") {
+            if (result.target === "react-vite") {
               logger.log(`Built react-vite → ${result.distDir}`);
-            } else if (result.command === "package") {
+            } else {
               const dest = result.outputPath ?? result.outputDir;
               logger.log(
                 `Packaged ${result.target}${dest ? ` → ${dest}` : ""} (${result.fileCount} files)`,

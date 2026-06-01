@@ -59,15 +59,10 @@ describe("@lessonkit/studio-renderer coverage", () => {
     expect(loaded.ok).toBe(true);
     if (!loaded.ok) return;
 
-    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
-    vi.stubEnv("NODE_ENV", "development");
-    try {
-      render(<div>{renderPageBlocks(loaded.project.pages[0]!.blocks)}</div>);
-      expect(screen.getByText("Checklist (coming soon)")).toBeTruthy();
-      expect(warn).toHaveBeenCalled();
-    } finally {
-      vi.unstubAllEnvs();
-    }
+    render(<div>{renderPageBlocks(loaded.project.pages[0]!.blocks)}</div>);
+    expect(screen.getByLabelText("Checklist")).toBeTruthy();
+    expect(screen.getByText("A")).toBeTruthy();
+    expect(screen.getByText("B")).toBeTruthy();
   });
 
   it("video block uses title in aria-label when provided", () => {
@@ -82,7 +77,7 @@ describe("@lessonkit/studio-renderer coverage", () => {
     unmount();
 
     render(<div>{renderBlock({ type: "video", id: "v2", src: "/x.mp4" })}</div>);
-    expect(screen.getByLabelText("Video (preview stub)")).toBeTruthy();
+    expect(screen.getByLabelText("Video")).toBeTruthy();
   });
 
   it("input block defaults inputType to text", () => {

@@ -116,24 +116,24 @@ export function buildStudioBlockCatalog(): {
       },
       {
         type: "checklist",
-        category: "stub",
-        description: "Checklist block (renderer stub in 0.1.0).",
+        category: "primitive",
+        description: "Checklist with read-only preview checkboxes (editor + preview).",
         props: [
           { name: "id", type: "string", required: true, description: "Stable block id." },
           { name: "items", type: "string[]", required: true, description: "Checklist items." },
         ],
-        rendererStatus: "stub",
+        rendererStatus: "implemented",
       },
       {
         type: "video",
-        category: "stub",
-        description: "Video block (renderer stub in 0.1.0).",
+        category: "primitive",
+        description: "HTML5 video preview block.",
         props: [
           { name: "id", type: "string", required: true, description: "Stable block id." },
           { name: "src", type: "string", required: true, description: "Video URL or path." },
           { name: "title", type: "string", required: false, description: "Accessible title." },
         ],
-        rendererStatus: "stub",
+        rendererStatus: "implemented",
       },
     ],
   };

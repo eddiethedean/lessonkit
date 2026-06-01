@@ -182,6 +182,41 @@ describe("ThemeProvider", () => {
     );
   });
 
+  it("defaults mode to light when omitted", () => {
+    render(
+      <ThemeProvider>
+        <span data-testid="child">ok</span>
+      </ThemeProvider>,
+    );
+    expect(screen.getByTestId("child")).toBeTruthy();
+    expect(document.documentElement.style.getPropertyValue("--lk-color-primary").trim()).toBe(
+      "#2563eb",
+    );
+  });
+
+  it("system mode resolves to light when matchMedia prefers light", () => {
+    vi.stubGlobal(
+      "matchMedia",
+      vi.fn().mockImplementation((query: string) => ({
+        matches: false,
+        media: query,
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+      })),
+    );
+    function Reader() {
+      const { resolvedMode } = useTheme();
+      return <span data-testid="mode">{resolvedMode}</span>;
+    }
+    render(
+      <ThemeProvider mode="system">
+        <Reader />
+      </ThemeProvider>,
+    );
+    expect(screen.getByTestId("mode").textContent).toBe("light");
+    vi.unstubAllGlobals();
+  });
+
   it("throws when useTheme is outside provider", () => {
     const spy = vi.spyOn(console, "error").mockImplementation(() => {});
     expect(() => render(<ThemeReader />)).toThrow(/ThemeProvider/);

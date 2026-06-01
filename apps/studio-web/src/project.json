@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "course": {
+    "courseId": "studio-web-demo",
+    "title": "Studio web demo"
+  },
+  "pages": [
+    {
+      "id": "lesson-1",
+      "title": "Welcome",
+      "blocks": [
+        {
+          "type": "heading",
+          "id": "heading-1",
+          "level": 2,
+          "text": "LessonKit Studio 0.2"
+        },
+        {
+          "type": "text",
+          "id": "text-1",
+          "text": "Edit this course in the visual editor. Changes autosave to localStorage."
+        }
+      ]
+    }
+  ]
+}

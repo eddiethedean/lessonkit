@@ -3,13 +3,20 @@ import {
   brandTheme,
   brandThemeOverrides,
   buildThemeCatalog,
+  colorExtraVarName,
+  colorVarName,
   darkTheme,
   defaultTheme,
   getPresetTheme,
   lightTheme,
   mergeThemes,
+  radiusVarName,
+  shadowVarName,
+  spacingVarName,
   themeToCssDeclarationBlock,
   themeToCssVariables,
+  tokenKeyToKebab,
+  typographyVarName,
   validateTheme,
 } from "../src";
 import catalogJson from "../theme-catalog.v1.json";
@@ -65,6 +72,44 @@ describe("@lessonkit/themes", () => {
       colors: { ...defaultTheme.colors, extra: { accent: "#00ff00" } },
     });
     expect(goodExtra.ok).toBe(true);
+    const emptyExtra = validateTheme({
+      ...defaultTheme,
+      colors: { ...defaultTheme.colors, extra: {} },
+    });
+    expect(emptyExtra.ok).toBe(true);
+    if (emptyExtra.ok) {
+      expect(emptyExtra.theme.colors.extra).toBeUndefined();
+    }
+  });
+
+  it("validateTheme rejects invalid nested groups and unknown keys", () => {
+    for (const colors of [null, []]) {
+      const result = validateTheme({ ...defaultTheme, colors });
+      expect(result.ok).toBe(false);
+    }
+    for (const spacing of [null, [], { ...defaultTheme.spacing, typo: "1px" }]) {
+      const result = validateTheme({ ...defaultTheme, spacing });
+      expect(result.ok).toBe(false);
+    }
+    for (const typography of [null, [], { ...defaultTheme.typography, typo: "x" }]) {
+      const result = validateTheme({ ...defaultTheme, typography });
+      expect(result.ok).toBe(false);
+    }
+    for (const radius of [null, [], { ...defaultTheme.radius, typo: "1px" }]) {
+      const result = validateTheme({ ...defaultTheme, radius });
+      expect(result.ok).toBe(false);
+    }
+    for (const shadows of [null, [], { ...defaultTheme.shadows, typo: "x" }]) {
+      const result = validateTheme({ ...defaultTheme, shadows });
+      expect(result.ok).toBe(false);
+    }
+    for (const key of ["", "   ", 0, null] as const) {
+      const result = validateTheme({
+        ...defaultTheme,
+        colors: { ...defaultTheme.colors, primary: key as unknown as string },
+      });
+      expect(result.ok).toBe(false);
+    }
   });
 
   it("getPresetTheme returns each preset", () => {
@@ -118,6 +163,30 @@ describe("@lessonkit/themes", () => {
   it("themeToCssVariables maps extension colors", () => {
     const vars = themeToCssVariables(darkTheme);
     expect(vars["--lk-color-extra-accent"]).toBe("#22d3ee");
+  });
+
+  it("themeToCssVariables skips non-object colors.extra", () => {
+    const theme = {
+      ...defaultTheme,
+      colors: { ...defaultTheme.colors, extra: "not-an-object" as unknown as Record<string, string> },
+    };
+    const vars = themeToCssVariables(theme);
+    expect(Object.keys(vars).some((k) => k.includes("extra"))).toBe(false);
+  });
+
+  it("css variable helpers kebab-case camelCase keys", () => {
+    expect(tokenKeyToKebab("fontSizeBase")).toBe("font-size-base");
+    expect(colorVarName("primary")).toBe("--lk-color-primary");
+    expect(colorExtraVarName("accent")).toBe("--lk-color-extra-accent");
+    expect(spacingVarName("md")).toBe("--lk-space-md");
+    expect(typographyVarName("fontFamily")).toBe("--lk-font-family");
+    expect(radiusVarName("sm")).toBe("--lk-radius-sm");
+    expect(shadowVarName("lg")).toBe("--lk-shadow-lg");
+  });
+
+  it("buildThemeCatalog includes color-extra entry", () => {
+    const entries = buildThemeCatalog();
+    expect(entries.some((e) => e.type === "color-extra")).toBe(true);
   });
 
   it("theme-catalog.v1.json matches buildThemeCatalog()", () => {

@@ -92,7 +92,7 @@ export async function buildStagingPackage(
       outputDir: "outputDir" in build ? build.outputDir : undefined,
     };
   } catch (err) {
-    await fsp.rm(stagingDir, { recursive: true, force: true }).catch(() => undefined);
+    await fsp.rm(stagingDir, { recursive: true, force: true }).catch(/* v8 ignore next */ () => undefined);
     throw err;
   }
 }

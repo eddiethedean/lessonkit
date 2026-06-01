@@ -1,0 +1,62 @@
+{
+  "name": "@lessonkit/studio-builder",
+  "version": "0.2.0",
+  "private": false,
+  "description": "Headless editor state, commands, and undo/redo for LessonKit Studio.",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eddiethedean/lessonkit.git",
+    "directory": "packages/studio-builder"
+  },
+  "homepage": "https://github.com/eddiethedean/lessonkit/tree/main/packages/studio-builder",
+  "bugs": {
+    "url": "https://github.com/eddiethedean/lessonkit/issues"
+  },
+  "keywords": [
+    "lessonkit",
+    "lessonkit-studio",
+    "editor",
+    "authoring"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts --format esm,cjs --dts",
+    "dev": "tsup src/index.ts --format esm,cjs --dts --watch",
+    "prepublishOnly": "npm run build",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "lint": "echo \"(no lint configured yet)\""
+  },
+  "dependencies": {
+    "@lessonkit/core": "file:../core",
+    "@lessonkit/studio-schema": "file:../studio-schema",
+    "zustand": "^5.0.8"
+  },
+  "devDependencies": {
+    "tsup": "^8.5.0",
+    "typescript": "^5.8.3",
+    "vitest": "^4.1.8"
+  }
+}

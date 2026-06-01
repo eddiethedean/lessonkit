@@ -3,7 +3,25 @@
 All notable changes to the LessonKit monorepo are documented here.
 
 - [`@lessonkit/*`](https://www.npmjs.com/org/lessonkit) — core platform (tag `v*.*.*`)
-- [`@lessonkit/studio-schema`](https://www.npmjs.com/package/@lessonkit/studio-schema), [`@lessonkit/studio-renderer`](https://www.npmjs.com/package/@lessonkit/studio-renderer) — Studio authoring (tag `studio-v*`, same `@lessonkit` org)
+- [`@lessonkit/studio-schema`](https://www.npmjs.com/package/@lessonkit/studio-schema), [`@lessonkit/studio-renderer`](https://www.npmjs.com/package/@lessonkit/studio-renderer), [`@lessonkit/studio-builder`](https://www.npmjs.com/package/@lessonkit/studio-builder), [`@lessonkit/studio-ui`](https://www.npmjs.com/package/@lessonkit/studio-ui) — Studio authoring (tag `studio-v*`, same `@lessonkit` org)
+
+## [studio-v0.2.0] - 2026-06-01
+
+Visual editor MVP: headless builder, React editor UI, and local `apps/studio-web`. Requires **@lessonkit/core**, **@lessonkit/react**, and **@lessonkit/themes** at **1.0.2** (pinned at publish time).
+
+### Added
+
+- **@lessonkit/studio-builder** (0.2.0): editor store, `dispatch` commands, undo/redo, `subscribeAutosave`, tree helpers, `createDefaultBlock`.
+- **@lessonkit/studio-ui** (0.2.0): `StudioEditor` with palette, dnd-kit canvas (nested containers), property inspector, preview pane.
+- **apps/studio-web**: local Vite editor; `localStorage` autosave; import/export JSON.
+- **Docs:** [Studio editor guide](docs/guides/studio/editor.md).
+
+### Changed
+
+- **@lessonkit/studio-schema** / **@lessonkit/studio-renderer** (0.2.0): checklist and video blocks use minimal real preview UI (replacing 0.1 stubs).
+- **Monorepo:** `build:packages` and Studio Release workflow include builder and ui.
+
+> **Not included:** codegen, GitHub sync, hosted Studio, `lessonkit-studio` CLI (see [STUDIO_READINESS.md](docs/STUDIO_READINESS.md)).
 
 ## [studio-v0.1.0] - 2026-06-01
 

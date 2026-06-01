@@ -104,6 +104,7 @@ guides/react-developers/contributing-to-the-monorepo
 :caption: Guides — Studio
 
 guides/studio/project-format-v1
+guides/studio/editor
 ```
 
 ```{toctree}

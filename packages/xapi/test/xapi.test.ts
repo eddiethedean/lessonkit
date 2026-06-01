@@ -65,6 +65,38 @@ describe("@lessonkit/xapi", () => {
     }
   });
 
+  it("does not warn in production when statements queue without transport", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    vi.stubEnv("NODE_ENV", "production");
+
+    try {
+      const client = createXAPIClient({ courseId });
+      client.startedLesson({ lessonId: "lesson-1" });
+      expect(warn).not.toHaveBeenCalled();
+    } finally {
+      vi.unstubAllEnvs();
+      warn.mockRestore();
+    }
+  });
+
+  it("warns in dev when transport fails", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    vi.stubEnv("NODE_ENV", "development");
+    const transport = vi.fn(async () => {
+      throw new Error("network");
+    });
+
+    try {
+      const client = createXAPIClient({ transport, courseId });
+      client.startedLesson({ lessonId: "lesson-1" });
+      await new Promise((r) => setTimeout(r, 0));
+      expect(warn).toHaveBeenCalledWith(expect.stringMatching(/transport failed/));
+    } finally {
+      vi.unstubAllEnvs();
+      warn.mockRestore();
+    }
+  });
+
   it("uses Math.random fallback when crypto.randomUUID is unavailable", async () => {
     vi.stubGlobal("crypto", {});
     const queue = createInMemoryXAPIQueue();

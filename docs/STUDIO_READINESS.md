@@ -111,3 +111,15 @@ for:
 - [x] [Studio project format v1](guides/studio/project-format-v1.md) documented
 - [x] npm publish path: `studio-v*` tag → [Studio Release](../.github/workflows/studio-release.yml) (see [RELEASING.md](../RELEASING.md))
 
+## Studio 0.2.0 — Visual editor MVP
+
+- [x] `@lessonkit/studio-builder`: Zustand editor store, commands, undo/redo (bounded stack), validation on commit, debounced autosave subscription
+- [x] `@lessonkit/studio-ui`: `StudioEditor` with page list, block palette, dnd-kit canvas (root + nested containers), property inspector, live preview
+- [x] `apps/studio-web`: runnable Vite app; `localStorage` autosave; import/export JSON
+- [x] Checklist / video blocks: minimal real preview renderers (not stubs)
+- [x] Monorepo CI: `build:packages` includes `studio-builder` → `studio-ui`; `build:apps` includes `lessonkit-studio-web`
+- [x] [Studio editor guide](guides/studio/editor.md) documented
+- [ ] npm publish: push `studio-v0.2.0` after `main` CI is green (publishes schema, builder, renderer, ui at 0.2.0)
+
+> **Not included in 0.2.0:** codegen (`studio-codegen`), GitHub sync, AI workflows, `lessonkit-studio` CLI, Tauri desktop, schema v2.
+

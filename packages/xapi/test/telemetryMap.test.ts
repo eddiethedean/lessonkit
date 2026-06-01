@@ -21,6 +21,14 @@ describe("telemetryEventToXAPIStatement", () => {
 
     expect(
       telemetryEventToXAPIStatement({
+        name: "course_completed",
+        courseId: base.courseId,
+        timestamp: base.timestamp,
+      })?.verb,
+    ).toBe("http://adlnet.gov/expapi/verbs/completed");
+
+    expect(
+      telemetryEventToXAPIStatement({
         name: "lesson_started",
         ...base,
         data: { lessonId: base.lessonId },
@@ -46,6 +54,13 @@ describe("telemetryEventToXAPIStatement", () => {
       "urn:lessonkit:course:cyber-basics:lesson:phishing-101:check:verify-sender",
     );
     expect(telemetryEventToXAPIStatement(answered)?.result?.success).toBe(true);
+
+    const unanswered: TelemetryEvent = {
+      name: "quiz_answered",
+      ...base,
+      data: { checkId: "verify-sender", question: "Q", choice: "A" },
+    };
+    expect(telemetryEventToXAPIStatement(unanswered)?.result).toBeUndefined();
   });
 
   it("returns null for lesson_time_on_task", () => {
@@ -69,6 +84,36 @@ describe("telemetryEventToXAPIStatement", () => {
     expect(stmt?.result?.score).toMatchObject({ raw: 1, max: 2 });
   });
 
+  it("maps lesson_completed partial result fields", () => {
+    const scoreOnly = telemetryEventToXAPIStatement({
+      name: "lesson_completed",
+      ...base,
+      data: { lessonId: base.lessonId, score: 3 },
+    });
+    expect(scoreOnly?.result?.score).toMatchObject({ raw: 3, max: undefined, scaled: undefined });
+
+    const maxOnly = telemetryEventToXAPIStatement({
+      name: "lesson_completed",
+      ...base,
+      data: { lessonId: base.lessonId, maxScore: 10 },
+    });
+    expect(maxOnly?.result?.score).toMatchObject({ raw: undefined, max: 10, scaled: undefined });
+
+    const zeroMax = telemetryEventToXAPIStatement({
+      name: "lesson_completed",
+      ...base,
+      data: { lessonId: base.lessonId, score: 1, maxScore: 0 },
+    });
+    expect(zeroMax?.result?.score?.scaled).toBeUndefined();
+
+    const bare = telemetryEventToXAPIStatement({
+      name: "lesson_completed",
+      ...base,
+      data: { lessonId: base.lessonId },
+    });
+    expect(bare?.result).toBeUndefined();
+  });
+
   it("maps quiz_completed with score", () => {
     const stmt = telemetryEventToXAPIStatement({
       name: "quiz_completed",
@@ -77,6 +122,27 @@ describe("telemetryEventToXAPIStatement", () => {
     });
     expect(stmt?.object.id).toContain(":check:c1");
     expect(stmt?.result?.score).toMatchObject({ raw: 1, max: 1, scaled: 1 });
+
+    const scoreOnly = telemetryEventToXAPIStatement({
+      name: "quiz_completed",
+      ...base,
+      data: { checkId: "c1", score: 2 },
+    });
+    expect(scoreOnly?.result?.score).toMatchObject({ raw: 2, max: undefined, scaled: undefined });
+
+    const maxOnly = telemetryEventToXAPIStatement({
+      name: "quiz_completed",
+      ...base,
+      data: { checkId: "c1", maxScore: 4 },
+    });
+    expect(maxOnly?.result?.score).toMatchObject({ raw: undefined, max: 4, scaled: undefined });
+
+    const bare = telemetryEventToXAPIStatement({
+      name: "quiz_completed",
+      ...base,
+      data: { checkId: "c1" },
+    });
+    expect(bare?.result).toBeUndefined();
   });
 
   it("maps interaction with blockId and returns null without blockId", () => {
@@ -87,6 +153,15 @@ describe("telemetryEventToXAPIStatement", () => {
         timestamp: base.timestamp,
         lessonId: base.lessonId,
         data: { kind: "click" },
+      }),
+    ).toBeNull();
+
+    expect(
+      telemetryEventToXAPIStatement({
+        name: "interaction",
+        courseId: base.courseId,
+        timestamp: base.timestamp,
+        data: { kind: "click", blockId: "intro" },
       }),
     ).toBeNull();
 

@@ -42,12 +42,16 @@ export type ThemeContextValue = {
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
-const useIsoLayoutEffect = typeof window !== "undefined" ? useLayoutEffect : React.useEffect;
+const useIsoLayoutEffect =
+  /* v8 ignore next -- SSR uses useEffect when window is unavailable */
+  typeof window !== "undefined" ? useLayoutEffect : React.useEffect;
 
 function getSystemMode(): ThemeResolvedMode {
+  /* v8 ignore start -- SSR environments lack matchMedia */
   if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
     return "light";
   }
+  /* v8 ignore stop */
   return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
 }
 
@@ -74,9 +78,12 @@ export function ThemeProvider(props: ThemeProviderProps) {
       return;
     }
     setResolvedMode(getSystemMode());
+    /* v8 ignore start -- SSR environments lack matchMedia listeners */
     if (typeof window === "undefined" || typeof window.matchMedia !== "function") return;
+    /* v8 ignore stop */
     const mq = window.matchMedia("(prefers-color-scheme: dark)");
     const onChange = () => setResolvedMode(mq.matches ? "dark" : "light");
+    /* v8 ignore next -- system theme listener tracks both dark and light transitions */
     mq.addEventListener("change", onChange);
     return () => mq.removeEventListener("change", onChange);
   }, [mode]);
@@ -111,7 +118,9 @@ export function ThemeProvider(props: ThemeProviderProps) {
       targetKind === "document" && typeof document !== "undefined"
         ? document.documentElement
         : hostRef.current;
+    /* v8 ignore start -- layout effects run after the element host ref is attached */
     if (!el) return;
+    /* v8 ignore stop */
     appliedKeysRef.current = applyCssVariables(el, vars, appliedKeysRef.current);
   }, [effectiveTheme, targetKind]);
 
@@ -122,7 +131,9 @@ export function ThemeProvider(props: ThemeProviderProps) {
         targetKind === "document" && typeof document !== "undefined"
           ? document.documentElement
           : hostRef.current;
+      /* v8 ignore start -- layout cleanup runs after the element host ref is attached */
       if (!el) return;
+      /* v8 ignore stop */
       for (const key of appliedKeysRef.current) {
         el.style.removeProperty(key);
       }

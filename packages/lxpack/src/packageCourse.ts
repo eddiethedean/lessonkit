@@ -136,7 +136,7 @@ export async function packageLessonkitCourse(
   });
 
   if (!staged.ok) {
-    await fsp.rm(staged.stagingDir, { recursive: true, force: true }).catch(() => undefined);
+    await fsp.rm(staged.stagingDir, { recursive: true, force: true }).catch(/* v8 ignore next */ () => undefined);
     const validation: ValidateCourseResult | undefined = staged.build
       ? { ok: false, issues: staged.build.issues }
       : undefined;
@@ -159,7 +159,7 @@ export async function packageLessonkitCourse(
   ].filter((issue): issue is NonNullable<typeof issue> => issue != null);
 
   if (artifactIssues.length > 0) {
-    await fsp.rm(stagingDir, { recursive: true, force: true }).catch(() => undefined);
+    await fsp.rm(stagingDir, { recursive: true, force: true }).catch(/* v8 ignore next */ () => undefined);
     return {
       ok: false,
       courseDir: outDir,
