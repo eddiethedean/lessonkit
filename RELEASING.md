@@ -11,7 +11,7 @@ Published packages: `@lessonkit/core`, `@lessonkit/xapi`, `@lessonkit/accessibil
 
 > **1.0.0** is the stable public API release. See [MIGRATION-0.x-to-1.0.md](docs/MIGRATION-0.x-to-1.0.md).
 
-### 1.0.2 checklist (version bump on main — tag withheld)
+### 1.0.2 checklist (ready to publish)
 
 | Item | Status |
 |------|--------|
@@ -22,7 +22,11 @@ Published packages: `@lessonkit/core`, `@lessonkit/xapi`, `@lessonkit/accessibil
 | [CHANGELOG.md](CHANGELOG.md) `## [1.0.2]` documents the patch | Done |
 | No pending `.changeset/*.md` files | Done (only `config.json`) |
 | Vitest 4.1.8+ (GHSA-5xrq-8626) | Done |
-| Git tag `v1.0.2` | **Intentionally not created** — publish when ready |
+| `npm run lint` + `typecheck` + `test` + `coverage` + `test:integration` | Verified locally (2026-06-01) |
+| `npm run test:e2e` + `build-storybook` (react/lxpack changes) | Verified locally (2026-06-01) |
+| `npm run copy-template -w @lessonkit/cli` (template in sync) | Verified locally (2026-06-01) |
+| `npm audit --omit=dev --audit-level=high` | 0 vulnerabilities (2026-06-01; 3 moderate dev-only Storybook/uuid on full audit) |
+| Git tag `v1.0.2` | **Create when ready** — triggers npm publish |
 
 > **Do not create or push a `v1.0.2` git tag** until you intend to publish that version to npm.
 

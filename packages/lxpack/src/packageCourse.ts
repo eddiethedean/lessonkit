@@ -115,7 +115,7 @@ export async function packageLessonkitCourse(
   if (!descriptorValidation.ok) {
     return {
       ok: false,
-      courseDir: outDir,
+      courseDir: resolve(writeOpts.outDir),
       target,
       issues: descriptorValidation.issues.map((i) => ({
         path: i.path,

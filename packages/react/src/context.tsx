@@ -66,7 +66,7 @@ export type LessonkitRuntime = {
     user?: TelemetryUser;
   };
   setActiveLesson: (lessonId: LessonId) => void;
-  completeLesson: (lessonId: LessonId) => void;
+  completeLesson: (lessonId: LessonId, opts?: { courseId?: CourseId }) => void;
   completeCourse: () => void;
   track: <N extends TelemetryEventName>(
     name: N,

@@ -5,11 +5,20 @@ All notable changes to the LessonKit monorepo are documented here. Published pac
 
 ## [1.0.2] - 2026-06-01
 
-Patch release: contributor DX, integration test determinism, session storage hardening, and Vitest 4 security upgrade.
+Patch release: telemetry and course-lifecycle correctness, contributor DX, integration test determinism, session storage hardening, and Vitest 4 security upgrade.
 
 ### Fixed
 
+- **@lessonkit/react**: `course_started` tracking dedupe is marked only after `tracking.flush()` so batched `batchSink` delivery cannot be lost while session storage blocks retry.
+- **@lessonkit/react**: `Lesson` auto-complete on unmount no longer emits `lesson_completed` under the wrong `courseId` when the provider switches courses (conditional lesson trees / `key={courseId}`).
+- **@lessonkit/react**: `course_started` non-tracking pipeline awaits async `extraSinks` before marking pipeline delivery (failures retry).
+- **@lessonkit/react**: Dev-only `<Quiz>` outside `<Lesson>` no longer violates Rules of Hooks (wrapper + `QuizInner`).
+- **@lessonkit/react**: `completeLesson` accepts optional `{ courseId }` and ignores completions when the live provider course differs.
+- **@lessonkit/xapi**: Duplicate `send()` while an in-flight statement fails schedules a retry after the flight completes (success path still dedupes in-flight sends).
+- **@lessonkit/core**: `createTrackingClient()` throws when `batchSink` is set with `batch.enabled: false`.
 - **@lessonkit/core**: `createSessionStoragePort()` falls back to in-memory storage when `sessionStorage` is `null` or throws on access (embedded / restricted contexts).
+- **@lessonkit/lxpack**: Bridge resolution falls back to `parent.lxpackBridge.v1` when the SDK helper returns null.
+- **@lessonkit/lxpack**: Descriptor validation failures report `courseDir` as the staged course directory (`outDir`), not the packaging output path.
 - **Integration tests**: `package --no-build` failure test removes copied `dist/` so a local fixture build cannot make the test pass spuriously.
 
 ### Changed

@@ -79,10 +79,19 @@ export function Lesson(props: LessonProps) {
   const { setActiveLesson, config } = useLessonkit();
   const { completeLesson } = useCompletion();
   const lessonMountGenerationRef = useRef(0);
+  const liveCourseIdRef = useRef(config.courseId);
+  liveCourseIdRef.current = config.courseId;
 
   useEffect(() => {
     const unregister = registerLessonMount(lessonId);
     const generation = ++lessonMountGenerationRef.current;
+    const mountedCourseId = config.courseId;
+    let effectSurvivedTick = false;
+    queueMicrotask(() => {
+      queueMicrotask(() => {
+        effectSurvivedTick = true;
+      });
+    });
     setActiveLesson(lessonId);
     return () => {
       unregister();
@@ -91,8 +100,10 @@ export function Lesson(props: LessonProps) {
       }
       if (!autoComplete) return;
       queueMicrotask(() => {
+        if (!effectSurvivedTick) return;
         if (lessonMountGenerationRef.current !== generation) return;
-        completeLesson(lessonId);
+        if (liveCourseIdRef.current !== mountedCourseId) return;
+        completeLesson(lessonId, { courseId: mountedCourseId });
       });
     };
   }, [lessonId, config.courseId, setActiveLesson, completeLesson, autoComplete]);
@@ -168,7 +179,6 @@ export function KnowledgeCheck(props: KnowledgeCheckProps) {
 }
 
 export function Quiz(props: QuizProps) {
-  const checkId = useMemo(() => normalizeComponentId(props.checkId, "checkId"), [props.checkId]);
   const enclosingLessonId = useEnclosingLessonId();
   const missingLesson = enclosingLessonId === undefined;
 
@@ -185,6 +195,21 @@ export function Quiz(props: QuizProps) {
   if (missingLesson && isDevEnvironment()) {
     throw new Error("[lessonkit] <Quiz> must be wrapped in <Lesson>");
   }
+
+  if (missingLesson) {
+    return (
+      <section role="alert" aria-label="Quiz configuration error" data-lk-check-id={props.checkId}>
+        <p>Quiz must be placed inside a Lesson.</p>
+      </section>
+    );
+  }
+
+  return <QuizInner {...props} enclosingLessonId={enclosingLessonId} />;
+}
+
+function QuizInner(props: QuizProps & { enclosingLessonId: LessonId }) {
+  const { enclosingLessonId } = props;
+  const checkId = useMemo(() => normalizeComponentId(props.checkId, "checkId"), [props.checkId]);
 
   const quiz = useQuizState(enclosingLessonId);
   const { plugins, config, session } = useLessonkit();
@@ -210,14 +235,6 @@ export function Quiz(props: QuizProps) {
     }
     return choice === props.answer;
   };
-
-  if (missingLesson) {
-    return (
-      <section role="alert" aria-label="Quiz configuration error" data-lk-check-id={checkId}>
-        <p>Quiz must be placed inside a Lesson.</p>
-      </section>
-    );
-  }
 
   const passed = quizPassed;
 

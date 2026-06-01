@@ -1,5 +1,6 @@
 node_modules/
 dist/
+coverage/
 .lxpack/
 .DS_Store
 *.local

@@ -3,7 +3,10 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { Course, KnowledgeCheck, Lesson, LessonkitProvider, ProgressTracker, Quiz, Reflection, Scenario, resetQuizWarningsForTests, useCompletion, useLessonkit, useProgress, useQuizState, useTracking } from "../src";
 import { resetLessonMountRegistryForTests } from "../src/runtime/lessonMountRegistry";
-import { resetLessonkitProviderStorageForTests } from "../src/provider/useLessonkitProviderRuntime";
+import {
+  resetCourseStartedTrackingFlightForTests,
+  resetLessonkitProviderStorageForTests,
+} from "../src/provider/useLessonkitProviderRuntime";
 import {
   defineAssessmentPlugin,
   defineLifecyclePlugin,
@@ -14,6 +17,12 @@ import {
 import * as xapiModule from "@lessonkit/xapi";
 import type { XAPIStatement, XAPITransport } from "@lessonkit/xapi";
 import * as courseStartedPipelineModule from "../src/runtime/courseStartedPipeline";
+import { createSessionStoragePort } from "../src/runtime/ports";
+import {
+  markCourseStarted,
+  markCourseStartedEmittedToTracking,
+  markCourseStartedPipelineDelivered,
+} from "../src/runtime/session";
 
 describe("@lessonkit/react runtime", () => {
   afterEach(() => {
@@ -22,6 +31,7 @@ describe("@lessonkit/react runtime", () => {
     resetQuizWarningsForTests();
     resetLessonMountRegistryForTests();
     resetLessonkitProviderStorageForTests();
+    resetCourseStartedTrackingFlightForTests();
   });
 
   it("throws in dev when courseId is invalid", async () => {
@@ -1476,6 +1486,99 @@ describe("@lessonkit/react runtime", () => {
     expect(stray).toHaveLength(0);
   });
 
+  it("does not auto-complete lesson under new courseId when lesson unmounts on course switch", async () => {
+    const events: TelemetryEvent[] = [];
+    const sink = (e: TelemetryEvent) => {
+      events.push(e);
+    };
+
+    function CourseContent(props: { courseId: string }) {
+      if (props.courseId === "course-a") {
+        return (
+          <Lesson title="L" lessonId="lesson-1">
+            <div />
+          </Lesson>
+        );
+      }
+      return <div>other</div>;
+    }
+
+    const { rerender } = render(
+      <LessonkitProvider
+        config={{
+          courseId: "course-a",
+          tracking: { sink },
+          xapi: { enabled: false },
+        }}
+      >
+        <CourseContent courseId="course-a" />
+      </LessonkitProvider>,
+    );
+
+    await waitFor(() =>
+      expect(
+        events.some((e) => e.name === "lesson_started" && e.courseId === "course-a"),
+      ).toBe(true),
+    );
+
+    rerender(
+      <LessonkitProvider
+        config={{
+          courseId: "course-b",
+          tracking: { sink },
+          xapi: { enabled: false },
+        }}
+      >
+        <CourseContent courseId="course-b" />
+      </LessonkitProvider>,
+    );
+
+    await waitFor(() => expect(events.some((e) => e.courseId === "course-b")).toBe(true));
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    const stray = events.filter(
+      (e) =>
+        e.name === "lesson_completed" &&
+        e.courseId === "course-b" &&
+        e.lessonId === "lesson-1",
+    );
+    expect(stray).toHaveLength(0);
+  });
+
+  it("marks course_started tracking dedupe after batchSink delivery", async () => {
+    let batchSinkCalled = false;
+    const batchSink = async (events: TelemetryEvent[]) => {
+      batchSinkCalled = true;
+      expect(events.some((e) => e.name === "course_started")).toBe(true);
+    };
+
+    render(
+      <LessonkitProvider
+        config={{
+          courseId: "course-1",
+          tracking: {
+            batchSink,
+            batch: { enabled: true, flushIntervalMs: 60_000, maxBatchSize: 1 },
+          },
+          xapi: { enabled: false },
+        }}
+      >
+        <div />
+      </LessonkitProvider>,
+    );
+
+    await waitFor(() => expect(batchSinkCalled).toBe(true));
+    await waitFor(() =>
+      expect(
+        Object.keys(sessionStorage).some((k) =>
+          k.startsWith("lessonkit:course_started_tracking:"),
+        ),
+      ).toBe(true),
+    );
+  });
+
   it("reverts to tab session id when configured sessionId is cleared", async () => {
     function Reader() {
       const { session } = useLessonkit();
@@ -1570,7 +1673,7 @@ describe("@lessonkit/react runtime", () => {
     const events: TelemetryEvent[] = [];
     const emitSpy = vi
       .spyOn(courseStartedPipelineModule, "emitCourseStartedNonTrackingPipeline")
-      .mockImplementation(() => {
+      .mockImplementation(async () => {
         throw new Error("xapi pipeline failed");
       });
 
@@ -1604,7 +1707,7 @@ describe("@lessonkit/react runtime", () => {
     const sinkB: TelemetrySink = (e) => void events.push(e);
     const emitSpy = vi
       .spyOn(courseStartedPipelineModule, "emitCourseStartedNonTrackingPipeline")
-      .mockImplementation(() => {
+      .mockImplementation(async () => {
         if (shouldThrow) throw new Error("xapi pipeline failed");
         return { xapiStatementSent: true };
       });
@@ -1645,6 +1748,50 @@ describe("@lessonkit/react runtime", () => {
     expect(events.filter((e) => e.name === "course_started")).toHaveLength(1);
 
     emitSpy.mockRestore();
+  });
+
+  it("does not re-emit course_started when dedupe marks already exist for the next course", async () => {
+    const events: TelemetryEvent[] = [];
+    const sessionId = "course-switch-dedupe-session";
+
+    const { rerender } = render(
+      <LessonkitProvider
+        config={{
+          courseId: "course-1",
+          session: { sessionId },
+          tracking: { sink: (e) => void events.push(e) },
+          xapi: { enabled: false },
+        }}
+      >
+        <div>child</div>
+      </LessonkitProvider>,
+    );
+
+    await waitFor(() => expect(events.filter((e) => e.name === "course_started")).toHaveLength(1));
+
+    const storage = createSessionStoragePort();
+    markCourseStarted(storage, sessionId, "course-2");
+    markCourseStartedEmittedToTracking(storage, sessionId, "course-2");
+    markCourseStartedPipelineDelivered(storage, sessionId, "course-2");
+
+    rerender(
+      <LessonkitProvider
+        config={{
+          courseId: "course-2",
+          session: { sessionId },
+          tracking: { sink: (e) => void events.push(e) },
+          xapi: { enabled: false },
+        }}
+      >
+        <div>child</div>
+      </LessonkitProvider>,
+    );
+
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 0));
+    });
+
+    expect(events.filter((e) => e.name === "course_started")).toHaveLength(1);
   });
 
   it("forwards course_started to extraSinks when tracking enables after xAPI bootstrap", async () => {
@@ -1697,7 +1844,7 @@ describe("@lessonkit/react runtime", () => {
     const trackingEvents: TelemetryEvent[] = [];
     const emitSpy = vi
       .spyOn(courseStartedPipelineModule, "emitCourseStartedNonTrackingPipeline")
-      .mockImplementation(() => {
+      .mockImplementation(async () => {
         throw new Error("pipeline failed");
       });
 

@@ -78,6 +78,16 @@ describe("@lessonkit/core", () => {
     expect(() => client.dispose?.()).not.toThrow();
   });
 
+  it("throws when batchSink is set with batch.enabled false", () => {
+    const batchSink = vi.fn(async () => {});
+    expect(() =>
+      createTrackingClient({
+        batchSink,
+        batch: { enabled: false },
+      }),
+    ).toThrow(/batchSink cannot be used with batch\.enabled: false/);
+  });
+
   it("non-batched dispose stops further tracking", () => {
     const sink = vi.fn();
     const client = createTrackingClient({ sink, batch: { enabled: false } });

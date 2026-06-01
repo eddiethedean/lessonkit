@@ -33,10 +33,18 @@ export function createXAPIClient(opts?: {
       return;
     }
     const existing = inflightById.get(statement.id);
-    if (existing) return;
+    if (existing) {
+      void existing.then(
+        () => undefined,
+        () => {
+          sendOrQueue(statement);
+        },
+      );
+      return;
+    }
 
-    const flight = Promise.resolve()
-      .then(() => transport(statement))
+    const transportFlight = Promise.resolve().then(() => transport(statement));
+    const flight = transportFlight
       .catch(() => {
         queue.enqueue(statement);
         if (isDevEnvironment() && !warnedTransportFailure) {
@@ -49,7 +57,7 @@ export function createXAPIClient(opts?: {
       .finally(() => {
         inflightById.delete(statement.id);
       });
-    inflightById.set(statement.id, flight);
+    inflightById.set(statement.id, transportFlight);
     void flight;
   };
 

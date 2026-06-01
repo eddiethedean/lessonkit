@@ -16,13 +16,53 @@ export type CourseStartedPipelineEmitResult = {
   xapiStatementSent: boolean;
 };
 
+function isDevEnvironment(): boolean {
+  const g = globalThis as typeof globalThis & { process?: { env?: { NODE_ENV?: string } } };
+  return typeof g.process !== "undefined" && g.process.env?.NODE_ENV !== "production";
+}
+
+function warnExtraSinkFailure(sinkId: string, err: unknown): void {
+  if (isDevEnvironment()) {
+    console.warn(
+      `[lessonkit] course_started extra sink "${sinkId}" failed:`,
+      err instanceof Error ? err.message : err,
+    );
+  }
+}
+
+async function emitExtraSinks(
+  sinks: TelemetryPipelineSink[],
+  event: TelemetryEvent,
+  emitCtx: { courseId: CourseId; sessionId?: string; attemptId?: string },
+): Promise<void> {
+  await Promise.all(
+    sinks.map(async (sink) => {
+      let result: void | Promise<void>;
+      try {
+        result = sink.emit(event, emitCtx);
+      } catch (err) {
+        warnExtraSinkFailure(sink.id, err);
+        throw err;
+      }
+      if (result != null && typeof (result as Promise<void>).then === "function") {
+        try {
+          await result;
+        } catch (err) {
+          warnExtraSinkFailure(sink.id, err);
+          throw err;
+        }
+      }
+    }),
+  );
+}
+
 /**
  * Emit course_started to non-tracking sinks (xAPI, lxpack bridge, extraSinks).
- * Propagates sync failures so callers can retry; does not use the swallowing telemetry pipeline.
+ * Propagates sync/async failures so callers can retry; does not use the swallowing telemetry pipeline.
  */
-export function emitCourseStartedNonTrackingPipeline(
+export async function emitCourseStartedNonTrackingPipeline(
   opts: CourseStartedPipelineEmitOpts,
-): CourseStartedPipelineEmitResult {
+): Promise<CourseStartedPipelineEmitResult> {
   let xapiStatementSent = false;
 
   if (!opts.skipXapi && opts.xapi) {
@@ -41,9 +81,7 @@ export function emitCourseStartedNonTrackingPipeline(
     attemptId: opts.event.attemptId,
   };
 
-  for (const sink of opts.extraSinks ?? []) {
-    sink.emit(opts.event, emitCtx);
-  }
+  await emitExtraSinks(opts.extraSinks ?? [], opts.event, emitCtx);
 
   return { xapiStatementSent };
 }

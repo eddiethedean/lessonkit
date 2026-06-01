@@ -76,7 +76,7 @@ function getBridge(parentWindow?: Window): LxpackBridgeV1 | null {
   if (typeof window === "undefined") return null;
   const parent = (parentWindow ?? window.parent) as (Window & LxpackBridgeHost) | null;
   if (!parent || parent === window) return null;
-  return parent.lxpack ?? null;
+  return parent.lxpackBridge?.v1 ?? parent.lxpack ?? null;
 }
 
 export type LxpackBridgeMode = "auto" | "off";

@@ -89,6 +89,39 @@ describe("@lessonkit/xapi", () => {
     expect(statements[0]).toMatchObject({ id: "1" });
   });
 
+  it("retries duplicate send after in-flight transport failure", async () => {
+    let calls = 0;
+    let release!: () => void;
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const transport = vi.fn(async () => {
+      calls += 1;
+      await gate;
+      if (calls === 1) {
+        throw new Error("network");
+      }
+    });
+    const client = createXAPIClient({ transport, courseId });
+    const statement: XAPIStatement = {
+      id: "retry-inflight-1",
+      timestamp: "t",
+      verb: "http://adlnet.gov/expapi/verbs/experienced",
+      object: { id: "o" },
+    };
+
+    client.send(statement);
+    client.send(statement);
+    release();
+    await new Promise((r) => setTimeout(r, 0));
+
+    expect(calls).toBe(2);
+    expect(client.queueSize()).toBe(1);
+    transport.mockImplementation(async () => {});
+    await client.flush();
+    expect(client.queueSize()).toBe(0);
+  });
+
   it("does not send duplicate in-flight statements with the same id", async () => {
     const statements: XAPIStatement[] = [];
     let release!: () => void;

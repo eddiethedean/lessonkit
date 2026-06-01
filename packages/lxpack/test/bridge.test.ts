@@ -5,8 +5,17 @@ import {
   forwardTelemetryToBridge,
   normalizeAssessmentPassingScore,
   normalizeAssessmentScore,
+  notifyLxpackLessonComplete,
 } from "../src/bridge";
 import type { LxpackBridgeV1 } from "../src/bridge";
+
+vi.mock("@lxpack/spa-bridge", async (importOriginal) => {
+  const mod = await importOriginal<typeof import("@lxpack/spa-bridge")>();
+  return {
+    ...mod,
+    getLxpackBridge: vi.fn(() => null),
+  };
+});
 
 describe("@lessonkit/lxpack/bridge", () => {
   it("normalizeAssessmentScore scales raw points when score > 1", () => {
@@ -63,6 +72,21 @@ describe("@lessonkit/lxpack/bridge", () => {
 
     process.env.NODE_ENV = prevEnv;
     warn.mockRestore();
+  });
+
+  it("resolves parent.lxpackBridge.v1 when SDK helper returns null", () => {
+    const completeLesson = vi.fn();
+    const parent = {
+      lxpackBridge: { v1: { completeLesson } },
+    };
+    vi.stubGlobal("window", { parent });
+
+    try {
+      expect(notifyLxpackLessonComplete("lesson-1")).toBe(true);
+      expect(completeLesson).toHaveBeenCalledWith("lesson-1");
+    } finally {
+      vi.unstubAllGlobals();
+    }
   });
 
   it("forwardTelemetryToBridge swallows host bridge throws", () => {

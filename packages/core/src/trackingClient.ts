@@ -41,6 +41,11 @@ export function createTrackingClient(opts?: {
 }): TrackingClient {
   const sink = opts?.sink;
   const batchSink = opts?.batchSink;
+  if (batchSink != null && opts?.batch?.enabled === false) {
+    throw new Error(
+      "[lessonkit] tracking.batchSink cannot be used with batch.enabled: false; omit batch.enabled or set it to true",
+    );
+  }
   const batchEnabled = opts?.batch?.enabled ?? Boolean(batchSink);
   const flushIntervalMs = opts?.batch?.flushIntervalMs ?? 5000;
   const maxBatchSize = opts?.batch?.maxBatchSize ?? 25;
