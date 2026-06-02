@@ -1,5 +1,11 @@
 # Studio visual editor (0.3.0)
 
+::::{admonition} Alpha
+:class: warning
+
+LessonKit Studio is **Alpha**. Expect breaking changes to the editor UI, exported output, and `StudioProjectV1` format between Studio releases.
+::::
+
 The local visual editor MVP lives in **`apps/studio-web`** and is built from:
 
 - **`@lessonkit/studio-builder`** — headless project state, commands, undo/redo, autosave hooks

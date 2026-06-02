@@ -1,5 +1,11 @@
 # LessonKit Studio
 
+::::{admonition} Alpha
+:class: warning
+
+LessonKit Studio is **Alpha**. Expect breaking changes to the editor UI, exported output, and `StudioProjectV1` format between Studio releases. Pin `@lessonkit/studio-*` versions and review the changelog before upgrading.
+::::
+
 :::{admonition} Who this is for
 :class: tip
 

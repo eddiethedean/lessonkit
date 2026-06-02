@@ -1,5 +1,11 @@
 # Exporting from Studio (0.3.0)
 
+::::{admonition} Alpha
+:class: warning
+
+LessonKit Studio is **Alpha**. Expect breaking changes to the editor UI, exported output, and `StudioProjectV1` format between Studio releases.
+::::
+
 Studio 0.3 adds **`@lessonkit/studio-codegen`**: turn a validated `StudioProjectV1` into a React/Vite project authors can build and ship. LMS packaging (SCORM, xAPI, cmi5, standalone) uses **@lessonkit/lxpack** via the **`lessonkit package`** CLI — the same path as hand-authored courses.
 
 ## Export modes

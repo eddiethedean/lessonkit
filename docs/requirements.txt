@@ -1,5 +1,5 @@
-sphinx>=7.4,<9
+Sphinx>=7.1,<9
 myst-parser>=3.0,<5
 furo>=2024.8.6,<2026
 sphinx-copybutton>=0.5,<1
-sphinx-design>=0.6,<1
+sphinx-design>=0.5,<1

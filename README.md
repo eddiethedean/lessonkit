@@ -181,7 +181,9 @@ Keep `courseId`, `lessonId`, and `checkId` in sync with `lessonkit.json`—`less
 | [`@lessonkit/themes`](https://github.com/eddiethedean/lessonkit/tree/main/packages/themes) | [![npm](https://img.shields.io/npm/v/@lessonkit/themes.svg)](https://www.npmjs.com/package/@lessonkit/themes) | Theme presets and design tokens |
 | [`@lessonkit/accessibility`](https://github.com/eddiethedean/lessonkit/tree/main/packages/accessibility) | [![npm](https://img.shields.io/npm/v/@lessonkit/accessibility.svg)](https://www.npmjs.com/package/@lessonkit/accessibility) | Focus trap, roving tabindex, reduced motion |
 
-**LessonKit Studio** (publish with `studio-v*` tags): [`@lessonkit/studio-schema`](packages/studio-schema) · [`@lessonkit/studio-renderer`](packages/studio-renderer) · [`@lessonkit/studio-builder`](packages/studio-builder) · [`@lessonkit/studio-ui`](packages/studio-ui) · [project format v1](docs/guides/studio/project-format-v1.md) · [visual editor](docs/guides/studio/editor.md) (`apps/studio-web`)
+**LessonKit Studio (Alpha)** (publish with `studio-v*` tags): [`@lessonkit/studio-schema`](packages/studio-schema) · [`@lessonkit/studio-renderer`](packages/studio-renderer) · [`@lessonkit/studio-builder`](packages/studio-builder) · [`@lessonkit/studio-ui`](packages/studio-ui) · [project format v1](docs/guides/studio/project-format-v1.md) · [visual editor](docs/guides/studio/editor.md) (`apps/studio-web`)
+
+Studio is **Alpha**: expect breaking changes to the editor UI, exported output, and `StudioProjectV1` format between Studio releases. Pin `@lessonkit/studio-*` versions and review the changelog before upgrading.
 
 ---
 

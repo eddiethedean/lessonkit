@@ -1,5 +1,11 @@
 # Studio live app
 
+::::{admonition} Alpha
+:class: warning
+
+LessonKit Studio is **Alpha**. Expect breaking changes to the editor UI, exported output, and `StudioProjectV1` format between Studio releases.
+::::
+
 This page embeds a **production build** of [`apps/studio-web`](https://github.com/eddiethedean/lessonkit/tree/main/apps/studio-web), compiled when the documentation site is built (CI and [Read the Docs](https://lessonkit.readthedocs.io/)). It is the same app you get from `npm run dev -w lessonkit-studio-web`, without installing Node locally.
 
 ## What you can do here

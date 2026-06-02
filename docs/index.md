@@ -41,7 +41,9 @@ Pick the path that matches how you work:
 :link: guides/studio/index
 :link-type: doc
 
-**Visual authoring.** Drag-and-drop blocks, live preview, export to React/Vite—try the **[live app](guides/studio/app.md)** in the docs.
+**Visual authoring (Alpha).** Drag-and-drop blocks, live preview, export to React/Vite—try the **[live app](guides/studio/app.md)** in the docs.
+
+**Status:** Studio is **Alpha**; expect breaking changes between Studio releases.
 
 +++
 **Open Studio →**

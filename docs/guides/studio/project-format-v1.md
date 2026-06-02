@@ -1,5 +1,11 @@
 # Studio project format (v1)
 
+::::{admonition} Alpha
+:class: warning
+
+LessonKit Studio is **Alpha**. Expect breaking changes to the editor UI, exported output, and `StudioProjectV1` format between Studio releases.
+::::
+
 LessonKit Studio uses a JSON authoring document stored at `src/project.json`, separate from the packaging manifest `lessonkit.json` used by `@lessonkit/cli` and `@lessonkit/lxpack`. Format **v1** shipped in Studio **0.1.0**; the visual editor shipped in **0.2.0** ([editor guide](editor.md)).
 
 ## On-disk layout
