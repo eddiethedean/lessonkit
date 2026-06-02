@@ -32,15 +32,15 @@ exclude_patterns = [
     "TELEMETRY.md",
     "THEMING.md",
     "ACCESSIBILITY.md",
+    "BLOCK_CATALOG.md",
+    "CORE.md",
+    "PLUGINS.md",
+    "LXPACK_BRIDGE.md",
     "LXPACK_UPGRADES_FOR_LESSONKIT.md",
+    "LXPACK_UPGRADE_PLAN_FOR_MAINTAINERS.md",
     "LessonKit_Studio_PLAN.md",
     "LessonKit_Studio_SPEC.md",
     "STUDIO_READINESS.md",
-]
-
-suppress_warnings = [
-    "myst.xref_missing",
-    "misc.highlighting_failure",
 ]
 
 source_suffix = {
@@ -126,7 +126,7 @@ myst_enable_extensions = [
     "deflist",
     "tasklist",
 ]
-myst_heading_anchors = 3
+myst_heading_anchors = 4
 myst_url_schemes = ("http", "https", "mailto")
 
 copybutton_prompt_text = r">>> |\.\.\. |\$ |bash# "

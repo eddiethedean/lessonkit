@@ -209,6 +209,11 @@ html[data-theme="dark"] .lk-demo-frame {
   box-shadow: 0 8px 30px -12px rgba(0, 0, 0, 0.45);
 }
 
+.lk-demo-frame--studio {
+  min-height: 720px;
+  height: min(85vh, 960px);
+}
+
 .lk-demo-links {
   margin: 0 0 2rem;
   font-size: 0.9375rem;

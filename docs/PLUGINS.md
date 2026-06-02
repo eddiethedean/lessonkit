@@ -56,8 +56,10 @@ const myAnalytics = defineTelemetryPlugin({
     return event;
   },
 });
-
-<Course courseId="my-course" config={{ plugins: [myAnalytics] }}>…</Course>
 ```
 
-See [Plugin cookbook](guides/react-developers/plugin-cookbook.md) for a full walkthrough.
+```tsx
+<Course courseId="my-course" config={{ plugins: [myAnalytics] }}>...</Course>
+```
+
+See [Plugin cookbook](../guides/react-developers/plugin-cookbook.md) for a full walkthrough.

@@ -50,7 +50,7 @@ Without `blockId`, interaction events are tracked but do not emit xAPI.
 
 ## Identity
 
-All events require `courseId`. Lesson-scoped events require `lessonId`. Component ids are **trimmed** at the React provider boundary (`assertValidId`) so telemetry payloads and xAPI URNs stay aligned. See [`IDENTITY.md`](IDENTITY.md).
+All events require `courseId`. Lesson-scoped events require `lessonId`. Component ids are **trimmed** at the React provider boundary (`assertValidId`) so telemetry payloads and xAPI URNs stay aligned. See [Identity reference](reference/identity.md).
 
 ### `course_started` dedupe
 

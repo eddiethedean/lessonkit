@@ -6,6 +6,7 @@ Forward-looking priorities, responsibility shifts, and API proposals for the [LX
 
 ```{include} ../LXPACK_UPGRADE_PLAN_FOR_MAINTAINERS.md
 :start-after: Executive summary
+:relative-docs: reference/
 ```
 
 ## Historical checklist (LessonKit team)
@@ -14,4 +15,5 @@ What LessonKit requested before LXPack v0.4.0, and integration status from the L
 
 ```{include} ../LXPACK_UPGRADES_FOR_LESSONKIT.md
 :start-after: This document captures
+:relative-docs: reference/
 ```

@@ -1,4 +1,4 @@
-# Studio visual editor (0.2.0)
+# Studio visual editor (0.3.0)
 
 The local visual editor MVP lives in **`apps/studio-web`** and is built from:
 
@@ -16,11 +16,16 @@ npm run dev -w lessonkit-studio-web
 
 Open the URL Vite prints (typically `http://localhost:5173`).
 
+## Live demo (docs site)
+
+Use the dedicated **[Studio live app](app.md)** page (also linked from [Studio overview](index.md)). It is built by the same `docs/scripts/build-docs-demos.sh` pipeline as the [course examples](../../examples/index.md).
+
 ## Persistence (0.2)
 
 - **Autosave:** validated project JSON is written to `localStorage` under `lessonkit-studio:project` (debounced, default 500ms).
 - **Export / import:** toolbar buttons download or load `project.json`.
 - **Reset:** restores the bundled sample project.
+- **Export panel (0.3):** download a React/Vite zip (renderer or explicit JSX), optional theme preset and xAPI activity IRI, and copy Node CLI steps for LMS packaging. See [Studio export guide](export.md).
 
 GitHub sync and hosted Studio are planned for 0.4+; do not rely on `localStorage` for production authoring.
 
@@ -58,4 +63,4 @@ if (!loaded.ok) throw new Error("invalid project");
 />
 ```
 
-See also [Studio project format v1](project-format-v1.md) and [STUDIO_READINESS.md](../../STUDIO_READINESS.md).
+See also [Studio overview](index.md), [Studio project format v1](project-format-v1.md), [Studio export guide](export.md), and [Studio readiness](../../project/studio-readiness.md).

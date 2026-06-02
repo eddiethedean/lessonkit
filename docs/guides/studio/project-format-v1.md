@@ -89,11 +89,12 @@ The renderer wraps `ThemeProvider`, `Course`, and `Lesson` from `@lessonkit/reac
 
 ## Example
 
-See [`examples/studio-minimal`](../../../examples/studio-minimal) — run `npm run dev -w lessonkit-example-studio-minimal` after `npm run build:packages`.
+See [examples/studio-minimal](https://github.com/eddiethedean/lessonkit/tree/main/examples/studio-minimal) — run `npm run dev -w lessonkit-example-studio-minimal` after `npm run build:packages`.
 
 ## Related docs
 
-- [LessonKit Studio spec](../../LessonKit_Studio_SPEC.md)
-- [Runtime block catalog](../../BLOCK_CATALOG.md) — framework primitives used by `quiz` and `scenario`
-- [Studio editor (0.2)](editor.md) — run `apps/studio-web`, autosave, shortcuts
-- [STUDIO_READINESS.md](../../STUDIO_READINESS.md) — Studio readiness checklists
+- [Studio overview](index.md) · [Live app](app.md)
+- [Visual editor](editor.md) · [Export](export.md)
+- [LessonKit Studio spec](../../project/studio-spec.md)
+- [Runtime block catalog](../../reference/block-catalog.md) — framework primitives used by `quiz` and `scenario`
+- [Studio readiness](../../project/studio-readiness.md) — Studio readiness checklists

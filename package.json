@@ -1,7 +1,7 @@
 {
   "name": "lessonkit",
   "version": "1.0.2",
-  "studio-version": "0.2.0",
+  "studio-version": "0.3.0",
   "private": true,
   "packageManager": "npm@10.9.0",
   "workspaces": [
@@ -15,7 +15,7 @@
   ],
   "scripts": {
     "build": "npm run build:packages && npm run build:apps",
-    "build:packages": "npm run -w @lessonkit/core build && npm run -w @lessonkit/xapi build && npm run -w @lessonkit/accessibility build && npm run -w @lessonkit/themes build && npm run -w @lessonkit/lxpack build && npm run -w @lessonkit/react build && npm run -w @lessonkit/studio-schema build && npm run -w @lessonkit/studio-renderer build && npm run -w @lessonkit/studio-builder build && npm run -w @lessonkit/studio-ui build && npm run -w @lessonkit/cli build",
+    "build:packages": "npm run -w @lessonkit/core build && npm run -w @lessonkit/xapi build && npm run -w @lessonkit/accessibility build && npm run -w @lessonkit/themes build && npm run -w @lessonkit/lxpack build && npm run -w @lessonkit/react build && npm run -w @lessonkit/studio-schema build && npm run -w @lessonkit/studio-renderer build && npm run -w @lessonkit/studio-builder build && npm run -w @lessonkit/studio-ui build && npm run -w @lessonkit/studio-codegen build && npm run -w @lessonkit/cli build",
     "build:apps": "npm run -w lessonkit-example-react-vite build && npm run -w lessonkit-example-lxpack-golden build && npm run -w lessonkit-example-data-privacy build && npm run -w lessonkit-example-customer-service build && npm run -w lessonkit-example-studio-minimal build && npm run -w lessonkit-studio-web build && npm run -w lessonkit-template-vite-react build && npm run -w lessonkit-e2e-telemetry-harness build",
     "dev": "npm run --workspaces --if-present dev",
     "pretest": "npm run build:packages",

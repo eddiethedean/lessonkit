@@ -37,6 +37,16 @@ Pick the path that matches how you work:
 **Open developer guides →**
 :::
 
+:::{grid-item-card} LessonKit Studio
+:link: guides/studio/index
+:link-type: doc
+
+**Visual authoring.** Drag-and-drop blocks, live preview, export to React/Vite—try the **[live app](guides/studio/app.md)** in the docs.
+
++++
+**Open Studio →**
+:::
+
 ::::
 
 :::{admonition} New to React?
@@ -100,11 +110,14 @@ guides/react-developers/contributing-to-the-monorepo
 ```
 
 ```{toctree}
-:maxdepth: 1
-:caption: Guides — Studio
+:maxdepth: 2
+:caption: LessonKit Studio
 
+guides/studio/index
+guides/studio/app
 guides/studio/project-format-v1
 guides/studio/editor
+guides/studio/export
 ```
 
 ```{toctree}
@@ -132,5 +145,8 @@ reference/lxpack-upgrades
 project/changelog
 project/security
 project/roadmap
+project/studio-readiness
+project/studio-spec
+project/studio-plan
 MIGRATION-0.x-to-1.0
 ```

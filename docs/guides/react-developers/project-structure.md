@@ -17,7 +17,7 @@ my-course/
 `lessonkit.json` is the contract between your React app and `@lessonkit/lxpack`:
 
 - `course.courseId` and every `assessments[].checkId` **must match** React props
-- `lessons[].id` **must match** when each lesson is a separate SPA or LMS entry; with `layout: "single-spa"`, the manifest lists only the LMS shell lesson(s) while additional in-app step ids may exist only in React (see [`examples/lxpack-golden/README.md`](../../examples/lxpack-golden/README.md))
+- `lessons[].id` **must match** when each lesson is a separate SPA or LMS entry; with `layout: "single-spa"`, the manifest lists only the LMS shell lesson(s) while additional in-app step ids may exist only in React (see [lxpack-golden README](https://github.com/eddiethedean/lessonkit/blob/main/examples/lxpack-golden/README.md))
 - `course.layout` should be `single-spa` for `lessonkit package` (1.0.0)
 - `paths.spaDistDir` points at the Vite output (default `dist`)
 

@@ -1,7 +1,7 @@
 # Plugin cookbook — console analytics
 
 This walkthrough adds a minimal **analytics** plugin to a LessonKit React course. It mirrors
-[`examples/_shared/plugins/consoleAnalyticsPlugin.ts`](../../../examples/_shared/plugins/consoleAnalyticsPlugin.ts).
+[examples/_shared/plugins/consoleAnalyticsPlugin.ts](https://github.com/eddiethedean/lessonkit/blob/main/examples/_shared/plugins/consoleAnalyticsPlugin.ts).
 
 ## 1. Define the plugin
 

@@ -7,8 +7,8 @@ pragmatic: small, shippable milestones with clear outputs.
 
 | Line | What it is | Primary docs |
 |------|------------|--------------|
-| **LessonKit (framework)** | React components, telemetry, xAPI, CLI, packaging | [`PLAN.md`](PLAN.md), [`SPEC.md`](SPEC.md) |
-| **LessonKit Studio** | Visual authoring on top of the framework + LXPack | [`docs/LessonKit_Studio_PLAN.md`](docs/LessonKit_Studio_PLAN.md), [`docs/LessonKit_Studio_SPEC.md`](docs/LessonKit_Studio_SPEC.md) |
+| **LessonKit (framework)** | React components, telemetry, xAPI, CLI, packaging | [PLAN.md](https://github.com/eddiethedean/lessonkit/blob/main/PLAN.md), [SPEC.md](https://github.com/eddiethedean/lessonkit/blob/main/SPEC.md) |
+| **LessonKit Studio** | Visual authoring on top of the framework + LXPack | [`docs/LessonKit_Studio_PLAN.md`](studio-plan.md), [`docs/LessonKit_Studio_SPEC.md`](studio-spec.md) |
 
 Studio is not a replacement for code-first authoring—it shares the same runtime (`@lessonkit/react`),
 export targets, and accessibility/telemetry goals. Packaging and LMS delivery lean on **LXPack** once
@@ -18,11 +18,11 @@ the framework adapter exists (see 0.6.0).
 
 ## Key references
 
-- [`PLAN.md`](PLAN.md) — framework product vision and MVP scope
-- [`SPEC.md`](SPEC.md) — framework technical spec and requirements
-- [`docs/LessonKit_Studio_PLAN.md`](docs/LessonKit_Studio_PLAN.md) — Studio vision, MVP scope, positioning
-- [`docs/LessonKit_Studio_SPEC.md`](docs/LessonKit_Studio_SPEC.md) — Studio architecture, schema, editor, exports
-- [`docs/LXPACK_UPGRADES_FOR_LESSONKIT.md`](docs/LXPACK_UPGRADES_FOR_LESSONKIT.md) — LXPack interoperability notes
+- [PLAN.md](https://github.com/eddiethedean/lessonkit/blob/main/PLAN.md) — framework product vision and MVP scope
+- [SPEC.md](https://github.com/eddiethedean/lessonkit/blob/main/SPEC.md) — framework technical spec and requirements
+- [`docs/LessonKit_Studio_PLAN.md`](studio-plan.md) — Studio vision, MVP scope, positioning
+- [`docs/LessonKit_Studio_SPEC.md`](studio-spec.md) — Studio architecture, schema, editor, exports
+- [`docs/LXPACK_UPGRADES_FOR_LESSONKIT.md`](docs/reference/lxpack-upgrades.md) — LXPack interoperability notes
 
 ## Status
 
@@ -62,7 +62,7 @@ the framework adapter exists (see 0.6.0).
 
 #### Status (1.0.0)
 
-The 0.1.x deliverables above are **complete**. Identity v1 (`courseId`, `lessonId`, `checkId`) is required and normalized at runtime. Unit tests, Storybook, and the block catalog ship in the monorepo. See [CHANGELOG.md](CHANGELOG.md).
+The 0.1.x deliverables above are **complete**. Identity v1 (`courseId`, `lessonId`, `checkId`) is required and normalized at runtime. Unit tests, Storybook, and the block catalog ship in the monorepo. See [CHANGELOG](docs/project/changelog.md).
 
 ---
 
@@ -133,7 +133,7 @@ The 0.1.x deliverables above are **complete**. Identity v1 (`courseId`, `lessonI
 
 ### 0.5.x — Deterministic identity model (framework contract) — **shipped in 0.5.0**
 
-See [`docs/IDENTITY.md`](docs/IDENTITY.md) and [`docs/TELEMETRY.md`](docs/TELEMETRY.md).
+See [`docs/IDENTITY.md`](docs/reference/identity.md) and [`docs/TELEMETRY.md`](docs/reference/telemetry.md).
 
 ---
 
@@ -155,7 +155,7 @@ See [`docs/IDENTITY.md`](docs/IDENTITY.md) and [`docs/TELEMETRY.md`](docs/TELEME
 - CI smoke test:
   - builds the golden example and validates artifacts
 - References:
-  - LXPack interoperability checklist: [`docs/LXPACK_UPGRADES_FOR_LESSONKIT.md`](docs/LXPACK_UPGRADES_FOR_LESSONKIT.md)
+  - LXPack interoperability checklist: [`docs/LXPACK_UPGRADES_FOR_LESSONKIT.md`](docs/reference/lxpack-upgrades.md)
 
 ---
 
@@ -200,7 +200,7 @@ See [`docs/IDENTITY.md`](docs/IDENTITY.md) and [`docs/TELEMETRY.md`](docs/TELEME
 - **Documentation**:
   - reference page for the runtime block catalog (`docs/reference/block-catalog.md`) — props, a11y/theming/telemetry contracts per block
   - catalog JSON schema or export path documented for generators (linked from vibe-coding and React developer guides)
-  - update [`docs/STUDIO_READINESS.md`](docs/STUDIO_READINESS.md) 0.8.x checklist as catalog items ship
+  - update [`docs/STUDIO_READINESS.md`](docs/project/studio-readiness.md) 0.8.x checklist as catalog items ship
   - examples demonstrate every catalog block (at least one reference course)
 
 ---
@@ -226,7 +226,7 @@ See [`docs/IDENTITY.md`](docs/IDENTITY.md) and [`docs/TELEMETRY.md`](docs/TELEME
   - export parity guide for authors (`docs/guides/react-developers/export-parity.md` or equivalent) — what is guaranteed across React/Vite vs LMS targets
   - conformance matrix documented (what is tested, how to run locally, CI expectations)
   - contributor docs for Playwright e2e and packaging smoke tests
-  - update [`docs/STUDIO_READINESS.md`](docs/STUDIO_READINESS.md) 0.9.x checklist as harness items ship
+  - update [`docs/STUDIO_READINESS.md`](docs/project/studio-readiness.md) 0.9.x checklist as harness items ship
 
 ---
 
@@ -287,7 +287,7 @@ begins**—including schema spikes, renderer prototypes, or `lessonkit-studio` p
 
 Studio is a **visual learning experience builder** on LessonKit + LXPack: drag-and-drop authoring,
 Git-backed projects, live preview, and export to React/Vite, LXPack, SCORM, xAPI, cmi5, and standalone
-web builds. Full detail: [`docs/LessonKit_Studio_PLAN.md`](docs/LessonKit_Studio_PLAN.md), [`docs/LessonKit_Studio_SPEC.md`](docs/LessonKit_Studio_SPEC.md).
+web builds. Full detail: [`docs/LessonKit_Studio_PLAN.md`](studio-plan.md), [`docs/LessonKit_Studio_SPEC.md`](studio-spec.md).
 
 ### Studio development gate (met)
 
@@ -367,19 +367,41 @@ These are delivered as part of framework milestones **before** the Studio gate�
 
 - **Project layout** (Git-backed): [`docs/guides/studio/project-format-v1.md`](docs/guides/studio/project-format-v1.md)
   - `lessonkit.json`, `src/project.json`, `assets/`, `themes/`
-- **`@lessonkit/studio-schema`** ([`packages/studio-schema`](packages/studio-schema)):
+- **`@lessonkit/studio-schema`** ([`packages/studio-schema`](https://github.com/eddiethedean/lessonkit/tree/main/packages/studio-schema)):
   - `schemaVersion` **1**; `migrateStudioProject` / `loadStudioProject`; validation + normalization
   - JSON document model: `pages[]` with `id` and `blocks[]`
-- **`@lessonkit/studio-renderer`** ([`packages/studio-renderer`](packages/studio-renderer)):
+- **`@lessonkit/studio-renderer`** ([`packages/studio-renderer`](https://github.com/eddiethedean/lessonkit/tree/main/packages/studio-renderer)):
   - `StudioRenderer` → `@lessonkit/react` (`Course`, `Lesson`, `Quiz`, `Scenario`)
-  - Example: [`examples/studio-minimal`](examples/studio-minimal)
+  - Example: [examples/studio-minimal](https://github.com/eddiethedean/lessonkit/tree/main/examples/studio-minimal)
 - **Initial block types:** text, heading, image, button, input, container, quiz, scenario; checklist / video stubbed
+
+---
+
+### Studio 0.3.0 — Code generation and export
+
+**Status:** Ready to publish (`studio-v0.3.0`): all five Studio packages at **0.3.0** including `@lessonkit/studio-codegen`.
+
+#### Goals
+
+- Export real artifacts authors can ship; Studio focuses on authoring, LXPack on packaging.
+
+#### Deliverables (done)
+
+- **`@lessonkit/studio-codegen`**: renderer + JSX React/Vite export; `studioProjectToDescriptor`; Node LXPack helpers.
+- **`@lessonkit/studio-ui`**: `ExportPanel`; lazy block previews; virtualized large canvases.
+- **`apps/studio-web`**: zip download + export options in header.
+- **Integration test** and **`examples/studio-export`**.
+- **Docs:** [Studio export guide](docs/guides/studio/export.md), STUDIO_READINESS 0.3 checklist.
+
+#### Out of scope (0.4+)
+
+- GitHub sync, hosted `lessonkit.app`, `lessonkit-studio` CLI, Tauri desktop, schema v2.
 
 ---
 
 ### Studio 0.2.0 — Visual editor MVP
 
-**Status:** Ready to publish (`studio-v0.2.0`): `@lessonkit/studio-schema`, `studio-renderer`, `studio-builder`, and `studio-ui` at **0.2.0**; local app [`apps/studio-web`](apps/studio-web).
+**Status:** Shipped (`studio-v0.2.0`).
 
 #### Goals
 
@@ -391,31 +413,11 @@ These are delivered as part of framework milestones **before** the Studio gate�
 - **`@lessonkit/studio-ui`**: `StudioEditor` — palette, dnd-kit canvas (nested containers), property inspector, live preview.
 - **`apps/studio-web`**: Vite shell, `localStorage` autosave, import/export JSON.
 - **Renderer**: checklist and video blocks use minimal real preview UI (no longer stubs).
-- **Docs**: [Studio editor guide](docs/guides/studio/editor.md), [STUDIO_READINESS.md](docs/STUDIO_READINESS.md) 0.2 checklist.
+- **Docs**: [Studio editor guide](docs/guides/studio/editor.md), [STUDIO_READINESS.md](docs/project/studio-readiness.md) 0.2 checklist.
 
 #### Out of scope (0.3+)
 
-- `@lessonkit/studio-codegen`, GitHub sync, hosted `lessonkit.app`, `lessonkit-studio` CLI, Tauri desktop, schema v2.
-
----
-
-### Studio 0.3.0 — Code generation and export
-
-#### Goals
-
-- Export real artifacts authors can ship; Studio focuses on authoring, LXPack on packaging.
-
-#### Deliverables
-
-- **`@lessonkit/studio-codegen`**:
-  - **React/Vite**: `App.tsx`, `components/`, `assets/`, `styles/`
-  - **LXPack**: `course.yaml`, lesson assets, metadata (via `@lessonkit/lxpack`)
-  - **Static HTML package** (where applicable)
-- **Export targets** (end state; SCORM/xAPI/cmi5 via LXPack build):
-  - React/Vite application
-  - LXPack course package
-  - SCORM, xAPI, cmi5, standalone web (via `@lessonkit/lxpack` shipped in framework 0.6.0 / 0.7.0 before Studio starts)
-- **Performance**: lazy-loaded blocks; virtualized large pages; fast canvas + instant undo
+- GitHub sync, hosted `lessonkit.app`, `lessonkit-studio` CLI, Tauri desktop, schema v2 (codegen shipped in 0.3.0).
 
 ---
 
@@ -483,7 +485,7 @@ These are delivered as part of framework milestones **before** the Studio gate�
 
 ### Studio — Future scope (non-MVP)
 
-Tracked in [`docs/LessonKit_Studio_PLAN.md`](docs/LessonKit_Studio_PLAN.md); not scheduled on framework semver:
+Tracked in [`docs/LessonKit_Studio_PLAN.md`](studio-plan.md); not scheduled on framework semver:
 
 - Real-time multiplayer collaboration
 - Timeline / animation editor; video synchronization

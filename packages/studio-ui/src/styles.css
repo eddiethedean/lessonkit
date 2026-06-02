@@ -72,6 +72,69 @@
   background: color-mix(in srgb, var(--lk-color-primary, #4f46e5) 8%, transparent);
 }
 
+.lk-studio-block-skeleton {
+  min-height: 2.5rem;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--lk-color-border, #d0d4e4) 35%, transparent);
+}
+
+.lk-studio-drop-zone--virtual .lk-studio-virtual-scroll {
+  max-height: 24rem;
+  overflow: auto;
+}
+
+.lk-studio-export {
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  border: 1px solid var(--lk-color-border, #d0d4e4);
+  border-radius: 6px;
+  background: var(--lk-color-surface, #fff);
+  font-size: 0.875rem;
+}
+
+.lk-studio-export-fieldset {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.lk-studio-export-label {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.lk-studio-export-label select,
+.lk-studio-export-label input {
+  padding: 0.35rem 0.5rem;
+  border: 1px solid var(--lk-color-border, #d0d4e4);
+  border-radius: 4px;
+}
+
+.lk-studio-export-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.lk-studio-export-error {
+  color: #b91c1c;
+  margin: 0.5rem 0 0;
+}
+
+.lk-studio-export-message {
+  margin: 0.5rem 0 0;
+  opacity: 0.85;
+}
+
+.lk-studio-export-hint {
+  margin: 0.5rem 0 0;
+  opacity: 0.75;
+  font-size: 0.8125rem;
+}
+
 .lk-studio-palette-item {
   display: block;
   width: 100%;

@@ -7,7 +7,7 @@ Requires **Node.js 18+** (LXPack `@lxpack/api` **0.6.2+**).
 ## Workflow
 
 1. **Author** a React app with stable `courseId`, `lessonId`, and `checkId` props.
-2. **Describe** the course in a `LessonkitCourseDescriptor` (see [`examples/lxpack-golden/course.descriptor.ts`](../examples/lxpack-golden/course.descriptor.ts)).
+2. **Describe** the course in a `LessonkitCourseDescriptor` (see [course.descriptor.ts](https://github.com/eddiethedean/lessonkit/blob/main/examples/lxpack-golden/course.descriptor.ts)).
 3. **Build** the Vite app (`npm run build` → `dist/`).
 4. **Package** with `packageLessonkitCourse()` or the golden example scripts.
 
@@ -138,7 +138,7 @@ Import `examples/lxpack-golden/.lxpack/course/.lxpack/out/course-scorm12.zip` in
 
 ## ID mapping
 
-LessonKit ids are used as-is in LXPack (`courseId`, `lessonId`, `checkId`). See [`IDENTITY.md`](IDENTITY.md).
+LessonKit ids are used as-is in LXPack (`courseId`, `lessonId`, `checkId`). See [Identity reference](reference/identity.md).
 
 ## CLI (1.0+)
 
@@ -151,7 +151,7 @@ lessonkit package --target scorm12
 lessonkit package --target standalone --json
 ```
 
-See [`docs/CLI.md`](CLI.md) for the full command reference and `lessonkit.json` schema.
+See [`docs/CLI.md`](reference/cli.md) for the full command reference and `lessonkit.json` schema.
 
 ## Staged packaging pipeline (1.0)
 
@@ -184,5 +184,5 @@ Project manifests (`lessonkit.json` with `schemaVersion: 1`) are parsed by `pars
 
 ## Related
 
-- [`LXPACK_UPGRADES_FOR_LESSONKIT.md`](LXPACK_UPGRADES_FOR_LESSONKIT.md)
+- [LXPack interoperability](reference/lxpack-upgrades.md)
 - [LXPack LessonKit interoperability](https://lxpack.readthedocs.io/en/latest/guides/lessonkit-interoperability/)

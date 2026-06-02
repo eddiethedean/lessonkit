@@ -6,13 +6,14 @@ Sphinx site published at **[lessonkit.readthedocs.io](https://lessonkit.readthed
 | --- | --- |
 | AI-assisted / non-React | [Vibe coding](https://lessonkit.readthedocs.io/en/latest/guides/vibe-coding/index.html) |
 | React developers | [React guides](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/index.html) |
-| Runnable demos | [Examples](https://lessonkit.readthedocs.io/en/latest/examples/index.html) |
+| LessonKit Studio | [Studio guides](https://lessonkit.readthedocs.io/en/latest/guides/studio/index.html) · [Live app](https://lessonkit.readthedocs.io/en/latest/guides/studio/app.html) |
+| Runnable course demos | [Examples](https://lessonkit.readthedocs.io/en/latest/examples/index.html) |
 
 ## Build locally
 
 ```bash
 pip install -r docs/requirements.txt
-bash docs/scripts/build-docs-demos.sh   # optional: embed example apps
+bash docs/scripts/build-docs-demos.sh   # embed example courses + apps/studio-web
 sphinx-build -b html docs docs/_build/html
 ```
 

@@ -3,7 +3,7 @@
 Published packages:
 
 - **LessonKit** (`v*.*.*` tag → [Release](.github/workflows/release.yml)): `@lessonkit/core`, `@lessonkit/xapi`, `@lessonkit/accessibility`, `@lessonkit/react`, `@lessonkit/themes`, `@lessonkit/lxpack`, `@lessonkit/cli`
-- **Studio** (`studio-v*` tag → [Studio Release](.github/workflows/studio-release.yml)): `@lessonkit/studio-schema`, `@lessonkit/studio-renderer`, `@lessonkit/studio-builder`, `@lessonkit/studio-ui`
+- **Studio** (`studio-v*` tag → [Studio Release](.github/workflows/studio-release.yml)): `@lessonkit/studio-schema`, `@lessonkit/studio-renderer`, `@lessonkit/studio-builder`, `@lessonkit/studio-ui`, `@lessonkit/studio-codegen`
 
 Normal `v1.0.3` tags **do not** publish or re-version Studio packages. Studio uses its own semver line (e.g. `0.1.0`) and tag prefix.
 
@@ -15,6 +15,20 @@ Normal `v1.0.3` tags **do not** publish or re-version Studio packages. Studio us
 - No pending files in [`.changeset/`](.changeset/) that would run `changeset version` and bump versions unexpectedly (this repo publishes via **git tags**, not `changeset publish`).
 
 > **1.0.0** is the stable public API release. See [MIGRATION-0.x-to-1.0.md](docs/MIGRATION-0.x-to-1.0.md).
+
+### Studio 0.3.0 checklist (ready to publish)
+
+| Item | Status |
+|------|--------|
+| Studio packages at `0.3.0` (schema, renderer, builder, ui, codegen) | Done |
+| [CHANGELOG.md](CHANGELOG.md) `## [studio-v0.3.0]` | Done |
+| [studio-release.yml](.github/workflows/studio-release.yml) publishes all five packages | Done |
+| Integration test `studio-export-package.test.ts` | Done |
+| [Studio export guide](docs/guides/studio/export.md) + [STUDIO_READINESS.md](docs/STUDIO_READINESS.md) 0.3 section | Done |
+| `main` CI green | Verify before tag |
+| Git tag `studio-v0.3.0` | **Create when ready** |
+
+> **Do not create or push `studio-v0.3.0`** until you intend to publish to npm. Normal `v*` tags do not publish Studio.
 
 ### Studio 0.2.0 checklist (ready to publish)
 

@@ -114,7 +114,7 @@ const registry = createPluginRegistry([
 ]);
 ```
 
-See [Plugins reference](PLUGINS.md) and [LXPack bridge reference](LXPACK_BRIDGE.md).
+See [Plugins reference](reference/plugins.md) and [LXPack bridge reference](reference/lxpack-bridge.md).
 
 ## Ports
 

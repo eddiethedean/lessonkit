@@ -72,7 +72,7 @@ Example:
 }
 ```
 
-Implementation reference: [`guides/studio/project-format-v1.md`](guides/studio/project-format-v1.md).
+Implementation reference: [Studio project format v1](../guides/studio/project-format-v1.md).
 
 ---
 

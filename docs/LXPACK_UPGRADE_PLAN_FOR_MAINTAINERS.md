@@ -2,7 +2,7 @@
 
 **Audience:** [LXPack](https://github.com/eddiethedean/lxpack) maintainers and contributors.  
 **Purpose:** Prioritize LXPack changes that reduce duplication, tighten the LessonKit integration contract, and move packaging/runtime concerns to the right layer.  
-**LessonKit reference:** [`@lessonkit/lxpack`](https://github.com/eddiethedean/lessonkit/tree/main/packages/lxpack) (adapter) · [golden example](https://github.com/eddiethedean/lessonkit/tree/main/examples/lxpack-golden) · [packaging guide](PACKAGING.md)
+**LessonKit reference:** [`@lessonkit/lxpack`](https://github.com/eddiethedean/lessonkit/tree/main/packages/lxpack) (adapter) · [golden example](https://github.com/eddiethedean/lessonkit/tree/main/examples/lxpack-golden) · [packaging guide](reference/packaging.md)
 
 ---
 
@@ -71,7 +71,7 @@ Remaining wins are **conformance** and **optional meta-packages**, not core pack
 
 ## Recommended division of responsibility
 
-```mermaid
+```text
 flowchart TB
   subgraph lk [LessonKit — keep]
     REACT["@lessonkit/react\ncomponents, hooks, a11y"]
@@ -428,7 +428,7 @@ Artifacts: `examples/lxpack-golden/.lxpack/course/.lxpack/out/course-scorm12.zip
 
 | Document | Audience |
 |----------|----------|
-| [LessonKit packaging guide](PACKAGING.md) | LessonKit authors |
-| [Historical upgrade checklist (LessonKit)](LXPACK_UPGRADES_FOR_LESSONKIT.md) | What v0.4.0 already shipped |
+| [LessonKit packaging guide](reference/packaging.md) | LessonKit authors |
+| [Historical upgrade checklist (LessonKit)](reference/lxpack-upgrades.md) | What v0.4.0 already shipped |
 | [LXPack LessonKit interoperability](https://lxpack.readthedocs.io/en/latest/guides/lessonkit-interoperability/) | LXPack docs (maintain alongside this plan) |
-| [LessonKit ROADMAP](../ROADMAP.md) | 0.9.x conformance, 1.0.0 gate |
+| [LessonKit ROADMAP](../project/roadmap.md) | 0.9.x conformance, 1.0.0 gate |

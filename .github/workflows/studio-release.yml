@@ -92,5 +92,6 @@ jobs:
           publish_workspace @lessonkit/studio-builder
           publish_workspace @lessonkit/studio-renderer
           publish_workspace @lessonkit/studio-ui
+          publish_workspace @lessonkit/studio-codegen
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

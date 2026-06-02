@@ -51,5 +51,5 @@ dispatchBridgeAction({
 
 ## Related
 
-- [Packaging reference](PACKAGING.md) — LMS export workflow
-- [Telemetry reference](TELEMETRY.md) — event catalog
+- [Packaging reference](reference/packaging.md) — LMS export workflow
+- [Telemetry reference](reference/telemetry.md) — event catalog

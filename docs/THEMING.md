@@ -100,4 +100,4 @@ import { themeToLxpackRuntime } from "@lessonkit/lxpack";
 const { theme, cssVariables } = themeToLxpackRuntime({ preset: "brand" });
 ```
 
-See [`docs/PACKAGING.md`](PACKAGING.md) and [`docs/LXPACK_UPGRADES_FOR_LESSONKIT.md`](LXPACK_UPGRADES_FOR_LESSONKIT.md).
+See [Packaging reference](reference/packaging.md) and [LXPack interoperability](reference/lxpack-upgrades.md).

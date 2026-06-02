@@ -1,6 +1,6 @@
 # LXPack upgrades for LessonKit interoperability
 
-> **For LXPack maintainers:** see **[LXPACK_UPGRADE_PLAN_FOR_MAINTAINERS.md](LXPACK_UPGRADE_PLAN_FOR_MAINTAINERS.md)** for the forward-looking upgrade plan (responsibility shifts, proposed APIs, release sequence). This page is the historical checklist and LessonKit-side integration status.
+> **For LXPack maintainers:** see **[LXPack upgrade plan for maintainers](#upgrade-plan-for-lxpack-maintainers)** on this page for the forward-looking upgrade plan (responsibility shifts, proposed APIs, release sequence). This page is the historical checklist and LessonKit-side integration status.
 
 This document captures the improvements we wanted in [LXPack](https://github.com/eddiethedean/lxpack)
 so it works better as the **packaging and LMS export layer** for
@@ -9,7 +9,7 @@ so it works better as the **packaging and LMS export layer** for
 ## Status
 
 - **LXPack v0.4.0** — baseline SPA + `@lxpack/api` + `lessonkit.json` merge (historical checklist below).
-- **LXPack v0.6.0** — `packageLessonkit()`, interchange schema in `@lxpack/validators`, `@lxpack/spa-bridge`, `@lxpack/tracking-schema` telemetry map, interchange `runtime` + `assessments`. **LessonKit 0.8.2** integrates these (`^0.6.0`); see [maintainer upgrade plan](LXPACK_UPGRADE_PLAN_FOR_MAINTAINERS.md#status-lxpack-v060--shipped).
+- **LXPack v0.6.0** — `packageLessonkit()`, interchange schema in `@lxpack/validators`, `@lxpack/spa-bridge`, `@lxpack/tracking-schema` telemetry map, interchange `runtime` + `assessments`. **LessonKit 0.8.2** integrates these (`^0.6.0`); see [maintainer upgrade plan](#upgrade-plan-for-lxpack-maintainers).
 
 LessonKit is React-first authoring (`@lessonkit/react`). LXPack is a manifest-driven compiler and
 runtime (`course.yaml`, markdown/HTML/component lessons, SCORM/xAPI/cmi5 export). The two projects
@@ -29,7 +29,7 @@ Related LessonKit docs:
 LessonKit’s preferred path is **Strategy A** from the roadmap:
 
 1. Author courses in React with `@lessonkit/react`.
-2. Export to an LXPack project via **`@lessonkit/lxpack`** (shipped in 0.6.0 — see [`PACKAGING.md`](PACKAGING.md)).
+2. Export to an LXPack project via **`@lessonkit/lxpack`** (shipped in 0.6.0 — see [Packaging reference](reference/packaging.md)).
 3. Run `lxpack validate` and `lxpack build --target …` for LMS delivery (via `validateLessonkitProject` / `packageLessonkitCourse` or the golden example scripts).
 
 The adapter maps a `LessonkitCourseDescriptor` plus built SPA assets into LXPack’s `course.yaml` and `lessonkit.json`; multi-lesson UX stays in your React app for `single-spa` layouts.
@@ -44,9 +44,9 @@ as the **default packaging toolchain** and focus on building a thin, well-tested
 Recommended LessonKit next steps:
 
 1. ~~Create `@lessonkit/lxpack`~~ — **done** (0.6.0).
-2. ~~Decide a stable mapping for identities~~ — **done** (identity v1; see [`IDENTITY.md`](IDENTITY.md)).
-3. ~~Add at least one end-to-end example~~ — **done** ([`examples/lxpack-golden/`](../examples/lxpack-golden/)).
-4. ~~Add a CI smoke test that runs LXPack packaging for that example~~ — **done** (`.github/workflows/checks.yml` packaging job; [`integration/`](../integration/); [`e2e/`](../e2e/)).
+2. ~~Decide a stable mapping for identities~~ — **done** (identity v1; see [Identity reference](reference/identity.md)).
+3. ~~Add at least one end-to-end example~~ — **done** (](https://github.com/eddiethedean/lessonkit/tree/main/examples/lxpack-golden/)).
+4. ~~Add a CI smoke test that runs LXPack packaging for that example~~ — **done** ([`.github/workflows/checks.yml`](https://github.com/eddiethedean/lessonkit/blob/main/.github/workflows/checks.yml) packaging job; [integration](https://github.com/eddiethedean/lessonkit/tree/main/integration); [e2e](https://github.com/eddiethedean/lessonkit/tree/main/e2e)).
 
 ---
 
@@ -293,7 +293,7 @@ If not already present in LXPack docs, add:
 
 ## Suggested division of responsibility
 
-```mermaid
+```text
 flowchart TB
   subgraph author [Authoring]
     LK["LessonKit React app\n(@lessonkit/react)"]

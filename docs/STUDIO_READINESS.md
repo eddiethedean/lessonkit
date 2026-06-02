@@ -7,7 +7,7 @@ for:
 - **AI code generators** producing LessonKit code (Claude/Cursor-style workflows)
 - **LessonKit Studio** (a non-coder layer built on top, post–framework 1.0.0)
 
-> **Framework 1.0.0 has shipped** — the Studio development gate is met. Studio implementation may begin per [`ROADMAP.md`](../ROADMAP.md).
+> **Framework 1.0.0 has shipped** — the Studio development gate is met. Studio implementation may begin per [ROADMAP](../project/roadmap.md).
 
 ## Readiness principles
 
@@ -28,14 +28,14 @@ for:
 
 ## 0.5.x — Identity + semantics (IDs, telemetry, xAPI)
 
-- [x] Identity model v1 is documented ([`IDENTITY.md`](IDENTITY.md)):
+- [x] Identity model v1 is documented ([`IDENTITY.md`](../reference/identity.md)):
   - [x] `courseId` required on `Course` / `LessonkitProvider`
   - [x] `lessonId` required on `Lesson` (no runtime `useId` fallback)
   - [x] `checkId` required on `Quiz` / `KnowledgeCheck`; optional `blockId` on `Scenario` / `Reflection`
 - [x] ID generation guidance is deterministic (`slugifyId`, `deriveId`, `validateId` in `@lessonkit/core`)
-- [x] Telemetry event catalog is versioned (`telemetry-catalog.v1.json`, [`TELEMETRY.md`](TELEMETRY.md))
+- [x] Telemetry event catalog is versioned (`telemetry-catalog.v1.json`, [`TELEMETRY.md`](../reference/telemetry.md))
 - [x] Telemetry → xAPI mapping is canonical (`telemetryEventToXAPIStatement` in `@lessonkit/xapi`)
-- [x] “Regenerate code” guidance exists in [`IDENTITY.md`](IDENTITY.md)
+- [x] “Regenerate code” guidance exists in [`IDENTITY.md`](../reference/identity.md)
 
 ## 0.6.x — Export surfaces + `@lessonkit/lxpack` adapter
 
@@ -79,14 +79,14 @@ for:
 - [x] Conformance matrix exists and is enforced in CI:
   - [x] `@lxpack/conformance` + golden package matrix scripts
   - [x] React/Vite, standalone, and SCORM 1.2 parity spec on `examples/lxpack-golden`
-- [x] Contributor docs for Playwright e2e and packaging smoke ([export parity guide](guides/react-developers/export-parity.md), [e2e/README.md](../e2e/README.md), [contributing E2E section](guides/react-developers/contributing-to-the-monorepo.md#e2e-and-conformance))
+- [x] Contributor docs for Playwright e2e and packaging smoke ([export parity guide](../guides/react-developers/export-parity.md), [e2e README](https://github.com/eddiethedean/lessonkit/blob/main/e2e/README.md), [contributing E2E section](../guides/react-developers/contributing-to-the-monorepo.md#e2e-and-conformance))
 
 ## 0.8.0+ — Plugin architecture
 
 - [x] Plugin contract v1 in `@lessonkit/core` (`LessonkitPlugin`, `createPluginRegistry`, `defineTelemetryPlugin`)
 - [x] `@lessonkit/react` registers plugins on `LessonkitProvider` (`config.plugins`)
 - [x] Extension points: lifecycle (`setup`/`dispose`), `onTelemetry`, `wrapTrackingSink`, `scoreAssessment`, `interactionBlocks` metadata
-- [x] [Plugins reference](reference/plugins.md) and [plugin cookbook](guides/react-developers/plugin-cookbook.md)
+- [x] [Plugins reference](../reference/plugins.md) and [plugin cookbook](../guides/react-developers/plugin-cookbook.md)
 - [x] Example plugin: `examples/_shared/plugins/consoleAnalyticsPlugin.ts`
 
 ## 1.0.0 — Studio gate checklist (framework)
@@ -107,9 +107,9 @@ for:
 - [x] `studio-project.v1.json` and `studio-block-catalog.v1.json` exported; catalog matches `buildStudioBlockCatalog()` in tests
 - [x] `@lessonkit/studio-renderer` maps Studio blocks to `@lessonkit/react` (`Course`, `Lesson`, `Quiz`, `Scenario`) plus presentational primitives
 - [x] Initial block types: text, heading, image, button, input, container, quiz, scenario (checklist / video: schema + stub renderer)
-- [x] Example [`examples/studio-minimal`](../examples/studio-minimal) loads `src/project.json` via shared renderer
-- [x] [Studio project format v1](guides/studio/project-format-v1.md) documented
-- [x] npm publish path: `studio-v*` tag → [Studio Release](../.github/workflows/studio-release.yml) (see [RELEASING.md](../RELEASING.md))
+- [x] Example [studio-minimal](https://github.com/eddiethedean/lessonkit/tree/main/examples/studio-minimal) loads `src/project.json` via shared renderer
+- [x] [Studio project format v1](../guides/studio/project-format-v1.md) documented
+- [x] npm publish path: `studio-v*` tag → [Studio Release](https://github.com/eddiethedean/lessonkit/blob/main/.github/workflows/studio-release.yml) (see [RELEASING.md](https://github.com/eddiethedean/lessonkit/blob/main/RELEASING.md))
 
 ## Studio 0.2.0 — Visual editor MVP
 
@@ -118,8 +118,20 @@ for:
 - [x] `apps/studio-web`: runnable Vite app; `localStorage` autosave; import/export JSON
 - [x] Checklist / video blocks: minimal real preview renderers (not stubs)
 - [x] Monorepo CI: `build:packages` includes `studio-builder` → `studio-ui`; `build:apps` includes `lessonkit-studio-web`
-- [x] [Studio editor guide](guides/studio/editor.md) documented
+- [x] [Studio editor guide](../guides/studio/editor.md) documented
 - [ ] npm publish: push `studio-v0.2.0` after `main` CI is green (publishes schema, builder, renderer, ui at 0.2.0)
 
 > **Not included in 0.2.0:** codegen (`studio-codegen`), GitHub sync, AI workflows, `lessonkit-studio` CLI, Tauri desktop, schema v2.
+
+## Studio 0.3.0 — Code generation and export
+
+- [x] `@lessonkit/studio-codegen`: `studioProjectToDescriptor`, renderer + explicit JSX React/Vite export, Node helpers (`writeReactViteProject`, `writeLxpackProjectFromStudio`, `packageStudioProject`)
+- [x] `@lessonkit/studio-ui`: `ExportPanel` (mode, theme, xAPI IRI, zip download hook, CLI snippet); canvas lazy block previews + root-list virtualization (30+ blocks)
+- [x] `apps/studio-web`: Export panel wired with JSZip download; version label from package
+- [x] Integration test: codegen → vite build → `lessonkit package --target scorm12`
+- [x] Example [studio-export](https://github.com/eddiethedean/lessonkit/tree/main/examples/studio-export) and [Studio export guide](../guides/studio/export.md)
+- [x] Monorepo: `build:packages` includes `studio-codegen`; Studio Release publishes five packages
+- [ ] npm publish: push `studio-v0.3.0` after `main` CI is green
+
+> **Not included in 0.3.0:** GitHub sync (`studio-github`), AI workflows, `lessonkit-studio` CLI, Tauri desktop, schema v2, hosted `lessonkit.app`.
 

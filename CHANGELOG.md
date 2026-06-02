@@ -3,7 +3,25 @@
 All notable changes to the LessonKit monorepo are documented here.
 
 - [`@lessonkit/*`](https://www.npmjs.com/org/lessonkit) — core platform (tag `v*.*.*`)
-- [`@lessonkit/studio-schema`](https://www.npmjs.com/package/@lessonkit/studio-schema), [`@lessonkit/studio-renderer`](https://www.npmjs.com/package/@lessonkit/studio-renderer), [`@lessonkit/studio-builder`](https://www.npmjs.com/package/@lessonkit/studio-builder), [`@lessonkit/studio-ui`](https://www.npmjs.com/package/@lessonkit/studio-ui) — Studio authoring (tag `studio-v*`, same `@lessonkit` org)
+- [`@lessonkit/studio-schema`](https://www.npmjs.com/package/@lessonkit/studio-schema), [`@lessonkit/studio-renderer`](https://www.npmjs.com/package/@lessonkit/studio-renderer), [`@lessonkit/studio-builder`](https://www.npmjs.com/package/@lessonkit/studio-builder), [`@lessonkit/studio-ui`](https://www.npmjs.com/package/@lessonkit/studio-ui), [`@lessonkit/studio-codegen`](https://www.npmjs.com/package/@lessonkit/studio-codegen) — Studio authoring (tag `studio-v*`, same `@lessonkit` org)
+
+## [studio-v0.3.0] - 2026-06-01
+
+Code generation and export: `@lessonkit/studio-codegen`, export panel in studio-web, canvas performance, and SCORM integration test. Requires **@lessonkit/core**, **@lessonkit/react**, and **@lessonkit/themes** at **1.0.2** (pinned at publish time).
+
+### Added
+
+- **@lessonkit/studio-codegen** (0.3.0): `generateExportFiles`, renderer + JSX React/Vite export, `studioProjectToDescriptor`, Node helpers (`writeReactViteProject`, `writeLxpackProjectFromStudio`, `packageStudioProject`).
+- **@lessonkit/studio-ui** (0.3.0): `ExportPanel`; lazy block previews; virtualized canvas for large pages.
+- **apps/studio-web**: React/Vite zip download (JSZip); export options in header.
+- **Integration test:** Studio codegen → Vite build → SCORM 1.2 package.
+- **Docs:** [Studio export guide](docs/guides/studio/export.md); `examples/studio-export`.
+
+### Changed
+
+- All Studio packages bumped to **0.3.0**; Studio Release publishes five packages.
+
+> **Not included:** GitHub sync, hosted Studio, `lessonkit-studio` CLI (see [STUDIO_READINESS.md](studio-readiness.md)).
 
 ## [studio-v0.2.0] - 2026-06-01
 
@@ -21,7 +39,7 @@ Visual editor MVP: headless builder, React editor UI, and local `apps/studio-web
 - **@lessonkit/studio-schema** / **@lessonkit/studio-renderer** (0.2.0): checklist and video blocks use minimal real preview UI (replacing 0.1 stubs).
 - **Monorepo:** `build:packages` and Studio Release workflow include builder and ui.
 
-> **Not included:** codegen, GitHub sync, hosted Studio, `lessonkit-studio` CLI (see [STUDIO_READINESS.md](docs/STUDIO_READINESS.md)).
+> **Not included:** codegen, GitHub sync, hosted Studio, `lessonkit-studio` CLI (see [STUDIO_READINESS.md](studio-readiness.md)).
 
 ## [studio-v0.1.0] - 2026-06-01
 
@@ -31,9 +49,9 @@ First public preview of LessonKit Studio packages. Requires **@lessonkit/core**,
 
 - **@lessonkit/studio-schema**: `schemaVersion: 1` project model; `parseStudioProject`, `validateStudioProject`, `normalizeStudioProject`, `migrateStudioProject`, `loadStudioProject`, `buildStudioBlockCatalog`; shipped `studio-project.v1.json` and `studio-block-catalog.v1.json`.
 - **@lessonkit/studio-renderer**: `StudioRenderer` mapping Studio blocks to `@lessonkit/react` (`Course`, `Lesson`, `Quiz`, `Scenario`) and presentational primitives; checklist/video stubs.
-- **Monorepo**: `examples/studio-minimal`, [Studio project format v1](docs/guides/studio/project-format-v1.md), [Studio Release](.github/workflows/studio-release.yml) workflow (`studio-v*` tags).
+- **Monorepo**: `examples/studio-minimal`, [Studio project format v1](docs/guides/studio/project-format-v1.md), [Studio Release](https://github.com/eddiethedean/lessonkit/blob/main/.github/workflows/studio-release.yml) workflow (`studio-v*` tags).
 
-> **Not included in 0.1.0:** visual editor app, `lessonkit-studio` CLI, builder/codegen packages (planned 0.2+). See [STUDIO_READINESS.md](docs/STUDIO_READINESS.md).
+> **Not included in 0.1.0:** visual editor app, `lessonkit-studio` CLI, builder/codegen packages (planned 0.2+). See [STUDIO_READINESS.md](studio-readiness.md).
 
 ## [1.0.2] - 2026-06-01
 
@@ -184,7 +202,7 @@ SOLID monorepo refactor: headless runtime, telemetry pipeline, segregated plugin
 
 - **`@lessonkit/integration`**: Vitest integration workspace (`npm run test:integration`) — real CLI `init` / `build` / `package` pipeline, golden target matrix, descriptor parity guards.
 - **E2E**: Playwright launch specs for SCORM 2004 (`API_1484_11` mock), xAPI, and cmi5 packages; global-setup packages all golden LMS artifacts.
-- **CI**: **Integration (Node 20)** job in [`.github/workflows/checks.yml`](.github/workflows/checks.yml).
+- **CI**: **Integration (Node 20)** job in [`.github/workflows/checks.yml`](https://github.com/eddiethedean/lessonkit/blob/main/.github/workflows/checks.yml).
 
 ### Changed
 
@@ -209,12 +227,12 @@ SOLID monorepo refactor: headless runtime, telemetry pipeline, segregated plugin
 
 - **E2E telemetry harness** (`e2e/fixtures/telemetry-harness/`): Playwright project for telemetry batching and xAPI queue behavior via `window.__e2e`.
 - **E2E**: Expanded keyboard coverage on golden Vite (lesson nav, knowledge check).
-- **Docs**: Conformance matrix table and CI job map in [export parity guide](docs/guides/react-developers/export-parity.md); expanded [`e2e/README.md`](e2e/README.md); [contributing E2E section](docs/guides/react-developers/contributing-to-the-monorepo.md#e2e-and-conformance).
+- **Docs**: Conformance matrix table and CI job map in [export parity guide](docs/guides/react-developers/export-parity.md); expanded [`e2e/README.md`](https://github.com/eddiethedean/lessonkit/blob/main/e2e/README.md); [contributing E2E section](docs/guides/react-developers/contributing-to-the-monorepo.md#e2e-and-conformance).
 - **`PluginHost.deliverTelemetryBatch`**: batch flush hook for events already filtered at emit time (avoids double `onTelemetry` passes).
 
 ### Changed
 
-- Monorepo packages bumped to **0.9.1**; **0.9.x conformance harness** milestone complete per [ROADMAP.md](ROADMAP.md).
+- Monorepo packages bumped to **0.9.1**; **0.9.x conformance harness** milestone complete per [ROADMAP](docs/project/roadmap.md).
 - **`@lessonkit/core`**: `TrackingClient.flush` / `dispose` may return `Promise<void>`; batched `dispose` drains the buffer after in-flight flushes complete.
 - **`@lessonkit/react`**: Provider unmount awaits tracking flush/dispose; `setActiveLesson` flushes batched telemetry after auto-completing the previous lesson.
 
@@ -289,7 +307,7 @@ SOLID monorepo refactor: headless runtime, telemetry pipeline, segregated plugin
 
 - **@lessonkit/react**: Runtime block catalog v1 — `buildBlockCatalog()`, `getBlockCatalogEntry()`, `BLOCK_CATALOG`, `blockCatalogVersion`.
 - **@lessonkit/react**: Machine-readable `@lessonkit/react/block-catalog.v1.json` and JSON Schema `@lessonkit/react/block-contract.v1.json`.
-- **Docs**: [`docs/BLOCK_CATALOG.md`](docs/BLOCK_CATALOG.md) and [block catalog reference](https://lessonkit.readthedocs.io/en/latest/reference/block-catalog.html).
+- **Docs**: [`docs/BLOCK_CATALOG.md`](docs/reference/block-catalog.md) and [block catalog reference](https://lessonkit.readthedocs.io/en/latest/reference/block-catalog.html).
 - **Examples**: `examples/lxpack-golden` demonstrates every catalog block (`KnowledgeCheck`, optional `blockId` on Scenario/Reflection).
 
 ### Changed
@@ -305,7 +323,7 @@ SOLID monorepo refactor: headless runtime, telemetry pipeline, segregated plugin
 - **`lessonkit.json` v1**: Canonical project manifest for packaging and future Studio alignment.
 - **CLI**: Structured errors, stable exit codes, `--json` output mode, `--skip-install` / `--force` for automation.
 - **Template bundling**: Vite + React starter copied into `@lessonkit/cli` for `lessonkit init`.
-- **Docs**: [`docs/CLI.md`](docs/CLI.md).
+- **Docs**: [`docs/CLI.md`](docs/reference/cli.md).
 - **CI**: CLI packaging smoke step on golden example.
 
 ### Changed
@@ -331,7 +349,7 @@ SOLID monorepo refactor: headless runtime, telemetry pipeline, segregated plugin
 - **@lessonkit/react**: Forwards `lesson_completed`, `course_completed`, and `quiz_completed` to `window.parent.lxpackBridge.v1` when embedded (`config.lxpack.bridge`, default `auto`).
 - **Examples**: `examples/lxpack-golden` — build + SCORM 1.2 / standalone packaging scripts.
 - **CI**: Node 20 packaging smoke job (golden example → SCORM ZIP).
-- **Docs**: [`docs/PACKAGING.md`](docs/PACKAGING.md); LXPack id mapping in [`docs/IDENTITY.md`](docs/IDENTITY.md); theme parity in [`docs/THEMING.md`](docs/THEMING.md).
+- **Docs**: [`docs/PACKAGING.md`](docs/reference/packaging.md); LXPack id mapping in [`docs/IDENTITY.md`](docs/reference/identity.md); theme parity in [`docs/THEMING.md`](docs/reference/theming.md).
 
 ### Changed
 
@@ -356,7 +374,7 @@ SOLID monorepo refactor: headless runtime, telemetry pipeline, segregated plugin
 
 - **@lessonkit/core**: Identity v1 — `validateId`, `slugifyId`, `deriveId`, `buildLessonkitUrn`; typed `TelemetryEvent` payloads; `TELEMETRY_EVENT_CATALOG` / `telemetry-catalog.v1.json`; `identity-contract.v1.json`.
 - **@lessonkit/xapi**: `telemetryEventToXAPIStatement()` — canonical mapping from telemetry to xAPI object URNs.
-- **Docs**: [`docs/IDENTITY.md`](docs/IDENTITY.md), [`docs/TELEMETRY.md`](docs/TELEMETRY.md).
+- **Docs**: [`docs/IDENTITY.md`](docs/reference/identity.md), [`docs/TELEMETRY.md`](docs/reference/telemetry.md).
 
 ### Changed
 
@@ -381,7 +399,7 @@ SOLID monorepo refactor: headless runtime, telemetry pipeline, segregated plugin
 
 ### Migration
 
-See [`docs/IDENTITY.md`](docs/IDENTITY.md): add `courseId`, `lessonId`, and `checkId` to your components; preserve IDs in source when regenerating.
+See [`docs/IDENTITY.md`](docs/reference/identity.md): add `courseId`, `lessonId`, and `checkId` to your components; preserve IDs in source when regenerating.
 
 ## [0.4.0] - 2026-05-28
 
@@ -389,7 +407,7 @@ See [`docs/IDENTITY.md`](docs/IDENTITY.md): add `courseId`, `lessonId`, and `che
 
 - **@lessonkit/themes**: Token schema v1 (colors, spacing, typography, radius, shadows), `validateTheme`, `mergeThemes`, `themeToCssVariables`, presets (`default`, `light`, `dark`, `brand`), `buildThemeCatalog`, published `theme-contract.v1.json` / `theme-catalog.v1.json`, optional `base.css`.
 - **@lessonkit/react**: `ThemeProvider`, `useTheme`, and theme types; injects `--lk-*` CSS variables on `:root` or a scoped element.
-- **Docs**: [`docs/THEMING.md`](docs/THEMING.md) — CSS variable contract, merge precedence, generator catalog paths.
+- **Docs**: [`docs/THEMING.md`](docs/reference/theming.md) — CSS variable contract, merge precedence, generator catalog paths.
 - **Examples/templates**: Showcase theme toggle (light / dark / system); styles migrated to `--lk-*` variables.
 
 ### Changed

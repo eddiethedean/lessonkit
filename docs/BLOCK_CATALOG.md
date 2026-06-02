@@ -45,7 +45,7 @@ ThemeProvider
 ```
 
 - **`Quiz` / `KnowledgeCheck`** must be inside an active `Lesson` for quiz telemetry (`lessonId` required).
-- **`Scenario` / `Reflection`**: set `blockId` when you want block-level URNs on `interaction` events (see [Telemetry reference](telemetry.md)).
+- **`Scenario` / `Reflection`**: set `blockId` when you want block-level URNs on `interaction` events (see [Telemetry reference](reference/telemetry.md)).
 - **`ProgressTracker`** reads runtime progress; place inside `Course`.
 
 ## Per-block contracts
@@ -121,19 +121,19 @@ No props.
 
 ## Cross-references
 
-- **Identity:** [`IDENTITY.md`](IDENTITY.md) — id format and URNs (`@lessonkit/core/identity-contract.v1.json`)
-- **Telemetry events:** [`TELEMETRY.md`](TELEMETRY.md) — event catalog (`@lessonkit/core/telemetry-catalog.v1.json`)
-- **Theming:** [`THEMING.md`](THEMING.md) — token catalog (`@lessonkit/themes/theme-catalog.v1.json`)
-- **Accessibility:** [Accessibility reference](accessibility.md)
+- **Identity:** [Identity reference](reference/identity.md) — id format and URNs (`@lessonkit/core/identity-contract.v1.json`)
+- **Telemetry events:** [Telemetry reference](reference/telemetry.md) — event catalog (`@lessonkit/core/telemetry-catalog.v1.json`)
+- **Theming:** [Theming reference](reference/theming.md) — token catalog (`@lessonkit/themes/theme-catalog.v1.json`)
+- **Accessibility:** [Accessibility reference](reference/accessibility.md)
 
 ## Reference example
 
-[`examples/lxpack-golden`](https://github.com/eddiethedean/lessonkit/tree/main/examples/lxpack-golden) renders every catalog block (`Course`, `Lesson`, `Scenario`, `Quiz`, `KnowledgeCheck`, `Reflection`, `ProgressTracker`) and is the packaging golden path for CI.
+[examples/lxpack-golden](https://github.com/eddiethedean/lessonkit/tree/main/examples/lxpack-golden) renders every catalog block (`Course`, `Lesson`, `Scenario`, `Quiz`, `KnowledgeCheck`, `Reflection`, `ProgressTracker`) and is the packaging golden path for CI.
 
 ## Generator checklist
 
 1. Import `@lessonkit/react/block-catalog.v1.json` and reject unknown block types.
 2. Validate required props and IDs per entry (`requiredIds`, `props`).
-3. Keep `courseId` and every `checkId` in sync with `lessonkit.json`. For `single-spa` layouts, manifest `lessons[].id` lists LMS shell lesson(s) only; additional in-app `lessonId`s may exist only in React (see [Identity](IDENTITY.md#single-spa-manifest-vs-in-app-steps)).
+3. Keep `courseId` and every `checkId` in sync with `lessonkit.json`. For `single-spa` layouts, manifest `lessons[].id` lists LMS shell lesson(s) only; additional in-app `lessonId`s may exist only in React (see [Identity](reference/identity.md#single-spa-manifest-vs-in-app-steps)).
 4. Nest blocks per `parentConstraints` (Quiz inside Lesson, etc.).
 5. Do not invent Studio-only blocks (`text`, `heading`, …) until they ship in a future catalog version.

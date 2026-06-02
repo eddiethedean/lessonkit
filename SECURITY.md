@@ -32,7 +32,7 @@ Include as much detail as you can:
 
 - Vulnerabilities in LessonKit source under `packages/`, `examples/`, and `templates/`
 - Dependency issues that affect consumers of published `@lessonkit/*` packages
-- CI/packaging flows documented in [`docs/PACKAGING.md`](docs/PACKAGING.md) (e.g. unsafe archive paths, partial export artifacts)
+- CI/packaging flows documented in [`docs/PACKAGING.md`](docs/reference/packaging.md) (e.g. unsafe archive paths, partial export artifacts)
 
 Out of scope (please report to the upstream project instead):
 
@@ -57,7 +57,7 @@ CI runs on every push and pull request to `main`:
 | **npm audit** | Fails on **high** or **critical** vulnerabilities in the lockfile (production and full tree) |
 | **CodeQL** | Static analysis for JavaScript/TypeScript across the monorepo |
 
-See [`.github/workflows/checks.yml`](.github/workflows/checks.yml).
+See [`.github/workflows/checks.yml`](https://github.com/eddiethedean/lessonkit/blob/main/.github/workflows/checks.yml).
 
 ## Secure development practices
 
@@ -66,10 +66,10 @@ When building or packaging courses:
 - Pin `@lessonkit/*` versions and run `npm audit` in your app
 - Treat `courseId`, `lessonId`, and `checkId` as stable identifiers, not user-controlled HTML
 - Use `validateDescriptor` / `packageLessonkitCourse` from `@lessonkit/lxpack` rather than hand-editing exported manifests
-- Keep `spaPath` values relative and validated (see [`docs/PACKAGING.md`](docs/PACKAGING.md))
+- Keep `spaPath` values relative and validated (see [`docs/PACKAGING.md`](docs/reference/packaging.md))
 - Configure xAPI transports over HTTPS and avoid logging learner PII in custom telemetry sinks
 
 ## Security updates
 
-Fixed security issues are noted under **Fixed** in [`CHANGELOG.md`](CHANGELOG.md) and, when
+Fixed security issues are noted under **Fixed** in [CHANGELOG](docs/project/changelog.md) and, when
 published, via [GitHub Security Advisories](https://github.com/eddiethedean/lessonkit/security/advisories).

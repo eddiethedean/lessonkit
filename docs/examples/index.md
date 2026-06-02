@@ -8,6 +8,12 @@ These pages embed **production builds** of the monorepo examples, compiled when 
 From the repo root, run `bash docs/scripts/build-docs-demos.sh` before `make html` in `docs/` so the bundles exist under `_static/demos/`.
 :::
 
+:::{admonition} LessonKit Studio
+:class: note
+
+The visual editor lives in its own docs section: **[LessonKit Studio → Live app](../guides/studio/app.md)**.
+:::
+
 ## Cybersecurity awareness (`examples/react-vite`)
 
 Corporate InfoSec annual module in the security theme: policy attestation, email header triage, smishing simulation, Teams social engineering, and attestation.

@@ -10,7 +10,7 @@ npm install -g @lessonkit/cli
 npx @lessonkit/cli init my-course
 ```
 
-**Node.js:** dev, build, and LMS packaging targets work on Node **18+** (see [`PACKAGING.md`](PACKAGING.md)).
+**Node.js:** dev, build, and LMS packaging targets work on Node **18+** (see [Packaging reference](reference/packaging.md)).
 
 ## Quick start
 
@@ -63,12 +63,12 @@ Every LessonKit project includes a `lessonkit.json` at the project root. The CLI
 |-------|-------------|
 | `schemaVersion` | Must be `1` |
 | `name` | Project slug (used by `lessonkit init`) |
-| `course` | [`LessonkitCourseDescriptor`](../packages/lxpack/src/types.ts) passed to `@lessonkit/lxpack` |
+| `course` | [`LessonkitCourseDescriptor`](https://github.com/eddiethedean/lessonkit/blob/main/packages/lxpack/src/types.ts) passed to `@lessonkit/lxpack` |
 | `paths.spaDistDir` | Vite build output (default `dist`) |
 | `paths.lxpackOutDir` | LXPack project directory (default `.lxpack/course`) |
 | `paths.outputBaseDir` | Packaged artifact base under the LXPack project dir (default `.lxpack/out`; artifacts are `{outputBaseDir}/course-<target>.zip` or `{outputBaseDir}/standalone`) |
 
-Keep `course.courseId`, `course.lessons[].id`, and `course.assessments[].checkId` aligned with your React component props. `lessonkit init` updates `lessonkit.json` and patches `src/App.tsx` `courseId` / course title for you. See [`IDENTITY.md`](IDENTITY.md).
+Keep `course.courseId`, `course.lessons[].id`, and `course.assessments[].checkId` aligned with your React component props. `lessonkit init` updates `lessonkit.json` and patches `src/App.tsx` `courseId` / course title for you. See [Identity reference](reference/identity.md).
 
 The CLI only recognizes project manifests with `schemaVersion: 1` (not the interchange `lessonkit.json` written under `.lxpack/course`). `per-lesson-spa` layout is not supported by `lessonkit package` (1.0.0) — use `single-spa`. Use `@lessonkit/lxpack` directly if you need `per-lesson-spa`. SPA build output is controlled by `paths.spaDistDir` (not `course.spaDistDir`).
 
@@ -139,11 +139,11 @@ lessonkit package --target scorm12 --out .lxpack/out/custom.zip
 | `--out` | Override output artifact path (must resolve inside the project root) |
 | `--json` | Structured JSON result on stdout (CI/codegen) |
 
-Lxpack targets run `packageLessonkitCourse()` from `@lessonkit/lxpack`. Output layout matches [`PACKAGING.md`](PACKAGING.md).
+Lxpack targets run `packageLessonkitCourse()` from `@lessonkit/lxpack`. Output layout matches [Packaging reference](reference/packaging.md).
 
 ### `lessonkit publish`
 
-Stub — use npm and the tag-based workflow in [`RELEASING.md`](../RELEASING.md).
+Stub — use npm and the tag-based workflow in [RELEASING](https://github.com/eddiethedean/lessonkit/blob/main/RELEASING.md).
 
 ## Exit codes
 
@@ -187,6 +187,6 @@ Failure:
 
 ## Related
 
-- [`PACKAGING.md`](PACKAGING.md) — LXPack adapter and output layout
-- [`templates/vite-react/`](../templates/vite-react/) — starter template
-- [`examples/lxpack-golden/`](../examples/lxpack-golden/) — packaging reference
+- [Packaging reference](reference/packaging.md) — LXPack adapter and output layout
+- [vite-react template](https://github.com/eddiethedean/lessonkit/tree/main/templates/vite-react/) — starter template
+- [lxpack-golden example](https://github.com/eddiethedean/lessonkit/tree/main/examples/lxpack-golden/) — packaging reference

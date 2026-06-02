@@ -23,7 +23,7 @@ Run the component gallery from the monorepo:
 npm run storybook
 ```
 
-See [Storybook](../../storybook/README.md) for story groups (Course/Lesson layouts, Quiz states, blocks).
+See [Storybook](https://github.com/eddiethedean/lessonkit/tree/main/packages/react/storybook) for story groups (Course/Lesson layouts, Quiz states, blocks).
 
 ## Hooks
 

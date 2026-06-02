@@ -100,4 +100,19 @@ describe("EditorCanvas", () => {
     expect(within(canvas).getByLabelText("Scenario")).toBeDefined();
     expect(canvas.querySelector(".lk-studio-nested")).toBeTruthy();
   });
+
+  it("virtualizes large root block lists", () => {
+    const blocks = Array.from({ length: 32 }, (_, index) => ({
+      type: "text" as const,
+      id: `text-${index}`,
+      text: `Block ${index}`,
+    }));
+    const store = createEditorStore({
+      ...project,
+      pages: [{ id: "lesson-1", title: "Large", blocks }],
+    });
+    render(<EditorCanvas store={store} />);
+    expect(document.querySelector(".lk-studio-drop-zone--virtual")).toBeTruthy();
+    expect(document.querySelector(".lk-studio-virtual-scroll")).toBeTruthy();
+  });
 });

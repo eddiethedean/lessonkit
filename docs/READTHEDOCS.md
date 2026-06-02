@@ -40,7 +40,12 @@ Or use the Makefile (builds examples, then Sphinx):
 cd docs && make html
 ```
 
-Compiled examples are embedded under **Examples → Live examples**. The Makefile runs `docs/scripts/build-docs-demos.sh` first (Node 18+ at repo root).
+Compiled demos are produced by `docs/scripts/build-docs-demos.sh` (Node 18+ at repo root):
+
+- **LessonKit Studio** — [guides/studio/app.md](guides/studio/app.md)
+- **Course examples** — [examples/index.md](examples/index.md)
+
+The Makefile and `.readthedocs.yaml` run that script before Sphinx.
 
 ## Custom domain (optional)
 

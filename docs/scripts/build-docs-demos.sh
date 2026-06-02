@@ -35,4 +35,7 @@ cp -R examples/data-privacy/dist/. "$DEMOS_DIR/data-privacy/"
 build_demo lessonkit-example-customer-service customer-service
 cp -R examples/customer-service/dist/. "$DEMOS_DIR/customer-service/"
 
+build_demo lessonkit-studio-web studio
+cp -R apps/studio-web/dist/. "$DEMOS_DIR/studio/"
+
 echo "==> Demo bundles ready under docs/_static/demos/"

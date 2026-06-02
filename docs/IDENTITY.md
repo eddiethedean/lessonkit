@@ -62,14 +62,14 @@ Ids are **not rewritten** — use the same slugs in React props and in your `Les
 
 When `course.layout` is `single-spa`, `lessonkit.json` typically lists **one** LMS shell lesson (the SPA entry). The React app may define additional in-SPA step ids (`lessonId` on `<Lesson>`) for navigation and telemetry that are **not** duplicated in `course.lessons[]`. Always keep `courseId` and assessment `checkId`s aligned with the manifest; keep shell lesson ids aligned when they represent the packaged SPA lesson.
 
-See [`examples/lxpack-golden/README.md`](../examples/lxpack-golden/README.md) for a full walkthrough.
+See [lxpack-golden example](https://github.com/eddiethedean/lessonkit/tree/main/examples/lxpack-golden/README.md) for a full walkthrough.
 
 ## History (0.4.x → 0.5.x)
 
-For older migration steps from pre-0.5 runtimes, see [Migration from 0.4.x](#migration-from-04x) below and [MIGRATION-0.x-to-1.0.md](MIGRATION-0.x-to-1.0.md).
+For older migration steps from pre-0.5 runtimes, see [Migration from 0.4.x](#migration-from-04x) below and [Migration from 0.x to 1.0](../MIGRATION-0.x-to-1.0.md).
 
-See [`PACKAGING.md`](PACKAGING.md).
+See [Packaging reference](reference/packaging.md).
 
 ## See also
 
-[`TELEMETRY.md`](TELEMETRY.md) and [`CHANGELOG.md`](../CHANGELOG.md).
+[Telemetry reference](reference/telemetry.md) and [CHANGELOG](../project/changelog.md).

@@ -77,7 +77,7 @@ npm run conformance:lxpack
 npm run conformance:golden
 ```
 
-See [`e2e/README.md`](../../../e2e/README.md) for the test catalog, artifact layout, and debugging.
+See [e2e/README](https://github.com/eddiethedean/lessonkit/blob/main/e2e/README.md) for the test catalog, artifact layout, and debugging.
 
 ## CI job map
 
@@ -96,5 +96,5 @@ Workflow: [`.github/workflows/checks.yml`](https://github.com/eddiethedean/lesso
 
 - [Packaging and CLI](packaging-and-cli.md)
 - [Contributing — E2E and conformance](contributing-to-the-monorepo.md#e2e-and-conformance)
-- [STUDIO_READINESS.md](../../STUDIO_READINESS.md) — framework and Studio readiness checklists
-- [LXPack upgrade plan](../../LXPACK_UPGRADE_PLAN_FOR_MAINTAINERS.md)
+- [Studio readiness](../../project/studio-readiness.md) — framework and Studio readiness checklists
+- [LXPack upgrade plan](../../reference/lxpack-upgrades.md)
