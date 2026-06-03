@@ -86,6 +86,51 @@ Identity rules (`courseId`, `lessonId`, `checkId`, URNs): [`docs/IDENTITY.md`](d
 
 ---
 
+# Assessment contract (framework 1.2.x)
+
+Planned expansion of the runtime block catalog ([`ROADMAP.md`](ROADMAP.md#12x--assessment-contract--tier-b-p0-blocks), [H5P capability map](docs/project/h5p-capability-map.md)). Aligns with H5P’s [question type contract](https://h5p.org/documentation/developers/contracts) but is implemented in React, not `H5P.Question`.
+
+## Scored blocks
+
+All assessment components require `checkId` and sync with `lessonkit.json` `assessments[]` (same as `Quiz` today).
+
+## Runtime interface (target)
+
+Parent containers (`AssessmentSequence`, future `SlideDeck`, `InteractiveVideo`) may call:
+
+| Method | Purpose |
+| --- | --- |
+| `getScore()` / `getMaxScore()` | Aggregate scoring |
+| `getAnswerGiven()` | Whether the learner may submit or advance |
+| `resetTask()` | Clear attempt for retry |
+| `showSolutions()` | Reveal correct answers when enabled |
+| `getXAPIData()` | Statement payload for `@lessonkit/xapi` |
+
+Behaviour props (aligned with H5P): `enableRetry`, `enableSolutionsButton`, optional `autoCheck`.
+
+## Framework 1.2.x P0 components
+
+| Component | H5P analog |
+| --- | --- |
+| `TrueFalse` | True/False |
+| `FillInTheBlanks` | Fill in the Blanks |
+| `DragAndDrop` | Drag and Drop |
+| `DragTheWords` | Drag the Words |
+| `MarkTheWords` | Mark the Words |
+| `AssessmentSequence` | Question Set |
+
+`Quiz` / `KnowledgeCheck` remain the reference implementation of the contract; v1 catalog stays valid until `blockCatalogVersion = 2` ships.
+
+## Requirements
+
+- WCAG 2.1 AA for every interaction mode (including keyboard alternatives to drag-and-drop).
+- Telemetry catalog v2 entries for each new interaction type.
+- Export parity: standalone + SCORM + xAPI for golden-path courses using P0 blocks.
+- Machine-readable catalog: `block-catalog.v2.json` must list contract fields per block.
+- **H5P documentation:** each new block completes the [H5P documentation checklist](ROADMAP.md#h5p-documentation-checklist-per-block) (capability map, block catalog, authors guide, Storybook H5P subtitle).
+
+---
+
 # Accessibility Requirements
 
 ## WCAG Support

@@ -51,6 +51,12 @@ Pick the path that matches how you work:
 
 ::::
 
+:::{admonition} Coming from H5P?
+:class: tip
+
+You can map familiar H5P content types to LessonKit components and Studio blocks. **`Quiz`** is H5P Multiple Choice; more types are on the roadmap with the same names where possible. Start with **[Coming from H5P?](guides/h5p-for-lessonkit-authors.md)** and the **[H5P capability map](project/h5p-capability-map.md)**.
+:::
+
 :::{admonition} New to React?
 :class: note
 
@@ -93,6 +99,13 @@ guides/vibe-coding/prompting-and-workflows
 guides/vibe-coding/shipping-to-lms
 guides/vibe-coding/troubleshooting
 guides/library-skills
+```
+
+```{toctree}
+:maxdepth: 1
+:caption: Guides — H5P authors
+
+guides/h5p-for-lessonkit-authors
 ```
 
 ```{toctree}
@@ -147,6 +160,7 @@ reference/lxpack-upgrades
 project/changelog
 project/security
 project/roadmap
+project/h5p-capability-map
 project/studio-readiness
 project/studio-spec
 project/studio-plan

@@ -23,12 +23,14 @@ the framework adapter exists (see 0.6.0).
 - [`docs/LessonKit_Studio_PLAN.md`](studio-plan.md) — Studio vision, MVP scope, positioning
 - [`docs/LessonKit_Studio_SPEC.md`](studio-spec.md) — Studio architecture, schema, editor, exports
 - [`docs/LXPACK_UPGRADES_FOR_LESSONKIT.md`](docs/reference/lxpack-upgrades.md) — LXPack interoperability notes
+- [H5P content types](https://h5p.org/content-types-and-applications) — external reference for the [H5P-aligned capability backlog](#h5p-aligned-capability-backlog) below (patterns, not a runtime dependency)
+- [`docs/project/h5p-capability-map.md`](docs/project/h5p-capability-map.md) — H5P machine name → LessonKit block traceability matrix
 
 ## Status
 
 - **Framework:** **1.0.2** — stable public API (contributor DX, session storage hardening, Vitest 4)
 - **Studio:** **unblocked** — framework gate met; see [Studio milestones](#lessonkit-studio-milestones)
-- **Focus (now):** LessonKit Studio 0.1.x planning and implementation
+- **Focus (now):** LessonKit Studio 0.4.x+ (GitHub, AI, hosted) and **Phase 3** planning ([H5P-aligned backlog](#h5p-aligned-capability-backlog))
 
 ## Guiding principles
 
@@ -36,6 +38,7 @@ the framework adapter exists (see 0.6.0).
 - **Single renderer**: Studio canvas, live preview, and exported apps must share rendering logic (`@lessonkit/react` + Studio renderer).
 - **Accessibility-first**: WCAG 2.1 AA target; keyboard + focus management by default in framework and generated experiences.
 - **Interop-ready**: analytics primitives now; SCORM/xAPI/cmi5 via LXPack export is additive (framework adapter + Studio codegen).
+- **Proven interactions**: adopt high-value patterns from the broader interactive-content ecosystem (notably [H5P](https://h5p.org/content-types-and-applications)) as first-class React blocks with shared contracts—not embedded H5P iframes.
 - **Git-native (Studio)**: projects are Git-backed repos; GitHub App for auth, commits, branching, collaboration.
 - **DX matters**: fast local dev, simple project bootstrap, excellent docs.
 - **Framework first**: ship a stable, documented framework API before any Studio code (hard gate at 1.0.0).
@@ -281,6 +284,44 @@ begins**—including schema spikes, renderer prototypes, or `lessonkit-studio` p
 
 ---
 
+### 1.2.x — Assessment contract + Tier B P0 blocks
+
+**Status:** Planned (Phase 3). Traceability: [`docs/project/h5p-capability-map.md`](docs/project/h5p-capability-map.md).
+
+#### Goals
+
+- Extend the runtime block catalog beyond single-select `Quiz` using an H5P-aligned **assessment contract** (scores, reset, solutions, xAPI, retry flags).
+- Keep export parity (React/Vite, SCORM, xAPI) and generator-safe JSON catalog (`blockCatalogVersion = 2`).
+
+#### Deliverables
+
+- [ ] **`Assessment` contract** in `@lessonkit/core` + enforcement in `block-contract.v2.json`
+- [ ] **`TrueFalse`** — binary choice; `checkId`; Storybook + tests
+- [ ] **`FillInTheBlanks`** — fill-in interaction; xAPI `fill-in`; keyboard-accessible blanks
+- [ ] **`DragAndDrop`** — drag targets with keyboard alternative
+- [ ] **`DragTheWords`** — inline word drag
+- [ ] **`MarkTheWords`** — selectable tokens (pointer + keyboard)
+- [ ] **`AssessmentSequence`** — ordered mix of contract-compliant assessments (H5P Question Set)
+- [ ] **Telemetry catalog v2** — events for new interaction types
+- [ ] **`block-catalog.v2.json`** + docs in [`docs/BLOCK_CATALOG.md`](docs/BLOCK_CATALOG.md)
+- [ ] **Golden path + e2e** — each P0 block scores in standalone and SCORM exports
+- [ ] **SPEC** — assessment API documented in [`SPEC.md`](SPEC.md#assessment-contract-framework-12x)
+- [ ] **H5P documentation (1.2.x P0)** — complete [H5P doc checklist](#h5p-documentation-checklist-per-block) for each shipped block (`TrueFalse`, `FillInTheBlanks`, `DragAndDrop`, `DragTheWords`, `MarkTheWords`, `AssessmentSequence`; extend `Quiz` row if behaviour changes)
+
+#### Paired Studio work (0.8.x)
+
+- [ ] `studio-schema` types + `studio-renderer` + palette for 1.2.x P0 blocks
+- [ ] Codegen emits new components and `lessonkit.json` assessment entries
+- [ ] **Studio palette labels** — H5P-familiar display names (e.g. “Fill in the Blanks”) + H5P doc checklist items for **studio-schema** catalog and [Studio editor guide](docs/guides/studio/editor.md)
+
+#### Out of scope for 1.2.x
+
+- Compound containers (`InteractiveBook`, `SlideDeck`) — **1.3.x / 1.4.x**
+- H5P `.h5p` import — **1.7.x** research spike
+- Tier C–E media/game blocks — later framework minors per [capability map](docs/project/h5p-capability-map.md)
+
+---
+
 ## LessonKit Studio milestones
 
 > **Studio development gate:** Framework **1.0.0** has shipped. Studio milestones below may proceed; see [Status](#status).
@@ -494,6 +535,196 @@ Tracked in [`docs/LessonKit_Studio_PLAN.md`](studio-plan.md); not scheduled on f
 - Plugin ecosystem and LMS cloud hosting
 - AI course agents and design agents
 - Integrated LMS deployment
+- Block palette and compound authoring from the [H5P-aligned backlog](#h5p-aligned-capability-backlog) (phased with framework catalog releases)
+
+---
+
+## H5P-aligned capability backlog
+
+[H5P](https://h5p.org/) is a mature catalog of **50+ interactive content types** plus **compound containers** (Interactive Book, Course Presentation, Interactive Video, Branching Scenario) and **platform services** (Hub, `.h5p` transport, question-type contracts, xAPI). LessonKit should **not** embed H5P runtimes in iframes—we should **incorporate the interaction patterns** as native `@lessonkit/react` primitives and `@lessonkit/studio-schema` blocks, with the same guarantees we already ship: identity v1, WCAG 2.1 AA, telemetry catalog, export parity, and machine-readable block contracts.
+
+**Legend:** ✅ shipped · 🟡 partial · ⬜ planned
+
+### Parity baseline (already in LessonKit)
+
+| H5P pattern | LessonKit today | Notes |
+|-------------|-----------------|-------|
+| Multiple Choice | ✅ `Quiz` / `KnowledgeCheck` | Single-select MCQ; sync `checkId` with `lessonkit.json` |
+| Scenario / narrative block | ✅ `Scenario` | Manual `interaction` telemetry |
+| Reflection / open response | ✅ `Reflection` | Textarea; not auto-scored |
+| Column / stacked layout | 🟡 Studio `container` | Nested blocks; not yet a framework `Page` primitive |
+| Course / lesson structure | ✅ `Course`, `Lesson` | Differs from H5P “one activity per embed” |
+| Progress / completion | ✅ `ProgressTracker`, hooks | H5P scores per activity; we aggregate at course level |
+| Theming | ✅ `@lessonkit/themes` | `--lk-*` vs H5P per-library CSS |
+| xAPI + LMS export | ✅ `@lessonkit/xapi`, `@lessonkit/lxpack` | SCORM/xAPI/cmi5 via packaging, not `.h5p` |
+| Visual authoring | 🟡 Studio 0.2–0.3 | text, heading, image, button, input, container, quiz, scenario, checklist, video |
+| Content-type discovery | ⬜ | H5P Hub; we need catalog + Studio palette + docs (see Tier F) |
+
+### Tier A — Compound experiences (highest leverage)
+
+These are H5P’s “course builders.” Each becomes a **framework container** + **Studio compound block** + **codegen** path, with an explicit **sub-block allowlist** (H5P curates these for versioning, UX, and scoring—see [question-type contract](https://h5p.org/documentation/developers/contracts)).
+
+| Priority | H5P content type | LessonKit target | Framework / Studio | Depends on |
+|----------|------------------|------------------|--------------------|------------|
+| P0 | **Interactive Book** | `InteractiveBook` or multi-page `Lesson` model | Framework **1.3.x**, Studio **0.8.x** | Page layout, resume state, sub-block catalog |
+| P0 | **Course Presentation** | `SlideDeck` | Framework **1.4.x**, Studio **0.9.x** | Slide schema, per-slide block allowlist, keyboard slide nav |
+| P0 | **Interactive Video** | `InteractiveVideo` | Framework **1.5.x**, Studio **0.10.x** | Video block, timed overlays, question contract |
+| P0 | **Branching Scenario** | `BranchingScenario` | Framework **1.6.x**, Studio **0.11.x** | Branch graph, scoring, xAPI branching verbs |
+| P1 | **Question Set (Quiz)** | `AssessmentSequence` | Framework **1.2.x** | Question-type contract (below) |
+| P1 | **Column** → **Page** | `Page` (rename/clarify Studio `container`) | Studio **0.8.x**, catalog v2 | Unified semantics with Interactive Book chapters |
+| P2 | **Game Map** | `GameMap` | Framework **1.8.x** | Spatial layout, optional non-scored stages |
+| P2 | **Virtual Tour (360)** | `VirtualTour` | Framework **1.9.x** | 360 asset pipeline, hotspot model |
+| P3 | **Documentation Tool** | `DocumentationTool` | Framework **2.x** | Cornell notes, exportable learner artifacts |
+| P3 | **Interactive Canvas / Structure Strip** | `StructureStrip`, `WritingCanvas` | Framework **2.x** | Writing pedagogy; lower than core LMS parity |
+
+**Deliverables (cross-cutting for Tier A):**
+
+- **Compound block contract** in `block-contract.v1.json`: allowed child types, max nesting depth, score aggregation, `resetTask` / `getCurrentState` for resume
+- **Studio**: visual editors for timelines (video), slide strips (presentation), branch graph (scenario)—see Studio Future scope
+- **Telemetry**: `branch_selected`, `slide_viewed`, `video_segment_completed`, `book_page_viewed` (extend telemetry catalog v2)
+- **Docs**: composition guide (which blocks nest where), parity with export targets
+
+### Tier B — Questions and scored tasks
+
+Extend beyond MCQ via a formal **assessment contract** (H5P’s `H5P.Question` pattern: `getScore`, `getMaxScore`, `getAnswerGiven`, `resetTask`, `showSolutions`, `getXAPIData`, `enableRetry` / `enableSolutionsButton`).
+
+| Priority | H5P content type | LessonKit component / block | Notes |
+|----------|------------------|----------------------------|-------|
+| P0 | **True/False** | `TrueFalse` | Smallest extension of `Quiz` |
+| P0 | **Fill in the Blanks** | `FillInTheBlanks` | Text input scoring; xAPI `fill-in` |
+| P0 | **Drag and Drop** | `DragAndDrop` | Image or text targets; keyboard alternative required |
+| P0 | **Drag the Words** | `DragTheWords` | Sub-type of drag + text |
+| P0 | **Mark the Words** | `MarkTheWords` | Click/highlight; keyboard-selectable tokens |
+| P1 | **Single Choice Set** | `SingleChoiceSet` | Sequential single-question slides |
+| P1 | **Multiple Choice** (variants) | Extend `Quiz` | Multi-select, shuffle, feedback modes |
+| P1 | **Summary** | `Summary` | Construct summary from statement bank |
+| P1 | **Sort the Paragraphs** | `SortParagraphs` | Ordering task; drag or keyboard reorder |
+| P1 | **Guess the Answer** | `GuessTheAnswer` | Reveal answer; optional scoring |
+| P1 | **Multimedia Choice** | `MultimediaChoice` | Image/audio options (a11y captions required) |
+| P2 | **Speak the Words** / **Speak the Words Set** | `SpeakTheWords`, `SpeakTheWordsSet` | Web Speech API; graceful degradation |
+| P2 | **Dictation** | `Dictation` | Audio prompt + text compare |
+| P2 | **Complex / Advanced Fill in the Blanks** | `AdvancedBlanks` | Dropdown/markup blanks; higher a11y bar |
+| P3 | **Arithmetic Quiz** | `ArithmeticQuiz` | Timed math; optional (no H5P Question Set contract) |
+| P3 | **Essay** (third-party in H5P) | `Essay` | AI/manual grading hooks via `scoreAssessment` plugin |
+| P3 | **Questionnaire** | `Questionnaire` | Unscored survey; feedback export |
+
+**Framework milestone:** **1.2.x — Assessment contract v1** — shared `Assessment` base, catalog entries, Storybook, e2e for Tier B P0 items.
+
+### Tier C — Media, images, and exploration
+
+| Priority | H5P content type | LessonKit target | Notes |
+|----------|------------------|------------------|-------|
+| P1 | **Image Hotspots** | `ImageHotspots` | Regions + popovers; keyboard reachable hotspots |
+| P1 | **Find the Hotspot** / **Find Multiple Hotspots** | `FindHotspot`, `FindMultipleHotspots` | Scored discovery tasks |
+| P1 | **Image Slider** | `ImageSlider` | Carousel primitive in Studio |
+| P2 | **Image Juxtaposition** | `ImageJuxtaposition` | Before/after slider |
+| P2 | **Agamotto (Image Blender)** | `ImageSequence` | Progressive image sequence |
+| P2 | **Collage** | `Collage` | Multi-image layout block |
+| P2 | **Image Pairing** / **Image Sequencing** | `ImagePairing`, `ImageSequencing` | Memory/order games |
+| P2 | **Memory Game** | `MemoryGame` | Card flip; focus management |
+| P3 | **Iframe Embedder** | `Embed` (restricted) | Sandboxed, responsive; opt-in for security |
+| P3 | **Chart** | `Chart` | Bar/pie; accessible data table fallback |
+
+**Studio:** asset library, hotspot editor, collage/slider layout tools (**0.10.x+**).
+
+### Tier D — Text, cards, and informational content
+
+| Priority | H5P content type | LessonKit target | Notes |
+|----------|------------------|------------------|-------|
+| P1 | **Accordion** | `Accordion` | Studio primitive; nest policy (no accordion-in-accordion) |
+| P1 | **Dialog Cards** | `DialogCards` | Flip cards; reduced-motion safe |
+| P1 | **Flashcards** | `Flashcards` | Study mode; optional self-score |
+| P2 | **Timeline** | `Timeline` | Events + media; fragile as sub-content in H5P—test resize |
+| P2 | **Table** | `Table` | Studio + framework rich text table |
+| P2 | **Information Wall** | `InformationWall` | Searchable panels |
+| P3 | **Exportable Text Area / Cornell** | `CornellNotes`, `ExportableNotes` | Learner export (PDF/text) |
+| P3 | **Personality Quiz** | `PersonalityQuiz` | Outcome buckets; community pattern, lower priority |
+| P1 | **Audio Recorder** | `AudioRecorder` | Learner recording; consent + storage policy |
+| P2 | **Slideshow (parallax)** | `ParallaxSlideshow` | Presentation variant; respect `prefers-reduced-motion` |
+
+**Primitives (H5P sub-content):** extend Studio **text**, **heading**, **image**, **button**, **video**, **audio**, **link** with shared semantics for compounds.
+
+### Tier E — Games, puzzles, and novelty
+
+Lower priority unless a customer/LMS parity request surfaces; still catalog for AI/Studio discoverability.
+
+| H5P content type | LessonKit target | Priority |
+|------------------|------------------|----------|
+| Crossword | `Crossword` | P3 |
+| Find the Words | `WordSearch` | P3 (keyboard a11y hard—H5P often excludes from compounds) |
+| Combination Lock | `CombinationLock` | P3 |
+| KewAr Code / QR | `QrContent` | P3 |
+| Advent Calendar | `AdventCalendar` | P3 |
+| Agora World (AR) | `AugmentedReality` | P4 / research |
+
+### Tier F — Platform, authoring ecosystem, and interoperability
+
+Capabilities H5P provides **around** content types—LessonKit equivalents should be explicit roadmap items:
+
+| H5P capability | LessonKit target | Milestone hint |
+|----------------|------------------|----------------|
+| **Content Type Hub** (discover/install/update libraries) | **Block registry** in Studio + documented npm packages (`@lessonkit/blocks-*` optional split); CLI `lessonkit blocks list` | Studio **0.8.x**, CLI **1.7.x** |
+| **`.h5p` import/export** | **`.lkcourse` / interchange** JSON + assets zip; optional **H5P import adapter** (read-only, map subset → `StudioProjectV1`) | Framework **1.7.x** (research spike) |
+| **Question-type contract** | `Assessment` interface + `block-contract` enforcement | Framework **1.2.x** |
+| **Compound sub-content allowlists** | Per-parent `allowedChildTypes` in catalog | Framework **1.3.x** with first compound |
+| **Resume / attempt state** | `getCurrentState` on assessments + compounds; session storage v2 | Framework **1.3.x** (extends 1.0.2 session work) |
+| **Hub OER / content reuse** | Template gallery + import from shared examples repo | Studio **0.6.x** gallery + **1.x** OER |
+| **Semantics-driven editor** | Studio inspector generated from block JSON Schema (H5P `semantics.json` analog) | Studio **0.9.x** |
+| **Community / third-party blocks** | Plugin `interactionBlocks` + marketplace (post–1.0 plugins) | Framework plugins **2.x** |
+| **LTI / embed** | Already via LMS packaging; document embed snippet for standalone | Docs + lxpack **1.x** |
+| **Fresh UI / theming per widget** | Single `--lk-*` theme across all blocks (advantage over H5P per-library CSS) | Ongoing `@lessonkit/themes` |
+
+### Implementation principles (learned from H5P)
+
+When implementing backlog items, follow H5P’s constraints **in React form**:
+
+1. **Design by contract** — compound parents call documented methods on children (scores, reset, xAPI, resume).
+2. **One implementation per block type per course build** — avoid duplicate library versions in nested trees (H5P global version lock).
+3. **Sub-content curation** — not every block nests everywhere; document allowlists like H5P maintainers do.
+4. **Keyboard-first** — exclude or fix patterns H5P excludes (e.g. non-keyboard word search) rather than shipping inaccessible compounds.
+5. **Export parity** — every scored block must map to `lessonkit.json` assessments and LXPack descriptors.
+6. **Machine-readable catalog** — each new block extends `block-catalog.v1.json` and `studio-schema` catalog before Studio palette ships.
+7. **H5P documentation** — every shipped H5P-parity block completes the [checklist below](#h5p-documentation-checklist-per-block) in the same PR (or release) as the component.
+
+### H5P documentation checklist (per block)
+
+**Gate:** a framework or Studio block is not **done** for H5P parity until these are checked off (copy into PR description or release notes).
+
+| # | Task | Where |
+| --- | --- | --- |
+| 1 | Set capability map **Status** to ✅ and confirm **Framework** / **Studio** columns | [`docs/project/h5p-capability-map.md`](docs/project/h5p-capability-map.md) master table |
+| 2 | Add row: LessonKit id, **H5P display name**, **H5P machine name** (if known) | Same map + [block catalog](docs/BLOCK_CATALOG.md) (v1 or v2 section) |
+| 3 | Document props, `checkId` / `blockId`, a11y, telemetry, parent constraints | [block catalog](docs/BLOCK_CATALOG.md) per-block section (or new subsection) |
+| 4 | Add **H5P equivalent** admonition or table row on the block’s doc touchpoints | At minimum: block catalog; [components guide](docs/guides/react-developers/components-and-hooks.md) table if public API; [H5P authors guide](docs/guides/h5p-for-lessonkit-authors.md) “Available today” or “Planned” table when status changes |
+| 5 | Storybook story titled with **H5P name in subtitle** (e.g. “FillInTheBlanks — H5P Fill in the Blanks”) | `packages/react/stories/` |
+| 6 | Studio: palette **label** = H5P display name; optional **description** “Maps from H5P …” | `@lessonkit/studio-ui` / `studio-schema` catalog |
+| 7 | If scored: example `lessonkit.json` `assessments[]` entry + export parity note | Golden example or [packaging guide](docs/reference/packaging.md) callout when first of kind |
+| 8 | `h5pAlias` / `h5pMachineName` in **block-catalog JSON** entry (when catalog field ships in 1.2.x) | `block-catalog.v2.json` + `buildBlockCatalog()` |
+
+**Ongoing pages (already live—keep links accurate):** [docs index](docs/index.md) H5P tip, [H5P authors guide](docs/guides/h5p-for-lessonkit-authors.md), [capability map](docs/project/h5p-capability-map.md).
+
+**Applies to:** all Tier A–E blocks in the [H5P-aligned backlog](#h5p-aligned-capability-backlog), not only 1.2.x.
+
+### Suggested delivery phases
+
+```text
+Framework 1.2.x   Assessment contract + Tier B P0 + H5P doc checklist per block
+Framework 1.3.x   Page/InteractiveBook foundation + resume state + catalog allowlists + H5P docs
+Framework 1.4.x   SlideDeck (Course Presentation) + H5P docs
+Framework 1.5.x   InteractiveVideo + timed overlays + H5P docs
+Framework 1.6.x   BranchingScenario + branch telemetry + H5P docs
+Framework 1.7.x   Interchange format + optional H5P import spike + import guide callouts
+Framework 1.8.x+  Tier C–E blocks by demand; plugin marketplace; H5P doc checklist each
+
+Studio 0.8.x      Palette: Tier B P0 + Accordion, DialogCards, ImageHotspots + H5P palette labels/docs
+Studio 0.9.x      Schema-driven inspector; SlideDeck editor shell + H5P docs
+Studio 0.10.x     InteractiveVideo timeline editor + H5P docs
+Studio 0.11.x     Branching graph editor (links Studio Future scope) + H5P docs
+```
+
+**Documentation:** [`docs/project/h5p-capability-map.md`](docs/project/h5p-capability-map.md) — traceability matrix (status ✅ as blocks ship). **Per-block gate:** [H5P documentation checklist](#h5p-documentation-checklist-per-block) required for every new H5P-parity feature. **Hub pages:** [`docs/guides/h5p-for-lessonkit-authors.md`](docs/guides/h5p-for-lessonkit-authors.md), [docs index](docs/index.md), [block catalog](docs/BLOCK_CATALOG.md), components + Studio guides.
+
+**Out of scope (explicit):** running H5P Core inside LessonKit exports; maintaining parity with every unmaintained H5P third-party type; iframe-first embed model.
 
 ---
 
@@ -508,7 +739,7 @@ Tracked in [`docs/LessonKit_Studio_PLAN.md`](studio-plan.md); not scheduled on f
 
 ---
 
-## Milestone alignment (framework → Studio)
+## Milestone alignment (framework → Studio → content expansion)
 
 ```text
 Phase 1 — Framework only (no Studio code)
@@ -518,10 +749,20 @@ Phase 1 — Framework only (no Studio code)
                                                               ▼
                                                     STUDIO GATE (blocker)
                                                               │
-Phase 2 — Studio only (after 1.0.0)                           │
-────────────────────────────────────                          │
+Phase 2 — Studio (after 1.0.0)                              │
+────────────────────────────────                              │
 Studio 0.1.0 → 0.2.0 → 0.3.0 → 0.4.0 → 0.5.0 → 0.6.0 → 0.7.0 → Studio 1.0.0
+                                                              │
+Phase 3 — Interactive content expansion (parallel tracks)     │
+────────────────────────────────────────────────────────      │
+Framework 1.2.x → 1.3.x → … → 1.7.x+  (blocks + compounds; 1.2.x checklist in roadmap) │
+Studio 0.8.x → 0.11.x+  (palette + compound editors)          │
+        ▲                                                     │
+        └── driven by H5P-aligned backlog (see above) ───────┘
 ```
 
-**No overlap:** framework milestones are not shared with Studio delivery. Studio milestones run
-sequentially **only after** framework **1.0.0** is released.
+**Phase 1 gate:** Studio does not start until framework **1.0.0** ships.
+
+**Phase 3:** Framework **1.2.x+** and Studio **0.8.x+** may proceed in parallel once the baseline
+catalog and export path are stable—each new block requires framework contract + renderer + Studio
+palette (and codegen) before it is “done.”

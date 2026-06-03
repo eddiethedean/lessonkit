@@ -1,5 +1,17 @@
 # Components and hooks
 
+:::{admonition} H5P equivalents
+:class: tip
+
+| LessonKit | H5P |
+| --- | --- |
+| `Quiz` / `KnowledgeCheck` | Multiple Choice |
+| `Scenario` | Scenario / narrative block |
+| `Reflection` | Open response (manual scoring) |
+
+More types (`FillInTheBlanks`, `InteractiveVideo`, …) are on the roadmap. See **[Coming from H5P?](../h5p-for-lessonkit-authors.md)** and the **[capability map](../../project/h5p-capability-map.md)**.
+:::
+
 Canonical block list, props, and contracts: [Block catalog reference](../../reference/block-catalog.md).
 
 ## Components

@@ -199,6 +199,7 @@ Full site: **[lessonkit.readthedocs.io](https://lessonkit.readthedocs.io/en/late
 | Identity & URNs | [Identity reference](https://lessonkit.readthedocs.io/en/latest/reference/identity.html) |
 | Telemetry & xAPI | [Telemetry](https://lessonkit.readthedocs.io/en/latest/reference/telemetry.html) · [xAPI](https://lessonkit.readthedocs.io/en/latest/reference/xapi.html) |
 | Theming & accessibility | [Theming](https://lessonkit.readthedocs.io/en/latest/reference/theming.html) · [Accessibility](https://lessonkit.readthedocs.io/en/latest/reference/accessibility.html) |
+| Coming from H5P | [H5P → LessonKit guide](https://lessonkit.readthedocs.io/en/latest/guides/h5p-for-lessonkit-authors.html) · [Capability map](https://lessonkit.readthedocs.io/en/latest/project/h5p-capability-map.html) |
 
 Source markdown: [`docs/`](https://github.com/eddiethedean/lessonkit/tree/main/docs) · Changelog: [CHANGELOG.md](https://github.com/eddiethedean/lessonkit/blob/main/CHANGELOG.md) · Security: [SECURITY.md](https://github.com/eddiethedean/lessonkit/blob/main/SECURITY.md)
 

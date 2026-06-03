@@ -6,6 +6,12 @@
 Instructional designers, trainers, and builders who **do not write React by hand**—you’ll pair LessonKit with an AI editor and the CLI.
 :::
 
+:::{admonition} Used H5P before?
+:class: tip
+
+Ask your AI to follow LessonKit patterns and map activities using **[Coming from H5P?](../h5p-for-lessonkit-authors.md)** (e.g. “use `Quiz` like H5P Multiple Choice”). Capability list: **[H5P capability map](../../project/h5p-capability-map.md)**.
+:::
+
 These guides are for **instructional designers, trainers, and builders who do not write React by hand**. You will use an AI assistant in your editor (Cursor, VS Code + Copilot, Windsurf, etc.) and the LessonKit CLI to create and ship courses.
 
 You do not need to understand TypeScript, hooks, or bundlers. You **do** need to:

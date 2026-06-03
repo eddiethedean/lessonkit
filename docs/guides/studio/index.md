@@ -14,6 +14,12 @@ Authors and instructional designers who want a **visual editor** for LessonKit c
 
 LessonKit Studio is the authoring surface for **`StudioProjectV1`** JSON: the same project model powers the editor, shared renderer preview, and **`@lessonkit/studio-codegen`** export. LMS packaging still uses **`lessonkit package`** and **@lessonkit/lxpack** after you build the exported app.
 
+:::{admonition} H5P authors
+:class: tip
+
+Studio blocks map to the same React runtime as code-first courses. **`quiz`** in the editor = H5P **Multiple Choice** (`Quiz` in React). As new H5P-aligned types ship (Fill in the Blanks, Interactive Video, …), they appear in the palette with **H5P-familiar labels**. See **[Coming from H5P?](../h5p-for-lessonkit-authors.md)** and the **[capability map](../../project/h5p-capability-map.md)**.
+:::
+
 ## Try it now
 
 **[Open the live Studio app](app.md)** — embedded in this documentation site (refreshed on each Read the Docs build). Edits autosave to your browser `localStorage` for that demo only.
