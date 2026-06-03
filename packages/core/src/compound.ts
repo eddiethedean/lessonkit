@@ -33,6 +33,12 @@ export function createCompoundResumeState(input: CompoundResumeInput = {}): Comp
   };
 }
 
+/** Clamp page index to valid range for a compound with `pageCount` pages. */
+export function clampCompoundPageIndex(index: number, pageCount: number): number {
+  if (pageCount < 1) return 0;
+  return Math.min(Math.max(0, Math.floor(index)), pageCount - 1);
+}
+
 export function parseCompoundResumeState(raw: unknown): CompoundResumeState | null {
   if (!raw || typeof raw !== "object") return null;
   const obj = raw as Record<string, unknown>;

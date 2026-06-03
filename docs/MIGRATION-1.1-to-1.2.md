@@ -46,13 +46,16 @@ Import `@lessonkit/react/block-catalog.v3.json` for machine-readable entries inc
 
 ## Session / resume
 
-`LessonkitConfig.session.persistCompoundState` defaults to `true`. Compound containers restore `activePageIndex` (and child assessment state when handles support `resume`) from `sessionStorage` on mount, and persist on navigation.
+`LessonkitConfig.session.persistCompoundState` defaults to `true`. Compound containers restore `activePageIndex` from `sessionStorage` on mount and persist on navigation or when child assessment state changes.
+
+Child answer state is restored when the assessment block implements `getCurrentState` / `resume` (all 1.1.x P0 assessments and 1.2.x scored blocks, including `FindHotspot` / `FindMultipleHotspots`). Set `blockId` on `AssessmentSequence` when using persistence — multiple sequences without `blockId` share one storage key.
 
 ## `lessonkit.json`
 
 - Compound `blockId` values are **not** LMS `lessonId`s.
 - Scored children still use `assessments[]` with `checkId`.
 - New optional kinds: `findHotspot`, `findMultipleHotspots` (see `@lessonkit/lxpack` types).
+- When `persistCompoundState` is enabled, provide a unique `blockId` on each `AssessmentSequence`.
 
 ## AssessmentSequence behavior
 

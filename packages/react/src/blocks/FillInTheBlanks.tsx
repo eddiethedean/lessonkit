@@ -89,8 +89,23 @@ function FillInTheBlanksInner(
         score,
         maxScore: handleMax,
       }),
+      getCurrentState: () => ({ values, passed, showSolutions }),
+      resume: (state) => {
+        const s = state as {
+          values?: Record<string, string>;
+          passed?: boolean;
+          showSolutions?: boolean;
+        };
+        if (s.values && typeof s.values === "object") setValues({ ...s.values });
+        if (typeof s.passed === "boolean") {
+          setPassed(s.passed);
+          completedRef.current = s.passed;
+          answeredRef.current = s.passed;
+        }
+        if (typeof s.showSolutions === "boolean") setShowSolutions(s.showSolutions);
+      },
     };
-  }, [allFilled, blanks.length, checkId, maxScore, passedThreshold, score, values]);
+  }, [allFilled, blanks.length, checkId, maxScore, passed, passedThreshold, score, showSolutions, values]);
 
   useImperativeHandle(ref, () => handle, [handle]);
   useRegisterAssessmentHandle(checkId, handle);

@@ -11,7 +11,7 @@ Developer tooling, not a timeline authoring tool: **React + telemetry + packagin
 
 | | |
 | --- | --- |
-| **Release** | Framework [1.1.0](https://github.com/eddiethedean/lessonkit/blob/main/CHANGELOG.md#110---2026-06-03) · Studio [0.3.1](https://github.com/eddiethedean/lessonkit/blob/main/CHANGELOG.md#studio-v031---2026-06-03) (tags pending on npm) |
+| **Release** | Framework [1.2.0](https://github.com/eddiethedean/lessonkit/blob/main/CHANGELOG.md#120---2026-06-03) · Studio [0.3.2](https://github.com/eddiethedean/lessonkit/blob/main/CHANGELOG.md#studio-v032---2026-06-03) |
 | **npm** | [`@lessonkit/*`](https://www.npmjs.com/org/lessonkit) |
 | **Docs** | [lessonkit.readthedocs.io](https://lessonkit.readthedocs.io/en/latest/) |
 | **Node.js** | 18+ (dev, build, LMS packaging) |

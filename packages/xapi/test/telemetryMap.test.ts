@@ -252,13 +252,36 @@ describe("telemetryEventToXAPIStatement", () => {
     });
     expect(hotspot?.verb).toBe("http://adlnet.gov/expapi/verbs/experienced");
 
+    const accordion = telemetryEventToXAPIStatement({
+      name: "accordion_section_toggled",
+      ...base,
+      data: { blockId: "acc-1", sectionId: "s1", expanded: true },
+    });
+    expect(accordion?.verb).toBe("http://adlnet.gov/expapi/verbs/experienced");
+
+    const flashcard: TelemetryEvent = {
+      name: "flashcard_flipped",
+      ...base,
+      data: { blockId: "fc-1", cardIndex: 0, face: "back" },
+    };
+    expect(telemetryEventToXAPIStatement(flashcard)?.verb).toBe(
+      "http://adlnet.gov/expapi/verbs/experienced",
+    );
+
+    const slider: TelemetryEvent = {
+      name: "image_slider_changed",
+      ...base,
+      data: { blockId: "slider-1", slideIndex: 1 },
+    };
+    expect(telemetryEventToXAPIStatement(slider)?.object.id).toContain(":block:slider-1");
+
     expect(
       telemetryEventToXAPIStatement({
         name: "book_page_viewed",
         courseId: base.courseId,
         timestamp: base.timestamp,
         data: { blockId: "book-1", pageIndex: 0 },
-      }),
+      } as TelemetryEvent),
     ).toBeNull();
   });
 

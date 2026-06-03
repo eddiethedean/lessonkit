@@ -77,7 +77,7 @@ describe("assertExportableProject", () => {
   });
 
   it("wraps non-Error throws from quiz collection", () => {
-    vi.spyOn(collectQuizzes, "collectQuizAssessments").mockImplementation(() => {
+    vi.spyOn(collectQuizzes, "collectAssessments").mockImplementation(() => {
       throw "duplicate quiz";
     });
     const result = assertExportableProject(sampleProject);

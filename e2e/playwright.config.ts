@@ -23,7 +23,7 @@ export default defineConfig({
   projects: [
     {
       name: "golden-vite",
-      testIgnore: ["**/telemetry-harness/**", "**/assessments-p0/**"],
+      testIgnore: ["**/telemetry-harness/**", "**/assessments-p0/**", "**/interactive-book/**"],
       use: {
         ...devices["Desktop Chrome"],
         baseURL: "http://127.0.0.1:4173",
@@ -43,6 +43,14 @@ export default defineConfig({
       use: {
         ...devices["Desktop Chrome"],
         baseURL: "http://127.0.0.1:4179",
+      },
+    },
+    {
+      name: "interactive-book-vite",
+      testDir: "./tests/interactive-book",
+      use: {
+        ...devices["Desktop Chrome"],
+        baseURL: "http://127.0.0.1:4183",
       },
     },
   ],
@@ -67,6 +75,14 @@ export default defineConfig({
         "npm run build -w lessonkit-example-assessments-p0 && npm run preview -w lessonkit-example-assessments-p0 -- --host 127.0.0.1 --port 4179",
       cwd: repoRoot,
       url: "http://127.0.0.1:4179",
+      reuseExistingServer: !process.env.CI,
+      timeout: 180_000,
+    },
+    {
+      command:
+        "npm run build -w lessonkit-example-interactive-book && npm run preview -w lessonkit-example-interactive-book -- --host 127.0.0.1 --port 4183",
+      cwd: repoRoot,
+      url: "http://127.0.0.1:4183",
       reuseExistingServer: !process.env.CI,
       timeout: 180_000,
     },

@@ -12,6 +12,7 @@ import {
   buildBlockCatalogV1,
   blockCatalogVersion,
   getBlockCatalogEntry,
+  type BlockCatalogEntryV2,
 } from "../src/blockCatalog";
 import {
   Course,
@@ -110,9 +111,12 @@ describe("@lessonkit/react block catalog", () => {
   });
 
   it("v3 catalog includes compound blocks", () => {
-    expect(getBlockCatalogEntry("InteractiveBook", { version: 3 })?.compoundContract).toBe(true);
-    expect(getBlockCatalogEntry("Page", { version: 3 })?.allowedChildTypes).toContain("Text");
-    expect(getBlockCatalogEntry("Accordion", { version: 3 })?.h5pMachineName).toBe("H5P.Accordion");
+    const book = getBlockCatalogEntry("InteractiveBook", { version: 3 }) as BlockCatalogEntryV2 | undefined;
+    const page = getBlockCatalogEntry("Page", { version: 3 }) as BlockCatalogEntryV2 | undefined;
+    const accordion = getBlockCatalogEntry("Accordion", { version: 3 }) as BlockCatalogEntryV2 | undefined;
+    expect(book?.compoundContract).toBe(true);
+    expect(page?.allowedChildTypes).toContain("Text");
+    expect(accordion?.h5pMachineName).toBe("H5P.Accordion");
   });
 
   it("block-catalog.v1.json satisfies block-contract.v1.json shape", () => {

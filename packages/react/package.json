@@ -64,7 +64,7 @@
     "react-dom": ">=18"
   },
   "dependencies": {
-    "@lessonkit/accessibility": "1.1.0",
+    "@lessonkit/accessibility": "1.2.0",
     "@lessonkit/core": "1.2.0",
     "@lessonkit/lxpack": "1.2.0",
     "@lessonkit/themes": "1.2.0",

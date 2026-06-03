@@ -60,8 +60,31 @@ function TrueFalseInner(
         score,
         maxScore,
       }),
+      getCurrentState: () => ({
+        selected,
+        selectionCorrect,
+        passed,
+        showSolutions,
+      }),
+      resume: (state) => {
+        const s = state as {
+          selected?: boolean | null;
+          selectionCorrect?: boolean | null;
+          passed?: boolean;
+          showSolutions?: boolean;
+        };
+        if (s.selected === true || s.selected === false || s.selected === null) setSelected(s.selected);
+        if (s.selectionCorrect === true || s.selectionCorrect === false || s.selectionCorrect === null) {
+          setSelectionCorrect(s.selectionCorrect);
+        }
+        if (typeof s.passed === "boolean") {
+          setPassed(s.passed);
+          completedRef.current = s.passed;
+        }
+        if (typeof s.showSolutions === "boolean") setShowSolutions(s.showSolutions);
+      },
     };
-  }, [checkId, passed, props.answer, selected]);
+  }, [checkId, passed, props.answer, selected, selectionCorrect, showSolutions]);
 
   useImperativeHandle(ref, () => handle, [handle]);
   useRegisterAssessmentHandle(checkId, handle);

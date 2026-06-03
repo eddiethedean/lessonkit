@@ -7,7 +7,7 @@ export type {
   StudioExportPaths,
 } from "./types";
 
-export { collectQuizAssessments, walkBlocks } from "./collectQuizzes";
+export { collectAssessments, collectQuizAssessments, walkBlocks } from "./collectQuizzes";
 export { assertExportableProject } from "./validateExport";
 export {
   buildLessonkitManifest,

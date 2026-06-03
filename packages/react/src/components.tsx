@@ -274,6 +274,26 @@ function QuizInner(props: QuizProps & { enclosingLessonId: LessonId }) {
         score,
         maxScore,
       }),
+      getCurrentState: () => ({
+        selected,
+        selectionCorrect,
+        quizPassed,
+      }),
+      resume: (state) => {
+        const s = state as {
+          selected?: string | null;
+          selectionCorrect?: boolean | null;
+          quizPassed?: boolean;
+        };
+        if (typeof s.selected === "string" || s.selected === null) setSelected(s.selected);
+        if (s.selectionCorrect === true || s.selectionCorrect === false || s.selectionCorrect === null) {
+          setSelectionCorrect(s.selectionCorrect);
+        }
+        if (typeof s.quizPassed === "boolean") {
+          setQuizPassed(s.quizPassed);
+          completedRef.current = s.quizPassed;
+        }
+      },
     };
   }, [checkId, quizPassed, selected, selectionCorrect]);
 

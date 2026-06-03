@@ -1,67 +1,78 @@
-import React, { createContext, useCallback, useContext, useImperativeHandle, useMemo, useRef } from "react";
+import React, { createContext, useCallback, useContext, useImperativeHandle, useMemo, useRef, useState } from "react";
 import type { AssessmentHandle, CheckId, CompoundHandle, CompoundResumeState } from "@lessonkit/core";
-import { createCompoundResumeState } from "@lessonkit/core";
+import { clampCompoundPageIndex, createCompoundResumeState } from "@lessonkit/core";
 import { aggregateAssessmentScores } from "./aggregateScores";
 
 type Registry = Map<CheckId, AssessmentHandle>;
 
-type CompoundContextValue = {
+type CompoundRegistryContextValue = {
   register: (checkId: CheckId, handle: AssessmentHandle) => () => void;
   getHandles: () => Registry;
-  activePageIndex: number;
-  setActivePageIndex: (index: number) => void;
 };
 
-const CompoundContext = createContext<CompoundContextValue | null>(null);
+const CompoundRegistryContext = createContext<CompoundRegistryContextValue | null>(null);
+const CompoundHandlesVersionContext = createContext(0);
 
 export function CompoundProvider({
   children,
-  activePageIndex,
-  onActivePageIndexChange,
+  activePageIndex: _activePageIndex,
+  onActivePageIndexChange: _onActivePageIndexChange,
 }: {
   children: React.ReactNode;
   activePageIndex: number;
   onActivePageIndexChange: (index: number) => void;
 }) {
   const registryRef = useRef<Registry>(new Map());
+  const [handlesVersion, setHandlesVersion] = useState(0);
 
   const register = useCallback((checkId: CheckId, handle: AssessmentHandle) => {
+    const prev = registryRef.current.get(checkId);
     registryRef.current.set(checkId, handle);
+    if (prev !== handle) {
+      setHandlesVersion((v) => v + 1);
+    }
     return () => {
-      registryRef.current.delete(checkId);
+      if (registryRef.current.get(checkId) === handle) {
+        registryRef.current.delete(checkId);
+        setHandlesVersion((v) => v + 1);
+      }
     };
   }, []);
 
-  const setActivePageIndex = useCallback(
-    (index: number) => {
-      onActivePageIndexChange(index);
-    },
-    [onActivePageIndexChange],
-  );
-
-  const value = useMemo(
+  const registryValue = useMemo(
     () => ({
       register,
       getHandles: () => registryRef.current,
-      activePageIndex,
-      setActivePageIndex,
     }),
-    [register, activePageIndex, setActivePageIndex],
+    [register],
   );
 
-  return <CompoundContext.Provider value={value}>{children}</CompoundContext.Provider>;
+  return (
+    <CompoundRegistryContext.Provider value={registryValue}>
+      <CompoundHandlesVersionContext.Provider value={handlesVersion}>
+        {children}
+      </CompoundHandlesVersionContext.Provider>
+    </CompoundRegistryContext.Provider>
+  );
 }
 
 export function useCompoundRegistry() {
-  return useContext(CompoundContext);
+  const registry = useContext(CompoundRegistryContext);
+  const handlesVersion = useContext(CompoundHandlesVersionContext);
+  if (!registry) return null;
+  return { ...registry, handlesVersion };
+}
+
+export function useCompoundHandlesVersion(): number {
+  return useContext(CompoundHandlesVersionContext);
 }
 
 export function useRegisterAssessmentHandle(checkId: CheckId, handle: AssessmentHandle | null) {
-  const ctx = useCompoundRegistry();
+  const registry = useContext(CompoundRegistryContext);
   React.useEffect(() => {
-    if (!ctx || !handle) return;
-    return ctx.register(checkId, handle);
-  }, [ctx, checkId, handle]);
+    if (!registry || !handle) return;
+    return registry.register(checkId, handle);
+  }, [registry, checkId, handle]);
 }
 
 export function useCompoundHandleRef(
@@ -70,10 +81,20 @@ export function useCompoundHandleRef(
     activePageIndex: number;
     setActivePageIndex: (index: number) => void;
     getHandles: () => Registry;
+    pageCount?: number;
     enableSolutionsButton?: boolean;
   },
 ) {
-  const { activePageIndex, setActivePageIndex, getHandles } = opts;
+  const { activePageIndex, setActivePageIndex, getHandles, pageCount } = opts;
+
+  const setIndexClamped = useCallback(
+    (index: number) => {
+      const next =
+        pageCount !== undefined ? clampCompoundPageIndex(index, pageCount) : Math.max(0, Math.floor(index));
+      setActivePageIndex(next);
+    },
+    [pageCount, setActivePageIndex],
+  );
 
   useImperativeHandle(
     ref,
@@ -99,14 +120,14 @@ export function useCompoundHandleRef(
         return createCompoundResumeState({ activePageIndex, childStates });
       },
       resume: (state: CompoundResumeState) => {
-        setActivePageIndex(state.activePageIndex);
+        setIndexClamped(state.activePageIndex);
         for (const [checkId, handle] of getHandles()) {
           const child = state.childStates[checkId];
           if (child && handle.resume) handle.resume(child);
         }
       },
     }),
-    [activePageIndex, setActivePageIndex, getHandles, opts.enableSolutionsButton],
+    [activePageIndex, setIndexClamped, getHandles, opts.enableSolutionsButton],
   );
 }
 

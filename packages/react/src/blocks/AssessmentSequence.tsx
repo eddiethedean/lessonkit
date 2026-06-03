@@ -1,5 +1,6 @@
-import React, { forwardRef, useCallback, useMemo, useState } from "react";
+import React, { forwardRef, useCallback, useEffect, useMemo, useState } from "react";
 import type { AssessmentBehaviour, BlockId, CompoundHandle } from "@lessonkit/core";
+import { clampCompoundPageIndex } from "@lessonkit/core";
 import { CompoundProvider, useCompoundHandleRef, useCompoundRegistry } from "../compound/CompoundProvider";
 import { useCompoundNavigation } from "../compound/useCompoundNavigation";
 import {
@@ -9,7 +10,7 @@ import {
 import { validateCompoundChildren } from "../compound/validateChildren";
 import { setLessonkitBlockType } from "../compound/blockType";
 import { useLessonkit } from "../hooks";
-import { normalizeComponentId } from "../runtime/validateComponentId";
+import { normalizeComponentId, isDevEnvironment } from "../runtime/validateComponentId";
 
 export type AssessmentSequenceProps = AssessmentBehaviour & {
   children: React.ReactNode;
@@ -36,17 +37,20 @@ const AssessmentSequenceInner = forwardRef<CompoundHandle, AssessmentSequenceInn
     useCompoundPersistence({
       courseId: config.courseId,
       compoundId,
+      pageCount: childArray.length,
       index,
       setIndex,
       enabled: persistEnabled,
     });
 
     const { goNext, goPrev, progress } = useCompoundNavigation(childArray.length, index, setIndex);
+    const visibleIndex = clampCompoundPageIndex(index, childArray.length);
 
     useCompoundHandleRef(ref, {
-      activePageIndex: index,
+      activePageIndex: visibleIndex,
       setActivePageIndex: setIndex,
       getHandles: () => ctx?.getHandles() ?? new Map(),
+      pageCount: childArray.length,
       enableSolutionsButton: props.enableSolutionsButton,
     });
 
@@ -67,7 +71,7 @@ const AssessmentSequenceInner = forwardRef<CompoundHandle, AssessmentSequenceInn
         </p>
         <div data-testid="assessment-sequence-step">
           {childArray.map((child, i) => (
-            <div key={child.key ?? i} hidden={i !== index}>
+            <div key={child.key ?? i} hidden={i !== visibleIndex}>
               {child}
             </div>
           ))}
@@ -76,7 +80,7 @@ const AssessmentSequenceInner = forwardRef<CompoundHandle, AssessmentSequenceInn
           <button
             type="button"
             data-testid="sequence-prev"
-            disabled={index === 0 || childArray.length === 0}
+            disabled={visibleIndex === 0 || childArray.length === 0}
             onClick={goPrev}
           >
             Previous
@@ -84,7 +88,7 @@ const AssessmentSequenceInner = forwardRef<CompoundHandle, AssessmentSequenceInn
           <button
             type="button"
             data-testid="sequence-next"
-            disabled={index >= childArray.length - 1 || childArray.length === 0}
+            disabled={visibleIndex >= childArray.length - 1 || childArray.length === 0}
             onClick={goNext}
           >
             Next
@@ -109,6 +113,13 @@ export const AssessmentSequence = forwardRef<CompoundHandle, AssessmentSequenceP
     ) as React.ReactElement[];
     const { config } = useLessonkit();
     const persistEnabled = config.session?.persistCompoundState !== false;
+
+    useEffect(() => {
+      if (!persistEnabled || props.blockId || !isDevEnvironment()) return;
+      console.warn(
+        "[lessonkit] <AssessmentSequence> without blockId shares one sessionStorage key; set blockId when persistCompoundState is enabled.",
+      );
+    }, [persistEnabled, props.blockId]);
 
     const initialIndex = useMemo(
       () => readCompoundInitialIndex(config.courseId, compoundId, childArray.length, persistEnabled),

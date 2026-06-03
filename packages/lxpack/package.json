@@ -55,8 +55,8 @@
     "lint": "echo \"(no lint configured yet)\""
   },
   "dependencies": {
-    "@lessonkit/core": "1.1.0",
-    "@lessonkit/themes": "1.1.0",
+    "@lessonkit/core": "1.2.0",
+    "@lessonkit/themes": "1.2.0",
     "@lxpack/api": "^0.6.2",
     "@lxpack/spa-bridge": "^0.6.2",
     "@lxpack/tracking-schema": "^0.6.2",

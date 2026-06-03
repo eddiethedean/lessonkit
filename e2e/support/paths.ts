@@ -6,6 +6,7 @@ export const E2E_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 export const REPO_ROOT = join(E2E_ROOT, "..");
 export const GOLDEN_DIR = join(REPO_ROOT, "examples/lxpack-golden");
 export const ASSESSMENTS_P0_DIR = join(REPO_ROOT, "examples/assessments-p0");
+export const INTERACTIVE_BOOK_DIR = join(REPO_ROOT, "examples/interactive-book");
 export const CLI_BIN = join(REPO_ROOT, "packages/cli/dist/bin.js");
 export const TELEMETRY_HARNESS_DIR = join(E2E_ROOT, "fixtures/telemetry-harness");
 export const ARTIFACTS_DIR = join(E2E_ROOT, ".artifacts");

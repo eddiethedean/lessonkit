@@ -64,6 +64,7 @@ export type {
 } from "./compound";
 export {
   COMPOUND_RESUME_SCHEMA_VERSION,
+  clampCompoundPageIndex,
   createCompoundResumeState,
   parseCompoundResumeState,
 } from "./compound";

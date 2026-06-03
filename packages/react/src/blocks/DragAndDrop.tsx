@@ -65,8 +65,24 @@ function DragAndDropInner(
         score,
         maxScore,
       }),
+      getCurrentState: () => ({ assignments, pool, passed, keyboardItem }),
+      resume: (state) => {
+        const s = state as {
+          assignments?: Record<string, string>;
+          pool?: string[];
+          passed?: boolean;
+          keyboardItem?: string | null;
+        };
+        if (s.assignments && typeof s.assignments === "object") setAssignments({ ...s.assignments });
+        if (Array.isArray(s.pool)) setPool([...s.pool]);
+        if (typeof s.passed === "boolean") {
+          setPassed(s.passed);
+          completedRef.current = s.passed;
+        }
+        if (s.keyboardItem === null || typeof s.keyboardItem === "string") setKeyboardItem(s.keyboardItem ?? null);
+      },
     };
-  }, [allCorrect, allFilled, assignments, checkId, props.targets]);
+  }, [allCorrect, allFilled, assignments, checkId, keyboardItem, passed, pool, props.targets]);
 
   useImperativeHandle(ref, () => handle, [handle]);
   useRegisterAssessmentHandle(checkId, handle);

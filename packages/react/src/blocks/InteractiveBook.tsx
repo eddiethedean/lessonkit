@@ -1,5 +1,6 @@
 import React, { forwardRef, useCallback, useEffect, useMemo, useState } from "react";
 import type { BlockId, CompoundHandle } from "@lessonkit/core";
+import { clampCompoundPageIndex } from "@lessonkit/core";
 import { CompoundProvider, useCompoundHandleRef, useCompoundRegistry } from "../compound/CompoundProvider";
 import { useCompoundNavigation } from "../compound/useCompoundNavigation";
 import {
@@ -40,17 +41,20 @@ const InteractiveBookInner = forwardRef<CompoundHandle, InteractiveBookInnerProp
     useCompoundPersistence({
       courseId: config.courseId,
       compoundId: blockId,
+      pageCount: pages.length,
       index,
       setIndex,
       enabled: persistEnabled,
     });
 
     const { goNext, goPrev, progress } = useCompoundNavigation(pages.length, index, setIndex);
+    const visibleIndex = clampCompoundPageIndex(index, pages.length);
 
     useCompoundHandleRef(ref, {
-      activePageIndex: index,
+      activePageIndex: visibleIndex,
       setActivePageIndex: setIndex,
       getHandles: () => ctx?.getHandles() ?? new Map(),
+      pageCount: pages.length,
     });
 
     const pageTitles = useMemo(
@@ -64,12 +68,12 @@ const InteractiveBookInner = forwardRef<CompoundHandle, InteractiveBookInnerProp
         "book_page_viewed",
         {
           blockId,
-          pageIndex: index,
-          pageTitle: pageTitles[index],
+          pageIndex: visibleIndex,
+          pageTitle: pageTitles[visibleIndex],
         },
         { lessonId },
       );
-    }, [index, blockId, lessonId, pages.length, pageTitles, track]);
+    }, [visibleIndex, blockId, lessonId, pages.length, pageTitles, track]);
 
     return (
       <section aria-label={props.title} data-testid="interactive-book" data-lk-block-id={blockId}>
@@ -87,7 +91,7 @@ const InteractiveBookInner = forwardRef<CompoundHandle, InteractiveBookInnerProp
           {pages.map((page, i) =>
             React.cloneElement(page, {
               key: page.key ?? page.props.blockId,
-              hidden: i !== index,
+              hidden: i !== visibleIndex,
               pageIndex: i,
               parentType: "InteractiveBook",
             }),
@@ -97,7 +101,7 @@ const InteractiveBookInner = forwardRef<CompoundHandle, InteractiveBookInnerProp
           <button
             type="button"
             data-testid="book-prev"
-            disabled={index === 0 || pages.length === 0}
+            disabled={visibleIndex === 0 || pages.length === 0}
             onClick={goPrev}
           >
             Previous
@@ -105,7 +109,7 @@ const InteractiveBookInner = forwardRef<CompoundHandle, InteractiveBookInnerProp
           <button
             type="button"
             data-testid="book-next"
-            disabled={index >= pages.length - 1 || pages.length === 0}
+            disabled={visibleIndex >= pages.length - 1 || pages.length === 0}
             onClick={goNext}
           >
             Next

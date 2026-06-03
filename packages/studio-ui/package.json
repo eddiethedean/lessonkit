@@ -1,6 +1,6 @@
 {
   "name": "@lessonkit/studio-ui",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "private": false,
   "description": "React visual editor UI for LessonKit Studio.",
   "license": "Apache-2.0",

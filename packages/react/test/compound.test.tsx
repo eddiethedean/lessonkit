@@ -7,6 +7,7 @@ import { createSessionStoragePort } from "@lessonkit/core";
 import {
   AssessmentSequence,
   Course,
+  FindHotspot,
   InteractiveBook,
   Lesson,
   Page,
@@ -138,6 +139,117 @@ describe("InteractiveBook", () => {
     expect(raw).toBeTruthy();
     const parsed = JSON.parse(raw!) as { activePageIndex: number };
     expect(parsed.activePageIndex).toBe(1);
+  });
+
+  it("does not wipe childStates from sessionStorage on mount", () => {
+    saveCompoundState(
+      createSessionStoragePort(),
+      COURSE_ID,
+      "book-child",
+      createCompoundResumeState({
+        activePageIndex: 0,
+        childStates: { "hs-1": { selected: "t1", checked: true } },
+      }),
+    );
+
+    render(
+      wrap(
+        <InteractiveBook blockId="book-child" title="Book">
+          <Page blockId="p1" title="Hotspot">
+            <FindHotspot
+              checkId="hs-1"
+              src="/img.png"
+              alt="Map"
+              targets={[{ id: "t1", label: "A", x: 10, y: 10 }]}
+              correctTargetId="t1"
+            />
+          </Page>
+        </InteractiveBook>,
+        true,
+      ),
+    );
+
+    const raw = sessionStorage.getItem(compoundStateStorageKey(COURSE_ID, "book-child"));
+    expect(raw).toBeTruthy();
+    const parsed = JSON.parse(raw!) as { childStates: Record<string, { selected?: string; checked?: boolean }> };
+    expect(parsed.childStates["hs-1"]?.selected).toBe("t1");
+    expect(parsed.childStates["hs-1"]?.checked).toBe(true);
+  });
+
+  it("clamps corrupt activePageIndex from sessionStorage", () => {
+    saveCompoundState(
+      createSessionStoragePort(),
+      COURSE_ID,
+      "book-clamp",
+      createCompoundResumeState({ activePageIndex: 99 }),
+    );
+
+    render(
+      wrap(
+        <InteractiveBook blockId="book-clamp" title="Book">
+          <Page blockId="p1" title="One">
+            <Text>Only page</Text>
+          </Page>
+        </InteractiveBook>,
+        true,
+      ),
+    );
+
+    expect(screen.getByText("Only page")).toBeTruthy();
+    expect(screen.getByText("Page 1 of 1")).toBeTruthy();
+  });
+
+  it("restores TrueFalse answer state from sessionStorage", () => {
+    saveCompoundState(
+      createSessionStoragePort(),
+      COURSE_ID,
+      "book-tf",
+      createCompoundResumeState({
+        activePageIndex: 0,
+        childStates: {
+          "tf-resume": { selected: true, selectionCorrect: true, passed: true, showSolutions: false },
+        },
+      }),
+    );
+
+    render(
+      wrap(
+        <InteractiveBook blockId="book-tf" title="Book">
+          <Page blockId="p1" title="Quiz">
+            <TrueFalse checkId="tf-resume" question="True?" answer={true} />
+          </Page>
+        </InteractiveBook>,
+        true,
+      ),
+    );
+
+    expect((screen.getByLabelText("True") as HTMLInputElement).checked).toBe(true);
+  });
+
+  it("uses persistCompoundState true by default", () => {
+    saveCompoundState(
+      createSessionStoragePort(),
+      COURSE_ID,
+      "book-default",
+      createCompoundResumeState({ activePageIndex: 1 }),
+    );
+
+    render(
+      <Course title="Compound" courseId={COURSE_ID} config={{ xapi: { enabled: false } }}>
+        <Lesson title="L1" lessonId="lesson-1">
+          <InteractiveBook blockId="book-default" title="Book">
+            <Page blockId="p1" title="One">
+              <Text>Page one</Text>
+            </Page>
+            <Page blockId="p2" title="Two">
+              <Text>Page two</Text>
+            </Page>
+          </InteractiveBook>
+        </Lesson>
+      </Course>,
+    );
+
+    expect(screen.getByText("Page two")).toBeTruthy();
   });
 });
 

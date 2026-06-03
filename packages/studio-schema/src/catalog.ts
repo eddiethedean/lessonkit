@@ -1,9 +1,10 @@
-export const studioBlockCatalogVersion = 1 as const;
+export const studioBlockCatalogVersion = 2 as const;
 
 export type StudioBlockCatalogEntry = {
   type: string;
   category: "primitive" | "layout" | "learning" | "stub";
   description: string;
+  displayName?: string;
   props: { name: string; type: string; required: boolean; description: string }[];
   rendererStatus: "implemented" | "stub";
 };
@@ -132,6 +133,249 @@ export function buildStudioBlockCatalog(): {
           { name: "id", type: "string", required: true, description: "Stable block id." },
           { name: "src", type: "string", required: true, description: "Video URL or path." },
           { name: "title", type: "string", required: false, description: "Accessible title." },
+        ],
+        rendererStatus: "implemented",
+      },
+      {
+        type: "trueFalse",
+        category: "learning",
+        displayName: "True/False",
+        description: "Maps to @lessonkit/react TrueFalse.",
+        props: [
+          { name: "id", type: "string", required: true, description: "Stable block id." },
+          { name: "checkId", type: "CheckId", required: true, description: "Assessment id." },
+          { name: "question", type: "string", required: true, description: "Question text." },
+          { name: "answer", type: "boolean", required: true, description: "Correct answer." },
+        ],
+        rendererStatus: "implemented",
+      },
+      {
+        type: "fillInTheBlanks",
+        category: "learning",
+        displayName: "Fill in the Blanks",
+        description: "Maps to @lessonkit/react FillInTheBlanks.",
+        props: [
+          { name: "id", type: "string", required: true, description: "Stable block id." },
+          { name: "checkId", type: "CheckId", required: true, description: "Assessment id." },
+          {
+            name: "template",
+            type: "string",
+            required: true,
+            description: "Text with *answer* markers.",
+          },
+          {
+            name: "blanks",
+            type: "{ id, answer }[]",
+            required: false,
+            description: "Optional explicit blanks.",
+          },
+        ],
+        rendererStatus: "implemented",
+      },
+      {
+        type: "markTheWords",
+        category: "learning",
+        displayName: "Mark the Words",
+        description: "Maps to @lessonkit/react MarkTheWords.",
+        props: [
+          { name: "id", type: "string", required: true, description: "Stable block id." },
+          { name: "checkId", type: "CheckId", required: true, description: "Assessment id." },
+          { name: "text", type: "string", required: true, description: "Source text." },
+          { name: "correctWords", type: "string[]", required: true, description: "Words to mark." },
+        ],
+        rendererStatus: "implemented",
+      },
+      {
+        type: "dragTheWords",
+        category: "learning",
+        displayName: "Drag the Words",
+        description: "Maps to @lessonkit/react DragTheWords.",
+        props: [
+          { name: "id", type: "string", required: true, description: "Stable block id." },
+          { name: "checkId", type: "CheckId", required: true, description: "Assessment id." },
+          {
+            name: "template",
+            type: "string",
+            required: true,
+            description: "Sentence with *zone* markers.",
+          },
+          { name: "words", type: "string[]", required: true, description: "Draggable words." },
+        ],
+        rendererStatus: "implemented",
+      },
+      {
+        type: "dragAndDrop",
+        category: "learning",
+        displayName: "Drag and Drop",
+        description: "Maps to @lessonkit/react DragAndDrop.",
+        props: [
+          { name: "id", type: "string", required: true, description: "Stable block id." },
+          { name: "checkId", type: "CheckId", required: true, description: "Assessment id." },
+          { name: "items", type: "DragItem[]", required: true, description: "Draggable items." },
+          { name: "targets", type: "DropTarget[]", required: true, description: "Drop zones." },
+        ],
+        rendererStatus: "implemented",
+      },
+      {
+        type: "page",
+        category: "layout",
+        displayName: "Page",
+        description: "Compound page (chapter) with nested blocks.",
+        props: [
+          { name: "id", type: "string", required: true, description: "Stable block id." },
+          { name: "blockId", type: "BlockId", required: true, description: "Telemetry block id." },
+          { name: "title", type: "string", required: false, description: "Page title." },
+          { name: "blocks", type: "StudioBlock[]", required: true, description: "Page content." },
+        ],
+        rendererStatus: "implemented",
+      },
+      {
+        type: "interactiveBook",
+        category: "layout",
+        displayName: "Interactive Book",
+        description: "Maps to @lessonkit/react InteractiveBook.",
+        props: [
+          { name: "id", type: "string", required: true, description: "Stable block id." },
+          { name: "blockId", type: "BlockId", required: true, description: "Telemetry block id." },
+          { name: "title", type: "string", required: true, description: "Book title." },
+          { name: "pages", type: "StudioPageBlock[]", required: true, description: "Book chapters." },
+          {
+            name: "showBookScore",
+            type: "boolean",
+            required: false,
+            description: "Show aggregate score.",
+          },
+        ],
+        rendererStatus: "implemented",
+      },
+      {
+        type: "assessmentSequence",
+        category: "learning",
+        displayName: "Question Set",
+        description: "Maps to @lessonkit/react AssessmentSequence.",
+        props: [
+          { name: "id", type: "string", required: true, description: "Stable block id." },
+          { name: "blockId", type: "BlockId", required: false, description: "Telemetry block id." },
+          {
+            name: "sequential",
+            type: "boolean",
+            required: false,
+            description: "One question at a time.",
+          },
+          { name: "blocks", type: "StudioBlock[]", required: true, description: "Assessment blocks." },
+        ],
+        rendererStatus: "implemented",
+      },
+      {
+        type: "accordion",
+        category: "learning",
+        displayName: "Accordion",
+        description: "Maps to @lessonkit/react Accordion.",
+        props: [
+          { name: "id", type: "string", required: true, description: "Stable block id." },
+          { name: "blockId", type: "BlockId", required: true, description: "Telemetry block id." },
+          {
+            name: "sections",
+            type: "AccordionSection[]",
+            required: true,
+            description: "Accordion panels.",
+          },
+        ],
+        rendererStatus: "implemented",
+      },
+      {
+        type: "dialogCards",
+        category: "learning",
+        displayName: "Dialog Cards",
+        description: "Maps to @lessonkit/react DialogCards.",
+        props: [
+          { name: "id", type: "string", required: true, description: "Stable block id." },
+          { name: "blockId", type: "BlockId", required: true, description: "Telemetry block id." },
+          { name: "cards", type: "DialogCard[]", required: true, description: "Flip cards." },
+        ],
+        rendererStatus: "implemented",
+      },
+      {
+        type: "flashcards",
+        category: "learning",
+        displayName: "Flashcards",
+        description: "Maps to @lessonkit/react Flashcards.",
+        props: [
+          { name: "id", type: "string", required: true, description: "Stable block id." },
+          { name: "blockId", type: "BlockId", required: true, description: "Telemetry block id." },
+          { name: "cards", type: "Flashcard[]", required: true, description: "Card deck." },
+          {
+            name: "selfScore",
+            type: "boolean",
+            required: false,
+            description: "Enable self-score mode.",
+          },
+        ],
+        rendererStatus: "implemented",
+      },
+      {
+        type: "imageHotspots",
+        category: "learning",
+        displayName: "Image Hotspots",
+        description: "Maps to @lessonkit/react ImageHotspots.",
+        props: [
+          { name: "id", type: "string", required: true, description: "Stable block id." },
+          { name: "blockId", type: "BlockId", required: true, description: "Telemetry block id." },
+          { name: "src", type: "string", required: true, description: "Image URL or path." },
+          { name: "alt", type: "string", required: true, description: "Alt text." },
+          { name: "hotspots", type: "HotspotSpec[]", required: true, description: "Hotspot regions." },
+        ],
+        rendererStatus: "implemented",
+      },
+      {
+        type: "imageSlider",
+        category: "learning",
+        displayName: "Image Slider",
+        description: "Maps to @lessonkit/react ImageSlider.",
+        props: [
+          { name: "id", type: "string", required: true, description: "Stable block id." },
+          { name: "blockId", type: "BlockId", required: true, description: "Telemetry block id." },
+          { name: "slides", type: "ImageSlide[]", required: true, description: "Slides." },
+        ],
+        rendererStatus: "implemented",
+      },
+      {
+        type: "findHotspot",
+        category: "learning",
+        displayName: "Find the Hotspot",
+        description: "Maps to @lessonkit/react FindHotspot.",
+        props: [
+          { name: "id", type: "string", required: true, description: "Stable block id." },
+          { name: "checkId", type: "CheckId", required: true, description: "Assessment id." },
+          { name: "src", type: "string", required: true, description: "Image URL or path." },
+          { name: "alt", type: "string", required: true, description: "Alt text." },
+          { name: "targets", type: "HotspotTarget[]", required: true, description: "Click targets." },
+          {
+            name: "correctTargetId",
+            type: "string",
+            required: true,
+            description: "Correct target id.",
+          },
+        ],
+        rendererStatus: "implemented",
+      },
+      {
+        type: "findMultipleHotspots",
+        category: "learning",
+        displayName: "Find Multiple Hotspots",
+        description: "Maps to @lessonkit/react FindMultipleHotspots.",
+        props: [
+          { name: "id", type: "string", required: true, description: "Stable block id." },
+          { name: "checkId", type: "CheckId", required: true, description: "Assessment id." },
+          { name: "src", type: "string", required: true, description: "Image URL or path." },
+          { name: "alt", type: "string", required: true, description: "Alt text." },
+          { name: "targets", type: "HotspotTarget[]", required: true, description: "Click targets." },
+          {
+            name: "correctTargetIds",
+            type: "string[]",
+            required: true,
+            description: "Correct target ids.",
+          },
         ],
         rendererStatus: "implemented",
       },

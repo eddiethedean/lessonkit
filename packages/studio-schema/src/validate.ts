@@ -145,6 +145,8 @@ function validateBlockIds(
         break;
       }
       case "container":
+      case "page":
+      case "assessmentSequence":
         validateBlockIds(
           block.blocks,
           `${blockPath}.blocks`,
@@ -154,6 +156,61 @@ function validateBlockIds(
           seenCheckIds,
         );
         break;
+      case "interactiveBook":
+        for (let p = 0; p < block.pages.length; p++) {
+          validateBlockIds(
+            block.pages[p]!.blocks,
+            `${blockPath}.pages[${p}].blocks`,
+            issues,
+            seenIds,
+            depth + 1,
+            seenCheckIds,
+          );
+        }
+        break;
+      case "accordion":
+        for (let s = 0; s < block.sections.length; s++) {
+          validateBlockIds(
+            block.sections[s]!.blocks,
+            `${blockPath}.sections[${s}].blocks`,
+            issues,
+            seenIds,
+            depth + 1,
+            seenCheckIds,
+          );
+        }
+        break;
+      case "imageHotspots":
+        for (let h = 0; h < block.hotspots.length; h++) {
+          validateBlockIds(
+            block.hotspots[h]!.blocks,
+            `${blockPath}.hotspots[${h}].blocks`,
+            issues,
+            seenIds,
+            depth + 1,
+            seenCheckIds,
+          );
+        }
+        break;
+      case "trueFalse":
+      case "fillInTheBlanks":
+      case "markTheWords":
+      case "dragTheWords":
+      case "dragAndDrop":
+      case "findHotspot":
+      case "findMultipleHotspots": {
+        const checkResult = validateId(block.checkId, `${blockPath}.checkId`);
+        if (!checkResult.ok) issues.push(...checkResult.issues);
+        else if (seenCheckIds.has(block.checkId)) {
+          issues.push({
+            path: `${blockPath}.checkId`,
+            message: `duplicate checkId "${block.checkId}" (also at ${seenCheckIds.get(block.checkId)})`,
+          });
+        } else {
+          seenCheckIds.set(block.checkId, blockPath);
+        }
+        break;
+      }
       default:
         break;
     }

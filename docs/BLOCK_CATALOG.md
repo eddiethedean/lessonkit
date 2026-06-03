@@ -168,7 +168,29 @@ These LessonKit blocks are React implementations of common H5P **question** cont
 
 **Not in v2:** compound types (`InteractiveBook`, `SlideDeck`, …) — see [roadmap](../project/roadmap.md#h5p-aligned-capability-backlog).
 
-Import `@lessonkit/react/block-catalog.v2.json` or `buildBlockCatalog({ version: 2 })` (default). Use `{ version: 1 }` for legacy generators.
+Import `@lessonkit/react/block-catalog.v2.json` or `buildBlockCatalog({ version: 2 })`. Use `{ version: 1 }` for legacy generators.
+
+---
+
+## Catalog v3 (framework 1.2.0 — shipped)
+
+**Default in 1.2.0:** `buildBlockCatalog()` and `buildBlockCatalog({ version: 3 })`.
+
+Adds content primitives (`Text`, `Heading`, `Image`), compound containers (`Page`, `InteractiveBook`), Tier C/D blocks (`Accordion`, `DialogCards`, `Flashcards`, `ImageHotspots`, `ImageSlider`, `FindHotspot`, `FindMultipleHotspots`), and `allowedChildTypes` / `compoundContract` on compound entries.
+
+| Block | H5P display name (typical) |
+| --- | --- |
+| `Page` | Column / page (Interactive Book chapter) |
+| `InteractiveBook` | Interactive Book |
+| `Accordion` | Accordion |
+| `DialogCards` | Dialog Cards |
+| `Flashcards` | Flashcards |
+| `ImageHotspots` | Image Hotspots |
+| `ImageSlider` | Image Slider |
+| `FindHotspot` | Find the Hotspot |
+| `FindMultipleHotspots` | Find Multiple Hotspots |
+
+Import `@lessonkit/react/block-catalog.v3.json` or pin `{ version: 2 }` until generators are updated.
 
 ---
 

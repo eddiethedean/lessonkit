@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  clampCompoundPageIndex,
   createCompoundResumeState,
   parseCompoundResumeState,
   COMPOUND_RESUME_SCHEMA_VERSION,
@@ -27,6 +28,12 @@ describe("compound resume state", () => {
   it("rejects invalid schema", () => {
     expect(parseCompoundResumeState(null)).toBeNull();
     expect(parseCompoundResumeState({ schemaVersion: 99 })).toBeNull();
+  });
+
+  it("clamps activePageIndex via clampCompoundPageIndex", () => {
+    expect(clampCompoundPageIndex(99, 3)).toBe(2);
+    expect(clampCompoundPageIndex(-1, 3)).toBe(0);
+    expect(clampCompoundPageIndex(1, 0)).toBe(0);
   });
 
   it("drops invalid childStates entries", () => {

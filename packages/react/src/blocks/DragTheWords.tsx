@@ -86,8 +86,25 @@ function DragTheWordsInner(
         score,
         maxScore: handleMax,
       }),
+      getCurrentState: () => ({ zones, pool, passed, keyboardWord }),
+      resume: (state) => {
+        const s = state as {
+          zones?: Record<string, string>;
+          pool?: string[];
+          passed?: boolean;
+          keyboardWord?: string | null;
+        };
+        if (s.zones && typeof s.zones === "object") setZones({ ...s.zones });
+        if (Array.isArray(s.pool)) setPool([...s.pool]);
+        if (typeof s.passed === "boolean") {
+          setPassed(s.passed);
+          completedRef.current = s.passed;
+          answeredRef.current = s.passed;
+        }
+        if (s.keyboardWord === null || typeof s.keyboardWord === "string") setKeyboardWord(s.keyboardWord ?? null);
+      },
     };
-  }, [allFilled, answers.length, checkId, maxScore, passedThreshold, score, zones]);
+  }, [allFilled, answers.length, checkId, keyboardWord, maxScore, passed, passedThreshold, pool, score, zones]);
 
   useImperativeHandle(ref, () => handle, [handle]);
   useRegisterAssessmentHandle(checkId, handle);

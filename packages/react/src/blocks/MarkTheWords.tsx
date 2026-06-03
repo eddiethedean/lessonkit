@@ -76,8 +76,26 @@ function MarkTheWordsInner(
         score,
         maxScore: handleMax,
       }),
+      getCurrentState: () => ({
+        marked: [...marked],
+        passed,
+        showSolutions,
+      }),
+      resume: (state) => {
+        const s = state as {
+          marked?: number[];
+          passed?: boolean;
+          showSolutions?: boolean;
+        };
+        if (Array.isArray(s.marked)) setMarked(new Set(s.marked));
+        if (typeof s.passed === "boolean") {
+          setPassed(s.passed);
+          completedRef.current = s.passed;
+        }
+        if (typeof s.showSolutions === "boolean") setShowSolutions(s.showSolutions);
+      },
     };
-  }, [checkId, marked, maxScore, passedThreshold, score, tokens]);
+  }, [checkId, marked, maxScore, passed, passedThreshold, score, showSolutions, tokens]);
 
   useImperativeHandle(ref, () => handle, [handle]);
   useRegisterAssessmentHandle(checkId, handle);

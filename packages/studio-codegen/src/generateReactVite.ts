@@ -3,7 +3,7 @@ import { buildLessonkitManifest } from "./toDescriptor";
 import type { GeneratedFile, StudioExportOptions } from "./types";
 import { emitAppTsx } from "./emitJsx";
 
-const DEFAULT_LESSONKIT_VERSION = "1.1.0";
+const DEFAULT_LESSONKIT_VERSION = "1.2.0";
 const DEFAULT_STUDIO_VERSION = "0.3.1";
 
 function resolveVersions(options: StudioExportOptions) {
