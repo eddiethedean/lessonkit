@@ -82,7 +82,7 @@ describe("@lessonkit/studio-renderer", () => {
     expect(screen.getByRole("alert").textContent).toContain("missing-lesson");
   });
 
-  it("warns in dev when project fails validation", () => {
+  it("shows validation alert when project fails validation", () => {
     const loaded = loadStudioProject(goldenRaw);
     expect(loaded.ok).toBe(true);
     if (!loaded.ok) return;
@@ -92,15 +92,7 @@ describe("@lessonkit/studio-renderer", () => {
       pages: [{ ...loaded.project.pages[0]!, id: "1bad" as "lesson-1", title: "X", blocks: [] }],
     };
 
-    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
-    vi.stubEnv("NODE_ENV", "development");
-    try {
-      render(<StudioRenderer project={invalid} />);
-      expect(screen.getByRole("alert").textContent).toContain("Invalid Studio project");
-      expect(warn).toHaveBeenCalled();
-    } finally {
-      vi.unstubAllEnvs();
-      warn.mockRestore();
-    }
+    render(<StudioRenderer project={invalid} />);
+    expect(screen.getByRole("alert").textContent).toContain("Invalid Studio project");
   });
 });

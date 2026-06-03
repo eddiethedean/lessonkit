@@ -29,7 +29,7 @@ function ValidationBanner({ store }: { store: StoreApi<EditorStoreState> }) {
   if (!issues.length) return null;
   return (
     <div className="lk-studio-validation" role="alert">
-      <strong>Validation</strong>
+      <strong>Fix validation issues to save</strong>
       <ul>
         {issues.map((issue) => (
           <li key={`${issue.path}:${issue.message}`}>

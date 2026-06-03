@@ -67,7 +67,7 @@ for:
   - [x] theming surface contract
   - [x] telemetry semantics
 - [x] Catalog is exported in machine-readable form (JSON) and documented
-- [x] `@lessonkit/react` is capable of rendering every catalog block in an example
+- [x] `@lessonkit/react` is capable of rendering every framework catalog block in an example (v1 + v2 block catalog)
 
 ## 0.9.x — Conformance harness (parity proof)
 
@@ -88,6 +88,13 @@ for:
 - [x] Extension points: lifecycle (`setup`/`dispose`), `onTelemetry`, `wrapTrackingSink`, `scoreAssessment`, `interactionBlocks` metadata
 - [x] [Plugins reference](../reference/plugins.md) and [plugin cookbook](../guides/react-developers/plugin-cookbook.md)
 - [x] Example plugin: `examples/_shared/plugins/consoleAnalyticsPlugin.ts`
+
+## 1.1.0 — Assessment contract + Tier B P0 blocks (framework)
+
+- [x] `AssessmentHandle` / `assessment_*` telemetry on P0 blocks (`TrueFalse`, `FillInTheBlanks`, `DragAndDrop`, `DragTheWords`, `MarkTheWords`, `AssessmentSequence`)
+- [x] Block catalog v2 (`block-catalog.v2.json`) with interaction types
+- [x] Example `examples/assessments-p0` and [MIGRATION-1.0-to-1.1.md](../MIGRATION-1.0-to-1.1.md)
+- [x] `lessonkit init` template pins `^1.1.0`
 
 ## 1.0.0 — Studio gate checklist (framework)
 
@@ -119,7 +126,7 @@ for:
 - [x] Checklist / video blocks: minimal real preview renderers (not stubs)
 - [x] Monorepo CI: `build:packages` includes `studio-builder` → `studio-ui`; `build:apps` includes `lessonkit-studio-web`
 - [x] [Studio editor guide](../guides/studio/editor.md) documented
-- [ ] npm publish: push `studio-v0.2.0` after `main` CI is green (publishes schema, builder, renderer, ui at 0.2.0)
+- [x] npm publish: `studio-v0.2.0` (schema, builder, renderer, ui)
 
 > **Not included in 0.2.0:** codegen (`studio-codegen`), GitHub sync, AI workflows, `lessonkit-studio` CLI, Tauri desktop, schema v2.
 
@@ -131,7 +138,7 @@ for:
 - [x] Integration test: codegen → vite build → `lessonkit package --target scorm12`
 - [x] Example [studio-export](https://github.com/eddiethedean/lessonkit/tree/main/examples/studio-export) and [Studio export guide](../guides/studio/export.md)
 - [x] Monorepo: `build:packages` includes `studio-codegen`; Studio Release publishes five packages
-- [ ] npm publish: push `studio-v0.3.0` after `main` CI is green
+- [x] npm publish: `studio-v0.3.0` (five Studio packages; framework pinned at 1.0.2 on npm tag)
 
 > **Not included in 0.3.0:** GitHub sync (`studio-github`), AI workflows, `lessonkit-studio` CLI, Tauri desktop, schema v2, hosted `lessonkit.app`.
 

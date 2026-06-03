@@ -25,6 +25,7 @@ function TrueFalseInner(
   const assessment = useAssessmentState(enclosingLessonId);
   const { plugins, config, session } = useLessonkit();
   const [selected, setSelected] = useState<boolean | null>(null);
+  const [selectionCorrect, setSelectionCorrect] = useState<boolean | null>(null);
   const [showSolutions, setShowSolutions] = useState(false);
   const [passed, setPassed] = useState(false);
   const completedRef = useRef(false);
@@ -34,6 +35,7 @@ function TrueFalseInner(
     completedRef.current = false;
     setPassed(false);
     setSelected(null);
+    setSelectionCorrect(null);
     setShowSolutions(false);
   };
 
@@ -79,7 +81,8 @@ function TrueFalseInner(
         pluginCtx,
       ) ?? null;
     const correct = value === props.answer;
-    const scored = scoreFromCustom(custom, correct);
+    const scored = scoreFromCustom(custom, correct, 1, props.passingScore);
+    setSelectionCorrect(scored.passed);
     assessment.answer({
       checkId,
       interactionType: INTERACTION,
@@ -133,9 +136,9 @@ function TrueFalseInner(
           Correct answer: <strong>{props.answer ? "True" : "False"}</strong>
         </p>
       ) : null}
-      {selected !== null ? (
+      {selected !== null && selectionCorrect !== null ? (
         <p role="status" aria-live="polite">
-          {selected === props.answer ? "Correct" : "Try again"}
+          {selectionCorrect ? "Correct" : "Try again"}
         </p>
       ) : null}
       {props.enableRetry && passed ? (

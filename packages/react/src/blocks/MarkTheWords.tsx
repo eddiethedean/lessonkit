@@ -3,8 +3,9 @@ import type { AssessmentBaseProps, AssessmentHandle, AssessmentInteractionType }
 import type { LessonId } from "@lessonkit/core";
 import { AssessmentLessonGuard } from "../assessment/AssessmentLessonGuard";
 import { useRegisterAssessmentHandle } from "../assessment/AssessmentSequenceContext";
+import { meetsPassingThreshold } from "../assessment/scoring";
 import { useAssessmentState } from "../assessment/useAssessmentState";
-import { normalizeComponentId } from "../runtime/validateComponentId";
+import { isDevEnvironment, normalizeComponentId } from "../runtime/validateComponentId";
 
 export type MarkTheWordsProps = AssessmentBaseProps & {
   /** Plain text; words listed in `correctWords` are selectable targets. */
@@ -53,15 +54,17 @@ function MarkTheWordsInner(
     return indices;
   }, [tokens, correctSet]);
 
-  const allMarked =
-    selectableIndices.length > 0 && selectableIndices.every((i) => marked.has(i));
+  const hasTargets = selectableIndices.length > 0;
+  const allMarked = hasTargets && selectableIndices.every((i) => marked.has(i));
+  const maxScore = selectableIndices.length;
+  const score = allMarked ? maxScore : marked.size;
+  const passedThreshold = meetsPassingThreshold(score, maxScore || 1, props.passingScore);
 
   const handle = useMemo((): AssessmentHandle => {
-    const maxScore = selectableIndices.length || 1;
-    const score = allMarked ? maxScore : marked.size;
+    const handleMax = maxScore || 1;
     return {
       getScore: () => score,
-      getMaxScore: () => maxScore,
+      getMaxScore: () => handleMax,
       getAnswerGiven: () => marked.size > 0,
       resetTask: reset,
       showSolutions: () => setShowSolutions(true),
@@ -69,12 +72,12 @@ function MarkTheWordsInner(
         checkId,
         interactionType: INTERACTION,
         response: [...marked].map((i) => tokens[i]),
-        correct: allMarked,
+        correct: passedThreshold,
         score,
-        maxScore,
+        maxScore: handleMax,
       }),
     };
-  }, [allMarked, checkId, marked, selectableIndices.length, tokens]);
+  }, [checkId, marked, maxScore, passedThreshold, score, tokens]);
 
   useImperativeHandle(ref, () => handle, [handle]);
   useRegisterAssessmentHandle(checkId, handle);
@@ -90,10 +93,18 @@ function MarkTheWordsInner(
   };
 
   useEffect(() => {
-    if (!allMarked || completedRef.current) return;
+    if (!hasTargets) {
+      if (isDevEnvironment()) {
+        console.warn(
+          "[lessonkit] MarkTheWords: no tokens match correctWords",
+          props.correctWords,
+        );
+      }
+      return;
+    }
+    if (!passedThreshold || completedRef.current) return;
     completedRef.current = true;
     setPassed(true);
-    const maxScore = selectableIndices.length || 1;
     assessment.answer({
       checkId,
       interactionType: INTERACTION,
@@ -104,14 +115,32 @@ function MarkTheWordsInner(
     assessment.complete({
       checkId,
       interactionType: INTERACTION,
-      score: maxScore,
+      score,
       maxScore,
       passingScore: props.passingScore ?? maxScore,
     });
-  }, [allMarked, assessment, checkId, marked, props.passingScore, props.text, selectableIndices.length, tokens]);
+  }, [
+    assessment,
+    checkId,
+    hasTargets,
+    marked,
+    maxScore,
+    passedThreshold,
+    props.passingScore,
+    props.correctWords,
+    props.text,
+    score,
+    tokens,
+  ]);
 
   return (
     <section aria-label="Mark the Words" data-lk-check-id={checkId}>
+      {!hasTargets ? (
+        <p role="alert">
+          No words in this sentence match <code>correctWords</code>. Check spelling and capitalization
+          in the source text.
+        </p>
+      ) : null}
       <p id={`${checkId}-hint`}>Select the correct words in the sentence.</p>
       <p aria-describedby={`${checkId}-hint`}>
         {tokens.map((token, i) => {

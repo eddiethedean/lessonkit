@@ -9,7 +9,7 @@ import {
   InputBlock,
   TextBlock,
 } from "./blocks/primitives";
-import { ChecklistBlock, VideoBlock } from "./blocks/stubs";
+import { ChecklistBlock, VideoBlock } from "./blocks/media";
 
 export function renderBlock(block: StudioBlock): React.ReactNode {
   switch (block.type) {

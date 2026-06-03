@@ -40,7 +40,7 @@ describe("Studio codegen → build → package", () => {
       outDir: projectDir,
       exportMode: "renderer",
       lessonkitVersion: "1.0.2",
-      studioVersion: "0.3.0",
+      studioVersion: "0.3.1",
     });
 
     await patchPackageJsonForMonorepo(join(projectDir, "package.json"));

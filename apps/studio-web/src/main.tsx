@@ -90,7 +90,7 @@ function App() {
   }, [onProjectChange]);
 
   const editorKey = useMemo(() => project.course.courseId + project.pages.length, [project]);
-  const studioVersion = (pkg as { studioVersion?: string }).studioVersion ?? "0.3.0";
+  const studioVersion = (pkg as { studioVersion?: string }).studioVersion ?? "0.3.1";
 
   return (
     <div style={{ padding: "1rem", maxWidth: 1400, margin: "0 auto" }}>

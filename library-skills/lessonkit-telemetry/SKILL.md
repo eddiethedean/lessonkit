@@ -6,7 +6,7 @@ description: >-
   Use when adding analytics, LRS, SCORM completion, or custom plugins.
 license: Apache-2.0
 metadata:
-  lessonkit-version: "1.0.2"
+  lessonkit-version: "1.1.0"
 ---
 
 # LessonKit telemetry and plugins

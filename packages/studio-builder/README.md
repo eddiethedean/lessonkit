@@ -8,7 +8,7 @@ Headless editor state for LessonKit Studio: commands, undo/redo, validation, and
 npm install @lessonkit/studio-builder @lessonkit/studio-schema @lessonkit/core
 ```
 
-Studio **0.2.0** is tested with **@lessonkit/core@1.0.2**.
+Studio **0.3.1** on `main` is developed against **@lessonkit/core@1.1.0**.
 
 ## Usage
 

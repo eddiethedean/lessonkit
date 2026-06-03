@@ -1,6 +1,6 @@
 {
   "name": "@lessonkit/studio-schema",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "private": false,
   "description": "LessonKit Studio project schema, validation, and normalization (v1).",
   "license": "Apache-2.0",

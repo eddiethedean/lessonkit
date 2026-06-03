@@ -5,10 +5,6 @@ import { Course, Lesson, ThemeProvider, type LessonkitConfig } from "@lessonkit/
 import type { ThemePresetName } from "@lessonkit/themes";
 import { renderPageBlocks } from "./renderBlock";
 
-function isDevEnvironment(): boolean {
-  return typeof process !== "undefined" && process.env.NODE_ENV !== "production";
-}
-
 export type StudioRendererProps = {
   project: StudioProjectV1;
   config?: Omit<LessonkitConfig, "courseId">;
@@ -29,21 +25,14 @@ export function StudioRenderer({
     return project.pages.filter((p) => p.id === activePageId);
   }, [project.pages, activePageId]);
 
-  const devValidation = useMemo(() => {
-    if (!isDevEnvironment()) return null;
-    return validateStudioProject(project);
-  }, [project]);
+  const validation = useMemo(() => validateStudioProject(project), [project]);
 
-  if (devValidation && !devValidation.ok) {
-    console.warn(
-      "[lessonkit-studio] StudioRenderer project validation issues:",
-      devValidation.issues,
-    );
+  if (!validation.ok) {
     return (
       <div className={className} role="alert">
-        <p>Invalid Studio project (development validation).</p>
+        <p>Invalid Studio project.</p>
         <ul>
-          {devValidation.issues.map((issue) => (
+          {validation.issues.map((issue) => (
             <li key={`${issue.path}:${issue.message}`}>
               {issue.path}: {issue.message}
             </li>

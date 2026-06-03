@@ -11,7 +11,7 @@ LessonKit Studio **project format v1**: parse, validate, normalize, migrate, and
 npm install @lessonkit/studio-schema
 ```
 
-Requires a compatible [`@lessonkit/core`](https://www.npmjs.com/package/@lessonkit/core) release (Studio **0.2.0** is tested with **@lessonkit/core@1.0.2**).
+Requires a compatible [`@lessonkit/core`](https://www.npmjs.com/package/@lessonkit/core) release (Studio **0.3.1** on `main` uses **@lessonkit/core@1.1.0**).
 
 ## Usage
 

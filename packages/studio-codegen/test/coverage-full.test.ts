@@ -22,6 +22,7 @@ describe("coverage gaps", () => {
       { type: "heading", id: "h", level: 3 as const, text: "H" },
       { type: "image", id: "i", src: "assets/p.png", alt: "pic" },
       { type: "button", id: "b", label: "Go", href: "https://example.com" },
+      { type: "button", id: "b2", label: "Submit" },
       { type: "input", id: "in", label: "Name", placeholder: "x", inputType: "email" as const },
       { type: "container", id: "c", blocks: [{ type: "text", id: "t", text: "inner" }] },
       {
@@ -37,8 +38,25 @@ describe("coverage gaps", () => {
     ] satisfies StudioBlock[];
 
     for (const block of blocks) {
-      expect(emitBlockJsx(block, "  ").length).toBeGreaterThan(0);
+      const jsx = emitBlockJsx(block, "  ");
+      expect(jsx.length).toBeGreaterThan(0);
+      if (block.type === "button" && !block.href) {
+        expect(jsx).toContain("<button");
+      }
     }
+  });
+
+  it("assertExportableProject warns when multiple pages are present", () => {
+    const result = assertExportableProject({
+      ...sampleProject,
+      pages: [
+        { id: "lesson-1", title: "One", blocks: [] },
+        { id: "lesson-2", title: "Two", blocks: [] },
+      ],
+    });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.warnings?.some((w) => w.path === "pages")).toBe(true);
   });
 
   it("assertExportableProject reports duplicate checkId", () => {

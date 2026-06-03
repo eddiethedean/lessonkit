@@ -5,6 +5,31 @@ All notable changes to the LessonKit monorepo are documented here.
 - [`@lessonkit/*`](https://www.npmjs.com/org/lessonkit) — core platform (tag `v*.*.*`)
 - [`@lessonkit/studio-schema`](https://www.npmjs.com/package/@lessonkit/studio-schema), [`@lessonkit/studio-renderer`](https://www.npmjs.com/package/@lessonkit/studio-renderer), [`@lessonkit/studio-builder`](https://www.npmjs.com/package/@lessonkit/studio-builder), [`@lessonkit/studio-ui`](https://www.npmjs.com/package/@lessonkit/studio-ui), [`@lessonkit/studio-codegen`](https://www.npmjs.com/package/@lessonkit/studio-codegen) — Studio authoring (tag `studio-v*`, same `@lessonkit` org)
 
+## Unreleased
+
+Framework **1.1.0** on `main` (no npm bump yet).
+
+### Fixed
+
+- **@lessonkit/react:** `TrueFalse` feedback respects plugin `passed`; `passingScore` applied in `scoreFromCustom`; `autoCheck` dedupes `assessment_answered`; empty FIB/DragTheWords templates and zero-token `MarkTheWords` show author-facing errors.
+- **Docs / policy:** Version badges, SECURITY supported versions, README migration link, broken CHANGELOG paths.
+
+## [studio-v0.3.1] - 2026-06-03
+
+Maintenance release for all five Studio packages at **0.3.1** (framework **1.1.0** on `main`; npm publish pins framework at release time).
+
+### Fixed
+
+- **@lessonkit/studio-schema:** `validateStudioProject` matches `parse` constraints; duplicate `checkId`; scenario nesting depth.
+- **@lessonkit/studio-builder:** Autosave skips projects with validation errors.
+- **@lessonkit/studio-codegen:** JSX export parity with renderer (button, input, checklist, video); multi-page LXPack warning; default export pins `@lessonkit/*` **1.1.0**.
+- **@lessonkit/studio-renderer:** Invalid projects always show validation panel (not dev-only); checklist/video blocks in `media.tsx`.
+- **@lessonkit/studio-ui:** Export panel shows multi-page LXPack warnings.
+
+### Changed
+
+- All Studio packages bumped to **0.3.1**.
+
 ## [1.1.0] - 2026-06-03
 
 Framework **1.1.x** — Assessment contract and Tier B P0 blocks. All seven `@lessonkit/*` packages ship at **1.1.0** (no Studio package changes in this release).
@@ -39,7 +64,7 @@ Code generation and export: `@lessonkit/studio-codegen`, export panel in studio-
 
 - All Studio packages bumped to **0.3.0**; Studio Release publishes five packages.
 
-> **Not included:** GitHub sync, hosted Studio, `lessonkit-studio` CLI (see [STUDIO_READINESS.md](studio-readiness.md)).
+> **Not included:** GitHub sync, hosted Studio, `lessonkit-studio` CLI (see [STUDIO_READINESS.md](https://github.com/eddiethedean/lessonkit/blob/main/docs/STUDIO_READINESS.md)).
 
 ## [studio-v0.2.0] - 2026-06-01
 
@@ -57,7 +82,7 @@ Visual editor MVP: headless builder, React editor UI, and local `apps/studio-web
 - **@lessonkit/studio-schema** / **@lessonkit/studio-renderer** (0.2.0): checklist and video blocks use minimal real preview UI (replacing 0.1 stubs).
 - **Monorepo:** `build:packages` and Studio Release workflow include builder and ui.
 
-> **Not included:** codegen, GitHub sync, hosted Studio, `lessonkit-studio` CLI (see [STUDIO_READINESS.md](studio-readiness.md)).
+> **Not included:** codegen, GitHub sync, hosted Studio, `lessonkit-studio` CLI (see [STUDIO_READINESS.md](https://github.com/eddiethedean/lessonkit/blob/main/docs/STUDIO_READINESS.md)).
 
 ## [studio-v0.1.0] - 2026-06-01
 
@@ -69,7 +94,7 @@ First public preview of LessonKit Studio packages. Requires **@lessonkit/core**,
 - **@lessonkit/studio-renderer**: `StudioRenderer` mapping Studio blocks to `@lessonkit/react` (`Course`, `Lesson`, `Quiz`, `Scenario`) and presentational primitives; checklist/video stubs.
 - **Monorepo**: `examples/studio-minimal`, [Studio project format v1](docs/guides/studio/project-format-v1.md), [Studio Release](https://github.com/eddiethedean/lessonkit/blob/main/.github/workflows/studio-release.yml) workflow (`studio-v*` tags).
 
-> **Not included in 0.1.0:** visual editor app, `lessonkit-studio` CLI, builder/codegen packages (planned 0.2+). See [STUDIO_READINESS.md](studio-readiness.md).
+> **Not included in 0.1.0:** visual editor app, `lessonkit-studio` CLI, builder/codegen packages (planned 0.2+). See [STUDIO_READINESS.md](https://github.com/eddiethedean/lessonkit/blob/main/docs/STUDIO_READINESS.md).
 
 ## [1.0.2] - 2026-06-01
 

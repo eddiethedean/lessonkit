@@ -12,13 +12,18 @@ export function emitBlockJsx(block: StudioBlock, indent: string): string {
     case "image":
       return `${indent}<img className="lk-studio-image" src=${jsxStringLiteral(block.src)} alt=${jsxStringLiteral(block.alt)} />`;
     case "button": {
-      const href = block.href
-        ? ` href=${jsxStringLiteral(block.href)}`
-        : "";
-      return `${indent}<a className="lk-studio-button"${href}>${escapeHtmlText(block.label)}</a>`;
+      if (block.href) {
+        return `${indent}<a className="lk-studio-button" href=${jsxStringLiteral(block.href)}>${escapeHtmlText(block.label)}</a>`;
+      }
+      return `${indent}<button type="button" className="lk-studio-button">${escapeHtmlText(block.label)}</button>`;
     }
-    case "input":
-      return `${indent}<label className="lk-studio-input">\n${indent}  <span>${escapeHtmlText(block.label)}</span>\n${indent}  <input type=${jsxStringLiteral(block.inputType ?? "text")} placeholder=${jsxStringLiteral(block.placeholder ?? "")} />\n${indent}</label>`;
+    case "input": {
+      const inputId = `lk-studio-input-${block.id}`;
+      const placeholder = block.placeholder
+        ? ` placeholder=${jsxStringLiteral(block.placeholder)}`
+        : "";
+      return `${indent}<div className="lk-studio-input">\n${indent}  <label htmlFor=${jsxStringLiteral(inputId)}>${escapeHtmlText(block.label)}</label>\n${indent}  <input id=${jsxStringLiteral(inputId)} type=${jsxStringLiteral(block.inputType ?? "text")} name=${jsxStringLiteral(block.id)}${placeholder} />\n${indent}</div>`;
+    }
     case "container":
       return `${indent}<div className="lk-studio-container">\n${emitBlocksJsx(block.blocks, indent + "  ")}\n${indent}</div>`;
     case "quiz":
@@ -28,10 +33,13 @@ export function emitBlockJsx(block: StudioBlock, indent: string): string {
       return `${indent}<Scenario${blockId}>\n${emitBlocksJsx(block.blocks, indent + "  ")}\n${indent}</Scenario>`;
     }
     case "checklist":
-      return `${indent}<ul className="lk-studio-checklist">\n${block.items.map((item) => `${indent}  <li><label><input type="checkbox" readOnly /> ${escapeHtmlText(item)}</label></li>`).join("\n")}\n${indent}</ul>`;
+      return `${indent}<section className="lk-studio-checklist" aria-label="Checklist">\n${indent}  <ul className="lk-studio-checklist-list">\n${block.items.map((item) => `${indent}    <li><label className="lk-studio-checklist-item"><input type="checkbox" disabled readOnly /><span>${escapeHtmlText(item)}</span></label></li>`).join("\n")}\n${indent}  </ul>\n${indent}</section>`;
     case "video": {
-      const title = block.title ? ` title=${jsxStringLiteral(block.title)}` : "";
-      return `${indent}<video className="lk-studio-video" src=${jsxStringLiteral(block.src)} controls${title} />`;
+      const titleAttr = block.title ? ` aria-label=${jsxStringLiteral(block.title)}` : ` aria-label="Video"`;
+      const titleHeading = block.title
+        ? `\n${indent}  <h3 className="lk-studio-video-title">${escapeHtmlText(block.title)}</h3>`
+        : "";
+      return `${indent}<section className="lk-studio-video"${titleAttr}>${titleHeading}\n${indent}  <video className="lk-studio-video-player" controls preload="metadata" src=${jsxStringLiteral(block.src)}>\n${indent}    <track kind="captions" />\n${indent}  </video>\n${indent}</section>`;
     }
     default: {
       const _exhaustive: never = block;

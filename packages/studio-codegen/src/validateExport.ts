@@ -3,6 +3,7 @@ import {
   validateStudioProject,
   type StudioProjectV1,
 } from "@lessonkit/studio-schema";
+import type { StudioValidationIssue } from "@lessonkit/studio-schema";
 import type { ExportValidationResult, StudioExportOptions } from "./types";
 import { collectQuizAssessments } from "./collectQuizzes";
 
@@ -36,5 +37,18 @@ export function assertExportableProject(
     };
   }
 
-  return { ok: true, project: normalizeStudioProject(project) };
+  const warnings: StudioValidationIssue[] = [];
+  if (project.pages.length > 1) {
+    warnings.push({
+      path: "pages",
+      message:
+        "LXPack single-spa export maps only the first page to lessonkit.json; additional pages stay in project.json and exported React lessons",
+    });
+  }
+
+  return {
+    ok: true,
+    project: normalizeStudioProject(project),
+    ...(warnings.length ? { warnings } : {}),
+  };
 }

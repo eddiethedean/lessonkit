@@ -31,7 +31,7 @@ export type GeneratedFile = {
 };
 
 export type ExportValidationResult =
-  | { ok: true; project: StudioProjectV1 }
+  | { ok: true; project: StudioProjectV1; warnings?: StudioValidationIssue[] }
   | { ok: false; issues: StudioValidationIssue[] };
 
 export type PackageStudioOptions = StudioExportOptions & {

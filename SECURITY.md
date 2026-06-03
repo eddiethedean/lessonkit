@@ -2,13 +2,14 @@
 
 ## Supported versions
 
-LessonKit is in active development on the **0.x** line. Security fixes are applied to the latest
+LessonKit framework **1.x** is the current line on `main`. Security fixes are applied to the latest
 release on `main` and backported to the current npm `@lessonkit/*` versions when practical.
 
 | Version | Supported |
 | ------- | --------- |
-| 0.6.x   | Yes       |
-| < 0.6   | No        |
+| 1.1.x   | Yes       |
+| 1.0.x   | Best effort |
+| < 1.0   | No        |
 
 Published packages: [@lessonkit on npm](https://www.npmjs.com/org/lessonkit).
 

@@ -1,4 +1,4 @@
-# Studio visual editor (0.3.0)
+# Studio visual editor (0.3.1)
 
 ::::{admonition} Alpha
 :class: warning

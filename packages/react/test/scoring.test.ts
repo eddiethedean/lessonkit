@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { scoreFromCustom } from "../src/assessment/scoring";
+import {
+  meetsPassingThreshold,
+  scoreFromCustom,
+} from "../src/assessment/scoring";
 
 describe("scoreFromCustom", () => {
   it("uses explicit passed flag and score", () => {
@@ -41,5 +44,29 @@ describe("scoreFromCustom", () => {
   it("falls back to boolean correctness", () => {
     expect(scoreFromCustom(null, true, 5)).toEqual({ score: 5, maxScore: 5, passed: true });
     expect(scoreFromCustom(null, false)).toEqual({ score: 0, maxScore: 1, passed: false });
+  });
+
+  it("applies passingScore threshold for ratio and fallback scores", () => {
+    expect(scoreFromCustom({ score: 2, maxScore: 4 }, false, 4, 2)).toEqual({
+      score: 2,
+      maxScore: 4,
+      passed: true,
+    });
+    expect(scoreFromCustom({ score: 1, maxScore: 4 }, true, 4, 2)).toEqual({
+      score: 1,
+      maxScore: 4,
+      passed: false,
+    });
+    expect(scoreFromCustom(null, true, 4, 2)).toEqual({
+      score: 4,
+      maxScore: 4,
+      passed: true,
+    });
+  });
+
+  it("meetsPassingThreshold uses absolute points", () => {
+    expect(meetsPassingThreshold(2, 4, 2)).toBe(true);
+    expect(meetsPassingThreshold(1, 4, 2)).toBe(false);
+    expect(meetsPassingThreshold(4, 4)).toBe(true);
   });
 });

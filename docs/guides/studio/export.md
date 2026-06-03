@@ -1,4 +1,4 @@
-# Exporting from Studio (0.3.0)
+# Exporting from Studio (0.3.1)
 
 ::::{admonition} Alpha
 :class: warning
@@ -76,7 +76,9 @@ npx lessonkit package --target scorm12 --no-build
 
 ## Validation
 
-Export refuses invalid projects (`validateStudioProject`, at least one page, unique quiz `checkId`s). Fix issues in the editor validation banner before exporting.
+Export refuses invalid projects (`validateStudioProject`, at least one page, unique quiz `checkId`s, non-empty block fields). Fix issues in the editor validation banner before exporting.
+
+**Multi-page projects:** LXPack `single-spa` descriptors include only the **first page** in `lessonkit.json`. Additional pages remain in `project.json` and as extra `<Lesson>` entries in exported React apps. The export panel shows a warning when `pages.length > 1`.
 
 ## Examples and tests
 

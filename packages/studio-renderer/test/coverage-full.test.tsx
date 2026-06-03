@@ -98,7 +98,7 @@ describe("@lessonkit/studio-renderer coverage", () => {
     expect(screen.getByLabelText("Name").getAttribute("type")).toBe("text");
   });
 
-  it("skips dev validation in production", () => {
+  it("shows validation alert in production for invalid projects", () => {
     const loaded = loadStudioProject({
       schemaVersion: 1,
       course: { courseId: "cov-course", title: "Cov" },
@@ -112,11 +112,7 @@ describe("@lessonkit/studio-renderer coverage", () => {
       pages: [{ ...loaded.project.pages[0]!, id: "1bad" as "lesson-1", title: "X", blocks: [] }],
     };
 
-    vi.stubEnv("NODE_ENV", "production");
-    try {
-      expect(() => render(<StudioRenderer project={invalid} />)).toThrow();
-    } finally {
-      vi.unstubAllEnvs();
-    }
+    render(<StudioRenderer project={invalid} />);
+    expect(screen.getByRole("alert").textContent).toContain("Invalid Studio project");
   });
 });

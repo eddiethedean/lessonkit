@@ -3,6 +3,7 @@ import type { ChangeEvent } from "react";
 import { visuallyHiddenStyle } from "@lessonkit/accessibility";
 import type { AssessmentScoreResult, BlockId, CourseId, LessonId } from "@lessonkit/core";
 import type { McqAssessmentDescriptor } from "@lessonkit/lxpack";
+import { meetsPassingThreshold } from "./assessment/scoring";
 import { LessonkitProvider, type LessonkitConfig } from "./context";
 import { useCompletion, useLessonkit, useQuizState } from "./hooks";
 import { LessonContext, useEnclosingLessonId } from "./lessonContext";
@@ -234,8 +235,8 @@ function QuizInner(props: QuizProps & { enclosingLessonId: LessonId }) {
   const isChoiceCorrect = (choice: string, custom: AssessmentScoreResult | null): boolean => {
     if (!custom) return choice === props.answer;
     if (custom.passed !== undefined) return custom.passed;
-    if (custom.maxScore != null && custom.maxScore > 0) {
-      return custom.score / custom.maxScore >= 1;
+    if (custom.maxScore != null && custom.maxScore > 0 && custom.score != null) {
+      return meetsPassingThreshold(custom.score, custom.maxScore, props.passingScore);
     }
     return choice === props.answer;
   };
@@ -288,7 +289,7 @@ function QuizInner(props: QuizProps & { enclosingLessonId: LessonId }) {
                   const maxScore = custom?.maxScore ?? 1;
                   quiz.complete({
                     checkId,
-                    score: custom?.score ?? 1,
+                    score: custom?.score ?? maxScore,
                     maxScore,
                     passingScore: props.passingScore ?? maxScore,
                   });

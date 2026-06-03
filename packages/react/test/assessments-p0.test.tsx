@@ -1,6 +1,7 @@
 import React from "react";
 import { afterEach, describe, expect, it } from "vitest";
 import { cleanup, render, screen, fireEvent } from "@testing-library/react";
+import { defineAssessmentPlugin } from "@lessonkit/core";
 import {
   AssessmentSequence,
   Course,
@@ -48,6 +49,24 @@ describe("1.1.x P0 assessment blocks", () => {
     );
     fireEvent.click(screen.getByLabelText("False"));
     expect(screen.getByRole("status").textContent).toContain("Try again");
+  });
+
+  it("TrueFalse feedback follows scoreAssessment passed flag", () => {
+    const plugin = defineAssessmentPlugin({
+      id: "tf-scorer",
+      version: "1",
+      kind: "assessment",
+      scoreAssessment: () => ({ passed: true, score: 1, maxScore: 1 }),
+    });
+    render(
+      <Course title="Assessments" courseId="assessments-p0" config={{ xapi: { enabled: false }, plugins: [plugin] }}>
+        <Lesson title="L1" lessonId="lesson-1">
+          <TrueFalse checkId="tf-plugin" question="Sky is blue?" answer={true} />
+        </Lesson>
+      </Course>,
+    );
+    fireEvent.click(screen.getByLabelText("False"));
+    expect(screen.getByRole("status").textContent).toContain("Correct");
   });
 
   it("MarkTheWords marks correct tokens", () => {

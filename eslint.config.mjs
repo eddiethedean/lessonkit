@@ -6,6 +6,7 @@ const sourceFiles = [
   "packages/*/src/**/*.{ts,tsx}",
   "packages/*/test/**/*.{ts,tsx}",
   "packages/*/stories/**/*.{ts,tsx}",
+  "apps/*/src/**/*.{ts,tsx}",
   "examples/*/src/**/*.{ts,tsx}",
   "examples/*/test/**/*.{ts,tsx}",
   "templates/*/src/**/*.{ts,tsx}",

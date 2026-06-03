@@ -3,8 +3,9 @@ import type { AssessmentBaseProps, AssessmentHandle, AssessmentInteractionType }
 import type { LessonId } from "@lessonkit/core";
 import { AssessmentLessonGuard } from "../assessment/AssessmentLessonGuard";
 import { useRegisterAssessmentHandle } from "../assessment/AssessmentSequenceContext";
+import { meetsPassingThreshold } from "../assessment/scoring";
 import { useAssessmentState } from "../assessment/useAssessmentState";
-import { normalizeComponentId } from "../runtime/validateComponentId";
+import { isDevEnvironment, normalizeComponentId } from "../runtime/validateComponentId";
 
 export type DragTheWordsProps = AssessmentBaseProps & {
   /** Sentence with `*` around drop zones; `words` are draggable options. */
@@ -45,9 +46,11 @@ function DragTheWordsInner(
   const [keyboardWord, setKeyboardWord] = useState<string | null>(null);
   const [passed, setPassed] = useState(false);
   const completedRef = useRef(false);
+  const answeredRef = useRef(false);
 
   const reset = () => {
     completedRef.current = false;
+    answeredRef.current = false;
     setPassed(false);
     setZones(Object.fromEntries(answers.map((_, i) => [`zone-${i}`, ""])));
     setPool([...props.words]);
@@ -58,20 +61,20 @@ function DragTheWordsInner(
     reset();
   }, [checkId, props.template, props.words.join("\0")]);
 
-  const allFilled = answers.every((_, i) => (zones[`zone-${i}`] ?? "").length > 0);
-  const allCorrect = answers.every(
-    (ans, i) => (zones[`zone-${i}`] ?? "").trim().toLowerCase() === ans.toLowerCase(),
-  );
+  const hasZones = answers.length > 0;
+  const allFilled = hasZones && answers.every((_, i) => (zones[`zone-${i}`] ?? "").length > 0);
+  let score = 0;
+  answers.forEach((ans, i) => {
+    if ((zones[`zone-${i}`] ?? "").trim().toLowerCase() === ans.toLowerCase()) score += 1;
+  });
+  const maxScore = answers.length;
+  const passedThreshold = meetsPassingThreshold(score, maxScore || 1, props.passingScore);
 
   const handle = useMemo((): AssessmentHandle => {
-    const maxScore = answers.length || 1;
-    let score = 0;
-    answers.forEach((ans, i) => {
-      if ((zones[`zone-${i}`] ?? "").trim().toLowerCase() === ans.toLowerCase()) score += 1;
-    });
+    const handleMax = maxScore || 1;
     return {
       getScore: () => score,
-      getMaxScore: () => maxScore,
+      getMaxScore: () => handleMax,
       getAnswerGiven: () => allFilled,
       resetTask: reset,
       showSolutions: () => {},
@@ -79,12 +82,12 @@ function DragTheWordsInner(
         checkId,
         interactionType: INTERACTION,
         response: zones,
-        correct: allCorrect,
+        correct: passedThreshold,
         score,
-        maxScore,
+        maxScore: handleMax,
       }),
     };
-  }, [allCorrect, allFilled, answers, checkId, zones]);
+  }, [allFilled, answers.length, checkId, maxScore, passedThreshold, score, zones]);
 
   useImperativeHandle(ref, () => handle, [handle]);
   useRegisterAssessmentHandle(checkId, handle);
@@ -112,30 +115,43 @@ function DragTheWordsInner(
   };
 
   const check = () => {
+    if (!hasZones) {
+      if (isDevEnvironment()) {
+        console.warn("[lessonkit] DragTheWords has no drop zones in template");
+      }
+      return;
+    }
     if (!allFilled) return;
-    assessment.answer({
-      checkId,
-      interactionType: INTERACTION,
-      question: props.template,
-      response: zones,
-      correct: allCorrect,
-    });
-    if (allCorrect && !completedRef.current) {
+    if (!answeredRef.current) {
+      answeredRef.current = true;
+      assessment.answer({
+        checkId,
+        interactionType: INTERACTION,
+        question: props.template,
+        response: zones,
+        correct: passedThreshold,
+      });
+    }
+    if (passedThreshold && !completedRef.current) {
       completedRef.current = true;
       setPassed(true);
       assessment.complete({
         checkId,
         interactionType: INTERACTION,
-        score: answers.length,
-        maxScore: answers.length,
-        passingScore: props.passingScore ?? answers.length,
+        score,
+        maxScore,
+        passingScore: props.passingScore ?? maxScore,
       });
     }
   };
 
   useEffect(() => {
+    if (!allFilled) answeredRef.current = false;
+  }, [allFilled]);
+
+  useEffect(() => {
     if (props.autoCheck && allFilled) check();
-  }, [allFilled, props.autoCheck, zones]);
+  }, [allFilled, props.autoCheck, zones, passedThreshold]);
 
   return (
     <section aria-label="Drag the Words" data-lk-check-id={checkId}>
@@ -187,9 +203,12 @@ function DragTheWordsInner(
       <button type="button" data-testid="check-drag-words" disabled={!allFilled || passed} onClick={check}>
         Check
       </button>
+      {!hasZones ? (
+        <p role="alert">This activity has no drop zones. Wrap answers in asterisks in the template.</p>
+      ) : null}
       {allFilled ? (
         <p role="status" aria-live="polite">
-          {passed || allCorrect ? "Correct" : "Try again"}
+          {passed || passedThreshold ? "Correct" : "Try again"}
         </p>
       ) : null}
     </section>

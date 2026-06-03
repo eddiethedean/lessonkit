@@ -1,6 +1,6 @@
 # Migration checklist
 
-- [ ] All `@lessonkit/*` at `^1.0.2`
+- [ ] All `@lessonkit/*` at `^1.1.0` (or pin `^1.0.2` until you adopt 1.1 assessment blocks)
 - [ ] Replace `buildTrackEvent` → `buildTelemetryEvent`
 - [ ] Replace `defineLessonkitPlugin` → `define*Plugin` + `createPluginRegistry`
 - [ ] Remove `setLxpackBridgeMode`; use `config.lxpack.bridge`

@@ -128,6 +128,11 @@ export function ExportPanel({ project, className, onDownloadZip }: ExportPanelPr
           {validation.issues.map((i: { path: string; message: string }) => `${i.path}: ${i.message}`).join("; ")}
         </p>
       ) : null}
+      {validation.ok && validation.warnings?.length ? (
+        <p className="lk-studio-export-warning" role="status">
+          {validation.warnings.map((i) => `${i.path}: ${i.message}`).join(" ")}
+        </p>
+      ) : null}
       {message ? <p className="lk-studio-export-message">{message}</p> : null}
       <p className="lk-studio-export-hint">
         Browser export ships a React/Vite project. LMS packaging (SCORM, xAPI, cmi5) requires Node and{" "}

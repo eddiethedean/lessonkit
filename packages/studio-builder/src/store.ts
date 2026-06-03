@@ -167,7 +167,7 @@ export function createEditorStore(initialProject: StudioProjectV1): StoreApi<Edi
         bindAutosave(
           store.subscribe,
           () => get().project,
-          () => get().isDirty,
+          () => get().isDirty && get().validationIssues.length === 0,
           (p) => {
             onSave(p);
             set({ isDirty: false });

@@ -3,8 +3,9 @@ import type { AssessmentBaseProps, AssessmentHandle, AssessmentInteractionType }
 import type { LessonId } from "@lessonkit/core";
 import { AssessmentLessonGuard } from "../assessment/AssessmentLessonGuard";
 import { useRegisterAssessmentHandle } from "../assessment/AssessmentSequenceContext";
+import { meetsPassingThreshold } from "../assessment/scoring";
 import { useAssessmentState } from "../assessment/useAssessmentState";
-import { normalizeComponentId } from "../runtime/validateComponentId";
+import { isDevEnvironment, normalizeComponentId } from "../runtime/validateComponentId";
 
 export type FillInBlankSpec = { id: string; answer: string };
 
@@ -49,9 +50,11 @@ function FillInTheBlanksInner(
   const [passed, setPassed] = useState(false);
   const [showSolutions, setShowSolutions] = useState(false);
   const completedRef = useRef(false);
+  const answeredRef = useRef(false);
 
   const reset = () => {
     completedRef.current = false;
+    answeredRef.current = false;
     setPassed(false);
     setValues(Object.fromEntries(blanks.map((b) => [b.id, ""])));
     setShowSolutions(false);
@@ -61,20 +64,20 @@ function FillInTheBlanksInner(
     reset();
   }, [checkId, props.template, blanks.map((b) => b.answer).join("\0")]);
 
-  const allFilled = blanks.every((b) => (values[b.id] ?? "").trim().length > 0);
-  const allCorrect = blanks.every(
-    (b) => (values[b.id] ?? "").trim().toLowerCase() === b.answer.toLowerCase(),
-  );
+  const hasBlanks = blanks.length > 0;
+  const allFilled = hasBlanks && blanks.every((b) => (values[b.id] ?? "").trim().length > 0);
+  let score = 0;
+  blanks.forEach((b) => {
+    if ((values[b.id] ?? "").trim().toLowerCase() === b.answer.toLowerCase()) score += 1;
+  });
+  const maxScore = blanks.length;
+  const passedThreshold = meetsPassingThreshold(score, maxScore || 1, props.passingScore);
 
   const handle = useMemo((): AssessmentHandle => {
-    const maxScore = blanks.length || 1;
-    let score = 0;
-    blanks.forEach((b) => {
-      if ((values[b.id] ?? "").trim().toLowerCase() === b.answer.toLowerCase()) score += 1;
-    });
+    const handleMax = maxScore || 1;
     return {
       getScore: () => score,
-      getMaxScore: () => maxScore,
+      getMaxScore: () => handleMax,
       getAnswerGiven: () => allFilled,
       resetTask: reset,
       showSolutions: () => setShowSolutions(true),
@@ -82,42 +85,54 @@ function FillInTheBlanksInner(
         checkId,
         interactionType: INTERACTION,
         response: values,
-        correct: allCorrect,
+        correct: passedThreshold,
         score,
-        maxScore,
+        maxScore: handleMax,
       }),
     };
-  }, [allCorrect, allFilled, blanks, checkId, values]);
+  }, [allFilled, blanks.length, checkId, maxScore, passedThreshold, score, values]);
 
   useImperativeHandle(ref, () => handle, [handle]);
   useRegisterAssessmentHandle(checkId, handle);
 
   const check = () => {
+    if (!hasBlanks) {
+      if (isDevEnvironment()) {
+        console.warn("[lessonkit] FillInTheBlanks has no blanks in template");
+      }
+      return;
+    }
     if (!allFilled) return;
-    const correct = allCorrect;
-    assessment.answer({
-      checkId,
-      interactionType: INTERACTION,
-      question: props.template,
-      response: values,
-      correct,
-    });
-    if (correct && !completedRef.current) {
+    if (!answeredRef.current) {
+      answeredRef.current = true;
+      assessment.answer({
+        checkId,
+        interactionType: INTERACTION,
+        question: props.template,
+        response: values,
+        correct: passedThreshold,
+      });
+    }
+    if (passedThreshold && !completedRef.current) {
       completedRef.current = true;
       setPassed(true);
       assessment.complete({
         checkId,
         interactionType: INTERACTION,
-        score: blanks.length,
-        maxScore: blanks.length,
-        passingScore: props.passingScore ?? blanks.length,
+        score,
+        maxScore,
+        passingScore: props.passingScore ?? maxScore,
       });
     }
   };
 
   useEffect(() => {
+    if (!allFilled) answeredRef.current = false;
+  }, [allFilled]);
+
+  useEffect(() => {
     if (props.autoCheck && allFilled) check();
-  }, [allFilled, props.autoCheck, values]);
+  }, [allFilled, props.autoCheck, values, passedThreshold]);
 
   const reveal = showSolutions || (passed && props.enableSolutionsButton);
 
@@ -152,9 +167,12 @@ function FillInTheBlanksInner(
           Check
         </button>
       ) : null}
+      {!hasBlanks ? (
+        <p role="alert">This activity has no blanks. Add text wrapped in asterisks, e.g. The *answer* here.</p>
+      ) : null}
       {allFilled ? (
         <p role="status" aria-live="polite">
-          {passed || allCorrect ? "Correct" : "Try again"}
+          {passed || passedThreshold ? "Correct" : "Try again"}
         </p>
       ) : null}
       {props.enableRetry && passed ? (
