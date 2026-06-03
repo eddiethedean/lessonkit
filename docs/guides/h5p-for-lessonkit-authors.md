@@ -79,4 +79,4 @@ A few LessonKit ids differ from H5P labels where we already shipped or need clea
 3. **Visual path** — [LessonKit Studio](studio/index.md)
 4. **Ship to LMS** — [Packaging](../reference/packaging.md) · [Vibe coding: shipping](vibe-coding/shipping-to-lms.md)
 
-Roadmap detail: [H5P-aligned backlog](../../ROADMAP.md#h5p-aligned-capability-backlog) in the repo.
+Roadmap detail: [H5P-aligned backlog](../project/roadmap.md#h5p-aligned-capability-backlog) in the repo.

@@ -4,7 +4,7 @@ import { join, relative } from "node:path";
 import { expect, test } from "@playwright/test";
 import type { Server } from "node:http";
 import { completeAssessmentsP0ScormShell } from "../../fixtures/assessments-p0-flow";
-import { ARTIFACTS_DIR, ASSESSMENTS_P0_DIR, REPO_ROOT } from "../../support/paths";
+import { ARTIFACTS_DIR, ASSESSMENTS_P0_DIR, CLI_BIN, REPO_ROOT } from "../../support/paths";
 import { injectScorm12Api, readScorm12State } from "../../support/scorm/inject";
 import { resolveScorm12LaunchPath, unpackScormZip } from "../../support/scorm/unpack";
 import { startStaticServer, stopServer } from "../../support/standalone-server";
@@ -17,12 +17,15 @@ test.describe("assessments-p0 scorm12 LMS", () => {
 
   test.beforeAll(async () => {
     mkdirSync(ARTIFACTS_DIR, { recursive: true });
-    execSync("npm run build:packages", { cwd: REPO_ROOT, stdio: "inherit" });
+    execSync("npm run build:packages && npm run -w @lessonkit/cli build", {
+      cwd: REPO_ROOT,
+      stdio: "inherit",
+    });
     execSync("npm run build -w lessonkit-example-assessments-p0", {
       cwd: REPO_ROOT,
       stdio: "inherit",
     });
-    execSync("npx lessonkit package --target scorm12 --no-build", {
+    execSync(`node ${CLI_BIN} package --target scorm12 --no-build`, {
       cwd: ASSESSMENTS_P0_DIR,
       stdio: "inherit",
     });

@@ -8,7 +8,7 @@ Use this page as a **lookup table**: H5P display name and machine name → Lesso
 
 Traceability matrix for adopting [H5P](https://h5p.org/content-types-and-applications) interaction patterns as native LessonKit blocks—not as embedded H5P runtimes.
 
-**Roadmap:** [ROADMAP.md — H5P-aligned backlog](../../ROADMAP.md#h5p-aligned-capability-backlog)  
+**Roadmap:** [ROADMAP.md — H5P-aligned backlog](roadmap.md#h5p-aligned-capability-backlog)  
 **Runtime catalog (today):** [Block catalog](../reference/block-catalog.md) (`blockCatalogVersion = 1`)  
 **Catalog expansion (shipped 1.1.0):** framework **1.1.x** (`blockCatalogVersion = 2`)
 
@@ -50,13 +50,13 @@ H5P question types implement the [question type contract](https://h5p.org/docume
 | 8 | Telemetry catalog v2 | — | Events for new interaction types (e.g. `blank_filled`, `item_dropped`) |
 | 9 | `block-catalog.v2.json` | — | Machine-readable entries for all above; semver bump `@lessonkit/react` |
 | 10 | Export parity | — | Golden example + e2e: each P0 block scores in standalone + SCORM |
-| 11 | H5P docs (each block) | — | [ROADMAP H5P documentation checklist](../../ROADMAP.md#h5p-documentation-checklist-per-block) |
+| 11 | H5P docs (each block) | — | [ROADMAP H5P documentation checklist](roadmap.md#h5p-documentation-checklist-per-block) |
 
 **Studio 0.8.x (paired):** schema types + renderer + palette for 1.1.x P0 blocks; H5P-familiar palette labels per checklist.
 
 ### H5P documentation checklist (per block)
 
-Required when a row moves to ✅ — full gate in [ROADMAP](../../ROADMAP.md#h5p-documentation-checklist-per-block):
+Required when a row moves to ✅ — full gate in [ROADMAP](roadmap.md#h5p-documentation-checklist-per-block):
 
 1. Update **Status** (and milestone columns) in the master table below.
 2. Add or extend **block catalog** entry with H5P display + machine name.
@@ -194,4 +194,4 @@ Read-only mapping for a **subset** of `.h5p` content into `StudioProjectV1` / Re
 - When a block ships: complete the [H5P documentation checklist](#h5p-documentation-checklist-per-block) in the same release (do not merge implementation-only PRs without doc updates).
 - Update **Status** and **Framework** / **Studio** columns in the master table.
 - Bump [block catalog](../reference/block-catalog.md) version section when `block-catalog.v2.json` lands.
-- Keep [ROADMAP.md](../../ROADMAP.md#h5p-aligned-capability-backlog) tiers in sync with this table.
+- Keep [ROADMAP.md](roadmap.md#h5p-aligned-capability-backlog) tiers in sync with this table.
