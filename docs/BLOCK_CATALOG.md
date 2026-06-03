@@ -3,7 +3,7 @@
 :::{admonition} H5P equivalents
 :class: tip
 
-Many LessonKit blocks mirror **[H5P](https://h5p.org/content-types-and-applications)** content types as native React components (not embedded H5P). **`Quiz`** = H5P **Multiple Choice**; **`Scenario`** ≈ narrative scenario regions. Planned types (`FillInTheBlanks`, `InteractiveVideo`, …) are listed in [Catalog v2](#catalog-v2-framework-12x--planned). Full mapping: **[H5P capability map](project/h5p-capability-map.md)** · guide: **[Coming from H5P?](guides/h5p-for-lessonkit-authors.md)**.
+Many LessonKit blocks mirror **[H5P](https://h5p.org/content-types-and-applications)** content types as native React components (not embedded H5P). **`Quiz`** = H5P **Multiple Choice**; Tier B P0 question types ship in [Catalog v2](#catalog-v2-framework-110--shipped) (framework 1.1.0). Full mapping: **[H5P capability map](../project/h5p-capability-map.md)** · guide: **[Coming from H5P?](../guides/h5p-for-lessonkit-authors.md)**.
 :::
 
 The block catalog describes every **framework-owned** learning primitive in `@lessonkit/react`. Use it to validate generated code, document supported props, and align Studio/AI workflows with the same runtime components authors use today.
@@ -135,15 +135,15 @@ No props.
 **Theming:** Inherits global tokens.  
 **Telemetry:** None (display-only).
 
-## Catalog v2 (framework 1.2.x — planned)
+## Catalog v2 (framework 1.1.0 — shipped)
 
-:::{admonition} H5P question types (1.2.x)
+:::{admonition} H5P question types (1.1.0)
 :class: note
 
-These LessonKit blocks are **planned** React implementations of common H5P **question** content types. Each will implement the shared **Assessment contract** (scores, retry, solutions, xAPI)—see [SPEC.md](../SPEC.md#assessment-contract-framework-12x).
+These LessonKit blocks are React implementations of common H5P **question** content types. Each implements the shared **Assessment contract** (scores, retry, solutions, xAPI)—see [SPEC.md](https://github.com/eddiethedean/lessonkit/blob/main/SPEC.md#assessment-contract-framework-11x).
 :::
 
-`blockCatalogVersion = 2` adds H5P-aligned assessments under a shared **Assessment contract**. Full traceability: [H5P capability map](project/h5p-capability-map.md).
+`blockCatalogVersion = 2` adds H5P-aligned assessments under a shared **Assessment contract**. Full traceability: [H5P capability map](../project/h5p-capability-map.md).
 
 | LessonKit block | H5P display name |
 | --- | --- |
@@ -154,7 +154,7 @@ These LessonKit blocks are **planned** React implementations of common H5P **que
 | `MarkTheWords` | Mark the Words |
 | `AssessmentSequence` | Question Set |
 
-| Block | Category | `checkId` | 1.2.x tranche |
+| Block | Category | `checkId` | 1.1.x tranche |
 | --- | --- | --- | --- |
 | `TrueFalse` | assessment | required | P0 |
 | `FillInTheBlanks` | assessment | required | P0 |
@@ -166,15 +166,15 @@ These LessonKit blocks are **planned** React implementations of common H5P **que
 
 **P0 acceptance (each block):** Storybook story, unit tests, catalog JSON entry, telemetry + xAPI mapping, `lessonkit.json` assessment mapping, export parity e2e.
 
-**Not in v2:** compound types (`InteractiveBook`, `SlideDeck`, …) — see [roadmap](project/roadmap.md#h5p-aligned-capability-backlog).
+**Not in v2:** compound types (`InteractiveBook`, `SlideDeck`, …) — see [roadmap](../project/roadmap.md#h5p-aligned-capability-backlog).
 
-Generators should continue using **v1** until v2 is published; then reject unknown types via `block-catalog.v2.json`.
+Import `@lessonkit/react/block-catalog.v2.json` or `buildBlockCatalog({ version: 2 })` (default). Use `{ version: 1 }` for legacy generators.
 
 ---
 
 ## Cross-references
 
-- **H5P mapping:** [H5P capability map](project/h5p-capability-map.md)
+- **H5P mapping:** [H5P capability map](../project/h5p-capability-map.md)
 - **Identity:** [Identity reference](reference/identity.md) — id format and URNs (`@lessonkit/core/identity-contract.v1.json`)
 - **Telemetry events:** [Telemetry reference](reference/telemetry.md) — event catalog (`@lessonkit/core/telemetry-catalog.v1.json`)
 - **Theming:** [Theming reference](reference/theming.md) — token catalog (`@lessonkit/themes/theme-catalog.v1.json`)
@@ -190,6 +190,6 @@ Generators should continue using **v1** until v2 is published; then reject unkno
 2. Validate required props and IDs per entry (`requiredIds`, `props`).
 3. Keep `courseId` and every `checkId` in sync with `lessonkit.json`. For `single-spa` layouts, manifest `lessons[].id` lists LMS shell lesson(s) only; additional in-app `lessonId`s may exist only in React (see [Identity](reference/identity.md#single-spa-manifest-vs-in-app-steps)).
 4. Nest blocks per `parentConstraints` (Quiz inside Lesson, etc.).
-5. Do not invent Studio-only blocks (`text`, `heading`, …) in **framework** codegen until they ship in a future runtime catalog version (Studio schema is separate; see [H5P capability map](project/h5p-capability-map.md)).
-6. For planned assessments, see [catalog v2](#catalog-v2-framework-12x--planned) and implement `checkId` before shipping.
-7. When shipping an H5P-parity block, complete the [H5P documentation checklist](../../ROADMAP.md#h5p-documentation-checklist-per-block) (capability map ✅, H5P names here, authors guide, Storybook).
+5. Do not invent Studio-only blocks (`text`, `heading`, …) in **framework** codegen until they ship in a future runtime catalog version (Studio schema is separate; see [H5P capability map](../project/h5p-capability-map.md)).
+6. For new assessments, see [catalog v2](#catalog-v2-framework-110--shipped) and implement `checkId` before shipping.
+7. When shipping an H5P-parity block, complete the [H5P documentation checklist](../project/roadmap.md#h5p-documentation-checklist-per-block) (capability map ✅, H5P names here, authors guide, Storybook).

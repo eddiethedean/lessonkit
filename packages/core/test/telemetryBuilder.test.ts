@@ -94,6 +94,20 @@ describe("buildTelemetryEvent", () => {
       }),
     ).toThrow(/lessonId/);
   });
+
+  it("builds assessment_completed with interactionType", () => {
+    const event = buildTelemetryEvent({
+      name: "assessment_completed",
+      courseId: "c",
+      lessonId: "l1",
+      data: { checkId: "tf-1", interactionType: "trueFalse", score: 1, maxScore: 1 },
+    });
+    expect(event.name).toBe("assessment_completed");
+    expect(event.data).toBeDefined();
+    if (event.name === "assessment_completed") {
+      expect(event.data.interactionType).toBe("trueFalse");
+    }
+  });
 });
 
 describe("tryBuildTelemetryEvent", () => {

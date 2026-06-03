@@ -2,7 +2,7 @@ import React, { useEffect, useId, useMemo, useRef, useState } from "react";
 import type { ChangeEvent } from "react";
 import { visuallyHiddenStyle } from "@lessonkit/accessibility";
 import type { AssessmentScoreResult, BlockId, CourseId, LessonId } from "@lessonkit/core";
-import type { AssessmentDescriptor } from "@lessonkit/lxpack";
+import type { McqAssessmentDescriptor } from "@lessonkit/lxpack";
 import { LessonkitProvider, type LessonkitConfig } from "./context";
 import { useCompletion, useLessonkit, useQuizState } from "./hooks";
 import { LessonContext, useEnclosingLessonId } from "./lessonContext";
@@ -46,9 +46,9 @@ export type ReflectionProps = {
   children?: React.ReactNode;
 };
 
-export type QuizProps = AssessmentDescriptor;
+export type QuizProps = McqAssessmentDescriptor;
 
-export type KnowledgeCheckProps = AssessmentDescriptor;
+export type KnowledgeCheckProps = McqAssessmentDescriptor;
 
 export type ProgressTrackerProps = {
   totalLessons?: number;

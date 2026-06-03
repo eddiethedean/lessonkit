@@ -11,8 +11,8 @@ test.describe("golden scorm2004 LMS", () => {
 
   test.beforeAll(async () => {
     const manifest = readArtifactsManifest();
-    server = await startStaticServer(manifest.scorm2004UnpackedDir, 4179);
-    baseUrl = `http://127.0.0.1:4179`;
+    server = await startStaticServer(manifest.scorm2004UnpackedDir, 4182);
+    baseUrl = `http://127.0.0.1:4182`;
   });
 
   test.afterAll(async () => {

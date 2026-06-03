@@ -1,3 +1,4 @@
+import type { AssessmentInteractionType } from "./assessment";
 import type { BlockId, CheckId, CourseId, LessonId } from "./identityTypes";
 
 export type { BlockId, CheckId, CourseId, LessonId } from "./identityTypes";
@@ -10,6 +11,8 @@ export type TelemetryEventName =
   | "lesson_time_on_task"
   | "quiz_answered"
   | "quiz_completed"
+  | "assessment_answered"
+  | "assessment_completed"
   | "interaction";
 
 export type TelemetryUser = {
@@ -49,6 +52,22 @@ export type QuizCompletedData = {
   passingScore?: number;
 };
 
+export type AssessmentAnsweredData = {
+  checkId: CheckId;
+  interactionType: AssessmentInteractionType;
+  question?: string;
+  response?: string | string[] | boolean | Record<string, unknown>;
+  correct?: boolean;
+};
+
+export type AssessmentCompletedData = {
+  checkId: CheckId;
+  interactionType: AssessmentInteractionType;
+  score?: number;
+  maxScore?: number;
+  passingScore?: number;
+};
+
 export type InteractionData = {
   kind?: string;
   blockId?: BlockId;
@@ -64,6 +83,16 @@ export type TelemetryEvent =
   | (TelemetryEventBase & { name: "lesson_time_on_task"; lessonId: LessonId; data: LessonLifecycleData })
   | (TelemetryEventBase & { name: "quiz_answered"; lessonId: LessonId; data: QuizAnsweredData })
   | (TelemetryEventBase & { name: "quiz_completed"; lessonId: LessonId; data: QuizCompletedData })
+  | (TelemetryEventBase & {
+      name: "assessment_answered";
+      lessonId: LessonId;
+      data: AssessmentAnsweredData;
+    })
+  | (TelemetryEventBase & {
+      name: "assessment_completed";
+      lessonId: LessonId;
+      data: AssessmentCompletedData;
+    })
   | (TelemetryEventBase & { name: "interaction"; lessonId?: LessonId; data?: InteractionData });
 
 /** Payload shape for a telemetry event name. */

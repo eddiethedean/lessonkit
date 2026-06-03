@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "name": "assessments-p0",
+  "course": {
+    "courseId": "assessments-p0-demo",
+    "title": "Assessment blocks (1.1.0)",
+    "layout": "single-spa",
+    "spaLessonId": "p0-lesson",
+    "lessons": [{ "id": "p0-lesson", "title": "P0 interactions" }],
+    "assessments": [
+      {
+        "kind": "trueFalse",
+        "checkId": "phishing-tf",
+        "question": "Phishing emails are always easy to spot.",
+        "answer": false,
+        "passingScore": 1
+      }
+    ],
+    "theme": { "preset": "default" },
+    "tracking": { "completion": { "threshold": 1 } }
+  },
+  "paths": {
+    "spaDistDir": "dist",
+    "lxpackOutDir": ".lxpack/course",
+    "outputBaseDir": ".lxpack/out"
+  }
+}

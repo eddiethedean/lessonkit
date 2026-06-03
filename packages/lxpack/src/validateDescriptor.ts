@@ -34,14 +34,41 @@ function parseAssessmentDescriptor(raw: unknown): AssessmentDescriptor {
   if (!isRecord(raw)) {
     return { checkId: "", question: "", choices: [], answer: "" };
   }
-  return {
+  const base = {
     checkId: typeof raw.checkId === "string" ? raw.checkId : "",
     question: typeof raw.question === "string" ? raw.question : "",
+    passingScore: typeof raw.passingScore === "number" ? raw.passingScore : undefined,
+  };
+  const kind = raw.kind;
+  if (kind === "trueFalse") {
+    return {
+      kind: "trueFalse",
+      ...base,
+      answer: typeof raw.answer === "boolean" ? raw.answer : raw.answer === "true",
+    };
+  }
+  if (kind === "fillInBlanks") {
+    return {
+      kind: "fillInBlanks",
+      ...base,
+      template: typeof raw.template === "string" ? raw.template : "",
+      blanks: Array.isArray(raw.blanks)
+        ? raw.blanks
+            .filter((b): b is Record<string, unknown> => isRecord(b))
+            .map((b) => ({
+              id: typeof b.id === "string" ? b.id : "",
+              answer: typeof b.answer === "string" ? b.answer : "",
+            }))
+        : undefined,
+    };
+  }
+  return {
+    kind: kind === "mcq" ? "mcq" : undefined,
+    ...base,
     choices: Array.isArray(raw.choices)
       ? raw.choices.filter((c): c is string => typeof c === "string")
       : [],
     answer: typeof raw.answer === "string" ? raw.answer : "",
-    passingScore: typeof raw.passingScore === "number" ? raw.passingScore : undefined,
   };
 }
 
@@ -127,10 +154,26 @@ function normalizeDescriptor(input: LessonkitCourseDescriptor): LessonkitCourseD
       const check = validateId(assessment.checkId, "checkId");
       /* v8 ignore next */
       if (!check.ok) throw new Error("normalizeDescriptor called with invalid checkId");
+      const question = assessment.question.trim();
+      if (assessment.kind === "trueFalse") {
+        return { ...assessment, checkId: check.id, question };
+      }
+      if (assessment.kind === "fillInBlanks") {
+        return {
+          ...assessment,
+          checkId: check.id,
+          question,
+          template: assessment.template.trim(),
+          blanks: assessment.blanks?.map((b) => ({
+            id: b.id.trim(),
+            answer: b.answer.trim(),
+          })),
+        };
+      }
       return {
         ...assessment,
         checkId: check.id,
-        question: assessment.question.trim(),
+        question,
         choices: assessment.choices.map((c) => c.trim()).filter((c) => c.length > 0),
         answer: assessment.answer.trim(),
       };
@@ -299,17 +342,28 @@ function validateDescriptorParsed(input: LessonkitCourseDescriptor): DescriptorV
     if (!assessment.question?.trim()) {
       issues.push({ path: `${path}.question`, message: "question is required" });
     }
-    const trimmedChoices = (assessment.choices ?? []).map((c) => c.trim()).filter((c) => c.length > 0);
-    if (!trimmedChoices.length) {
-      issues.push({
-        path: `${path}.choices`,
-        message: "at least one non-empty choice is required",
-      });
-    }
-    if (!assessment.answer?.trim()) {
-      issues.push({ path: `${path}.answer`, message: "answer is required" });
-    } else if (trimmedChoices.length && !trimmedChoices.includes(assessment.answer.trim())) {
-      issues.push({ path: `${path}.answer`, message: "answer must match a choice" });
+    const kind = assessment.kind ?? "mcq";
+    if (kind === "trueFalse" && assessment.kind === "trueFalse") {
+      if (typeof assessment.answer !== "boolean") {
+        issues.push({ path: `${path}.answer`, message: "answer must be a boolean for trueFalse" });
+      }
+    } else if (kind === "fillInBlanks" && assessment.kind === "fillInBlanks") {
+      if (!assessment.template?.trim()) {
+        issues.push({ path: `${path}.template`, message: "template is required for fillInBlanks" });
+      }
+    } else if ("choices" in assessment && "answer" in assessment && typeof assessment.answer === "string") {
+      const trimmedChoices = assessment.choices.map((c: string) => c.trim()).filter((c: string) => c.length > 0);
+      if (!trimmedChoices.length) {
+        issues.push({
+          path: `${path}.choices`,
+          message: "at least one non-empty choice is required",
+        });
+      }
+      if (!assessment.answer.trim()) {
+        issues.push({ path: `${path}.answer`, message: "answer is required" });
+      } else if (trimmedChoices.length && !trimmedChoices.includes(assessment.answer.trim())) {
+        issues.push({ path: `${path}.answer`, message: "answer must match a choice" });
+      }
     }
     const passingScore = assessment.passingScore;
     if (passingScore !== undefined && !(Number.isFinite(passingScore) && passingScore > 0)) {

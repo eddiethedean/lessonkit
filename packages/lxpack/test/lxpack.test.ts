@@ -45,6 +45,38 @@ const baseDescriptor = {
 };
 
 describe("validateDescriptor", () => {
+  it("accepts trueFalse and fillInBlanks assessment kinds", () => {
+    const tf = validateDescriptor({
+      ...baseDescriptor,
+      assessments: [{ kind: "trueFalse", checkId: "tf-1", question: "Agree?", answer: "true" }],
+    });
+    expect(tf.ok).toBe(true);
+
+    const fib = validateDescriptor({
+      ...baseDescriptor,
+      assessments: [
+        {
+          kind: "fillInBlanks",
+          checkId: "fib-1",
+          question: "Fill",
+          template: "Type *here*",
+          blanks: [
+            null,
+            { id: "b1", answer: "here" },
+            { answer: "missing-id" },
+          ],
+        },
+      ],
+    });
+    expect(fib.ok).toBe(true);
+
+    const falseTf = validateDescriptor({
+      ...baseDescriptor,
+      assessments: [{ kind: "trueFalse", checkId: "tf-f", question: "No?", answer: false }],
+    });
+    expect(falseTf.ok).toBe(true);
+  });
+
   it("rejects duplicate lesson ids", () => {
     const result = validateDescriptor({
       ...baseDescriptor,
@@ -166,9 +198,69 @@ describe("interchange", () => {
 describe("assessments", () => {
   it("maps checkId to lxpack assessment", () => {
     const lx = assessmentDescriptorToLxpack(baseDescriptor.assessments![0]!);
-    expect(lx.id).toBe("email-first-step");
-    expect(lx.questions[0]?.choices.some((c) => c.correct)).toBe(true);
+    expect(lx).not.toBeNull();
+    expect(lx!.id).toBe("email-first-step");
+    expect(lx!.questions[0]?.choices.some((c) => c.correct)).toBe(true);
     expect(extractAssessments(baseDescriptor)).toHaveLength(1);
+  });
+
+  it("extractAssessments skips kinds that do not package to shell quizzes", () => {
+    const injected = extractAssessments({
+      ...baseDescriptor,
+      assessments: [
+        baseDescriptor.assessments![0]!,
+        {
+          kind: "fillInBlanks",
+          checkId: "fib-only",
+          question: "Fill",
+          template: "Type *x*",
+          blanks: [{ id: "b1", answer: "x" }],
+        },
+      ],
+    });
+    expect(injected).toHaveLength(1);
+    expect(injected[0]?.id).toBe("email-first-step");
+  });
+
+  it("converts trueFalse descriptors to two-choice MCQ", () => {
+    const lxTrue = assessmentDescriptorToLxpack({
+      kind: "trueFalse",
+      checkId: "tf-check",
+      question: "Agree?",
+      answer: true,
+    });
+    expect(lxTrue).not.toBeNull();
+    expect(lxTrue!.questions[0]?.choices).toHaveLength(2);
+    expect(lxTrue!.questions[0]?.choices.find((c) => c.correct)?.text).toBe("True");
+
+    const lxFalse = assessmentDescriptorToLxpack({
+      kind: "trueFalse",
+      checkId: "tf-false",
+      question: "Agree?",
+      answer: false,
+    });
+    expect(lxFalse!.questions[0]?.choices.find((c) => c.correct)?.text).toBe("False");
+  });
+
+  it("returns null for descriptors without MCQ fields", () => {
+    expect(
+      assessmentDescriptorToLxpack({
+        checkId: "orphan",
+        question: "Q",
+      } as Parameters<typeof assessmentDescriptorToLxpack>[0]),
+    ).toBeNull();
+  });
+
+  it("returns null for fillInBlanks (SPA scoring only)", () => {
+    expect(
+      assessmentDescriptorToLxpack({
+        kind: "fillInBlanks",
+        checkId: "fib-check",
+        question: "Fill in",
+        template: "Answer *here*",
+        blanks: [{ id: "b1", answer: "answer" }],
+      }),
+    ).toBeNull();
   });
 
   it("assigns distinct choice ids when labels slug to the same value", () => {
@@ -178,7 +270,8 @@ describe("assessments", () => {
       choices: ["Yes", "YES"],
       answer: "Yes",
     });
-    const ids = lx.questions[0]?.choices.map((c) => c.id) ?? [];
+    expect(lx).not.toBeNull();
+    const ids = lx!.questions[0]?.choices.map((c) => c.id) ?? [];
     expect(new Set(ids).size).toBe(2);
   });
 });

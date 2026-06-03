@@ -1,6 +1,9 @@
 export type {
   AssessmentDescriptor,
+  FillInBlanksAssessmentDescriptor,
   LessonDescriptor,
+  McqAssessmentDescriptor,
+  TrueFalseAssessmentDescriptor,
   LessonkitCourseDescriptor,
   LessonkitInterchangeV1,
   MappedLessonkitIds,

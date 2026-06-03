@@ -439,7 +439,8 @@ describe("coverage-full lxpack", () => {
         choices: ["!!!"],
         answer: "!!!",
       });
-      expect(lx.questions[0]?.choices[0]?.id).toMatch(/^choice-1$/);
+      expect(lx).not.toBeNull();
+      expect(lx!.questions[0]?.choices[0]?.id).toMatch(/^choice-1$/);
     });
 
     it("mapLessonkitIds handles courses without assessments", () => {

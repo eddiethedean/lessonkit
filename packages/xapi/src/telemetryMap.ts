@@ -94,6 +94,43 @@ export function telemetryEventToXAPIStatement(event: TelemetryEvent): XAPIStatem
         { result: Object.keys(result).length ? result : undefined },
       );
     }
+    case "assessment_answered": {
+      const lessonId = event.lessonId;
+      const checkId = event.data.checkId;
+      const result: XAPIResult = {};
+      if (typeof event.data.correct === "boolean") {
+        result.success = event.data.correct;
+      }
+      return statementFor(
+        buildLessonkitUrn({ courseId, lessonId, checkId }),
+        XAPIVerbs.answered,
+        event.timestamp,
+        { result: Object.keys(result).length ? result : undefined },
+      );
+    }
+    case "assessment_completed": {
+      const lessonId = event.lessonId;
+      const checkId = event.data.checkId;
+      const { score, maxScore } = event.data;
+      const result: XAPIResult = {};
+      if (typeof score === "number" || typeof maxScore === "number") {
+        const max = typeof maxScore === "number" ? maxScore : undefined;
+        const raw = typeof score === "number" ? score : undefined;
+        result.score = {
+          raw,
+          max,
+          min: 0,
+          scaled:
+            typeof raw === "number" && typeof max === "number" && max > 0 ? raw / max : undefined,
+        };
+      }
+      return statementFor(
+        buildLessonkitUrn({ courseId, lessonId, checkId }),
+        XAPIVerbs.completed,
+        event.timestamp,
+        { result: Object.keys(result).length ? result : undefined },
+      );
+    }
     case "interaction": {
       const lessonId = event.lessonId;
       const blockId = event.data?.blockId;

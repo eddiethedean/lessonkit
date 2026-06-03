@@ -23,7 +23,7 @@ export default defineConfig({
   projects: [
     {
       name: "golden-vite",
-      testIgnore: "**/telemetry-harness/**",
+      testIgnore: ["**/telemetry-harness/**", "**/assessments-p0/**"],
       use: {
         ...devices["Desktop Chrome"],
         baseURL: "http://127.0.0.1:4173",
@@ -35,6 +35,14 @@ export default defineConfig({
       use: {
         ...devices["Desktop Chrome"],
         baseURL: "http://127.0.0.1:4174",
+      },
+    },
+    {
+      name: "assessments-p0-vite",
+      testDir: "./tests/assessments-p0",
+      use: {
+        ...devices["Desktop Chrome"],
+        baseURL: "http://127.0.0.1:4179",
       },
     },
   ],
@@ -51,6 +59,14 @@ export default defineConfig({
         "npm run build -w lessonkit-e2e-telemetry-harness && npm run preview -w lessonkit-e2e-telemetry-harness -- --host 127.0.0.1 --port 4174",
       cwd: repoRoot,
       url: "http://127.0.0.1:4174",
+      reuseExistingServer: !process.env.CI,
+      timeout: 180_000,
+    },
+    {
+      command:
+        "npm run build -w lessonkit-example-assessments-p0 && npm run preview -w lessonkit-example-assessments-p0 -- --host 127.0.0.1 --port 4179",
+      cwd: repoRoot,
+      url: "http://127.0.0.1:4179",
       reuseExistingServer: !process.env.CI,
       timeout: 180_000,
     },

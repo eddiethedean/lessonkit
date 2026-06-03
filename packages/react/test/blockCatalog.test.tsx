@@ -8,6 +8,7 @@ import telemetryCatalogJson from "@lessonkit/core/telemetry-catalog.v1.json";
 import {
   BLOCK_CATALOG,
   buildBlockCatalog,
+  buildBlockCatalogV1,
   blockCatalogVersion,
   getBlockCatalogEntry,
 } from "../src/blockCatalog";
@@ -39,14 +40,16 @@ describe("@lessonkit/react block catalog", () => {
   it("block-catalog.v1.json matches buildBlockCatalog()", () => {
     const catalog = catalogJson as { schemaVersion: number; entries: ReturnType<typeof buildBlockCatalog> };
     expect(catalog.schemaVersion).toBe(blockCatalogVersion);
-    expect(catalog.entries).toEqual(buildBlockCatalog());
+    expect(catalog.entries).toEqual(buildBlockCatalog({ version: 1 }));
   });
 
   it("BLOCK_CATALOG has an entry for every exported block type", () => {
     for (const type of EXPORTED_BLOCK_TYPES) {
-      expect(getBlockCatalogEntry(type)).toBeDefined();
+      expect(getBlockCatalogEntry(type, { version: 1 })).toBeDefined();
     }
-    expect(getBlockCatalogEntry("KnowledgeCheck")).toBe(getBlockCatalogEntry("Quiz"));
+    expect(getBlockCatalogEntry("KnowledgeCheck", { version: 1 })).toBe(
+      getBlockCatalogEntry("Quiz", { version: 1 }),
+    );
   });
 
   it("requiredIds and optionalIds align with identity-contract.v1.json", () => {
@@ -82,6 +85,15 @@ describe("@lessonkit/react block catalog", () => {
     }
   });
 
+  it("v2 catalog includes P0 assessment blocks with assessment_* telemetry", () => {
+    const v2 = buildBlockCatalog({ version: 2 });
+    expect(getBlockCatalogEntry("TrueFalse", { version: 2 })).toBeDefined();
+    expect(getBlockCatalogEntry("FillInTheBlanks", { version: 2 })?.telemetry.emits).toContain(
+      "assessment_completed",
+    );
+    expect(v2.length).toBeGreaterThan(BLOCK_CATALOG.length);
+  });
+
   it("block-catalog.v1.json satisfies block-contract.v1.json shape", () => {
     const catalog = catalogJson as { schemaVersion: number; entries: unknown[] };
     const contract = contractJson as {
@@ -104,6 +116,10 @@ describe("@lessonkit/react block catalog", () => {
 
   it("getBlockCatalogEntry returns undefined for unknown types", () => {
     expect(getBlockCatalogEntry("UnknownBlock")).toBeUndefined();
+  });
+
+  it("buildBlockCatalogV1 matches version 1 builder", () => {
+    expect(buildBlockCatalogV1()).toEqual(buildBlockCatalog({ version: 1 }));
   });
 
   it("renders every catalog block type in a minimal Course/Lesson tree", () => {

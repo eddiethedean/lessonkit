@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 export const E2E_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 export const REPO_ROOT = join(E2E_ROOT, "..");
 export const GOLDEN_DIR = join(REPO_ROOT, "examples/lxpack-golden");
+export const ASSESSMENTS_P0_DIR = join(REPO_ROOT, "examples/assessments-p0");
 export const TELEMETRY_HARNESS_DIR = join(E2E_ROOT, "fixtures/telemetry-harness");
 export const ARTIFACTS_DIR = join(E2E_ROOT, ".artifacts");
 export const ARTIFACTS_MANIFEST = join(ARTIFACTS_DIR, "manifest.json");

@@ -87,3 +87,15 @@ export async function ensureGoldenBuilt(): Promise<void> {
     stdio: "inherit",
   });
 }
+
+export async function ensureAssessmentsP0Built(): Promise<void> {
+  const { existsSync } = await import("node:fs");
+  const distIndex = join(REPO_ROOT, "examples/assessments-p0/dist/index.html");
+  if (existsSync(distIndex)) return;
+
+  const { execSync } = await import("node:child_process");
+  execSync("npm run build -w lessonkit-example-assessments-p0", {
+    cwd: REPO_ROOT,
+    stdio: "inherit",
+  });
+}

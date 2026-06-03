@@ -23,6 +23,8 @@ export function useCompletion() {
   return useMemo(() => ({ completeLesson, completeCourse }), [completeLesson, completeCourse]);
 }
 
+export { useAssessmentState } from "./assessment/useAssessmentState";
+
 export function useQuizState(enclosingLessonId?: LessonId) {
   const { track } = useLessonkit();
   const trackOpts = enclosingLessonId ? { lessonId: enclosingLessonId } : undefined;

@@ -1,4 +1,5 @@
 export const blockCatalogVersion = 1 as const;
+export const blockCatalogV2Version = 2 as const;
 
 export type BlockPropSpec = {
   name: string;
@@ -7,7 +8,7 @@ export type BlockPropSpec = {
   description: string;
 };
 
-export type BlockCatalogEntry = {
+export type BlockCatalogEntryBase = {
   type: string;
   aliases?: string[];
   category: "container" | "content" | "assessment" | "chrome";
@@ -33,6 +34,14 @@ export type BlockCatalogEntry = {
     requiresActiveLesson?: boolean;
     manualTracking?: string;
   };
+};
+
+export type BlockCatalogEntry = BlockCatalogEntryBase;
+
+export type BlockCatalogEntryV2 = BlockCatalogEntryBase & {
+  assessmentContract?: true;
+  h5pMachineName?: string;
+  h5pAlias?: string;
 };
 
 export const BLOCK_CATALOG = [
@@ -222,8 +231,166 @@ export const BLOCK_CATALOG = [
   },
 ] satisfies BlockCatalogEntry[];
 
-export function buildBlockCatalog(): BlockCatalogEntry[] {
-  return BLOCK_CATALOG.map((entry) => ({
+const assessmentBehaviourProps: BlockPropSpec[] = [
+  { name: "enableRetry", type: "boolean", required: false, description: "Allow retry after completion." },
+  { name: "enableSolutionsButton", type: "boolean", required: false, description: "Show solution control." },
+  { name: "autoCheck", type: "boolean", required: false, description: "Check answers automatically when possible." },
+  { name: "passingScore", type: "number", required: false, description: "Minimum score to pass." },
+];
+
+const v2AssessmentEntries = [
+  {
+    type: "TrueFalse",
+    category: "assessment" as const,
+    assessmentContract: true as const,
+    h5pMachineName: "H5P.TrueFalse",
+    h5pAlias: "True/False",
+    description: "Binary true/false question with assessment contract.",
+    props: [
+      { name: "checkId", type: "CheckId", required: true, description: "Stable check id." },
+      { name: "question", type: "string", required: true, description: "Question text." },
+      { name: "answer", type: "boolean", required: true, description: "Correct answer." },
+      ...assessmentBehaviourProps,
+    ],
+    requiredIds: ["checkId"],
+    parentConstraints: ["Lesson", "AssessmentSequence"],
+    a11y: {
+      element: "section",
+      ariaLabel: "True or False",
+      keyboard: "Radio group with True/False options.",
+      liveRegions: "role='status' for feedback.",
+      notes: "H5P True/False equivalent.",
+    },
+    theming: { surface: "global-inherit" as const, dataAttributes: ["data-lk-check-id"], stylingNotes: "Uses data-lk-check-id." },
+    telemetry: { emits: ["assessment_answered", "assessment_completed"], requiresActiveLesson: true },
+  },
+  {
+    type: "FillInTheBlanks",
+    category: "assessment" as const,
+    assessmentContract: true as const,
+    h5pMachineName: "H5P.Blanks",
+    h5pAlias: "Fill in the Blanks",
+    description: "Fill-in-the-blank text with *answer* markers in template.",
+    props: [
+      { name: "checkId", type: "CheckId", required: true, description: "Stable check id." },
+      { name: "template", type: "string", required: true, description: "Text with *blank* markers." },
+      { name: "blanks", type: "FillInBlankSpec[]", required: false, description: "Explicit blank specs." },
+      ...assessmentBehaviourProps,
+    ],
+    requiredIds: ["checkId"],
+    parentConstraints: ["Lesson", "AssessmentSequence"],
+    a11y: {
+      element: "section",
+      ariaLabel: "Fill in the Blanks",
+      keyboard: "Tab between text inputs.",
+      notes: "H5P Fill in the Blanks equivalent.",
+    },
+    theming: { surface: "global-inherit" as const, dataAttributes: ["data-lk-check-id"], stylingNotes: "Uses data-lk-check-id." },
+    telemetry: { emits: ["assessment_answered", "assessment_completed"], requiresActiveLesson: true },
+  },
+  {
+    type: "DragAndDrop",
+    category: "assessment" as const,
+    assessmentContract: true as const,
+    h5pMachineName: "H5P.DragQuestion",
+    h5pAlias: "Drag and Drop",
+    description: "Drag items onto labeled targets.",
+    props: [
+      { name: "checkId", type: "CheckId", required: true, description: "Stable check id." },
+      { name: "items", type: "DragItem[]", required: true, description: "Draggable items." },
+      { name: "targets", type: "DropTarget[]", required: true, description: "Drop targets." },
+      ...assessmentBehaviourProps,
+    ],
+    requiredIds: ["checkId"],
+    parentConstraints: ["Lesson", "AssessmentSequence"],
+    a11y: {
+      element: "section",
+      ariaLabel: "Drag and Drop",
+      keyboard: "Select item then activate target; drag also supported.",
+      notes: "H5P Drag and Drop equivalent.",
+    },
+    theming: { surface: "global-inherit" as const, dataAttributes: ["data-lk-check-id"], stylingNotes: "Uses data-lk-check-id." },
+    telemetry: { emits: ["assessment_answered", "assessment_completed"], requiresActiveLesson: true },
+  },
+  {
+    type: "DragTheWords",
+    category: "assessment" as const,
+    assessmentContract: true as const,
+    h5pMachineName: "H5P.DragText",
+    h5pAlias: "Drag the Words",
+    description: "Drag words into inline blanks.",
+    props: [
+      { name: "checkId", type: "CheckId", required: true, description: "Stable check id." },
+      { name: "template", type: "string", required: true, description: "Sentence with *blank* zones." },
+      { name: "words", type: "string[]", required: true, description: "Draggable word bank." },
+      ...assessmentBehaviourProps,
+    ],
+    requiredIds: ["checkId"],
+    parentConstraints: ["Lesson", "AssessmentSequence"],
+    a11y: {
+      element: "section",
+      ariaLabel: "Drag the Words",
+      keyboard: "Select word then activate zone.",
+      notes: "H5P Drag the Words equivalent.",
+    },
+    theming: { surface: "global-inherit" as const, dataAttributes: ["data-lk-check-id"], stylingNotes: "Uses data-lk-check-id." },
+    telemetry: { emits: ["assessment_answered", "assessment_completed"], requiresActiveLesson: true },
+  },
+  {
+    type: "MarkTheWords",
+    category: "assessment" as const,
+    assessmentContract: true as const,
+    h5pMachineName: "H5P.MarkTheWords",
+    h5pAlias: "Mark the Words",
+    description: "Select correct words in a sentence.",
+    props: [
+      { name: "checkId", type: "CheckId", required: true, description: "Stable check id." },
+      { name: "text", type: "string", required: true, description: "Source text." },
+      { name: "correctWords", type: "string[]", required: true, description: "Words to mark." },
+      ...assessmentBehaviourProps,
+    ],
+    requiredIds: ["checkId"],
+    parentConstraints: ["Lesson", "AssessmentSequence"],
+    a11y: {
+      element: "section",
+      ariaLabel: "Mark the Words",
+      keyboard: "Toggle words with buttons.",
+      notes: "H5P Mark the Words equivalent.",
+    },
+    theming: { surface: "global-inherit" as const, dataAttributes: ["data-lk-check-id"], stylingNotes: "Uses data-lk-check-id." },
+    telemetry: { emits: ["assessment_answered", "assessment_completed"], requiresActiveLesson: true },
+  },
+  {
+    type: "AssessmentSequence",
+    category: "container" as const,
+    h5pMachineName: "H5P.QuestionSet",
+    h5pAlias: "Question Set",
+    description: "Ordered sequence of contract-compliant assessments.",
+    props: [
+      { name: "children", type: "ReactNode", required: true, description: "Assessment blocks." },
+      { name: "sequential", type: "boolean", required: false, description: "One question at a time." },
+      ...assessmentBehaviourProps.filter((p) => p.name !== "passingScore"),
+    ],
+    requiredIds: [],
+    parentConstraints: ["Lesson"],
+    a11y: {
+      element: "section",
+      ariaLabel: "Assessment sequence",
+      keyboard: "Previous/Next navigation between steps.",
+      notes: "H5P Question Set equivalent.",
+    },
+    theming: { surface: "global-inherit" as const, stylingNotes: "Container for assessments." },
+    telemetry: { emits: [], manualTracking: "Child assessments emit assessment_* events." },
+  },
+] satisfies BlockCatalogEntryV2[];
+
+export const BLOCK_CATALOG_V2: BlockCatalogEntryV2[] = [
+  ...(BLOCK_CATALOG as BlockCatalogEntryV2[]),
+  ...v2AssessmentEntries,
+];
+
+function cloneCatalogEntry<T extends BlockCatalogEntryBase>(entry: T): T {
+  return {
     ...entry,
     props: entry.props.map((p) => ({ ...p })),
     aliases: entry.aliases ? [...entry.aliases] : undefined,
@@ -238,9 +405,28 @@ export function buildBlockCatalog(): BlockCatalogEntry[] {
       ...entry.telemetry,
       emits: [...entry.telemetry.emits],
     },
-  }));
+  };
 }
 
-export function getBlockCatalogEntry(type: string): BlockCatalogEntry | undefined {
-  return BLOCK_CATALOG.find((entry) => entry.type === type || entry.aliases?.includes(type));
+export type BuildBlockCatalogOptions = { version?: 1 | 2 };
+
+export function buildBlockCatalog(opts?: BuildBlockCatalogOptions): BlockCatalogEntry[] | BlockCatalogEntryV2[] {
+  const version = opts?.version ?? 2;
+  const source = version === 2 ? BLOCK_CATALOG_V2 : BLOCK_CATALOG;
+  return source.map((entry) => cloneCatalogEntry(entry));
 }
+
+/** @deprecated Use buildBlockCatalog({ version: 1 }) */
+export function buildBlockCatalogV1(): BlockCatalogEntry[] {
+  return buildBlockCatalog({ version: 1 }) as BlockCatalogEntry[];
+}
+
+export function getBlockCatalogEntry(
+  type: string,
+  opts?: BuildBlockCatalogOptions,
+): BlockCatalogEntry | BlockCatalogEntryV2 | undefined {
+  const version = opts?.version ?? 2;
+  const source = version === 2 ? BLOCK_CATALOG_V2 : BLOCK_CATALOG;
+  return source.find((entry) => entry.type === type || entry.aliases?.includes(type));
+}
+

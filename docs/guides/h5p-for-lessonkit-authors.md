@@ -12,21 +12,21 @@ LessonKit is **React-first**, not a plugin inside your LMS’s content bank. You
 
 Use the **[H5P capability map](../project/h5p-capability-map.md)** for the full table (machine name, display name, LessonKit id, roadmap status).
 
-### Available today (framework 1.0)
+### Available today (framework 1.1.0)
 
 | H5P name | LessonKit | Import / notes |
 | --- | --- | --- |
 | **Multiple Choice** (`H5P.MultiChoice`) | `Quiz` / `KnowledgeCheck` | Set `checkId`; mirror in `lessonkit.json` `assessments[]` |
+| **True/False** | `TrueFalse` | `kind: "trueFalse"` in manifest; LXPack packages as 2-choice MCQ |
+| **Fill in the Blanks** | `FillInTheBlanks` | SPA scoring + `assessment_completed` bridge |
+| **Drag and Drop** | `DragAndDrop` | Keyboard pick-target mode; SPA + bridge scoring |
+| **Drag the Words** | `DragTheWords` | Inline drop zones; SPA + bridge scoring |
+| **Mark the Words** | `MarkTheWords` | Selectable tokens; SPA + bridge scoring |
+| **Question Set** | `AssessmentSequence` | Aggregates child assessments by `checkId` |
 | **Scenario** (narrative regions) | `Scenario` | Optional `blockId` for telemetry URNs |
 | Open response / reflection | `Reflection` | Not auto-scored (like many H5P text tasks) |
 | Course shell | `Course`, `Lesson` | One SPA vs one H5P activity per embed |
 | Progress | `ProgressTracker` | Course-level progress, not per-iframe |
-
-:::{admonition} H5P: Question Set
-:class: note
-
-**H5P Question Set** maps to the planned **`AssessmentSequence`** component (framework **1.2.x**). Until then, compose multiple `Quiz` components in a `Lesson` or build a small custom sequence in React.
-:::
 
 ### Planned (roadmap / capability map)
 
@@ -34,11 +34,6 @@ Common H5P types and their LessonKit names (same idea, React implementation):
 
 | H5P | LessonKit (planned) |
 | --- | --- |
-| True/False | `TrueFalse` |
-| Fill in the Blanks | `FillInTheBlanks` |
-| Drag and Drop | `DragAndDrop` |
-| Drag the Words | `DragTheWords` |
-| Mark the Words | `MarkTheWords` |
 | Interactive Video | `InteractiveVideo` |
 | Course Presentation | `SlideDeck` |
 | Branching Scenario | `BranchingScenario` |
@@ -56,7 +51,7 @@ A few LessonKit ids differ from H5P labels where we already shipped or need clea
 :::{admonition} H5P Hub → Studio palette
 :class: tip
 
-**H5P Hub** is where you install content types in your LMS. **LessonKit Studio** (Alpha) is the visual editor for blocks that compile to the same React runtime as hand-written courses. Today: text, heading, image, quiz, scenario, container, and more—see [Studio guide](studio/index.md). New H5P-aligned blocks appear in the palette as framework **1.2.x+** ships.
+**H5P Hub** is where you install content types in your LMS. **LessonKit Studio** (Alpha) is the visual editor for blocks that compile to the same React runtime as hand-written courses. Today: text, heading, image, quiz, scenario, container, and more—see [Studio guide](studio/index.md). Framework **1.1.0** ships `TrueFalse`, `FillInTheBlanks`, `DragAndDrop`, `DragTheWords`, `MarkTheWords`, and `AssessmentSequence` in `@lessonkit/react`. Studio palette support is planned for Studio **0.8.x**.
 :::
 
 ## Wiring differences (H5P vs LessonKit)
@@ -74,7 +69,7 @@ A few LessonKit ids differ from H5P labels where we already shipped or need clea
 :::{admonition} H5P import (research)
 :class: note
 
-**Runtime embedding of H5P is not planned.** A future **read-only `.h5p` import** (framework **1.7.x**) may translate a subset of activities into `StudioProjectV1` or React source—still using LessonKit components after export. Until then, rebuild high-value activities using the capability map and [block catalog](../reference/block-catalog.md).
+**Runtime embedding of H5P is not planned.** A future **read-only `.h5p` import** (framework **1.6.x**) may translate a subset of activities into `StudioProjectV1` or React source—still using LessonKit components after export. Until then, rebuild high-value activities using the capability map and [block catalog](../reference/block-catalog.md).
 :::
 
 ## Next steps

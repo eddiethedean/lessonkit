@@ -5,6 +5,24 @@ All notable changes to the LessonKit monorepo are documented here.
 - [`@lessonkit/*`](https://www.npmjs.com/org/lessonkit) — core platform (tag `v*.*.*`)
 - [`@lessonkit/studio-schema`](https://www.npmjs.com/package/@lessonkit/studio-schema), [`@lessonkit/studio-renderer`](https://www.npmjs.com/package/@lessonkit/studio-renderer), [`@lessonkit/studio-builder`](https://www.npmjs.com/package/@lessonkit/studio-builder), [`@lessonkit/studio-ui`](https://www.npmjs.com/package/@lessonkit/studio-ui), [`@lessonkit/studio-codegen`](https://www.npmjs.com/package/@lessonkit/studio-codegen) — Studio authoring (tag `studio-v*`, same `@lessonkit` org)
 
+## [1.1.0] - 2026-06-03
+
+Framework **1.1.x** — Assessment contract and Tier B P0 blocks. All seven `@lessonkit/*` packages ship at **1.1.0** (no Studio package changes in this release).
+
+### Added
+
+- **@lessonkit/core**: `AssessmentHandle`, `AssessmentBehaviour`, `AssessmentXAPIData`, `AssessmentInteractionType`; telemetry events `assessment_answered` and `assessment_completed`; `telemetry-catalog.v2.json` and `buildTelemetryCatalogV2()`.
+- **@lessonkit/react**: `TrueFalse`, `FillInTheBlanks`, `DragAndDrop`, `DragTheWords`, `MarkTheWords`, `AssessmentSequence`; `useAssessmentState`; `block-catalog.v2.json` and `block-contract.v2.json` (`blockCatalogVersion` 2 via `buildBlockCatalog({ version: 2 })`, default).
+- **@lessonkit/xapi**: xAPI mapping for `assessment_answered` / `assessment_completed`.
+- **@lessonkit/lxpack**: Discriminated `AssessmentDescriptor` (`mcq`, `trueFalse`, `fillInBlanks`); `trueFalse` converts to MCQ for LMS shell packaging; `assessment_completed` forwards to LXPack bridge.
+- **Example**: `examples/assessments-p0` — golden path for P0 blocks and SCORM 1.2 packaging.
+- **Docs**: [MIGRATION-1.0-to-1.1.md](docs/MIGRATION-1.0-to-1.1.md).
+
+### Changed
+
+- `lessonkit init` template pins `^1.1.0` for `@lessonkit/*`.
+- `Quiz` / `KnowledgeCheck` props remain `McqAssessmentDescriptor` (unchanged MCQ shape).
+
 ## [studio-v0.3.0] - 2026-06-01
 
 Code generation and export: `@lessonkit/studio-codegen`, export panel in studio-web, canvas performance, and SCORM integration test. Requires **@lessonkit/core**, **@lessonkit/react**, and **@lessonkit/themes** at **1.0.2** (pinned at publish time).

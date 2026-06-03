@@ -62,6 +62,23 @@ Normal `v1.0.3` tags **do not** publish or re-version Studio packages. Studio us
 
 > **Do not create or push `studio-v0.1.0`** until you intend to publish to npm. Normal `v*` tags do not publish Studio.
 
+### 1.1.0 checklist (ready to publish — no git tag yet)
+
+| Item | Status |
+|------|--------|
+| All seven `@lessonkit/*` packages at `1.1.0` | Done |
+| Internal `@lessonkit/*` workspace deps pinned to `1.1.0` | Done |
+| Root `package.json` and Sphinx `docs/conf.py` `release` = `1.1.0` | Done |
+| `lessonkit init` template pins `^1.1.0` (`copy-template.mjs`) | Done |
+| [CHANGELOG.md](CHANGELOG.md) `## [1.1.0]` | Done |
+| Assessment contract, telemetry-catalog v2, block-catalog v2 | Done |
+| P0 blocks + `examples/assessments-p0` + integration/e2e | Done |
+| [MIGRATION-1.0-to-1.1.md](docs/MIGRATION-1.0-to-1.1.md) | Done |
+| `npm run lint` + `typecheck` + `test` + `coverage` + `test:integration` + `test:e2e` + `build-storybook` + `copy-template` | Verified locally (2026-06-03) |
+| Git tag `v1.1.0` | **Skipped per release plan** — create manually when ready to publish |
+
+> **Do not create or push `v1.1.0`** until you intend to publish that version to npm.
+
 ### 1.0.2 checklist (ready to publish)
 
 | Item | Status |

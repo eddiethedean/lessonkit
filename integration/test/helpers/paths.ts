@@ -5,6 +5,7 @@ export const INTEGRATION_ROOT = join(dirname(fileURLToPath(import.meta.url)), ".
 export const REPO_ROOT = join(INTEGRATION_ROOT, "..");
 export const CLI_BIN = join(REPO_ROOT, "packages/cli/dist/bin.js");
 export const GOLDEN_DIR = join(REPO_ROOT, "examples/lxpack-golden");
+export const ASSESSMENTS_P0_DIR = join(REPO_ROOT, "examples/assessments-p0");
 export const MINIMAL_FIXTURE_DIR = join(INTEGRATION_ROOT, "fixtures/minimal-course");
 
 export const LESSONKIT_PACKAGES = [

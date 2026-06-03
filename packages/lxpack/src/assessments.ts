@@ -1,4 +1,4 @@
-import type { AssessmentDescriptor, LessonkitCourseDescriptor } from "./types";
+import type { AssessmentDescriptor, LessonkitCourseDescriptor, McqAssessmentDescriptor } from "./types";
 
 export type LxpackInjectedAssessment = {
   id: string;
@@ -21,9 +21,7 @@ function slugChoiceId(text: string, index: number): string {
   return `${stem}-${index + 1}`;
 }
 
-export function assessmentDescriptorToLxpack(
-  assessment: AssessmentDescriptor,
-): LxpackInjectedAssessment {
+function mcqToLxpack(assessment: McqAssessmentDescriptor): LxpackInjectedAssessment {
   const choices = assessment.choices.map((text, index) => {
     const id = slugChoiceId(text, index);
     return {
@@ -46,8 +44,35 @@ export function assessmentDescriptorToLxpack(
   };
 }
 
+export function assessmentDescriptorToLxpack(
+  assessment: AssessmentDescriptor,
+): LxpackInjectedAssessment | null {
+  const kind = assessment.kind ?? "mcq";
+  if (kind === "trueFalse" && assessment.kind === "trueFalse") {
+    const choices = ["True", "False"];
+    const answerText = assessment.answer ? "True" : "False";
+    return mcqToLxpack({
+      kind: "mcq",
+      checkId: assessment.checkId,
+      question: assessment.question,
+      choices,
+      answer: answerText,
+      passingScore: assessment.passingScore,
+    });
+  }
+  if (kind === "fillInBlanks") {
+    return null;
+  }
+  if ("choices" in assessment && "answer" in assessment && typeof assessment.answer === "string") {
+    return mcqToLxpack(assessment);
+  }
+  return null;
+}
+
 export function extractAssessments(
   descriptor: LessonkitCourseDescriptor,
 ): LxpackInjectedAssessment[] {
-  return (descriptor.assessments ?? []).map(assessmentDescriptorToLxpack);
+  return (descriptor.assessments ?? [])
+    .map(assessmentDescriptorToLxpack)
+    .filter((a): a is LxpackInjectedAssessment => a !== null);
 }

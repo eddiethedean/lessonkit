@@ -142,6 +142,27 @@ function dispatchBridgeActionInner(
 }
 
 /** Resolve bridge and dispatch a telemetry-derived action. */
+function forwardAssessmentCompletedToBridge(
+  bridge: LxpackBridgeV1,
+  event: TelemetryEvent & { name: "assessment_completed" },
+): void {
+  const data = event.data;
+  const scaled = normalizeAssessmentScore({
+    score: data.score,
+    maxScore: data.maxScore,
+  });
+  if (scaled === null) return;
+  bridge.submitAssessment?.({
+    id: data.checkId,
+    score: scaled,
+    passingScore: normalizeAssessmentPassingScore({
+      passingScore: data.passingScore,
+      maxScore: data.maxScore,
+    }),
+    maxScore: data.maxScore,
+  });
+}
+
 export function forwardTelemetryToBridge(
   event: TelemetryEvent,
   mode: LxpackBridgeMode = "auto",
@@ -150,6 +171,10 @@ export function forwardTelemetryToBridge(
   if (mode === "off") return;
   const bridge = getBridge(parentWindow);
   if (!bridge) return;
+  if (event.name === "assessment_completed") {
+    forwardAssessmentCompletedToBridge(bridge, event);
+    return;
+  }
   const lessonkitEvent = telemetryEventToLessonkit(event);
   if (!lessonkitEvent) return;
   const action = mapLessonkitTelemetryToBridgeAction(lessonkitEvent);

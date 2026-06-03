@@ -10,13 +10,37 @@ export type LessonDescriptor = {
   spaPath?: string;
 };
 
-export type AssessmentDescriptor = {
+export type McqAssessmentDescriptor = {
+  kind?: "mcq";
   checkId: CheckId;
   question: string;
   choices: string[];
   answer: string;
   passingScore?: number;
 };
+
+export type TrueFalseAssessmentDescriptor = {
+  kind: "trueFalse";
+  checkId: CheckId;
+  question: string;
+  answer: boolean;
+  passingScore?: number;
+};
+
+export type FillInBlanksAssessmentDescriptor = {
+  kind: "fillInBlanks";
+  checkId: CheckId;
+  question: string;
+  template: string;
+  blanks?: Array<{ id: string; answer: string }>;
+  passingScore?: number;
+};
+
+/** Discriminated assessment entries in lessonkit.json (defaults to MCQ when kind omitted). */
+export type AssessmentDescriptor =
+  | McqAssessmentDescriptor
+  | TrueFalseAssessmentDescriptor
+  | FillInBlanksAssessmentDescriptor;
 
 export type LessonkitCourseDescriptor = {
   courseId: CourseId;

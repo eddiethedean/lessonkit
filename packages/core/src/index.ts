@@ -25,6 +25,8 @@ export { slugifyId, deriveId } from "./slugify";
 export { buildLessonkitUrn, type LessonkitUrnParts } from "./urn";
 
 export type {
+  AssessmentAnsweredData,
+  AssessmentCompletedData,
   InteractionData,
   LessonLifecycleData,
   QuizAnsweredData,
@@ -39,12 +41,27 @@ export type {
   TrackingClient,
 } from "./telemetryTypes";
 
+export type {
+  AssessmentBehaviour,
+  AssessmentHandle,
+  AssessmentInteractionType,
+  AssessmentXAPIData,
+  AssessmentBaseProps,
+} from "./assessment";
+
 export {
   buildTelemetryCatalog,
   TELEMETRY_EVENT_CATALOG,
   telemetryCatalogVersion,
   type TelemetryCatalogEntry,
 } from "./telemetryCatalog";
+
+export {
+  buildTelemetryCatalogV2,
+  TELEMETRY_EVENT_CATALOG_V2,
+  telemetryCatalogV2Version,
+  type TelemetryCatalogV2Entry,
+} from "./telemetryCatalogV2";
 
 export { createTrackingClient } from "./trackingClient";
 export { createSessionId } from "./ids";

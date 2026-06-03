@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 2,
+  "entries": [
+    {
+      "name": "assessment_answered",
+      "description": "Learner submitted an assessment interaction answer",
+      "requiredFields": ["courseId", "lessonId", "sessionId", "timestamp"],
+      "dataFields": ["checkId", "interactionType", "question", "response", "correct"],
+      "xapiVerb": "http://adlnet.gov/expapi/verbs/answered",
+      "urnPattern": "urn:lessonkit:course:{courseId}:lesson:{lessonId}:check:{checkId}"
+    },
+    {
+      "name": "assessment_completed",
+      "description": "Assessment interaction completed (passing criteria met)",
+      "requiredFields": ["courseId", "lessonId", "sessionId", "timestamp"],
+      "dataFields": ["checkId", "interactionType", "score", "maxScore", "passingScore"],
+      "xapiVerb": "http://adlnet.gov/expapi/verbs/completed",
+      "urnPattern": "urn:lessonkit:course:{courseId}:lesson:{lessonId}:check:{checkId}"
+    }
+  ]
+}

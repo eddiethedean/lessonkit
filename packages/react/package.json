@@ -1,6 +1,6 @@
 {
   "name": "@lessonkit/react",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "private": false,
   "description": "React components and hooks for building learning experiences with LessonKit.",
   "license": "Apache-2.0",
@@ -33,12 +33,16 @@
       "require": "./dist/index.cjs"
     },
     "./block-catalog.v1.json": "./block-catalog.v1.json",
-    "./block-contract.v1.json": "./block-contract.v1.json"
+    "./block-catalog.v2.json": "./block-catalog.v2.json",
+    "./block-contract.v1.json": "./block-contract.v1.json",
+    "./block-contract.v2.json": "./block-contract.v2.json"
   },
   "files": [
     "dist",
     "block-catalog.v1.json",
-    "block-contract.v1.json"
+    "block-catalog.v2.json",
+    "block-contract.v1.json",
+    "block-contract.v2.json"
   ],
   "scripts": {
     "build": "tsup src/index.tsx --format esm,cjs --dts --external react --external react-dom --external @lessonkit/accessibility --external @lessonkit/lxpack --external @lessonkit/themes",
@@ -56,11 +60,11 @@
     "react-dom": ">=18"
   },
   "dependencies": {
-    "@lessonkit/accessibility": "1.0.2",
-    "@lessonkit/core": "1.0.2",
-    "@lessonkit/lxpack": "1.0.2",
-    "@lessonkit/themes": "1.0.2",
-    "@lessonkit/xapi": "1.0.2"
+    "@lessonkit/accessibility": "1.1.0",
+    "@lessonkit/core": "1.1.0",
+    "@lessonkit/lxpack": "1.1.0",
+    "@lessonkit/themes": "1.1.0",
+    "@lessonkit/xapi": "1.1.0"
   },
   "devDependencies": {
     "@storybook/addon-essentials": "8.6.18",

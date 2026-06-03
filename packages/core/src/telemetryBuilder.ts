@@ -1,5 +1,7 @@
 import { assertNever } from "./assertNever";
 import type {
+  AssessmentAnsweredData,
+  AssessmentCompletedData,
   CourseId,
   InteractionData,
   LessonId,
@@ -48,12 +50,23 @@ export type BuildTelemetryEventInput =
       data: QuizCompletedData;
     })
   | (BuildTelemetryEventContext & {
+      name: "assessment_answered";
+      lessonId?: LessonId;
+      data: AssessmentAnsweredData;
+    })
+  | (BuildTelemetryEventContext & {
+      name: "assessment_completed";
+      lessonId?: LessonId;
+      data: AssessmentCompletedData;
+    })
+  | (BuildTelemetryEventContext & {
       name: "interaction";
       lessonId?: LessonId;
       data?: InteractionData;
     });
 
 let warnedMissingQuizLesson = false;
+let warnedMissingAssessmentLesson = false;
 
 function isDevEnvironment(): boolean {
   const g = globalThis as typeof globalThis & { process?: { env?: { NODE_ENV?: string } } };
@@ -63,6 +76,7 @@ function isDevEnvironment(): boolean {
 /** Reset dev-warning state (tests only). */
 export function resetTelemetryBuilderWarningsForTests(): void {
   warnedMissingQuizLesson = false;
+  warnedMissingAssessmentLesson = false;
 }
 
 function resolveLessonId(
@@ -121,6 +135,16 @@ export function buildTelemetryEvent(opts: BuildTelemetryEventInput): TelemetryEv
       if (!lessonId) throw new Error("quiz_completed requires active lessonId");
       return { name: "quiz_completed", ...base, lessonId, data: opts.data };
     }
+    case "assessment_answered": {
+      const lessonId = opts.lessonId;
+      if (!lessonId) throw new Error("assessment_answered requires active lessonId");
+      return { name: "assessment_answered", ...base, lessonId, data: opts.data };
+    }
+    case "assessment_completed": {
+      const lessonId = opts.lessonId;
+      if (!lessonId) throw new Error("assessment_completed requires active lessonId");
+      return { name: "assessment_completed", ...base, lessonId, data: opts.data };
+    }
     case "interaction":
       return {
         name: "interaction",
@@ -137,13 +161,25 @@ export function buildTelemetryEvent(opts: BuildTelemetryEventInput): TelemetryEv
  * Like `buildTelemetryEvent`, but returns null (with a dev warning) when quiz events lack an active lesson.
  */
 export function tryBuildTelemetryEvent(opts: BuildTelemetryEventInput): TelemetryEvent | null {
-  const isQuiz = opts.name === "quiz_answered" || opts.name === "quiz_completed";
-  if (isQuiz && !opts.lessonId) {
-    if (isDevEnvironment() && !warnedMissingQuizLesson) {
-      warnedMissingQuizLesson = true;
-      console.warn(
-        `[lessonkit] ${opts.name} skipped: wrap <Quiz> in <Lesson> so an active lessonId is available`,
-      );
+  const needsLesson =
+    opts.name === "quiz_answered" ||
+    opts.name === "quiz_completed" ||
+    opts.name === "assessment_answered" ||
+    opts.name === "assessment_completed";
+  if (needsLesson && !opts.lessonId) {
+    if (isDevEnvironment()) {
+      if (opts.name.startsWith("quiz_") && !warnedMissingQuizLesson) {
+        warnedMissingQuizLesson = true;
+        console.warn(
+          `[lessonkit] ${opts.name} skipped: wrap <Quiz> in <Lesson> so an active lessonId is available`,
+        );
+      }
+      if (opts.name.startsWith("assessment_") && !warnedMissingAssessmentLesson) {
+        warnedMissingAssessmentLesson = true;
+        console.warn(
+          `[lessonkit] ${opts.name} skipped: wrap assessment blocks in <Lesson> so an active lessonId is available`,
+        );
+      }
     }
     return null;
   }

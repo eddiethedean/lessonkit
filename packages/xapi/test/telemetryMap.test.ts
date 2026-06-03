@@ -177,6 +177,56 @@ describe("telemetryEventToXAPIStatement", () => {
     ).toBe("urn:lessonkit:course:cyber-basics:lesson:phishing-101:block:intro");
   });
 
+  it("maps assessment_answered and assessment_completed", () => {
+    const answered = telemetryEventToXAPIStatement({
+      name: "assessment_answered",
+      ...base,
+      data: {
+        checkId: "tf-1",
+        interactionType: "trueFalse",
+        correct: false,
+      },
+    });
+    expect(answered?.verb).toBe("http://adlnet.gov/expapi/verbs/answered");
+    expect(answered?.result?.success).toBe(false);
+
+    const answeredBare = telemetryEventToXAPIStatement({
+      name: "assessment_answered",
+      ...base,
+      data: { checkId: "tf-1", interactionType: "trueFalse" },
+    });
+    expect(answeredBare?.result).toBeUndefined();
+
+    const completed = telemetryEventToXAPIStatement({
+      name: "assessment_completed",
+      ...base,
+      data: { checkId: "fib-1", interactionType: "fillInBlanks", score: 2, maxScore: 2 },
+    });
+    expect(completed?.verb).toBe("http://adlnet.gov/expapi/verbs/completed");
+    expect(completed?.result?.score).toMatchObject({ raw: 2, max: 2, scaled: 1 });
+
+    const completedBare = telemetryEventToXAPIStatement({
+      name: "assessment_completed",
+      ...base,
+      data: { checkId: "fib-1", interactionType: "fillInBlanks" },
+    });
+    expect(completedBare?.result).toBeUndefined();
+
+    const scoreOnly = telemetryEventToXAPIStatement({
+      name: "assessment_completed",
+      ...base,
+      data: { checkId: "fib-1", interactionType: "fillInBlanks", score: 1 },
+    });
+    expect(scoreOnly?.result?.score).toMatchObject({ raw: 1, max: undefined, scaled: undefined });
+
+    const maxOnly = telemetryEventToXAPIStatement({
+      name: "assessment_completed",
+      ...base,
+      data: { checkId: "fib-1", interactionType: "fillInBlanks", maxScore: 2 },
+    });
+    expect(maxOnly?.result?.score).toMatchObject({ raw: undefined, max: 2, scaled: undefined });
+  });
+
   it("throws for unknown event names", () => {
     expect(() =>
       telemetryEventToXAPIStatement({

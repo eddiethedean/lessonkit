@@ -86,9 +86,9 @@ Identity rules (`courseId`, `lessonId`, `checkId`, URNs): [`docs/IDENTITY.md`](d
 
 ---
 
-# Assessment contract (framework 1.2.x)
+# Assessment contract (framework 1.1.x)
 
-Planned expansion of the runtime block catalog ([`ROADMAP.md`](ROADMAP.md#12x--assessment-contract--tier-b-p0-blocks), [H5P capability map](docs/project/h5p-capability-map.md)). Aligns with H5P’s [question type contract](https://h5p.org/documentation/developers/contracts) but is implemented in React, not `H5P.Question`.
+Planned expansion of the runtime block catalog ([`ROADMAP.md`](ROADMAP.md#11x--assessment-contract--tier-b-p0-blocks), [H5P capability map](docs/project/h5p-capability-map.md)). Aligns with H5P’s [question type contract](https://h5p.org/documentation/developers/contracts) but is implemented in React, not `H5P.Question`.
 
 ## Scored blocks
 
@@ -108,7 +108,7 @@ Parent containers (`AssessmentSequence`, future `SlideDeck`, `InteractiveVideo`)
 
 Behaviour props (aligned with H5P): `enableRetry`, `enableSolutionsButton`, optional `autoCheck`.
 
-## Framework 1.2.x P0 components
+## Framework 1.1.x P0 components
 
 | Component | H5P analog |
 | --- | --- |

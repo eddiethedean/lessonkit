@@ -89,6 +89,34 @@ describe("@lessonkit/lxpack/bridge", () => {
     }
   });
 
+  it("forwards assessment_completed to submitAssessment", () => {
+    const submitAssessment = vi.fn();
+    vi.stubGlobal("window", {
+      parent: { lxpackBridge: { v1: { submitAssessment } } },
+    });
+
+    const event: TelemetryEvent = {
+      name: "assessment_completed",
+      courseId: "c",
+      lessonId: "l1",
+      sessionId: "s",
+      timestamp: "2026-01-01T00:00:00.000Z",
+      data: {
+        checkId: "tf-1",
+        interactionType: "trueFalse",
+        score: 1,
+        maxScore: 1,
+      },
+    };
+
+    try {
+      forwardTelemetryToBridge(event, "auto");
+      expect(submitAssessment).toHaveBeenCalled();
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
   it("forwardTelemetryToBridge swallows host bridge throws", () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
     const prevEnv = process.env.NODE_ENV;
