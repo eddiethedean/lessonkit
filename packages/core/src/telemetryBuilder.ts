@@ -1,8 +1,14 @@
 import { assertNever } from "./assertNever";
 import type {
+  AccordionSectionToggledData,
   AssessmentAnsweredData,
   AssessmentCompletedData,
+  BookPageViewedData,
+  CompoundPageViewedData,
   CourseId,
+  FlashcardFlippedData,
+  HotspotOpenedData,
+  ImageSliderChangedData,
   InteractionData,
   LessonId,
   LessonLifecycleData,
@@ -63,6 +69,36 @@ export type BuildTelemetryEventInput =
       name: "interaction";
       lessonId?: LessonId;
       data?: InteractionData;
+    })
+  | (BuildTelemetryEventContext & {
+      name: "book_page_viewed";
+      lessonId?: LessonId;
+      data: BookPageViewedData;
+    })
+  | (BuildTelemetryEventContext & {
+      name: "compound_page_viewed";
+      lessonId?: LessonId;
+      data: CompoundPageViewedData;
+    })
+  | (BuildTelemetryEventContext & {
+      name: "hotspot_opened";
+      lessonId?: LessonId;
+      data: HotspotOpenedData;
+    })
+  | (BuildTelemetryEventContext & {
+      name: "accordion_section_toggled";
+      lessonId?: LessonId;
+      data: AccordionSectionToggledData;
+    })
+  | (BuildTelemetryEventContext & {
+      name: "flashcard_flipped";
+      lessonId?: LessonId;
+      data: FlashcardFlippedData;
+    })
+  | (BuildTelemetryEventContext & {
+      name: "image_slider_changed";
+      lessonId?: LessonId;
+      data: ImageSliderChangedData;
     });
 
 let warnedMissingQuizLesson = false;
@@ -152,6 +188,29 @@ export function buildTelemetryEvent(opts: BuildTelemetryEventInput): TelemetryEv
         lessonId: opts.lessonId,
         data: opts.data,
       };
+    case "book_page_viewed": {
+      const lessonId = opts.lessonId;
+      if (!lessonId) throw new Error("book_page_viewed requires active lessonId");
+      return { name: "book_page_viewed", ...base, lessonId, data: opts.data };
+    }
+    case "compound_page_viewed": {
+      const lessonId = opts.lessonId;
+      if (!lessonId) throw new Error("compound_page_viewed requires active lessonId");
+      return { name: "compound_page_viewed", ...base, lessonId, data: opts.data };
+    }
+    case "hotspot_opened":
+      return { name: "hotspot_opened", ...base, lessonId: opts.lessonId, data: opts.data };
+    case "accordion_section_toggled":
+      return {
+        name: "accordion_section_toggled",
+        ...base,
+        lessonId: opts.lessonId,
+        data: opts.data,
+      };
+    case "flashcard_flipped":
+      return { name: "flashcard_flipped", ...base, lessonId: opts.lessonId, data: opts.data };
+    case "image_slider_changed":
+      return { name: "image_slider_changed", ...base, lessonId: opts.lessonId, data: opts.data };
     default:
       return assertNever(opts);
   }

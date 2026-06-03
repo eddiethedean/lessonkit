@@ -1,0 +1,261 @@
+import {
+  ASSESSMENT_SEQUENCE_ALLOWED_CHILD_TYPES,
+  INTERACTIVE_BOOK_ALLOWED_CHILD_TYPES,
+  PAGE_ALLOWED_CHILD_TYPES,
+  COMPOUND_MAX_NESTING_DEPTH,
+} from "@lessonkit/core";
+import type { BlockCatalogEntryV2 } from "./blockCatalog";
+
+const COMPOUND_PARENTS = ["Lesson", "Page", "InteractiveBook", "AssessmentSequence"] as const;
+
+function extendParents(entry: BlockCatalogEntryV2): BlockCatalogEntryV2 {
+  if (!entry.parentConstraints?.length) return entry;
+  const merged = new Set([...entry.parentConstraints, ...COMPOUND_PARENTS]);
+  return { ...entry, parentConstraints: [...merged] };
+}
+
+const assessmentBehaviourProps = [
+  { name: "enableRetry", type: "boolean", required: false, description: "Allow retry after completion." },
+  { name: "enableSolutionsButton", type: "boolean", required: false, description: "Show solution control." },
+  { name: "autoCheck", type: "boolean", required: false, description: "Check answers automatically when possible." },
+  { name: "passingScore", type: "number", required: false, description: "Minimum score to pass." },
+];
+
+export const v3CompoundAndContentEntries = [
+  {
+    type: "Text",
+    category: "content" as const,
+    description: "Paragraph text content.",
+    props: [
+      { name: "blockId", type: "BlockId", required: false, description: "Stable block id." },
+      { name: "children", type: "ReactNode", required: true, description: "Text body." },
+    ],
+    requiredIds: [],
+    parentConstraints: [...COMPOUND_PARENTS],
+    a11y: { element: "p", ariaLabel: "Text", keyboard: "N/A", notes: "Semantic paragraph." },
+    theming: { surface: "global-inherit" as const, stylingNotes: "Inherits theme." },
+    telemetry: { emits: [] },
+  },
+  {
+    type: "Heading",
+    category: "content" as const,
+    description: "Heading levels 1–3.",
+    props: [
+      { name: "blockId", type: "BlockId", required: false, description: "Stable block id." },
+      { name: "level", type: "1 | 2 | 3", required: true, description: "Heading level." },
+      { name: "children", type: "ReactNode", required: true, description: "Heading text." },
+    ],
+    requiredIds: [],
+    parentConstraints: [...COMPOUND_PARENTS],
+    a11y: { element: "h1-h3", ariaLabel: "Heading", keyboard: "N/A", notes: "Use one level per outline." },
+    theming: { surface: "global-inherit" as const, stylingNotes: "Inherits theme." },
+    telemetry: { emits: [] },
+  },
+  {
+    type: "Image",
+    category: "content" as const,
+    description: "Image with required alt text.",
+    props: [
+      { name: "blockId", type: "BlockId", required: false, description: "Stable block id." },
+      { name: "src", type: "string", required: true, description: "Image URL." },
+      { name: "alt", type: "string", required: true, description: "Alt text." },
+    ],
+    requiredIds: [],
+    parentConstraints: [...COMPOUND_PARENTS],
+    a11y: { element: "img", ariaLabel: "Image", keyboard: "N/A", notes: "Requires alt." },
+    theming: { surface: "global-inherit" as const, stylingNotes: "Responsive max-width." },
+    telemetry: { emits: [] },
+  },
+  {
+    type: "Page",
+    category: "container" as const,
+    compoundContract: true as const,
+    h5pMachineName: "H5P.Column",
+    h5pAlias: "Column",
+    description: "Column layout container (H5P Column / Page).",
+    allowedChildTypes: [...PAGE_ALLOWED_CHILD_TYPES],
+    maxNestingDepth: COMPOUND_MAX_NESTING_DEPTH.Page,
+    props: [
+      { name: "blockId", type: "BlockId", required: true, description: "Stable block id." },
+      { name: "title", type: "string", required: false, description: "Page title." },
+      { name: "children", type: "ReactNode", required: true, description: "Page content." },
+    ],
+    requiredIds: [],
+    optionalIds: ["blockId"],
+    parentConstraints: ["Lesson", "InteractiveBook"],
+    a11y: { element: "section", ariaLabel: "Page", keyboard: "N/A", notes: "H5P Column equivalent." },
+    theming: { surface: "global-inherit" as const, stylingNotes: "Container." },
+    telemetry: { emits: ["compound_page_viewed"], requiresActiveLesson: true },
+  },
+  {
+    type: "InteractiveBook",
+    category: "container" as const,
+    compoundContract: true as const,
+    h5pMachineName: "H5P.InteractiveBook",
+    h5pAlias: "Interactive Book",
+    description: "Multi-page book with chapter navigation.",
+    allowedChildTypes: [...INTERACTIVE_BOOK_ALLOWED_CHILD_TYPES],
+    maxNestingDepth: COMPOUND_MAX_NESTING_DEPTH.InteractiveBook,
+    props: [
+      { name: "blockId", type: "BlockId", required: true, description: "Stable block id." },
+      { name: "title", type: "string", required: true, description: "Book title." },
+      { name: "showBookScore", type: "boolean", required: false, description: "Show aggregate score." },
+      { name: "children", type: "Page[]", required: true, description: "Page chapters." },
+    ],
+    requiredIds: ["blockId"],
+    parentConstraints: ["Lesson"],
+    a11y: {
+      element: "section",
+      ariaLabel: "Interactive book",
+      keyboard: "Previous/Next chapter navigation.",
+      notes: "H5P Interactive Book equivalent.",
+    },
+    theming: { surface: "global-inherit" as const, stylingNotes: "Book chrome." },
+    telemetry: { emits: ["book_page_viewed"], requiresActiveLesson: true },
+  },
+  {
+    type: "Accordion",
+    category: "content" as const,
+    h5pMachineName: "H5P.Accordion",
+    h5pAlias: "Accordion",
+    description: "Expandable sections.",
+    props: [
+      { name: "blockId", type: "BlockId", required: true, description: "Stable block id." },
+      { name: "sections", type: "AccordionSection[]", required: true, description: "Sections." },
+    ],
+    requiredIds: ["blockId"],
+    parentConstraints: [...COMPOUND_PARENTS],
+    a11y: { element: "section", ariaLabel: "Accordion", keyboard: "Button toggles sections.", notes: "No nested accordions." },
+    theming: { surface: "global-inherit" as const, stylingNotes: "Disclosure pattern." },
+    telemetry: { emits: ["accordion_section_toggled"] },
+  },
+  {
+    type: "DialogCards",
+    category: "content" as const,
+    h5pMachineName: "H5P.Dialogcards",
+    h5pAlias: "Dialog Cards",
+    description: "Flip cards with front/back text.",
+    props: [
+      { name: "blockId", type: "BlockId", required: true, description: "Stable block id." },
+      { name: "cards", type: "DialogCard[]", required: true, description: "Cards." },
+    ],
+    requiredIds: ["blockId"],
+    parentConstraints: [...COMPOUND_PARENTS],
+    a11y: { element: "section", ariaLabel: "Dialog cards", keyboard: "Flip and navigate cards.", notes: "Reduced motion safe." },
+    theming: { surface: "global-inherit" as const, stylingNotes: "Card flip." },
+    telemetry: { emits: [] },
+  },
+  {
+    type: "Flashcards",
+    category: "content" as const,
+    h5pMachineName: "H5P.Flashcards",
+    h5pAlias: "Flashcards",
+    description: "Study flashcards with optional self-score.",
+    props: [
+      { name: "blockId", type: "BlockId", required: true, description: "Stable block id." },
+      { name: "cards", type: "Flashcard[]", required: true, description: "Cards." },
+      { name: "selfScore", type: "boolean", required: false, description: "Self-score mode." },
+    ],
+    requiredIds: ["blockId"],
+    parentConstraints: [...COMPOUND_PARENTS],
+    a11y: { element: "section", ariaLabel: "Flashcards", keyboard: "Flip and next.", notes: "Not LMS-scored by default." },
+    theming: { surface: "global-inherit" as const, stylingNotes: "Study mode." },
+    telemetry: { emits: ["flashcard_flipped"] },
+  },
+  {
+    type: "ImageHotspots",
+    category: "content" as const,
+    h5pMachineName: "H5P.ImageHotspots",
+    h5pAlias: "Image Hotspots",
+    description: "Image with clickable hotspot popovers.",
+    props: [
+      { name: "blockId", type: "BlockId", required: true, description: "Stable block id." },
+      { name: "src", type: "string", required: true, description: "Image URL." },
+      { name: "alt", type: "string", required: true, description: "Alt text." },
+      { name: "hotspots", type: "HotspotSpec[]", required: true, description: "Hotspots." },
+    ],
+    requiredIds: ["blockId"],
+    parentConstraints: [...COMPOUND_PARENTS],
+    a11y: { element: "section", ariaLabel: "Image hotspots", keyboard: "Buttons on image.", notes: "Popover dialog." },
+    theming: { surface: "global-inherit" as const, stylingNotes: "Positioned hotspots." },
+    telemetry: { emits: ["hotspot_opened"] },
+  },
+  {
+    type: "ImageSlider",
+    category: "content" as const,
+    h5pMachineName: "H5P.ImageSlider",
+    h5pAlias: "Image Slider",
+    description: "Carousel of images.",
+    props: [
+      { name: "blockId", type: "BlockId", required: true, description: "Stable block id." },
+      { name: "slides", type: "ImageSlide[]", required: true, description: "Slides." },
+    ],
+    requiredIds: ["blockId"],
+    parentConstraints: [...COMPOUND_PARENTS],
+    a11y: { element: "section", ariaLabel: "Image slider", keyboard: "Previous/next slide.", notes: "Carousel." },
+    theming: { surface: "global-inherit" as const, stylingNotes: "Slider." },
+    telemetry: { emits: ["image_slider_changed"] },
+  },
+  {
+    type: "FindHotspot",
+    category: "assessment" as const,
+    assessmentContract: true as const,
+    h5pMachineName: "H5P.ImageHotspotQuestion",
+    h5pAlias: "Find the Hotspot",
+    description: "Select the correct region on an image.",
+    props: [
+      { name: "checkId", type: "CheckId", required: true, description: "Stable check id." },
+      { name: "src", type: "string", required: true, description: "Image URL." },
+      { name: "alt", type: "string", required: true, description: "Alt text." },
+      { name: "targets", type: "HotspotTarget[]", required: true, description: "Targets." },
+      { name: "correctTargetId", type: "string", required: true, description: "Correct target id." },
+      ...assessmentBehaviourProps,
+    ],
+    requiredIds: ["checkId"],
+    parentConstraints: [...COMPOUND_PARENTS],
+    a11y: { element: "section", ariaLabel: "Find the hotspot", keyboard: "Select target buttons.", notes: "Scored." },
+    theming: { surface: "global-inherit" as const, dataAttributes: ["data-lk-check-id"], stylingNotes: "Uses data-lk-check-id." },
+    telemetry: { emits: ["assessment_answered", "assessment_completed"], requiresActiveLesson: true },
+  },
+  {
+    type: "FindMultipleHotspots",
+    category: "assessment" as const,
+    assessmentContract: true as const,
+    h5pMachineName: "H5P.ImageMultipleHotspotQuestion",
+    h5pAlias: "Find Multiple Hotspots",
+    description: "Select all correct regions on an image.",
+    props: [
+      { name: "checkId", type: "CheckId", required: true, description: "Stable check id." },
+      { name: "src", type: "string", required: true, description: "Image URL." },
+      { name: "alt", type: "string", required: true, description: "Alt text." },
+      { name: "targets", type: "HotspotTarget[]", required: true, description: "Targets." },
+      { name: "correctTargetIds", type: "string[]", required: true, description: "Correct target ids." },
+      ...assessmentBehaviourProps,
+    ],
+    requiredIds: ["checkId"],
+    parentConstraints: [...COMPOUND_PARENTS],
+    a11y: { element: "section", ariaLabel: "Find multiple hotspots", keyboard: "Toggle targets.", notes: "Scored." },
+    theming: { surface: "global-inherit" as const, dataAttributes: ["data-lk-check-id"], stylingNotes: "Uses data-lk-check-id." },
+    telemetry: { emits: ["assessment_answered", "assessment_completed"], requiresActiveLesson: true },
+  },
+] satisfies (BlockCatalogEntryV2 & {
+  compoundContract?: true;
+  allowedChildTypes?: readonly string[];
+  maxNestingDepth?: number;
+})[];
+
+export function buildV3CatalogFromV2(v2: BlockCatalogEntryV2[]): BlockCatalogEntryV2[] {
+  const patched = v2.map((entry) => {
+    const base = extendParents(entry);
+    if (entry.type === "AssessmentSequence") {
+      return {
+        ...base,
+        compoundContract: true as const,
+        allowedChildTypes: [...ASSESSMENT_SEQUENCE_ALLOWED_CHILD_TYPES],
+        maxNestingDepth: COMPOUND_MAX_NESTING_DEPTH.AssessmentSequence,
+      };
+    }
+    return base;
+  });
+  return [...patched, ...v3CompoundAndContentEntries];
+}

@@ -9,6 +9,18 @@ All notable changes to the LessonKit monorepo are documented here.
 
 _No pending changes._
 
+## [1.2.0] - 2026-06-03
+
+Framework **1.2.x** — Compound containers, resume state, and Tier C/D P0 blocks. `@lessonkit/core`, `@lessonkit/react`, `@lessonkit/lxpack`, `@lessonkit/xapi`, `@lessonkit/themes`, and `@lessonkit/accessibility` ship at **1.2.0**.
+
+### Added
+
+- **@lessonkit/core**: `CompoundHandle`, `CompoundResumeState`, compound session storage v2, `compoundAllowlists`, telemetry catalog v3 (`book_page_viewed`, content interaction events).
+- **@lessonkit/react**: `Page`, `InteractiveBook`, `Text`, `Heading`, `Image`; Tier C/D blocks (`Accordion`, `DialogCards`, `Flashcards`, `ImageHotspots`, `ImageSlider`, `FindHotspot`, `FindMultipleHotspots`); `AssessmentSequence` implements `CompoundHandle`; `block-catalog.v3.json` (default `buildBlockCatalog({ version: 3 })`).
+- **@lessonkit/lxpack**: `findHotspot` / `findMultipleHotspots` assessment descriptor kinds.
+- **Example**: `examples/interactive-book`.
+- **Docs**: [MIGRATION-1.1-to-1.2.md](docs/MIGRATION-1.1-to-1.2.md); ROADMAP 1.2.x milestone; H5P capability map updates.
+
 ## [studio-v0.3.1] - 2026-06-03
 
 Maintenance release for all five Studio packages at **0.3.1** (framework **1.1.0** on `main`; npm publish pins framework at release time).

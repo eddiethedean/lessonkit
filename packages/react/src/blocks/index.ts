@@ -4,3 +4,15 @@ export { FillInTheBlanks, type FillInTheBlanksProps, type FillInBlankSpec } from
 export { DragTheWords, type DragTheWordsProps } from "./DragTheWords";
 export { DragAndDrop, type DragAndDropProps, type DragItem, type DropTarget } from "./DragAndDrop";
 export { AssessmentSequence, type AssessmentSequenceProps } from "./AssessmentSequence";
+export { Text, type TextProps } from "./Text";
+export { Heading, type HeadingProps } from "./Heading";
+export { Image, type ImageProps } from "./Image";
+export { Page, type PageProps } from "./Page";
+export { InteractiveBook, type InteractiveBookProps } from "./InteractiveBook";
+export { Accordion, type AccordionProps, type AccordionSection } from "./Accordion";
+export { DialogCards, type DialogCardsProps, type DialogCard } from "./DialogCards";
+export { Flashcards, type FlashcardsProps, type Flashcard } from "./Flashcards";
+export { ImageHotspots, type ImageHotspotsProps, type HotspotSpec } from "./ImageHotspots";
+export { ImageSlider, type ImageSliderProps, type ImageSlide } from "./ImageSlider";
+export { FindHotspot, type FindHotspotProps, type HotspotTarget } from "./FindHotspot";
+export { FindMultipleHotspots, type FindMultipleHotspotsProps } from "./FindMultipleHotspots";

@@ -20,6 +20,8 @@ export type LessonkitConfig = {
     sessionId?: string;
     attemptId?: string;
     user?: TelemetryUser;
+    /** Persist compound navigation and child state in session storage (default true). */
+    persistCompoundState?: boolean;
   };
   tracking?: {
     enabled?: boolean;

@@ -31,6 +31,12 @@ export type {
   LessonLifecycleData,
   QuizAnsweredData,
   QuizCompletedData,
+  BookPageViewedData,
+  CompoundPageViewedData,
+  HotspotOpenedData,
+  AccordionSectionToggledData,
+  FlashcardFlippedData,
+  ImageSliderChangedData,
   TelemetryBatchSink,
   TelemetryEvent,
   TelemetryEventBase,
@@ -47,7 +53,38 @@ export type {
   AssessmentInteractionType,
   AssessmentXAPIData,
   AssessmentBaseProps,
+  AssessmentResumeState,
 } from "./assessment";
+
+export type {
+  CompoundHandle,
+  CompoundBaseProps,
+  CompoundResumeState,
+  CompoundResumeInput,
+} from "./compound";
+export {
+  COMPOUND_RESUME_SCHEMA_VERSION,
+  createCompoundResumeState,
+  parseCompoundResumeState,
+} from "./compound";
+
+export {
+  compoundStateStorageKey,
+  loadCompoundState,
+  saveCompoundState,
+  clearCompoundState,
+} from "./compoundState";
+
+export {
+  PAGE_ALLOWED_CHILD_TYPES,
+  INTERACTIVE_BOOK_ALLOWED_CHILD_TYPES,
+  ASSESSMENT_SEQUENCE_ALLOWED_CHILD_TYPES,
+  COMPOUND_MAX_NESTING_DEPTH,
+  ACCORDION_FORBIDDEN_CHILD_TYPES,
+  getAllowedChildTypes,
+  isChildTypeAllowed,
+  type CompoundParentType,
+} from "./compoundAllowlists";
 
 export {
   buildTelemetryCatalog,
@@ -62,6 +99,13 @@ export {
   telemetryCatalogV2Version,
   type TelemetryCatalogV2Entry,
 } from "./telemetryCatalogV2";
+
+export {
+  buildTelemetryCatalogV3,
+  TELEMETRY_EVENT_CATALOG_V3,
+  telemetryCatalogV3Version,
+  type TelemetryCatalogV3Entry,
+} from "./telemetryCatalogV3";
 
 export { createTrackingClient } from "./trackingClient";
 export { createSessionId } from "./ids";

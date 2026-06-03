@@ -63,6 +63,19 @@ export function assessmentDescriptorToLxpack(
   if (kind === "fillInBlanks") {
     return null;
   }
+  if (kind === "findHotspot" && assessment.kind === "findHotspot") {
+    return mcqToLxpack({
+      kind: "mcq",
+      checkId: assessment.checkId,
+      question: assessment.question,
+      choices: [assessment.correctTargetId, "other"],
+      answer: assessment.correctTargetId,
+      passingScore: assessment.passingScore,
+    });
+  }
+  if (kind === "findMultipleHotspots") {
+    return null;
+  }
   if ("choices" in assessment && "answer" in assessment && typeof assessment.answer === "string") {
     return mcqToLxpack(assessment);
   }

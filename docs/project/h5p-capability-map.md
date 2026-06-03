@@ -94,19 +94,19 @@ H5P **machine names** follow common library ids (e.g. `H5P.MultiChoice`). Displa
 | `H5P.QuestionSet` | Question Set (Quiz) | `AssessmentSequence` | A | P1 | ✅ | 1.1.x | 0.8.x |
 | — | Scenario (narrative) | `Scenario` | — | — | ✅ | 1.0 | 0.1+ |
 | — | Reflection (open text) | `Reflection` | — | — | ✅ | 1.0 | — |
-| `H5P.InteractiveBook` | Interactive Book | `InteractiveBook` | A | P0 | ⬜ | 1.2.x | 0.8.x |
+| `H5P.InteractiveBook` | Interactive Book | `InteractiveBook` | A | P0 | ✅ | 1.2.x | 0.8.x |
 | `H5P.CoursePresentation` | Course Presentation | `SlideDeck` | A | P0 | ⬜ | 1.3.x | 0.9.x |
 | `H5P.InteractiveVideo` | Interactive Video | `InteractiveVideo` | A | P0 | ⬜ | 1.4.x | 0.10.x |
 | `H5P.BranchingScenario` | Branching Scenario | `BranchingScenario` | A | P0 | ⬜ | 1.5.x | 0.11.x |
-| `H5P.Column` | Column / Page | `Page` | A | P1 | 🟡 | 1.2.x | 0.8.x (`container`) |
+| `H5P.Column` | Column / Page | `Page` | A | P1 | ✅ | 1.2.x | 0.8.x (`container`) |
 | `H5P.GameMap` | Game Map | `GameMap` | A | P2 | ⬜ | 1.7.x | — |
 | `H5P.ThreeSixty` | Virtual Tour (360) | `VirtualTour` | A | P2 | ⬜ | 1.9.x | — |
 | `H5P.DocumentationTool` | Documentation Tool | `DocumentationTool` | A | P3 | ⬜ | 2.x | — |
 | `H5P.StructureStrip` | Interactive Structure Strip | `StructureStrip` | A | P3 | ⬜ | 2.x | — |
-| `H5P.ImageHotspots` | Image Hotspots | `ImageHotspots` | C | P1 | ⬜ | 1.2.x | 0.8.x |
-| `H5P.ImageHotspotQuestion` | Find the Hotspot | `FindHotspot` | C | P1 | ⬜ | 1.2.x | 0.8.x |
-| `H5P.ImageMultipleHotspotQuestion` | Find Multiple Hotspots | `FindMultipleHotspots` | C | P1 | ⬜ | 1.2.x | 0.8.x |
-| `H5P.ImageSlider` | Image Slider | `ImageSlider` | C | P1 | ⬜ | 1.2.x | 0.8.x |
+| `H5P.ImageHotspots` | Image Hotspots | `ImageHotspots` | C | P1 | ✅ | 1.2.x | 0.8.x |
+| `H5P.ImageHotspotQuestion` | Find the Hotspot | `FindHotspot` | C | P1 | ✅ | 1.2.x | 0.8.x |
+| `H5P.ImageMultipleHotspotQuestion` | Find Multiple Hotspots | `FindMultipleHotspots` | C | P1 | ✅ | 1.2.x | 0.8.x |
+| `H5P.ImageSlider` | Image Slider | `ImageSlider` | C | P1 | ✅ | 1.2.x | 0.8.x |
 | `H5P.ImageJuxtaposition` | Image Juxtaposition | `ImageJuxtaposition` | C | P2 | ⬜ | 1.3.x | — |
 | `H5P.Agamotto` | Agamotto (Image Blender) | `ImageSequence` | C | P2 | ⬜ | 1.3.x | — |
 | `H5P.Collage` | Collage | `Collage` | C | P2 | ⬜ | 1.3.x | 0.9.x |
@@ -115,9 +115,9 @@ H5P **machine names** follow common library ids (e.g. `H5P.MultiChoice`). Displa
 | `H5P.MemoryGame` | Memory Game | `MemoryGame` | C | P2 | ⬜ | 1.4.x | — |
 | `H5P.IFrameEmbed` | Iframe Embedder | `Embed` | C | P3 | ⬜ | 1.5.x | — |
 | `H5P.Chart` | Chart | `Chart` | C | P3 | ⬜ | 1.5.x | — |
-| `H5P.Accordion` | Accordion | `Accordion` | D | P1 | ⬜ | 1.2.x | 0.8.x |
-| `H5P.Dialogcards` | Dialog Cards | `DialogCards` | D | P1 | ⬜ | 1.2.x | 0.8.x |
-| `H5P.Flashcards` | Flashcards | `Flashcards` | D | P1 | ⬜ | 1.2.x | 0.8.x |
+| `H5P.Accordion` | Accordion | `Accordion` | D | P1 | ✅ | 1.2.x | 0.8.x |
+| `H5P.Dialogcards` | Dialog Cards | `DialogCards` | D | P1 | ✅ | 1.2.x | 0.8.x |
+| `H5P.Flashcards` | Flashcards | `Flashcards` | D | P1 | ✅ | 1.2.x | 0.8.x |
 | `H5P.Timeline` | Timeline | `Timeline` | D | P2 | ⬜ | 1.3.x | — |
 | `H5P.Table` | Table | `Table` | D | P2 | ⬜ | 1.2.x | 0.8.x |
 | `H5P.InformationWall` | Information Wall | `InformationWall` | D | P2 | ⬜ | 1.4.x | — |
@@ -149,8 +149,8 @@ H5P **machine names** follow common library ids (e.g. `H5P.MultiChoice`). Displa
 | `.h5p` package | `.lkcourse` zip + optional import adapter | ⬜ | 1.6.x |
 | `semantics.json` editor | JSON Schema–driven Studio inspector | ⬜ | Studio 0.9.x |
 | Question type contract | `Assessment` interface | ✅ | 1.1.x |
-| Compound allowlists | `allowedChildTypes` in catalog | ⬜ | 1.2.x |
-| Resume state | `getCurrentState` / session v2 | ⬜ | 1.2.x |
+| Compound allowlists | `allowedChildTypes` in catalog | ✅ | 1.2.x |
+| Resume state | `getCurrentState` / session v2 | ✅ | 1.2.x |
 | OER Hub reuse | Template gallery | ⬜ | Studio 0.6.x+ |
 | Per-library CSS | Global `--lk-*` tokens | ✅ | 0.4.x / themes |
 

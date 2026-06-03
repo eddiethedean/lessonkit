@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "name": "interactive-book",
+  "course": {
+    "courseId": "interactive-book-demo",
+    "title": "Interactive Book (1.2.0)",
+    "layout": "single-spa",
+    "spaLessonId": "book-lesson",
+    "lessons": [{ "id": "book-lesson", "title": "Safety handbook" }],
+    "assessments": [
+      {
+        "kind": "trueFalse",
+        "checkId": "ppe-tf",
+        "question": "PPE is optional in the warehouse.",
+        "answer": false,
+        "passingScore": 1
+      }
+    ],
+    "theme": { "preset": "default" },
+    "tracking": { "completion": { "threshold": 1 } }
+  },
+  "paths": {
+    "spaDistDir": "dist",
+    "lxpackOutDir": ".lxpack/course",
+    "outputBaseDir": ".lxpack/out"
+  }
+}

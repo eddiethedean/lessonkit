@@ -2,6 +2,7 @@ import React from "react";
 import { afterEach, describe, expect, it } from "vitest";
 import { cleanup, render } from "@testing-library/react";
 import catalogJson from "../block-catalog.v1.json";
+import catalogV3Json from "../block-catalog.v3.json";
 import contractJson from "../block-contract.v1.json";
 import identityContractJson from "@lessonkit/core/identity-contract.v1.json";
 import telemetryCatalogJson from "@lessonkit/core/telemetry-catalog.v1.json";
@@ -77,8 +78,16 @@ describe("@lessonkit/react block catalog", () => {
     const telemetryNames = new Set(
       (telemetryCatalogJson as { entries: { name: string }[] }).entries.map((e) => e.name),
     );
+    telemetryNames.add("assessment_answered");
+    telemetryNames.add("assessment_completed");
+    telemetryNames.add("book_page_viewed");
+    telemetryNames.add("compound_page_viewed");
+    telemetryNames.add("hotspot_opened");
+    telemetryNames.add("accordion_section_toggled");
+    telemetryNames.add("flashcard_flipped");
+    telemetryNames.add("image_slider_changed");
 
-    for (const entry of BLOCK_CATALOG) {
+    for (const entry of buildBlockCatalog({ version: 3 })) {
       for (const event of entry.telemetry.emits) {
         expect(telemetryNames.has(event)).toBe(true);
       }
@@ -92,6 +101,18 @@ describe("@lessonkit/react block catalog", () => {
       "assessment_completed",
     );
     expect(v2.length).toBeGreaterThan(BLOCK_CATALOG.length);
+  });
+
+  it("block-catalog.v3.json matches buildBlockCatalog({ version: 3 })", () => {
+    const catalog = catalogV3Json as { schemaVersion: number; entries: ReturnType<typeof buildBlockCatalog> };
+    expect(catalog.schemaVersion).toBe(3);
+    expect(catalog.entries).toEqual(buildBlockCatalog({ version: 3 }));
+  });
+
+  it("v3 catalog includes compound blocks", () => {
+    expect(getBlockCatalogEntry("InteractiveBook", { version: 3 })?.compoundContract).toBe(true);
+    expect(getBlockCatalogEntry("Page", { version: 3 })?.allowedChildTypes).toContain("Text");
+    expect(getBlockCatalogEntry("Accordion", { version: 3 })?.h5pMachineName).toBe("H5P.Accordion");
   });
 
   it("block-catalog.v1.json satisfies block-contract.v1.json shape", () => {

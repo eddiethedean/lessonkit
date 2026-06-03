@@ -1,7 +1,13 @@
 import { validateId } from "@lessonkit/core";
 import type { ExportTarget } from "@lxpack/api";
 import type { LessonkitThemeV1, ThemePresetName } from "@lessonkit/themes";
-import type { AssessmentDescriptor, LessonDescriptor, LessonkitCourseDescriptor, SpaLayout } from "./types";
+import type {
+  AssessmentDescriptor,
+  LessonDescriptor,
+  LessonkitCourseDescriptor,
+  McqAssessmentDescriptor,
+  SpaLayout,
+} from "./types";
 import { isSafeRelativeSpaPath } from "./spaPath";
 import { themeToLxpackRuntime } from "./theme";
 import type { ValidationIssue } from "./validationIssue";
@@ -60,6 +66,26 @@ function parseAssessmentDescriptor(raw: unknown): AssessmentDescriptor {
               answer: typeof b.answer === "string" ? b.answer : "",
             }))
         : undefined,
+    };
+  }
+  if (kind === "findHotspot") {
+    return {
+      kind: "findHotspot",
+      ...base,
+      src: typeof raw.src === "string" ? raw.src : "",
+      alt: typeof raw.alt === "string" ? raw.alt : "",
+      correctTargetId: typeof raw.correctTargetId === "string" ? raw.correctTargetId : "",
+    };
+  }
+  if (kind === "findMultipleHotspots") {
+    return {
+      kind: "findMultipleHotspots",
+      ...base,
+      src: typeof raw.src === "string" ? raw.src : "",
+      alt: typeof raw.alt === "string" ? raw.alt : "",
+      correctTargetIds: Array.isArray(raw.correctTargetIds)
+        ? raw.correctTargetIds.filter((id): id is string => typeof id === "string")
+        : [],
     };
   }
   return {
@@ -170,12 +196,33 @@ function normalizeDescriptor(input: LessonkitCourseDescriptor): LessonkitCourseD
           })),
         };
       }
+      if (assessment.kind === "findHotspot") {
+        return {
+          ...assessment,
+          checkId: check.id,
+          question,
+          src: assessment.src.trim(),
+          alt: assessment.alt.trim(),
+          correctTargetId: assessment.correctTargetId.trim(),
+        };
+      }
+      if (assessment.kind === "findMultipleHotspots") {
+        return {
+          ...assessment,
+          checkId: check.id,
+          question,
+          src: assessment.src.trim(),
+          alt: assessment.alt.trim(),
+          correctTargetIds: assessment.correctTargetIds.map((id) => id.trim()).filter((id) => id.length > 0),
+        };
+      }
+      const mcq = assessment as McqAssessmentDescriptor;
       return {
-        ...assessment,
+        ...mcq,
         checkId: check.id,
         question,
-        choices: assessment.choices.map((c) => c.trim()).filter((c) => c.length > 0),
-        answer: assessment.answer.trim(),
+        choices: mcq.choices.map((c) => c.trim()).filter((c) => c.length > 0),
+        answer: mcq.answer.trim(),
       };
     }),
   };
