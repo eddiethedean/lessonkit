@@ -165,4 +165,5 @@ project/studio-readiness
 project/studio-spec
 project/studio-plan
 MIGRATION-0.x-to-1.0
+MIGRATION-1.0-to-1.1
 ```
