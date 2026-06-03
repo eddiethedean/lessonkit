@@ -7,28 +7,56 @@ Published packages:
 
 Normal `v1.0.3` tags **do not** publish or re-version Studio packages. Studio uses its own semver line (e.g. `0.1.0`) and tag prefix.
 
+## Publishing 1.1.0 + Studio 0.3.1 (recommended order)
+
+1. Confirm [1.1.0](#110-checklist-ready-to-publish) and [Studio 0.3.1](#studio-031-checklist-ready-to-publish) checklists below.
+2. Tag and push **framework first** (re-runs CI, then publishes seven `@lessonkit/*` packages):
+
+   ```bash
+   git tag v1.1.0
+   git push origin v1.1.0
+   ```
+
+3. After `v1.1.0` is on npm, tag and push **Studio** (pins `@lessonkit/*` to **1.1.0** via `prepare-publish.mjs`):
+
+   ```bash
+   git tag studio-v0.3.1
+   git push origin studio-v0.3.1
+   ```
+
 ## Prerequisites
 
 - `main` is green (see [CI workflow](.github/workflows/ci.yml)).
-- All `packages/*/package.json` versions match the release (e.g. `1.0.2`).
+- All `packages/*/package.json` versions match the release (framework `1.1.0`, Studio `0.3.1` on `main`).
 - [CHANGELOG.md](CHANGELOG.md) documents the release.
 - No pending files in [`.changeset/`](.changeset/) that would run `changeset version` and bump versions unexpectedly (this repo publishes via **git tags**, not `changeset publish`).
 
 > **1.0.0** is the stable public API release. See [MIGRATION-0.x-to-1.0.md](docs/MIGRATION-0.x-to-1.0.md).
 
-### Studio 0.3.0 checklist (ready to publish)
+### Studio 0.3.1 checklist (ready to publish)
 
 | Item | Status |
 |------|--------|
-| Studio packages at `0.3.0` (schema, renderer, builder, ui, codegen) | Done |
-| [CHANGELOG.md](CHANGELOG.md) `## [studio-v0.3.0]` | Done |
+| Studio packages at `0.3.1` (schema, renderer, builder, ui, codegen) | Done |
+| Root `studio-version` = `0.3.1` | Done |
+| [CHANGELOG.md](CHANGELOG.md) `## [studio-v0.3.1]` | Done |
 | [studio-release.yml](.github/workflows/studio-release.yml) publishes all five packages | Done |
-| Integration test `studio-export-package.test.ts` | Done |
-| [Studio export guide](docs/guides/studio/export.md) + [STUDIO_READINESS.md](docs/STUDIO_READINESS.md) 0.3 section | Done |
-| `main` CI green | Verify before tag |
-| Git tag `studio-v0.3.0` | **Create when ready** |
+| `prepare-publish.mjs studio 0.3.1` pins `@lessonkit/*` to `packages/core` version (**1.1.0**) | Done |
+| Integration test `studio-export-package.test.ts` (`studioVersion: 0.3.1`) | Done |
+| `main` CI green | Done — [CI run 26893507343](https://github.com/eddiethedean/lessonkit/actions/runs/26893507343) |
+| npm latest `@lessonkit/studio-schema` | **0.3.0** — publish with `studio-v0.3.1` |
+| Git tag `studio-v0.3.1` | **Create when ready** |
 
-> **Do not create or push `studio-v0.3.0`** until you intend to publish to npm. Normal `v*` tags do not publish Studio.
+> Publish **framework `v1.1.0` first**, then `studio-v0.3.1`, so Studio tarballs pin the published **1.1.0** line.
+
+> **Do not create or push `studio-v0.3.1`** until you intend to publish to npm. Normal `v*` tags do not publish Studio.
+
+### Studio 0.3.0 checklist (published on npm)
+
+| Item | Status |
+|------|--------|
+| Studio packages at `0.3.0` | Published |
+| Git tag `studio-v0.3.0` | Shipped 2026-06-01 |
 
 ### Studio 0.2.0 checklist (ready to publish)
 
@@ -62,7 +90,7 @@ Normal `v1.0.3` tags **do not** publish or re-version Studio packages. Studio us
 
 > **Do not create or push `studio-v0.1.0`** until you intend to publish to npm. Normal `v*` tags do not publish Studio.
 
-### 1.1.0 checklist (ready to publish — no git tag yet)
+### 1.1.0 checklist (ready to publish)
 
 | Item | Status |
 |------|--------|
@@ -70,12 +98,16 @@ Normal `v1.0.3` tags **do not** publish or re-version Studio packages. Studio us
 | Internal `@lessonkit/*` workspace deps pinned to `1.1.0` | Done |
 | Root `package.json` and Sphinx `docs/conf.py` `release` = `1.1.0` | Done |
 | `lessonkit init` template pins `^1.1.0` (`copy-template.mjs`) | Done |
-| [CHANGELOG.md](CHANGELOG.md) `## [1.1.0]` | Done |
+| [CHANGELOG.md](CHANGELOG.md) `## [1.1.0]` (includes audit fixes on `main`) | Done |
 | Assessment contract, telemetry-catalog v2, block-catalog v2 | Done |
 | P0 blocks + `examples/assessments-p0` + integration/e2e | Done |
 | [MIGRATION-1.0-to-1.1.md](docs/MIGRATION-1.0-to-1.1.md) | Done |
-| `npm run lint` + `typecheck` + `test` + `coverage` + `test:integration` + `test:e2e` + `build-storybook` + `copy-template` | Verified locally (2026-06-03) |
-| Git tag `v1.1.0` | **Skipped per release plan** — create manually when ready to publish |
+| No pending `.changeset/*.md` files | Done |
+| `main` CI green | Done — [CI run 26893507343](https://github.com/eddiethedean/lessonkit/actions/runs/26893507343) |
+| `npm run lint` + `typecheck` + `test` + `coverage` + `test:integration` + `test:e2e` + `build-storybook` | Verified locally (2026-06-03) |
+| `npm audit --omit=dev --audit-level=high` | Run before tag |
+| npm latest `@lessonkit/react` | **1.0.2** — publish with `v1.1.0` |
+| Git tag `v1.1.0` | **Create when ready** |
 
 > **Do not create or push `v1.1.0`** until you intend to publish that version to npm.
 

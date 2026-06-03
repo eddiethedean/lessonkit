@@ -7,12 +7,7 @@ All notable changes to the LessonKit monorepo are documented here.
 
 ## Unreleased
 
-Framework **1.1.0** on `main` (no npm bump yet).
-
-### Fixed
-
-- **@lessonkit/react:** `TrueFalse` feedback respects plugin `passed`; `passingScore` applied in `scoreFromCustom`; `autoCheck` dedupes `assessment_answered`; empty FIB/DragTheWords templates and zero-token `MarkTheWords` show author-facing errors.
-- **Docs / policy:** Version badges, SECURITY supported versions, README migration link, broken CHANGELOG paths.
+_No pending changes._
 
 ## [studio-v0.3.1] - 2026-06-03
 
@@ -47,6 +42,11 @@ Framework **1.1.x** — Assessment contract and Tier B P0 blocks. All seven `@le
 
 - `lessonkit init` template pins `^1.1.0` for `@lessonkit/*`.
 - `Quiz` / `KnowledgeCheck` props remain `McqAssessmentDescriptor` (unchanged MCQ shape).
+
+### Fixed
+
+- **@lessonkit/react:** `TrueFalse` feedback respects plugin `passed`; `passingScore` applied in `scoreFromCustom`; `autoCheck` dedupes `assessment_answered`; empty FIB/DragTheWords templates and zero-token `MarkTheWords` show author-facing errors.
+- **Docs / policy:** Version badges, SECURITY supported versions, README migration link, broken CHANGELOG paths.
 
 ## [studio-v0.3.0] - 2026-06-01
 
@@ -513,6 +513,9 @@ Last version published to npm before 0.2.x.
 - Initial public packages: `@lessonkit/core`, `@lessonkit/react`, `@lessonkit/xapi`, `@lessonkit/accessibility`, `@lessonkit/themes`, `@lessonkit/cli`.
 - Tag-based publish workflow and CI checks (build, typecheck, test, coverage).
 
+[studio-v0.3.1]: https://github.com/eddiethedean/lessonkit/compare/studio-v0.3.0...studio-v0.3.1
+[studio-v0.3.0]: https://github.com/eddiethedean/lessonkit/compare/studio-v0.2.0...studio-v0.3.0
+[1.1.0]: https://github.com/eddiethedean/lessonkit/compare/v1.0.2...v1.1.0
 [0.5.0]: https://github.com/eddiethedean/lessonkit/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/eddiethedean/lessonkit/compare/v0.3.1...v0.4.0
 [0.3.1]: https://github.com/eddiethedean/lessonkit/compare/v0.3.0...v0.3.1
