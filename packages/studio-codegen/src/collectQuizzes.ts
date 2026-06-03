@@ -6,41 +6,10 @@ import type {
   StudioMarkTheWordsBlock,
   StudioProjectV1,
 } from "@lessonkit/studio-schema";
+import { isAssessmentBlockType } from "@lessonkit/studio-schema";
+import { walkBlocks } from "@lessonkit/studio-schema";
 
-export function walkBlocks(blocks: StudioBlock[], visit: (block: StudioBlock) => void): void {
-  for (const block of blocks) {
-    visit(block);
-    switch (block.type) {
-      case "container":
-      case "scenario":
-        walkBlocks(block.blocks, visit);
-        break;
-      case "page":
-        walkBlocks(block.blocks, visit);
-        break;
-      case "interactiveBook":
-        for (const page of block.pages) {
-          walkBlocks(page.blocks, visit);
-        }
-        break;
-      case "assessmentSequence":
-        walkBlocks(block.blocks, visit);
-        break;
-      case "accordion":
-        for (const section of block.sections) {
-          walkBlocks(section.blocks, visit);
-        }
-        break;
-      case "imageHotspots":
-        for (const hotspot of block.hotspots) {
-          walkBlocks(hotspot.blocks, visit);
-        }
-        break;
-      default:
-        break;
-    }
-  }
-}
+export { walkBlocks } from "@lessonkit/studio-schema";
 
 function questionFromTemplate(template: string): string {
   const plain = template.replace(/\*[^*]+\*/g, "___").trim();
@@ -78,6 +47,7 @@ function dragAndDropToMcq(block: StudioDragAndDropBlock): AssessmentDescriptor {
 }
 
 function blockToAssessment(block: StudioBlock): AssessmentDescriptor | null {
+  if (!isAssessmentBlockType(block.type)) return null;
   switch (block.type) {
     case "quiz":
       return {

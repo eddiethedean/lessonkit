@@ -18,55 +18,8 @@ import type {
 import { studioSchemaVersion } from "./types";
 import { isRecord, parsePositiveInt, parseString, pushIssue } from "./parseUtils";
 
-const BLOCK_TYPES = [
-  "text",
-  "heading",
-  "image",
-  "button",
-  "input",
-  "container",
-  "quiz",
-  "scenario",
-  "checklist",
-  "video",
-  "trueFalse",
-  "fillInTheBlanks",
-  "markTheWords",
-  "dragTheWords",
-  "dragAndDrop",
-  "page",
-  "interactiveBook",
-  "assessmentSequence",
-  "accordion",
-  "dialogCards",
-  "flashcards",
-  "imageHotspots",
-  "imageSlider",
-  "findHotspot",
-  "findMultipleHotspots",
-] as const;
-
-function parseBoolean(
-  raw: unknown,
-  path: string,
-  issues: StudioValidationIssue[],
-): boolean | undefined {
-  if (typeof raw === "boolean") return raw;
-  if (raw === "true") return true;
-  if (raw === "false") return false;
-  pushIssue(issues, path, "must be a boolean");
-  return undefined;
-}
-
-function parseNumber(
-  raw: unknown,
-  path: string,
-  issues: StudioValidationIssue[],
-): number | undefined {
-  if (typeof raw === "number" && Number.isFinite(raw)) return raw;
-  pushIssue(issues, path, "must be a number");
-  return undefined;
-}
+import { BLOCK_TYPES } from "./blockRegistry";
+import { parseBoolean, parseNumber } from "./parse/helpers";
 
 function parseStringArray(
   raw: unknown,

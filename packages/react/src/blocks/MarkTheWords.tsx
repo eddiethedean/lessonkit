@@ -1,8 +1,10 @@
-import React, { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
+import React, { forwardRef, useEffect, useMemo, useRef, useState } from "react";
 import type { AssessmentBaseProps, AssessmentHandle, AssessmentInteractionType } from "@lessonkit/core";
 import type { LessonId } from "@lessonkit/core";
 import { AssessmentLessonGuard } from "../assessment/AssessmentLessonGuard";
-import { useRegisterAssessmentHandle } from "../assessment/AssessmentSequenceContext";
+import { buildAssessmentHandle } from "../assessment/internal/buildAssessmentHandle";
+import { readBooleanStateField } from "../assessment/internal/resumeState";
+import { useAssessmentHandleRegistration } from "../assessment/internal/useAssessmentHandleRegistration";
 import { meetsPassingThreshold } from "../assessment/scoring";
 import { useAssessmentState } from "../assessment/useAssessmentState";
 import { isDevEnvironment, normalizeComponentId } from "../runtime/validateComponentId";
@@ -60,45 +62,38 @@ function MarkTheWordsInner(
   const score = allMarked ? maxScore : marked.size;
   const passedThreshold = meetsPassingThreshold(score, maxScore || 1, props.passingScore);
 
-  const handle = useMemo((): AssessmentHandle => {
-    const handleMax = maxScore || 1;
-    return {
-      getScore: () => score,
-      getMaxScore: () => handleMax,
-      getAnswerGiven: () => marked.size > 0,
-      resetTask: reset,
-      showSolutions: () => setShowSolutions(true),
-      getXAPIData: () => ({
+  const handle = useMemo(
+    () =>
+      buildAssessmentHandle({
         checkId,
-        interactionType: INTERACTION,
-        response: [...marked].map((i) => tokens[i]),
-        correct: passedThreshold,
-        score,
-        maxScore: handleMax,
+        getScore: () => score,
+        getMaxScore: () => maxScore || 1,
+        getAnswerGiven: () => marked.size > 0,
+        resetTask: reset,
+        showSolutions: () => setShowSolutions(true),
+        getXAPIData: () => ({
+          checkId,
+          interactionType: INTERACTION,
+          response: [...marked].map((i) => tokens[i]),
+          correct: passedThreshold,
+          score,
+          maxScore: maxScore || 1,
+        }),
+        getCurrentState: () => ({ marked: [...marked], passed, showSolutions }),
+        resume: (state) => {
+          const raw = state.marked;
+          if (Array.isArray(raw)) setMarked(new Set(raw.filter((i): i is number => typeof i === "number")));
+          readBooleanStateField(state, "passed", (value) => {
+            setPassed(value);
+            completedRef.current = value;
+          });
+          readBooleanStateField(state, "showSolutions", setShowSolutions);
+        },
       }),
-      getCurrentState: () => ({
-        marked: [...marked],
-        passed,
-        showSolutions,
-      }),
-      resume: (state) => {
-        const s = state as {
-          marked?: number[];
-          passed?: boolean;
-          showSolutions?: boolean;
-        };
-        if (Array.isArray(s.marked)) setMarked(new Set(s.marked));
-        if (typeof s.passed === "boolean") {
-          setPassed(s.passed);
-          completedRef.current = s.passed;
-        }
-        if (typeof s.showSolutions === "boolean") setShowSolutions(s.showSolutions);
-      },
-    };
-  }, [checkId, marked, maxScore, passed, passedThreshold, score, showSolutions, tokens]);
+    [checkId, marked, maxScore, passed, passedThreshold, score, showSolutions, tokens],
+  );
 
-  useImperativeHandle(ref, () => handle, [handle]);
-  useRegisterAssessmentHandle(checkId, handle);
+  useAssessmentHandleRegistration(checkId, handle, ref);
 
   const toggle = (index: number) => {
     if (passed && !props.enableRetry) return;

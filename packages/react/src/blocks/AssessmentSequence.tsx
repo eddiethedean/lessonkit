@@ -1,12 +1,7 @@
 import React, { forwardRef, useCallback, useEffect, useMemo, useState } from "react";
 import type { AssessmentBehaviour, BlockId, CompoundHandle } from "@lessonkit/core";
-import { clampCompoundPageIndex } from "@lessonkit/core";
-import { CompoundProvider, useCompoundHandleRef, useCompoundRegistry } from "../compound/CompoundProvider";
-import { useCompoundNavigation } from "../compound/useCompoundNavigation";
-import {
-  readCompoundInitialIndex,
-  useCompoundPersistence,
-} from "../compound/useCompoundPersistence";
+import { CompoundProvider } from "../compound/CompoundProvider";
+import { useCompoundInitialIndex, useCompoundShell } from "../compound/useCompoundShell";
 import { validateCompoundChildren } from "../compound/validateChildren";
 import { setLessonkitBlockType } from "../compound/blockType";
 import { useLessonkit } from "../hooks";
@@ -24,33 +19,23 @@ type AssessmentSequenceInnerProps = AssessmentSequenceProps & {
   childArray: React.ReactElement[];
   index: number;
   setIndex: React.Dispatch<React.SetStateAction<number>>;
+  persistEnabled: boolean;
 };
 
 const AssessmentSequenceInner = forwardRef<CompoundHandle, AssessmentSequenceInnerProps>(
   function AssessmentSequenceInner(props, ref) {
-    const { compoundId, childArray, index, setIndex } = props;
+    const { compoundId, childArray, index, setIndex, persistEnabled } = props;
     const sequential = props.sequential !== false;
-    const ctx = useCompoundRegistry();
     const { config } = useLessonkit();
-    const persistEnabled = config.session?.persistCompoundState !== false;
 
-    useCompoundPersistence({
+    const { visibleIndex, goNext, goPrev, progress } = useCompoundShell({
       courseId: config.courseId,
       compoundId,
       pageCount: childArray.length,
       index,
       setIndex,
-      enabled: persistEnabled,
-    });
-
-    const { goNext, goPrev, progress } = useCompoundNavigation(childArray.length, index, setIndex);
-    const visibleIndex = clampCompoundPageIndex(index, childArray.length);
-
-    useCompoundHandleRef(ref, {
-      activePageIndex: visibleIndex,
-      setActivePageIndex: setIndex,
-      getHandles: () => ctx?.getHandles() ?? new Map(),
-      pageCount: childArray.length,
+      persistEnabled,
+      ref,
       enableSolutionsButton: props.enableSolutionsButton,
     });
 
@@ -121,10 +106,12 @@ export const AssessmentSequence = forwardRef<CompoundHandle, AssessmentSequenceP
       );
     }, [persistEnabled, props.blockId]);
 
-    const initialIndex = useMemo(
-      () => readCompoundInitialIndex(config.courseId, compoundId, childArray.length, persistEnabled),
-      [config.courseId, compoundId, childArray.length, persistEnabled],
-    );
+    const initialIndex = useCompoundInitialIndex({
+      courseId: config.courseId,
+      compoundId,
+      pageCount: childArray.length,
+      persistEnabled,
+    });
 
     const [index, setIndex] = useState(initialIndex);
     const setIndexStable = useCallback((i: number) => setIndex(i), []);
@@ -138,6 +125,7 @@ export const AssessmentSequence = forwardRef<CompoundHandle, AssessmentSequenceP
           childArray={childArray}
           index={index}
           setIndex={setIndex}
+          persistEnabled={persistEnabled}
         />
       </CompoundProvider>
     );

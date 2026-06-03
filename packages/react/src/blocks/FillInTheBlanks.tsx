@@ -1,8 +1,11 @@
-import React, { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
+import React, { forwardRef, useEffect, useMemo, useRef, useState } from "react";
 import type { AssessmentBaseProps, AssessmentHandle, AssessmentInteractionType } from "@lessonkit/core";
 import type { LessonId } from "@lessonkit/core";
 import { AssessmentLessonGuard } from "../assessment/AssessmentLessonGuard";
-import { useRegisterAssessmentHandle } from "../assessment/AssessmentSequenceContext";
+import { parseStarDelimitedTemplate } from "../assessment/internal/parseStarDelimitedTemplate";
+import { buildAssessmentHandle } from "../assessment/internal/buildAssessmentHandle";
+import { readBooleanStateField } from "../assessment/internal/resumeState";
+import { useAssessmentHandleRegistration } from "../assessment/internal/useAssessmentHandleRegistration";
 import { meetsPassingThreshold } from "../assessment/scoring";
 import { useAssessmentState } from "../assessment/useAssessmentState";
 import { isDevEnvironment, normalizeComponentId } from "../runtime/validateComponentId";
@@ -19,21 +22,11 @@ export type FillInTheBlanksProps = AssessmentBaseProps & {
 const INTERACTION: AssessmentInteractionType = "fillInBlanks";
 
 function parseTemplate(template: string): { parts: string[]; blanks: FillInBlankSpec[] } {
-  const parts: string[] = [];
-  const blanks: FillInBlankSpec[] = [];
-  const re = /\*([^*]+)\*/g;
-  let last = 0;
-  let match: RegExpExecArray | null;
-  let n = 0;
-  while ((match = re.exec(template)) !== null) {
-    parts.push(template.slice(last, match.index));
-    const id = `blank-${n++}`;
-    blanks.push({ id, answer: match[1]!.trim() });
-    parts.push(id);
-    last = match.index + match[0].length;
-  }
-  parts.push(template.slice(last));
-  return { parts, blanks };
+  const { parts, values } = parseStarDelimitedTemplate(template, "blank");
+  return {
+    parts,
+    blanks: values.map((answer, i) => ({ id: `blank-${i}`, answer })),
+  };
 }
 
 function FillInTheBlanksInner(
@@ -73,42 +66,39 @@ function FillInTheBlanksInner(
   const maxScore = blanks.length;
   const passedThreshold = meetsPassingThreshold(score, maxScore || 1, props.passingScore);
 
-  const handle = useMemo((): AssessmentHandle => {
-    const handleMax = maxScore || 1;
-    return {
-      getScore: () => score,
-      getMaxScore: () => handleMax,
-      getAnswerGiven: () => allFilled,
-      resetTask: reset,
-      showSolutions: () => setShowSolutions(true),
-      getXAPIData: () => ({
+  const handle = useMemo(
+    () =>
+      buildAssessmentHandle({
         checkId,
-        interactionType: INTERACTION,
-        response: values,
-        correct: passedThreshold,
-        score,
-        maxScore: handleMax,
+        getScore: () => score,
+        getMaxScore: () => maxScore || 1,
+        getAnswerGiven: () => allFilled,
+        resetTask: reset,
+        showSolutions: () => setShowSolutions(true),
+        getXAPIData: () => ({
+          checkId,
+          interactionType: INTERACTION,
+          response: values,
+          correct: passedThreshold,
+          score,
+          maxScore: maxScore || 1,
+        }),
+        getCurrentState: () => ({ values, passed, showSolutions }),
+        resume: (state) => {
+          const raw = state.values;
+          if (raw && typeof raw === "object") setValues({ ...(raw as Record<string, string>) });
+          readBooleanStateField(state, "passed", (value) => {
+            setPassed(value);
+            completedRef.current = value;
+            answeredRef.current = value;
+          });
+          readBooleanStateField(state, "showSolutions", setShowSolutions);
+        },
       }),
-      getCurrentState: () => ({ values, passed, showSolutions }),
-      resume: (state) => {
-        const s = state as {
-          values?: Record<string, string>;
-          passed?: boolean;
-          showSolutions?: boolean;
-        };
-        if (s.values && typeof s.values === "object") setValues({ ...s.values });
-        if (typeof s.passed === "boolean") {
-          setPassed(s.passed);
-          completedRef.current = s.passed;
-          answeredRef.current = s.passed;
-        }
-        if (typeof s.showSolutions === "boolean") setShowSolutions(s.showSolutions);
-      },
-    };
-  }, [allFilled, blanks.length, checkId, maxScore, passed, passedThreshold, score, showSolutions, values]);
+    [allFilled, checkId, maxScore, passed, passedThreshold, score, showSolutions, values],
+  );
 
-  useImperativeHandle(ref, () => handle, [handle]);
-  useRegisterAssessmentHandle(checkId, handle);
+  useAssessmentHandleRegistration(checkId, handle, ref);
 
   const check = () => {
     if (!hasBlanks) {

@@ -1,8 +1,10 @@
-import React, { forwardRef, useImperativeHandle, useMemo, useState } from "react";
+import React, { forwardRef, useMemo, useState } from "react";
 import type { AssessmentBaseProps, AssessmentHandle, AssessmentInteractionType } from "@lessonkit/core";
 import type { LessonId } from "@lessonkit/core";
 import { AssessmentLessonGuard } from "../assessment/AssessmentLessonGuard";
-import { useRegisterAssessmentHandle } from "../assessment/AssessmentSequenceContext";
+import { buildAssessmentHandle } from "../assessment/internal/buildAssessmentHandle";
+import { readBooleanStateField } from "../assessment/internal/resumeState";
+import { useAssessmentHandleRegistration } from "../assessment/internal/useAssessmentHandleRegistration";
 import { useAssessmentState } from "../assessment/useAssessmentState";
 import { setLessonkitBlockType } from "../compound/blockType";
 import { normalizeComponentId } from "../runtime/validateComponentId";
@@ -39,37 +41,37 @@ function FindMultipleHotspotsInner(
     selected.size === props.correctTargetIds.length &&
     props.correctTargetIds.every((id) => selected.has(id));
 
-  const handle = useMemo((): AssessmentHandle => {
-    const maxScore = 1;
-    const score = checked && correct ? 1 : 0;
-    return {
-      getScore: () => score,
-      getMaxScore: () => maxScore,
-      getAnswerGiven: () => selected.size > 0,
-      resetTask: () => {
-        setSelected(new Set());
-        setChecked(false);
-      },
-      showSolutions: () => setSelected(new Set(props.correctTargetIds)),
-      getXAPIData: () => ({
+  const handle = useMemo(
+    () =>
+      buildAssessmentHandle({
         checkId,
-        interactionType: INTERACTION,
-        response: [...selected],
-        correct: checked ? correct : undefined,
-        score,
-        maxScore,
+        getScore: () => (checked && correct ? 1 : 0),
+        getMaxScore: () => 1,
+        getAnswerGiven: () => selected.size > 0,
+        resetTask: () => {
+          setSelected(new Set());
+          setChecked(false);
+        },
+        showSolutions: () => setSelected(new Set(props.correctTargetIds)),
+        getXAPIData: () => ({
+          checkId,
+          interactionType: INTERACTION,
+          response: [...selected],
+          correct: checked ? correct : undefined,
+          score: checked && correct ? 1 : 0,
+          maxScore: 1,
+        }),
+        getCurrentState: () => ({ selected: [...selected], checked }),
+        resume: (state) => {
+          const raw = state.selected;
+          if (Array.isArray(raw)) setSelected(new Set(raw.filter((id): id is string => typeof id === "string")));
+          readBooleanStateField(state, "checked", setChecked);
+        },
       }),
-      getCurrentState: () => ({ selected: [...selected], checked }),
-      resume: (state) => {
-        const s = state as { selected?: string[]; checked?: boolean };
-        if (Array.isArray(s.selected)) setSelected(new Set(s.selected));
-        if (typeof s.checked === "boolean") setChecked(s.checked);
-      },
-    };
-  }, [checkId, selected, checked, correct, props.correctTargetIds]);
+    [checkId, selected, checked, correct, props.correctTargetIds],
+  );
 
-  useImperativeHandle(ref, () => handle, [handle]);
-  useRegisterAssessmentHandle(checkId, handle);
+  useAssessmentHandleRegistration(checkId, handle, ref);
 
   const submit = () => {
     if (selected.size === 0) return;

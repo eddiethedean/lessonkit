@@ -1,8 +1,11 @@
-import React, { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
+import React, { forwardRef, useEffect, useMemo, useRef, useState } from "react";
 import type { AssessmentBaseProps, AssessmentHandle, AssessmentInteractionType } from "@lessonkit/core";
 import type { LessonId } from "@lessonkit/core";
 import { AssessmentLessonGuard } from "../assessment/AssessmentLessonGuard";
-import { useRegisterAssessmentHandle } from "../assessment/AssessmentSequenceContext";
+import { parseStarDelimitedTemplate } from "../assessment/internal/parseStarDelimitedTemplate";
+import { buildAssessmentHandle } from "../assessment/internal/buildAssessmentHandle";
+import { readBooleanStateField } from "../assessment/internal/resumeState";
+import { useAssessmentHandleRegistration } from "../assessment/internal/useAssessmentHandleRegistration";
 import { meetsPassingThreshold } from "../assessment/scoring";
 import { useAssessmentState } from "../assessment/useAssessmentState";
 import { isDevEnvironment, normalizeComponentId } from "../runtime/validateComponentId";
@@ -16,20 +19,8 @@ export type DragTheWordsProps = AssessmentBaseProps & {
 const INTERACTION: AssessmentInteractionType = "dragTheWords";
 
 function parseZones(template: string): { parts: string[]; answers: string[] } {
-  const parts: string[] = [];
-  const answers: string[] = [];
-  const re = /\*([^*]+)\*/g;
-  let last = 0;
-  let match: RegExpExecArray | null;
-  let n = 0;
-  while ((match = re.exec(template)) !== null) {
-    parts.push(template.slice(last, match.index));
-    answers.push(match[1]!.trim());
-    parts.push(`zone-${n++}`);
-    last = match.index + match[0].length;
-  }
-  parts.push(template.slice(last));
-  return { parts, answers };
+  const { parts, values } = parseStarDelimitedTemplate(template, "zone");
+  return { parts, answers: values };
 }
 
 function DragTheWordsInner(
@@ -70,44 +61,41 @@ function DragTheWordsInner(
   const maxScore = answers.length;
   const passedThreshold = meetsPassingThreshold(score, maxScore || 1, props.passingScore);
 
-  const handle = useMemo((): AssessmentHandle => {
-    const handleMax = maxScore || 1;
-    return {
-      getScore: () => score,
-      getMaxScore: () => handleMax,
-      getAnswerGiven: () => allFilled,
-      resetTask: reset,
-      showSolutions: () => {},
-      getXAPIData: () => ({
+  const handle = useMemo(
+    () =>
+      buildAssessmentHandle({
         checkId,
-        interactionType: INTERACTION,
-        response: zones,
-        correct: passedThreshold,
-        score,
-        maxScore: handleMax,
+        getScore: () => score,
+        getMaxScore: () => maxScore || 1,
+        getAnswerGiven: () => allFilled,
+        resetTask: reset,
+        showSolutions: () => {},
+        getXAPIData: () => ({
+          checkId,
+          interactionType: INTERACTION,
+          response: zones,
+          correct: passedThreshold,
+          score,
+          maxScore: maxScore || 1,
+        }),
+        getCurrentState: () => ({ zones, pool, passed, keyboardWord }),
+        resume: (state) => {
+          const rawZones = state.zones;
+          if (rawZones && typeof rawZones === "object") setZones({ ...(rawZones as Record<string, string>) });
+          if (Array.isArray(state.pool)) setPool([...(state.pool as string[])]);
+          readBooleanStateField(state, "passed", (value) => {
+            setPassed(value);
+            completedRef.current = value;
+            answeredRef.current = value;
+          });
+          const kw = state.keyboardWord;
+          if (kw === null || typeof kw === "string") setKeyboardWord(kw ?? null);
+        },
       }),
-      getCurrentState: () => ({ zones, pool, passed, keyboardWord }),
-      resume: (state) => {
-        const s = state as {
-          zones?: Record<string, string>;
-          pool?: string[];
-          passed?: boolean;
-          keyboardWord?: string | null;
-        };
-        if (s.zones && typeof s.zones === "object") setZones({ ...s.zones });
-        if (Array.isArray(s.pool)) setPool([...s.pool]);
-        if (typeof s.passed === "boolean") {
-          setPassed(s.passed);
-          completedRef.current = s.passed;
-          answeredRef.current = s.passed;
-        }
-        if (s.keyboardWord === null || typeof s.keyboardWord === "string") setKeyboardWord(s.keyboardWord ?? null);
-      },
-    };
-  }, [allFilled, answers.length, checkId, keyboardWord, maxScore, passed, passedThreshold, pool, score, zones]);
+    [allFilled, checkId, keyboardWord, maxScore, passed, passedThreshold, pool, score, zones],
+  );
 
-  useImperativeHandle(ref, () => handle, [handle]);
-  useRegisterAssessmentHandle(checkId, handle);
+  useAssessmentHandleRegistration(checkId, handle, ref);
 
   const placeInZone = (zoneId: string, word: string) => {
     if (passed && !props.enableRetry) return;

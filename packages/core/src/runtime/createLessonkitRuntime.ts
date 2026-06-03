@@ -6,6 +6,10 @@ import { createProgressController, type ProgressController, type ProgressState }
 import { resolveSessionId } from "../session";
 import { tryBuildTelemetryEvent } from "../telemetryBuilder";
 import type { TelemetryDataFor } from "../telemetryTypes";
+import {
+  completeCourseWithTelemetry,
+  completeLessonWithTelemetry,
+} from "./courseLifecycle";
 
 export type LessonkitRuntimeVersion = "v1" | "v2";
 
@@ -97,7 +101,7 @@ export function createLessonkitRuntime(
     emit(event);
   };
 
-  const emitLessonCompleted = (
+  const emitLessonCompletedEvents = (
     lessonId: LessonId,
     durationMs: number | undefined,
     emitFn: TelemetryEmitFn,
@@ -138,7 +142,7 @@ export function createLessonkitRuntime(
       if (previous && previous !== lessonId) {
         const completed = progress.completeLesson(previous, clock.nowMs());
         if (completed.didComplete) {
-          emitLessonCompleted(previous, completed.durationMs, emitFn);
+          emitLessonCompletedEvents(previous, completed.durationMs, emitFn);
         }
       }
 
@@ -146,21 +150,20 @@ export function createLessonkitRuntime(
       emitFn("lesson_started", { lessonId }, lessonId);
     },
     completeLesson(lessonId, emitFn) {
-      const result = progress.completeLesson(lessonId, clock.nowMs());
-      if (!result.didComplete) return;
-      emitLessonCompleted(lessonId, result.durationMs, emitFn);
+      completeLessonWithTelemetry({
+        progress,
+        lessonId,
+        nowMs: clock.nowMs(),
+        emitLessonCompleted: (id, durationMs) => emitLessonCompletedEvents(id, durationMs, emitFn),
+      });
     },
     completeCourse(emitFn) {
-      const current = progress.getState();
-      if (current.activeLessonId) {
-        const lessonResult = progress.completeLesson(current.activeLessonId, clock.nowMs());
-        if (lessonResult.didComplete) {
-          emitLessonCompleted(current.activeLessonId, lessonResult.durationMs, emitFn);
-        }
-      }
-      const result = progress.completeCourse();
-      if (!result.didComplete) return;
-      emitFn("course_completed");
+      completeCourseWithTelemetry({
+        progress,
+        nowMs: clock.nowMs(),
+        emitLessonCompleted: (id, durationMs) => emitLessonCompletedEvents(id, durationMs, emitFn),
+        emitCourseCompleted: () => emitFn("course_completed"),
+      });
     },
     track,
     resetForCourseChange(nextCourseId) {

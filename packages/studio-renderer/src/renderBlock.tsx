@@ -22,43 +22,9 @@ import {
   TrueFalse,
 } from "@lessonkit/react";
 import type { StudioBlock } from "@lessonkit/studio-schema";
+import { walkBlocks } from "@lessonkit/studio-schema";
 import { ButtonBlock, ContainerBlock, InputBlock } from "./blocks/primitives";
 import { ChecklistBlock, VideoBlock } from "./blocks/media";
-
-export function walkBlocks(blocks: StudioBlock[], visit: (block: StudioBlock) => void): void {
-  for (const block of blocks) {
-    visit(block);
-    switch (block.type) {
-      case "container":
-      case "scenario":
-        walkBlocks(block.blocks, visit);
-        break;
-      case "page":
-        walkBlocks(block.blocks, visit);
-        break;
-      case "interactiveBook":
-        for (const page of block.pages) {
-          walkBlocks(page.blocks, visit);
-        }
-        break;
-      case "assessmentSequence":
-        walkBlocks(block.blocks, visit);
-        break;
-      case "accordion":
-        for (const section of block.sections) {
-          walkBlocks(section.blocks, visit);
-        }
-        break;
-      case "imageHotspots":
-        for (const hotspot of block.hotspots) {
-          walkBlocks(hotspot.blocks, visit);
-        }
-        break;
-      default:
-        break;
-    }
-  }
-}
 
 function renderNestedBlocks(blocks: StudioBlock[]): React.ReactNode {
   return blocks.map((child) => (
@@ -240,3 +206,5 @@ export function renderBlock(block: StudioBlock): React.ReactNode {
 export function renderPageBlocks(blocks: StudioBlock[]): React.ReactNode {
   return blocks.map((block) => <React.Fragment key={block.id}>{renderBlock(block)}</React.Fragment>);
 }
+
+export { walkBlocks } from "@lessonkit/studio-schema";

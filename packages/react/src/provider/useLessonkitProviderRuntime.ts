@@ -33,12 +33,17 @@ import {
   hasCourseStartedEmittedToTracking,
   hasCourseStartedPipelineDelivered,
   markCourseStarted,
-  markCourseStartedEmittedToTracking,
-  markCourseStartedPipelineDelivered,
   migrateCourseStartedMark,
   resolveSessionId,
 } from "../runtime/session";
-import { emitCourseStartedNonTrackingPipeline } from "../runtime/courseStartedPipeline";
+import {
+  assertTrackingSinkConfig,
+  buildCourseStartedEvent,
+  emitPendingCourseStarted,
+  isCourseStartedSinkSettled,
+  isTrackingActive,
+  resetCourseStartedTrackingFlightForTests,
+} from "./courseStarted";
 import {
   buildPluginContext,
   createReactPluginHost,
@@ -55,262 +60,12 @@ const useIsoLayoutEffect =
 
 const defaultStorage = createSessionStoragePort();
 
-let courseStartedTrackingFlightKey: string | null = null;
-
-/** @internal Reset in-flight course_started tracking guard between tests. */
-export function resetCourseStartedTrackingFlightForTests(): void {
-  courseStartedTrackingFlightKey = null;
-}
-
 /** @internal Reset provider session dedupe between tests. */
 export function resetLessonkitProviderStorageForTests(): void {
   resetStoragePortForTests(defaultStorage);
 }
 
-function isTrackingActive(tracking?: LessonkitConfig["tracking"]): boolean {
-  return tracking?.enabled !== false;
-}
-
-type CourseStartedEmitOpts = {
-  pluginHost: PluginHost | null;
-  sessionId: string;
-  courseId: CourseId;
-  attemptId?: string;
-  user?: TelemetryUser;
-  lxpackBridge: LxpackBridgeMode;
-  extraSinks?: import("@lessonkit/core").TelemetryPipelineSink[];
-  skipXapi?: boolean;
-  onXapiStatementSent?: () => void;
-  shouldCommit?: () => boolean;
-};
-
-/** Result of a course_started emit attempt (internal). */
-type CourseStartedEmitResult = "emitted" | "filtered" | "failed";
-
-function isCourseStartedSinkSettled(result: CourseStartedEmitResult): boolean {
-  return result === "emitted";
-}
-
-function buildCourseStartedEvent(opts: CourseStartedEmitOpts): TelemetryEvent | null {
-  const pluginCtx = buildPluginContext({
-    courseId: opts.courseId,
-    sessionId: opts.sessionId,
-    attemptId: opts.attemptId,
-    user: opts.user,
-  });
-  const built = buildTelemetryEvent({
-    name: "course_started",
-    courseId: opts.courseId,
-    sessionId: opts.sessionId,
-    attemptId: opts.attemptId,
-    user: opts.user,
-  });
-  return opts.pluginHost ? opts.pluginHost.runTelemetry(built, pluginCtx) : built;
-}
-
-async function emitCourseStartedToTracking(
-  tracking: TrackingClient,
-  storage: ReturnType<typeof createSessionStoragePort>,
-  sessionId: string,
-  courseId: CourseId,
-  event: TelemetryEvent,
-  shouldCommit?: () => boolean,
-): Promise<boolean> {
-  const flightKey = `${sessionId}:${courseId}`;
-  /* v8 ignore start -- defensive dedupe when tracking mark races ahead of in-flight emit */
-  if (hasCourseStartedEmittedToTracking(storage, sessionId, courseId)) {
-    return true;
-  }
-  /* v8 ignore stop */
-  if (courseStartedTrackingFlightKey === flightKey) {
-    return false;
-  }
-  courseStartedTrackingFlightKey = flightKey;
-  try {
-    /* v8 ignore start -- stale course_started generation aborts before tracking emit */
-    if (shouldCommit && !shouldCommit()) return false;
-    /* v8 ignore stop */
-    tracking.track(event);
-    await tracking.flush?.();
-    /* v8 ignore start -- stale course_started generation aborts before dedupe mark */
-    if (shouldCommit && !shouldCommit()) return false;
-    /* v8 ignore stop */
-    markCourseStartedEmittedToTracking(storage, sessionId, courseId);
-    return true;
-  } catch {
-    /* v8 ignore next -- tracking sink failure leaves dedupe unmarked so a later effect can retry */
-    return false;
-  } finally {
-    if (courseStartedTrackingFlightKey === flightKey) {
-      courseStartedTrackingFlightKey = null;
-    }
-  }
-}
-
-async function emitCourseStartedPipelineOnly(
-  opts: CourseStartedEmitOpts & {
-    xapi: XAPIClient | null;
-    storage: ReturnType<typeof createSessionStoragePort>;
-    event: TelemetryEvent;
-    skipXapi?: boolean;
-    onXapiStatementSent?: () => void;
-  },
-): Promise<CourseStartedEmitResult> {
-  try {
-    /* v8 ignore start -- stale course_started generation aborts before pipeline emit */
-    if (opts.shouldCommit && !opts.shouldCommit()) return "failed";
-    /* v8 ignore stop */
-    const { xapiStatementSent } = await emitCourseStartedNonTrackingPipeline({
-      event: opts.event,
-      xapi: opts.xapi,
-      lxpackBridge: opts.lxpackBridge,
-      extraSinks: opts.extraSinks,
-      skipXapi: opts.skipXapi,
-    });
-    /* v8 ignore start -- stale course_started generation aborts before session marks */
-    if (opts.shouldCommit && !opts.shouldCommit()) return "failed";
-    /* v8 ignore stop */
-    markCourseStarted(opts.storage, opts.sessionId, opts.courseId);
-    markCourseStartedPipelineDelivered(opts.storage, opts.sessionId, opts.courseId);
-    if (xapiStatementSent) {
-      opts.onXapiStatementSent?.();
-    }
-    return "emitted";
-  } catch {
-    /* v8 ignore next -- xAPI/bridge/extraSink failures leave pipeline dedupe unmarked so a later effect can retry */
-    return "failed";
-  }
-}
-
-async function emitCourseStarted(opts: CourseStartedEmitOpts & {
-  tracking: TrackingClient;
-  xapi: XAPIClient | null;
-  storage: ReturnType<typeof createSessionStoragePort>;
-}): Promise<CourseStartedEmitResult> {
-  const event = buildCourseStartedEvent(opts);
-  /* v8 ignore start -- plugin filtered course_started before tracking emit */
-  if (event === null) return "filtered";
-  /* v8 ignore stop */
-
-  const tracked = await emitCourseStartedToTracking(
-    opts.tracking,
-    opts.storage,
-    opts.sessionId,
-    opts.courseId,
-    event,
-    opts.shouldCommit,
-  );
-  if (!tracked) return "failed";
-
-  return emitCourseStartedPipelineOnly({
-    ...opts,
-    event,
-    skipXapi: opts.skipXapi,
-    onXapiStatementSent: opts.onXapiStatementSent,
-    shouldCommit: opts.shouldCommit,
-  });
-}
-
-/** Emit course_started to tracking/bridge when xAPI bootstrap already marked session storage. */
-async function emitCourseStartedToTrackingOnly(
-  opts: CourseStartedEmitOpts & {
-    tracking: TrackingClient;
-    storage: ReturnType<typeof createSessionStoragePort>;
-  },
-): Promise<CourseStartedEmitResult> {
-  const event = buildCourseStartedEvent(opts);
-  /* v8 ignore start -- plugin filtered course_started during tracking-only recovery */
-  if (event === null) return "filtered";
-  /* v8 ignore stop */
-
-  const tracked = await emitCourseStartedToTracking(
-    opts.tracking,
-    opts.storage,
-    opts.sessionId,
-    opts.courseId,
-    event,
-    opts.shouldCommit,
-  );
-  if (!tracked) return "failed";
-
-  try {
-    /* v8 ignore start -- stale course_started generation aborts before pipeline-only delivery */
-    if (opts.shouldCommit && !opts.shouldCommit()) return "failed";
-    /* v8 ignore stop */
-    await emitCourseStartedNonTrackingPipeline({
-      event,
-      xapi: null,
-      lxpackBridge: opts.lxpackBridge,
-      extraSinks: opts.extraSinks,
-      skipXapi: true,
-    });
-    markCourseStartedPipelineDelivered(opts.storage, opts.sessionId, opts.courseId);
-    return "emitted";
-  } catch {
-    return "failed";
-  }
-}
-
-async function emitPendingCourseStarted(opts: CourseStartedEmitOpts & {
-  tracking: TrackingClient;
-  xapi: XAPIClient | null;
-  storage: ReturnType<typeof createSessionStoragePort>;
-  skipXapi?: boolean;
-  onXapiStatementSent?: () => void;
-}): Promise<CourseStartedEmitResult> {
-  const trackingEmitted = hasCourseStartedEmittedToTracking(
-    opts.storage,
-    opts.sessionId,
-    opts.courseId,
-  );
-  const sessionStarted = hasCourseStarted(opts.storage, opts.sessionId, opts.courseId);
-
-  if (sessionStarted && !trackingEmitted) {
-    return emitCourseStartedToTrackingOnly(opts);
-  }
-  if (trackingEmitted && !sessionStarted) {
-    const event = buildCourseStartedEvent(opts);
-    /* v8 ignore start -- plugin filtered course_started during pipeline-only recovery */
-    if (event === null) return "filtered";
-    /* v8 ignore stop */
-    return emitCourseStartedPipelineOnly({ ...opts, event });
-  }
-  if (!trackingEmitted && !sessionStarted) {
-    return emitCourseStarted(opts);
-  }
-  const pipelineDelivered = hasCourseStartedPipelineDelivered(
-    opts.storage,
-    opts.sessionId,
-    opts.courseId,
-  );
-  /* v8 ignore start -- pipeline and session marks already settled */
-  if (sessionStarted && trackingEmitted && pipelineDelivered) {
-    return "emitted";
-  }
-  /* v8 ignore stop */
-  /* v8 ignore start -- only pipeline-retry state reaches this guard */
-  if (sessionStarted && trackingEmitted && !pipelineDelivered) {
-    const event = buildCourseStartedEvent(opts);
-    /* v8 ignore start -- plugin filtered course_started during pipeline retry */
-    if (event === null) return "filtered";
-    /* v8 ignore stop */
-    return emitCourseStartedPipelineOnly({
-      ...opts,
-      event,
-      skipXapi: opts.skipXapi,
-      onXapiStatementSent: opts.onXapiStatementSent,
-    });
-  }
-  /* v8 ignore stop */
-  return "emitted";
-}
-
-function assertTrackingSinkConfig(tracking?: LessonkitConfig["tracking"]): void {
-  if (!tracking?.sink || !tracking?.batchSink) return;
-  throw new Error(
-    "[lessonkit] tracking.sink and tracking.batchSink cannot both be set; use batchSink alone for batched delivery",
-  );
-}
+export { resetCourseStartedTrackingFlightForTests };
 
 export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitRuntime {
   const normalizedCourseId = useMemo(

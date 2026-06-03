@@ -2,6 +2,7 @@ import React, { createContext, useCallback, useContext, useImperativeHandle, use
 import type { AssessmentHandle, CheckId, CompoundHandle, CompoundResumeState } from "@lessonkit/core";
 import { clampCompoundPageIndex, createCompoundResumeState } from "@lessonkit/core";
 import { aggregateAssessmentScores } from "./aggregateScores";
+import { resumeChildHandles } from "./resumeChildHandles";
 
 type Registry = Map<CheckId, AssessmentHandle>;
 
@@ -121,10 +122,7 @@ export function useCompoundHandleRef(
       },
       resume: (state: CompoundResumeState) => {
         setIndexClamped(state.activePageIndex);
-        for (const [checkId, handle] of getHandles()) {
-          const child = state.childStates[checkId];
-          if (child && handle.resume) handle.resume(child);
-        }
+        resumeChildHandles(getHandles(), state.childStates);
       },
     }),
     [activePageIndex, setIndexClamped, getHandles, opts.enableSolutionsButton],

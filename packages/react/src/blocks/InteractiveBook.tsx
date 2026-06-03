@@ -1,12 +1,7 @@
 import React, { forwardRef, useCallback, useEffect, useMemo, useState } from "react";
 import type { BlockId, CompoundHandle } from "@lessonkit/core";
-import { clampCompoundPageIndex } from "@lessonkit/core";
-import { CompoundProvider, useCompoundHandleRef, useCompoundRegistry } from "../compound/CompoundProvider";
-import { useCompoundNavigation } from "../compound/useCompoundNavigation";
-import {
-  readCompoundInitialIndex,
-  useCompoundPersistence,
-} from "../compound/useCompoundPersistence";
+import { CompoundProvider } from "../compound/CompoundProvider";
+import { useCompoundInitialIndex, useCompoundShell } from "../compound/useCompoundShell";
 import { validateCompoundChildren } from "../compound/validateChildren";
 import { setLessonkitBlockType } from "../compound/blockType";
 import { useLessonkit } from "../hooks";
@@ -26,35 +21,25 @@ type InteractiveBookInnerProps = InteractiveBookProps & {
   pages: React.ReactElement<PageProps>[];
   index: number;
   setIndex: React.Dispatch<React.SetStateAction<number>>;
+  persistEnabled: boolean;
 };
 
 const InteractiveBookInner = forwardRef<CompoundHandle, InteractiveBookInnerProps>(
   function InteractiveBookInner(props, ref) {
-    const { blockId, pages, index, setIndex } = props;
+    const { blockId, pages, index, setIndex, persistEnabled } = props;
     validateCompoundChildren("InteractiveBook", pages);
 
     const { config, track } = useLessonkit();
     const lessonId = useEnclosingLessonId();
-    const ctx = useCompoundRegistry();
-    const persistEnabled = config.session?.persistCompoundState !== false;
 
-    useCompoundPersistence({
+    const { visibleIndex, goNext, goPrev, progress, ctx } = useCompoundShell({
       courseId: config.courseId,
       compoundId: blockId,
       pageCount: pages.length,
       index,
       setIndex,
-      enabled: persistEnabled,
-    });
-
-    const { goNext, goPrev, progress } = useCompoundNavigation(pages.length, index, setIndex);
-    const visibleIndex = clampCompoundPageIndex(index, pages.length);
-
-    useCompoundHandleRef(ref, {
-      activePageIndex: visibleIndex,
-      setActivePageIndex: setIndex,
-      getHandles: () => ctx?.getHandles() ?? new Map(),
-      pageCount: pages.length,
+      persistEnabled,
+      ref,
     });
 
     const pageTitles = useMemo(
@@ -134,10 +119,12 @@ export const InteractiveBook = forwardRef<CompoundHandle, InteractiveBookProps>(
   const { config } = useLessonkit();
   const persistEnabled = config.session?.persistCompoundState !== false;
 
-  const initialIndex = useMemo(
-    () => readCompoundInitialIndex(config.courseId, blockId, pages.length, persistEnabled),
-    [config.courseId, blockId, pages.length, persistEnabled],
-  );
+  const initialIndex = useCompoundInitialIndex({
+    courseId: config.courseId,
+    compoundId: blockId,
+    pageCount: pages.length,
+    persistEnabled,
+  });
 
   const [index, setIndex] = useState(initialIndex);
   const setIndexStable = useCallback((i: number) => setIndex(i), []);
@@ -151,6 +138,7 @@ export const InteractiveBook = forwardRef<CompoundHandle, InteractiveBookProps>(
         pages={pages}
         index={index}
         setIndex={setIndex}
+        persistEnabled={persistEnabled}
       />
     </CompoundProvider>
   );

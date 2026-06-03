@@ -1,12 +1,13 @@
-import React, { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
+import React, { forwardRef, useEffect, useMemo, useRef, useState } from "react";
 import type { AssessmentBaseProps, AssessmentHandle, AssessmentInteractionType } from "@lessonkit/core";
 import type { LessonId } from "@lessonkit/core";
 import { AssessmentLessonGuard } from "../assessment/AssessmentLessonGuard";
-import { useRegisterAssessmentHandle } from "../assessment/AssessmentSequenceContext";
-import { scoreFromCustom } from "../assessment/scoring";
+import { buildAssessmentHandle } from "../assessment/internal/buildAssessmentHandle";
+import { readBooleanField, readBooleanStateField } from "../assessment/internal/resumeState";
+import { useAssessmentHandleRegistration } from "../assessment/internal/useAssessmentHandleRegistration";
+import { usePluginScoring } from "../assessment/internal/usePluginScoring";
 import { useAssessmentState } from "../assessment/useAssessmentState";
 import { useLessonkit } from "../hooks";
-import { buildPluginContext } from "../runtime/plugins";
 import { normalizeComponentId } from "../runtime/validateComponentId";
 
 export type TrueFalseProps = AssessmentBaseProps & {
@@ -23,7 +24,8 @@ function TrueFalseInner(
   const { enclosingLessonId } = props;
   const checkId = useMemo(() => normalizeComponentId(props.checkId, "checkId"), [props.checkId]);
   const assessment = useAssessmentState(enclosingLessonId);
-  const { plugins, config, session } = useLessonkit();
+  const { config } = useLessonkit();
+  const { scoreResponse } = usePluginScoring(checkId, enclosingLessonId);
   const [selected, setSelected] = useState<boolean | null>(null);
   const [selectionCorrect, setSelectionCorrect] = useState<boolean | null>(null);
   const [showSolutions, setShowSolutions] = useState(false);
@@ -43,68 +45,53 @@ function TrueFalseInner(
     reset();
   }, [checkId, props.answer, props.question, config.courseId, enclosingLessonId]);
 
-  const handle = useMemo((): AssessmentHandle => {
-    const maxScore = 1;
-    const score = passed ? maxScore : selected === null ? 0 : selected === props.answer ? maxScore : 0;
-    return {
-      getScore: () => score,
-      getMaxScore: () => maxScore,
-      getAnswerGiven: () => selected !== null,
-      resetTask: reset,
-      showSolutions: () => setShowSolutions(true),
-      getXAPIData: () => ({
+  const handle = useMemo(
+    () =>
+      buildAssessmentHandle({
         checkId,
-        interactionType: INTERACTION,
-        response: selected ?? undefined,
-        correct: selected === props.answer,
-        score,
-        maxScore,
+        getScore: () => {
+          const maxScore = 1;
+          return passed ? maxScore : selected === null ? 0 : selected === props.answer ? maxScore : 0;
+        },
+        getMaxScore: () => 1,
+        getAnswerGiven: () => selected !== null,
+        resetTask: reset,
+        showSolutions: () => setShowSolutions(true),
+        getXAPIData: () => ({
+          checkId,
+          interactionType: INTERACTION,
+          response: selected ?? undefined,
+          correct: selected === props.answer,
+          score: passed ? 1 : selected === null ? 0 : selected === props.answer ? 1 : 0,
+          maxScore: 1,
+        }),
+        getCurrentState: () => ({ selected, selectionCorrect, passed, showSolutions }),
+        resume: (state) => {
+          const nextSelected = readBooleanField(state, "selected");
+          if (nextSelected === true || nextSelected === false || nextSelected === null) {
+            setSelected(nextSelected);
+          }
+          const nextCorrect = readBooleanField(state, "selectionCorrect");
+          if (nextCorrect === true || nextCorrect === false || nextCorrect === null) {
+            setSelectionCorrect(nextCorrect);
+          }
+          readBooleanStateField(state, "passed", (value) => {
+            setPassed(value);
+            completedRef.current = value;
+          });
+          readBooleanStateField(state, "showSolutions", setShowSolutions);
+        },
       }),
-      getCurrentState: () => ({
-        selected,
-        selectionCorrect,
-        passed,
-        showSolutions,
-      }),
-      resume: (state) => {
-        const s = state as {
-          selected?: boolean | null;
-          selectionCorrect?: boolean | null;
-          passed?: boolean;
-          showSolutions?: boolean;
-        };
-        if (s.selected === true || s.selected === false || s.selected === null) setSelected(s.selected);
-        if (s.selectionCorrect === true || s.selectionCorrect === false || s.selectionCorrect === null) {
-          setSelectionCorrect(s.selectionCorrect);
-        }
-        if (typeof s.passed === "boolean") {
-          setPassed(s.passed);
-          completedRef.current = s.passed;
-        }
-        if (typeof s.showSolutions === "boolean") setShowSolutions(s.showSolutions);
-      },
-    };
-  }, [checkId, passed, props.answer, selected, selectionCorrect, showSolutions]);
+    [checkId, passed, props.answer, selected, selectionCorrect, showSolutions],
+  );
 
-  useImperativeHandle(ref, () => handle, [handle]);
-  useRegisterAssessmentHandle(checkId, handle);
+  useAssessmentHandleRegistration(checkId, handle, ref);
 
   const submit = (value: boolean) => {
     if (passed && !props.enableRetry) return;
     setSelected(value);
-    const pluginCtx = buildPluginContext({
-      courseId: config.courseId,
-      sessionId: session.sessionId,
-      attemptId: session.attemptId,
-      user: session.user,
-    });
-    const custom =
-      plugins?.scoreAssessment(
-        { checkId, lessonId: enclosingLessonId, response: value },
-        pluginCtx,
-      ) ?? null;
     const correct = value === props.answer;
-    const scored = scoreFromCustom(custom, correct, 1, props.passingScore);
+    const scored = scoreResponse(value, correct, 1, props.passingScore);
     setSelectionCorrect(scored.passed);
     assessment.answer({
       checkId,
