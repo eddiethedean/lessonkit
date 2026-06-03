@@ -2,7 +2,10 @@ import React, { forwardRef, useCallback, useEffect, useMemo, useState } from "re
 import type { BlockId, CompoundHandle } from "@lessonkit/core";
 import { CompoundProvider, useCompoundHandleRef, useCompoundRegistry } from "../compound/CompoundProvider";
 import { useCompoundNavigation } from "../compound/useCompoundNavigation";
-import { useCompoundResume } from "../compound/useCompoundResume";
+import {
+  readCompoundInitialIndex,
+  useCompoundPersistence,
+} from "../compound/useCompoundPersistence";
 import { validateCompoundChildren } from "../compound/validateChildren";
 import { setLessonkitBlockType } from "../compound/blockType";
 import { useLessonkit } from "../hooks";
@@ -17,89 +20,134 @@ export type InteractiveBookProps = {
   children: React.ReactElement<PageProps> | React.ReactElement<PageProps>[];
 };
 
-const InteractiveBookInner = forwardRef<CompoundHandle, InteractiveBookProps>(function InteractiveBookInner(
-  props,
-  ref,
-) {
-  const blockId = useMemo(() => normalizeComponentId(props.blockId, "blockId") as BlockId, [props.blockId]);
-  validateCompoundChildren("InteractiveBook", props.children);
+type InteractiveBookInnerProps = InteractiveBookProps & {
+  blockId: BlockId;
+  pages: React.ReactElement<PageProps>[];
+  index: number;
+  setIndex: React.Dispatch<React.SetStateAction<number>>;
+};
 
-  const pages = React.Children.toArray(props.children).filter(React.isValidElement) as React.ReactElement<PageProps>[];
-  const { config, track } = useLessonkit();
-  const lessonId = useEnclosingLessonId();
-  const ctx = useCompoundRegistry();
+const InteractiveBookInner = forwardRef<CompoundHandle, InteractiveBookInnerProps>(
+  function InteractiveBookInner(props, ref) {
+    const { blockId, pages, index, setIndex } = props;
+    validateCompoundChildren("InteractiveBook", pages);
 
-  const { index, setIndex, goNext, goPrev, progress } = useCompoundNavigation(pages.length, 0);
+    const { config, track } = useLessonkit();
+    const lessonId = useEnclosingLessonId();
+    const ctx = useCompoundRegistry();
+    const persistEnabled = config.session?.persistCompoundState !== false;
 
-  useCompoundResume({
-    courseId: config.courseId,
-    compoundId: blockId,
-    enabled: config.session?.persistCompoundState !== false,
-    onResume: (state) => setIndex(state.activePageIndex),
-  });
+    useCompoundPersistence({
+      courseId: config.courseId,
+      compoundId: blockId,
+      index,
+      setIndex,
+      enabled: persistEnabled,
+    });
 
-  useCompoundHandleRef(ref, {
-    activePageIndex: index,
-    setActivePageIndex: setIndex,
-    getHandles: () => ctx?.getHandles() ?? new Map(),
-  });
+    const { goNext, goPrev, progress } = useCompoundNavigation(pages.length, index, setIndex);
 
-  useEffect(() => {
-    if (!lessonId) return;
-    const page = pages[index];
-    track(
-      "book_page_viewed",
-      {
-        blockId,
-        pageIndex: index,
-        pageTitle: page?.props.title,
-      },
-      { lessonId },
+    useCompoundHandleRef(ref, {
+      activePageIndex: index,
+      setActivePageIndex: setIndex,
+      getHandles: () => ctx?.getHandles() ?? new Map(),
+    });
+
+    const pageTitles = useMemo(
+      () => pages.map((page) => page.props.title),
+      [pages],
     );
-  }, [index, blockId, lessonId, pages, track]);
 
-  const current = pages[index] ?? null;
+    useEffect(() => {
+      if (!lessonId || pages.length === 0) return;
+      track(
+        "book_page_viewed",
+        {
+          blockId,
+          pageIndex: index,
+          pageTitle: pageTitles[index],
+        },
+        { lessonId },
+      );
+    }, [index, blockId, lessonId, pages.length, pageTitles, track]);
 
-  return (
-    <section aria-label={props.title} data-testid="interactive-book" data-lk-block-id={blockId}>
-      <h3>{props.title}</h3>
-      <p>
-        Page {progress.current} of {progress.total}
-      </p>
-      {props.showBookScore && ctx ? (
-        <p data-testid="book-score">
-          Score: {Array.from(ctx.getHandles().values()).reduce((s, h) => s + h.getScore(), 0)} /{" "}
-          {Array.from(ctx.getHandles().values()).reduce((s, h) => s + h.getMaxScore(), 0)}
+    return (
+      <section aria-label={props.title} data-testid="interactive-book" data-lk-block-id={blockId}>
+        <h3>{props.title}</h3>
+        <p>
+          Page {progress.current} of {progress.total}
         </p>
-      ) : null}
-      <div data-testid="interactive-book-page">{current}</div>
-      <nav aria-label="Book navigation">
-        <button type="button" data-testid="book-prev" disabled={index === 0} onClick={goPrev}>
-          Previous
-        </button>
-        <button
-          type="button"
-          data-testid="book-next"
-          disabled={index >= pages.length - 1}
-          onClick={goNext}
-        >
-          Next
-        </button>
-      </nav>
-    </section>
-  );
-});
+        {props.showBookScore && ctx ? (
+          <p data-testid="book-score">
+            Score: {Array.from(ctx.getHandles().values()).reduce((s, h) => s + h.getScore(), 0)} /{" "}
+            {Array.from(ctx.getHandles().values()).reduce((s, h) => s + h.getMaxScore(), 0)}
+          </p>
+        ) : null}
+        <div data-testid="interactive-book-page">
+          {pages.map((page, i) =>
+            React.cloneElement(page, {
+              key: page.key ?? page.props.blockId,
+              hidden: i !== index,
+              pageIndex: i,
+              parentType: "InteractiveBook",
+            }),
+          )}
+        </div>
+        <nav aria-label="Book navigation">
+          <button
+            type="button"
+            data-testid="book-prev"
+            disabled={index === 0 || pages.length === 0}
+            onClick={goPrev}
+          >
+            Previous
+          </button>
+          <button
+            type="button"
+            data-testid="book-next"
+            disabled={index >= pages.length - 1 || pages.length === 0}
+            onClick={goNext}
+          >
+            Next
+          </button>
+        </nav>
+      </section>
+    );
+  },
+);
 
 export const InteractiveBook = forwardRef<CompoundHandle, InteractiveBookProps>(function InteractiveBook(
   props,
   ref,
 ) {
-  const [index, setIndex] = useState(0);
+  const blockId = useMemo(
+    () => normalizeComponentId(props.blockId, "blockId") as BlockId,
+    [props.blockId],
+  );
+  const pages = React.Children.toArray(props.children).filter(
+    React.isValidElement,
+  ) as React.ReactElement<PageProps>[];
+  const { config } = useLessonkit();
+  const persistEnabled = config.session?.persistCompoundState !== false;
+
+  const initialIndex = useMemo(
+    () => readCompoundInitialIndex(config.courseId, blockId, pages.length, persistEnabled),
+    [config.courseId, blockId, pages.length, persistEnabled],
+  );
+
+  const [index, setIndex] = useState(initialIndex);
   const setIndexStable = useCallback((i: number) => setIndex(i), []);
 
   return (
     <CompoundProvider activePageIndex={index} onActivePageIndexChange={setIndexStable}>
-      <InteractiveBookInner {...props} ref={ref} />
+      <InteractiveBookInner
+        {...props}
+        ref={ref}
+        blockId={blockId}
+        pages={pages}
+        index={index}
+        setIndex={setIndex}
+      />
     </CompoundProvider>
   );
 });

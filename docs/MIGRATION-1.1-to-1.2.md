@@ -46,7 +46,7 @@ Import `@lessonkit/react/block-catalog.v3.json` for machine-readable entries inc
 
 ## Session / resume
 
-`LessonkitConfig.session.persistCompoundState` defaults to `true`. Compound containers restore `activePageIndex` from `sessionStorage` on mount.
+`LessonkitConfig.session.persistCompoundState` defaults to `true`. Compound containers restore `activePageIndex` (and child assessment state when handles support `resume`) from `sessionStorage` on mount, and persist on navigation.
 
 ## `lessonkit.json`
 

@@ -3,6 +3,8 @@ import type { ChangeEvent } from "react";
 import { visuallyHiddenStyle } from "@lessonkit/accessibility";
 import type { AssessmentScoreResult, BlockId, CourseId, LessonId } from "@lessonkit/core";
 import type { McqAssessmentDescriptor } from "@lessonkit/lxpack";
+import type { AssessmentHandle } from "@lessonkit/core";
+import { useRegisterAssessmentHandle } from "./assessment/AssessmentSequenceContext";
 import { meetsPassingThreshold } from "./assessment/scoring";
 import { LessonkitProvider, type LessonkitConfig } from "./context";
 import { useCompletion, useLessonkit, useQuizState } from "./hooks";
@@ -242,6 +244,40 @@ function QuizInner(props: QuizProps & { enclosingLessonId: LessonId }) {
   };
 
   const passed = quizPassed;
+
+  const handle = useMemo((): AssessmentHandle => {
+    const maxScore = 1;
+    const score =
+      quizPassed && selected !== null
+        ? maxScore
+        : selected === null
+          ? 0
+          : selectionCorrect
+            ? maxScore
+            : 0;
+    return {
+      getScore: () => score,
+      getMaxScore: () => maxScore,
+      getAnswerGiven: () => selected !== null,
+      resetTask: () => {
+        completedRef.current = false;
+        setQuizPassed(false);
+        setSelected(null);
+        setSelectionCorrect(null);
+      },
+      showSolutions: () => {},
+      getXAPIData: () => ({
+        checkId,
+        interactionType: "mcq" as const,
+        response: selected ?? undefined,
+        correct: selectionCorrect ?? undefined,
+        score,
+        maxScore,
+      }),
+    };
+  }, [checkId, quizPassed, selected, selectionCorrect]);
+
+  useRegisterAssessmentHandle(checkId, handle);
 
   return (
     <section aria-label="Quiz" data-lk-check-id={checkId}>

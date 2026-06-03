@@ -1,34 +1,47 @@
-import React, { forwardRef, useCallback, useState } from "react";
-import type { AssessmentBehaviour, CompoundHandle } from "@lessonkit/core";
+import React, { forwardRef, useCallback, useMemo, useState } from "react";
+import type { AssessmentBehaviour, BlockId, CompoundHandle } from "@lessonkit/core";
 import { CompoundProvider, useCompoundHandleRef, useCompoundRegistry } from "../compound/CompoundProvider";
 import { useCompoundNavigation } from "../compound/useCompoundNavigation";
-import { useCompoundResume } from "../compound/useCompoundResume";
+import {
+  readCompoundInitialIndex,
+  useCompoundPersistence,
+} from "../compound/useCompoundPersistence";
 import { validateCompoundChildren } from "../compound/validateChildren";
 import { setLessonkitBlockType } from "../compound/blockType";
 import { useLessonkit } from "../hooks";
+import { normalizeComponentId } from "../runtime/validateComponentId";
 
 export type AssessmentSequenceProps = AssessmentBehaviour & {
   children: React.ReactNode;
   /** Show one child assessment at a time (Question Set). */
   sequential?: boolean;
-  blockId?: string;
+  blockId?: BlockId;
 };
 
-const AssessmentSequenceInner = forwardRef<CompoundHandle, AssessmentSequenceProps>(
+type AssessmentSequenceInnerProps = AssessmentSequenceProps & {
+  compoundId: BlockId;
+  childArray: React.ReactElement[];
+  index: number;
+  setIndex: React.Dispatch<React.SetStateAction<number>>;
+};
+
+const AssessmentSequenceInner = forwardRef<CompoundHandle, AssessmentSequenceInnerProps>(
   function AssessmentSequenceInner(props, ref) {
+    const { compoundId, childArray, index, setIndex } = props;
     const sequential = props.sequential !== false;
-    const childArray = React.Children.toArray(props.children).filter(React.isValidElement);
-    const { index, setIndex, goNext, goPrev, progress } = useCompoundNavigation(childArray.length, 0);
     const ctx = useCompoundRegistry();
     const { config } = useLessonkit();
-    const compoundId = props.blockId ?? "assessment-sequence";
+    const persistEnabled = config.session?.persistCompoundState !== false;
 
-    useCompoundResume({
+    useCompoundPersistence({
       courseId: config.courseId,
       compoundId,
-      enabled: config.session?.persistCompoundState !== false,
-      onResume: (state) => setIndex(state.activePageIndex),
+      index,
+      setIndex,
+      enabled: persistEnabled,
     });
+
+    const { goNext, goPrev, progress } = useCompoundNavigation(childArray.length, index, setIndex);
 
     useCompoundHandleRef(ref, {
       activePageIndex: index,
@@ -60,13 +73,18 @@ const AssessmentSequenceInner = forwardRef<CompoundHandle, AssessmentSequencePro
           ))}
         </div>
         <nav aria-label="Sequence navigation">
-          <button type="button" data-testid="sequence-prev" disabled={index === 0} onClick={goPrev}>
+          <button
+            type="button"
+            data-testid="sequence-prev"
+            disabled={index === 0 || childArray.length === 0}
+            onClick={goPrev}
+          >
             Previous
           </button>
           <button
             type="button"
             data-testid="sequence-next"
-            disabled={index >= childArray.length - 1}
+            disabled={index >= childArray.length - 1 || childArray.length === 0}
             onClick={goNext}
           >
             Next
@@ -79,12 +97,37 @@ const AssessmentSequenceInner = forwardRef<CompoundHandle, AssessmentSequencePro
 
 export const AssessmentSequence = forwardRef<CompoundHandle, AssessmentSequenceProps>(
   function AssessmentSequence(props, ref) {
-    const [index, setIndex] = useState(0);
+    const compoundId = useMemo(
+      () =>
+        props.blockId
+          ? (normalizeComponentId(props.blockId, "blockId") as BlockId)
+          : ("assessment-sequence" as BlockId),
+      [props.blockId],
+    );
+    const childArray = React.Children.toArray(props.children).filter(
+      React.isValidElement,
+    ) as React.ReactElement[];
+    const { config } = useLessonkit();
+    const persistEnabled = config.session?.persistCompoundState !== false;
+
+    const initialIndex = useMemo(
+      () => readCompoundInitialIndex(config.courseId, compoundId, childArray.length, persistEnabled),
+      [config.courseId, compoundId, childArray.length, persistEnabled],
+    );
+
+    const [index, setIndex] = useState(initialIndex);
     const setIndexStable = useCallback((i: number) => setIndex(i), []);
 
     return (
       <CompoundProvider activePageIndex={index} onActivePageIndexChange={setIndexStable}>
-        <AssessmentSequenceInner {...props} ref={ref} />
+        <AssessmentSequenceInner
+          {...props}
+          ref={ref}
+          compoundId={compoundId}
+          childArray={childArray}
+          index={index}
+          setIndex={setIndex}
+        />
       </CompoundProvider>
     );
   },

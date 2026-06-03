@@ -1,6 +1,8 @@
 import React, { useId, useState } from "react";
 import type { BlockId } from "@lessonkit/core";
 import { setLessonkitBlockType } from "../compound/blockType";
+import { validateAccordionSections } from "../compound/validateChildren";
+import { isDevEnvironment } from "../runtime/validateComponentId";
 import { useLessonkit } from "../hooks";
 import { useEnclosingLessonId } from "../lessonContext";
 
@@ -16,6 +18,10 @@ export type AccordionProps = {
 };
 
 export function Accordion(props: AccordionProps) {
+  if (isDevEnvironment()) {
+    validateAccordionSections(props.sections);
+  }
+
   const [open, setOpen] = useState<Set<string>>(new Set());
   const { track } = useLessonkit();
   const lessonId = useEnclosingLessonId();
@@ -41,10 +47,12 @@ export function Accordion(props: AccordionProps) {
       {props.sections.map((section) => {
         const expanded = open.has(section.id);
         const panelId = `${baseId}-${section.id}`;
+        const triggerId = `${baseId}-trigger-${section.id}`;
         return (
           <div key={section.id} data-testid={`accordion-section-${section.id}`}>
             <h4>
               <button
+                id={triggerId}
                 type="button"
                 aria-expanded={expanded}
                 aria-controls={panelId}
@@ -55,7 +63,7 @@ export function Accordion(props: AccordionProps) {
               </button>
             </h4>
             {expanded ? (
-              <div id={panelId} role="region" aria-labelledby={panelId}>
+              <div id={panelId} role="region" aria-labelledby={triggerId}>
                 {section.content}
               </div>
             ) : null}

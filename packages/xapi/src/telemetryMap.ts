@@ -135,15 +135,35 @@ export function telemetryEventToXAPIStatement(event: TelemetryEvent): XAPIStatem
       const lessonId = event.lessonId;
       const blockId = event.data?.blockId;
       if (!lessonId || !blockId) return null;
-      return statementFor(
-        buildLessonkitUrn({ courseId, lessonId, blockId }),
-        XAPIVerbs.experienced,
-        event.timestamp,
-      );
+      return experiencedBlockStatement(courseId, lessonId, blockId, event.timestamp);
+    }
+    case "book_page_viewed":
+    case "compound_page_viewed":
+    case "hotspot_opened":
+    case "accordion_section_toggled":
+    case "flashcard_flipped":
+    case "image_slider_changed": {
+      const lessonId = event.lessonId;
+      const blockId = event.data?.blockId;
+      if (!lessonId || !blockId) return null;
+      return experiencedBlockStatement(courseId, lessonId, blockId, event.timestamp);
     }
     default:
       return assertNever(event, "Unhandled telemetry event");
   }
+}
+
+function experiencedBlockStatement(
+  courseId: TelemetryEvent["courseId"],
+  lessonId: string,
+  blockId: string,
+  timestamp: string,
+): XAPIStatement {
+  return statementFor(
+    buildLessonkitUrn({ courseId, lessonId, blockId }),
+    XAPIVerbs.experienced,
+    timestamp,
+  );
 }
 
 function statementFor(

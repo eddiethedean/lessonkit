@@ -38,10 +38,14 @@ export function parseCompoundResumeState(raw: unknown): CompoundResumeState | nu
   const obj = raw as Record<string, unknown>;
   if (obj.schemaVersion !== COMPOUND_RESUME_SCHEMA_VERSION) return null;
   if (typeof obj.activePageIndex !== "number" || !Number.isFinite(obj.activePageIndex)) return null;
-  const childStates =
-    obj.childStates && typeof obj.childStates === "object" && !Array.isArray(obj.childStates)
-      ? (obj.childStates as Record<string, AssessmentResumeState>)
-      : {};
+  const childStates: Record<string, AssessmentResumeState> = {};
+  if (obj.childStates && typeof obj.childStates === "object" && !Array.isArray(obj.childStates)) {
+    for (const [key, value] of Object.entries(obj.childStates as Record<string, unknown>)) {
+      if (value !== null && typeof value === "object" && !Array.isArray(value)) {
+        childStates[key] = value as AssessmentResumeState;
+      }
+    }
+  }
   const activeChapterIndex =
     typeof obj.activeChapterIndex === "number" && Number.isFinite(obj.activeChapterIndex)
       ? obj.activeChapterIndex

@@ -28,6 +28,15 @@ describe("compound resume state", () => {
     expect(parseCompoundResumeState(null)).toBeNull();
     expect(parseCompoundResumeState({ schemaVersion: 99 })).toBeNull();
   });
+
+  it("drops invalid childStates entries", () => {
+    const parsed = parseCompoundResumeState({
+      schemaVersion: COMPOUND_RESUME_SCHEMA_VERSION,
+      activePageIndex: 0,
+      childStates: { valid: { a: 1 }, bad: null, alsoBad: "x" },
+    });
+    expect(parsed?.childStates).toEqual({ valid: { a: 1 } });
+  });
 });
 
 describe("compound session storage", () => {
