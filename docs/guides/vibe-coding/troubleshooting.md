@@ -10,7 +10,7 @@ npx @lessonkit/cli dev
 
 Or install globally: `npm install -g @lessonkit/cli`.
 
-## `lessonkit dev` opens but the page is blank
+## `npm run dev` opens but the page is blank
 
 Ask the AI:
 

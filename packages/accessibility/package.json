@@ -9,7 +9,7 @@
     "url": "git+https://github.com/eddiethedean/lessonkit.git",
     "directory": "packages/accessibility"
   },
-  "homepage": "https://github.com/eddiethedean/lessonkit",
+  "homepage": "https://lessonkit.readthedocs.io/en/latest/reference/accessibility.html",
   "bugs": {
     "url": "https://github.com/eddiethedean/lessonkit/issues"
   },

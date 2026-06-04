@@ -9,7 +9,7 @@
     "url": "git+https://github.com/eddiethedean/lessonkit.git",
     "directory": "packages/studio-ui"
   },
-  "homepage": "https://github.com/eddiethedean/lessonkit/tree/main/packages/studio-ui",
+  "homepage": "https://lessonkit.readthedocs.io/en/latest/guides/studio/index.html",
   "bugs": {
     "url": "https://github.com/eddiethedean/lessonkit/issues"
   },

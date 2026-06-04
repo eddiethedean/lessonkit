@@ -9,7 +9,7 @@
     "url": "git+https://github.com/eddiethedean/lessonkit.git",
     "directory": "packages/cli"
   },
-  "homepage": "https://github.com/eddiethedean/lessonkit",
+  "homepage": "https://lessonkit.readthedocs.io/en/latest/reference/cli.html",
   "bugs": {
     "url": "https://github.com/eddiethedean/lessonkit/issues"
   },

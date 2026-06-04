@@ -86,7 +86,25 @@ Warehouse new-hire briefing in the compact field theme: PPE sign-off, photo haza
   · <a href="https://github.com/eddiethedean/lessonkit/tree/main/examples/lxpack-golden">Source on GitHub</a>
 </p>
 
+## Interactive book (`examples/interactive-book`)
+
+Compound `Page` and `InteractiveBook` patterns (framework 1.2). Source-only on this site—run locally from the monorepo.
+
+<p class="lk-demo-links">
+  <a href="https://github.com/eddiethedean/lessonkit/tree/main/examples/interactive-book">Source on GitHub</a>
+</p>
+
+## Assessment showcase (`examples/assessments-p0`)
+
+P0 blocks: `TrueFalse`, drag/drop, hotspots, fill-in-blanks, and related types. Source-only on this site.
+
+<p class="lk-demo-links">
+  <a href="https://github.com/eddiethedean/lessonkit/tree/main/examples/assessments-p0">Source on GitHub</a>
+</p>
+
 ## Run examples locally
+
+Requires a clone of the monorepo and **`npm run build:packages`** first (examples use `file:../../packages/*`).
 
 ```bash
 npm install
@@ -95,6 +113,8 @@ npm -w lessonkit-example-react-vite run dev
 npm -w lessonkit-example-data-privacy run dev
 npm -w lessonkit-example-customer-service run dev
 npm -w lessonkit-example-lxpack-golden run dev
+npm -w lessonkit-example-interactive-book run dev
+npm -w lessonkit-example-assessments-p0 run dev
 ```
 
-Packaging walkthrough: [Packaging and CLI](../guides/react-developers/packaging-and-cli.md).
+Packaging walkthrough: [Packaging and CLI](../guides/react-developers/packaging-and-cli.md). Full index: [examples/README](https://github.com/eddiethedean/lessonkit/blob/main/examples/README.md).

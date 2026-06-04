@@ -7,7 +7,17 @@ All notable changes to the LessonKit monorepo are documented here.
 
 ## Unreleased
 
-_No pending changes._
+### Added
+
+- Onboarding docs: [Getting started in 5 minutes](docs/guides/react-developers/getting-started-in-5-minutes.md), [Glossary](docs/reference/glossary.md), [API reference index](docs/reference/api.md), [ARCHITECTURE.md](https://github.com/eddiethedean/lessonkit/blob/main/ARCHITECTURE.md), [CODE_OF_CONDUCT.md](https://github.com/eddiethedean/lessonkit/blob/main/CODE_OF_CONDUCT.md), [good first contributions](docs/project/good-first-contributions.md).
+- Library Skills remote installer: `library-skills/install-remote.sh`.
+- GitHub Actions workflow to publish Storybook to GitHub Pages (`.github/workflows/storybook-pages.yml`).
+
+### Changed
+
+- README and quickstart: npm-first funnel, `npm run dev`, Studio live-demo path, package install table, examples index.
+- npm package `homepage` fields point to Read the Docs.
+- CLI template Vitest aligned to v4.x.
 
 ## [studio-v0.3.2] - 2026-06-03
 

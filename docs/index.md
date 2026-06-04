@@ -60,7 +60,7 @@ You can map familiar H5P content types to LessonKit components and Studio blocks
 :::{admonition} New to React?
 :class: note
 
-LessonKit courses are React apps. If you want to learn React before the developer guides, start with **[curated free resources](guides/react-developers/index.md#new-to-react)** (react.dev, TypeScript, Vite), then follow the [quickstart](guides/react-developers/quickstart.md). Prefer to skip React? Use **[vibe coding](guides/vibe-coding/index.md)** instead.
+LessonKit courses are React apps. If you want to learn React before the developer guides, start with **[curated free resources](guides/react-developers/index.md#new-to-react)** (react.dev, TypeScript, Vite), then follow [Getting started in 5 minutes](guides/react-developers/getting-started-in-5-minutes.md) or the [quickstart](guides/react-developers/quickstart.md). Prefer to skip React? Use **[vibe coding](guides/vibe-coding/index.md)** instead.
 :::
 
 ```{raw} html
@@ -114,6 +114,7 @@ H5P_CATALOG_CROSSWALK
 :caption: Guides — React developers
 
 guides/react-developers/index
+guides/react-developers/getting-started-in-5-minutes
 guides/react-developers/quickstart
 guides/react-developers/project-structure
 guides/react-developers/components-and-hooks
@@ -141,6 +142,8 @@ guides/studio/export
 :maxdepth: 1
 :caption: Reference
 
+reference/glossary
+reference/api
 reference/cli
 reference/core
 reference/packaging
@@ -160,6 +163,7 @@ reference/lxpack-upgrades
 :caption: Project
 
 project/changelog
+project/good-first-contributions
 project/security
 project/roadmap
 project/h5p-capability-map

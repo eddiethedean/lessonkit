@@ -34,7 +34,7 @@ Studio blocks map to the same React runtime as code-first courses. **`quiz`** in
 | `@lessonkit/studio-ui` | `StudioEditor`, `ExportPanel` |
 | `@lessonkit/studio-codegen` | React/Vite + LXPack export (0.3+) |
 
-Published on the **`studio-v*`** tag line (separate from core `v*` releases). See [changelog](../../project/changelog.md) for Studio release notes.
+Published on the **`studio-v*`** tag line (separate from core `v*` releases). **Last reviewed with framework 1.2.0 / Studio 0.3.2.** New framework blocks may appear in `@lessonkit/react` before the Studio palette catches up on older Studio lines—pin versions and read the changelog. See [changelog](../../project/changelog.md) for Studio release notes.
 
 ## Guide outline
 

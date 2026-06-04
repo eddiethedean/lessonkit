@@ -31,7 +31,7 @@ Add a second lesson to this LessonKit course:
 Keep courseId unchanged. Match checkId in lessonkit.json assessments if you add a quiz.
 ```
 
-Run `lessonkit dev` and click through both lessons.
+Run `npm run dev` and click through both lessons.
 
 ## Add a quiz (prompt)
 

@@ -6,13 +6,19 @@ Thank you for helping improve LessonKit. This file is the GitHub entry point for
 
 ## Code of conduct
 
-LessonKit is released under the [Apache-2.0 License](LICENSE). Be respectful and constructive in issues and pull requests. Harassment and discriminatory behavior are not welcome.
+We follow the [Contributor Covenant](CODE_OF_CONDUCT.md). Be respectful and constructive in issues and pull requests.
 
 ## Before you open a PR
 
 1. Fork the repository and create a branch from `main`.
 2. Keep each PR focused on one logical change (feature, fix, or docs update).
 3. Search [existing issues](https://github.com/eddiethedean/lessonkit/issues) to avoid duplicate work.
+
+## Good first contributions
+
+Look for issues labeled **`good first issue`** or **`help wanted`**. Starter ideas (no issue required—comment on an existing thread first): [Good first contributions](https://lessonkit.readthedocs.io/en/latest/project/good-first-contributions.html).
+
+Maintainers: create those labels in GitHub (**Settings → Labels**) if they are not present yet.
 
 ## Development setup
 
@@ -25,6 +31,16 @@ npm test
 ```
 
 `npm test` runs `pretest` → `build:packages` first so workspace `@lessonkit/*` dist matches source.
+
+### Faster loops
+
+| Change type | Usually enough |
+| --- | --- |
+| `docs/` only (Markdown, Sphinx) | `cd docs && pip install -r requirements.txt && sphinx-build -W -b html . _build/html` |
+| Single package you edited | `npm run build -w @lessonkit/react` then `npm test -w @lessonkit/react` |
+| Examples after package API change | `npm run build:packages` then the example workspace `dev` / `test` |
+
+Skip the full monorepo `npm run build` when your PR touches only documentation or one workspace.
 
 ## Node.js versions
 
@@ -58,7 +74,7 @@ If you add or change a workspace in the root `package.json`, run `npm install` a
 
 - Tests and lint/typecheck pass locally when feasible (`npm test`, `npm run lint`, `npm run typecheck`).
 - Update user-facing docs if behavior or public API changes (README, `docs/`, or package READMEs).
-- Add a [CHANGELOG.md](CHANGELOG.md) entry only when the maintainer requests it or the change is release-note-worthy.
+- **CHANGELOG:** add an entry under **Unreleased** when the change is user-facing (npm API, CLI flags, packaging behavior, or docs that correct wrong guidance). Skip changelog lines for typos, internal refactors, or test-only changes. Maintainers may fold entries at release time; you do not need Changesets unless asked.
 - Do not commit secrets (`.env`, API keys, credentials).
 
 ## Releases

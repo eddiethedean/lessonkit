@@ -16,6 +16,8 @@ Optional: `@lessonkit/xapi`, `@lessonkit/themes`, `@lessonkit/accessibility`
 
 ## Usage
 
+`Course` wraps `LessonkitProvider`—pass `config` on `Course` unless you need a custom provider tree.
+
 ```tsx
 import { useMemo } from "react";
 import { Course, Lesson, Quiz, ProgressTracker, ThemeProvider } from "@lessonkit/react";
@@ -68,7 +70,7 @@ export default function App() {
 
 ## Docs
 
-[Components & hooks](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/components-and-hooks.html) · [Block catalog](https://lessonkit.readthedocs.io/en/latest/reference/block-catalog.html) · [Theming](https://lessonkit.readthedocs.io/en/latest/reference/theming.html) · [Storybook](https://github.com/eddiethedean/lessonkit/blob/main/docs/storybook/README.md) (`npm run storybook` from repo root)
+[Components & hooks](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/components-and-hooks.html) · [5-minute guide](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/getting-started-in-5-minutes.html) · [Block catalog](https://lessonkit.readthedocs.io/en/latest/reference/block-catalog.html) · [Theming](https://lessonkit.readthedocs.io/en/latest/reference/theming.html) · [Storybook](https://eddiethedean.github.io/lessonkit/storybook/) · [API index](https://lessonkit.readthedocs.io/en/latest/reference/api.html)
 
 ## License
 
