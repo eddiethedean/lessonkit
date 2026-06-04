@@ -7,6 +7,52 @@ Published packages:
 
 Normal `v1.0.3` tags **do not** publish or re-version Studio packages. Studio uses its own semver line (e.g. `0.1.0`) and tag prefix.
 
+## Publishing 1.2.0 + Studio 0.3.2 (recommended order)
+
+1. Confirm [1.2.0](#120-checklist-ready-to-publish) and [Studio 0.3.2](#studio-032-checklist-ready-to-publish) checklists below.
+2. Tag and push **framework first** (publishes seven `@lessonkit/*` packages at **1.2.0**):
+
+   ```bash
+   git tag v1.2.0
+   git push origin v1.2.0
+   ```
+
+3. After `v1.2.0` is on npm, tag and push **Studio** (pins `@lessonkit/*` to **1.2.0** via `prepare-publish.mjs`):
+
+   ```bash
+   git tag studio-v0.3.2
+   git push origin studio-v0.3.2
+   ```
+
+### 1.2.0 checklist (ready to publish)
+
+| Item | Status |
+|------|--------|
+| All seven `@lessonkit/*` packages at `1.2.0` | Verify on `release/1.2.0` |
+| [CHANGELOG.md](CHANGELOG.md) `## [1.2.0]` includes **Changed** (catalog v3 default, compound persistence, AssessmentSequence scores) | Done |
+| [MIGRATION-1.1-to-1.2.md](docs/MIGRATION-1.1-to-1.2.md) in Sphinx toctree | Done |
+| `package-lock.json` includes all workspace examples (`npm ci` clean) | Verify before tag |
+| Sphinx `docs/conf.py` `release` = `1.2.0` | Done |
+| `main` / release branch CI green | Verify before tag |
+| Headless `createLessonkitRuntime` runs `plugins` hooks | Done |
+| Git tag `v1.2.0` | **Create when ready** |
+
+> **Do not create or push `v1.2.0`** until you intend to publish to npm.
+
+### Studio 0.3.2 checklist (ready to publish)
+
+| Item | Status |
+|------|--------|
+| Studio packages at `0.3.2` (schema, renderer, builder, ui, codegen) | Verify on branch |
+| Root `studio-version` = `0.3.2` | Verify |
+| [CHANGELOG.md](CHANGELOG.md) `## [studio-v0.3.2]` | Add when bumping Studio |
+| `prepare-publish.mjs studio 0.3.2` pins `@lessonkit/*` to **1.2.0** | Run at publish time |
+| Framework **1.2.0** on npm before `studio-v0.3.2` tag | Required |
+| Studio palette/codegen covers 1.2 blocks (see [ROADMAP](ROADMAP.md)) | Verify |
+| Git tag `studio-v0.3.2` | **Create when ready** |
+
+> Publish **framework `v1.2.0` first**, then `studio-v0.3.2`.
+
 ## Publishing 1.1.0 + Studio 0.3.1 (recommended order)
 
 1. Confirm [1.1.0](#110-checklist-ready-to-publish) and [Studio 0.3.1](#studio-031-checklist-ready-to-publish) checklists below.

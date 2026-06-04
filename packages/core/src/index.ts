@@ -184,6 +184,7 @@ export type {
   TelemetryPlugin,
 } from "./plugins";
 
+export { buildPluginContext } from "./plugins/context";
 export {
   createPluginRegistry,
   defineAssessmentPlugin,

@@ -64,7 +64,10 @@ export type AssessmentPlugin = PluginIdentity & {
   ) => AssessmentScoreResult | null;
 };
 
-/** Narrow interaction metadata plugin (ISP). */
+/**
+ * Narrow interaction metadata plugin (ISP).
+ * @experimental Not wired into PluginHost; reserved for a future release.
+ */
 export type InteractionPlugin = PluginIdentity & {
   interactionBlocks?: InteractionBlockRegistration[];
 };

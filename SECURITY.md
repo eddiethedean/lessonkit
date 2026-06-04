@@ -69,6 +69,7 @@ When building or packaging courses:
 - Use `validateDescriptor` / `packageLessonkitCourse` from `@lessonkit/lxpack` rather than hand-editing exported manifests
 - Keep `spaPath` values relative and validated (see [`docs/PACKAGING.md`](docs/reference/packaging.md))
 - Configure xAPI transports over HTTPS and avoid logging learner PII in custom telemetry sinks
+- When `persistCompoundState` is enabled (default in 1.2.0), learner progress and assessment answers are stored in **browser `sessionStorage`** for the tab; disable it on shared or kiosk devices (`session: { persistCompoundState: false }`) and set a unique `blockId` on each compound container
 
 ## Security updates
 

@@ -48,6 +48,8 @@ Import `@lessonkit/react/block-catalog.v3.json` for machine-readable entries inc
 
 `LessonkitConfig.session.persistCompoundState` defaults to `true`. Compound containers restore `activePageIndex` from `sessionStorage` on mount and persist on navigation or when child assessment state changes.
 
+**Security:** Resume data (including assessment answers) is stored in the browser tab. On shared or kiosk devices, set `persistCompoundState: false` or use a private browsing profile. See [Security](project/security.md).
+
 Child answer state is restored when the assessment block implements `getCurrentState` / `resume` (all 1.1.x P0 assessments and 1.2.x scored blocks, including `FindHotspot` / `FindMultipleHotspots`). Set `blockId` on `AssessmentSequence` when using persistence — multiple sequences without `blockId` share one storage key.
 
 ## `lessonkit.json`

@@ -77,6 +77,16 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
   );
 
   const useV2Runtime = normalizedConfig.runtimeVersion !== "v1";
+
+  useEffect(() => {
+    if (useV2Runtime) return;
+    const g = globalThis as typeof globalThis & { process?: { env?: { NODE_ENV?: string } } };
+    if (typeof g.process !== "undefined" && g.process.env?.NODE_ENV === "production") return;
+    console.warn(
+      '[lessonkit] LessonkitProvider runtimeVersion "v1" is deprecated; omit or use "v2" (default). v1 will be removed in LessonKit 2.0.',
+    );
+  }, [useV2Runtime]);
+
   const extraSinksRef = useRef(normalizedConfig.sinks);
   extraSinksRef.current = normalizedConfig.sinks;
 
@@ -101,7 +111,12 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
   const lxpackBridgeModeRef = useRef<LxpackBridgeMode>(normalizedConfig.lxpack?.bridge ?? "auto");
   lxpackBridgeModeRef.current = normalizedConfig.lxpack?.bridge ?? "auto";
 
-  const pluginHost = useMemo(() => createReactPluginHost(normalizedConfig.plugins), [normalizedConfig.plugins]);
+  const pluginsFingerprint =
+    normalizedConfig.plugins?.map((p) => `${p.id}\0${p.version}`).join("|") ?? "";
+  const pluginHost = useMemo(
+    () => createReactPluginHost(normalizedConfig.plugins),
+    [pluginsFingerprint],
+  );
   const pluginHostRef = useRef(pluginHost);
   pluginHostRef.current = pluginHost;
 
@@ -120,6 +135,7 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
         courseId: normalizedCourseId,
         runtimeVersion: "v2",
         session: normalizedConfig.session,
+        plugins: pluginHostRef.current ?? normalizedConfig.plugins,
       });
       progressRef.current = headlessRef.current.progress;
     } else {
@@ -134,6 +150,7 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
       courseId: normalizedCourseId,
       runtimeVersion: "v2",
       session: normalizedConfig.session,
+      plugins: pluginHostRef.current ?? normalizedConfig.plugins,
     });
   }
 
@@ -604,21 +621,36 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
         session: normalizedConfig.session,
       });
     }
-  }, [useV2Runtime, normalizedCourseId, sessionAttemptId, sessionConfiguredId, sessionUserKey, normalizedConfig.session]);
+  }, [
+    useV2Runtime,
+    normalizedCourseId,
+    sessionAttemptId,
+    sessionConfiguredId,
+    sessionUserKey,
+    normalizedConfig.session,
+  ]);
 
   useEffect(() => {
-    if (!pluginHost) return;
+    if (!useV2Runtime || !headlessRef.current) return;
+    headlessRef.current.updateConfig({
+      plugins: pluginHostRef.current ?? normalizedConfig.plugins,
+    });
+  }, [useV2Runtime, pluginHost]);
+
+  useEffect(() => {
+    const host = useV2Runtime ? headlessRef.current?.pluginHost ?? null : pluginHost;
+    if (!host) return;
     const ctx = buildPluginContext({
       courseId: courseIdRef.current,
       sessionId: sessionIdRef.current,
       attemptId: attemptIdRef.current,
       user: userRef.current,
     });
-    pluginHost.setupAll(ctx);
+    host.setupAll(ctx);
     return () => {
-      pluginHost.disposeAll();
+      host.disposeAll();
     };
-  }, [pluginHost, normalizedCourseId, sessionAttemptId, sessionConfiguredId, sessionUserKey]);
+  }, [pluginHost, useV2Runtime, normalizedCourseId, sessionAttemptId, sessionConfiguredId, sessionUserKey]);
 
   useEffect(() => {
     const nextConfigured = normalizedConfig.session?.sessionId;

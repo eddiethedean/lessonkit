@@ -5,7 +5,11 @@ import { useCompoundInitialIndex, useCompoundShell } from "../compound/useCompou
 import { validateCompoundChildren } from "../compound/validateChildren";
 import { setLessonkitBlockType } from "../compound/blockType";
 import { useLessonkit } from "../hooks";
-import { normalizeComponentId, isDevEnvironment } from "../runtime/validateComponentId";
+import { normalizeComponentId } from "../runtime/validateComponentId";
+import {
+  DEFAULT_ASSESSMENT_SEQUENCE_COMPOUND_ID,
+  warnSharedCompoundStorageKey,
+} from "../compound/warnPersistence";
 
 export type AssessmentSequenceProps = AssessmentBehaviour & {
   children: React.ReactNode;
@@ -90,7 +94,7 @@ export const AssessmentSequence = forwardRef<CompoundHandle, AssessmentSequenceP
       () =>
         props.blockId
           ? (normalizeComponentId(props.blockId, "blockId") as BlockId)
-          : ("assessment-sequence" as BlockId),
+          : (DEFAULT_ASSESSMENT_SEQUENCE_COMPOUND_ID as BlockId),
       [props.blockId],
     );
     const childArray = React.Children.toArray(props.children).filter(
@@ -100,10 +104,11 @@ export const AssessmentSequence = forwardRef<CompoundHandle, AssessmentSequenceP
     const persistEnabled = config.session?.persistCompoundState !== false;
 
     useEffect(() => {
-      if (!persistEnabled || props.blockId || !isDevEnvironment()) return;
-      console.warn(
-        "[lessonkit] <AssessmentSequence> without blockId shares one sessionStorage key; set blockId when persistCompoundState is enabled.",
-      );
+      warnSharedCompoundStorageKey({
+        persistEnabled,
+        hasExplicitBlockId: Boolean(props.blockId),
+        componentName: "AssessmentSequence",
+      });
     }, [persistEnabled, props.blockId]);
 
     const initialIndex = useCompoundInitialIndex({

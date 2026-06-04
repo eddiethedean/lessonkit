@@ -3,7 +3,7 @@
 ```{raw} html
 <div class="lk-hero">
   <div class="lk-hero-badges">
-    <span class="lk-badge lk-badge--accent">v1.1.0</span>
+    <span class="lk-badge lk-badge--accent">v1.2.0</span>
     <span class="lk-badge">React-first</span>
     <span class="lk-badge">SCORM · xAPI · cmi5</span>
   </div>
@@ -43,7 +43,7 @@ Pick the path that matches how you work:
 
 **Visual authoring (Alpha).** Drag-and-drop blocks, live preview, export to React/Vite—try the **[live app](guides/studio/app.md)** in the docs.
 
-**Status:** Studio is **Alpha**; expect breaking changes between Studio releases.
+**Status:** Studio is **Alpha** (npm **0.3.2**, pins framework **1.2.0** when published with `studio-v0.3.2`). Framework **1.2** blocks may ship before Studio palette parity on older Studio lines.
 
 +++
 **Open Studio →**

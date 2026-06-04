@@ -9,6 +9,19 @@ All notable changes to the LessonKit monorepo are documented here.
 
 _No pending changes._
 
+## [studio-v0.3.2] - 2026-06-03
+
+Studio packages at **0.3.2**, pinned to framework **1.2.0** at publish time.
+
+### Added
+
+- **@lessonkit/studio-schema**: Registry/catalog tests; H5P-familiar palette labels for 1.2 blocks (`Question Set`, `Find the Hotspot`, etc.).
+- **@lessonkit/studio-renderer** / **@lessonkit/studio-codegen**: 1.2 compound and Tier C/D block parity with `@lessonkit/react`.
+
+### Changed
+
+- All Studio packages bumped to **0.3.2**; export defaults pin `@lessonkit/*` **1.2.0**.
+
 ## [1.2.0] - 2026-06-03
 
 Framework **1.2.x** — Compound containers, resume state, and Tier C/D P0 blocks. `@lessonkit/core`, `@lessonkit/react`, `@lessonkit/lxpack`, `@lessonkit/xapi`, `@lessonkit/themes`, and `@lessonkit/accessibility` ship at **1.2.0**.
@@ -20,6 +33,14 @@ Framework **1.2.x** — Compound containers, resume state, and Tier C/D P0 block
 - **@lessonkit/lxpack**: `findHotspot` / `findMultipleHotspots` assessment descriptor kinds.
 - **Example**: `examples/interactive-book`.
 - **Docs**: [MIGRATION-1.1-to-1.2.md](docs/MIGRATION-1.1-to-1.2.md); ROADMAP 1.2.x milestone; H5P capability map updates.
+- **@lessonkit/core**: Headless `createLessonkitRuntime` runs plugin telemetry hooks and `scoreAssessment`; `buildPluginContext` exported.
+
+### Changed
+
+- **`buildBlockCatalog()`** defaults to **catalog v3** (use `{ version: 2 }` to keep the 1.1.x shape).
+- **`AssessmentSequence`** implements `CompoundHandle` and may surface parent-level scores when using a ref.
+- **`persistCompoundState`** defaults to **`true`**; provide a unique `blockId` on each compound container to avoid shared `sessionStorage` keys.
+- **`runtimeVersion: "v1"`** logs a development deprecation warning; **v2** remains the default.
 
 ## [studio-v0.3.1] - 2026-06-03
 

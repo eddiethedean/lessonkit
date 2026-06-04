@@ -31,6 +31,7 @@ export type AssessmentKind = NonNullable<AssessmentDescriptor["kind"]> | "mcq";
 
 export type StudioBlockRegistryEntry = {
   type: StudioBlockType;
+  /** Palette label (H5P-familiar where applicable). */
   displayName: string;
   category: "primitive" | "layout" | "learning" | "stub";
   traverseChildren: boolean;
@@ -56,13 +57,13 @@ export const STUDIO_BLOCK_REGISTRY: Record<StudioBlockType, StudioBlockRegistryE
   dragAndDrop: { type: "dragAndDrop", displayName: "Drag and Drop", category: "learning", traverseChildren: false, editorNestable: false, assessmentKind: "mcq" },
   page: { type: "page", displayName: "Page", category: "layout", traverseChildren: true, editorNestable: false },
   interactiveBook: { type: "interactiveBook", displayName: "Interactive Book", category: "layout", traverseChildren: true, editorNestable: false },
-  assessmentSequence: { type: "assessmentSequence", displayName: "Assessment Sequence", category: "layout", traverseChildren: true, editorNestable: false },
+  assessmentSequence: { type: "assessmentSequence", displayName: "Question Set", category: "layout", traverseChildren: true, editorNestable: false },
   accordion: { type: "accordion", displayName: "Accordion", category: "layout", traverseChildren: true, editorNestable: false },
   dialogCards: { type: "dialogCards", displayName: "Dialog Cards", category: "learning", traverseChildren: false, editorNestable: false },
   flashcards: { type: "flashcards", displayName: "Flashcards", category: "learning", traverseChildren: false, editorNestable: false },
   imageHotspots: { type: "imageHotspots", displayName: "Image Hotspots", category: "layout", traverseChildren: true, editorNestable: false },
   imageSlider: { type: "imageSlider", displayName: "Image Slider", category: "learning", traverseChildren: false, editorNestable: false },
-  findHotspot: { type: "findHotspot", displayName: "Find Hotspot", category: "learning", traverseChildren: false, editorNestable: false, assessmentKind: "findHotspot" },
+  findHotspot: { type: "findHotspot", displayName: "Find the Hotspot", category: "learning", traverseChildren: false, editorNestable: false, assessmentKind: "findHotspot" },
   findMultipleHotspots: { type: "findMultipleHotspots", displayName: "Find Multiple Hotspots", category: "learning", traverseChildren: false, editorNestable: false, assessmentKind: "findMultipleHotspots" },
 };
 

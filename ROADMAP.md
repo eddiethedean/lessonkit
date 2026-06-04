@@ -310,9 +310,9 @@ begins**—including schema spikes, renderer prototypes, or `lessonkit-studio` p
 
 #### Paired Studio work (0.8.x)
 
-- [ ] `studio-schema` types + `studio-renderer` + palette for 1.1.x P0 blocks
-- [ ] Codegen emits new components and `lessonkit.json` assessment entries
-- [ ] **Studio palette labels** — H5P-familiar display names (e.g. “Fill in the Blanks”) + H5P doc checklist items for **studio-schema** catalog and [Studio editor guide](docs/guides/studio/editor.md)
+- [x] `studio-schema` types + `studio-renderer` + palette for 1.1.x P0 blocks
+- [x] Codegen emits new components and `lessonkit.json` assessment entries
+- [x] **Studio palette labels** — H5P-familiar display names (e.g. “Fill in the Blanks”) + H5P doc checklist items for **studio-schema** catalog and [Studio editor guide](docs/guides/studio/editor.md)
 
 #### Out of scope for 1.1.x
 
