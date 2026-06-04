@@ -106,6 +106,7 @@ guides/library-skills
 :caption: Guides — H5P authors
 
 guides/h5p-for-lessonkit-authors
+H5P_CATALOG_CROSSWALK
 ```
 
 ```{toctree}
@@ -166,4 +167,5 @@ project/studio-spec
 project/studio-plan
 MIGRATION-0.x-to-1.0
 MIGRATION-1.0-to-1.1
+MIGRATION-1.1-to-1.2
 ```
