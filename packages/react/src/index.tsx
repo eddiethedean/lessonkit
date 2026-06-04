@@ -87,7 +87,12 @@ export {
 
 export { resetAssessmentWarningsForTests } from "./assessment/AssessmentLessonGuard";
 
-export type { LessonkitConfig, LessonkitProviderProps, LessonkitRuntime } from "./context";
+export type {
+  LessonkitConfig,
+  LessonkitObservabilityConfig,
+  LessonkitProviderProps,
+  LessonkitRuntime,
+} from "./context";
 export { LessonkitProvider } from "./context";
 
 export type {

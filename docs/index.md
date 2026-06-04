@@ -118,6 +118,7 @@ guides/react-developers/quickstart
 guides/react-developers/project-structure
 guides/react-developers/components-and-hooks
 guides/react-developers/telemetry-and-xapi
+guides/react-developers/production-checklist
 guides/react-developers/theming-and-accessibility
 guides/react-developers/packaging-and-cli
 guides/react-developers/export-parity

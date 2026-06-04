@@ -7,6 +7,7 @@ export type CourseStartedPipelineEmitOpts = {
   event: TelemetryEvent;
   xapi: XAPIClient | null;
   lxpackBridge: LxpackBridgeMode;
+  onLxpackBridgeMiss?: (event: TelemetryEvent) => void;
   extraSinks?: TelemetryPipelineSink[];
   /** When xAPI already sent course_started for this client (layout bootstrap or prior pipeline). */
   skipXapi?: boolean;
@@ -73,7 +74,9 @@ export async function emitCourseStartedNonTrackingPipeline(
     }
   }
 
-  forwardTelemetryToLxpack(opts.event, opts.lxpackBridge);
+  forwardTelemetryToLxpack(opts.event, opts.lxpackBridge, {
+    onBridgeMiss: opts.onLxpackBridgeMiss,
+  });
 
   const emitCtx = {
     courseId: opts.event.courseId as CourseId,

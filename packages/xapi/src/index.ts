@@ -8,6 +8,6 @@ export type {
   XAPITransport,
   XAPIVerbIri,
 } from "./types";
-export { createInMemoryXAPIQueue } from "./queue";
+export { createInMemoryXAPIQueue, type InMemoryXAPIQueueOptions } from "./queue";
 export { createXAPIClient } from "./client";
 export { telemetryEventToXAPIStatement } from "./telemetryMap";

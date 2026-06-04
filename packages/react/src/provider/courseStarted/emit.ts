@@ -26,6 +26,7 @@ export type CourseStartedEmitOpts = {
   attemptId?: string;
   user?: TelemetryUser;
   lxpackBridge: LxpackBridgeMode;
+  onLxpackBridgeMiss?: (event: TelemetryEvent) => void;
   extraSinks?: import("@lessonkit/core").TelemetryPipelineSink[];
   skipXapi?: boolean;
   onXapiStatementSent?: () => void;
@@ -115,6 +116,7 @@ export async function emitCourseStartedPipelineOnly(
       event: opts.event,
       xapi: opts.xapi,
       lxpackBridge: opts.lxpackBridge,
+      onLxpackBridgeMiss: opts.onLxpackBridgeMiss,
       extraSinks: opts.extraSinks,
       skipXapi: opts.skipXapi,
     });
@@ -184,6 +186,7 @@ export async function emitCourseStartedToTrackingOnly(
       event,
       xapi: null,
       lxpackBridge: opts.lxpackBridge,
+      onLxpackBridgeMiss: opts.onLxpackBridgeMiss,
       extraSinks: opts.extraSinks,
       skipXapi: true,
     });

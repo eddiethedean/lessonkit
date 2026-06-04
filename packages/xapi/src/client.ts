@@ -13,10 +13,20 @@ export function createXAPIClient(opts?: {
   transport?: XAPITransport;
   courseId?: CourseId;
   queue?: XAPIQueue;
+  /** When creating the default in-memory queue (max size 1000 unless overridden). */
+  maxQueueSize?: number;
+  onQueueDepth?: (size: number) => void;
+  onQueueCap?: () => void;
 }): XAPIClient {
   const transport = opts?.transport;
   const courseId = opts?.courseId;
-  const queue = opts?.queue ?? createInMemoryXAPIQueue();
+  const queue =
+    opts?.queue ??
+    createInMemoryXAPIQueue({
+      maxSize: opts?.maxQueueSize,
+      onDepth: opts?.onQueueDepth,
+      onCap: opts?.onQueueCap,
+    });
   let warnedNoTransport = false;
   let warnedTransportFailure = false;
   const inflightById = new Map<string, Promise<void>>();

@@ -17,7 +17,11 @@ export function emitTelemetry(
   tracking: TrackingClient,
   xapi: XAPIClient | null,
   event: TelemetryEvent,
-  opts?: { lxpackBridge?: LxpackBridgeMode; extraSinks?: import("@lessonkit/core").TelemetryPipelineSink[] },
+  opts?: {
+    lxpackBridge?: LxpackBridgeMode;
+    extraSinks?: import("@lessonkit/core").TelemetryPipelineSink[];
+    onLxpackBridgeMiss?: (event: TelemetryEvent) => void;
+  },
 ): void {
   if (!event.courseId) {
     if (isDevEnvironment() && !warnedMissingCourseId) {
@@ -31,6 +35,7 @@ export function emitTelemetry(
     tracking,
     xapi,
     lxpackBridge: opts?.lxpackBridge ?? "auto",
+    onLxpackBridgeMiss: opts?.onLxpackBridgeMiss,
   };
   emitThroughPipeline(event, legacy, opts?.extraSinks);
 }

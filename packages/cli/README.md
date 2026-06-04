@@ -32,6 +32,8 @@ lessonkit package --target scorm12   # LMS artifact
 
 Every project includes a root `lessonkit.json` manifest (`schemaVersion: 1`).
 
+Subprocess timeout defaults to **30 minutes** (`LESSONKIT_CMD_TIMEOUT_MS`; set `0` to disable).
+
 ## Docs
 
 [CLI reference](https://lessonkit.readthedocs.io/en/latest/reference/cli.html) · [Packaging guide](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/packaging-and-cli.html) · [Template source](https://github.com/eddiethedean/lessonkit/tree/main/templates/vite-react)

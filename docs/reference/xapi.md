@@ -18,7 +18,7 @@ Peer usage: `@lessonkit/core` (telemetry types and URNs).
 |--------|---------|
 | `telemetryEventToXAPIStatement(event)` | Canonical mapper from `@lessonkit/core` `TelemetryEvent` to `XAPIStatement` (or `null`) |
 | `createXAPIClient({ courseId, transport, queue? })` | Imperative lifecycle helpers + queued send |
-| `createInMemoryXAPIQueue()` | Default queue when transport fails or is async |
+| `createInMemoryXAPIQueue({ maxSize?, onDepth?, onCap? })` | Default queue when transport fails or is async (max **1000** statements; oldest dropped when full) |
 | `XAPIStatement`, `XAPITransport`, `XAPIClient`, `XAPIQueue` | Types |
 
 ## Telemetry → xAPI mapping
@@ -46,4 +46,6 @@ Direct `createXAPIClient` usage is optional for non-React tooling; prefer the ma
 
 ## Transport errors
 
-If `transport` throws or rejects, statements are retained in the in-memory queue. Call `await client.flush()` to retry. The React provider flushes on client/course changes and unmount.
+If `transport` throws or rejects, statements are retained in the in-memory queue. Call `await client.flush()` to retry. The React provider flushes on client/course changes, unmount, and when the tab is hidden (`visibilitychange` / `pagehide`).
+
+When the queue exceeds `maxSize` (default 1000), the oldest statement is dropped and `onCap` runs (wire via `config.observability.onXapiQueueCap` in React). See [production checklist](../guides/react-developers/production-checklist.md).

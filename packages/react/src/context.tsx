@@ -12,7 +12,10 @@ import type {
 import type { XAPIClient, XAPITransport } from "@lessonkit/xapi";
 import type { LxpackBridgeMode } from "@lessonkit/lxpack/bridge";
 import type { ProgressState } from "./runtime/progress";
+import type { LessonkitObservabilityConfig } from "./runtime/observability";
 import { useLessonkitProviderRuntime } from "./provider/useLessonkitProviderRuntime";
+
+export type { LessonkitObservabilityConfig };
 
 export type LessonkitConfig = {
   courseId: CourseId;
@@ -48,6 +51,8 @@ export type LessonkitConfig = {
   runtimeVersion?: "v1" | "v2";
   /** Optional custom telemetry pipeline sinks (used alongside tracking/xapi). */
   sinks?: import("@lessonkit/core").TelemetryPipelineSink[];
+  /** Production hooks for sink failures, xAPI queue depth, and LMS bridge misses. */
+  observability?: LessonkitObservabilityConfig;
 };
 
 export type { ProgressState };

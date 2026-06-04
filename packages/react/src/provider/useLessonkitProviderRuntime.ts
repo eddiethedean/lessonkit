@@ -19,7 +19,8 @@ import type {
 } from "@lessonkit/core";
 import { createLessonkitRuntime, createTrackingClient, assertValidId } from "@lessonkit/core";
 import type { XAPIClient } from "@lessonkit/xapi";
-import { createInMemoryXAPIQueue } from "@lessonkit/xapi";
+
+import { createXapiQueueFromObservability, wrapTrackingSink } from "../runtime/observability";
 import { telemetryEventToXAPIStatement } from "@lessonkit/xapi";
 import { tryBuildTelemetryEvent } from "../runtime/emitTelemetry";
 import type { LxpackBridgeMode } from "../runtime/lxpackBridge";
@@ -111,6 +112,13 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
   const lxpackBridgeModeRef = useRef<LxpackBridgeMode>(normalizedConfig.lxpack?.bridge ?? "auto");
   lxpackBridgeModeRef.current = normalizedConfig.lxpack?.bridge ?? "auto";
 
+  const observabilityRef = useRef(normalizedConfig.observability);
+  observabilityRef.current = normalizedConfig.observability;
+
+  const onLxpackBridgeMiss = useCallback((event: TelemetryEvent) => {
+    observabilityRef.current?.onLxpackBridgeMiss?.(event);
+  }, []);
+
   const pluginsFingerprint =
     normalizedConfig.plugins?.map((p) => `${p.id}\0${p.version}`).join("|") ?? "";
   const pluginHost = useMemo(
@@ -180,7 +188,7 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
   const activeLessonIdRef = useRef<LessonId | undefined>(progress.activeLessonId);
   activeLessonIdRef.current = progress.activeLessonId;
 
-  const xapiQueueRef = useRef(createInMemoryXAPIQueue());
+  const xapiQueueRef = useRef(createXapiQueueFromObservability(normalizedConfig.observability));
   const xapiRef = useRef<XAPIClient | null>(null);
   const [xapi, setXapi] = useState<XAPIClient | null>(null);
   const prevXapiCourseIdRef = useRef(normalizedCourseId);
@@ -205,7 +213,7 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
         /* v8 ignore stop */
         void xapiRef.current?.flush();
       }
-      xapiQueueRef.current = createInMemoryXAPIQueue();
+      xapiQueueRef.current = createXapiQueueFromObservability(observabilityRef.current);
       prevXapiCourseIdRef.current = courseId;
       xapiCourseStartedSentOnClientRef.current = false;
     }
@@ -302,7 +310,7 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
 
   useIsoLayoutEffect(() => {
     const prev = trackingRef.current;
-    const baseSink = normalizedConfig.tracking?.sink;
+    const baseSink = wrapTrackingSink(normalizedConfig.tracking?.sink, observabilityRef.current);
     const userBatchSink = normalizedConfig.tracking?.batchSink;
     assertTrackingSinkConfig(normalizedConfig.tracking);
     const sink =
@@ -367,6 +375,7 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
           attemptId: attemptIdRef.current,
           user: userRef.current,
           lxpackBridge: lxpackBridgeModeRef.current,
+          onLxpackBridgeMiss,
           extraSinks: extraSinksRef.current,
           skipXapi: xapiCourseStartedSentOnClientRef.current,
           onXapiStatementSent: () => {
@@ -412,9 +421,10 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
         user: userRef.current,
       }),
       lxpackBridge: lxpackBridgeModeRef.current,
+      onLxpackBridgeMiss,
       extraSinks: extraSinksRef.current,
     });
-  }, []);
+  }, [onLxpackBridgeMiss]);
 
   const emitLifecycleEvent: TelemetryEmitFn = useCallback(
     (name, data, lessonId) => {
@@ -488,13 +498,14 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
           attemptId: attemptIdRef.current,
           user: userRef.current,
           lxpackBridge: lxpackBridgeModeRef.current,
+          onLxpackBridgeMiss,
           extraSinks: extraSinksRef.current,
         });
         courseStartedEmittedToSinkRef.current = isCourseStartedSinkSettled(result);
       }
       /* v8 ignore stop */
     })();
-  }, [normalizedCourseId, normalizedConfig.tracking?.enabled, syncProgress]);
+  }, [normalizedCourseId, normalizedConfig.tracking?.enabled, syncProgress, onLxpackBridgeMiss]);
 
   const emitLessonCompleted = useCallback(
     (lessonId: LessonId, durationMs?: number) => {
@@ -549,6 +560,23 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
           // ignore
         }
       })();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    const flushOnExit = () => {
+      void xapiRef.current?.flush();
+      void trackingRef.current?.flush?.();
+    };
+    const onVisibilityChange = () => {
+      if (document.visibilityState === "hidden") flushOnExit();
+    };
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    window.addEventListener("pagehide", flushOnExit);
+    return () => {
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+      window.removeEventListener("pagehide", flushOnExit);
     };
   }, []);
 
