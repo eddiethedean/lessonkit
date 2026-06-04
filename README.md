@@ -14,14 +14,28 @@ Developer tooling, not a timeline authoring tool: **React + telemetry + packagin
 | **Release** | Framework [1.2.0](https://github.com/eddiethedean/lessonkit/blob/main/CHANGELOG.md#120---2026-06-03) · Studio [0.3.2](https://github.com/eddiethedean/lessonkit/blob/main/CHANGELOG.md#studio-v032---2026-06-03) |
 | **npm** | [`@lessonkit/*`](https://www.npmjs.com/org/lessonkit) |
 | **Docs** | [lessonkit.readthedocs.io](https://lessonkit.readthedocs.io/en/latest/) |
-| **Node.js** | 18+ (dev, build, LMS packaging) |
+| **Node.js** | 18+ (dev, build, LMS packaging); **20+** for Playwright e2e when [contributing](CONTRIBUTING.md) |
+
+---
+
+## Choose your path
+
+| Path | Start here |
+| --- | --- |
+| **New course (CLI)** | `npx @lessonkit/cli init` → [Quickstart — CLI scaffold](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/quickstart.html#cli-scaffold) |
+| **Existing React app** | `npm install @lessonkit/react @lessonkit/core` → [Quickstart — add to Vite](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/quickstart.html#add-to-an-existing-vite-react-app) |
+| **Visual Studio (Alpha)** | Monorepo `npm run dev -w lessonkit-studio-web` → [Studio editor guide](https://lessonkit.readthedocs.io/en/latest/guides/studio/editor.html) |
+
+**Live demos:** [Examples on Read the Docs](https://lessonkit.readthedocs.io/en/latest/examples/index.html)
 
 ---
 
 ## Table of contents
 
+- [Choose your path](#choose-your-path)
 - [Why LessonKit](#why-lessonkit)
 - [Features](#features)
+- [Upgrading to 1.2](#upgrading-to-12)
 - [Quick start](#quick-start)
 - [How it works](#how-it-works)
 - [Example](#example)
@@ -41,13 +55,17 @@ Developer tooling, not a timeline authoring tool: **React + telemetry + packagin
 | **Accessibility** | Semantic structure, focus utilities, reduced-motion helpers, documented WCAG targets |
 | **Delivery teams** | Modern SPA via Vite plus LMS artifacts through [`@lessonkit/lxpack`](https://lessonkit.readthedocs.io/en/latest/reference/packaging.html) |
 
-Migrating from 0.9.x? See [MIGRATION-0.x-to-1.0.md](https://github.com/eddiethedean/lessonkit/blob/main/docs/MIGRATION-0.x-to-1.0.md). From 1.0.x? See [MIGRATION-1.0-to-1.1.md](https://github.com/eddiethedean/lessonkit/blob/main/docs/MIGRATION-1.0-to-1.1.md).
+Migrating from 0.9.x? See [MIGRATION-0.x-to-1.0.md](https://github.com/eddiethedean/lessonkit/blob/main/docs/MIGRATION-0.x-to-1.0.md). From 1.0.x? See [MIGRATION-1.0-to-1.1.md](https://github.com/eddiethedean/lessonkit/blob/main/docs/MIGRATION-1.0-to-1.1.md). From 1.1.x? See [MIGRATION-1.1-to-1.2.md](https://github.com/eddiethedean/lessonkit/blob/main/docs/MIGRATION-1.1-to-1.2.md).
 
 ---
 
 ## Features
 
-- **React authoring** — `Course`, `Lesson`, `Scenario`, `Quiz`, `Reflection`, `ProgressTracker`, and hooks for progress, tracking, and completion
+- **Structure** — `Course`, `Lesson`, `Scenario`, `Quiz`, `KnowledgeCheck`, `Reflection`, `ProgressTracker`, `LessonkitProvider`; hooks for progress, tracking, and completion
+- **Compound & resume** — `Page`, `InteractiveBook`, `AssessmentSequence` (`CompoundHandle`, session resume)
+- **Content** — `Text`, `Heading`, `Image`
+- **Assessments (P0)** — `TrueFalse`, `MarkTheWords`, `FillInTheBlanks`, `DragTheWords`, `DragAndDrop`, `FindHotspot`, `FindMultipleHotspots`
+- **Presentation (Tier C/D)** — `Accordion`, `DialogCards`, `Flashcards`, `ImageHotspots`, `ImageSlider`
 - **Identity v1** — Required `courseId`, `lessonId`, and `checkId`; stable URNs for telemetry and xAPI
 - **Telemetry** — Session-aware events, optional batching, pluggable pipeline sinks
 - **xAPI** — Statement generation, in-memory queueing, and transport hooks via `@lessonkit/xapi`
@@ -55,6 +73,19 @@ Migrating from 0.9.x? See [MIGRATION-0.x-to-1.0.md](https://github.com/eddiethed
 - **LMS export** — SCORM 1.2/2004, standalone, xAPI, cmi5 from a built Vite app
 - **CLI** — Scaffold projects and package with a root `lessonkit.json` manifest
 - **Agent skills** — [Library Skills](https://github.com/eddiethedean/lessonkit/tree/main/library-skills) for Cursor, Claude Code, and compatible assistants
+
+---
+
+## Upgrading to 1.2
+
+If you are on **1.1.x**, review these default changes before upgrading:
+
+- `buildBlockCatalog()` defaults to **catalog v3** (pass `{ version: 2 }` to keep the 1.1.x shape).
+- `persistCompoundState` defaults to **`true`**; set a unique `blockId` on each compound container.
+- `AssessmentSequence` implements `CompoundHandle` (parent-level scores are possible when using a ref).
+- `runtimeVersion: "v1"` logs a development deprecation warning; **v2** remains the default.
+
+Full guide: [MIGRATION-1.1-to-1.2.md](https://github.com/eddiethedean/lessonkit/blob/main/docs/MIGRATION-1.1-to-1.2.md)
 
 ---
 
@@ -67,6 +98,8 @@ npx @lessonkit/cli init my-course
 cd my-course
 lessonkit dev
 ```
+
+In a scaffolded project, use `npm run dev` or `npx lessonkit dev`; a global CLI is optional (`npm install -g @lessonkit/cli`).
 
 Build and package for an LMS:
 
@@ -226,7 +259,7 @@ npm test
 
 Run an example: `npm -w lessonkit-example-react-vite run dev`
 
-Contributors: [monorepo guide](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/contributing-to-the-monorepo.html) · [RELEASING.md](https://github.com/eddiethedean/lessonkit/blob/main/RELEASING.md) · [ROADMAP.md](https://github.com/eddiethedean/lessonkit/blob/main/ROADMAP.md)
+Contributors: [CONTRIBUTING.md](CONTRIBUTING.md) · [monorepo guide](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/contributing-to-the-monorepo.html) · [RELEASING.md](https://github.com/eddiethedean/lessonkit/blob/main/RELEASING.md) · [ROADMAP.md](https://github.com/eddiethedean/lessonkit/blob/main/ROADMAP.md)
 
 ---
 

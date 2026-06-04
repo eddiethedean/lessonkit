@@ -43,17 +43,28 @@ export default function App() {
 
 ## API
 
-**Components:** `Course`, `Lesson`, `Scenario`, `Quiz`, `KnowledgeCheck`, `Reflection`, `ProgressTracker`, `ThemeProvider`
+**Structure:** `Course`, `Lesson`, `Scenario`, `Quiz`, `KnowledgeCheck`, `Reflection`, `ProgressTracker`, `ThemeProvider`, `LessonkitProvider`
 
-**Hooks:** `useProgress`, `useTracking`, `useQuizState`, `useCompletion`, `useTheme`
+**Compound:** `Page`, `InteractiveBook`, `AssessmentSequence` — types: `CompoundHandle`, `CompoundResumeState`, `CompoundBaseProps`
 
-**Catalog:** `@lessonkit/react/block-catalog.v1.json` · `buildBlockCatalog()`, `getBlockCatalogEntry()`
+**Content:** `Text`, `Heading`, `Image`
+
+**Assessments:** `TrueFalse`, `MarkTheWords`, `FillInTheBlanks`, `DragTheWords`, `DragAndDrop`, `FindHotspot`, `FindMultipleHotspots`
+
+**Presentation:** `Accordion`, `DialogCards`, `Flashcards`, `ImageHotspots`, `ImageSlider`
+
+**Hooks:** `useProgress`, `useTracking`, `useQuizState`, `useAssessmentState`, `useCompletion`, `useLessonkit`, `useTheme`
+
+**Runtime (re-exported from `@lessonkit/core`):** `createLessonkitRuntime`, `buildTelemetryEvent`, `createPluginRegistry`, `defineAssessmentPlugin`, `defineLifecyclePlugin`, `defineTelemetryPlugin` — use `@lessonkit/core` directly for headless runtimes.
+
+**Catalog:** `buildBlockCatalog()` defaults to **v3** in 1.2.0 (`{ version: 2 }` for the 1.1.x shape). JSON: `@lessonkit/react/block-catalog.v1.json`, `.v2.json`, `.v3.json` — `getBlockCatalogEntry()`, `BLOCK_CATALOG_V3`, etc.
 
 ## Tips
 
 - Hoist `config` with `useMemo` so tracking/xAPI clients are not recreated every render.
 - xAPI is on by default; provide `xapi.transport` or statements queue in memory.
 - Lessons complete on unmount or when another lesson becomes active via `setActiveLesson`.
+- Compound resume: use a unique `blockId` when `persistCompoundState` is enabled; see [SECURITY.md](https://github.com/eddiethedean/lessonkit/blob/main/SECURITY.md) for shared-device guidance.
 
 ## Docs
 
