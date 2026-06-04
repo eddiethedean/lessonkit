@@ -29,7 +29,7 @@ Developer tooling, not a timeline authoring tool: **React + telemetry + packagin
 | **LessonKit Studio (Alpha)** | [Live editor on Read the Docs](https://lessonkit.readthedocs.io/en/latest/guides/studio/app.html) (no install) · [Studio guides](https://lessonkit.readthedocs.io/en/latest/guides/studio/index.html) |
 | **Contribute / run Studio locally** | Clone this repo → [Contributing](CONTRIBUTING.md) · Studio dev: `npm run dev -w lessonkit-studio-web` after `npm run build:packages` |
 
-**Live demos:** [Examples on Read the Docs](https://lessonkit.readthedocs.io/en/latest/examples/index.html)
+**Live demos:** [Examples on Read the Docs](https://lessonkit.readthedocs.io/en/latest/examples/index.html) · **Block catalogs:** [1.1](examples/framework-11-showcase) · [1.2](examples/framework-12-showcase)
 
 ---
 

@@ -1,0 +1,86 @@
+{
+  "schemaVersion": 1,
+  "name": "framework-12-showcase",
+  "course": {
+    "courseId": "framework-12-showcase",
+    "title": "Atlas Analytics — LessonKit 1.2 Showcase",
+    "version": "1.2.0",
+    "layout": "single-spa",
+    "spaLessonId": "orientation",
+    "lessons": [{ "id": "orientation", "title": "Orientation" }],
+    "assessments": [
+      {
+        "kind": "trueFalse",
+        "checkId": "handbook-sso-tf",
+        "question": "SSO is optional for production Atlas workspaces.",
+        "answer": false,
+        "passingScore": 1
+      },
+      {
+        "kind": "trueFalse",
+        "checkId": "atlas-sso-tf",
+        "question": "You should share Atlas dashboard links in public channels.",
+        "answer": false,
+        "passingScore": 1
+      },
+      {
+        "kind": "fillInBlanks",
+        "checkId": "report-channel-fib",
+        "question": "Complete the escalation phrase.",
+        "template": "Report suspicious exports to the *security* desk.",
+        "passingScore": 1
+      },
+      {
+        "checkId": "policy-mtw",
+        "question": "Which token must learners mark in the policy sentence?",
+        "choices": ["credentials", "colleagues", "calendar"],
+        "answer": "credentials",
+        "passingScore": 1
+      },
+      {
+        "checkId": "sync-dtw",
+        "question": "Which word completes the sync workflow?",
+        "choices": ["Validate", "Publish", "Archive"],
+        "answer": "Validate",
+        "passingScore": 1
+      },
+      {
+        "checkId": "export-dad",
+        "question": "Where do raw CSV exports belong?",
+        "choices": ["Approved vault", "Personal drive"],
+        "answer": "Approved vault",
+        "passingScore": 1
+      },
+      {
+        "kind": "findHotspot",
+        "checkId": "alert-hs",
+        "question": "Tap the control that acknowledges a critical alert.",
+        "src": "/images/workspace-map.svg",
+        "alt": "Atlas workspace with alert controls",
+        "correctTargetId": "ack-alert",
+        "passingScore": 1
+      },
+      {
+        "kind": "findMultipleHotspots",
+        "checkId": "dashboards-hs",
+        "question": "Select every widget that may contain regulated data.",
+        "src": "/images/workspace-map.svg",
+        "alt": "Atlas workspace with dashboard widgets",
+        "correctTargetIds": ["widget-pii", "widget-payroll"],
+        "passingScore": 1
+      }
+    ],
+    "theme": { "preset": "brand" },
+    "tracking": {
+      "completion": { "threshold": 1 },
+      "xapi": {
+        "activityIri": "https://lessonkit.example/courses/framework-12-showcase"
+      }
+    }
+  },
+  "paths": {
+    "spaDistDir": "dist",
+    "lxpackOutDir": ".lxpack/course",
+    "outputBaseDir": ".lxpack/out"
+  }
+}

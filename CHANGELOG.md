@@ -12,6 +12,8 @@ All notable changes to the LessonKit monorepo are documented here.
 - Onboarding docs: [Getting started in 5 minutes](docs/guides/react-developers/getting-started-in-5-minutes.md), [Glossary](docs/reference/glossary.md), [API reference index](docs/reference/api.md), [ARCHITECTURE.md](https://github.com/eddiethedean/lessonkit/blob/main/ARCHITECTURE.md), [CODE_OF_CONDUCT.md](https://github.com/eddiethedean/lessonkit/blob/main/CODE_OF_CONDUCT.md), [good first contributions](docs/project/good-first-contributions.md).
 - Library Skills remote installer: `library-skills/install-remote.sh`.
 - GitHub Actions workflow to publish Storybook to GitHub Pages (`.github/workflows/storybook-pages.yml`).
+- Example: [`examples/framework-12-showcase`](examples/framework-12-showcase) — full LessonKit 1.2 block catalog in one course.
+- Example: [`examples/framework-11-showcase`](examples/framework-11-showcase) — full LessonKit 1.1 foundation + P0 assessments.
 
 ### Changed
 
@@ -41,7 +43,7 @@ Framework **1.2.x** — Compound containers, resume state, and Tier C/D P0 block
 - **@lessonkit/core**: `CompoundHandle`, `CompoundResumeState`, compound session storage v2, `compoundAllowlists`, telemetry catalog v3 (`book_page_viewed`, content interaction events).
 - **@lessonkit/react**: `Page`, `InteractiveBook`, `Text`, `Heading`, `Image`; Tier C/D blocks (`Accordion`, `DialogCards`, `Flashcards`, `ImageHotspots`, `ImageSlider`, `FindHotspot`, `FindMultipleHotspots`); `AssessmentSequence` implements `CompoundHandle`; `block-catalog.v3.json` (default `buildBlockCatalog({ version: 3 })`).
 - **@lessonkit/lxpack**: `findHotspot` / `findMultipleHotspots` assessment descriptor kinds.
-- **Example**: `examples/interactive-book`.
+- Example: `examples/interactive-book`, **`examples/framework-12-showcase`** (full 1.2 catalog).
 - **Docs**: [MIGRATION-1.1-to-1.2.md](docs/MIGRATION-1.1-to-1.2.md); ROADMAP 1.2.x milestone; H5P capability map updates.
 - **@lessonkit/core**: Headless `createLessonkitRuntime` runs plugin telemetry hooks and `scoreAssessment`; `buildPluginContext` exported.
 

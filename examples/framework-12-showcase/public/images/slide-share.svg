@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="360" viewBox="0 0 640 360" role="img" aria-label="Share phase">
+  <rect width="640" height="360" fill="#111827" rx="12"/>
+  <text x="40" y="64" fill="#f9fafb" font-family="system-ui,sans-serif" font-size="22" font-weight="600">3 · Share</text>
+  <text x="40" y="100" fill="#9ca3af" font-family="system-ui,sans-serif" font-size="15">Publish to approved channels only.</text>
+  <path d="M420 240 L520 180 L620 240 Z" fill="#059669" opacity="0.5"/>
+</svg>

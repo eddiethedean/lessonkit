@@ -13,7 +13,9 @@ These workspaces use `file:../../packages/*` dependencies—they are for **monor
 | [`customer-service/`](customer-service/) | `lessonkit-example-customer-service` | De-escalation | Support theme · chat and voice coaching · on RTD |
 | [`lxpack-golden/`](lxpack-golden/) | `lessonkit-example-lxpack-golden` | Warehouse Safety | Packaging reference · SCORM/xAPI smoke target · on RTD |
 | [`interactive-book/`](interactive-book/) | `lessonkit-example-interactive-book` | Interactive book | Compound `Page` / `InteractiveBook` (1.2) |
-| [`assessments-p0/`](assessments-p0/) | `lessonkit-example-assessments-p0` | Assessment showcase | P0 blocks: drag/drop, hotspots, fill-in-blanks |
+| [`framework-11-showcase/`](framework-11-showcase/) | `lessonkit-example-framework-11-showcase` | Incident Response | **Full 1.1 catalog** — foundation + P0 assessments |
+| [`framework-12-showcase/`](framework-12-showcase/) | `lessonkit-example-framework-12-showcase` | Atlas Analytics | **Full 1.2 catalog** — content, compound, Tier C/D, hotspots |
+| [`assessments-p0/`](assessments-p0/) | `lessonkit-example-assessments-p0` | Assessment showcase | Minimal P0 sample (subset of 1.1) |
 | [`studio-minimal/`](studio-minimal/) | `lessonkit-example-studio-minimal` | Studio sample | `StudioProjectV1` + renderer preview |
 | [`studio-export/`](studio-export/) | — | Export pipeline | Node script demo (not a dev server); see [README](studio-export/README.md) |
 

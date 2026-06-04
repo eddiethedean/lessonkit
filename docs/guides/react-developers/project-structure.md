@@ -44,6 +44,8 @@ lessonkit/
 │   ├── customer-service/
 │   ├── lxpack-golden/     # packaging reference
 │   ├── interactive-book/  # compound containers (1.2)
+│   ├── framework-11-showcase/  # complete 1.1 catalog
+│   ├── framework-12-showcase/  # complete 1.2 catalog
 │   ├── assessments-p0/    # P0 assessment blocks
 │   ├── studio-minimal/
 │   └── studio-export/     # codegen script (not a dev server)
