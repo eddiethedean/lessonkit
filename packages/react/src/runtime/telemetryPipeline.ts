@@ -6,7 +6,6 @@ import {
 } from "@lessonkit/core";
 import type { XAPIClient } from "@lessonkit/xapi";
 import { telemetryEventToXAPIStatement } from "@lessonkit/xapi";
-import type { TelemetryEvent } from "@lessonkit/core";
 import { forwardTelemetryToLxpack, type LxpackBridgeMode } from "./lxpackBridge";
 
 export type LegacyEmitOptions = {

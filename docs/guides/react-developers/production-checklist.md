@@ -21,7 +21,7 @@ Verify the parent exposes `window.parent.lxpackBridge.v1` in SCORM previews befo
 ## Session and resume
 
 1. **Unique `blockId`** on each `Page`, `InteractiveBook`, and `AssessmentSequence` when `persistCompoundState` is enabled (default `true`).
-2. **Kiosk / shared devices** — set `config.session.persistCompoundState: false` or use private browsing. See [Security](../../../SECURITY.md).
+2. **Kiosk / shared devices** — set `config.session.persistCompoundState: false` or use private browsing. See [Security](../../project/security.md).
 3. **Expect multi-tab last-write-wins** — same origin tabs share `sessionStorage` keys.
 
 ## Authoring guardrails
