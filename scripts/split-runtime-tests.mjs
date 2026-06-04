@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import { execSync } from "node:child_process";
 
 const srcPath = path.join("packages/react/test/runtime.test.tsx");
 const src = fs.readFileSync(srcPath, "utf8");
@@ -139,3 +140,5 @@ ${groups.core.join("\n\n")}
 `;
 fs.writeFileSync(srcPath, coreContent);
 console.log(`runtime.test.tsx: ${groups.core.length} tests`);
+
+execSync("node scripts/trim-runtime-test-imports.mjs", { stdio: "inherit" });

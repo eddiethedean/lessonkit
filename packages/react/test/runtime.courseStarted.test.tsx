@@ -1,29 +1,13 @@
-import React, { useState } from "react";
-import { afterEach, describe, expect, it, vi } from "vitest";
-import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { Course, KnowledgeCheck, Lesson, LessonkitProvider, ProgressTracker, Quiz, Reflection, Scenario, resetQuizWarningsForTests, useCompletion, useLessonkit, useProgress, useQuizState, useTracking } from "../src";
-import { resetLessonMountRegistryForTests } from "../src/runtime/lessonMountRegistry";
-import {
-  resetCourseStartedTrackingFlightForTests,
-  resetLessonkitProviderStorageForTests,
-} from "../src/provider/useLessonkitProviderRuntime";
-import {
-  defineAssessmentPlugin,
-  defineLifecyclePlugin,
-  defineTelemetryPlugin,
-  type TelemetryEvent,
-  type TelemetrySink,
-} from "@lessonkit/core";
+import { registerRuntimeTestCleanup } from "./runtime.testSetup";
+import { describe, it, expect, vi } from "vitest";
+import { act, render, waitFor } from "@testing-library/react";
+import { Course, Lesson, LessonkitProvider, ProgressTracker } from "../src";
+import { defineTelemetryPlugin, type TelemetryEvent, type TelemetrySink } from "@lessonkit/core";
 import * as xapiModule from "@lessonkit/xapi";
 import type { XAPIStatement, XAPITransport } from "@lessonkit/xapi";
 import * as courseStartedPipelineModule from "../src/runtime/courseStartedPipeline";
 import { createSessionStoragePort } from "../src/runtime/ports";
-import {
-  markCourseStarted,
-  markCourseStartedEmittedToTracking,
-  markCourseStartedPipelineDelivered,
-} from "../src/runtime/session";
-import { registerRuntimeTestCleanup } from "./runtime.testSetup";
+import { markCourseStarted, markCourseStartedEmittedToTracking, markCourseStartedPipelineDelivered } from "../src/runtime/session";
 
 
 describe("@lessonkit/react runtime — course_started", () => {
@@ -827,3 +811,4 @@ it("emits course_started after courseId change when flush fails once", async () 
     vi.unmock("@lessonkit/core");
   });
 });
+

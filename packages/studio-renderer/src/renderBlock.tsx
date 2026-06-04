@@ -22,7 +22,6 @@ import {
   TrueFalse,
 } from "@lessonkit/react";
 import type { StudioBlock } from "@lessonkit/studio-schema";
-import { walkBlocks } from "@lessonkit/studio-schema";
 import { ButtonBlock, ContainerBlock, InputBlock } from "./blocks/primitives";
 import { ChecklistBlock, VideoBlock } from "./blocks/media";
 

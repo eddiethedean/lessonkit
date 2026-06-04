@@ -13,7 +13,6 @@ import type {
   TelemetryEvent,
   TelemetryEventName,
   TelemetryUser,
-  PluginHost,
   TrackingClient,
   HeadlessLessonkitRuntime,
   TelemetryEmitFn,
@@ -22,7 +21,7 @@ import { createLessonkitRuntime, createTrackingClient, assertValidId } from "@le
 import type { XAPIClient } from "@lessonkit/xapi";
 import { createInMemoryXAPIQueue } from "@lessonkit/xapi";
 import { telemetryEventToXAPIStatement } from "@lessonkit/xapi";
-import { buildTelemetryEvent, tryBuildTelemetryEvent } from "../runtime/emitTelemetry";
+import { tryBuildTelemetryEvent } from "../runtime/emitTelemetry";
 import type { LxpackBridgeMode } from "../runtime/lxpackBridge";
 import { createSessionStoragePort, resetStoragePortForTests } from "../runtime/ports";
 import { createProgressController, type ProgressState } from "../runtime/progress";

@@ -1,10 +1,9 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import {
   buildCourseStartedEvent,
   isCourseStartedSinkSettled,
   isTrackingActive,
 } from "../src/provider/courseStarted";
-import { createSessionStoragePort } from "../src/runtime/ports";
 
 describe("courseStarted helpers", () => {
   it("isTrackingActive defaults to true", () => {
@@ -28,8 +27,15 @@ describe("courseStarted helpers", () => {
     expect(event?.courseId).toBe("course-1");
   });
 
-  it("buildCourseStartedEvent accepts injected storage context via session", () => {
-    const storage = createSessionStoragePort();
-    expect(storage).toBeDefined();
+  it("buildCourseStartedEvent includes session metadata when provided", () => {
+    const event = buildCourseStartedEvent({
+      pluginHost: null,
+      courseId: "course-1",
+      sessionId: "session-42",
+      lxpackBridge: "auto",
+    });
+    expect(event?.sessionId).toBe("session-42");
+    expect(event?.name).toBe("course_started");
+    expect(event?.courseId).toBe("course-1");
   });
 });

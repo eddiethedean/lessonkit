@@ -1,5 +1,7 @@
-import { assertNever } from "../assertNever";
-import type { BuildTelemetryEventContext, BuildTelemetryEventInput } from "./buildInput";
+import type {
+  BuildTelemetryEventContext,
+  BuildTelemetryEventInput,
+} from "./buildInput";
 import type {
   AccordionSectionToggledData,
   AssessmentAnsweredData,
@@ -221,8 +223,10 @@ export const TELEMETRY_EVENT_REGISTRY: Record<BuildTelemetryEventInput["name"], 
 };
 
 export function buildTelemetryEventFromRegistry(opts: BuildTelemetryEventInput): TelemetryEvent {
-  const entry = TELEMETRY_EVENT_REGISTRY[opts.name as TelemetryEvent["name"]];
-  if (!entry) return assertNever(opts);
+  const entry = TELEMETRY_EVENT_REGISTRY[opts.name];
+  if (!entry) {
+    throw new Error("Unexpected value");
+  }
   const base: EventBase = {
     timestamp: opts.timestamp ?? nowIso(),
     courseId: opts.courseId,

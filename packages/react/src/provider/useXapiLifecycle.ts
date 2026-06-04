@@ -1,1 +1,0 @@
-export { useXapiClientLifecycle } from "./useXapiClientLifecycle";

@@ -1,29 +1,11 @@
 import React, { useState } from "react";
-import { afterEach, describe, expect, it, vi } from "vitest";
-import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { Course, KnowledgeCheck, Lesson, LessonkitProvider, ProgressTracker, Quiz, Reflection, Scenario, resetQuizWarningsForTests, useCompletion, useLessonkit, useProgress, useQuizState, useTracking } from "../src";
-import { resetLessonMountRegistryForTests } from "../src/runtime/lessonMountRegistry";
-import {
-  resetCourseStartedTrackingFlightForTests,
-  resetLessonkitProviderStorageForTests,
-} from "../src/provider/useLessonkitProviderRuntime";
-import {
-  defineAssessmentPlugin,
-  defineLifecyclePlugin,
-  defineTelemetryPlugin,
-  type TelemetryEvent,
-  type TelemetrySink,
-} from "@lessonkit/core";
-import * as xapiModule from "@lessonkit/xapi";
-import type { XAPIStatement, XAPITransport } from "@lessonkit/xapi";
-import * as courseStartedPipelineModule from "../src/runtime/courseStartedPipeline";
-import { createSessionStoragePort } from "../src/runtime/ports";
-import {
-  markCourseStarted,
-  markCourseStartedEmittedToTracking,
-  markCourseStartedPipelineDelivered,
-} from "../src/runtime/session";
 import { registerRuntimeTestCleanup } from "./runtime.testSetup";
+import { describe, it, expect, vi } from "vitest";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { Course, Lesson, LessonkitProvider, Quiz, useLessonkit, useQuizState, useTracking } from "../src";
+import { defineAssessmentPlugin, defineLifecyclePlugin, defineTelemetryPlugin, type TelemetryEvent, type TelemetrySink } from "@lessonkit/core";
+import type { XAPIStatement } from "@lessonkit/xapi";
+import * as courseStartedPipelineModule from "../src/runtime/courseStartedPipeline";
 
 
 describe("@lessonkit/react runtime — telemetry", () => {
@@ -1434,3 +1416,4 @@ it("does not emit lesson_started again when remounting a completed lesson", asyn
     await waitFor(() => expect(events.filter((e) => e.name === "lesson_started").length).toBe(startedCount));
   });
 });
+
