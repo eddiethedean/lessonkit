@@ -45,13 +45,34 @@ describe("compound resume state", () => {
     expect(parsed?.childStates).toEqual({ valid: { a: 1 } });
   });
 
-  it("rejects child states with functions or nested objects", () => {
+  it("accepts one-level string maps in child states (drag/fill resume)", () => {
+    const dragState = {
+      zones: { "zone-0": "cats", "zone-1": "dogs" },
+      pool: ["birds"],
+      passed: false,
+      submitted: true,
+    };
+    const fillState = {
+      values: { "blank-0": "Paris", "blank-1": "France" },
+      passed: true,
+      submitted: true,
+      showSolutions: false,
+    };
+    const parsed = parseCompoundResumeState({
+      schemaVersion: COMPOUND_RESUME_SCHEMA_VERSION,
+      activePageIndex: 0,
+      childStates: { drag: dragState, fill: fillState },
+    });
+    expect(parsed?.childStates).toEqual({ drag: dragState, fill: fillState });
+  });
+
+  it("rejects child states with functions or deeply nested objects", () => {
     const parsed = parseCompoundResumeState({
       schemaVersion: COMPOUND_RESUME_SCHEMA_VERSION,
       activePageIndex: 0,
       childStates: {
         ok: { answer: "a", picks: [1, 2] },
-        nested: { payload: { deep: true } },
+        nested: { payload: { nested: { deep: true } } },
         fn: { run: () => {} },
       },
     });

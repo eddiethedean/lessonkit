@@ -704,10 +704,12 @@ describe("coverage-full lxpack", () => {
       expect(remapArtifactPaths(stagingRoot, "C:\\out", artifact)).toBe("C:\\out\\course.zip");
     });
 
-    it("passes through remap when relative path escapes staging", () => {
+    it("throws when remap relative path escapes staging", () => {
       const staging = resolveComparablePath("/tmp/staging");
       const artifact = resolveComparablePath("/tmp/staging/../outside.zip");
-      expect(remapArtifactPaths(staging, "/tmp/out", artifact)).toBe(artifact);
+      expect(() => remapArtifactPaths(staging, "/tmp/out", artifact)).toThrow(
+        /outside the staging directory/,
+      );
     });
   });
 

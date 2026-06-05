@@ -20,6 +20,14 @@ Framework **1.3.x** — `SlideDeck` (H5P Course Presentation). `@lessonkit/core`
 - Example: `examples/slide-deck` — golden path for slide navigation, scoring, and session resume.
 - **Docs**: [MIGRATION-1.2-to-1.3.md](docs/MIGRATION-1.2-to-1.3.md); H5P capability map marks `H5P.CoursePresentation` → `SlideDeck` as shipped.
 
+### Fixed
+
+- **@lessonkit/core**: compound resume accepts one-level string-key maps in child state (DragTheWords, FillInTheBlanks, DragAndDrop round-trip); shared volatile session ID across provider and compound hooks; `course_started` dedupe when session storage write fails; batched telemetry partial-flush redelivery and `onTelemetryBufferDrop` observability.
+- **@lessonkit/react**: duplicate `assessment_answered` on resume for drag/fill blocks; compound persistence merges live handle state on save; FindHotspot resets when props change; compound containers use provider `StoragePort`.
+- **@lessonkit/xapi**: queue no longer drops the oldest non-head event during flush; interaction xAPI mapping guards missing `blockId`.
+- **@lessonkit/lxpack**: symlink-aware path containment for packaging inputs; fail closed on error-severity build issues in CLI `package`; `remapArtifactPaths` throws on escape.
+- **@lessonkit/cli**: packaging warnings filter respects issue severity.
+
 ## [1.2.0] - 2026-06-03
 
 Framework **1.2.x** — Compound containers, resume state, and Tier C/D P0 blocks. `@lessonkit/core`, `@lessonkit/react`, `@lessonkit/lxpack`, `@lessonkit/xapi`, `@lessonkit/themes`, and `@lessonkit/accessibility` ship at **1.2.0**.

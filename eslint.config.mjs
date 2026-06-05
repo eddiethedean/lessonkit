@@ -19,6 +19,7 @@ export default tseslint.config(
     ignores: [
       "**/dist/**",
       "**/node_modules/**",
+      "**/.lxpack/**",
       "**/storybook-static/**",
       "**/docs/_build/**",
       "**/docs/_static/**",

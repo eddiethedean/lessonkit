@@ -77,7 +77,7 @@ const experiencedBlockMapper: EventMapper = (event, ctx) => {
   if (event.name === "interaction") {
     const lessonId = event.lessonId;
     const blockId = event.data?.blockId;
-    if (!lessonId || !blockId) return null;
+    if (!lessonId || !blockId || typeof blockId !== "string") return null;
     return experiencedBlockStatement(ctx.courseId, lessonId, blockId, ctx.timestamp);
   }
   const lessonId = event.lessonId;

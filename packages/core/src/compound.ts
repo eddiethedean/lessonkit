@@ -48,9 +48,18 @@ function isJsonPrimitive(value: unknown): boolean {
   );
 }
 
+/** One-level string-keyed map with JSON-primitive values (e.g. drag zone assignments). */
+function isPlainStringKeyMap(value: unknown): boolean {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  return Object.entries(value as Record<string, unknown>).every(
+    ([key, entry]) => typeof key === "string" && isJsonPrimitive(entry),
+  );
+}
+
 function isValidChildResumeValue(value: unknown): boolean {
   if (isJsonPrimitive(value)) return true;
   if (Array.isArray(value)) return value.every((item) => isJsonPrimitive(item));
+  if (isPlainStringKeyMap(value)) return true;
   return false;
 }
 

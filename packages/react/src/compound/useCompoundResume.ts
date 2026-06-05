@@ -1,9 +1,10 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useContext, useEffect, useRef } from "react";
 import type { BlockId, CompoundResumeState, CourseId } from "@lessonkit/core";
 import { loadCompoundState, saveCompoundState } from "@lessonkit/core";
 import { createSessionStoragePort } from "@lessonkit/core";
 import type { StoragePort } from "@lessonkit/core";
 import { isDevEnvironment } from "../runtime/validateComponentId";
+import { LessonkitContext } from "../context";
 
 let warnedCompoundPersistFailure = false;
 
@@ -22,14 +23,15 @@ export function useCompoundResume(opts: {
   storage?: StoragePort;
   onResume?: (state: CompoundResumeState) => void;
 }): (state: CompoundResumeState) => void {
-  const storageRef = useRef(opts.storage ?? createSessionStoragePort());
+  const lessonkitCtx = useContext(LessonkitContext);
+  const storageRef = useRef(opts.storage ?? lessonkitCtx?.storage ?? createSessionStoragePort());
   const resumedRef = useRef(false);
   const resumeKeyRef = useRef("");
   const prevEnabledRef = useRef(opts.enabled);
 
   useEffect(() => {
-    storageRef.current = opts.storage ?? createSessionStoragePort();
-  }, [opts.storage]);
+    storageRef.current = opts.storage ?? lessonkitCtx?.storage ?? createSessionStoragePort();
+  }, [opts.storage, lessonkitCtx?.storage]);
 
   useEffect(() => {
     if (!prevEnabledRef.current && opts.enabled) {

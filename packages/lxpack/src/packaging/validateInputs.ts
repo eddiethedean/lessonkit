@@ -152,12 +152,12 @@ export function remapArtifactPaths(
   if (!artifactPath) return undefined;
   const resolved = resolveComparablePath(artifactPath);
   if (!isResolvedPathUnderRoot(stagingRoot, resolved)) {
-    return artifactPath;
+    throw new Error(`${artifactPath} is outside the staging directory`);
   }
   const rel = relativePathUnderRoot(stagingRoot, resolved);
   /* v8 ignore start */
   if (rel.startsWith("..") || isAbsolute(rel)) {
-    return artifactPath;
+    throw new Error(`${artifactPath} is outside the staging directory`);
   }
   /* v8 ignore stop */
   if (!rel) return outDir;

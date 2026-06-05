@@ -81,10 +81,14 @@ describe("courseLifecycle", () => {
     expect(result.marked).toBe(false);
   });
 
-  it("tryEmitCourseStarted reports unmarked when markCourseStarted storage write fails", () => {
+  it("tryEmitCourseStarted reports marked when in-memory dedupe succeeds despite failed durable write", () => {
+    const memory = new Map<string, string>();
     const storage = {
-      getItem: () => null,
-      setItem: () => false,
+      getItem: (k: string) => memory.get(k) ?? null,
+      setItem: (k: string, v: string) => {
+        memory.set(k, v);
+        return false;
+      },
     };
     const ctx = {
       courseId: "c" as const,
@@ -93,9 +97,13 @@ describe("courseLifecycle", () => {
       pluginHost: null,
       lxpackBridge: "auto" as const,
     };
-    const result = tryEmitCourseStarted(ctx, { emitCourseStartedEvent: () => true }, false);
-    expect(result.emitted).toBe(true);
-    expect(result.marked).toBe(false);
+    const emit = vi.fn(() => true);
+    const first = tryEmitCourseStarted(ctx, { emitCourseStartedEvent: emit }, false);
+    expect(first.emitted).toBe(true);
+    expect(first.marked).toBe(true);
+    const second = tryEmitCourseStarted(ctx, { emitCourseStartedEvent: emit }, first.emitted);
+    expect(second.emitted).toBe(true);
+    expect(emit).toHaveBeenCalledTimes(1);
   });
 
   it("tryEmitCourseStarted retries emit when storage is marked but sink has not received event", () => {

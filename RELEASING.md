@@ -9,10 +9,11 @@ Published packages (`v*.*.*` tag → [Release](.github/workflows/release.yml)): 
 | Item | Status |
 |------|--------|
 | All seven `@lessonkit/*` packages at `1.3.0` | Done |
-| [CHANGELOG.md](CHANGELOG.md) `## [1.3.0]` documents `Slide`, `SlideDeck`, `slide_viewed` | Done |
+| [CHANGELOG.md](CHANGELOG.md) `## [1.3.0]` documents `Slide`, `SlideDeck`, `slide_viewed`, and **Fixed** audit pass | Done |
 | [MIGRATION-1.2-to-1.3.md](docs/MIGRATION-1.2-to-1.3.md) in Sphinx toctree | Done |
-| `package-lock.json` includes all workspace examples (`npm ci` clean) | Verify before tag |
+| `package-lock.json` includes all workspace examples (`npm ci` clean) | Done (2026-06-05) |
 | Sphinx `docs/conf.py` `release` = `1.3.0` | Done |
+| No pending `.changeset/*.md` files | Done |
 | `release/1.3.0` CI green | Verify before tag |
 | `lessonkit init` template pins `^1.3.0` | Done |
 | `examples/slide-deck` integration + e2e golden path | Done |

@@ -90,7 +90,10 @@ function DragTheWordsInner(
             completedRef.current = value;
             answeredRef.current = value;
           });
-          readBooleanStateField(state, "submitted", setSubmitted);
+          readBooleanStateField(state, "submitted", (value) => {
+            setSubmitted(value);
+            if (value) answeredRef.current = true;
+          });
           const kw = state.keyboardWord;
           if (kw === null || typeof kw === "string") setKeyboardWord(kw ?? null);
         },
@@ -130,17 +133,16 @@ function DragTheWordsInner(
       return;
     }
     if (!allFilled) return;
-    if (!answeredRef.current) {
-      answeredRef.current = true;
-      setSubmitted(true);
-      assessment.answer({
+    if (answeredRef.current || submitted) return;
+    answeredRef.current = true;
+    setSubmitted(true);
+    assessment.answer({
         checkId,
         interactionType: INTERACTION,
         question: props.template,
         response: zones,
         correct: passedThreshold,
       });
-    }
     if (passedThreshold && !completedRef.current) {
       completedRef.current = true;
       setPassed(true);
@@ -155,7 +157,10 @@ function DragTheWordsInner(
   };
 
   useEffect(() => {
-    if (!allFilled) answeredRef.current = false;
+    if (!allFilled) {
+      answeredRef.current = false;
+      setSubmitted(false);
+    }
   }, [allFilled]);
 
   useEffect(() => {

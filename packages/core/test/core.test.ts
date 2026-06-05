@@ -218,7 +218,7 @@ describe("@lessonkit/core", () => {
     expect(sink).not.toHaveBeenCalled();
   });
 
-  it("re-queues the full batch when per-event sink fails mid-batch (at-most-once per-event caveat)", async () => {
+  it("re-queues only undelivered events when per-event sink fails mid-batch", async () => {
     const sink = vi
       .fn<(event: TelemetryEvent) => Promise<void>>(async () => {})
       .mockResolvedValueOnce(undefined)
@@ -247,11 +247,11 @@ describe("@lessonkit/core", () => {
     expect(secondFlush).toBe(true);
     await new Promise((r) => setTimeout(r, 0));
 
-    expect(sink.mock.calls.length).toBeGreaterThanOrEqual(5);
-    const redelivered = sink.mock.calls.slice(3).map((call) => call[0]?.timestamp);
-    expect(redelivered).toContain("t1");
-    expect(redelivered).toContain("t2");
-    expect(redelivered).toContain("t3");
+    expect(sink).toHaveBeenCalledTimes(4);
+    expect(sink.mock.calls[3]?.[0]?.timestamp).toBe("t3");
+    const redelivered = sink.mock.calls.map((call) => call[0]?.timestamp);
+    expect(redelivered.filter((t) => t === "t1")).toHaveLength(1);
+    expect(redelivered.filter((t) => t === "t2")).toHaveLength(1);
   });
 
   it("flush resolves true when sink delivers successfully", async () => {

@@ -3,6 +3,7 @@ import type {
   CourseId,
   LessonId,
   LessonkitPlugin,
+  StoragePort,
   TelemetryDataFor,
   TelemetryEventName,
   TelemetryUser,
@@ -67,6 +68,7 @@ export type LessonkitRuntime = {
   tracking: TrackingClient;
   xapi: XAPIClient | null;
   progress: ProgressState;
+  storage: StoragePort;
   session: {
     sessionId: string;
     attemptId?: string;

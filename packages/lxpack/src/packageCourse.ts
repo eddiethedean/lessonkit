@@ -18,6 +18,7 @@ import {
 } from "./packaging/validateInputs";
 import { promoteStagingToOutDir } from "./packaging/promote";
 import { buildStagingPackage, ensureOutDirParent } from "./packaging/staging";
+import { findPackagingErrorIssues } from "./packaging/issueSeverity";
 
 export type { ExportTarget } from "@lxpack/api";
 
@@ -166,6 +167,25 @@ export async function packageLessonkitCourse(
   }
 
   const { stagingDir, build } = staged;
+
+  const buildErrorIssues = findPackagingErrorIssues(build.issues);
+  if (buildErrorIssues.length > 0) {
+    await fsp.rm(stagingDir, { recursive: true, force: true }).catch(/* v8 ignore next */ () => undefined);
+    return {
+      ok: false,
+      courseDir: outDir,
+      target,
+      validation: { ok: false, manifest: build.manifest, issues: build.issues },
+      build,
+      issues: build.issues
+        .filter((i) => findPackagingErrorIssues([i]).length > 0)
+        .map((i) => ({
+          path: i.path ?? "build",
+          message: i.message,
+          severity: i.severity,
+        })),
+    };
+  }
 
   const stagingRoot = await fsp.realpath(stagingDir);
   const artifactIssues = [

@@ -1,4 +1,4 @@
-import React, { forwardRef, useMemo, useState } from "react";
+import React, { forwardRef, useEffect, useMemo, useState } from "react";
 import type { AssessmentBaseProps, AssessmentHandle, AssessmentInteractionType } from "@lessonkit/core";
 import type { LessonId } from "@lessonkit/core";
 import { AssessmentLessonGuard } from "../assessment/AssessmentLessonGuard";
@@ -34,6 +34,13 @@ function FindHotspotInner(
   const [checked, setChecked] = useState(false);
   const assessment = useAssessmentState(props.enclosingLessonId);
 
+  const targetIdsKey = props.targets.map((t) => t.id).join("\0");
+
+  useEffect(() => {
+    setSelected(null);
+    setChecked(false);
+  }, [checkId, props.correctTargetId, targetIdsKey]);
+
   const correct = selected === props.correctTargetId;
 
   const handle = useMemo(
@@ -59,11 +66,16 @@ function FindHotspotInner(
         getCurrentState: () => ({ selected, checked }),
         resume: (state) => {
           const nextSelected = readStringField(state, "selected");
-          if (typeof nextSelected === "string" || nextSelected === null) setSelected(nextSelected);
+          if (typeof nextSelected === "string" || nextSelected === null) {
+            const valid =
+              nextSelected === null ||
+              props.targets.some((t) => t.id === nextSelected);
+            setSelected(valid ? nextSelected : null);
+          }
           readBooleanStateField(state, "checked", setChecked);
         },
       }),
-    [checkId, selected, checked, correct, props.correctTargetId],
+    [checkId, selected, checked, correct, props.correctTargetId, props.targets],
   );
 
   useAssessmentHandleRegistration(checkId, handle, ref);

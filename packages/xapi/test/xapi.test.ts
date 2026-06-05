@@ -243,8 +243,9 @@ describe("@lessonkit/xapi", () => {
     }
   });
 
-  it("refuses enqueue at cap while the head statement is in flight", async () => {
-    const queue = createInMemoryXAPIQueue({ maxSize: 2 });
+  it("drops oldest non-head statement at cap while the head is in flight", async () => {
+    const onCap = vi.fn();
+    const queue = createInMemoryXAPIQueue({ maxSize: 2, onCap });
     let release!: () => void;
     const gate = new Promise<void>((resolve) => {
       release = resolve;
@@ -262,10 +263,12 @@ describe("@lessonkit/xapi", () => {
     expect(queue.size()).toBe(2);
     queue.enqueue({ id: "new", timestamp: "t", verb: "http://adlnet.gov/expapi/verbs/experienced", object: { id: "o3" } });
     expect(queue.size()).toBe(2);
+    expect(onCap).toHaveBeenCalledTimes(1);
 
     release();
     await flushPromise;
-    expect(transport).toHaveBeenCalled();
+    expect(queue.size()).toBe(0);
+    expect(transport).toHaveBeenCalledTimes(2);
   });
 
   it("queue flush stops on first transport error and keeps remainder queued", async () => {

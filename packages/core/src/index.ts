@@ -148,6 +148,7 @@ export {
   markCourseStartedEmittedToTracking,
   hasCourseStartedPipelineDelivered,
   markCourseStartedPipelineDelivered,
+  resetSharedVolatileSessionIdForTests,
 } from "./session";
 
 export type {

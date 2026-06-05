@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef } from "react";
+import React, { useCallback, useContext, useEffect, useRef } from "react";
 import type { AssessmentResumeState, BlockId, CompoundResumeState, CourseId, StoragePort } from "@lessonkit/core";
 import {
   clampCompoundPageIndex,
@@ -10,6 +10,7 @@ import { useCompoundHydrationBridgeRef } from "./CompoundHydrationBridge";
 import { useCompoundHandlesVersion, useCompoundRegistry } from "./CompoundProvider";
 import { filterRegisteredChildStates, resumeChildHandles } from "./resumeChildHandles";
 import { useCompoundResume } from "./useCompoundResume";
+import { LessonkitContext } from "../context";
 
 export function readCompoundInitialIndex(
   courseId: CourseId | undefined,
@@ -40,7 +41,8 @@ export function useCompoundPersistence(opts: {
   enabled: boolean;
   storage?: StoragePort;
 }): void {
-  const storage = opts.storage ?? createSessionStoragePort();
+  const lessonkitCtx = useContext(LessonkitContext);
+  const storage = opts.storage ?? lessonkitCtx?.storage ?? createSessionStoragePort();
   const ctx = useCompoundRegistry();
   const handlesVersion = useCompoundHandlesVersion();
   const bridgeRef = useCompoundHydrationBridgeRef();
@@ -73,12 +75,6 @@ export function useCompoundPersistence(opts: {
   }
 
   const buildState = useCallback((): CompoundResumeState => {
-    if (skipSaveUntilHydratedRef.current) {
-      return createCompoundResumeState({
-        activePageIndex: clampCompoundPageIndex(opts.index, opts.pageCount),
-        childStates: { ...loadedChildStatesRef.current },
-      });
-    }
     const childStates: Record<string, AssessmentResumeState> = {
       ...loadedChildStatesRef.current,
     };
@@ -156,17 +152,8 @@ export function useCompoundPersistence(opts: {
 
   const persistNow = useCallback(() => {
     if (!opts.enabled || !opts.courseId) return;
-    if (skipSaveUntilHydratedRef.current) {
-      saveResume(
-        createCompoundResumeState({
-          activePageIndex: clampCompoundPageIndex(opts.index, opts.pageCount),
-          childStates: { ...loadedChildStatesRef.current },
-        }),
-      );
-      return;
-    }
     saveResume(buildStateRef.current());
-  }, [opts.enabled, opts.courseId, opts.index, opts.pageCount, saveResume]);
+  }, [opts.enabled, opts.courseId, saveResume]);
 
   const notifyImperativeResume = useCallback(
     (state: CompoundResumeState) => {

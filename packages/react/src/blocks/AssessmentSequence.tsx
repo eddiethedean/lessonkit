@@ -107,7 +107,7 @@ export const AssessmentSequence = forwardRef<CompoundHandle, AssessmentSequenceP
     const childArray = React.Children.toArray(props.children).filter(
       React.isValidElement,
     ) as React.ReactElement[];
-    const { config } = useLessonkit();
+    const { config, storage } = useLessonkit();
     const persistEnabled = config.session?.persistCompoundState !== false;
 
     useEffect(() => {
@@ -123,6 +123,7 @@ export const AssessmentSequence = forwardRef<CompoundHandle, AssessmentSequenceP
       compoundId,
       pageCount: childArray.length,
       persistEnabled,
+      storage,
     });
 
     const [index, setIndex] = useState(initialIndex);

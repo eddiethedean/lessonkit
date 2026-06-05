@@ -48,6 +48,19 @@ describe("realpath path validation", () => {
     }
   });
 
+  it("rejects lxpackOutDir when a parent path component is a symlink escape", async () => {
+    const root = await mkdtemp(join(tmpdir(), "lk-parent-symlink-"));
+    const outside = await mkdtemp(join(tmpdir(), "lk-outside-parent-"));
+    try {
+      await symlink(outside, join(root, ".lxpack"), "dir");
+      const issues = validateProjectPaths(root, { lxpackOutDir: ".lxpack/course" });
+      expect(issues.some((i) => i.path === "paths.lxpackOutDir")).toBe(true);
+    } finally {
+      await rm(root, { recursive: true, force: true });
+      await rm(outside, { recursive: true, force: true });
+    }
+  });
+
   it("rejects output symlink escape in validatePackageInputs", async () => {
     const root = await mkdtemp(join(tmpdir(), "lk-output-realpath-"));
     const outside = await mkdtemp(join(tmpdir(), "lk-output-outside-"));

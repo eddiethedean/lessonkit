@@ -10,6 +10,8 @@ export type LessonkitObservabilityConfig = {
   onXapiQueueDepth?: (depth: number) => void;
   /** Oldest xAPI statement dropped because the queue reached max size. */
   onXapiQueueCap?: () => void;
+  /** Telemetry batch buffer dropped an event because the cap (1000) was reached. */
+  onTelemetryBufferDrop?: () => void;
   /** LMS bridge missing for a completion-related telemetry event (`bridge: auto`). */
   onLxpackBridgeMiss?: (event: TelemetryEvent) => void;
 };

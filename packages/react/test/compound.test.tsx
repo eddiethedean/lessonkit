@@ -7,6 +7,8 @@ import { createSessionStoragePort } from "@lessonkit/core";
 import {
   AssessmentSequence,
   Course,
+  DragTheWords,
+  FillInTheBlanks,
   FindHotspot,
   InteractiveBook,
   Lesson,
@@ -176,6 +178,87 @@ describe("InteractiveBook", () => {
     const parsed = JSON.parse(raw!) as { childStates: Record<string, { selected?: string; checked?: boolean }> };
     expect(parsed.childStates["hs-1"]?.selected).toBe("t1");
     expect(parsed.childStates["hs-1"]?.checked).toBe(true);
+  });
+
+  it("round-trips FillInTheBlanks child state through sessionStorage", () => {
+    saveCompoundState(
+      createSessionStoragePort(),
+      COURSE_ID,
+      "book-fill",
+      createCompoundResumeState({
+        activePageIndex: 0,
+        childStates: {
+          "fib-1": {
+            values: { "blank-0": "Paris" },
+            passed: false,
+            submitted: true,
+            showSolutions: false,
+          },
+        },
+      }),
+    );
+
+    render(
+      wrap(
+        <InteractiveBook blockId="book-fill" title="Book">
+          <Page blockId="p1" title="Blanks">
+            <FillInTheBlanks checkId="fib-1" template="Capital is *Paris*." />
+          </Page>
+        </InteractiveBook>,
+        true,
+      ),
+    );
+
+    expect(screen.getByDisplayValue("Paris")).toBeTruthy();
+    const raw = sessionStorage.getItem(compoundStateStorageKey(COURSE_ID, "book-fill"));
+    expect(raw).toBeTruthy();
+    const parsed = JSON.parse(raw!) as {
+      childStates: Record<string, { values?: Record<string, string> }>;
+    };
+    expect(parsed.childStates["fib-1"]?.values?.["blank-0"]).toBe("Paris");
+  });
+
+  it("round-trips DragTheWords child state through sessionStorage", () => {
+    saveCompoundState(
+      createSessionStoragePort(),
+      COURSE_ID,
+      "book-drag",
+      createCompoundResumeState({
+        activePageIndex: 0,
+        childStates: {
+          "dtw-1": {
+            zones: { "zone-0": "cats" },
+            pool: ["dogs"],
+            passed: false,
+            submitted: false,
+            keyboardWord: null,
+          },
+        },
+      }),
+    );
+
+    render(
+      wrap(
+        <InteractiveBook blockId="book-drag" title="Book">
+          <Page blockId="p1" title="Drag">
+            <DragTheWords
+              checkId="dtw-1"
+              template="I like *cats*."
+              words={["cats", "dogs"]}
+            />
+          </Page>
+        </InteractiveBook>,
+        true,
+      ),
+    );
+
+    expect(screen.getByTestId("zone-0").textContent).toContain("cats");
+    const raw = sessionStorage.getItem(compoundStateStorageKey(COURSE_ID, "book-drag"));
+    expect(raw).toBeTruthy();
+    const parsed = JSON.parse(raw!) as {
+      childStates: Record<string, { zones?: Record<string, string> }>;
+    };
+    expect(parsed.childStates["dtw-1"]?.zones?.["zone-0"]).toBe("cats");
   });
 
   it("persists page index when saved childStates have no registered handles", () => {

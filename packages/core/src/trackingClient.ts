@@ -10,6 +10,8 @@ export function createTrackingClient(opts?: {
     maxBatchSize?: number;
   };
   batchSink?: TelemetryBatchSink;
+  /** Called when an event is dropped because the batch buffer is at cap (including in production). */
+  onBufferDrop?: () => void;
 }): TrackingClient {
   const sink = opts?.sink;
   const batchSink = opts?.batchSink;
@@ -60,15 +62,21 @@ export function createTrackingClient(opts?: {
         if (batchSink) {
           await batchSink(events);
         } else {
-          for (const e of events) {
-            await sink?.(e);
+          for (let i = 0; i < events.length; i++) {
+            try {
+              await sink?.(events[i]!);
+            } catch {
+              buffer.unshift(...events.slice(i));
+              return;
+            }
           }
         }
         succeeded = true;
       })
       .catch(() => {
-        // Re-queue the full batch on failure. Per-event sinks may redeliver already-sent events.
-        buffer.unshift(...events);
+        if (batchSink) {
+          buffer.unshift(...events);
+        }
       })
       .then(async () => {
         if (succeeded && buffer.length > 0 && !disposed) {
@@ -115,6 +123,7 @@ export function createTrackingClient(opts?: {
     track: (event) => {
       if (disposed || disposing) return;
       if (buffer.length >= maxBufferSize) {
+        opts?.onBufferDrop?.();
         if (!warnedBufferCap && isDevEnvironment()) {
           warnedBufferCap = true;
           console.warn(

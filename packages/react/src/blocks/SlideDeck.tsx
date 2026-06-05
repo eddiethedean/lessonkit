@@ -133,7 +133,7 @@ export const SlideDeck = forwardRef<CompoundHandle, SlideDeckProps>(function Sli
   const slides = React.Children.toArray(props.children).filter(
     React.isValidElement,
   ) as React.ReactElement<SlideProps>[];
-  const { config } = useLessonkit();
+  const { config, storage } = useLessonkit();
   const persistEnabled = config.session?.persistCompoundState !== false;
 
   const initialIndex = useCompoundInitialIndex({
@@ -141,6 +141,7 @@ export const SlideDeck = forwardRef<CompoundHandle, SlideDeckProps>(function Sli
     compoundId: blockId,
     pageCount: slides.length,
     persistEnabled,
+    storage,
   });
 
     const [index, setIndex] = useState(initialIndex);

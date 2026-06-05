@@ -1,5 +1,6 @@
 import type { TelemetryEvent, TrackingClient } from "@lessonkit/core";
 import { createTrackingClient } from "@lessonkit/core";
+import type { LessonkitObservabilityConfig } from "./observability";
 
 export type TelemetryConfig = {
   enabled?: boolean;
@@ -13,13 +14,17 @@ export type TelemetryConfig = {
   };
 };
 
-export function createTrackingClientFromConfig(config: { tracking?: TelemetryConfig }): TrackingClient {
+export function createTrackingClientFromConfig(
+  config: { tracking?: TelemetryConfig },
+  observability?: LessonkitObservabilityConfig,
+): TrackingClient {
   if (config.tracking?.enabled === false) return createTrackingClient();
   if (config.tracking?.createClient) return config.tracking.createClient();
   return createTrackingClient({
     sink: config.tracking?.sink,
     batchSink: config.tracking?.batchSink,
     batch: config.tracking?.batch,
+    onBufferDrop: observability?.onTelemetryBufferDrop,
   });
 }
 

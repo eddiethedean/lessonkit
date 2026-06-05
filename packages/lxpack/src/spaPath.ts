@@ -1,5 +1,5 @@
-import { realpathSync } from "node:fs";
-import { isAbsolute, relative, resolve, sep, win32 } from "node:path";
+import { existsSync, realpathSync } from "node:fs";
+import { isAbsolute, join, relative, resolve, sep, win32 } from "node:path";
 
 /** Resolve absolute paths, including Windows drive paths when running on other OSes. */
 export function resolveComparablePath(p: string): string {
@@ -37,6 +37,34 @@ export function assertResolvedPathUnderRoot(root: string, target: string): void 
   }
 }
 
+/** Walk existing path prefixes under `rootReal`, resolving symlinks at each step. */
+function resolveExistingPathUnderRoot(
+  rootReal: string,
+  rootResolved: string,
+  targetResolved: string,
+): string {
+  const rel = relative(rootResolved, targetResolved);
+  if (rel.startsWith("..") || rel.includes(`..${sep}`)) {
+    throw new Error(`unsafe path escapes project root: ${targetResolved}`);
+  }
+  const segments = rel.split(/[/\\]/).filter((s) => s.length > 0 && s !== ".");
+  let current = rootReal;
+  for (const segment of segments) {
+    const next = join(current, segment);
+    if (existsSync(next)) {
+      try {
+        current = realpathSync(next);
+      } catch {
+        current = next;
+      }
+    } else {
+      current = next;
+    }
+    assertResolvedPathUnderRoot(rootReal, current);
+  }
+  return current;
+}
+
 /** Resolve symlinks on `root` and ensure `target` stays under it (including non-existent paths). */
 export function assertRealPathUnderRoot(root: string, target: string): void {
   /* v8 ignore start */
@@ -48,17 +76,12 @@ export function assertRealPathUnderRoot(root: string, target: string): void {
   } catch {
     rootReal = rootResolved;
   }
-  let targetCheck: string;
   try {
-    targetCheck = realpathSync(targetResolved);
+    const targetCheck = realpathSync(targetResolved);
+    assertResolvedPathUnderRoot(rootReal, targetCheck);
   } catch {
-    const rel = relative(rootResolved, targetResolved);
-    if (rel.startsWith("..") || rel.includes(`..${sep}`)) {
-      throw new Error(`unsafe path escapes project root: ${target}`);
-    }
-    targetCheck = resolve(rootReal, rel);
+    resolveExistingPathUnderRoot(rootReal, rootResolved, targetResolved);
   }
-  assertResolvedPathUnderRoot(rootReal, targetCheck);
   /* v8 ignore stop */
 }
 

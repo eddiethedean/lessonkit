@@ -54,11 +54,15 @@ export function createInMemoryXAPIQueue(opts?: InMemoryXAPIQueueOptions): XAPIQu
       const normalized = withStatementId(statement);
       if (buffer.some((s) => s.id === normalized.id)) return;
       if (buffer.length >= maxSize) {
-        if (headInFlight) {
+        if (headInFlight && buffer.length <= 1) {
           opts?.onCap?.();
           return;
         }
-        buffer.shift();
+        if (headInFlight) {
+          buffer.splice(1, 1);
+        } else {
+          buffer.shift();
+        }
         opts?.onCap?.();
       }
       buffer.push(normalized);

@@ -116,7 +116,7 @@ export const InteractiveBook = forwardRef<CompoundHandle, InteractiveBookProps>(
   const pages = React.Children.toArray(props.children).filter(
     React.isValidElement,
   ) as React.ReactElement<PageProps>[];
-  const { config } = useLessonkit();
+  const { config, storage } = useLessonkit();
   const persistEnabled = config.session?.persistCompoundState !== false;
 
   const initialIndex = useCompoundInitialIndex({
@@ -124,6 +124,7 @@ export const InteractiveBook = forwardRef<CompoundHandle, InteractiveBookProps>(
     compoundId: blockId,
     pageCount: pages.length,
     persistEnabled,
+    storage,
   });
 
   const [index, setIndex] = useState(initialIndex);

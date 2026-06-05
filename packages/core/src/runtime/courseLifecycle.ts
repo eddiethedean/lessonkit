@@ -25,15 +25,18 @@ export function tryEmitCourseStarted(
   deps: CourseLifecycleDeps,
   alreadyEmittedToSink: boolean,
 ): { emitted: boolean; marked: boolean } {
-  let marked = hasCourseStarted(ctx.storage, ctx.sessionId, ctx.courseId);
+  const marked = hasCourseStarted(ctx.storage, ctx.sessionId, ctx.courseId);
   if (alreadyEmittedToSink) {
     return { emitted: true, marked };
   }
   const emitted = deps.emitCourseStartedEvent(ctx);
   if (emitted && !marked) {
-    marked = markCourseStarted(ctx.storage, ctx.sessionId, ctx.courseId);
+    markCourseStarted(ctx.storage, ctx.sessionId, ctx.courseId);
   }
-  return { emitted, marked };
+  return {
+    emitted,
+    marked: hasCourseStarted(ctx.storage, ctx.sessionId, ctx.courseId),
+  };
 }
 
 export function buildCourseStartedTelemetryEvent(ctx: CourseLifecycleContext) {

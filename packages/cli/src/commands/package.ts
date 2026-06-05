@@ -99,7 +99,10 @@ export async function runPackage(opts: PackageOptions): Promise<CliJsonResult> {
     });
   }
 
-  const warnings = result.validation?.issues?.length ? result.validation.issues : undefined;
+  const warnings = result.validation?.issues?.filter((issue) => {
+    const severity = issue.severity?.toLowerCase();
+    return severity !== "error" && severity !== "fatal";
+  });
   if (warnings?.length && !opts.json) {
     for (const issue of warnings) {
       const location = issue.path ?? "course";
