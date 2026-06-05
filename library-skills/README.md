@@ -15,6 +15,14 @@ Agent Skills ([`SKILL.md`](https://agentskills.io)) that teach AI coding assista
 
 ## Install
 
+**Without cloning the monorepo** (requires git):
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/eddiethedean/lessonkit/main/library-skills/install-remote.sh | bash
+```
+
+**From this repo:**
+
 ```bash
 ./library-skills/install.sh --global              # all projects
 ./library-skills/install.sh --project           # this repo

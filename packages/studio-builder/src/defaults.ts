@@ -42,6 +42,151 @@ export function createDefaultBlock(
       return { type: "checklist", id, items: ["Item 1"] };
     case "video":
       return { type: "video", id, src: "", title: "Video" };
+    case "trueFalse":
+      return {
+        type: "trueFalse",
+        id,
+        checkId: deriveId("check", usedIds),
+        question: "True or false?",
+        answer: true,
+      };
+    case "fillInTheBlanks":
+      return {
+        type: "fillInTheBlanks",
+        id,
+        checkId: deriveId("check", usedIds),
+        template: "The *answer* goes here.",
+      };
+    case "markTheWords":
+      return {
+        type: "markTheWords",
+        id,
+        checkId: deriveId("check", usedIds),
+        text: "Select the correct words in this sentence.",
+        correctWords: ["correct"],
+      };
+    case "dragTheWords":
+      return {
+        type: "dragTheWords",
+        id,
+        checkId: deriveId("check", usedIds),
+        template: "Drag *words* into place.",
+        words: ["words"],
+      };
+    case "dragAndDrop":
+      return {
+        type: "dragAndDrop",
+        id,
+        checkId: deriveId("check", usedIds),
+        items: [{ id: "item-1", label: "Item 1" }],
+        targets: [{ id: "target-1", label: "Drop zone", accepts: "item-1" }],
+      };
+    case "page":
+      return {
+        type: "page",
+        id,
+        blockId: deriveId("page", usedIds),
+        title: "Page",
+        blocks: [{ type: "text", id: deriveId("text", usedIds), text: "Page content" }],
+      };
+    case "interactiveBook":
+      return {
+        type: "interactiveBook",
+        id,
+        blockId: deriveId("book", usedIds),
+        title: "Interactive Book",
+        pages: [
+          {
+            type: "page",
+            id: deriveId("page", usedIds),
+            blockId: deriveId("page", usedIds),
+            title: "Chapter 1",
+            blocks: [],
+          },
+        ],
+      };
+    case "assessmentSequence":
+      return {
+        type: "assessmentSequence",
+        id,
+        blockId: deriveId("sequence", usedIds),
+        sequential: true,
+        blocks: [],
+      };
+    case "accordion":
+      return {
+        type: "accordion",
+        id,
+        blockId: deriveId("accordion", usedIds),
+        sections: [
+          {
+            id: "section-1",
+            title: "Section 1",
+            blocks: [{ type: "text", id: deriveId("text", usedIds), text: "Section content" }],
+          },
+        ],
+      };
+    case "dialogCards":
+      return {
+        type: "dialogCards",
+        id,
+        blockId: deriveId("dialog", usedIds),
+        cards: [{ front: "Front", back: "Back" }],
+      };
+    case "flashcards":
+      return {
+        type: "flashcards",
+        id,
+        blockId: deriveId("flashcards", usedIds),
+        cards: [{ front: "Term", back: "Definition" }],
+      };
+    case "imageHotspots":
+      return {
+        type: "imageHotspots",
+        id,
+        blockId: deriveId("hotspots", usedIds),
+        src: "",
+        alt: "",
+        hotspots: [
+          {
+            id: "hotspot-1",
+            label: "Hotspot 1",
+            x: 50,
+            y: 50,
+            blocks: [{ type: "text", id: deriveId("text", usedIds), text: "Hotspot content" }],
+          },
+        ],
+      };
+    case "imageSlider":
+      return {
+        type: "imageSlider",
+        id,
+        blockId: deriveId("slider", usedIds),
+        slides: [{ src: "", alt: "Slide 1" }],
+      };
+    case "findHotspot":
+      return {
+        type: "findHotspot",
+        id,
+        checkId: deriveId("check", usedIds),
+        src: "",
+        alt: "",
+        targets: [{ id: "target-1", label: "Hotspot", x: 50, y: 50 }],
+        correctTargetId: "target-1",
+      };
+    case "findMultipleHotspots":
+      return {
+        type: "findMultipleHotspots",
+        id,
+        checkId: deriveId("check", usedIds),
+        src: "",
+        alt: "",
+        targets: [
+          { id: "target-1", label: "Hotspot 1", x: 30, y: 30 },
+          { id: "target-2", label: "Hotspot 2", x: 70, y: 70 },
+        ],
+        correctTargetIds: ["target-1"],
+      };
     /* v8 ignore start -- catalogTypes guard makes default unreachable */
     default:
       throw new Error(`Unhandled block type: ${type}`);

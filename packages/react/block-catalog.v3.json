@@ -1,0 +1,1504 @@
+{
+  "schemaVersion": 3,
+  "entries": [
+    {
+      "type": "Course",
+      "category": "container",
+      "description": "Top-level course shell; wraps LessonkitProvider and emits course lifecycle telemetry.",
+      "props": [
+        {
+          "name": "title",
+          "type": "string",
+          "required": true,
+          "description": "Course title shown in the h1."
+        },
+        {
+          "name": "courseId",
+          "type": "CourseId",
+          "required": true,
+          "description": "Stable course identifier for telemetry and packaging."
+        },
+        {
+          "name": "config",
+          "type": "Omit<LessonkitConfig, 'courseId'>",
+          "required": false,
+          "description": "Runtime config (tracking, xAPI, session, lxpack bridge). courseId is merged from props."
+        },
+        {
+          "name": "children",
+          "type": "ReactNode",
+          "required": true,
+          "description": "Lessons and course chrome."
+        }
+      ],
+      "requiredIds": [
+        "courseId"
+      ],
+      "a11y": {
+        "element": "section",
+        "ariaLabel": "title prop",
+        "keyboard": "No block-specific keyboard behavior; focus flows to child content.",
+        "notes": "Renders h1 with course title. Wrap with ThemeProvider at app root for theming."
+      },
+      "theming": {
+        "surface": "global-inherit",
+        "stylingNotes": "Inherits --lk-* CSS variables from ThemeProvider on document or scoped host."
+      },
+      "telemetry": {
+        "emits": [
+          "course_started",
+          "course_completed"
+        ]
+      }
+    },
+    {
+      "type": "Lesson",
+      "category": "container",
+      "description": "Lesson container; sets active lesson on mount and completes on unmount.",
+      "props": [
+        {
+          "name": "title",
+          "type": "string",
+          "required": true,
+          "description": "Lesson title shown in the h2."
+        },
+        {
+          "name": "lessonId",
+          "type": "LessonId",
+          "required": true,
+          "description": "Stable lesson identifier for telemetry and packaging."
+        },
+        {
+          "name": "autoCompleteOnUnmount",
+          "type": "boolean",
+          "required": false,
+          "description": "When false, unmount does not emit lesson_completed (default true)."
+        },
+        {
+          "name": "children",
+          "type": "ReactNode",
+          "required": true,
+          "description": "Scenario, Quiz, Reflection, and other blocks."
+        }
+      ],
+      "requiredIds": [
+        "lessonId"
+      ],
+      "parentConstraints": [
+        "Course",
+        "Lesson",
+        "Page",
+        "InteractiveBook",
+        "AssessmentSequence"
+      ],
+      "a11y": {
+        "element": "article",
+        "ariaLabel": "title prop",
+        "keyboard": "No block-specific keyboard behavior; focus flows to child content.",
+        "notes": "Renders h2 with lesson title. Only one Lesson should be mounted as active at a time in typical SPA layouts."
+      },
+      "theming": {
+        "surface": "global-inherit",
+        "stylingNotes": "Inherits --lk-* CSS variables from ThemeProvider."
+      },
+      "telemetry": {
+        "emits": [
+          "lesson_started",
+          "lesson_completed",
+          "lesson_time_on_task"
+        ]
+      }
+    },
+    {
+      "type": "Scenario",
+      "category": "content",
+      "description": "Scenario or narrative content region for branching stories and situational context.",
+      "props": [
+        {
+          "name": "blockId",
+          "type": "BlockId",
+          "required": false,
+          "description": "Optional stable block id for interaction telemetry URNs."
+        },
+        {
+          "name": "children",
+          "type": "ReactNode",
+          "required": true,
+          "description": "Scenario narrative and custom UI."
+        }
+      ],
+      "requiredIds": [],
+      "optionalIds": [
+        "blockId"
+      ],
+      "parentConstraints": [
+        "Lesson",
+        "Page",
+        "InteractiveBook",
+        "AssessmentSequence"
+      ],
+      "a11y": {
+        "element": "section",
+        "ariaLabel": "Scenario",
+        "keyboard": "No block-specific keyboard behavior; custom children may define their own.",
+        "notes": "Use for situational framing. Pair with useTracking() for branching interactions."
+      },
+      "theming": {
+        "surface": "global-inherit",
+        "dataAttributes": [
+          "data-lk-block-id"
+        ],
+        "stylingNotes": "Optional data-lk-block-id when blockId is set. Style via app CSS using --lk-* tokens."
+      },
+      "telemetry": {
+        "emits": [],
+        "manualTracking": "useTracking().track('interaction', { kind, blockId, payload })"
+      }
+    },
+    {
+      "type": "Reflection",
+      "category": "content",
+      "description": "Reflection prompt with a textarea for learner free-text responses.",
+      "props": [
+        {
+          "name": "blockId",
+          "type": "BlockId",
+          "required": false,
+          "description": "Optional stable block id for interaction telemetry URNs."
+        },
+        {
+          "name": "prompt",
+          "type": "string",
+          "required": false,
+          "description": "Reflection question or instruction."
+        },
+        {
+          "name": "hint",
+          "type": "string",
+          "required": false,
+          "description": "Optional hint linked via aria-describedby."
+        },
+        {
+          "name": "value",
+          "type": "string",
+          "required": false,
+          "description": "Controlled textarea value."
+        },
+        {
+          "name": "onChange",
+          "type": "(value: string) => void",
+          "required": false,
+          "description": "Called when the learner edits the textarea."
+        },
+        {
+          "name": "children",
+          "type": "ReactNode",
+          "required": false,
+          "description": "Optional content above the textarea."
+        }
+      ],
+      "requiredIds": [],
+      "optionalIds": [
+        "blockId"
+      ],
+      "parentConstraints": [
+        "Lesson",
+        "Page",
+        "InteractiveBook",
+        "AssessmentSequence"
+      ],
+      "a11y": {
+        "element": "section",
+        "ariaLabel": "Reflection",
+        "keyboard": "Textarea is keyboard-focusable; standard text entry.",
+        "notes": "When prompt is set, textarea uses aria-labelledby; otherwise aria-label='Reflection response'."
+      },
+      "theming": {
+        "surface": "global-inherit",
+        "dataAttributes": [
+          "data-lk-block-id"
+        ],
+        "stylingNotes": "Optional data-lk-block-id when blockId is set. Style textarea via app CSS."
+      },
+      "telemetry": {
+        "emits": [],
+        "requiresActiveLesson": true,
+        "manualTracking": "useTracking().track('interaction', { kind, blockId, payload }) on submit or blur"
+      }
+    },
+    {
+      "type": "Quiz",
+      "aliases": [
+        "KnowledgeCheck"
+      ],
+      "category": "assessment",
+      "description": "Single-question multiple-choice assessment with automatic answer and completion telemetry.",
+      "props": [
+        {
+          "name": "checkId",
+          "type": "CheckId",
+          "required": true,
+          "description": "Stable check identifier for telemetry and LXPack assessments."
+        },
+        {
+          "name": "question",
+          "type": "string",
+          "required": true,
+          "description": "Question text shown above choices."
+        },
+        {
+          "name": "choices",
+          "type": "string[]",
+          "required": true,
+          "description": "Radio button choice labels."
+        },
+        {
+          "name": "answer",
+          "type": "string",
+          "required": true,
+          "description": "Correct choice value (must match one choice)."
+        },
+        {
+          "name": "passingScore",
+          "type": "number",
+          "required": false,
+          "description": "Minimum score required to pass (defaults to maxScore when omitted)."
+        }
+      ],
+      "requiredIds": [
+        "checkId"
+      ],
+      "parentConstraints": [
+        "Lesson",
+        "Page",
+        "InteractiveBook",
+        "AssessmentSequence"
+      ],
+      "a11y": {
+        "element": "section",
+        "ariaLabel": "Quiz",
+        "keyboard": "Radio group navigable with arrow keys; one choice per question.",
+        "liveRegions": "role='status' aria-live='polite' for Correct / Try again feedback.",
+        "notes": "Fieldset with visually hidden legend. KnowledgeCheck is an alias that renders Quiz with identical behavior."
+      },
+      "theming": {
+        "surface": "global-inherit",
+        "dataAttributes": [
+          "data-lk-check-id"
+        ],
+        "stylingNotes": "data-lk-check-id set from checkId. Style labels and feedback via app CSS."
+      },
+      "telemetry": {
+        "emits": [
+          "quiz_answered",
+          "quiz_completed"
+        ],
+        "requiresActiveLesson": true
+      }
+    },
+    {
+      "type": "ProgressTracker",
+      "category": "chrome",
+      "description": "Displays count of completed lessons from runtime progress state.",
+      "props": [
+        {
+          "name": "totalLessons",
+          "type": "number",
+          "required": false,
+          "description": "When set, renders role=progressbar with aria-valuenow/max."
+        }
+      ],
+      "requiredIds": [],
+      "parentConstraints": [
+        "Course",
+        "Lesson",
+        "Page",
+        "InteractiveBook",
+        "AssessmentSequence"
+      ],
+      "a11y": {
+        "element": "aside",
+        "ariaLabel": "Progress",
+        "keyboard": "Presentational; no interactive elements.",
+        "notes": "Shows 'Lessons completed: N' from progress.completedLessonIds."
+      },
+      "theming": {
+        "surface": "global-inherit",
+        "stylingNotes": "Inherits --lk-* CSS variables; style via app CSS."
+      },
+      "telemetry": {
+        "emits": []
+      }
+    },
+    {
+      "type": "TrueFalse",
+      "category": "assessment",
+      "assessmentContract": true,
+      "h5pMachineName": "H5P.TrueFalse",
+      "h5pAlias": "True/False",
+      "description": "Binary true/false question with assessment contract.",
+      "props": [
+        {
+          "name": "checkId",
+          "type": "CheckId",
+          "required": true,
+          "description": "Stable check id."
+        },
+        {
+          "name": "question",
+          "type": "string",
+          "required": true,
+          "description": "Question text."
+        },
+        {
+          "name": "answer",
+          "type": "boolean",
+          "required": true,
+          "description": "Correct answer."
+        },
+        {
+          "name": "enableRetry",
+          "type": "boolean",
+          "required": false,
+          "description": "Allow retry after completion."
+        },
+        {
+          "name": "enableSolutionsButton",
+          "type": "boolean",
+          "required": false,
+          "description": "Show solution control."
+        },
+        {
+          "name": "autoCheck",
+          "type": "boolean",
+          "required": false,
+          "description": "Check answers automatically when possible."
+        },
+        {
+          "name": "passingScore",
+          "type": "number",
+          "required": false,
+          "description": "Minimum score to pass."
+        }
+      ],
+      "requiredIds": [
+        "checkId"
+      ],
+      "parentConstraints": [
+        "Lesson",
+        "AssessmentSequence",
+        "Page",
+        "InteractiveBook"
+      ],
+      "a11y": {
+        "element": "section",
+        "ariaLabel": "True or False",
+        "keyboard": "Radio group with True/False options.",
+        "liveRegions": "role='status' for feedback.",
+        "notes": "H5P True/False equivalent."
+      },
+      "theming": {
+        "surface": "global-inherit",
+        "dataAttributes": [
+          "data-lk-check-id"
+        ],
+        "stylingNotes": "Uses data-lk-check-id."
+      },
+      "telemetry": {
+        "emits": [
+          "assessment_answered",
+          "assessment_completed"
+        ],
+        "requiresActiveLesson": true
+      }
+    },
+    {
+      "type": "FillInTheBlanks",
+      "category": "assessment",
+      "assessmentContract": true,
+      "h5pMachineName": "H5P.Blanks",
+      "h5pAlias": "Fill in the Blanks",
+      "description": "Fill-in-the-blank text with *answer* markers in template.",
+      "props": [
+        {
+          "name": "checkId",
+          "type": "CheckId",
+          "required": true,
+          "description": "Stable check id."
+        },
+        {
+          "name": "template",
+          "type": "string",
+          "required": true,
+          "description": "Text with *blank* markers."
+        },
+        {
+          "name": "blanks",
+          "type": "FillInBlankSpec[]",
+          "required": false,
+          "description": "Explicit blank specs."
+        },
+        {
+          "name": "enableRetry",
+          "type": "boolean",
+          "required": false,
+          "description": "Allow retry after completion."
+        },
+        {
+          "name": "enableSolutionsButton",
+          "type": "boolean",
+          "required": false,
+          "description": "Show solution control."
+        },
+        {
+          "name": "autoCheck",
+          "type": "boolean",
+          "required": false,
+          "description": "Check answers automatically when possible."
+        },
+        {
+          "name": "passingScore",
+          "type": "number",
+          "required": false,
+          "description": "Minimum score to pass."
+        }
+      ],
+      "requiredIds": [
+        "checkId"
+      ],
+      "parentConstraints": [
+        "Lesson",
+        "AssessmentSequence",
+        "Page",
+        "InteractiveBook"
+      ],
+      "a11y": {
+        "element": "section",
+        "ariaLabel": "Fill in the Blanks",
+        "keyboard": "Tab between text inputs.",
+        "notes": "H5P Fill in the Blanks equivalent."
+      },
+      "theming": {
+        "surface": "global-inherit",
+        "dataAttributes": [
+          "data-lk-check-id"
+        ],
+        "stylingNotes": "Uses data-lk-check-id."
+      },
+      "telemetry": {
+        "emits": [
+          "assessment_answered",
+          "assessment_completed"
+        ],
+        "requiresActiveLesson": true
+      }
+    },
+    {
+      "type": "DragAndDrop",
+      "category": "assessment",
+      "assessmentContract": true,
+      "h5pMachineName": "H5P.DragQuestion",
+      "h5pAlias": "Drag and Drop",
+      "description": "Drag items onto labeled targets.",
+      "props": [
+        {
+          "name": "checkId",
+          "type": "CheckId",
+          "required": true,
+          "description": "Stable check id."
+        },
+        {
+          "name": "items",
+          "type": "DragItem[]",
+          "required": true,
+          "description": "Draggable items."
+        },
+        {
+          "name": "targets",
+          "type": "DropTarget[]",
+          "required": true,
+          "description": "Drop targets."
+        },
+        {
+          "name": "enableRetry",
+          "type": "boolean",
+          "required": false,
+          "description": "Allow retry after completion."
+        },
+        {
+          "name": "enableSolutionsButton",
+          "type": "boolean",
+          "required": false,
+          "description": "Show solution control."
+        },
+        {
+          "name": "autoCheck",
+          "type": "boolean",
+          "required": false,
+          "description": "Check answers automatically when possible."
+        },
+        {
+          "name": "passingScore",
+          "type": "number",
+          "required": false,
+          "description": "Minimum score to pass."
+        }
+      ],
+      "requiredIds": [
+        "checkId"
+      ],
+      "parentConstraints": [
+        "Lesson",
+        "AssessmentSequence",
+        "Page",
+        "InteractiveBook"
+      ],
+      "a11y": {
+        "element": "section",
+        "ariaLabel": "Drag and Drop",
+        "keyboard": "Select item then activate target; drag also supported.",
+        "notes": "H5P Drag and Drop equivalent."
+      },
+      "theming": {
+        "surface": "global-inherit",
+        "dataAttributes": [
+          "data-lk-check-id"
+        ],
+        "stylingNotes": "Uses data-lk-check-id."
+      },
+      "telemetry": {
+        "emits": [
+          "assessment_answered",
+          "assessment_completed"
+        ],
+        "requiresActiveLesson": true
+      }
+    },
+    {
+      "type": "DragTheWords",
+      "category": "assessment",
+      "assessmentContract": true,
+      "h5pMachineName": "H5P.DragText",
+      "h5pAlias": "Drag the Words",
+      "description": "Drag words into inline blanks.",
+      "props": [
+        {
+          "name": "checkId",
+          "type": "CheckId",
+          "required": true,
+          "description": "Stable check id."
+        },
+        {
+          "name": "template",
+          "type": "string",
+          "required": true,
+          "description": "Sentence with *blank* zones."
+        },
+        {
+          "name": "words",
+          "type": "string[]",
+          "required": true,
+          "description": "Draggable word bank."
+        },
+        {
+          "name": "enableRetry",
+          "type": "boolean",
+          "required": false,
+          "description": "Allow retry after completion."
+        },
+        {
+          "name": "enableSolutionsButton",
+          "type": "boolean",
+          "required": false,
+          "description": "Show solution control."
+        },
+        {
+          "name": "autoCheck",
+          "type": "boolean",
+          "required": false,
+          "description": "Check answers automatically when possible."
+        },
+        {
+          "name": "passingScore",
+          "type": "number",
+          "required": false,
+          "description": "Minimum score to pass."
+        }
+      ],
+      "requiredIds": [
+        "checkId"
+      ],
+      "parentConstraints": [
+        "Lesson",
+        "AssessmentSequence",
+        "Page",
+        "InteractiveBook"
+      ],
+      "a11y": {
+        "element": "section",
+        "ariaLabel": "Drag the Words",
+        "keyboard": "Select word then activate zone.",
+        "notes": "H5P Drag the Words equivalent."
+      },
+      "theming": {
+        "surface": "global-inherit",
+        "dataAttributes": [
+          "data-lk-check-id"
+        ],
+        "stylingNotes": "Uses data-lk-check-id."
+      },
+      "telemetry": {
+        "emits": [
+          "assessment_answered",
+          "assessment_completed"
+        ],
+        "requiresActiveLesson": true
+      }
+    },
+    {
+      "type": "MarkTheWords",
+      "category": "assessment",
+      "assessmentContract": true,
+      "h5pMachineName": "H5P.MarkTheWords",
+      "h5pAlias": "Mark the Words",
+      "description": "Select correct words in a sentence.",
+      "props": [
+        {
+          "name": "checkId",
+          "type": "CheckId",
+          "required": true,
+          "description": "Stable check id."
+        },
+        {
+          "name": "text",
+          "type": "string",
+          "required": true,
+          "description": "Source text."
+        },
+        {
+          "name": "correctWords",
+          "type": "string[]",
+          "required": true,
+          "description": "Words to mark."
+        },
+        {
+          "name": "enableRetry",
+          "type": "boolean",
+          "required": false,
+          "description": "Allow retry after completion."
+        },
+        {
+          "name": "enableSolutionsButton",
+          "type": "boolean",
+          "required": false,
+          "description": "Show solution control."
+        },
+        {
+          "name": "autoCheck",
+          "type": "boolean",
+          "required": false,
+          "description": "Check answers automatically when possible."
+        },
+        {
+          "name": "passingScore",
+          "type": "number",
+          "required": false,
+          "description": "Minimum score to pass."
+        }
+      ],
+      "requiredIds": [
+        "checkId"
+      ],
+      "parentConstraints": [
+        "Lesson",
+        "AssessmentSequence",
+        "Page",
+        "InteractiveBook"
+      ],
+      "a11y": {
+        "element": "section",
+        "ariaLabel": "Mark the Words",
+        "keyboard": "Toggle words with buttons.",
+        "notes": "H5P Mark the Words equivalent."
+      },
+      "theming": {
+        "surface": "global-inherit",
+        "dataAttributes": [
+          "data-lk-check-id"
+        ],
+        "stylingNotes": "Uses data-lk-check-id."
+      },
+      "telemetry": {
+        "emits": [
+          "assessment_answered",
+          "assessment_completed"
+        ],
+        "requiresActiveLesson": true
+      }
+    },
+    {
+      "type": "AssessmentSequence",
+      "category": "container",
+      "h5pMachineName": "H5P.QuestionSet",
+      "h5pAlias": "Question Set",
+      "description": "Ordered sequence of contract-compliant assessments.",
+      "props": [
+        {
+          "name": "children",
+          "type": "ReactNode",
+          "required": true,
+          "description": "Assessment blocks."
+        },
+        {
+          "name": "sequential",
+          "type": "boolean",
+          "required": false,
+          "description": "One question at a time."
+        },
+        {
+          "name": "enableRetry",
+          "type": "boolean",
+          "required": false,
+          "description": "Allow retry after completion."
+        },
+        {
+          "name": "enableSolutionsButton",
+          "type": "boolean",
+          "required": false,
+          "description": "Show solution control."
+        },
+        {
+          "name": "autoCheck",
+          "type": "boolean",
+          "required": false,
+          "description": "Check answers automatically when possible."
+        }
+      ],
+      "requiredIds": [],
+      "parentConstraints": [
+        "Lesson",
+        "Page",
+        "InteractiveBook",
+        "AssessmentSequence"
+      ],
+      "a11y": {
+        "element": "section",
+        "ariaLabel": "Assessment sequence",
+        "keyboard": "Previous/Next navigation between steps.",
+        "notes": "H5P Question Set equivalent."
+      },
+      "theming": {
+        "surface": "global-inherit",
+        "stylingNotes": "Container for assessments."
+      },
+      "telemetry": {
+        "emits": [],
+        "manualTracking": "Child assessments emit assessment_* events."
+      },
+      "compoundContract": true,
+      "allowedChildTypes": [
+        "TrueFalse",
+        "FillInTheBlanks",
+        "DragAndDrop",
+        "DragTheWords",
+        "MarkTheWords",
+        "Quiz",
+        "KnowledgeCheck",
+        "FindHotspot",
+        "FindMultipleHotspots"
+      ],
+      "maxNestingDepth": 1
+    },
+    {
+      "type": "Text",
+      "category": "content",
+      "description": "Paragraph text content.",
+      "props": [
+        {
+          "name": "blockId",
+          "type": "BlockId",
+          "required": false,
+          "description": "Stable block id."
+        },
+        {
+          "name": "children",
+          "type": "ReactNode",
+          "required": true,
+          "description": "Text body."
+        }
+      ],
+      "requiredIds": [],
+      "parentConstraints": [
+        "Lesson",
+        "Page",
+        "InteractiveBook",
+        "AssessmentSequence"
+      ],
+      "a11y": {
+        "element": "p",
+        "ariaLabel": "Text",
+        "keyboard": "N/A",
+        "notes": "Semantic paragraph."
+      },
+      "theming": {
+        "surface": "global-inherit",
+        "stylingNotes": "Inherits theme."
+      },
+      "telemetry": {
+        "emits": []
+      }
+    },
+    {
+      "type": "Heading",
+      "category": "content",
+      "description": "Heading levels 1–3.",
+      "props": [
+        {
+          "name": "blockId",
+          "type": "BlockId",
+          "required": false,
+          "description": "Stable block id."
+        },
+        {
+          "name": "level",
+          "type": "1 | 2 | 3",
+          "required": true,
+          "description": "Heading level."
+        },
+        {
+          "name": "children",
+          "type": "ReactNode",
+          "required": true,
+          "description": "Heading text."
+        }
+      ],
+      "requiredIds": [],
+      "parentConstraints": [
+        "Lesson",
+        "Page",
+        "InteractiveBook",
+        "AssessmentSequence"
+      ],
+      "a11y": {
+        "element": "h1-h3",
+        "ariaLabel": "Heading",
+        "keyboard": "N/A",
+        "notes": "Use one level per outline."
+      },
+      "theming": {
+        "surface": "global-inherit",
+        "stylingNotes": "Inherits theme."
+      },
+      "telemetry": {
+        "emits": []
+      }
+    },
+    {
+      "type": "Image",
+      "category": "content",
+      "description": "Image with required alt text.",
+      "props": [
+        {
+          "name": "blockId",
+          "type": "BlockId",
+          "required": false,
+          "description": "Stable block id."
+        },
+        {
+          "name": "src",
+          "type": "string",
+          "required": true,
+          "description": "Image URL."
+        },
+        {
+          "name": "alt",
+          "type": "string",
+          "required": true,
+          "description": "Alt text."
+        }
+      ],
+      "requiredIds": [],
+      "parentConstraints": [
+        "Lesson",
+        "Page",
+        "InteractiveBook",
+        "AssessmentSequence"
+      ],
+      "a11y": {
+        "element": "img",
+        "ariaLabel": "Image",
+        "keyboard": "N/A",
+        "notes": "Requires alt."
+      },
+      "theming": {
+        "surface": "global-inherit",
+        "stylingNotes": "Responsive max-width."
+      },
+      "telemetry": {
+        "emits": []
+      }
+    },
+    {
+      "type": "Page",
+      "category": "container",
+      "compoundContract": true,
+      "h5pMachineName": "H5P.Column",
+      "h5pAlias": "Column",
+      "description": "Column layout container (H5P Column / Page).",
+      "allowedChildTypes": [
+        "Text",
+        "Heading",
+        "Image",
+        "Scenario",
+        "Reflection",
+        "Quiz",
+        "KnowledgeCheck",
+        "TrueFalse",
+        "FillInTheBlanks",
+        "DragAndDrop",
+        "DragTheWords",
+        "MarkTheWords",
+        "Accordion",
+        "DialogCards",
+        "Flashcards",
+        "ImageHotspots",
+        "FindHotspot",
+        "FindMultipleHotspots",
+        "ImageSlider",
+        "ProgressTracker"
+      ],
+      "maxNestingDepth": 1,
+      "props": [
+        {
+          "name": "blockId",
+          "type": "BlockId",
+          "required": true,
+          "description": "Stable block id."
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "required": false,
+          "description": "Page title."
+        },
+        {
+          "name": "children",
+          "type": "ReactNode",
+          "required": true,
+          "description": "Page content."
+        }
+      ],
+      "requiredIds": [],
+      "optionalIds": [
+        "blockId"
+      ],
+      "parentConstraints": [
+        "Lesson",
+        "InteractiveBook"
+      ],
+      "a11y": {
+        "element": "section",
+        "ariaLabel": "Page",
+        "keyboard": "N/A",
+        "notes": "H5P Column equivalent."
+      },
+      "theming": {
+        "surface": "global-inherit",
+        "stylingNotes": "Container."
+      },
+      "telemetry": {
+        "emits": [
+          "compound_page_viewed"
+        ],
+        "requiresActiveLesson": true
+      }
+    },
+    {
+      "type": "InteractiveBook",
+      "category": "container",
+      "compoundContract": true,
+      "h5pMachineName": "H5P.InteractiveBook",
+      "h5pAlias": "Interactive Book",
+      "description": "Multi-page book with chapter navigation.",
+      "allowedChildTypes": [
+        "Page"
+      ],
+      "maxNestingDepth": 2,
+      "props": [
+        {
+          "name": "blockId",
+          "type": "BlockId",
+          "required": true,
+          "description": "Stable block id."
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "required": true,
+          "description": "Book title."
+        },
+        {
+          "name": "showBookScore",
+          "type": "boolean",
+          "required": false,
+          "description": "Show aggregate score."
+        },
+        {
+          "name": "children",
+          "type": "Page[]",
+          "required": true,
+          "description": "Page chapters."
+        }
+      ],
+      "requiredIds": [
+        "blockId"
+      ],
+      "parentConstraints": [
+        "Lesson"
+      ],
+      "a11y": {
+        "element": "section",
+        "ariaLabel": "Interactive book",
+        "keyboard": "Previous/Next chapter navigation.",
+        "notes": "H5P Interactive Book equivalent."
+      },
+      "theming": {
+        "surface": "global-inherit",
+        "stylingNotes": "Book chrome."
+      },
+      "telemetry": {
+        "emits": [
+          "book_page_viewed"
+        ],
+        "requiresActiveLesson": true
+      }
+    },
+    {
+      "type": "Accordion",
+      "category": "content",
+      "h5pMachineName": "H5P.Accordion",
+      "h5pAlias": "Accordion",
+      "description": "Expandable sections.",
+      "props": [
+        {
+          "name": "blockId",
+          "type": "BlockId",
+          "required": true,
+          "description": "Stable block id."
+        },
+        {
+          "name": "sections",
+          "type": "AccordionSection[]",
+          "required": true,
+          "description": "Sections."
+        }
+      ],
+      "requiredIds": [
+        "blockId"
+      ],
+      "parentConstraints": [
+        "Lesson",
+        "Page",
+        "InteractiveBook",
+        "AssessmentSequence"
+      ],
+      "a11y": {
+        "element": "section",
+        "ariaLabel": "Accordion",
+        "keyboard": "Button toggles sections.",
+        "notes": "No nested accordions."
+      },
+      "theming": {
+        "surface": "global-inherit",
+        "stylingNotes": "Disclosure pattern."
+      },
+      "telemetry": {
+        "emits": [
+          "accordion_section_toggled"
+        ]
+      }
+    },
+    {
+      "type": "DialogCards",
+      "category": "content",
+      "h5pMachineName": "H5P.Dialogcards",
+      "h5pAlias": "Dialog Cards",
+      "description": "Flip cards with front/back text.",
+      "props": [
+        {
+          "name": "blockId",
+          "type": "BlockId",
+          "required": true,
+          "description": "Stable block id."
+        },
+        {
+          "name": "cards",
+          "type": "DialogCard[]",
+          "required": true,
+          "description": "Cards."
+        }
+      ],
+      "requiredIds": [
+        "blockId"
+      ],
+      "parentConstraints": [
+        "Lesson",
+        "Page",
+        "InteractiveBook",
+        "AssessmentSequence"
+      ],
+      "a11y": {
+        "element": "section",
+        "ariaLabel": "Dialog cards",
+        "keyboard": "Flip and navigate cards.",
+        "notes": "Reduced motion safe."
+      },
+      "theming": {
+        "surface": "global-inherit",
+        "stylingNotes": "Card flip."
+      },
+      "telemetry": {
+        "emits": []
+      }
+    },
+    {
+      "type": "Flashcards",
+      "category": "content",
+      "h5pMachineName": "H5P.Flashcards",
+      "h5pAlias": "Flashcards",
+      "description": "Study flashcards with optional self-score.",
+      "props": [
+        {
+          "name": "blockId",
+          "type": "BlockId",
+          "required": true,
+          "description": "Stable block id."
+        },
+        {
+          "name": "cards",
+          "type": "Flashcard[]",
+          "required": true,
+          "description": "Cards."
+        },
+        {
+          "name": "selfScore",
+          "type": "boolean",
+          "required": false,
+          "description": "Self-score mode."
+        }
+      ],
+      "requiredIds": [
+        "blockId"
+      ],
+      "parentConstraints": [
+        "Lesson",
+        "Page",
+        "InteractiveBook",
+        "AssessmentSequence"
+      ],
+      "a11y": {
+        "element": "section",
+        "ariaLabel": "Flashcards",
+        "keyboard": "Flip and next.",
+        "notes": "Not LMS-scored by default."
+      },
+      "theming": {
+        "surface": "global-inherit",
+        "stylingNotes": "Study mode."
+      },
+      "telemetry": {
+        "emits": [
+          "flashcard_flipped"
+        ]
+      }
+    },
+    {
+      "type": "ImageHotspots",
+      "category": "content",
+      "h5pMachineName": "H5P.ImageHotspots",
+      "h5pAlias": "Image Hotspots",
+      "description": "Image with clickable hotspot popovers.",
+      "props": [
+        {
+          "name": "blockId",
+          "type": "BlockId",
+          "required": true,
+          "description": "Stable block id."
+        },
+        {
+          "name": "src",
+          "type": "string",
+          "required": true,
+          "description": "Image URL."
+        },
+        {
+          "name": "alt",
+          "type": "string",
+          "required": true,
+          "description": "Alt text."
+        },
+        {
+          "name": "hotspots",
+          "type": "HotspotSpec[]",
+          "required": true,
+          "description": "Hotspots."
+        }
+      ],
+      "requiredIds": [
+        "blockId"
+      ],
+      "parentConstraints": [
+        "Lesson",
+        "Page",
+        "InteractiveBook",
+        "AssessmentSequence"
+      ],
+      "a11y": {
+        "element": "section",
+        "ariaLabel": "Image hotspots",
+        "keyboard": "Buttons on image.",
+        "notes": "Popover dialog."
+      },
+      "theming": {
+        "surface": "global-inherit",
+        "stylingNotes": "Positioned hotspots."
+      },
+      "telemetry": {
+        "emits": [
+          "hotspot_opened"
+        ]
+      }
+    },
+    {
+      "type": "ImageSlider",
+      "category": "content",
+      "h5pMachineName": "H5P.ImageSlider",
+      "h5pAlias": "Image Slider",
+      "description": "Carousel of images.",
+      "props": [
+        {
+          "name": "blockId",
+          "type": "BlockId",
+          "required": true,
+          "description": "Stable block id."
+        },
+        {
+          "name": "slides",
+          "type": "ImageSlide[]",
+          "required": true,
+          "description": "Slides."
+        }
+      ],
+      "requiredIds": [
+        "blockId"
+      ],
+      "parentConstraints": [
+        "Lesson",
+        "Page",
+        "InteractiveBook",
+        "AssessmentSequence"
+      ],
+      "a11y": {
+        "element": "section",
+        "ariaLabel": "Image slider",
+        "keyboard": "Previous/next slide.",
+        "notes": "Carousel."
+      },
+      "theming": {
+        "surface": "global-inherit",
+        "stylingNotes": "Slider."
+      },
+      "telemetry": {
+        "emits": [
+          "image_slider_changed"
+        ]
+      }
+    },
+    {
+      "type": "FindHotspot",
+      "category": "assessment",
+      "assessmentContract": true,
+      "h5pMachineName": "H5P.ImageHotspotQuestion",
+      "h5pAlias": "Find the Hotspot",
+      "description": "Select the correct region on an image.",
+      "props": [
+        {
+          "name": "checkId",
+          "type": "CheckId",
+          "required": true,
+          "description": "Stable check id."
+        },
+        {
+          "name": "src",
+          "type": "string",
+          "required": true,
+          "description": "Image URL."
+        },
+        {
+          "name": "alt",
+          "type": "string",
+          "required": true,
+          "description": "Alt text."
+        },
+        {
+          "name": "targets",
+          "type": "HotspotTarget[]",
+          "required": true,
+          "description": "Targets."
+        },
+        {
+          "name": "correctTargetId",
+          "type": "string",
+          "required": true,
+          "description": "Correct target id."
+        },
+        {
+          "name": "enableRetry",
+          "type": "boolean",
+          "required": false,
+          "description": "Allow retry after completion."
+        },
+        {
+          "name": "enableSolutionsButton",
+          "type": "boolean",
+          "required": false,
+          "description": "Show solution control."
+        },
+        {
+          "name": "autoCheck",
+          "type": "boolean",
+          "required": false,
+          "description": "Check answers automatically when possible."
+        },
+        {
+          "name": "passingScore",
+          "type": "number",
+          "required": false,
+          "description": "Minimum score to pass."
+        }
+      ],
+      "requiredIds": [
+        "checkId"
+      ],
+      "parentConstraints": [
+        "Lesson",
+        "Page",
+        "InteractiveBook",
+        "AssessmentSequence"
+      ],
+      "a11y": {
+        "element": "section",
+        "ariaLabel": "Find the hotspot",
+        "keyboard": "Select target buttons.",
+        "notes": "Scored."
+      },
+      "theming": {
+        "surface": "global-inherit",
+        "dataAttributes": [
+          "data-lk-check-id"
+        ],
+        "stylingNotes": "Uses data-lk-check-id."
+      },
+      "telemetry": {
+        "emits": [
+          "assessment_answered",
+          "assessment_completed"
+        ],
+        "requiresActiveLesson": true
+      }
+    },
+    {
+      "type": "FindMultipleHotspots",
+      "category": "assessment",
+      "assessmentContract": true,
+      "h5pMachineName": "H5P.ImageMultipleHotspotQuestion",
+      "h5pAlias": "Find Multiple Hotspots",
+      "description": "Select all correct regions on an image.",
+      "props": [
+        {
+          "name": "checkId",
+          "type": "CheckId",
+          "required": true,
+          "description": "Stable check id."
+        },
+        {
+          "name": "src",
+          "type": "string",
+          "required": true,
+          "description": "Image URL."
+        },
+        {
+          "name": "alt",
+          "type": "string",
+          "required": true,
+          "description": "Alt text."
+        },
+        {
+          "name": "targets",
+          "type": "HotspotTarget[]",
+          "required": true,
+          "description": "Targets."
+        },
+        {
+          "name": "correctTargetIds",
+          "type": "string[]",
+          "required": true,
+          "description": "Correct target ids."
+        },
+        {
+          "name": "enableRetry",
+          "type": "boolean",
+          "required": false,
+          "description": "Allow retry after completion."
+        },
+        {
+          "name": "enableSolutionsButton",
+          "type": "boolean",
+          "required": false,
+          "description": "Show solution control."
+        },
+        {
+          "name": "autoCheck",
+          "type": "boolean",
+          "required": false,
+          "description": "Check answers automatically when possible."
+        },
+        {
+          "name": "passingScore",
+          "type": "number",
+          "required": false,
+          "description": "Minimum score to pass."
+        }
+      ],
+      "requiredIds": [
+        "checkId"
+      ],
+      "parentConstraints": [
+        "Lesson",
+        "Page",
+        "InteractiveBook",
+        "AssessmentSequence"
+      ],
+      "a11y": {
+        "element": "section",
+        "ariaLabel": "Find multiple hotspots",
+        "keyboard": "Toggle targets.",
+        "notes": "Scored."
+      },
+      "theming": {
+        "surface": "global-inherit",
+        "dataAttributes": [
+          "data-lk-check-id"
+        ],
+        "stylingNotes": "Uses data-lk-check-id."
+      },
+      "telemetry": {
+        "emits": [
+          "assessment_answered",
+          "assessment_completed"
+        ],
+        "requiresActiveLesson": true
+      }
+    }
+  ]
+}

@@ -6,7 +6,7 @@ description: >-
   fixing breaking changes after @lessonkit/* 1.0.0.
 license: Apache-2.0
 metadata:
-  lessonkit-version: "1.1.0"
+  lessonkit-version: "1.2.0"
 ---
 
 # LessonKit 0.9.x → 1.0 migration
@@ -14,9 +14,9 @@ metadata:
 ## Dependency pins
 
 ```json
-"@lessonkit/react": "^1.1.0",
-"@lessonkit/core": "^1.1.0",
-"@lessonkit/cli": "^1.1.0"
+"@lessonkit/react": "^1.2.0",
+"@lessonkit/core": "^1.2.0",
+"@lessonkit/cli": "^1.2.0"
 ```
 
 Run `lessonkit build` and fix TypeScript errors before packaging.

@@ -285,6 +285,28 @@ describe("@lessonkit/xapi", () => {
     expect(transport).toHaveBeenCalledTimes(1);
   });
 
+  it("drops oldest statements when queue exceeds maxSize and calls onCap", () => {
+    const caps: number[] = [];
+    const depths: number[] = [];
+    const queue = createInMemoryXAPIQueue({
+      maxSize: 2,
+      onCap: () => caps.push(1),
+      onDepth: (n) => depths.push(n),
+    });
+    const stmt = (id: string): XAPIStatement => ({
+      id,
+      timestamp: "t",
+      verb: "http://adlnet.gov/expapi/verbs/experienced",
+      object: { id: "o" },
+    });
+    queue.enqueue(stmt("1"));
+    queue.enqueue(stmt("2"));
+    queue.enqueue(stmt("3"));
+    expect(queue.size()).toBe(2);
+    expect(caps).toHaveLength(1);
+    expect(depths.at(-1)).toBe(2);
+  });
+
   it("coalesces concurrent flush calls so each statement is sent once", async () => {
     const queue = createInMemoryXAPIQueue();
     queue.enqueue({ id: "1", timestamp: "t", verb: "http://adlnet.gov/expapi/verbs/experienced", object: { id: "o1" } });

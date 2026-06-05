@@ -1,0 +1,110 @@
+{
+  "schemaVersion": 1,
+  "name": "framework-11-showcase",
+  "course": {
+    "courseId": "framework-11-showcase",
+    "title": "Incident Response — LessonKit 1.1 Showcase",
+    "version": "1.1.0",
+    "layout": "single-spa",
+    "spaLessonId": "shift-briefing",
+    "lessons": [{ "id": "shift-briefing", "title": "Shift briefing" }],
+    "assessments": [
+      {
+        "checkId": "briefing-quiz",
+        "question": "What is the first step when you suspect credential theft?",
+        "choices": ["Reset your password silently", "Report to the SOC hotline"],
+        "answer": "Report to the SOC hotline",
+        "passingScore": 1
+      },
+      {
+        "checkId": "verify-kc",
+        "question": "Which channel is approved for PII discussions?",
+        "choices": ["Public Slack", "Encrypted ticket queue"],
+        "answer": "Encrypted ticket queue",
+        "passingScore": 1
+      },
+      {
+        "kind": "trueFalse",
+        "checkId": "signal-tf",
+        "question": "You may ignore low-severity alerts overnight without logging them.",
+        "answer": false,
+        "passingScore": 1
+      },
+      {
+        "checkId": "token-mtw",
+        "question": "Which word indicates regulated data in the sentence?",
+        "choices": ["customer", "credentials", "calendar"],
+        "answer": "credentials",
+        "passingScore": 1
+      },
+      {
+        "kind": "fillInBlanks",
+        "checkId": "escalate-fib",
+        "question": "Complete the escalation phrase.",
+        "template": "Page the on-call lead via the *hotline*.",
+        "passingScore": 1
+      },
+      {
+        "checkId": "runbook-dtw",
+        "question": "Which verb completes the runbook step?",
+        "choices": ["Isolate", "Ignore", "Publish"],
+        "answer": "Isolate",
+        "passingScore": 1
+      },
+      {
+        "checkId": "tier-dad",
+        "question": "Where does a malware sample belong?",
+        "choices": ["Sandbox vault", "Email inbox"],
+        "answer": "Sandbox vault",
+        "passingScore": 1
+      },
+      {
+        "kind": "trueFalse",
+        "checkId": "cert-tf",
+        "question": "Shared admin accounts speed up incident response.",
+        "answer": false,
+        "passingScore": 1
+      },
+      {
+        "kind": "fillInBlanks",
+        "checkId": "cert-fib",
+        "question": "Complete the containment phrase.",
+        "template": "Revoke sessions on the *compromised* host.",
+        "passingScore": 1
+      },
+      {
+        "checkId": "cert-mtw",
+        "question": "Mark the regulated token.",
+        "choices": ["session", "credentials", "keyboard"],
+        "answer": "credentials",
+        "passingScore": 1
+      },
+      {
+        "checkId": "cert-dtw",
+        "question": "Runbook verb for step one.",
+        "choices": ["Isolate", "Delete", "Share"],
+        "answer": "Isolate",
+        "passingScore": 1
+      },
+      {
+        "checkId": "cert-dad",
+        "question": "Route the artifact correctly.",
+        "choices": ["Sandbox vault", "Desktop folder"],
+        "answer": "Sandbox vault",
+        "passingScore": 1
+      }
+    ],
+    "theme": { "preset": "brand" },
+    "tracking": {
+      "completion": { "threshold": 1 },
+      "xapi": {
+        "activityIri": "https://lessonkit.example/courses/framework-11-showcase"
+      }
+    }
+  },
+  "paths": {
+    "spaDistDir": "dist",
+    "lxpackOutDir": ".lxpack/course",
+    "outputBaseDir": ".lxpack/out"
+  }
+}

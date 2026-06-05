@@ -1,22 +1,20 @@
 import React, { useEffect, useId, useMemo, useRef, useState } from "react";
 import type { ChangeEvent } from "react";
 import { visuallyHiddenStyle } from "@lessonkit/accessibility";
-import type { AssessmentScoreResult, BlockId, CourseId, LessonId } from "@lessonkit/core";
+import type { BlockId, CourseId, LessonId } from "@lessonkit/core";
 import type { McqAssessmentDescriptor } from "@lessonkit/lxpack";
-import { meetsPassingThreshold } from "./assessment/scoring";
 import { LessonkitProvider, type LessonkitConfig } from "./context";
-import { useCompletion, useLessonkit, useQuizState } from "./hooks";
-import { LessonContext, useEnclosingLessonId } from "./lessonContext";
+import { useCompletion, useLessonkit } from "./hooks";
+import { LessonContext } from "./lessonContext";
 import { getLessonMountCount, registerLessonMount } from "./runtime/lessonMountRegistry";
-import { buildPluginContext } from "./runtime/plugins";
-import { isDevEnvironment, normalizeComponentId } from "./runtime/validateComponentId";
+import { normalizeComponentId } from "./runtime/validateComponentId";
 
-let warnedQuizOutsideLesson = false;
-
-/** @internal Reset module warnings between tests. */
-export function resetQuizWarningsForTests(): void {
-  warnedQuizOutsideLesson = false;
-}
+export {
+  KnowledgeCheck,
+  Quiz,
+  resetQuizWarningsForTests,
+  type QuizProps,
+} from "./components/Quiz";
 
 export type CourseProps = {
   title: string;
@@ -46,8 +44,6 @@ export type ReflectionProps = {
   onChange?: (value: string) => void;
   children?: React.ReactNode;
 };
-
-export type QuizProps = McqAssessmentDescriptor;
 
 export type KnowledgeCheckProps = McqAssessmentDescriptor;
 
@@ -165,146 +161,6 @@ export function Reflection(props: ReflectionProps) {
         aria-describedby={props.hint ? hintId : undefined}
         aria-label={props.prompt ? undefined : "Reflection response"}
       />
-    </section>
-  );
-}
-
-export function KnowledgeCheck(props: KnowledgeCheckProps) {
-  return (
-    <Quiz
-      checkId={props.checkId}
-      question={props.question}
-      choices={props.choices}
-      answer={props.answer}
-      passingScore={props.passingScore}
-    />
-  );
-}
-
-export function Quiz(props: QuizProps) {
-  const enclosingLessonId = useEnclosingLessonId();
-  const missingLesson = enclosingLessonId === undefined;
-
-  useEffect(() => {
-    if (!missingLesson || isDevEnvironment()) return;
-    /* v8 ignore start -- warnedQuizOutsideLesson gate only runs once per module load */
-    if (!warnedQuizOutsideLesson) {
-      warnedQuizOutsideLesson = true;
-      console.error(
-        "[lessonkit] <Quiz> must be wrapped in <Lesson>; quiz telemetry will not be emitted.",
-      );
-    }
-    /* v8 ignore stop */
-  }, [missingLesson]);
-
-  if (missingLesson && isDevEnvironment()) {
-    throw new Error("[lessonkit] <Quiz> must be wrapped in <Lesson>");
-  }
-
-  if (missingLesson) {
-    return (
-      <section role="alert" aria-label="Quiz configuration error" data-lk-check-id={props.checkId}>
-        <p>Quiz must be placed inside a Lesson.</p>
-      </section>
-    );
-  }
-
-  return <QuizInner {...props} enclosingLessonId={enclosingLessonId} />;
-}
-
-function QuizInner(props: QuizProps & { enclosingLessonId: LessonId }) {
-  const { enclosingLessonId } = props;
-  const checkId = useMemo(() => normalizeComponentId(props.checkId, "checkId"), [props.checkId]);
-
-  const quiz = useQuizState(enclosingLessonId);
-  const { plugins, config, session } = useLessonkit();
-  const [selected, setSelected] = useState<string | null>(null);
-  const [selectionCorrect, setSelectionCorrect] = useState<boolean | null>(null);
-  const [quizPassed, setQuizPassed] = useState(false);
-  const completedRef = useRef(false);
-  const questionId = useId();
-  const choicesKey = props.choices.join("\0");
-
-  useEffect(() => {
-    completedRef.current = false;
-    setQuizPassed(false);
-    setSelected(null);
-    setSelectionCorrect(null);
-  }, [checkId, props.answer, props.question, config.courseId, enclosingLessonId, choicesKey]);
-
-  const isChoiceCorrect = (choice: string, custom: AssessmentScoreResult | null): boolean => {
-    if (!custom) return choice === props.answer;
-    if (custom.passed !== undefined) return custom.passed;
-    if (custom.maxScore != null && custom.maxScore > 0 && custom.score != null) {
-      return meetsPassingThreshold(custom.score, custom.maxScore, props.passingScore);
-    }
-    return choice === props.answer;
-  };
-
-  const passed = quizPassed;
-
-  return (
-    <section aria-label="Quiz" data-lk-check-id={checkId}>
-      <p id={questionId}>{props.question}</p>
-      <fieldset aria-labelledby={questionId}>
-        <legend style={visuallyHiddenStyle}>Quiz choices</legend>
-        {props.choices.map((c, i) => (
-          <label key={`${questionId}-${i}`} style={{ display: "block" }}>
-            <input
-              type="radio"
-              name={questionId}
-              value={c}
-              checked={selected === c}
-              disabled={passed}
-              aria-invalid={selected === c && selectionCorrect === false ? true : undefined}
-              onChange={() => {
-                if (passed) return;
-                setSelected(c);
-                const pluginCtx = buildPluginContext({
-                  courseId: config.courseId,
-                  sessionId: session.sessionId,
-                  attemptId: session.attemptId,
-                  user: session.user,
-                });
-                const custom =
-                  plugins?.scoreAssessment(
-                    {
-                      checkId,
-                      lessonId: enclosingLessonId,
-                      response: c,
-                    },
-                    pluginCtx,
-                  ) ?? null;
-                const correct = isChoiceCorrect(c, custom);
-                setSelectionCorrect(correct);
-                quiz.answer({
-                  checkId,
-                  question: props.question,
-                  choice: c,
-                  correct,
-                });
-                if (correct && !completedRef.current) {
-                  completedRef.current = true;
-                  setQuizPassed(true);
-                  const maxScore = custom?.maxScore ?? 1;
-                  quiz.complete({
-                    checkId,
-                    score: custom?.score ?? maxScore,
-                    maxScore,
-                    passingScore: props.passingScore ?? maxScore,
-                  });
-                }
-              }}
-            />
-            {c}
-          </label>
-        ))}
-      </fieldset>
-      {selected && selectionCorrect !== null ? (
-        <p role="status" aria-live="polite">
-          {selectionCorrect ? "Correct" : "Try again"}
-        </p>
-      ) : null}
     </section>
   );
 }

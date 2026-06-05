@@ -1,0 +1,94 @@
+# Contributing to LessonKit
+
+Thank you for helping improve LessonKit. This file is the GitHub entry point for contributors; the full monorepo guide lives on Read the Docs.
+
+**Full guide:** [Contributing to the monorepo](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/contributing-to-the-monorepo.html)
+
+## Code of conduct
+
+We follow the [Contributor Covenant](CODE_OF_CONDUCT.md). Be respectful and constructive in issues and pull requests.
+
+## Before you open a PR
+
+1. Fork the repository and create a branch from `main`.
+2. Keep each PR focused on one logical change (feature, fix, or docs update).
+3. Search [existing issues](https://github.com/eddiethedean/lessonkit/issues) to avoid duplicate work.
+
+## Good first contributions
+
+Look for issues labeled **`good first issue`** or **`help wanted`**. Starter ideas (no issue required—comment on an existing thread first): [Good first contributions](https://lessonkit.readthedocs.io/en/latest/project/good-first-contributions.html).
+
+Maintainers: create those labels in GitHub (**Settings → Labels**) if they are not present yet.
+
+## Development setup
+
+```bash
+git clone https://github.com/eddiethedean/lessonkit.git
+cd lessonkit
+npm ci
+npm run build
+npm test
+```
+
+`npm test` runs `pretest` → `build:packages` first so workspace `@lessonkit/*` dist matches source.
+
+### Faster loops
+
+| Change type | Usually enough |
+| --- | --- |
+| `docs/` only (Markdown, Sphinx) | `cd docs && pip install -r requirements.txt && sphinx-build -W -b html . _build/html` |
+| Single package you edited | `npm run build -w @lessonkit/react` then `npm test -w @lessonkit/react` |
+| Examples after package API change | `npm run build:packages` then the example workspace `dev` / `test` |
+
+Skip the full monorepo `npm run build` when your PR touches only documentation or one workspace.
+
+## Node.js versions
+
+| Task | Node.js |
+| --- | --- |
+| Day-to-day dev, build, packaging smoke | **18+** |
+| Playwright e2e (`npm run test:e2e`) | **20+** |
+
+After `npm ci`, install Playwright once for e2e:
+
+```bash
+npm exec -w @lessonkit/e2e -- playwright install --with-deps chromium
+```
+
+See the [E2E section](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/contributing-to-the-monorepo.html#e2e-and-conformance) in the full guide.
+
+## Lockfile
+
+If you add or change a workspace in the root `package.json`, run `npm install` and commit the updated `package-lock.json`. CI expects a consistent lockfile.
+
+## What to run for your change
+
+| Area changed | Suggested checks |
+| --- | --- |
+| `packages/react`, `packages/core`, examples | `npm test`, often `npm run test:e2e` |
+| `packages/cli`, `packages/lxpack`, templates | `npm run test:integration` |
+| `docs/` (Sphinx) | `cd docs && pip install -r requirements.txt && sphinx-build -W -b html . _build/html` (or rely on CI `docs` job) |
+| Studio packages / `apps/studio-web` | Package tests + Studio smoke as noted in [RELEASING.md](RELEASING.md) when relevant |
+
+## Pull request expectations
+
+- Tests and lint/typecheck pass locally when feasible (`npm test`, `npm run lint`, `npm run typecheck`).
+- Update user-facing docs if behavior or public API changes (README, `docs/`, or package READMEs).
+- **CHANGELOG:** add an entry under **Unreleased** when the change is user-facing (npm API, CLI flags, packaging behavior, or docs that correct wrong guidance). Skip changelog lines for typos, internal refactors, or test-only changes. Maintainers may fold entries at release time; you do not need Changesets unless asked.
+- Do not commit secrets (`.env`, API keys, credentials).
+
+## Releases
+
+npm publish is **tag-driven** ([RELEASING.md](RELEASING.md)). Casual contributors do not need to cut releases or manage Changesets.
+
+## Security
+
+**Do not open a public issue for security vulnerabilities.**
+
+Use [GitHub private vulnerability reporting](https://github.com/eddiethedean/lessonkit/security/advisories/new) or follow [SECURITY.md](SECURITY.md).
+
+## Getting help
+
+- **Bugs and features:** use the [issue templates](https://github.com/eddiethedean/lessonkit/issues/new/choose).
+- **Documentation:** [lessonkit.readthedocs.io](https://lessonkit.readthedocs.io/en/latest/)
+- **Roadmap (maintainers):** [ROADMAP.md](ROADMAP.md)

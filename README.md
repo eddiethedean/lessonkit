@@ -9,22 +9,40 @@
 
 Developer tooling, not a timeline authoring tool: **React + telemetry + packaging**, not Storyline-in-a-box.
 
+> **Building a course?** You do not need to clone this repo. Run `npx @lessonkit/cli init my-course` and follow the [5-minute getting started guide](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/getting-started-in-5-minutes.html). Clone only if you are [contributing](CONTRIBUTING.md), running [examples](examples/README.md), or hacking [LessonKit Studio](https://lessonkit.readthedocs.io/en/latest/guides/studio/index.html) (alpha).
+
 | | |
 | --- | --- |
-| **Release** | Framework [1.1.0](https://github.com/eddiethedean/lessonkit/blob/main/CHANGELOG.md#110---2026-06-03) · Studio [0.3.1](https://github.com/eddiethedean/lessonkit/blob/main/CHANGELOG.md#studio-v031---2026-06-03) (tags pending on npm) |
+| **Release** | Framework [1.2.0](https://github.com/eddiethedean/lessonkit/blob/main/CHANGELOG.md#120---2026-06-03) · Studio [0.3.2](https://github.com/eddiethedean/lessonkit/blob/main/CHANGELOG.md#studio-v032---2026-06-03) |
 | **npm** | [`@lessonkit/*`](https://www.npmjs.com/org/lessonkit) |
 | **Docs** | [lessonkit.readthedocs.io](https://lessonkit.readthedocs.io/en/latest/) |
-| **Node.js** | 18+ (dev, build, LMS packaging) |
+| **Node.js** | 18+ (dev, build, LMS packaging); **20+** for Playwright e2e when [contributing](CONTRIBUTING.md) |
+
+---
+
+## Choose your path
+
+| Path | Start here |
+| --- | --- |
+| **New course (CLI)** | `npx @lessonkit/cli init` → [5-minute guide](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/getting-started-in-5-minutes.html) · [Quickstart](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/quickstart.html#cli-scaffold) |
+| **Existing React app** | `npm install @lessonkit/react` (+ CLI as devDep) → [Quickstart — add to Vite](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/quickstart.html#add-to-an-existing-vite-react-app) |
+| **LessonKit Studio (Alpha)** | [Live editor on Read the Docs](https://lessonkit.readthedocs.io/en/latest/guides/studio/app.html) (no install) · [Studio guides](https://lessonkit.readthedocs.io/en/latest/guides/studio/index.html) |
+| **Contribute / run Studio locally** | Clone this repo → [Contributing](CONTRIBUTING.md) · Studio dev: `npm run dev -w lessonkit-studio-web` after `npm run build:packages` |
+
+**Live demos:** [Examples on Read the Docs](https://lessonkit.readthedocs.io/en/latest/examples/index.html) · **Block catalogs:** [1.1](examples/framework-11-showcase) · [1.2](examples/framework-12-showcase)
 
 ---
 
 ## Table of contents
 
+- [Choose your path](#choose-your-path)
 - [Why LessonKit](#why-lessonkit)
+- [Which packages do I need?](#which-packages-do-i-need)
 - [Features](#features)
 - [Quick start](#quick-start)
 - [How it works](#how-it-works)
 - [Example](#example)
+- [Upgrading to 1.2](#upgrading-to-12)
 - [Packages](#packages)
 - [Documentation](#documentation)
 - [Development](#development)
@@ -41,13 +59,17 @@ Developer tooling, not a timeline authoring tool: **React + telemetry + packagin
 | **Accessibility** | Semantic structure, focus utilities, reduced-motion helpers, documented WCAG targets |
 | **Delivery teams** | Modern SPA via Vite plus LMS artifacts through [`@lessonkit/lxpack`](https://lessonkit.readthedocs.io/en/latest/reference/packaging.html) |
 
-Migrating from 0.9.x? See [MIGRATION-0.x-to-1.0.md](https://github.com/eddiethedean/lessonkit/blob/main/docs/MIGRATION-0.x-to-1.0.md). From 1.0.x? See [MIGRATION-1.0-to-1.1.md](https://github.com/eddiethedean/lessonkit/blob/main/docs/MIGRATION-1.0-to-1.1.md).
+Migrating from 0.9.x? See [MIGRATION-0.x-to-1.0.md](https://github.com/eddiethedean/lessonkit/blob/main/docs/MIGRATION-0.x-to-1.0.md). From 1.0.x? See [MIGRATION-1.0-to-1.1.md](https://github.com/eddiethedean/lessonkit/blob/main/docs/MIGRATION-1.0-to-1.1.md). From 1.1.x? See [MIGRATION-1.1-to-1.2.md](https://github.com/eddiethedean/lessonkit/blob/main/docs/MIGRATION-1.1-to-1.2.md).
 
 ---
 
 ## Features
 
-- **React authoring** — `Course`, `Lesson`, `Scenario`, `Quiz`, `Reflection`, `ProgressTracker`, and hooks for progress, tracking, and completion
+- **Structure** — `Course`, `Lesson`, `Scenario`, `Quiz`, `KnowledgeCheck`, `Reflection`, `ProgressTracker`, `LessonkitProvider`; hooks for progress, tracking, and completion
+- **Compound & resume** — `Page`, `InteractiveBook`, `AssessmentSequence` (`CompoundHandle`, session resume)
+- **Content** — `Text`, `Heading`, `Image`
+- **Assessments (P0)** — `TrueFalse`, `MarkTheWords`, `FillInTheBlanks`, `DragTheWords`, `DragAndDrop`, `FindHotspot`, `FindMultipleHotspots`
+- **Presentation (Tier C/D)** — `Accordion`, `DialogCards`, `Flashcards`, `ImageHotspots`, `ImageSlider`
 - **Identity v1** — Required `courseId`, `lessonId`, and `checkId`; stable URNs for telemetry and xAPI
 - **Telemetry** — Session-aware events, optional batching, pluggable pipeline sinks
 - **xAPI** — Statement generation, in-memory queueing, and transport hooks via `@lessonkit/xapi`
@@ -58,6 +80,22 @@ Migrating from 0.9.x? See [MIGRATION-0.x-to-1.0.md](https://github.com/eddiethed
 
 ---
 
+## Which packages do I need?
+
+| Goal | Install |
+| --- | --- |
+| Course UI in React | `@lessonkit/react` (pulls in core, themes, xapi, lxpack) |
+| Scaffold, dev, build, package | `@lessonkit/cli` as a **devDependency** (or use `npx @lessonkit/cli`) |
+| Custom headless runtime / telemetry types | `@lessonkit/core` |
+| Custom LRS transport or statement helpers | `@lessonkit/xapi` |
+| Custom theme presets | `@lessonkit/themes` |
+| Focus utilities in custom UI | `@lessonkit/accessibility` |
+| Packaging without the CLI | `@lessonkit/lxpack` (+ peer `@lxpack/api`) |
+
+See the [glossary](https://lessonkit.readthedocs.io/en/latest/reference/glossary.html) for terms like LXPack and `LessonkitProvider`.
+
+---
+
 ## Quick start
 
 ### New project
@@ -65,25 +103,30 @@ Migrating from 0.9.x? See [MIGRATION-0.x-to-1.0.md](https://github.com/eddiethed
 ```bash
 npx @lessonkit/cli init my-course
 cd my-course
-lessonkit dev
+npm run dev
 ```
+
+(`init` runs `npm install` by default.) Use `npx lessonkit dev` or a global CLI (`npm install -g @lessonkit/cli`) if you prefer.
 
 Build and package for an LMS:
 
 ```bash
-lessonkit build
-lessonkit package --target scorm12
+npm run build
+npm run package:scorm12
+# or: npx lessonkit build && npx lessonkit package --target scorm12
 ```
+
+SCORM zip output path: see [getting started in 5 minutes](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/getting-started-in-5-minutes.html#package-for-your-lms).
 
 Each project includes [`lessonkit.json`](https://lessonkit.readthedocs.io/en/latest/reference/cli.html) (`schemaVersion: 1`) that ties React props to the LXPack course descriptor.
 
 ### Existing React app
 
 ```bash
-npm install @lessonkit/react @lessonkit/core react react-dom
+npm install @lessonkit/react react react-dom
 ```
 
-Optional: `@lessonkit/xapi`, `@lessonkit/themes`, `@lessonkit/accessibility`.
+Optional: `@lessonkit/xapi` (typed helpers), `@lessonkit/themes`, `@lessonkit/accessibility`, `@lessonkit/core` (headless APIs).
 
 ### Guides
 
@@ -165,7 +208,24 @@ export default function SecurityTraining() {
 }
 ```
 
-Keep `courseId`, `lessonId`, and `checkId` in sync with `lessonkit.json`—`lessonkit init` patches the starter template for you. See [identity](https://lessonkit.readthedocs.io/en/latest/reference/identity.html) and [project structure](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/project-structure.html).
+`Course` wraps `LessonkitProvider` internally—pass `config` on `Course` unless you need a custom provider tree. Keep `courseId`, `lessonId`, and `checkId` in sync with `lessonkit.json`—`lessonkit init` patches the starter template for you. See [identity](https://lessonkit.readthedocs.io/en/latest/reference/identity.html), [ID parity](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/quickstart.html#keep-react-ids-in-sync-with-lessonkitjson), and [project structure](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/project-structure.html).
+
+Component gallery: [Storybook on GitHub Pages](https://eddiethedean.github.io/lessonkit/storybook/) (also `npm run storybook` in this repo).
+
+---
+
+## Upgrading to 1.2
+
+> **New project?** Skip this section.
+
+If you are on **1.1.x**, review these default changes before upgrading:
+
+- `buildBlockCatalog()` defaults to **catalog v3** (pass `{ version: 2 }` to keep the 1.1.x shape).
+- `persistCompoundState` defaults to **`true`**; set a unique `blockId` on each compound container.
+- `AssessmentSequence` implements `CompoundHandle` (parent-level scores are possible when using a ref).
+- `runtimeVersion: "v1"` logs a development deprecation warning; **v2** remains the default.
+
+Full guide: [MIGRATION-1.1-to-1.2.md](https://github.com/eddiethedean/lessonkit/blob/main/docs/MIGRATION-1.1-to-1.2.md)
 
 ---
 
@@ -194,7 +254,8 @@ Full site: **[lessonkit.readthedocs.io](https://lessonkit.readthedocs.io/en/late
 | Topic | Link |
 | --- | --- |
 | CLI & `lessonkit.json` | [CLI reference](https://lessonkit.readthedocs.io/en/latest/reference/cli.html) |
-| Components & hooks | [React guide](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/components-and-hooks.html) |
+| Components & hooks | [React guide](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/components-and-hooks.html) · [Storybook](https://eddiethedean.github.io/lessonkit/storybook/) |
+| Glossary | [Terms (LXPack, IDs, catalogs)](https://lessonkit.readthedocs.io/en/latest/reference/glossary.html) |
 | LMS packaging | [Packaging reference](https://lessonkit.readthedocs.io/en/latest/reference/packaging.html) |
 | Identity & URNs | [Identity reference](https://lessonkit.readthedocs.io/en/latest/reference/identity.html) |
 | Telemetry & xAPI | [Telemetry](https://lessonkit.readthedocs.io/en/latest/reference/telemetry.html) · [xAPI](https://lessonkit.readthedocs.io/en/latest/reference/xapi.html) |
@@ -224,9 +285,9 @@ npm test
 | `npm run test:e2e` | Playwright export parity |
 | `npm run storybook` | Component gallery |
 
-Run an example: `npm -w lessonkit-example-react-vite run dev`
+Run an example (after `npm run build:packages`): `npm -w lessonkit-example-react-vite run dev` — see [examples/README.md](examples/README.md)
 
-Contributors: [monorepo guide](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/contributing-to-the-monorepo.html) · [RELEASING.md](https://github.com/eddiethedean/lessonkit/blob/main/RELEASING.md) · [ROADMAP.md](https://github.com/eddiethedean/lessonkit/blob/main/ROADMAP.md)
+Contributors: [CONTRIBUTING.md](CONTRIBUTING.md) · [monorepo guide](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/contributing-to-the-monorepo.html) · [Architecture & design docs](ARCHITECTURE.md) · [RELEASING.md](RELEASING.md) · [ROADMAP.md](ROADMAP.md)
 
 ---
 

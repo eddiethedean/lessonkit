@@ -1,4 +1,5 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+import { defineTelemetryPlugin } from "../src/plugins/define";
 import { createLessonkitRuntime } from "../src/runtime/createLessonkitRuntime";
 
 describe("createLessonkitRuntime", () => {
@@ -94,5 +95,27 @@ describe("createLessonkitRuntime", () => {
     runtime.setActiveLesson("lesson-2", (name) => events.push(name));
     expect(events).toContain("lesson_started");
     expect(events.filter((e) => e === "lesson_completed").length).toBe(1);
+  });
+
+  it("track runs telemetry plugins before deliver", () => {
+    const plugin = defineTelemetryPlugin({
+      id: "filter",
+      version: "1",
+      kind: "analytics",
+      onTelemetry: (event) => (event.name === "course_started" ? null : event),
+    });
+    const runtime = createLessonkitRuntime({ courseId: "c", plugins: [plugin] });
+    const names: string[] = [];
+    runtime.track("course_started", undefined, (e) => names.push(e.name));
+    runtime.track("course_completed", undefined, (e) => names.push(e.name));
+    expect(names).toEqual(["course_completed"]);
+    expect(runtime.pluginHost?.plugins).toHaveLength(1);
+  });
+
+  it("warns when runtimeVersion is v1 in development", () => {
+    const spy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    createLessonkitRuntime({ courseId: "c", runtimeVersion: "v1" });
+    expect(spy).toHaveBeenCalledWith(expect.stringContaining('runtimeVersion "v1"'));
+    spy.mockRestore();
   });
 });

@@ -39,8 +39,8 @@ describe("Studio codegen → build → package", () => {
     await writeReactViteProject(loaded.project, {
       outDir: projectDir,
       exportMode: "renderer",
-      lessonkitVersion: "1.0.2",
-      studioVersion: "0.3.1",
+      lessonkitVersion: "1.2.0",
+      studioVersion: "0.3.2",
     });
 
     await patchPackageJsonForMonorepo(join(projectDir, "package.json"));

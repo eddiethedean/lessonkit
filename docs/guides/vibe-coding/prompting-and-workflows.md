@@ -20,7 +20,7 @@ Rules:
 
 ## Workflow A — content-only iteration
 
-1. `lessonkit dev` running
+1. `npm run dev` running
 2. Prompt: change copy, scenarios, or button labels only
 3. Refresh browser
 4. Repeat

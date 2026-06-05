@@ -32,10 +32,10 @@ cd my-phishing-course
 ## 4. Preview locally
 
 ```bash
-lessonkit dev
+npm run dev
 ```
 
-Open the URL shown (usually `http://localhost:5173`). Leave this running while you edit.
+(`npx lessonkit dev` works the same way.) Open the URL shown (usually `http://localhost:5173`). Leave this running while you edit.
 
 ## 5. First prompt to try
 
@@ -55,7 +55,7 @@ Save files, check the browser, then continue to [Your first course](your-first-c
 
 ```bash
 npm install -g @lessonkit/cli
-lessonkit dev
+npm run dev
 ```
 
 Global install is optional; `npx @lessonkit/cli` always works.

@@ -36,6 +36,7 @@ Map from telemetry events: `telemetryEventToXAPIStatement(event)` — uses canon
 
 - No transport → statements queue in memory (dev warns once).
 - Transport failure → re-queue; call `flush()` to retry.
+- Queue capped at **1000** statements by default; oldest dropped when full (`onCap` / `createInMemoryXAPIQueue({ onCap })`).
 - Concurrent `flush()` calls are coalesced.
 
 ## Docs

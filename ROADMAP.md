@@ -28,9 +28,9 @@ the framework adapter exists (see 0.6.0).
 
 ## Status
 
-- **Framework:** **1.1.0** — Assessment contract + Tier B P0 blocks (see [1.1.x](#11x--assessment-contract--tier-b-p0-blocks))
+- **Framework:** **1.2.0** — Compound containers + Tier C/D P0 (see [1.2.x](#12x--compound-containers--tier-cd-p0))
 - **Studio:** **unblocked** — framework gate met; see [Studio milestones](#lessonkit-studio-milestones)
-- **Focus (now):** LessonKit Studio 0.4.x+ (GitHub, AI, hosted) and **1.2.x** compound containers
+- **Focus (now):** LessonKit Studio 0.4.x+ (GitHub, AI, hosted) and **1.3.x** `SlideDeck`
 
 ## Guiding principles
 
@@ -310,13 +310,39 @@ begins**—including schema spikes, renderer prototypes, or `lessonkit-studio` p
 
 #### Paired Studio work (0.8.x)
 
-- [ ] `studio-schema` types + `studio-renderer` + palette for 1.1.x P0 blocks
-- [ ] Codegen emits new components and `lessonkit.json` assessment entries
-- [ ] **Studio palette labels** — H5P-familiar display names (e.g. “Fill in the Blanks”) + H5P doc checklist items for **studio-schema** catalog and [Studio editor guide](docs/guides/studio/editor.md)
+- [x] `studio-schema` types + `studio-renderer` + palette for 1.1.x P0 blocks
+- [x] Codegen emits new components and `lessonkit.json` assessment entries
+- [x] **Studio palette labels** — H5P-familiar display names (e.g. “Fill in the Blanks”) + H5P doc checklist items for **studio-schema** catalog and [Studio editor guide](docs/guides/studio/editor.md)
 
 #### Out of scope for 1.1.x
 
-- Compound containers (`InteractiveBook`, `SlideDeck`) — **1.2.x / 1.3.x**
+- Compound containers (`InteractiveBook`, `SlideDeck`) — shipped in **1.2.x** / **1.3.x** respectively
+
+---
+
+### 1.2.x — Compound containers + Tier C/D P0
+
+**Status:** **Shipped in 1.2.0**.
+
+#### Goals
+
+- Ship H5P-aligned compound foundation (`Page`, `InteractiveBook`) with resume state and catalog allowlists.
+- Add Tier C/D P1 content and assessment blocks for handbook-style courses.
+
+#### Deliverables
+
+- [x] **`CompoundHandle`** + `CompoundResumeState` in `@lessonkit/core`; session storage v2
+- [x] **Telemetry catalog v3** — `book_page_viewed`, `compound_page_viewed`, content interaction events
+- [x] **`block-catalog.v3.json`** — `allowedChildTypes`, `compoundContract`, `maxNestingDepth`
+- [x] **`Page`**, **`InteractiveBook`**, hardened **`AssessmentSequence`** with score aggregation
+- [x] **Content primitives** — `Text`, `Heading`, `Image`
+- [x] **Tier C/D P1** — `Accordion`, `DialogCards`, `Flashcards`, `ImageHotspots`, `ImageSlider`, `FindHotspot`, `FindMultipleHotspots`
+- [x] **Golden example** — `examples/interactive-book`
+- [x] **Docs** — [MIGRATION-1.1-to-1.2.md](docs/MIGRATION-1.1-to-1.2.md); H5P capability map updates
+
+#### Out of scope for 1.2.x
+
+- `SlideDeck` (Course Presentation) — **1.3.x**
 - H5P `.h5p` import — **1.6.x** research spike
 - Tier C–E media/game blocks — later framework minors per [capability map](docs/project/h5p-capability-map.md)
 

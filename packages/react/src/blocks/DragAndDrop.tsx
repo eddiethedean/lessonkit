@@ -1,8 +1,10 @@
-import React, { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
+import React, { forwardRef, useEffect, useMemo, useRef, useState } from "react";
 import type { AssessmentBaseProps, AssessmentHandle, AssessmentInteractionType } from "@lessonkit/core";
 import type { LessonId } from "@lessonkit/core";
 import { AssessmentLessonGuard } from "../assessment/AssessmentLessonGuard";
-import { useRegisterAssessmentHandle } from "../assessment/AssessmentSequenceContext";
+import { buildAssessmentHandle } from "../assessment/internal/buildAssessmentHandle";
+import { readBooleanStateField } from "../assessment/internal/resumeState";
+import { useAssessmentHandleRegistration } from "../assessment/internal/useAssessmentHandleRegistration";
 import { useAssessmentState } from "../assessment/useAssessmentState";
 import { normalizeComponentId } from "../runtime/validateComponentId";
 
@@ -45,13 +47,14 @@ function DragAndDropInner(
   const allFilled = props.targets.every((t) => (assignments[t.id] ?? "").length > 0);
   const allCorrect = props.targets.every((t) => assignments[t.id] === t.accepts);
 
-  const handle = useMemo((): AssessmentHandle => {
+  const handle = useMemo(() => {
     const maxScore = props.targets.length || 1;
     let score = 0;
     props.targets.forEach((t) => {
       if (assignments[t.id] === t.accepts) score += 1;
     });
-    return {
+    return buildAssessmentHandle({
+      checkId,
       getScore: () => score,
       getMaxScore: () => maxScore,
       getAnswerGiven: () => allFilled,
@@ -65,11 +68,24 @@ function DragAndDropInner(
         score,
         maxScore,
       }),
-    };
-  }, [allCorrect, allFilled, assignments, checkId, props.targets]);
+      getCurrentState: () => ({ assignments, pool, passed, keyboardItem }),
+      resume: (state) => {
+        const rawAssignments = state.assignments;
+        if (rawAssignments && typeof rawAssignments === "object") {
+          setAssignments({ ...(rawAssignments as Record<string, string>) });
+        }
+        if (Array.isArray(state.pool)) setPool([...(state.pool as string[])]);
+        readBooleanStateField(state, "passed", (value) => {
+          setPassed(value);
+          completedRef.current = value;
+        });
+        const item = state.keyboardItem;
+        if (item === null || typeof item === "string") setKeyboardItem(item ?? null);
+      },
+    });
+  }, [allCorrect, allFilled, assignments, checkId, keyboardItem, passed, pool, props.targets]);
 
-  useImperativeHandle(ref, () => handle, [handle]);
-  useRegisterAssessmentHandle(checkId, handle);
+  useAssessmentHandleRegistration(checkId, handle, ref);
 
   const place = (targetId: string, itemId: string) => {
     if (passed && !props.enableRetry) return;

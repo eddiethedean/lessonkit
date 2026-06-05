@@ -99,3 +99,15 @@ export async function ensureAssessmentsP0Built(): Promise<void> {
     stdio: "inherit",
   });
 }
+
+export async function ensureInteractiveBookBuilt(): Promise<void> {
+  const { existsSync } = await import("node:fs");
+  const distIndex = join(REPO_ROOT, "examples/interactive-book/dist/index.html");
+  if (existsSync(distIndex)) return;
+
+  const { execSync } = await import("node:child_process");
+  execSync("npm run build -w lessonkit-example-interactive-book", {
+    cwd: REPO_ROOT,
+    stdio: "inherit",
+  });
+}

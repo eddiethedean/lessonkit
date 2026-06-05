@@ -77,6 +77,43 @@ describe("validateDescriptor", () => {
     expect(falseTf.ok).toBe(true);
   });
 
+  it("accepts findHotspot and findMultipleHotspots assessment kinds", () => {
+    const findOne = validateDescriptor({
+      ...baseDescriptor,
+      assessments: [
+        {
+          kind: "findHotspot",
+          checkId: "hs-1",
+          question: "Find the hazard",
+          src: "/map.png",
+          alt: "Map",
+          targets: [{ id: "t1", label: "Fire exit", x: 10, y: 20 }],
+          correctTargetId: "t1",
+        },
+      ],
+    });
+    expect(findOne.ok).toBe(true);
+
+    const findMany = validateDescriptor({
+      ...baseDescriptor,
+      assessments: [
+        {
+          kind: "findMultipleHotspots",
+          checkId: "hs-m",
+          question: "Mark hazards",
+          src: "/floor.png",
+          alt: "Floor plan",
+          targets: [
+            { id: "a", label: "A", x: 1, y: 2 },
+            { id: "b", label: "B", x: 3, y: 4 },
+          ],
+          correctTargetIds: ["a", "b"],
+        },
+      ],
+    });
+    expect(findMany.ok).toBe(true);
+  });
+
   it("rejects duplicate lesson ids", () => {
     const result = validateDescriptor({
       ...baseDescriptor,

@@ -13,7 +13,13 @@ export type TelemetryEventName =
   | "quiz_completed"
   | "assessment_answered"
   | "assessment_completed"
-  | "interaction";
+  | "interaction"
+  | "book_page_viewed"
+  | "compound_page_viewed"
+  | "hotspot_opened"
+  | "accordion_section_toggled"
+  | "flashcard_flipped"
+  | "image_slider_changed";
 
 export type TelemetryUser = {
   id?: string;
@@ -75,6 +81,40 @@ export type InteractionData = {
   [key: string]: unknown;
 };
 
+export type BookPageViewedData = {
+  blockId: BlockId;
+  pageIndex: number;
+  pageTitle?: string;
+};
+
+export type CompoundPageViewedData = {
+  blockId: BlockId;
+  pageIndex: number;
+  parentType?: string;
+};
+
+export type HotspotOpenedData = {
+  blockId: BlockId;
+  hotspotId: string;
+};
+
+export type AccordionSectionToggledData = {
+  blockId: BlockId;
+  sectionId: string;
+  expanded: boolean;
+};
+
+export type FlashcardFlippedData = {
+  blockId: BlockId;
+  cardIndex: number;
+  face: "front" | "back";
+};
+
+export type ImageSliderChangedData = {
+  blockId: BlockId;
+  slideIndex: number;
+};
+
 export type TelemetryEvent =
   | (TelemetryEventBase & { name: "course_started"; lessonId?: LessonId; data?: undefined })
   | (TelemetryEventBase & { name: "course_completed"; lessonId?: LessonId; data?: undefined })
@@ -93,7 +133,25 @@ export type TelemetryEvent =
       lessonId: LessonId;
       data: AssessmentCompletedData;
     })
-  | (TelemetryEventBase & { name: "interaction"; lessonId?: LessonId; data?: InteractionData });
+  | (TelemetryEventBase & { name: "interaction"; lessonId?: LessonId; data?: InteractionData })
+  | (TelemetryEventBase & { name: "book_page_viewed"; lessonId: LessonId; data: BookPageViewedData })
+  | (TelemetryEventBase & {
+      name: "compound_page_viewed";
+      lessonId: LessonId;
+      data: CompoundPageViewedData;
+    })
+  | (TelemetryEventBase & { name: "hotspot_opened"; lessonId?: LessonId; data: HotspotOpenedData })
+  | (TelemetryEventBase & {
+      name: "accordion_section_toggled";
+      lessonId?: LessonId;
+      data: AccordionSectionToggledData;
+    })
+  | (TelemetryEventBase & { name: "flashcard_flipped"; lessonId?: LessonId; data: FlashcardFlippedData })
+  | (TelemetryEventBase & {
+      name: "image_slider_changed";
+      lessonId?: LessonId;
+      data: ImageSliderChangedData;
+    });
 
 /** Payload shape for a telemetry event name. */
 export type TelemetryDataFor<N extends TelemetryEventName> = Extract<

@@ -83,6 +83,7 @@ const runtime = createLessonkitRuntime({
   courseId: "my-course",
   runtimeVersion: "v2",
   session: { sessionId: "…", attemptId: "…" },
+  plugins: [defineTelemetryPlugin({ id: "…", version: "1", kind: "analytics", onTelemetry: (e) => e })],
 });
 
 runtime.setActiveLesson("intro", emitLifecycle);
@@ -90,7 +91,7 @@ runtime.completeLesson("intro", emitLifecycle);
 runtime.completeCourse(emitLifecycle);
 ```
 
-Exports: `createProgressController`, session helpers (`resolveSessionId`, `hasCourseStarted`, …), and course lifecycle helpers in `runtime/courseLifecycle`.
+Exports: `createProgressController`, `buildPluginContext`, session helpers (`resolveSessionId`, `hasCourseStarted`, …), and course lifecycle helpers in `runtime/courseLifecycle`. Plugin hooks run on `runtime.track` and lifecycle emits; call `runtime.dispose()` when tearing down a headless instance.
 
 ## Plugins
 

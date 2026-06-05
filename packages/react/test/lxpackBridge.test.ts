@@ -178,4 +178,13 @@ describe("lxpackBridge", () => {
     expect(completeCourse).toHaveBeenCalledTimes(1);
     vi.unstubAllGlobals();
   });
+
+  it("calls onBridgeMiss when bridge is missing for completion events", () => {
+    vi.stubGlobal("window", { parent: window } as unknown as Window);
+    const onBridgeMiss = vi.fn();
+    const event = buildTelemetryEvent({ name: "course_completed", courseId: "c", sessionId: "s" });
+    forwardTelemetryToLxpack(event, "auto", { onBridgeMiss });
+    expect(onBridgeMiss).toHaveBeenCalledWith(event);
+    vi.unstubAllGlobals();
+  });
 });

@@ -61,7 +61,7 @@ export function BlockPalette({ store }: BlockPaletteProps) {
           }}
           role="presentation"
         >
-          <PaletteItem type={entry.type} label={entry.type} />
+          <PaletteItem type={entry.type} label={entry.displayName ?? entry.type} />
         </div>
       ))}
     </div>

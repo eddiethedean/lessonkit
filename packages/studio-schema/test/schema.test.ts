@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import catalogJson from "../studio-block-catalog.v1.json";
+import catalogJson from "../studio-block-catalog.v2.json";
 import {
   buildStudioBlockCatalog,
   loadStudioProject,
@@ -38,7 +38,7 @@ const goldenProject = {
 };
 
 describe("@lessonkit/studio-schema", () => {
-  it("buildStudioBlockCatalog matches studio-block-catalog.v1.json", () => {
+  it("buildStudioBlockCatalog matches studio-block-catalog.v2.json", () => {
     expect(buildStudioBlockCatalog()).toEqual(catalogJson);
   });
 

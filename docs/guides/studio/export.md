@@ -1,4 +1,4 @@
-# Exporting from Studio (0.3.1)
+# Exporting from Studio (0.3.2)
 
 ::::{admonition} Alpha
 :class: warning

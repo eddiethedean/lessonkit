@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="360" viewBox="0 0 640 360" role="img" aria-label="Atlas workspace map">
+  <rect width="640" height="360" fill="#0b1220" rx="12"/>
+  <rect x="24" y="24" width="592" height="56" fill="#1e293b" rx="8"/>
+  <text x="40" y="58" fill="#f8fafc" font-family="system-ui,sans-serif" font-size="16" font-weight="600">Workspace  North America</text>
+  <rect x="24" y="96" width="280" height="120" fill="#172554" rx="8"/>
+  <text x="40" y="128" fill="#93c5fd" font-family="system-ui,sans-serif" font-size="13">PII dashboard</text>
+  <rect x="336" y="96" width="280" height="120" fill="#14532d" rx="8"/>
+  <text x="352" y="128" fill="#86efac" font-family="system-ui,sans-serif" font-size="13">Payroll summary</text>
+  <rect x="24" y="232" width="280" height="104" fill="#451a03" rx="8"/>
+  <text x="40" y="264" fill="#fdba74" font-family="system-ui,sans-serif" font-size="13">Alert panel</text>
+  <rect x="336" y="232" width="280" height="104" fill="#334155" rx="8"/>
+  <text x="352" y="264" fill="#cbd5e1" font-family="system-ui,sans-serif" font-size="13">Public KPIs</text>
+  <circle cx="120" cy="280" r="10" fill="#f97316"/>
+  <text x="136" y="286" fill="#fdba74" font-family="system-ui,sans-serif" font-size="12">Ack alert</text>
+</svg>

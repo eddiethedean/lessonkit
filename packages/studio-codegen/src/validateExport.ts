@@ -5,7 +5,7 @@ import {
 } from "@lessonkit/studio-schema";
 import type { StudioValidationIssue } from "@lessonkit/studio-schema";
 import type { ExportValidationResult, StudioExportOptions } from "./types";
-import { collectQuizAssessments } from "./collectQuizzes";
+import { collectAssessments } from "./collectQuizzes";
 
 export function assertExportableProject(
   project: StudioProjectV1,
@@ -24,7 +24,7 @@ export function assertExportableProject(
   }
 
   try {
-    collectQuizAssessments(project);
+    collectAssessments(project);
   } catch (err) {
     return {
       ok: false,

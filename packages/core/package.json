@@ -1,6 +1,6 @@
 {
   "name": "@lessonkit/core",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "private": false,
   "description": "Shared types and telemetry primitives for LessonKit.",
   "license": "Apache-2.0",
@@ -9,7 +9,7 @@
     "url": "git+https://github.com/eddiethedean/lessonkit.git",
     "directory": "packages/core"
   },
-  "homepage": "https://github.com/eddiethedean/lessonkit",
+  "homepage": "https://lessonkit.readthedocs.io/en/latest/reference/core.html",
   "bugs": {
     "url": "https://github.com/eddiethedean/lessonkit/issues"
   },
@@ -31,11 +31,15 @@
       "require": "./dist/index.cjs"
     },
     "./telemetry-catalog.v1.json": "./telemetry-catalog.v1.json",
+    "./telemetry-catalog.v2.json": "./telemetry-catalog.v2.json",
+    "./telemetry-catalog.v3.json": "./telemetry-catalog.v3.json",
     "./identity-contract.v1.json": "./identity-contract.v1.json"
   },
   "files": [
     "dist",
     "telemetry-catalog.v1.json",
+    "telemetry-catalog.v2.json",
+    "telemetry-catalog.v3.json",
     "identity-contract.v1.json"
   ],
   "scripts": {

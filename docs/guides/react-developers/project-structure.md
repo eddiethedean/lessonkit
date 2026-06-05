@@ -28,22 +28,32 @@ my-course/
 ```text
 lessonkit/
 ├── packages/
-│   ├── core/           # telemetry, identity
-│   ├── react/          # components + provider
+│   ├── core/              # telemetry, identity, headless runtime
+│   ├── react/             # components + provider
 │   ├── xapi/
 │   ├── accessibility/
 │   ├── themes/
-│   ├── lxpack/         # packaging adapter (Node 18+)
-│   └── cli/
+│   ├── lxpack/            # packaging adapter (Node 18+)
+│   ├── cli/
+│   └── studio-*           # schema, renderer, builder, ui, codegen (Alpha)
+├── apps/
+│   └── studio-web/        # visual editor (private npm workspace)
 ├── examples/
-│   ├── react-vite/
+│   ├── react-vite/        # RTD demos
 │   ├── data-privacy/
 │   ├── customer-service/
-│   └── lxpack-golden/
+│   ├── lxpack-golden/     # packaging reference
+│   ├── interactive-book/  # compound containers (1.2)
+│   ├── framework-11-showcase/  # complete 1.1 catalog
+│   ├── framework-12-showcase/  # complete 1.2 catalog
+│   ├── assessments-p0/    # P0 assessment blocks
+│   ├── studio-minimal/
+│   └── studio-export/     # codegen script (not a dev server)
+├── templates/             # synced with CLI template
 ├── library-skills/
 ├── e2e/
 ├── integration/
-└── docs/               # this documentation site
+└── docs/                  # this documentation site
 ```
 
 ## When to use which package

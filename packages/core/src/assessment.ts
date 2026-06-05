@@ -8,7 +8,12 @@ export type AssessmentInteractionType =
   | "markTheWords"
   | "dragTheWords"
   | "dragAndDrop"
-  | "assessmentSequence";
+  | "assessmentSequence"
+  | "findHotspot"
+  | "findMultipleHotspots";
+
+/** Serializable resume blob for a single assessment block. */
+export type AssessmentResumeState = Record<string, unknown>;
 
 /** Behaviour flags aligned with H5P question types. */
 export type AssessmentBehaviour = {
@@ -38,6 +43,8 @@ export type AssessmentHandle = {
   resetTask: () => void;
   showSolutions: () => void;
   getXAPIData: () => AssessmentXAPIData;
+  getCurrentState?: () => AssessmentResumeState;
+  resume?: (state: AssessmentResumeState) => void;
 };
 
 export type AssessmentBaseProps = AssessmentBehaviour & {

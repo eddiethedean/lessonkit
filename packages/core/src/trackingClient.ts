@@ -1,34 +1,6 @@
 import type { TelemetryBatchSink, TelemetryEvent, TelemetrySink, TrackingClient } from "./telemetryTypes";
-
-function isDevEnvironment(): boolean {
-  const g = globalThis as typeof globalThis & { process?: { env?: { NODE_ENV?: string } } };
-  return typeof g.process !== "undefined" && g.process.env?.NODE_ENV !== "production";
-}
-
-function invokeTrackingSink(sink: TelemetrySink, event: TelemetryEvent): void {
-  let result: void | Promise<void>;
-  try {
-    result = sink(event);
-  } catch (err) {
-    if (isDevEnvironment()) {
-      console.warn(
-        "[lessonkit] tracking sink failed:",
-        err instanceof Error ? err.message : err,
-      );
-    }
-    throw err;
-  }
-  if (result != null && typeof (result as Promise<void>).catch === "function") {
-    void (result as Promise<void>).catch((err) => {
-      if (isDevEnvironment()) {
-        console.warn(
-          "[lessonkit] tracking sink failed:",
-          err instanceof Error ? err.message : err,
-        );
-      }
-    });
-  }
-}
+import { invokeTrackingSink } from "./internal/sinkInvoke";
+import { isDevEnvironment } from "./internal/env";
 
 export function createTrackingClient(opts?: {
   sink?: TelemetrySink;

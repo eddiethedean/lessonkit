@@ -7,6 +7,57 @@ Published packages:
 
 Normal `v1.0.3` tags **do not** publish or re-version Studio packages. Studio uses its own semver line (e.g. `0.1.0`) and tag prefix.
 
+## Publishing 1.2.0 + Studio 0.3.2 (recommended order)
+
+1. Confirm [1.2.0](#120-checklist-ready-to-publish) and [Studio 0.3.2](#studio-032-checklist-ready-to-publish) checklists below.
+2. Tag and push **framework first** (publishes seven `@lessonkit/*` packages at **1.2.0**):
+
+   ```bash
+   git tag v1.2.0
+   git push origin v1.2.0
+   ```
+
+3. After `v1.2.0` is on npm, tag and push **Studio** (pins `@lessonkit/*` to **1.2.0** via `prepare-publish.mjs`):
+
+   ```bash
+   git tag studio-v0.3.2
+   git push origin studio-v0.3.2
+   ```
+
+### 1.2.0 checklist (ready to publish)
+
+| Item | Status |
+|------|--------|
+| All seven `@lessonkit/*` packages at `1.2.0` | Done |
+| [CHANGELOG.md](CHANGELOG.md) `## [1.2.0]` includes **Changed** (catalog v3 default, compound persistence, AssessmentSequence scores) | Done |
+| [MIGRATION-1.1-to-1.2.md](docs/MIGRATION-1.1-to-1.2.md) in Sphinx toctree | Done |
+| `package-lock.json` includes all workspace examples (`npm ci` clean) | Verify before tag |
+| Sphinx `docs/conf.py` `release` = `1.2.0` | Done |
+| `release/1.2.0` CI green ([PR #1](https://github.com/eddiethedean/lessonkit/pull/1)) | Done — merge to `main` before tag |
+| Headless `createLessonkitRuntime` runs `plugins` hooks | Done |
+| `lessonkit init` template pins `^1.2.0` | Done |
+| npm latest `@lessonkit/react` | **1.1.0** — publish with `v1.2.0` |
+| Git tag `v1.2.0` | **Create when ready** |
+
+> **Do not create or push `v1.2.0`** until you intend to publish to npm.
+
+### Studio 0.3.2 checklist (ready to publish)
+
+| Item | Status |
+|------|--------|
+| Studio packages at `0.3.2` (schema, renderer, builder, ui, codegen) | Done |
+| Root `studio-version` = `0.3.2` | Done |
+| [CHANGELOG.md](CHANGELOG.md) `## [studio-v0.3.2]` | Done |
+| `prepare-publish.mjs studio 0.3.2` pins `@lessonkit/*` to **1.2.0** | Run at publish time |
+| Framework **1.2.0** on npm before `studio-v0.3.2` tag | Required |
+| `@lessonkit/studio-codegen` default export pins `@lessonkit/studio-*` **0.3.2** | Done |
+| Integration test `studio-export-package.test.ts` (`studioVersion: 0.3.2`, `lessonkitVersion: 1.2.0`) | Done |
+| Studio palette/codegen covers 1.2 blocks (see [ROADMAP](ROADMAP.md)) | Done |
+| npm latest `@lessonkit/studio-schema` | **0.3.1** — publish with `studio-v0.3.2` |
+| Git tag `studio-v0.3.2` | **Create when ready** |
+
+> Publish **framework `v1.2.0` first**, then `studio-v0.3.2`.
+
 ## Publishing 1.1.0 + Studio 0.3.1 (recommended order)
 
 1. Confirm [1.1.0](#110-checklist-ready-to-publish) and [Studio 0.3.1](#studio-031-checklist-ready-to-publish) checklists below.

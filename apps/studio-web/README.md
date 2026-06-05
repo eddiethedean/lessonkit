@@ -1,6 +1,6 @@
 # lessonkit-studio-web
 
-Private Vite app for LessonKit Studio **0.3.1** (visual editor + export). Not published to npm.
+Private Vite app for LessonKit Studio **0.3.2** (visual editor + export). Not published to npm.
 
 ## Run
 

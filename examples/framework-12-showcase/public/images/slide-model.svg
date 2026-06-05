@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="360" viewBox="0 0 640 360" role="img" aria-label="Model phase">
+  <rect width="640" height="360" fill="#111827" rx="12"/>
+  <text x="40" y="64" fill="#f9fafb" font-family="system-ui,sans-serif" font-size="22" font-weight="600">2 · Model</text>
+  <text x="40" y="100" fill="#9ca3af" font-family="system-ui,sans-serif" font-size="15">Apply retention rules before sharing.</text>
+  <rect x="420" y="120" width="160" height="120" fill="#7c3aed" opacity="0.45" rx="8"/>
+</svg>

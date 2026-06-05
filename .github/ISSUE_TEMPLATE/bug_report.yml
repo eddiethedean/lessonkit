@@ -1,0 +1,84 @@
+name: Bug report
+description: Report unexpected behavior in LessonKit packages or CLI
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a bug. For security issues, use [private vulnerability reporting](https://github.com/eddiethedean/lessonkit/security/advisories/new) instead.
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Describe the actual behavior you observed.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect?
+      description: Describe the behavior you expected.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Minimal steps to reproduce the issue.
+      placeholder: |
+        1. npx @lessonkit/cli init repro
+        2. ...
+        3. See error
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: LessonKit version
+      description: npm version of @lessonkit/react, @lessonkit/cli, or other package involved.
+      placeholder: "1.2.0"
+    validations:
+      required: true
+
+  - type: input
+    id: node
+    attributes:
+      label: Node.js version
+      placeholder: "v20.11.0"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system
+      options:
+        - macOS
+        - Windows
+        - Linux
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: Minimal repro
+      description: Link to a branch, gist, or paste a minimal code sample.
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist
+      options:
+        - label: I searched existing issues and did not find a duplicate
+          required: true
+        - label: This is not a security vulnerability (I will use private advisory reporting instead)
+          required: true

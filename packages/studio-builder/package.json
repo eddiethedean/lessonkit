@@ -1,6 +1,6 @@
 {
   "name": "@lessonkit/studio-builder",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "private": false,
   "description": "Headless editor state, commands, and undo/redo for LessonKit Studio.",
   "license": "Apache-2.0",
@@ -9,7 +9,7 @@
     "url": "git+https://github.com/eddiethedean/lessonkit.git",
     "directory": "packages/studio-builder"
   },
-  "homepage": "https://github.com/eddiethedean/lessonkit/tree/main/packages/studio-builder",
+  "homepage": "https://lessonkit.readthedocs.io/en/latest/guides/studio/index.html",
   "bugs": {
     "url": "https://github.com/eddiethedean/lessonkit/issues"
   },

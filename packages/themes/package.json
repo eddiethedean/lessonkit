@@ -1,6 +1,6 @@
 {
   "name": "@lessonkit/themes",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "private": false,
   "description": "Theme primitives and tokens for LessonKit.",
   "license": "Apache-2.0",
@@ -9,7 +9,7 @@
     "url": "git+https://github.com/eddiethedean/lessonkit.git",
     "directory": "packages/themes"
   },
-  "homepage": "https://github.com/eddiethedean/lessonkit",
+  "homepage": "https://lessonkit.readthedocs.io/en/latest/reference/theming.html",
   "bugs": {
     "url": "https://github.com/eddiethedean/lessonkit/issues"
   },

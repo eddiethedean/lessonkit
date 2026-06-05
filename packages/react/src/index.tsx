@@ -16,6 +16,18 @@ export {
   DragTheWords,
   DragAndDrop,
   AssessmentSequence,
+  Text,
+  Heading,
+  Image,
+  Page,
+  InteractiveBook,
+  Accordion,
+  DialogCards,
+  Flashcards,
+  ImageHotspots,
+  ImageSlider,
+  FindHotspot,
+  FindMultipleHotspots,
 } from "./blocks";
 
 export type {
@@ -38,7 +50,31 @@ export type {
   DragItem,
   DropTarget,
   AssessmentSequenceProps,
+  TextProps,
+  HeadingProps,
+  ImageProps,
+  PageProps,
+  InteractiveBookProps,
+  AccordionProps,
+  AccordionSection,
+  DialogCardsProps,
+  DialogCard,
+  FlashcardsProps,
+  Flashcard,
+  ImageHotspotsProps,
+  HotspotSpec,
+  ImageSliderProps,
+  ImageSlide,
+  FindHotspotProps,
+  HotspotTarget,
+  FindMultipleHotspotsProps,
 } from "./blocks";
+
+export type {
+  CompoundHandle,
+  CompoundResumeState,
+  CompoundBaseProps,
+} from "@lessonkit/core";
 
 export {
   useCompletion,
@@ -51,7 +87,12 @@ export {
 
 export { resetAssessmentWarningsForTests } from "./assessment/AssessmentLessonGuard";
 
-export type { LessonkitConfig, LessonkitProviderProps, LessonkitRuntime } from "./context";
+export type {
+  LessonkitConfig,
+  LessonkitObservabilityConfig,
+  LessonkitProviderProps,
+  LessonkitRuntime,
+} from "./context";
 export { LessonkitProvider } from "./context";
 
 export type {
@@ -91,12 +132,19 @@ export type {
 export { ThemeProvider, useTheme } from "./theme/ThemeProvider";
 export type { ThemePresetName } from "@lessonkit/themes";
 
-export type { BlockCatalogEntry, BlockCatalogEntryV2, BlockPropSpec } from "./blockCatalog";
+export type {
+  BlockCatalogEntry,
+  BlockCatalogEntryV2,
+  BlockCatalogEntryV3,
+  BlockPropSpec,
+} from "./blockCatalog";
 export {
   BLOCK_CATALOG,
   BLOCK_CATALOG_V2,
+  BLOCK_CATALOG_V3,
   blockCatalogVersion,
   blockCatalogV2Version,
+  blockCatalogV3Version,
   buildBlockCatalog,
   getBlockCatalogEntry,
 } from "./blockCatalog";

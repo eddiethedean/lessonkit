@@ -7,7 +7,7 @@ import type {
   TelemetryUser,
   TrackingClient,
 } from "@lessonkit/core";
-import { createPluginRegistry } from "@lessonkit/core";
+import { buildPluginContext as buildPluginContextFromCore, createPluginRegistry } from "@lessonkit/core";
 import type { XAPIClient } from "@lessonkit/xapi";
 import { emitTelemetry } from "./emitTelemetry";
 import type { LxpackBridgeMode } from "./lxpackBridge";
@@ -23,12 +23,7 @@ export function buildPluginContext(opts: {
   attemptId?: string;
   user?: TelemetryUser;
 }): LessonkitPluginContext {
-  return {
-    courseId: opts.courseId,
-    sessionId: opts.sessionId,
-    attemptId: opts.attemptId,
-    user: opts.user,
-  };
+  return buildPluginContextFromCore(opts);
 }
 
 export function emitTelemetryWithPlugins(opts: {
@@ -39,6 +34,7 @@ export function emitTelemetryWithPlugins(opts: {
   pluginCtx: LessonkitPluginContext;
   lxpackBridge?: LxpackBridgeMode;
   extraSinks?: import("@lessonkit/core").TelemetryPipelineSink[];
+  onLxpackBridgeMiss?: (event: TelemetryEvent) => void;
 }): void {
   const next = opts.pluginHost
     ? opts.pluginHost.runTelemetry(opts.event, opts.pluginCtx)
@@ -47,5 +43,6 @@ export function emitTelemetryWithPlugins(opts: {
   emitTelemetry(opts.tracking, opts.xapi, next, {
     lxpackBridge: opts.lxpackBridge ?? "auto",
     extraSinks: opts.extraSinks,
+    onLxpackBridgeMiss: opts.onLxpackBridgeMiss,
   });
 }

@@ -1,7 +1,7 @@
 import type { LessonkitCourseDescriptor } from "@lessonkit/lxpack";
 import type { ThemePresetName } from "@lessonkit/themes";
 import type { StudioProjectV1 } from "@lessonkit/studio-schema";
-import { collectQuizAssessments } from "./collectQuizzes";
+import { collectAssessments } from "./collectQuizzes";
 import type { StudioExportOptions } from "./types";
 
 const DEFAULT_PATHS = {
@@ -18,7 +18,7 @@ export function studioProjectToDescriptor(
   project: StudioProjectV1,
   options: StudioExportOptions = {},
 ): LessonkitCourseDescriptor {
-  const assessments = collectQuizAssessments(project);
+  const assessments = collectAssessments(project);
   const firstPage = project.pages[0];
   if (!firstPage) {
     throw new Error("Project must include at least one page");

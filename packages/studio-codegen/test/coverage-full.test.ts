@@ -19,8 +19,30 @@ describe("coverage gaps", () => {
 
   it("emitBlockJsx covers all block types", () => {
     const blocks = [
+      { type: "text", id: "tx", text: "Hello" },
       { type: "heading", id: "h", level: 3 as const, text: "H" },
       { type: "image", id: "i", src: "assets/p.png", alt: "pic" },
+      {
+        type: "trueFalse",
+        id: "tf",
+        checkId: "check-tf",
+        question: "Q?",
+        answer: true,
+      },
+      {
+        type: "interactiveBook",
+        id: "book",
+        blockId: "book-1",
+        title: "Book",
+        pages: [
+          {
+            type: "page",
+            id: "pg",
+            blockId: "pg-1",
+            blocks: [{ type: "text", id: "inner-t", text: "Page text" }],
+          },
+        ],
+      },
       { type: "button", id: "b", label: "Go", href: "https://example.com" },
       { type: "button", id: "b2", label: "Submit" },
       { type: "input", id: "in", label: "Name", placeholder: "x", inputType: "email" as const },

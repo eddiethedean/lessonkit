@@ -13,16 +13,16 @@ import type {
   TelemetryEvent,
   TelemetryEventName,
   TelemetryUser,
-  PluginHost,
   TrackingClient,
   HeadlessLessonkitRuntime,
   TelemetryEmitFn,
 } from "@lessonkit/core";
 import { createLessonkitRuntime, createTrackingClient, assertValidId } from "@lessonkit/core";
 import type { XAPIClient } from "@lessonkit/xapi";
-import { createInMemoryXAPIQueue } from "@lessonkit/xapi";
+
+import { createXapiQueueFromObservability, wrapTrackingSink } from "../runtime/observability";
 import { telemetryEventToXAPIStatement } from "@lessonkit/xapi";
-import { buildTelemetryEvent, tryBuildTelemetryEvent } from "../runtime/emitTelemetry";
+import { tryBuildTelemetryEvent } from "../runtime/emitTelemetry";
 import type { LxpackBridgeMode } from "../runtime/lxpackBridge";
 import { createSessionStoragePort, resetStoragePortForTests } from "../runtime/ports";
 import { createProgressController, type ProgressState } from "../runtime/progress";
@@ -33,12 +33,17 @@ import {
   hasCourseStartedEmittedToTracking,
   hasCourseStartedPipelineDelivered,
   markCourseStarted,
-  markCourseStartedEmittedToTracking,
-  markCourseStartedPipelineDelivered,
   migrateCourseStartedMark,
   resolveSessionId,
 } from "../runtime/session";
-import { emitCourseStartedNonTrackingPipeline } from "../runtime/courseStartedPipeline";
+import {
+  assertTrackingSinkConfig,
+  buildCourseStartedEvent,
+  emitPendingCourseStarted,
+  isCourseStartedSinkSettled,
+  isTrackingActive,
+  resetCourseStartedTrackingFlightForTests,
+} from "./courseStarted";
 import {
   buildPluginContext,
   createReactPluginHost,
@@ -55,262 +60,12 @@ const useIsoLayoutEffect =
 
 const defaultStorage = createSessionStoragePort();
 
-let courseStartedTrackingFlightKey: string | null = null;
-
-/** @internal Reset in-flight course_started tracking guard between tests. */
-export function resetCourseStartedTrackingFlightForTests(): void {
-  courseStartedTrackingFlightKey = null;
-}
-
 /** @internal Reset provider session dedupe between tests. */
 export function resetLessonkitProviderStorageForTests(): void {
   resetStoragePortForTests(defaultStorage);
 }
 
-function isTrackingActive(tracking?: LessonkitConfig["tracking"]): boolean {
-  return tracking?.enabled !== false;
-}
-
-type CourseStartedEmitOpts = {
-  pluginHost: PluginHost | null;
-  sessionId: string;
-  courseId: CourseId;
-  attemptId?: string;
-  user?: TelemetryUser;
-  lxpackBridge: LxpackBridgeMode;
-  extraSinks?: import("@lessonkit/core").TelemetryPipelineSink[];
-  skipXapi?: boolean;
-  onXapiStatementSent?: () => void;
-  shouldCommit?: () => boolean;
-};
-
-/** Result of a course_started emit attempt (internal). */
-type CourseStartedEmitResult = "emitted" | "filtered" | "failed";
-
-function isCourseStartedSinkSettled(result: CourseStartedEmitResult): boolean {
-  return result === "emitted";
-}
-
-function buildCourseStartedEvent(opts: CourseStartedEmitOpts): TelemetryEvent | null {
-  const pluginCtx = buildPluginContext({
-    courseId: opts.courseId,
-    sessionId: opts.sessionId,
-    attemptId: opts.attemptId,
-    user: opts.user,
-  });
-  const built = buildTelemetryEvent({
-    name: "course_started",
-    courseId: opts.courseId,
-    sessionId: opts.sessionId,
-    attemptId: opts.attemptId,
-    user: opts.user,
-  });
-  return opts.pluginHost ? opts.pluginHost.runTelemetry(built, pluginCtx) : built;
-}
-
-async function emitCourseStartedToTracking(
-  tracking: TrackingClient,
-  storage: ReturnType<typeof createSessionStoragePort>,
-  sessionId: string,
-  courseId: CourseId,
-  event: TelemetryEvent,
-  shouldCommit?: () => boolean,
-): Promise<boolean> {
-  const flightKey = `${sessionId}:${courseId}`;
-  /* v8 ignore start -- defensive dedupe when tracking mark races ahead of in-flight emit */
-  if (hasCourseStartedEmittedToTracking(storage, sessionId, courseId)) {
-    return true;
-  }
-  /* v8 ignore stop */
-  if (courseStartedTrackingFlightKey === flightKey) {
-    return false;
-  }
-  courseStartedTrackingFlightKey = flightKey;
-  try {
-    /* v8 ignore start -- stale course_started generation aborts before tracking emit */
-    if (shouldCommit && !shouldCommit()) return false;
-    /* v8 ignore stop */
-    tracking.track(event);
-    await tracking.flush?.();
-    /* v8 ignore start -- stale course_started generation aborts before dedupe mark */
-    if (shouldCommit && !shouldCommit()) return false;
-    /* v8 ignore stop */
-    markCourseStartedEmittedToTracking(storage, sessionId, courseId);
-    return true;
-  } catch {
-    /* v8 ignore next -- tracking sink failure leaves dedupe unmarked so a later effect can retry */
-    return false;
-  } finally {
-    if (courseStartedTrackingFlightKey === flightKey) {
-      courseStartedTrackingFlightKey = null;
-    }
-  }
-}
-
-async function emitCourseStartedPipelineOnly(
-  opts: CourseStartedEmitOpts & {
-    xapi: XAPIClient | null;
-    storage: ReturnType<typeof createSessionStoragePort>;
-    event: TelemetryEvent;
-    skipXapi?: boolean;
-    onXapiStatementSent?: () => void;
-  },
-): Promise<CourseStartedEmitResult> {
-  try {
-    /* v8 ignore start -- stale course_started generation aborts before pipeline emit */
-    if (opts.shouldCommit && !opts.shouldCommit()) return "failed";
-    /* v8 ignore stop */
-    const { xapiStatementSent } = await emitCourseStartedNonTrackingPipeline({
-      event: opts.event,
-      xapi: opts.xapi,
-      lxpackBridge: opts.lxpackBridge,
-      extraSinks: opts.extraSinks,
-      skipXapi: opts.skipXapi,
-    });
-    /* v8 ignore start -- stale course_started generation aborts before session marks */
-    if (opts.shouldCommit && !opts.shouldCommit()) return "failed";
-    /* v8 ignore stop */
-    markCourseStarted(opts.storage, opts.sessionId, opts.courseId);
-    markCourseStartedPipelineDelivered(opts.storage, opts.sessionId, opts.courseId);
-    if (xapiStatementSent) {
-      opts.onXapiStatementSent?.();
-    }
-    return "emitted";
-  } catch {
-    /* v8 ignore next -- xAPI/bridge/extraSink failures leave pipeline dedupe unmarked so a later effect can retry */
-    return "failed";
-  }
-}
-
-async function emitCourseStarted(opts: CourseStartedEmitOpts & {
-  tracking: TrackingClient;
-  xapi: XAPIClient | null;
-  storage: ReturnType<typeof createSessionStoragePort>;
-}): Promise<CourseStartedEmitResult> {
-  const event = buildCourseStartedEvent(opts);
-  /* v8 ignore start -- plugin filtered course_started before tracking emit */
-  if (event === null) return "filtered";
-  /* v8 ignore stop */
-
-  const tracked = await emitCourseStartedToTracking(
-    opts.tracking,
-    opts.storage,
-    opts.sessionId,
-    opts.courseId,
-    event,
-    opts.shouldCommit,
-  );
-  if (!tracked) return "failed";
-
-  return emitCourseStartedPipelineOnly({
-    ...opts,
-    event,
-    skipXapi: opts.skipXapi,
-    onXapiStatementSent: opts.onXapiStatementSent,
-    shouldCommit: opts.shouldCommit,
-  });
-}
-
-/** Emit course_started to tracking/bridge when xAPI bootstrap already marked session storage. */
-async function emitCourseStartedToTrackingOnly(
-  opts: CourseStartedEmitOpts & {
-    tracking: TrackingClient;
-    storage: ReturnType<typeof createSessionStoragePort>;
-  },
-): Promise<CourseStartedEmitResult> {
-  const event = buildCourseStartedEvent(opts);
-  /* v8 ignore start -- plugin filtered course_started during tracking-only recovery */
-  if (event === null) return "filtered";
-  /* v8 ignore stop */
-
-  const tracked = await emitCourseStartedToTracking(
-    opts.tracking,
-    opts.storage,
-    opts.sessionId,
-    opts.courseId,
-    event,
-    opts.shouldCommit,
-  );
-  if (!tracked) return "failed";
-
-  try {
-    /* v8 ignore start -- stale course_started generation aborts before pipeline-only delivery */
-    if (opts.shouldCommit && !opts.shouldCommit()) return "failed";
-    /* v8 ignore stop */
-    await emitCourseStartedNonTrackingPipeline({
-      event,
-      xapi: null,
-      lxpackBridge: opts.lxpackBridge,
-      extraSinks: opts.extraSinks,
-      skipXapi: true,
-    });
-    markCourseStartedPipelineDelivered(opts.storage, opts.sessionId, opts.courseId);
-    return "emitted";
-  } catch {
-    return "failed";
-  }
-}
-
-async function emitPendingCourseStarted(opts: CourseStartedEmitOpts & {
-  tracking: TrackingClient;
-  xapi: XAPIClient | null;
-  storage: ReturnType<typeof createSessionStoragePort>;
-  skipXapi?: boolean;
-  onXapiStatementSent?: () => void;
-}): Promise<CourseStartedEmitResult> {
-  const trackingEmitted = hasCourseStartedEmittedToTracking(
-    opts.storage,
-    opts.sessionId,
-    opts.courseId,
-  );
-  const sessionStarted = hasCourseStarted(opts.storage, opts.sessionId, opts.courseId);
-
-  if (sessionStarted && !trackingEmitted) {
-    return emitCourseStartedToTrackingOnly(opts);
-  }
-  if (trackingEmitted && !sessionStarted) {
-    const event = buildCourseStartedEvent(opts);
-    /* v8 ignore start -- plugin filtered course_started during pipeline-only recovery */
-    if (event === null) return "filtered";
-    /* v8 ignore stop */
-    return emitCourseStartedPipelineOnly({ ...opts, event });
-  }
-  if (!trackingEmitted && !sessionStarted) {
-    return emitCourseStarted(opts);
-  }
-  const pipelineDelivered = hasCourseStartedPipelineDelivered(
-    opts.storage,
-    opts.sessionId,
-    opts.courseId,
-  );
-  /* v8 ignore start -- pipeline and session marks already settled */
-  if (sessionStarted && trackingEmitted && pipelineDelivered) {
-    return "emitted";
-  }
-  /* v8 ignore stop */
-  /* v8 ignore start -- only pipeline-retry state reaches this guard */
-  if (sessionStarted && trackingEmitted && !pipelineDelivered) {
-    const event = buildCourseStartedEvent(opts);
-    /* v8 ignore start -- plugin filtered course_started during pipeline retry */
-    if (event === null) return "filtered";
-    /* v8 ignore stop */
-    return emitCourseStartedPipelineOnly({
-      ...opts,
-      event,
-      skipXapi: opts.skipXapi,
-      onXapiStatementSent: opts.onXapiStatementSent,
-    });
-  }
-  /* v8 ignore stop */
-  return "emitted";
-}
-
-function assertTrackingSinkConfig(tracking?: LessonkitConfig["tracking"]): void {
-  if (!tracking?.sink || !tracking?.batchSink) return;
-  throw new Error(
-    "[lessonkit] tracking.sink and tracking.batchSink cannot both be set; use batchSink alone for batched delivery",
-  );
-}
+export { resetCourseStartedTrackingFlightForTests };
 
 export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitRuntime {
   const normalizedCourseId = useMemo(
@@ -323,6 +78,16 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
   );
 
   const useV2Runtime = normalizedConfig.runtimeVersion !== "v1";
+
+  useEffect(() => {
+    if (useV2Runtime) return;
+    const g = globalThis as typeof globalThis & { process?: { env?: { NODE_ENV?: string } } };
+    if (typeof g.process !== "undefined" && g.process.env?.NODE_ENV === "production") return;
+    console.warn(
+      '[lessonkit] LessonkitProvider runtimeVersion "v1" is deprecated; omit or use "v2" (default). v1 will be removed in LessonKit 2.0.',
+    );
+  }, [useV2Runtime]);
+
   const extraSinksRef = useRef(normalizedConfig.sinks);
   extraSinksRef.current = normalizedConfig.sinks;
 
@@ -347,7 +112,19 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
   const lxpackBridgeModeRef = useRef<LxpackBridgeMode>(normalizedConfig.lxpack?.bridge ?? "auto");
   lxpackBridgeModeRef.current = normalizedConfig.lxpack?.bridge ?? "auto";
 
-  const pluginHost = useMemo(() => createReactPluginHost(normalizedConfig.plugins), [normalizedConfig.plugins]);
+  const observabilityRef = useRef(normalizedConfig.observability);
+  observabilityRef.current = normalizedConfig.observability;
+
+  const onLxpackBridgeMiss = useCallback((event: TelemetryEvent) => {
+    observabilityRef.current?.onLxpackBridgeMiss?.(event);
+  }, []);
+
+  const pluginsFingerprint =
+    normalizedConfig.plugins?.map((p) => `${p.id}\0${p.version}`).join("|") ?? "";
+  const pluginHost = useMemo(
+    () => createReactPluginHost(normalizedConfig.plugins),
+    [pluginsFingerprint],
+  );
   const pluginHostRef = useRef(pluginHost);
   pluginHostRef.current = pluginHost;
 
@@ -366,6 +143,7 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
         courseId: normalizedCourseId,
         runtimeVersion: "v2",
         session: normalizedConfig.session,
+        plugins: pluginHostRef.current ?? normalizedConfig.plugins,
       });
       progressRef.current = headlessRef.current.progress;
     } else {
@@ -380,6 +158,7 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
       courseId: normalizedCourseId,
       runtimeVersion: "v2",
       session: normalizedConfig.session,
+      plugins: pluginHostRef.current ?? normalizedConfig.plugins,
     });
   }
 
@@ -409,7 +188,7 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
   const activeLessonIdRef = useRef<LessonId | undefined>(progress.activeLessonId);
   activeLessonIdRef.current = progress.activeLessonId;
 
-  const xapiQueueRef = useRef(createInMemoryXAPIQueue());
+  const xapiQueueRef = useRef(createXapiQueueFromObservability(normalizedConfig.observability));
   const xapiRef = useRef<XAPIClient | null>(null);
   const [xapi, setXapi] = useState<XAPIClient | null>(null);
   const prevXapiCourseIdRef = useRef(normalizedCourseId);
@@ -434,7 +213,7 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
         /* v8 ignore stop */
         void xapiRef.current?.flush();
       }
-      xapiQueueRef.current = createInMemoryXAPIQueue();
+      xapiQueueRef.current = createXapiQueueFromObservability(observabilityRef.current);
       prevXapiCourseIdRef.current = courseId;
       xapiCourseStartedSentOnClientRef.current = false;
     }
@@ -531,7 +310,7 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
 
   useIsoLayoutEffect(() => {
     const prev = trackingRef.current;
-    const baseSink = normalizedConfig.tracking?.sink;
+    const baseSink = wrapTrackingSink(normalizedConfig.tracking?.sink, observabilityRef.current);
     const userBatchSink = normalizedConfig.tracking?.batchSink;
     assertTrackingSinkConfig(normalizedConfig.tracking);
     const sink =
@@ -596,6 +375,7 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
           attemptId: attemptIdRef.current,
           user: userRef.current,
           lxpackBridge: lxpackBridgeModeRef.current,
+          onLxpackBridgeMiss,
           extraSinks: extraSinksRef.current,
           skipXapi: xapiCourseStartedSentOnClientRef.current,
           onXapiStatementSent: () => {
@@ -641,9 +421,10 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
         user: userRef.current,
       }),
       lxpackBridge: lxpackBridgeModeRef.current,
+      onLxpackBridgeMiss,
       extraSinks: extraSinksRef.current,
     });
-  }, []);
+  }, [onLxpackBridgeMiss]);
 
   const emitLifecycleEvent: TelemetryEmitFn = useCallback(
     (name, data, lessonId) => {
@@ -717,13 +498,14 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
           attemptId: attemptIdRef.current,
           user: userRef.current,
           lxpackBridge: lxpackBridgeModeRef.current,
+          onLxpackBridgeMiss,
           extraSinks: extraSinksRef.current,
         });
         courseStartedEmittedToSinkRef.current = isCourseStartedSinkSettled(result);
       }
       /* v8 ignore stop */
     })();
-  }, [normalizedCourseId, normalizedConfig.tracking?.enabled, syncProgress]);
+  }, [normalizedCourseId, normalizedConfig.tracking?.enabled, syncProgress, onLxpackBridgeMiss]);
 
   const emitLessonCompleted = useCallback(
     (lessonId: LessonId, durationMs?: number) => {
@@ -778,6 +560,23 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
           // ignore
         }
       })();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    const flushOnExit = () => {
+      void xapiRef.current?.flush();
+      void trackingRef.current?.flush?.();
+    };
+    const onVisibilityChange = () => {
+      if (document.visibilityState === "hidden") flushOnExit();
+    };
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    window.addEventListener("pagehide", flushOnExit);
+    return () => {
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+      window.removeEventListener("pagehide", flushOnExit);
     };
   }, []);
 
@@ -850,21 +649,36 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
         session: normalizedConfig.session,
       });
     }
-  }, [useV2Runtime, normalizedCourseId, sessionAttemptId, sessionConfiguredId, sessionUserKey, normalizedConfig.session]);
+  }, [
+    useV2Runtime,
+    normalizedCourseId,
+    sessionAttemptId,
+    sessionConfiguredId,
+    sessionUserKey,
+    normalizedConfig.session,
+  ]);
 
   useEffect(() => {
-    if (!pluginHost) return;
+    if (!useV2Runtime || !headlessRef.current) return;
+    headlessRef.current.updateConfig({
+      plugins: pluginHostRef.current ?? normalizedConfig.plugins,
+    });
+  }, [useV2Runtime, pluginHost]);
+
+  useEffect(() => {
+    const host = useV2Runtime ? headlessRef.current?.pluginHost ?? null : pluginHost;
+    if (!host) return;
     const ctx = buildPluginContext({
       courseId: courseIdRef.current,
       sessionId: sessionIdRef.current,
       attemptId: attemptIdRef.current,
       user: userRef.current,
     });
-    pluginHost.setupAll(ctx);
+    host.setupAll(ctx);
     return () => {
-      pluginHost.disposeAll();
+      host.disposeAll();
     };
-  }, [pluginHost, normalizedCourseId, sessionAttemptId, sessionConfiguredId, sessionUserKey]);
+  }, [pluginHost, useV2Runtime, normalizedCourseId, sessionAttemptId, sessionConfiguredId, sessionUserKey]);
 
   useEffect(() => {
     const nextConfigured = normalizedConfig.session?.sessionId;

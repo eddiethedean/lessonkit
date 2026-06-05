@@ -8,16 +8,56 @@ describe("emitJsx", () => {
       { type: "text", id: "t", text: 'Say "hello" & <goodbye>' },
       "",
     );
-    expect(jsx).toContain("&quot;");
-    expect(jsx).toContain("&amp;");
-    expect(jsx).toContain("&lt;");
+    expect(jsx).toContain("<Text");
+    expect(jsx).toContain('\\"hello\\"');
+    expect(jsx).toContain("&");
+    expect(jsx).toContain("<goodbye>");
+  });
+
+  it("emits TrueFalse and InteractiveBook framework components", () => {
+    const trueFalse = emitBlockJsx(
+      {
+        type: "trueFalse",
+        id: "tf1",
+        checkId: "check-tf",
+        question: "Sky is blue?",
+        answer: true,
+      },
+      "  ",
+    );
+    expect(trueFalse).toContain("<TrueFalse");
+    expect(trueFalse).toContain('answer={true}');
+
+    const book = emitBlockJsx(
+      {
+        type: "interactiveBook",
+        id: "book1",
+        blockId: "book-block",
+        title: "My book",
+        pages: [
+          {
+            type: "page",
+            id: "page1",
+            blockId: "page-block",
+            title: "Chapter",
+            blocks: [{ type: "text", id: "t1", text: "Chapter body" }],
+          },
+        ],
+      },
+      "  ",
+    );
+    expect(book).toContain("<InteractiveBook");
+    expect(book).toContain("<Page");
+    expect(book).toContain("hidden");
+    expect(book).toContain("Chapter body");
   });
 
   it("emits nested quiz blocks in lessons", () => {
     const app = emitAppTsx(sampleProject, "default");
     expect(app).toContain("<Lesson");
     expect(app).toContain("<Quiz");
-    expect(app).toContain("lk-studio-container");
+    expect(app).toContain("<Text");
+    expect(app).toContain("<Heading");
     expect(app).toContain('preset="default"');
   });
 

@@ -3,7 +3,7 @@
 ```{raw} html
 <div class="lk-hero">
   <div class="lk-hero-badges">
-    <span class="lk-badge lk-badge--accent">v1.1.0</span>
+    <span class="lk-badge lk-badge--accent">v1.2.0</span>
     <span class="lk-badge">React-first</span>
     <span class="lk-badge">SCORM · xAPI · cmi5</span>
   </div>
@@ -43,7 +43,7 @@ Pick the path that matches how you work:
 
 **Visual authoring (Alpha).** Drag-and-drop blocks, live preview, export to React/Vite—try the **[live app](guides/studio/app.md)** in the docs.
 
-**Status:** Studio is **Alpha**; expect breaking changes between Studio releases.
+**Status:** Studio is **Alpha** (npm **0.3.2**, pins framework **1.2.0** when published with `studio-v0.3.2`). Framework **1.2** blocks may ship before Studio palette parity on older Studio lines.
 
 +++
 **Open Studio →**
@@ -60,7 +60,7 @@ You can map familiar H5P content types to LessonKit components and Studio blocks
 :::{admonition} New to React?
 :class: note
 
-LessonKit courses are React apps. If you want to learn React before the developer guides, start with **[curated free resources](guides/react-developers/index.md#new-to-react)** (react.dev, TypeScript, Vite), then follow the [quickstart](guides/react-developers/quickstart.md). Prefer to skip React? Use **[vibe coding](guides/vibe-coding/index.md)** instead.
+LessonKit courses are React apps. If you want to learn React before the developer guides, start with **[curated free resources](guides/react-developers/index.md#new-to-react)** (react.dev, TypeScript, Vite), then follow [Getting started in 5 minutes](guides/react-developers/getting-started-in-5-minutes.md) or the [quickstart](guides/react-developers/quickstart.md). Prefer to skip React? Use **[vibe coding](guides/vibe-coding/index.md)** instead.
 :::
 
 ```{raw} html
@@ -106,6 +106,7 @@ guides/library-skills
 :caption: Guides — H5P authors
 
 guides/h5p-for-lessonkit-authors
+H5P_CATALOG_CROSSWALK
 ```
 
 ```{toctree}
@@ -113,10 +114,12 @@ guides/h5p-for-lessonkit-authors
 :caption: Guides — React developers
 
 guides/react-developers/index
+guides/react-developers/getting-started-in-5-minutes
 guides/react-developers/quickstart
 guides/react-developers/project-structure
 guides/react-developers/components-and-hooks
 guides/react-developers/telemetry-and-xapi
+guides/react-developers/production-checklist
 guides/react-developers/theming-and-accessibility
 guides/react-developers/packaging-and-cli
 guides/react-developers/export-parity
@@ -139,6 +142,8 @@ guides/studio/export
 :maxdepth: 1
 :caption: Reference
 
+reference/glossary
+reference/api
 reference/cli
 reference/core
 reference/packaging
@@ -158,6 +163,7 @@ reference/lxpack-upgrades
 :caption: Project
 
 project/changelog
+project/good-first-contributions
 project/security
 project/roadmap
 project/h5p-capability-map
@@ -166,4 +172,5 @@ project/studio-spec
 project/studio-plan
 MIGRATION-0.x-to-1.0
 MIGRATION-1.0-to-1.1
+MIGRATION-1.1-to-1.2
 ```

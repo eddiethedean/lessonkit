@@ -12,7 +12,7 @@ LessonKit is **React-first**, not a plugin inside your LMS’s content bank. You
 
 Use the **[H5P capability map](../project/h5p-capability-map.md)** for the full table (machine name, display name, LessonKit id, roadmap status).
 
-### Available today (framework 1.1.0)
+### Available today (framework 1.2.0)
 
 | H5P name | LessonKit | Import / notes |
 | --- | --- | --- |
@@ -23,22 +23,27 @@ Use the **[H5P capability map](../project/h5p-capability-map.md)** for the full 
 | **Drag the Words** | `DragTheWords` | Inline drop zones; SPA + bridge scoring |
 | **Mark the Words** | `MarkTheWords` | Selectable tokens; SPA + bridge scoring |
 | **Question Set** | `AssessmentSequence` | Aggregates child assessments by `checkId` |
+| **Interactive Book** | `InteractiveBook` + `Page` | Compound navigation + session resume |
+| **Accordion** | `Accordion` | Expand/collapse sections |
+| **Dialog Cards** | `DialogCards` | Flip-card dialog |
+| **Flashcards** | `Flashcards` | Card deck |
+| **Image Hotspots** | `ImageHotspots` | Clickable regions on an image |
+| **Image Slider** | `ImageSlider` | Slide carousel |
+| **Find the Hotspot** | `FindHotspot` | Scored hotspot selection |
+| **Find Multiple Hotspots** | `FindMultipleHotspots` | Multi-select hotspots |
 | **Scenario** (narrative regions) | `Scenario` | Optional `blockId` for telemetry URNs |
 | Open response / reflection | `Reflection` | Not auto-scored (like many H5P text tasks) |
 | Course shell | `Course`, `Lesson` | One SPA vs one H5P activity per embed |
 | Progress | `ProgressTracker` | Course-level progress, not per-iframe |
+| Content text / heading / image | `Text`, `Heading`, `Image` | Framework content primitives |
 
 ### Planned (roadmap / capability map)
-
-Common H5P types and their LessonKit names (same idea, React implementation):
 
 | H5P | LessonKit (planned) |
 | --- | --- |
 | Interactive Video | `InteractiveVideo` |
 | Course Presentation | `SlideDeck` |
 | Branching Scenario | `BranchingScenario` |
-| Interactive Book | `InteractiveBook` |
-| Column | `Page` (Studio `container` today) |
 
 :::{admonition} Renamed on purpose
 :class: important
@@ -51,7 +56,7 @@ A few LessonKit ids differ from H5P labels where we already shipped or need clea
 :::{admonition} H5P Hub → Studio palette
 :class: tip
 
-**H5P Hub** is where you install content types in your LMS. **LessonKit Studio** (Alpha) is the visual editor for blocks that compile to the same React runtime as hand-written courses. Today: text, heading, image, quiz, scenario, container, and more—see [Studio guide](studio/index.md). Framework **1.1.0** ships `TrueFalse`, `FillInTheBlanks`, `DragAndDrop`, `DragTheWords`, `MarkTheWords`, and `AssessmentSequence` in `@lessonkit/react`. Studio palette support is planned for Studio **0.8.x**.
+**H5P Hub** is where you install content types in your LMS. **LessonKit Studio** (Alpha) is the visual editor for blocks that compile to the same React runtime as hand-written courses. Studio **0.3.2** adds palette entries for framework 1.1.x P0 assessments and 1.2.x compound/Tier C/D blocks with H5P-familiar labels—see [Studio guide](studio/index.md).
 :::
 
 ## Wiring differences (H5P vs LessonKit)

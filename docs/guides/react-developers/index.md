@@ -55,10 +55,12 @@ Use the [Vibe coding guides](../vibe-coding/index.md) with an AI editor and the 
 | Topic | Page |
 | --- | --- |
 | Coming from H5P | [../h5p-for-lessonkit-authors.md](../h5p-for-lessonkit-authors.md) |
+| Getting started (5 min) | [getting-started-in-5-minutes.md](getting-started-in-5-minutes.md) |
 | Quickstart | [quickstart.md](quickstart.md) |
 | Project structure | [project-structure.md](project-structure.md) |
 | Components & hooks | [components-and-hooks.md](components-and-hooks.md) |
 | Telemetry & xAPI | [telemetry-and-xapi.md](telemetry-and-xapi.md) |
+| Production checklist | [production-checklist.md](production-checklist.md) |
 | Theming & a11y | [theming-and-accessibility.md](theming-and-accessibility.md) |
 | Packaging & CLI | [packaging-and-cli.md](packaging-and-cli.md) |
 | Export parity | [export-parity.md](export-parity.md) |

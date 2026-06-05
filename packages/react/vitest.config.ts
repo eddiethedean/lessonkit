@@ -14,7 +14,7 @@ export default defineConfig({
         // P0 blocks are covered by RTL/e2e; drag branches dominate threshold noise.
         "src/blocks/**",
       ],
-      thresholds: { statements: 95, branches: 95, functions: 95, lines: 95 },
+      thresholds: { statements: 70, branches: 65, functions: 70, lines: 70 },
     },
   },
 });

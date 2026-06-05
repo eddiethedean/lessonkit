@@ -15,7 +15,23 @@ Source: [`library-skills/`](https://github.com/eddiethedean/lessonkit/tree/main/
 
 ## Install
 
-From a clone of LessonKit (or your course repo if you vendor `library-skills/`):
+### Without cloning the monorepo
+
+Shallow-clone only `library-skills/`, run the installer, then delete the temp tree:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/eddiethedean/lessonkit/main/library-skills/install-remote.sh | bash
+```
+
+Project-scoped install:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/eddiethedean/lessonkit/main/library-skills/install-remote.sh | bash -s -- --project -C ~/my-course
+```
+
+Requires **git** on your PATH.
+
+### From a LessonKit clone (contributors)
 
 ```bash
 # All projects on this machine

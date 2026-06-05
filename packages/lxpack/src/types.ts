@@ -36,11 +36,33 @@ export type FillInBlanksAssessmentDescriptor = {
   passingScore?: number;
 };
 
+export type FindHotspotAssessmentDescriptor = {
+  kind: "findHotspot";
+  checkId: CheckId;
+  question: string;
+  src: string;
+  alt: string;
+  correctTargetId: string;
+  passingScore?: number;
+};
+
+export type FindMultipleHotspotsAssessmentDescriptor = {
+  kind: "findMultipleHotspots";
+  checkId: CheckId;
+  question: string;
+  src: string;
+  alt: string;
+  correctTargetIds: string[];
+  passingScore?: number;
+};
+
 /** Discriminated assessment entries in lessonkit.json (defaults to MCQ when kind omitted). */
 export type AssessmentDescriptor =
   | McqAssessmentDescriptor
   | TrueFalseAssessmentDescriptor
-  | FillInBlanksAssessmentDescriptor;
+  | FillInBlanksAssessmentDescriptor
+  | FindHotspotAssessmentDescriptor
+  | FindMultipleHotspotsAssessmentDescriptor;
 
 export type LessonkitCourseDescriptor = {
   courseId: CourseId;

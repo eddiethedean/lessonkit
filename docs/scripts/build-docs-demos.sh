@@ -35,6 +35,12 @@ cp -R examples/data-privacy/dist/. "$DEMOS_DIR/data-privacy/"
 build_demo lessonkit-example-customer-service customer-service
 cp -R examples/customer-service/dist/. "$DEMOS_DIR/customer-service/"
 
+build_demo lessonkit-example-framework-11-showcase framework-11-showcase
+cp -R examples/framework-11-showcase/dist/. "$DEMOS_DIR/framework-11-showcase/"
+
+build_demo lessonkit-example-framework-12-showcase framework-12-showcase
+cp -R examples/framework-12-showcase/dist/. "$DEMOS_DIR/framework-12-showcase/"
+
 build_demo lessonkit-studio-web studio
 cp -R apps/studio-web/dist/. "$DEMOS_DIR/studio/"
 

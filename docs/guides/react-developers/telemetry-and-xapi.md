@@ -51,6 +51,23 @@ When embedded in an LXPack export, `@lessonkit/react` can forward completion/sco
 
 `LessonkitProvider` uses `runtimeVersion: "v2"` by default (headless runtime from `@lessonkit/core`). Set `runtimeVersion: "v1"` to opt out; see [Core reference](../../reference/core.md) and [MIGRATION-0.x-to-1.0.md](../../MIGRATION-0.x-to-1.0.md).
 
+## Production
+
+Before go-live, complete the [production checklist](production-checklist.md) (LMS bridge, flush-on-exit, `blockId`, observability hooks).
+
+### Observability hooks
+
+```tsx
+observability: {
+  onTelemetrySinkError: (err, { sinkId }) => { /* report */ },
+  onXapiQueueDepth: (depth) => { /* gauge */ },
+  onXapiQueueCap: () => { /* alert: queue dropped oldest statement */ },
+  onLxpackBridgeMiss: (event) => { /* LMS bridge missing for completion */ },
+},
+```
+
+`LessonkitProvider` flushes xAPI and telemetry when the tab is hidden or on `pagehide`.
+
 ## Identity and URNs
 
 All telemetry requires `courseId`. Object URNs for xAPI follow the identity contract—[Identity reference](../../reference/identity.md).

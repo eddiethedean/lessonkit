@@ -1,5 +1,8 @@
+import { buildV3CatalogFromV2 } from "./catalogV3Entries";
+
 export const blockCatalogVersion = 1 as const;
 export const blockCatalogV2Version = 2 as const;
+export const blockCatalogV3Version = 3 as const;
 
 export type BlockPropSpec = {
   name: string;
@@ -40,9 +43,14 @@ export type BlockCatalogEntry = BlockCatalogEntryBase;
 
 export type BlockCatalogEntryV2 = BlockCatalogEntryBase & {
   assessmentContract?: true;
+  compoundContract?: true;
   h5pMachineName?: string;
   h5pAlias?: string;
+  allowedChildTypes?: readonly string[];
+  maxNestingDepth?: number;
 };
+
+export type BlockCatalogEntryV3 = BlockCatalogEntryV2;
 
 export const BLOCK_CATALOG = [
   {
@@ -389,13 +397,16 @@ export const BLOCK_CATALOG_V2: BlockCatalogEntryV2[] = [
   ...v2AssessmentEntries,
 ];
 
-function cloneCatalogEntry<T extends BlockCatalogEntryBase>(entry: T): T {
+export const BLOCK_CATALOG_V3: BlockCatalogEntryV3[] = buildV3CatalogFromV2(BLOCK_CATALOG_V2);
+
+function cloneCatalogEntry<T extends BlockCatalogEntryV2>(entry: T): T {
   return {
     ...entry,
     props: entry.props.map((p) => ({ ...p })),
     aliases: entry.aliases ? [...entry.aliases] : undefined,
     optionalIds: entry.optionalIds ? [...entry.optionalIds] : undefined,
     parentConstraints: entry.parentConstraints ? [...entry.parentConstraints] : undefined,
+    allowedChildTypes: entry.allowedChildTypes ? [...entry.allowedChildTypes] : undefined,
     a11y: { ...entry.a11y },
     theming: {
       ...entry.theming,
@@ -408,11 +419,14 @@ function cloneCatalogEntry<T extends BlockCatalogEntryBase>(entry: T): T {
   };
 }
 
-export type BuildBlockCatalogOptions = { version?: 1 | 2 };
+export type BuildBlockCatalogOptions = { version?: 1 | 2 | 3 };
 
-export function buildBlockCatalog(opts?: BuildBlockCatalogOptions): BlockCatalogEntry[] | BlockCatalogEntryV2[] {
-  const version = opts?.version ?? 2;
-  const source = version === 2 ? BLOCK_CATALOG_V2 : BLOCK_CATALOG;
+export function buildBlockCatalog(
+  opts?: BuildBlockCatalogOptions,
+): BlockCatalogEntry[] | BlockCatalogEntryV2[] | BlockCatalogEntryV3[] {
+  const version = opts?.version ?? 3;
+  const source =
+    version === 3 ? BLOCK_CATALOG_V3 : version === 2 ? BLOCK_CATALOG_V2 : BLOCK_CATALOG;
   return source.map((entry) => cloneCatalogEntry(entry));
 }
 
@@ -424,9 +438,10 @@ export function buildBlockCatalogV1(): BlockCatalogEntry[] {
 export function getBlockCatalogEntry(
   type: string,
   opts?: BuildBlockCatalogOptions,
-): BlockCatalogEntry | BlockCatalogEntryV2 | undefined {
-  const version = opts?.version ?? 2;
-  const source = version === 2 ? BLOCK_CATALOG_V2 : BLOCK_CATALOG;
+): BlockCatalogEntry | BlockCatalogEntryV2 | BlockCatalogEntryV3 | undefined {
+  const version = opts?.version ?? 3;
+  const source =
+    version === 3 ? BLOCK_CATALOG_V3 : version === 2 ? BLOCK_CATALOG_V2 : BLOCK_CATALOG;
   return source.find((entry) => entry.type === type || entry.aliases?.includes(type));
 }
 

@@ -41,13 +41,15 @@ Canonical block list, props, and contracts: [Block catalog reference](../../refe
 
 ## Storybook
 
-Run the component gallery from the monorepo:
+Browse published stories: **[Storybook on GitHub Pages](https://eddiethedean.github.io/lessonkit/storybook/)**.
+
+Run the gallery locally from the monorepo:
 
 ```bash
 npm run storybook
 ```
 
-See [Storybook](https://github.com/eddiethedean/lessonkit/tree/main/packages/react/storybook) for story groups (Course/Lesson layouts, Quiz states, blocks).
+See [packages/react/stories](https://github.com/eddiethedean/lessonkit/tree/main/packages/react/stories) for story groups (Course/Lesson layouts, Quiz states, blocks). API index: [API reference](../../reference/api.md).
 
 ## Hooks
 

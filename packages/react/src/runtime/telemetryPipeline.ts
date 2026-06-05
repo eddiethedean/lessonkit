@@ -12,6 +12,7 @@ export type LegacyEmitOptions = {
   tracking: TrackingClient;
   xapi: XAPIClient | null;
   lxpackBridge: LxpackBridgeMode;
+  onLxpackBridgeMiss?: (event: TelemetryEvent) => void;
 };
 
 function isDevEnvironment(): boolean {
@@ -44,7 +45,9 @@ function createLegacyPipeline(
     {
       id: "lxpack-bridge",
       emit(event) {
-        forwardTelemetryToLxpack(event, opts.lxpackBridge);
+        forwardTelemetryToLxpack(event, opts.lxpackBridge, {
+          onBridgeMiss: opts.onLxpackBridgeMiss,
+        });
       },
     },
     ...extraSinks,

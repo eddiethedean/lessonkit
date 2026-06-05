@@ -1,0 +1,28 @@
+name: Documentation
+description: Report missing or incorrect documentation
+title: "[Docs]: "
+labels: ["documentation"]
+body:
+  - type: input
+    id: location
+    attributes:
+      label: Page URL or file path
+      description: RTD URL, GitHub path (e.g. docs/guides/...), or npm README.
+      placeholder: https://lessonkit.readthedocs.io/en/latest/...
+    validations:
+      required: true
+
+  - type: textarea
+    id: issue
+    attributes:
+      label: What is wrong or missing?
+    validations:
+      required: true
+
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: Suggested fix (optional)
+      description: Wording, outline, or link to a PR branch if you have one.
+    validations:
+      required: false

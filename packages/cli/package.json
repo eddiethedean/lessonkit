@@ -1,6 +1,6 @@
 {
   "name": "@lessonkit/cli",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "private": false,
   "description": "LessonKit CLI — init, dev, build, and package learning experiences.",
   "license": "Apache-2.0",
@@ -9,7 +9,7 @@
     "url": "git+https://github.com/eddiethedean/lessonkit.git",
     "directory": "packages/cli"
   },
-  "homepage": "https://github.com/eddiethedean/lessonkit",
+  "homepage": "https://lessonkit.readthedocs.io/en/latest/reference/cli.html",
   "bugs": {
     "url": "https://github.com/eddiethedean/lessonkit/issues"
   },
@@ -42,8 +42,8 @@
     "lint": "echo \"(no lint configured yet)\""
   },
   "dependencies": {
-    "@lessonkit/core": "1.1.0",
-    "@lessonkit/lxpack": "1.1.0",
+    "@lessonkit/core": "1.2.0",
+    "@lessonkit/lxpack": "1.2.0",
     "commander": "^14.0.1"
   },
   "engines": {
