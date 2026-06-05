@@ -22,7 +22,7 @@ LessonKit plugins extend the runtime without forking `@lessonkit/react`. They re
 
 ## Constraints (v1)
 
-- Plugins are **bundled with your app** (static import). Dynamic loading and a marketplace are post–Studio 1.0.
+- Plugins are **bundled with your app** (static import). Dynamic loading and a marketplace are future work.
 - `onTelemetry` is **synchronous**; keep work fast or enqueue to your own service.
 - Custom **interaction** blocks require you to render React components; `interactionBlocks` is metadata for tooling.
 - Plugins must use **stable `id`** strings (reverse-DNS recommended, e.g. `com.example.analytics`).

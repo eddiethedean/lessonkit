@@ -17,7 +17,10 @@ describe("@lessonkit/react runtime/session", () => {
     const map = new Map<string, string>();
     const storage = {
       getItem: (k: string) => map.get(k) ?? null,
-      setItem: (k: string, v: string) => void map.set(k, v),
+      setItem: (k: string, v: string) => {
+        map.set(k, v);
+        return true;
+      },
     };
 
     const id1 = resolveSessionId(storage);
@@ -31,7 +34,10 @@ describe("@lessonkit/react runtime/session", () => {
     const map = new Map<string, string>();
     const storage = {
       getItem: (k: string) => map.get(k) ?? null,
-      setItem: (k: string, v: string) => void map.set(k, v),
+      setItem: (k: string, v: string) => {
+        map.set(k, v);
+        return true;
+      },
     };
 
     const sessionA = "session-a";
@@ -50,7 +56,10 @@ describe("@lessonkit/react runtime/session", () => {
     const map = new Map<string, string>();
     const storage = {
       getItem: (k: string) => map.get(k) ?? null,
-      setItem: (k: string, v: string) => void map.set(k, v),
+      setItem: (k: string, v: string) => {
+        map.set(k, v);
+        return true;
+      },
       removeItem: (k: string) => void map.delete(k),
     };
 

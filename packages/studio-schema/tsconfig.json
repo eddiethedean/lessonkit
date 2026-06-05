@@ -1,9 +1,0 @@
-{
-  "extends": "../../tsconfig.base.json",
-  "compilerOptions": {
-    "noEmit": true,
-    "resolveJsonModule": true,
-    "types": ["vitest/globals"]
-  },
-  "include": ["src", "test"]
-}

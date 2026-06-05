@@ -9,7 +9,7 @@ import {
   type ValidateCourseResult,
 } from "@lxpack/api";
 import { validateDescriptorForTarget } from "./validateDescriptor";
-import type { LxpackInjectedAssessment } from "./assessments";
+import { assessmentDescriptorToLxpack, type LxpackInjectedAssessment } from "./assessments";
 import type { WriteLxpackProjectOptions } from "./writeProject";
 import {
   remapArtifactPaths,
@@ -18,6 +18,7 @@ import {
 } from "./packaging/validateInputs";
 import { promoteStagingToOutDir } from "./packaging/promote";
 import { buildStagingPackage, ensureOutDirParent } from "./packaging/staging";
+import { findPackagingErrorIssues } from "./packaging/issueSeverity";
 
 export type { ExportTarget } from "@lxpack/api";
 
@@ -126,6 +127,21 @@ export async function packageLessonkitCourse(
 
   const descriptor = descriptorValidation.descriptor;
 
+  const nonInjectableAssessments = (descriptor.assessments ?? [])
+    .map((assessment, index) => ({ assessment, index }))
+    .filter(({ assessment }) => assessmentDescriptorToLxpack(assessment) === null);
+  if (nonInjectableAssessments.length > 0) {
+    return {
+      ok: false,
+      courseDir: outDir,
+      target,
+      issues: nonInjectableAssessments.map(({ assessment, index }) => ({
+        path: `assessments[${index}]`,
+        message: `assessment kind "${assessment.kind ?? "mcq"}" (checkId "${assessment.checkId}") is not injected into LMS shell quizzes for target "${target}"`,
+      })),
+    };
+  }
+
   const staged = await buildStagingPackage({
     ...writeOpts,
     descriptor,
@@ -151,6 +167,25 @@ export async function packageLessonkitCourse(
   }
 
   const { stagingDir, build } = staged;
+
+  const buildErrorIssues = findPackagingErrorIssues(build.issues);
+  if (buildErrorIssues.length > 0) {
+    await fsp.rm(stagingDir, { recursive: true, force: true }).catch(/* v8 ignore next */ () => undefined);
+    return {
+      ok: false,
+      courseDir: outDir,
+      target,
+      validation: { ok: false, manifest: build.manifest, issues: build.issues },
+      build,
+      issues: build.issues
+        .filter((i) => findPackagingErrorIssues([i]).length > 0)
+        .map((i) => ({
+          path: i.path ?? "build",
+          message: i.message,
+          severity: i.severity,
+        })),
+    };
+  }
 
   const stagingRoot = await fsp.realpath(stagingDir);
   const artifactIssues = [
@@ -183,6 +218,7 @@ export async function packageLessonkitCourse(
     await ensureOutDirParent(outDir);
     await promoteStagingToOutDir(stagingDir, outDir);
   } catch (err) {
+    await fsp.rm(stagingDir, { recursive: true, force: true }).catch(/* v8 ignore next */ () => undefined);
     return {
       ok: false,
       courseDir: outDir,

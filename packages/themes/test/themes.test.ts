@@ -11,6 +11,7 @@ import {
   lightTheme,
   mergeThemes,
   radiusVarName,
+  sanitizeCssCustomPropertyValue,
   shadowVarName,
   spacingVarName,
   themeToCssDeclarationBlock,
@@ -182,6 +183,40 @@ describe("@lessonkit/themes", () => {
     expect(typographyVarName("fontFamily")).toBe("--lk-font-family");
     expect(radiusVarName("sm")).toBe("--lk-radius-sm");
     expect(shadowVarName("lg")).toBe("--lk-shadow-lg");
+  });
+
+  it("sanitizeCssCustomPropertyValue rejects CSS-breaking values", () => {
+    expect(sanitizeCssCustomPropertyValue("#2563eb")).toBe("#2563eb");
+    expect(sanitizeCssCustomPropertyValue("red; } body { background: red")).toBeNull();
+    expect(sanitizeCssCustomPropertyValue("value\nbreak")).toBeNull();
+    expect(sanitizeCssCustomPropertyValue("/* comment */")).toBeNull();
+  });
+
+  it("validateTheme rejects unsafe token values and invalid extra keys", () => {
+    const unsafePrimary = validateTheme({
+      ...defaultTheme,
+      colors: { ...defaultTheme.colors, primary: "red; } body { background: red" },
+    });
+    expect(unsafePrimary.ok).toBe(false);
+
+    const badExtraKey = validateTheme({
+      ...defaultTheme,
+      colors: {
+        ...defaultTheme.colors,
+        extra: { "bad key": "#fff" },
+      },
+    });
+    expect(badExtraKey.ok).toBe(false);
+  });
+
+  it("themeToCssDeclarationBlock omits unsafe values", () => {
+    const theme = {
+      ...defaultTheme,
+      colors: { ...defaultTheme.colors, primary: "red; } body { background: red" },
+    };
+    const block = themeToCssDeclarationBlock(theme);
+    expect(block).not.toContain("body { background");
+    expect(block).not.toContain("--lk-color-primary:");
   });
 
   it("buildThemeCatalog includes color-extra entry", () => {

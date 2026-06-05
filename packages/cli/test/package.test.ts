@@ -94,6 +94,67 @@ describe("runPackage", () => {
     expect(result).toMatchObject({ target: "react-vite", distDir: join(dir, "dist") });
   });
 
+  it("prints packaging warnings when validation issues are non-fatal", async () => {
+    const stderr = vi.spyOn(process.stderr, "write").mockImplementation(() => true);
+    mockedPackage.mockResolvedValue({
+      ok: true,
+      courseDir: join(dir, ".lxpack/course"),
+      target: "scorm12",
+      outputPath: join(dir, ".lxpack/course/.lxpack/out/course-scorm12.zip"),
+      fileCount: 3,
+      validation: {
+        ok: true,
+        issues: [{ path: "assessments[0].question", message: "question is empty", severity: "warning" }],
+        manifest: {} as never,
+      },
+      build: {
+        ok: true,
+        issues: [{ path: "assessments[0].question", message: "question is empty", severity: "warning" }],
+        fileCount: 3,
+        target: "scorm12",
+        manifest: {} as never,
+      },
+    } satisfies PackageLessonkitCourseResult);
+
+    const result = await runPackage({ target: "scorm12", cwd: dir, noBuild: true, json: true });
+    expect(result.ok).toBe(true);
+    if (result.ok && result.command === "package" && result.target !== "react-vite") {
+      expect(result.warnings).toEqual([
+        { path: "assessments[0].question", message: "question is empty", severity: "warning" },
+      ]);
+    }
+    stderr.mockRestore();
+  });
+
+  it("writes packaging warnings to stderr in human mode", async () => {
+    const stderr = vi.spyOn(process.stderr, "write").mockImplementation(() => true);
+    mockedPackage.mockResolvedValue({
+      ok: true,
+      courseDir: join(dir, ".lxpack/course"),
+      target: "scorm12",
+      outputPath: join(dir, ".lxpack/course/.lxpack/out/course-scorm12.zip"),
+      fileCount: 3,
+      validation: {
+        ok: true,
+        issues: [{ path: "course.title", message: "title is short", severity: "warning" }],
+        manifest: {} as never,
+      },
+      build: {
+        ok: true,
+        issues: [{ path: "course.title", message: "title is short", severity: "warning" }],
+        fileCount: 3,
+        target: "scorm12",
+        manifest: {} as never,
+      },
+    } satisfies PackageLessonkitCourseResult);
+
+    await runPackage({ target: "scorm12", cwd: dir, noBuild: true });
+    expect(stderr).toHaveBeenCalledWith(
+      "[lessonkit] packaging warning: course.title: title is short\n",
+    );
+    stderr.mockRestore();
+  });
+
   it("surfaces packaging failures", async () => {
     mockedPackage.mockResolvedValue({
       ok: false,

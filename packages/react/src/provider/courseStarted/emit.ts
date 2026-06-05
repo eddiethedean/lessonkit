@@ -88,9 +88,10 @@ export async function emitCourseStartedToTracking(
   try {
     if (shouldCommit && !shouldCommit()) return false;
     tracking.track(event);
-    await tracking.flush?.();
-    if (shouldCommit && !shouldCommit()) return false;
     markCourseStartedEmittedToTracking(storage, sessionId, courseId);
+    const delivered = await tracking.flush?.();
+    if (delivered === false) return false;
+    if (shouldCommit && !shouldCommit()) return false;
     return true;
   } catch {
     return false;

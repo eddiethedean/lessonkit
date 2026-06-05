@@ -35,6 +35,7 @@ function FindMultipleHotspotsInner(
       else next.add(id);
       return next;
     });
+    setChecked(false);
   };
 
   const correct =
@@ -74,7 +75,7 @@ function FindMultipleHotspotsInner(
   useAssessmentHandleRegistration(checkId, handle, ref);
 
   const submit = () => {
-    if (selected.size === 0) return;
+    if (selected.size === 0 || checked) return;
     setChecked(true);
     assessment.answer({
       checkId,
@@ -88,7 +89,7 @@ function FindMultipleHotspotsInner(
         interactionType: INTERACTION,
         score: 1,
         maxScore: 1,
-        passingScore: props.passingScore,
+        passingScore: props.passingScore ?? 1,
       });
     }
   };

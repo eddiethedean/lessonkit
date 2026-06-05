@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { createNoopStorage } from "../src/ports";
 import {
   getTabSessionId,
@@ -25,9 +25,31 @@ describe("session", () => {
       getItem: (k: string) => store[k] ?? null,
       setItem: (k: string, v: string) => {
         store[k] = v;
+        return true;
       },
     };
     expect(resolveSessionId(storage, undefined)).toBe("tab-1");
+  });
+
+  it("resolveSessionId reuses volatile id when persistence fails", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    vi.stubEnv("NODE_ENV", "development");
+    const storage = {
+      getItem: () => null,
+      setItem: () => false,
+    };
+
+    try {
+      const id1 = resolveSessionId(storage, undefined);
+      const id2 = resolveSessionId(storage, undefined);
+      expect(id1).toBe(id2);
+      expect(warn).toHaveBeenCalledWith(
+        "[lessonkit] session id could not be persisted; reusing in-memory id for this tab.",
+      );
+    } finally {
+      vi.unstubAllEnvs();
+      warn.mockRestore();
+    }
   });
 
   it("resolveSessionId creates and persists a new id", () => {
@@ -36,6 +58,7 @@ describe("session", () => {
       getItem: (k: string) => store[k] ?? null,
       setItem: (k: string, v: string) => {
         store[k] = v;
+        return true;
       },
     };
     const id = resolveSessionId(storage, undefined);
@@ -46,7 +69,7 @@ describe("session", () => {
   it("getTabSessionId reads session key", () => {
     const storage = {
       getItem: (k: string) => (k === SESSION_STORAGE_KEY ? "s1" : null),
-      setItem: () => {},
+      setItem: () => true,
     };
     expect(getTabSessionId(storage)).toBe("s1");
   });
@@ -57,6 +80,7 @@ describe("session", () => {
       getItem: (k: string) => store[k] ?? null,
       setItem: (k: string, v: string) => {
         store[k] = v;
+        return true;
       },
       removeItem: (k: string) => {
         delete store[k];
@@ -77,6 +101,7 @@ describe("session", () => {
       getItem: (k: string) => store[k] ?? null,
       setItem: (k: string, v: string) => {
         store[k] = v;
+        return true;
       },
       removeItem: (k: string) => {
         delete store[k];
@@ -97,6 +122,7 @@ describe("session", () => {
       getItem: (k: string) => store[k] ?? null,
       setItem: (k: string, v: string) => {
         store[k] = v;
+        return true;
       },
       removeItem: (k: string) => {
         delete store[k];
@@ -117,6 +143,7 @@ describe("session", () => {
       getItem: (k: string) => store[k] ?? null,
       setItem: (k: string, v: string) => {
         store[k] = v;
+        return true;
       },
       removeItem: (k: string) => {
         delete store[k];
@@ -134,6 +161,7 @@ describe("session", () => {
       getItem: (k: string) => store[k] ?? null,
       setItem: (k: string, v: string) => {
         store[k] = v;
+        return true;
       },
       removeItem: (k: string) => {
         delete store[k];

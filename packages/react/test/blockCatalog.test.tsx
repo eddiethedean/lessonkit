@@ -82,6 +82,7 @@ describe("@lessonkit/react block catalog", () => {
     telemetryNames.add("assessment_answered");
     telemetryNames.add("assessment_completed");
     telemetryNames.add("book_page_viewed");
+    telemetryNames.add("slide_viewed");
     telemetryNames.add("compound_page_viewed");
     telemetryNames.add("hotspot_opened");
     telemetryNames.add("accordion_section_toggled");
@@ -113,9 +114,15 @@ describe("@lessonkit/react block catalog", () => {
   it("v3 catalog includes compound blocks", () => {
     const book = getBlockCatalogEntry("InteractiveBook", { version: 3 }) as BlockCatalogEntryV2 | undefined;
     const page = getBlockCatalogEntry("Page", { version: 3 }) as BlockCatalogEntryV2 | undefined;
+    const deck = getBlockCatalogEntry("SlideDeck", { version: 3 }) as BlockCatalogEntryV2 | undefined;
+    const slide = getBlockCatalogEntry("Slide", { version: 3 }) as BlockCatalogEntryV2 | undefined;
     const accordion = getBlockCatalogEntry("Accordion", { version: 3 }) as BlockCatalogEntryV2 | undefined;
     expect(book?.compoundContract).toBe(true);
     expect(page?.allowedChildTypes).toContain("Text");
+    expect(deck?.compoundContract).toBe(true);
+    expect(deck?.h5pMachineName).toBe("H5P.CoursePresentation");
+    expect(slide?.allowedChildTypes).toContain("TrueFalse");
+    expect(slide?.allowedChildTypes).not.toContain("ProgressTracker");
     expect(accordion?.h5pMachineName).toBe("H5P.Accordion");
   });
 

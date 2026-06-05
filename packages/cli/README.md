@@ -32,7 +32,7 @@ lessonkit package --target scorm12   # LMS artifact
 
 Every project includes a root `lessonkit.json` manifest (`schemaVersion: 1`).
 
-Subprocess timeout defaults to **30 minutes** (`LESSONKIT_CMD_TIMEOUT_MS`; set `0` to disable).
+Subprocess timeout defaults to **30 minutes** (`LESSONKIT_CMD_TIMEOUT_MS`). To disable the timeout, pass `timeoutMs: 0` in the exec API (the env var falls back to 30 minutes when set to `0` or omitted).
 
 ## Docs
 

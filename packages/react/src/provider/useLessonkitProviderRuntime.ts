@@ -9,6 +9,7 @@ import {
 import type {
   CourseId,
   LessonId,
+  StoragePort,
   TelemetryDataFor,
   TelemetryEvent,
   TelemetryEventName,
@@ -25,6 +26,7 @@ import { telemetryEventToXAPIStatement } from "@lessonkit/xapi";
 import { tryBuildTelemetryEvent } from "../runtime/emitTelemetry";
 import type { LxpackBridgeMode } from "../runtime/lxpackBridge";
 import { createSessionStoragePort, resetStoragePortForTests } from "../runtime/ports";
+import { resetSharedVolatileSessionIdForTests } from "@lessonkit/core";
 import { createProgressController, type ProgressState } from "../runtime/progress";
 import { createXapiClientFromConfig } from "../runtime/xapi";
 import {
@@ -61,8 +63,13 @@ const useIsoLayoutEffect =
 const defaultStorage = createSessionStoragePort();
 
 /** @internal Reset provider session dedupe between tests. */
+export function getLessonkitProviderStorage(): StoragePort {
+  return defaultStorage;
+}
+
 export function resetLessonkitProviderStorageForTests(): void {
   resetStoragePortForTests(defaultStorage);
+  resetSharedVolatileSessionIdForTests();
 }
 
 export { resetCourseStartedTrackingFlightForTests };
@@ -144,6 +151,7 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
         runtimeVersion: "v2",
         session: normalizedConfig.session,
         plugins: pluginHostRef.current ?? normalizedConfig.plugins,
+        deferPluginSetup: true,
       });
       progressRef.current = headlessRef.current.progress;
     } else {
@@ -159,6 +167,7 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
       runtimeVersion: "v2",
       session: normalizedConfig.session,
       plugins: pluginHostRef.current ?? normalizedConfig.plugins,
+      deferPluginSetup: true,
     });
   }
 
@@ -338,9 +347,12 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
             return userBatchSink(perEventForBatch);
           }
         : userBatchSink;
-    const next = createTrackingClientFromConfig({
-      tracking: { ...normalizedConfig.tracking, sink, batchSink },
-    });
+    const next = createTrackingClientFromConfig(
+      {
+        tracking: { ...normalizedConfig.tracking, sink, batchSink },
+      },
+      observabilityRef.current,
+    );
     trackingRef.current = next;
     trackingClientForUnmountRef.current = next;
     setTracking(next);
@@ -715,6 +727,7 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
       config: normalizedConfig,
       tracking,
       xapi,
+      storage: defaultStorage,
       session: { sessionId: sessionIdRef.current, attemptId: attemptIdRef.current, user: userRef.current },
       progress,
       setActiveLesson,

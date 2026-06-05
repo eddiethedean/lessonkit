@@ -26,7 +26,7 @@ pkg.scripts = {
   "test:coverage": "vitest run --coverage --passWithNoTests=false",
 };
 
-const lessonkitVersion = "^1.2.0";
+const lessonkitVersion = "^1.3.0";
 pkg.dependencies = {
   "@lessonkit/core": lessonkitVersion,
   "@lessonkit/react": lessonkitVersion,
@@ -46,7 +46,7 @@ pkg.devDependencies = {
   jsdom: "^26.1.0",
   typescript: "^5.8.3",
   vite: "^7.1.3",
-  vitest: "^3.2.4",
+  vitest: "^4.1.8",
 };
 
 await writeFile(pkgPath, `${JSON.stringify(pkg, null, 2)}\n`, "utf8");

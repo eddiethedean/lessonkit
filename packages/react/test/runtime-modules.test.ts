@@ -37,6 +37,7 @@ describe("@lessonkit/react runtime modules", () => {
       getItem: (key: string) => store[key] ?? null,
       setItem: (key: string, value: string) => {
         store[key] = value;
+        return true;
       },
       removeItem: () => {
         throw new Error("quota");

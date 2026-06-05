@@ -42,9 +42,11 @@ describe("remapArtifactPaths", () => {
     expect(remapArtifactPaths("/a", "/b", undefined)).toBeUndefined();
   });
 
-  it("passes through paths outside staging", () => {
+  it("throws for paths outside staging", () => {
     const outside = resolve("/elsewhere/pkg.zip");
-    expect(remapArtifactPaths(resolve("/staging"), resolve("/out"), outside)).toBe(outside);
+    expect(() => remapArtifactPaths(resolve("/staging"), resolve("/out"), outside)).toThrow(
+      /outside the staging directory/,
+    );
   });
 
   it("remaps when staging root differs only by drive letter casing on win32 paths", () => {

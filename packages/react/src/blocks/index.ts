@@ -9,6 +9,8 @@ export { Heading, type HeadingProps } from "./Heading";
 export { Image, type ImageProps } from "./Image";
 export { Page, type PageProps } from "./Page";
 export { InteractiveBook, type InteractiveBookProps } from "./InteractiveBook";
+export { Slide, type SlideProps } from "./Slide";
+export { SlideDeck, type SlideDeckProps } from "./SlideDeck";
 export { Accordion, type AccordionProps, type AccordionSection } from "./Accordion";
 export { DialogCards, type DialogCardsProps, type DialogCard } from "./DialogCards";
 export { Flashcards, type FlashcardsProps, type Flashcard } from "./Flashcards";

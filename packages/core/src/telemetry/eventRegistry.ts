@@ -7,6 +7,7 @@ import type {
   AssessmentAnsweredData,
   AssessmentCompletedData,
   BookPageViewedData,
+  SlideViewedData,
   CompoundPageViewedData,
   FlashcardFlippedData,
   HotspotOpenedData,
@@ -159,6 +160,20 @@ export const TELEMETRY_EVENT_REGISTRY: Record<BuildTelemetryEventInput["name"], 
         ...base,
         lessonId,
         data: opts.data as BookPageViewedData,
+      };
+    },
+  },
+  slide_viewed: {
+    requiresLessonId: true,
+    build: (opts, base) => {
+      if (opts.name !== "slide_viewed") throw new Error("unexpected event");
+      const lessonId = opts.lessonId;
+      if (!lessonId) throw new Error("slide_viewed requires active lessonId");
+      return {
+        name: "slide_viewed",
+        ...base,
+        lessonId,
+        data: opts.data as SlideViewedData,
       };
     },
   },

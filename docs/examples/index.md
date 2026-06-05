@@ -8,12 +8,6 @@ These pages embed **production builds** of the monorepo examples, compiled when 
 From the repo root, run `bash docs/scripts/build-docs-demos.sh` before `make html` in `docs/` so the bundles exist under `_static/demos/`.
 :::
 
-:::{admonition} LessonKit Studio
-:class: note
-
-The visual editor lives in its own docs section: **[LessonKit Studio → Live app](../guides/studio/app.md)**.
-:::
-
 ## Cybersecurity awareness (`examples/react-vite`)
 
 Corporate InfoSec annual module in the security theme: policy attestation, email header triage, smishing simulation, Teams social engineering, and attestation.
@@ -130,6 +124,14 @@ Compound `Page` and `InteractiveBook` patterns (framework 1.2). Source-only on t
   <a href="https://github.com/eddiethedean/lessonkit/tree/main/examples/interactive-book">Source on GitHub</a>
 </p>
 
+## Slide deck (`examples/slide-deck`)
+
+**Recommended starting point for 1.3.** Compound `Slide` and `SlideDeck` (H5P Course Presentation): keyboard navigation, deck scoring, and session resume. Source-only on this site—run locally from the monorepo.
+
+<p class="lk-demo-links">
+  <a href="https://github.com/eddiethedean/lessonkit/tree/main/examples/slide-deck">Source on GitHub</a>
+</p>
+
 ## Assessment showcase (`examples/assessments-p0`)
 
 P0 blocks: `TrueFalse`, drag/drop, hotspots, fill-in-blanks, and related types. Source-only on this site.
@@ -152,6 +154,7 @@ npm -w lessonkit-example-lxpack-golden run dev
 npm -w lessonkit-example-framework-11-showcase run dev
 npm -w lessonkit-example-framework-12-showcase run dev
 npm -w lessonkit-example-interactive-book run dev
+npm -w lessonkit-example-slide-deck run dev
 npm -w lessonkit-example-assessments-p0 run dev
 ```
 

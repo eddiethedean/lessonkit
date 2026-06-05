@@ -15,6 +15,7 @@ export type TelemetryEventName =
   | "assessment_completed"
   | "interaction"
   | "book_page_viewed"
+  | "slide_viewed"
   | "compound_page_viewed"
   | "hotspot_opened"
   | "accordion_section_toggled"
@@ -87,6 +88,12 @@ export type BookPageViewedData = {
   pageTitle?: string;
 };
 
+export type SlideViewedData = {
+  blockId: BlockId;
+  slideIndex: number;
+  slideTitle?: string;
+};
+
 export type CompoundPageViewedData = {
   blockId: BlockId;
   pageIndex: number;
@@ -135,6 +142,7 @@ export type TelemetryEvent =
     })
   | (TelemetryEventBase & { name: "interaction"; lessonId?: LessonId; data?: InteractionData })
   | (TelemetryEventBase & { name: "book_page_viewed"; lessonId: LessonId; data: BookPageViewedData })
+  | (TelemetryEventBase & { name: "slide_viewed"; lessonId: LessonId; data: SlideViewedData })
   | (TelemetryEventBase & {
       name: "compound_page_viewed";
       lessonId: LessonId;
@@ -166,6 +174,7 @@ export type TelemetryBatchSink = (events: TelemetryEvent[]) => void | Promise<vo
 
 export type TrackingClient = {
   track: (event: TelemetryEvent) => void;
-  flush?: () => void | Promise<void>;
+  /** Resolves to true when all buffered events were delivered; false when a sink failure re-queued events. */
+  flush?: () => void | Promise<boolean>;
   dispose?: () => void | Promise<void>;
 };

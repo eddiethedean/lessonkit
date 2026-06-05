@@ -7,7 +7,7 @@ from datetime import datetime
 project = "LessonKit"
 copyright = f"{datetime.now().year}, LessonKit contributors"
 author = "LessonKit contributors"
-release = "1.2.0"
+release = "1.3.0"
 
 extensions = [
     "myst_parser",
@@ -38,9 +38,6 @@ exclude_patterns = [
     "LXPACK_BRIDGE.md",
     "LXPACK_UPGRADES_FOR_LESSONKIT.md",
     "LXPACK_UPGRADE_PLAN_FOR_MAINTAINERS.md",
-    "LessonKit_Studio_PLAN.md",
-    "LessonKit_Studio_SPEC.md",
-    "STUDIO_READINESS.md",
 ]
 
 source_suffix = {

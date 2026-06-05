@@ -14,7 +14,7 @@ Requires `unzip` on PATH for SCORM tests.
 ## Commands
 
 ```bash
-npm run test:e2e              # 13 Playwright specs
+npm run test:e2e              # Playwright specs (golden-vite, harness, examples)
 npm run test:e2e:ui           # interactive mode
 npm run conformance:lxpack    # all LMS targets
 npm run conformance:golden    # golden example smoke
@@ -27,6 +27,9 @@ E2E_FORCE_REBUILD=1 npm run test:e2e   # rebuild artifacts
 | --- | --- | --- |
 | **golden-vite** | 4173 | Vite preview, SCORM, standalone, xAPI, cmi5, parity |
 | **telemetry-harness** | 4174 | Batch sink, xAPI queue recovery |
+| **assessments-p0-vite** | 4179 | P0 assessment blocks smoke |
+| **interactive-book-vite** | 4183 | InteractiveBook navigation + TrueFalse |
+| **slide-deck-vite** | 4184 | SlideDeck navigation, scoring, session resume |
 
 Artifacts: `e2e/.artifacts/manifest.json` (written by `global-setup.ts`).
 

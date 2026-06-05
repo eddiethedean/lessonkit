@@ -73,7 +73,7 @@ export default function App() {
 
 - `useTheme()` — returns `{ theme, preset, mode, resolvedMode }`
 
-## Machine-readable catalog (generators / Studio)
+## Machine-readable catalog (generators)
 
 Import JSON from the published package:
 

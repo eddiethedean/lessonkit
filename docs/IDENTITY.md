@@ -34,7 +34,7 @@ Build with `buildLessonkitUrn({ courseId, lessonId?, checkId?, blockId? })` from
 
 Machine-readable rules: `@lessonkit/core/identity-contract.v1.json`.
 
-## Regenerate code (generators & Studio)
+## Regenerate code (generators)
 
 1. **Preserve IDs in source** — never rely on runtime-generated lesson IDs (removed in 0.5.0).
 2. When adding content, call `deriveId(title, existingIds)` once at codegen time and write the result into props.

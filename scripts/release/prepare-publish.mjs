@@ -1,9 +1,8 @@
 /**
- * Align package versions and dependency ranges before npm publish in CI.
+ * Align framework package versions and dependency ranges before npm publish in CI.
  *
  * Usage:
- *   node scripts/release/prepare-publish.mjs lessonkit <version>
- *   node scripts/release/prepare-publish.mjs studio <version>
+ *   node scripts/release/prepare-publish.mjs <version>
  */
 import fs from "node:fs";
 import path from "node:path";
@@ -21,8 +20,6 @@ const LESSONKIT_DIRS = [
   "react",
   "cli",
 ];
-
-const STUDIO_DIRS = ["studio-schema", "studio-renderer", "studio-builder", "studio-ui", "studio-codegen"];
 
 const DEP_FIELDS = [
   "dependencies",
@@ -68,53 +65,18 @@ function alignDepsWithRules(dirNames, rules) {
   }
 }
 
-function lessonkitVersionFromRepo() {
-  const { pkg } = readPkg("core");
-  return pkg.version;
-}
+const version = process.argv[2];
 
-function prepareLessonkitPublish(version) {
-  for (const dir of LESSONKIT_DIRS) {
-    setVersion(dir, version);
-  }
-  alignDepsWithRules(LESSONKIT_DIRS, [
-    { match: (name) => name.startsWith("@lessonkit/"), value: version },
-  ]);
-}
-
-function isStudioScopedPackage(name) {
-  return name.startsWith("@lessonkit/studio-");
-}
-
-function prepareStudioPublish(studioVersion) {
-  const lessonkitVersion = lessonkitVersionFromRepo();
-  for (const dir of STUDIO_DIRS) {
-    setVersion(dir, studioVersion);
-  }
-  alignDepsWithRules(STUDIO_DIRS, [
-    { match: (name) => isStudioScopedPackage(name), value: studioVersion },
-    {
-      match: (name) => name.startsWith("@lessonkit/") && !isStudioScopedPackage(name),
-      value: lessonkitVersion,
-    },
-  ]);
-  console.log(`Studio publish: @lessonkit/studio-* @ ${studioVersion}`);
-  console.log(`Pinned other @lessonkit/* dependencies to ${lessonkitVersion} (from packages/core)`);
-}
-
-const mode = process.argv[2];
-const version = process.argv[3];
-
-if (!mode || !version) {
-  console.error("Usage: node scripts/release/prepare-publish.mjs <lessonkit|studio> <version>");
+if (!version) {
+  console.error("Usage: node scripts/release/prepare-publish.mjs <version>");
   process.exit(1);
 }
 
-if (mode === "lessonkit") {
-  prepareLessonkitPublish(version);
-} else if (mode === "studio") {
-  prepareStudioPublish(version);
-} else {
-  console.error(`Unknown mode: ${mode}`);
-  process.exit(1);
+for (const dir of LESSONKIT_DIRS) {
+  setVersion(dir, version);
 }
+alignDepsWithRules(LESSONKIT_DIRS, [
+  { match: (name) => name.startsWith("@lessonkit/"), value: version },
+]);
+
+console.log(`LessonKit publish: @lessonkit/* @ ${version}`);

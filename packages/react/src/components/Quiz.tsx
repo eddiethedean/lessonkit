@@ -4,7 +4,11 @@ import type { AssessmentHandle, LessonId } from "@lessonkit/core";
 import type { McqAssessmentDescriptor } from "@lessonkit/lxpack";
 import { AssessmentLessonGuard, resetAssessmentWarningsForTests } from "../assessment/AssessmentLessonGuard";
 import { buildAssessmentHandle } from "../assessment/internal/buildAssessmentHandle";
-import { readBooleanField, readBooleanStateField, readStringField } from "../assessment/internal/resumeState";
+import {
+  readBooleanField,
+  readNumberField,
+  readStringField,
+} from "../assessment/internal/resumeState";
 import { useAssessmentHandleRegistration } from "../assessment/internal/useAssessmentHandleRegistration";
 import { usePluginScoring } from "../assessment/internal/usePluginScoring";
 import { useQuizState } from "../hooks";
@@ -23,54 +27,96 @@ function QuizInner(
   const [selected, setSelected] = useState<string | null>(null);
   const [selectionCorrect, setSelectionCorrect] = useState<boolean | null>(null);
   const [quizPassed, setQuizPassed] = useState(false);
+  const [completedScore, setCompletedScore] = useState<number | null>(null);
+  const [completedMaxScore, setCompletedMaxScore] = useState<number | null>(null);
   const completedRef = useRef(false);
+  const telemetryReplayedRef = useRef(false);
   const questionId = useId();
   const choicesKey = props.choices.join("\0");
 
   useEffect(() => {
     completedRef.current = false;
+    telemetryReplayedRef.current = false;
     setQuizPassed(false);
     setSelected(null);
     setSelectionCorrect(null);
+    setCompletedScore(null);
+    setCompletedMaxScore(null);
   }, [checkId, props.answer, props.question, choicesKey]);
 
   const passed = quizPassed;
+
+  const resolveScores = () => {
+    const maxScore = completedMaxScore ?? 1;
+    if (quizPassed) {
+      return { score: completedScore ?? maxScore, maxScore };
+    }
+    if (selected !== null && selectionCorrect) {
+      return { score: completedMaxScore ?? maxScore, maxScore };
+    }
+    return { score: 0, maxScore };
+  };
+
+  const replayTelemetry = (
+    nextSelected: string | null,
+    nextCorrect: boolean | null,
+    nextPassed: boolean,
+    nextScore: number,
+    nextMaxScore: number,
+  ) => {
+    if (!nextPassed || telemetryReplayedRef.current) return;
+    telemetryReplayedRef.current = true;
+    if (nextSelected !== null) {
+      quiz.answer({
+        checkId,
+        question: props.question,
+        choice: nextSelected,
+        correct: nextCorrect ?? false,
+      });
+    }
+    quiz.complete({
+      checkId,
+      score: nextScore,
+      maxScore: nextMaxScore,
+      passingScore: props.passingScore ?? nextMaxScore,
+    });
+  };
 
   const handle = useMemo(
     () =>
       buildAssessmentHandle({
         checkId,
-        getScore: () => {
-          const maxScore = 1;
-          if (quizPassed && selected !== null) return maxScore;
-          if (selected === null) return 0;
-          return selectionCorrect ? maxScore : 0;
-        },
-        getMaxScore: () => 1,
+        getScore: () => resolveScores().score,
+        getMaxScore: () => resolveScores().maxScore,
         getAnswerGiven: () => selected !== null,
         resetTask: () => {
           completedRef.current = false;
+          telemetryReplayedRef.current = false;
           setQuizPassed(false);
           setSelected(null);
           setSelectionCorrect(null);
+          setCompletedScore(null);
+          setCompletedMaxScore(null);
         },
         showSolutions: () => {},
-        getXAPIData: () => ({
-          checkId,
-          interactionType: "mcq" as const,
-          response: selected ?? undefined,
-          correct: selectionCorrect ?? undefined,
-          score:
-            quizPassed && selected !== null
-              ? 1
-              : selected === null
-                ? 0
-                : selectionCorrect
-                  ? 1
-                  : 0,
-          maxScore: 1,
+        getXAPIData: () => {
+          const { score, maxScore } = resolveScores();
+          return {
+            checkId,
+            interactionType: "mcq" as const,
+            response: selected ?? undefined,
+            correct: selectionCorrect ?? undefined,
+            score,
+            maxScore,
+          };
+        },
+        getCurrentState: () => ({
+          selected,
+          selectionCorrect,
+          quizPassed,
+          completedScore,
+          completedMaxScore,
         }),
-        getCurrentState: () => ({ selected, selectionCorrect, quizPassed }),
         resume: (state) => {
           const nextSelected = readStringField(state, "selected");
           if (typeof nextSelected === "string" || nextSelected === null) setSelected(nextSelected);
@@ -78,13 +124,39 @@ function QuizInner(
           if (nextCorrect === true || nextCorrect === false || nextCorrect === null) {
             setSelectionCorrect(nextCorrect);
           }
-          readBooleanStateField(state, "quizPassed", (value) => {
-            setQuizPassed(value);
-            completedRef.current = value;
-          });
+          const nextCompletedScore = readNumberField(state, "completedScore");
+          if (typeof nextCompletedScore === "number") setCompletedScore(nextCompletedScore);
+          const nextCompletedMaxScore = readNumberField(state, "completedMaxScore");
+          if (typeof nextCompletedMaxScore === "number") setCompletedMaxScore(nextCompletedMaxScore);
+          const nextPassed = readBooleanField(state, "quizPassed");
+          if (nextPassed === true || nextPassed === false) {
+            setQuizPassed(nextPassed);
+            completedRef.current = nextPassed;
+            if (nextPassed) {
+              const maxScore = nextCompletedMaxScore ?? completedMaxScore ?? 1;
+              const score = nextCompletedScore ?? completedScore ?? maxScore;
+              replayTelemetry(
+                nextSelected ?? null,
+                nextCorrect ?? null,
+                nextPassed,
+                score,
+                maxScore,
+              );
+            }
+          }
         },
       }),
-    [checkId, quizPassed, selected, selectionCorrect],
+    [
+      checkId,
+      completedMaxScore,
+      completedScore,
+      props.passingScore,
+      props.question,
+      quiz,
+      quizPassed,
+      selected,
+      selectionCorrect,
+    ],
   );
 
   useAssessmentHandleRegistration(checkId, handle, ref);
@@ -119,9 +191,12 @@ function QuizInner(
                   completedRef.current = true;
                   setQuizPassed(true);
                   const maxScore = custom?.maxScore ?? 1;
+                  const score = custom?.score ?? maxScore;
+                  setCompletedScore(score);
+                  setCompletedMaxScore(maxScore);
                   quiz.complete({
                     checkId,
-                    score: custom?.score ?? maxScore,
+                    score,
                     maxScore,
                     passingScore: props.passingScore ?? maxScore,
                   });

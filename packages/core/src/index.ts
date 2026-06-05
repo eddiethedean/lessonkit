@@ -32,6 +32,7 @@ export type {
   QuizAnsweredData,
   QuizCompletedData,
   BookPageViewedData,
+  SlideViewedData,
   CompoundPageViewedData,
   HotspotOpenedData,
   AccordionSectionToggledData,
@@ -79,6 +80,8 @@ export {
 export {
   PAGE_ALLOWED_CHILD_TYPES,
   INTERACTIVE_BOOK_ALLOWED_CHILD_TYPES,
+  SLIDE_ALLOWED_CHILD_TYPES,
+  SLIDE_DECK_ALLOWED_CHILD_TYPES,
   ASSESSMENT_SEQUENCE_ALLOWED_CHILD_TYPES,
   COMPOUND_MAX_NESTING_DEPTH,
   ACCORDION_FORBIDDEN_CHILD_TYPES,
@@ -145,6 +148,7 @@ export {
   markCourseStartedEmittedToTracking,
   hasCourseStartedPipelineDelivered,
   markCourseStartedPipelineDelivered,
+  resetSharedVolatileSessionIdForTests,
 } from "./session";
 
 export type {

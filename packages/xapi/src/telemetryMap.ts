@@ -18,12 +18,26 @@ export function buildXapiScoreResult(opts: {
   const max = typeof opts.maxScore === "number" ? opts.maxScore : undefined;
   const raw = typeof opts.score === "number" ? opts.score : undefined;
   if (typeof raw !== "number" && typeof max !== "number") return undefined;
-  return {
-    raw,
-    max,
-    min: 0,
-    scaled: typeof raw === "number" && typeof max === "number" && max > 0 ? raw / max : undefined,
-  };
+  if (
+    (typeof raw === "number" && !Number.isFinite(raw)) ||
+    (typeof max === "number" && !Number.isFinite(max))
+  ) {
+    return undefined;
+  }
+  if (typeof max === "number" && max <= 0) return undefined;
+  if (typeof raw === "number" && raw < 0) return undefined;
+  const result: NonNullable<XAPIResult["score"]> = { min: 0 };
+  if (typeof raw === "number") result.raw = raw;
+  if (typeof max === "number") result.max = max;
+  if (
+    typeof raw === "number" &&
+    typeof max === "number" &&
+    max > 0 &&
+    raw <= max
+  ) {
+    result.scaled = raw / max;
+  }
+  return result;
 }
 
 type MapperContext = { courseId: TelemetryEvent["courseId"]; timestamp: string };
@@ -63,7 +77,7 @@ const experiencedBlockMapper: EventMapper = (event, ctx) => {
   if (event.name === "interaction") {
     const lessonId = event.lessonId;
     const blockId = event.data?.blockId;
-    if (!lessonId || !blockId) return null;
+    if (!lessonId || !blockId || typeof blockId !== "string") return null;
     return experiencedBlockStatement(ctx.courseId, lessonId, blockId, ctx.timestamp);
   }
   const lessonId = event.lessonId;
@@ -92,7 +106,8 @@ const TELEMETRY_XAPI_MAPPERS = {
     const data = event.data;
     const result: XAPIResult = {};
     if (typeof data?.durationMs === "number") {
-      result.duration = formatDurationMs(data.durationMs);
+      const duration = formatDurationMs(data.durationMs);
+      if (duration !== undefined) result.duration = duration;
     }
     if (typeof data?.success === "boolean") result.success = data.success;
     const score = buildXapiScoreResult({ score: data?.score, maxScore: data?.maxScore });
@@ -146,6 +161,7 @@ const TELEMETRY_XAPI_MAPPERS = {
   },
   interaction: experiencedBlockMapper,
   book_page_viewed: experiencedBlockMapper,
+  slide_viewed: experiencedBlockMapper,
   compound_page_viewed: experiencedBlockMapper,
   hotspot_opened: experiencedBlockMapper,
   accordion_section_toggled: experiencedBlockMapper,

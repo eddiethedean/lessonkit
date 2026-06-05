@@ -36,6 +36,7 @@ function DragTheWordsInner(
   const [pool, setPool] = useState<string[]>(() => [...props.words]);
   const [keyboardWord, setKeyboardWord] = useState<string | null>(null);
   const [passed, setPassed] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
   const completedRef = useRef(false);
   const answeredRef = useRef(false);
 
@@ -43,6 +44,7 @@ function DragTheWordsInner(
     completedRef.current = false;
     answeredRef.current = false;
     setPassed(false);
+    setSubmitted(false);
     setZones(Object.fromEntries(answers.map((_, i) => [`zone-${i}`, ""])));
     setPool([...props.words]);
     setKeyboardWord(null);
@@ -78,7 +80,7 @@ function DragTheWordsInner(
           score,
           maxScore: maxScore || 1,
         }),
-        getCurrentState: () => ({ zones, pool, passed, keyboardWord }),
+        getCurrentState: () => ({ zones, pool, passed, keyboardWord, submitted }),
         resume: (state) => {
           const rawZones = state.zones;
           if (rawZones && typeof rawZones === "object") setZones({ ...(rawZones as Record<string, string>) });
@@ -88,11 +90,15 @@ function DragTheWordsInner(
             completedRef.current = value;
             answeredRef.current = value;
           });
+          readBooleanStateField(state, "submitted", (value) => {
+            setSubmitted(value);
+            if (value) answeredRef.current = true;
+          });
           const kw = state.keyboardWord;
           if (kw === null || typeof kw === "string") setKeyboardWord(kw ?? null);
         },
       }),
-    [allFilled, checkId, keyboardWord, maxScore, passed, passedThreshold, pool, score, zones],
+    [allFilled, checkId, keyboardWord, maxScore, passed, passedThreshold, pool, score, submitted, zones],
   );
 
   useAssessmentHandleRegistration(checkId, handle, ref);
@@ -127,16 +133,16 @@ function DragTheWordsInner(
       return;
     }
     if (!allFilled) return;
-    if (!answeredRef.current) {
-      answeredRef.current = true;
-      assessment.answer({
+    if (answeredRef.current || submitted) return;
+    answeredRef.current = true;
+    setSubmitted(true);
+    assessment.answer({
         checkId,
         interactionType: INTERACTION,
         question: props.template,
         response: zones,
         correct: passedThreshold,
       });
-    }
     if (passedThreshold && !completedRef.current) {
       completedRef.current = true;
       setPassed(true);
@@ -151,7 +157,10 @@ function DragTheWordsInner(
   };
 
   useEffect(() => {
-    if (!allFilled) answeredRef.current = false;
+    if (!allFilled) {
+      answeredRef.current = false;
+      setSubmitted(false);
+    }
   }, [allFilled]);
 
   useEffect(() => {
@@ -211,7 +220,7 @@ function DragTheWordsInner(
       {!hasZones ? (
         <p role="alert">This activity has no drop zones. Wrap answers in asterisks in the template.</p>
       ) : null}
-      {allFilled ? (
+      {submitted ? (
         <p role="status" aria-live="polite">
           {passed || passedThreshold ? "Correct" : "Try again"}
         </p>

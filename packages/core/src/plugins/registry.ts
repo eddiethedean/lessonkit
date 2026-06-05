@@ -73,7 +73,7 @@ export function createPluginRegistry(plugins: readonly LessonkitPlugin[] = []): 
       typeof ctxSource === "function" ? ctxSource() : ctxSource;
 
     const ctxKey = (ctx: LessonkitPluginContext): string =>
-      `${ctx.courseId}\0${ctx.sessionId ?? ""}\0${ctx.attemptId ?? ""}`;
+      `${ctx.courseId}\0${ctx.sessionId ?? ""}\0${ctx.attemptId ?? ""}\0${ctx.user?.id ?? ""}`;
 
     type Layer = {
       plugin: LessonkitPlugin;

@@ -34,21 +34,17 @@ lessonkit/
 │   ├── accessibility/
 │   ├── themes/
 │   ├── lxpack/            # packaging adapter (Node 18+)
-│   ├── cli/
-│   └── studio-*           # schema, renderer, builder, ui, codegen (Alpha)
-├── apps/
-│   └── studio-web/        # visual editor (private npm workspace)
+│   └── cli/
 ├── examples/
 │   ├── react-vite/        # RTD demos
 │   ├── data-privacy/
 │   ├── customer-service/
 │   ├── lxpack-golden/     # packaging reference
 │   ├── interactive-book/  # compound containers (1.2)
+│   ├── slide-deck/        # SlideDeck compound (1.3)
 │   ├── framework-11-showcase/  # complete 1.1 catalog
 │   ├── framework-12-showcase/  # complete 1.2 catalog
-│   ├── assessments-p0/    # P0 assessment blocks
-│   ├── studio-minimal/
-│   └── studio-export/     # codegen script (not a dev server)
+│   └── assessments-p0/    # P0 assessment blocks
 ├── templates/             # synced with CLI template
 ├── library-skills/
 ├── e2e/

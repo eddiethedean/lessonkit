@@ -1,7 +1,9 @@
-import React, { forwardRef, useCallback, useEffect, useMemo, useState } from "react";
+import React, { forwardRef, useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
+import { deriveId } from "@lessonkit/core";
 import type { AssessmentBehaviour, BlockId, CompoundHandle } from "@lessonkit/core";
 import { CompoundProvider } from "../compound/CompoundProvider";
 import { useCompoundInitialIndex, useCompoundShell } from "../compound/useCompoundShell";
+import { CompoundPageIndexProvider } from "../compound/CompoundPageIndexContext";
 import { validateCompoundChildren } from "../compound/validateChildren";
 import { setLessonkitBlockType } from "../compound/blockType";
 import { useLessonkit } from "../hooks";
@@ -61,7 +63,7 @@ const AssessmentSequenceInner = forwardRef<CompoundHandle, AssessmentSequenceInn
         <div data-testid="assessment-sequence-step">
           {childArray.map((child, i) => (
             <div key={child.key ?? i} hidden={i !== visibleIndex}>
-              {child}
+              <CompoundPageIndexProvider pageIndex={i}>{child}</CompoundPageIndexProvider>
             </div>
           ))}
         </div>
@@ -90,17 +92,22 @@ const AssessmentSequenceInner = forwardRef<CompoundHandle, AssessmentSequenceInn
 
 export const AssessmentSequence = forwardRef<CompoundHandle, AssessmentSequenceProps>(
   function AssessmentSequence(props, ref) {
+    const reactInstanceId = useId();
+    const autoCompoundIdRef = useRef<BlockId | null>(null);
+    if (!props.blockId && !autoCompoundIdRef.current) {
+      autoCompoundIdRef.current = deriveId(`assessment-sequence-${reactInstanceId}`) as BlockId;
+    }
     const compoundId = useMemo(
       () =>
         props.blockId
           ? (normalizeComponentId(props.blockId, "blockId") as BlockId)
-          : (DEFAULT_ASSESSMENT_SEQUENCE_COMPOUND_ID as BlockId),
+          : (autoCompoundIdRef.current ?? (DEFAULT_ASSESSMENT_SEQUENCE_COMPOUND_ID as BlockId)),
       [props.blockId],
     );
     const childArray = React.Children.toArray(props.children).filter(
       React.isValidElement,
     ) as React.ReactElement[];
-    const { config } = useLessonkit();
+    const { config, storage } = useLessonkit();
     const persistEnabled = config.session?.persistCompoundState !== false;
 
     useEffect(() => {
@@ -116,10 +123,15 @@ export const AssessmentSequence = forwardRef<CompoundHandle, AssessmentSequenceP
       compoundId,
       pageCount: childArray.length,
       persistEnabled,
+      storage,
     });
 
     const [index, setIndex] = useState(initialIndex);
     const setIndexStable = useCallback((i: number) => setIndex(i), []);
+
+    useEffect(() => {
+      setIndex(initialIndex);
+    }, [config.courseId, compoundId, initialIndex]);
 
     return (
       <CompoundProvider activePageIndex={index} onActivePageIndexChange={setIndexStable}>

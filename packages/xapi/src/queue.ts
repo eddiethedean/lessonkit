@@ -1,4 +1,15 @@
+import { cryptoRandomId } from "./id";
 import type { XAPIQueue, XAPIStatement, XAPITransport } from "./types";
+
+function withStatementId(statement: XAPIStatement): XAPIStatement {
+  const trimmed = statement.id?.trim();
+  if (trimmed) {
+    if (trimmed !== statement.id) statement.id = trimmed;
+    return statement;
+  }
+  statement.id = cryptoRandomId();
+  return statement;
+}
 
 export type InMemoryXAPIQueueOptions = {
   /** Maximum queued statements (default 1000). Oldest entries are dropped when full. */
@@ -15,6 +26,7 @@ export function createInMemoryXAPIQueue(opts?: InMemoryXAPIQueueOptions): XAPIQu
   const maxSize = opts?.maxSize ?? DEFAULT_MAX_QUEUE_SIZE;
   const buffer: XAPIStatement[] = [];
   let flushInFlight: Promise<void> | null = null;
+  let headInFlight = false;
 
   const notifyDepth = () => {
     opts?.onDepth?.(buffer.length);
@@ -23,6 +35,7 @@ export function createInMemoryXAPIQueue(opts?: InMemoryXAPIQueueOptions): XAPIQu
   const runFlush = async (transport: XAPITransport): Promise<void> => {
     while (buffer.length) {
       const statement = buffer[0]!;
+      headInFlight = true;
       try {
         await transport(statement);
         buffer.shift();
@@ -30,18 +43,29 @@ export function createInMemoryXAPIQueue(opts?: InMemoryXAPIQueueOptions): XAPIQu
       } catch {
         // Stop flushing on first error; keep remainder queued.
         return;
+      } finally {
+        headInFlight = false;
       }
     }
   };
 
   return {
     enqueue: (statement) => {
-      if (statement.id && buffer.some((s) => s.id === statement.id)) return;
+      const normalized = withStatementId(statement);
+      if (buffer.some((s) => s.id === normalized.id)) return;
       if (buffer.length >= maxSize) {
-        buffer.shift();
+        if (headInFlight && buffer.length <= 1) {
+          opts?.onCap?.();
+          return;
+        }
+        if (headInFlight) {
+          buffer.splice(1, 1);
+        } else {
+          buffer.shift();
+        }
         opts?.onCap?.();
       }
-      buffer.push(statement);
+      buffer.push(normalized);
       notifyDepth();
     },
     size: () => buffer.length,

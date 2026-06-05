@@ -102,7 +102,7 @@ This requires:
 
 # Long-Term Roadmap
 
-> **Status:** Phases 1–3 shipped in **framework 1.0.0** (React components, LXPack packaging, CLI). Phase 4–5 remain future work (Studio, enterprise ecosystem).
+> **Status:** Phases 1–3 shipped in **framework 1.0.0** (React components, LXPack packaging, CLI). Phase 4–5 remain future work (enterprise ecosystem, content expansion).
 
 ## Phase 1
 React component library — **shipped (1.0.0)**

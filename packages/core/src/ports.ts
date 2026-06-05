@@ -1,6 +1,7 @@
 export type StoragePort = {
   getItem: (key: string) => string | null;
-  setItem: (key: string, value: string) => void;
+  /** Returns false when the value could not be durably persisted (e.g. sessionStorage quota). */
+  setItem: (key: string, value: string) => boolean;
   removeItem?: (key: string) => void;
   /** @internal Test helper to clear in-memory fallback state. */
   resetForTests?: () => void;
@@ -26,7 +27,7 @@ export function createDefaultClock(): ClockPort {
 export function createNoopStorage(): StoragePort {
   return {
     getItem: () => null,
-    setItem: () => {},
+    setItem: () => true,
   };
 }
 
@@ -62,8 +63,10 @@ function createMemoryBackedSessionStorage(
       memory.set(key, value);
       try {
         session.setItem(key, value);
+        return true;
       } catch {
         warnPersistFailure();
+        return false;
       }
     },
     removeItem: (key) => {
@@ -90,6 +93,7 @@ function createInMemorySessionStoragePort(): StoragePort {
     getItem: (key) => memory.get(key) ?? null,
     setItem: (key, value) => {
       memory.set(key, value);
+      return true;
     },
     removeItem: (key) => {
       memory.delete(key);

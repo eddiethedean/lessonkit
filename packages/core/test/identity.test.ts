@@ -87,7 +87,16 @@ describe("@lessonkit/core identity", () => {
     const used = new Set<string>(["intro"]);
     for (let n = 2; n < 1000; n++) used.add(`intro-${n}`);
     const id = deriveId("Intro", used);
-    expect(id.startsWith("intro-")).toBe(true);
+    expect(validateId(id).ok).toBe(true);
+    expect(id.length).toBeLessThanOrEqual(64);
+  });
+
+  it("deriveId keeps suffixed ids within the 64-character contract", () => {
+    const longBase = "a".repeat(64);
+    const used = new Set([longBase]);
+    const id = deriveId(longBase, used);
+    expect(validateId(id).ok).toBe(true);
+    expect(id.length).toBeLessThanOrEqual(64);
   });
 
   it("identity-contract.v1.json idPattern matches ID_PATTERN", () => {

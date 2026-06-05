@@ -5,6 +5,7 @@ export const telemetryCatalogV3Version = 3 as const;
 export type TelemetryCatalogV3EventName = Extract<
   TelemetryEventName,
   | "book_page_viewed"
+  | "slide_viewed"
   | "compound_page_viewed"
   | "hotspot_opened"
   | "accordion_section_toggled"
@@ -27,6 +28,14 @@ export const TELEMETRY_EVENT_CATALOG_V3: TelemetryCatalogV3Entry[] = [
     description: "Learner viewed a page/chapter in an Interactive Book",
     requiredFields: ["courseId", "lessonId", "sessionId", "timestamp"],
     dataFields: ["blockId", "pageIndex", "pageTitle"],
+    xapiVerb: "http://adlnet.gov/expapi/verbs/experienced",
+    urnPattern: "urn:lessonkit:course:{courseId}:lesson:{lessonId}:block:{blockId}",
+  },
+  {
+    name: "slide_viewed",
+    description: "Learner viewed a slide in a SlideDeck (Course Presentation)",
+    requiredFields: ["courseId", "lessonId", "sessionId", "timestamp"],
+    dataFields: ["blockId", "slideIndex", "slideTitle"],
     xapiVerb: "http://adlnet.gov/expapi/verbs/experienced",
     urnPattern: "urn:lessonkit:course:{courseId}:lesson:{lessonId}:block:{blockId}",
   },

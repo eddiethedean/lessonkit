@@ -99,6 +99,17 @@ export async function runPackage(opts: PackageOptions): Promise<CliJsonResult> {
     });
   }
 
+  const warnings = result.validation?.issues?.filter((issue) => {
+    const severity = issue.severity?.toLowerCase();
+    return severity !== "error" && severity !== "fatal";
+  });
+  if (warnings?.length && !opts.json) {
+    for (const issue of warnings) {
+      const location = issue.path ?? "course";
+      process.stderr.write(`[lessonkit] packaging warning: ${location}: ${issue.message}\n`);
+    }
+  }
+
   return {
     ok: true,
     command: "package",
@@ -107,5 +118,6 @@ export async function runPackage(opts: PackageOptions): Promise<CliJsonResult> {
     outputPath: result.outputPath,
     outputDir: result.outputDir,
     fileCount: result.fileCount,
+    ...(warnings?.length ? { warnings } : {}),
   };
 }

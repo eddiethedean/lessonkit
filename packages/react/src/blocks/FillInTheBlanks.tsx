@@ -42,6 +42,7 @@ function FillInTheBlanksInner(
   );
   const [passed, setPassed] = useState(false);
   const [showSolutions, setShowSolutions] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
   const completedRef = useRef(false);
   const answeredRef = useRef(false);
 
@@ -51,6 +52,7 @@ function FillInTheBlanksInner(
     setPassed(false);
     setValues(Object.fromEntries(blanks.map((b) => [b.id, ""])));
     setShowSolutions(false);
+    setSubmitted(false);
   };
 
   useEffect(() => {
@@ -83,7 +85,7 @@ function FillInTheBlanksInner(
           score,
           maxScore: maxScore || 1,
         }),
-        getCurrentState: () => ({ values, passed, showSolutions }),
+        getCurrentState: () => ({ values, passed, showSolutions, submitted }),
         resume: (state) => {
           const raw = state.values;
           if (raw && typeof raw === "object") setValues({ ...(raw as Record<string, string>) });
@@ -93,9 +95,13 @@ function FillInTheBlanksInner(
             answeredRef.current = value;
           });
           readBooleanStateField(state, "showSolutions", setShowSolutions);
+          readBooleanStateField(state, "submitted", (value) => {
+            setSubmitted(value);
+            if (value) answeredRef.current = true;
+          });
         },
       }),
-    [allFilled, checkId, maxScore, passed, passedThreshold, score, showSolutions, values],
+    [allFilled, checkId, maxScore, passed, passedThreshold, score, showSolutions, submitted, values],
   );
 
   useAssessmentHandleRegistration(checkId, handle, ref);
@@ -108,16 +114,16 @@ function FillInTheBlanksInner(
       return;
     }
     if (!allFilled) return;
-    if (!answeredRef.current) {
-      answeredRef.current = true;
-      assessment.answer({
+    if (answeredRef.current || submitted) return;
+    answeredRef.current = true;
+    setSubmitted(true);
+    assessment.answer({
         checkId,
         interactionType: INTERACTION,
         question: props.template,
         response: values,
         correct: passedThreshold,
       });
-    }
     if (passedThreshold && !completedRef.current) {
       completedRef.current = true;
       setPassed(true);
@@ -132,7 +138,10 @@ function FillInTheBlanksInner(
   };
 
   useEffect(() => {
-    if (!allFilled) answeredRef.current = false;
+    if (!allFilled) {
+      answeredRef.current = false;
+      setSubmitted(false);
+    }
   }, [allFilled]);
 
   useEffect(() => {
@@ -175,7 +184,7 @@ function FillInTheBlanksInner(
       {!hasBlanks ? (
         <p role="alert">This activity has no blanks. Add text wrapped in asterisks, e.g. The *answer* here.</p>
       ) : null}
-      {allFilled ? (
+      {submitted ? (
         <p role="status" aria-live="polite">
           {passed || passedThreshold ? "Correct" : "Try again"}
         </p>

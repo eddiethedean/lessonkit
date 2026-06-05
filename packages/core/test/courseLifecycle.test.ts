@@ -29,6 +29,7 @@ describe("courseLifecycle", () => {
       getItem: (k: string) => store[k] ?? null,
       setItem: (k: string, v: string) => {
         store[k] = v;
+        return true;
       },
     };
     const ctx = {
@@ -49,6 +50,7 @@ describe("courseLifecycle", () => {
       getItem: (k: string) => store[k] ?? null,
       setItem: (k: string, v: string) => {
         store[k] = v;
+        return true;
       },
     };
     const ctx = {
@@ -65,12 +67,52 @@ describe("courseLifecycle", () => {
     expect(emit).toHaveBeenCalledTimes(1);
   });
 
-  it("tryEmitCourseStarted reports not emitted when storage is marked but sink has not received event", () => {
+  it("tryEmitCourseStarted reports unmarked storage when alreadyEmittedToSink is true", () => {
+    const storage = createNoopStorage();
+    const ctx = {
+      courseId: "c" as const,
+      sessionId: "s",
+      storage,
+      pluginHost: null,
+      lxpackBridge: "auto" as const,
+    };
+    const result = tryEmitCourseStarted(ctx, { emitCourseStartedEvent: () => true }, true);
+    expect(result.emitted).toBe(true);
+    expect(result.marked).toBe(false);
+  });
+
+  it("tryEmitCourseStarted reports marked when in-memory dedupe succeeds despite failed durable write", () => {
+    const memory = new Map<string, string>();
+    const storage = {
+      getItem: (k: string) => memory.get(k) ?? null,
+      setItem: (k: string, v: string) => {
+        memory.set(k, v);
+        return false;
+      },
+    };
+    const ctx = {
+      courseId: "c" as const,
+      sessionId: "s",
+      storage,
+      pluginHost: null,
+      lxpackBridge: "auto" as const,
+    };
+    const emit = vi.fn(() => true);
+    const first = tryEmitCourseStarted(ctx, { emitCourseStartedEvent: emit }, false);
+    expect(first.emitted).toBe(true);
+    expect(first.marked).toBe(true);
+    const second = tryEmitCourseStarted(ctx, { emitCourseStartedEvent: emit }, first.emitted);
+    expect(second.emitted).toBe(true);
+    expect(emit).toHaveBeenCalledTimes(1);
+  });
+
+  it("tryEmitCourseStarted retries emit when storage is marked but sink has not received event", () => {
     const store: Record<string, string> = {};
     const storage = {
       getItem: (k: string) => store[k] ?? null,
       setItem: (k: string, v: string) => {
         store[k] = v;
+        return true;
       },
     };
     storage.setItem("lessonkit:course_started:s:c", "1");
@@ -83,9 +125,9 @@ describe("courseLifecycle", () => {
     };
     const emit = vi.fn(() => true);
     const result = tryEmitCourseStarted(ctx, { emitCourseStartedEvent: emit }, false);
-    expect(result.emitted).toBe(false);
+    expect(result.emitted).toBe(true);
     expect(result.marked).toBe(true);
-    expect(emit).not.toHaveBeenCalled();
+    expect(emit).toHaveBeenCalledTimes(1);
   });
 
   it("completeLessonWithTelemetry emits when progress completes", () => {

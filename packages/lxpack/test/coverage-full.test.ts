@@ -622,6 +622,18 @@ describe("coverage-full lxpack", () => {
   });
 
   describe("validatePackageInputs and remapArtifactPaths", () => {
+    it("requires projectRoot", async () => {
+      const root = await makeTempDir("lk-val-root-");
+      const result = validatePackageInputs({
+        target: "scorm12",
+        outDir: join(root, "course"),
+      });
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.issues.some((i) => i.path === "projectRoot")).toBe(true);
+      }
+    });
+
     it("rejects unsafe output path under projectRoot", async () => {
       const root = await makeTempDir("lk-val-out-");
       const result = validatePackageInputs({
@@ -631,6 +643,18 @@ describe("coverage-full lxpack", () => {
         output: "../../../evil.zip",
       });
       expect(result.ok).toBe(false);
+    });
+
+    it("accepts absolute output path confined under projectRoot", async () => {
+      const root = await makeTempDir("lk-val-abs-out-");
+      const output = join(root, "artifacts", "course-scorm12.zip");
+      const result = validatePackageInputs({
+        target: "scorm12",
+        outDir: join(root, "course"),
+        projectRoot: root,
+        output,
+      });
+      expect(result.ok).toBe(true);
     });
 
     it("rejects outputBaseDir outside projectRoot", async () => {
@@ -680,10 +704,12 @@ describe("coverage-full lxpack", () => {
       expect(remapArtifactPaths(stagingRoot, "C:\\out", artifact)).toBe("C:\\out\\course.zip");
     });
 
-    it("passes through remap when relative path escapes staging", () => {
+    it("throws when remap relative path escapes staging", () => {
       const staging = resolveComparablePath("/tmp/staging");
       const artifact = resolveComparablePath("/tmp/staging/../outside.zip");
-      expect(remapArtifactPaths(staging, "/tmp/out", artifact)).toBe(artifact);
+      expect(() => remapArtifactPaths(staging, "/tmp/out", artifact)).toThrow(
+        /outside the staging directory/,
+      );
     });
   });
 
@@ -807,6 +833,7 @@ describe("coverage-full lxpack", () => {
         descriptor: { ...baseDescriptor, assessments: [] },
         outDir: join(root, "course"),
         spaDistDir: dist,
+        projectRoot: root,
         target: "scorm12",
       });
       expect(result.ok).toBe(false);

@@ -3,6 +3,7 @@ import type {
   AssessmentAnsweredData,
   AssessmentCompletedData,
   BookPageViewedData,
+  SlideViewedData,
   CompoundPageViewedData,
   CourseId,
   FlashcardFlippedData,
@@ -71,6 +72,11 @@ export type BuildTelemetryEventInput =
       name: "book_page_viewed";
       lessonId?: LessonId;
       data: BookPageViewedData;
+    })
+  | (BuildTelemetryEventContext & {
+      name: "slide_viewed";
+      lessonId?: LessonId;
+      data: SlideViewedData;
     })
   | (BuildTelemetryEventContext & {
       name: "compound_page_viewed";

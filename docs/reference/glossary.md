@@ -41,11 +41,3 @@ Stable identifiers for telemetry, xAPI URNs, and LMS descriptors. Required on `C
 ## Block catalog
 
 Machine-readable list of block types and props. **`buildBlockCatalog()`** defaults to **catalog v3** in framework 1.2. JSON files are named `block-catalog.v1.json` … `v3.json` on `@lessonkit/react`—the filename is the schema generation, not necessarily the default you pass at runtime.
-
-## LessonKit Studio
-
-Visual editor (Alpha) for `StudioProjectV1` JSON. npm packages use **`studio-v*`** release tags, separate from framework **`v*`** tags. Try the [live app](../guides/studio/app.md) without cloning the monorepo.
-
-## StudioProjectV1
-
-Versioned JSON project format edited in Studio and exported via **`@lessonkit/studio-codegen`**.

@@ -218,7 +218,70 @@ describe("@lessonkit/core", () => {
     expect(sink).not.toHaveBeenCalled();
   });
 
-  it("drops oldest events when the batch buffer exceeds the cap", () => {
+  it("re-queues only undelivered events when per-event sink fails mid-batch", async () => {
+    const sink = vi
+      .fn<(event: TelemetryEvent) => Promise<void>>(async () => {})
+      .mockResolvedValueOnce(undefined)
+      .mockResolvedValueOnce(undefined)
+      .mockRejectedValueOnce(new Error("fail"))
+      .mockResolvedValue(undefined);
+
+    const client = createTrackingClient({
+      sink,
+      batch: { enabled: true, flushIntervalMs: 0, maxBatchSize: 100 },
+    });
+
+    client.track(interactionEvent("t1"));
+    client.track(interactionEvent("t2"));
+    client.track(interactionEvent("t3"));
+
+    const firstFlush = await client.flush?.();
+    expect(firstFlush).toBe(false);
+    await new Promise((r) => setTimeout(r, 0));
+
+    expect(sink).toHaveBeenCalledTimes(3);
+    expect(sink.mock.calls[0]?.[0]?.timestamp).toBe("t1");
+    expect(sink.mock.calls[1]?.[0]?.timestamp).toBe("t2");
+
+    const secondFlush = await client.flush?.();
+    expect(secondFlush).toBe(true);
+    await new Promise((r) => setTimeout(r, 0));
+
+    expect(sink).toHaveBeenCalledTimes(4);
+    expect(sink.mock.calls[3]?.[0]?.timestamp).toBe("t3");
+    const redelivered = sink.mock.calls.map((call) => call[0]?.timestamp);
+    expect(redelivered.filter((t) => t === "t1")).toHaveLength(1);
+    expect(redelivered.filter((t) => t === "t2")).toHaveLength(1);
+  });
+
+  it("flush resolves true when sink delivers successfully", async () => {
+    const batchSink = vi.fn(async () => {});
+    const client = createTrackingClient({
+      batchSink,
+      batch: { enabled: true, flushIntervalMs: 0, maxBatchSize: 100 },
+    });
+    client.track(interactionEvent("t1"));
+    await expect(client.flush?.()).resolves.toBe(true);
+  });
+
+  it("dispose completes when sink permanently fails", async () => {
+    vi.stubEnv("NODE_ENV", "development");
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const batchSink = vi.fn(async () => {
+      throw new Error("down");
+    });
+    const client = createTrackingClient({
+      batchSink,
+      batch: { enabled: true, flushIntervalMs: 0, maxBatchSize: 100 },
+    });
+    client.track(interactionEvent("t1"));
+    await expect(client.dispose?.()).resolves.toBeUndefined();
+    expect(warn).toHaveBeenCalled();
+    vi.unstubAllEnvs();
+    warn.mockRestore();
+  });
+
+  it("refuses new events when the batch buffer is at cap", () => {
     vi.stubEnv("NODE_ENV", "development");
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
     const batchSink = vi.fn(async () => {
@@ -235,7 +298,7 @@ describe("@lessonkit/core", () => {
     }
 
     expect(warn).toHaveBeenCalledTimes(1);
-    expect(warn.mock.calls[0]?.[0]).toContain("telemetry batch buffer capped");
+    expect(warn.mock.calls[0]?.[0]).toContain("new events are dropped");
     vi.unstubAllEnvs();
     warn.mockRestore();
   });

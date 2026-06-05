@@ -10,6 +10,8 @@ export function createTrackingClient(opts?: {
     maxBatchSize?: number;
   };
   batchSink?: TelemetryBatchSink;
+  /** Called when an event is dropped because the batch buffer is at cap (including in production). */
+  onBufferDrop?: () => void;
 }): TrackingClient {
   const sink = opts?.sink;
   const batchSink = opts?.batchSink;
@@ -42,18 +44,17 @@ export function createTrackingClient(opts?: {
   }
 
   const buffer: TelemetryEvent[] = [];
-  let flushInFlight: Promise<void> | null = null;
+  let flushInFlight: Promise<boolean> | null = null;
   let disposed = false;
   let disposing = false;
   let intervalId: ReturnType<typeof globalThis.setInterval> | undefined;
 
-  const runFlush = (): Promise<void> => {
+  const runFlush = (): Promise<boolean> => {
     /* v8 ignore start -- flush() never invokes runFlush with an empty buffer */
-    if (!buffer.length) return Promise.resolve();
+    if (!buffer.length) return Promise.resolve(true);
     /* v8 ignore stop */
 
     const events = buffer.splice(0, buffer.length);
-    let sent = 0;
     let succeeded = false;
 
     return Promise.resolve()
@@ -61,27 +62,34 @@ export function createTrackingClient(opts?: {
         if (batchSink) {
           await batchSink(events);
         } else {
-          for (const e of events) {
-            await sink?.(e);
-            sent += 1;
+          for (let i = 0; i < events.length; i++) {
+            try {
+              await sink?.(events[i]!);
+            } catch {
+              buffer.unshift(...events.slice(i));
+              return;
+            }
           }
         }
         succeeded = true;
       })
       .catch(() => {
-        buffer.unshift(...events.slice(sent));
+        if (batchSink) {
+          buffer.unshift(...events);
+        }
       })
-      .then(() => {
+      .then(async () => {
         if (succeeded && buffer.length > 0 && !disposed) {
           return runFlush();
         }
+        return succeeded;
       });
   };
 
-  const flush = (): Promise<void> => {
-    if (disposed) return Promise.resolve();
+  const flush = (): Promise<boolean> => {
+    if (disposed) return Promise.resolve(true);
     if (flushInFlight) return flushInFlight;
-    if (!buffer.length) return Promise.resolve();
+    if (!buffer.length) return Promise.resolve(true);
 
     flushInFlight = runFlush().finally(() => {
       flushInFlight = null;
@@ -89,13 +97,23 @@ export function createTrackingClient(opts?: {
     return flushInFlight;
   };
 
+  const MAX_DISPOSE_FLUSH_ATTEMPTS = 10;
+
   const drainAll = async (): Promise<void> => {
-    await flush();
-    /* v8 ignore start -- second flush pass; covered indirectly via dispose integration tests */
-    while (buffer.length > 0) {
-      await flush();
+    let attempts = 0;
+    while (buffer.length > 0 && attempts < MAX_DISPOSE_FLUSH_ATTEMPTS) {
+      const delivered = await flush();
+      attempts += 1;
+      if (!delivered) break;
     }
-    /* v8 ignore end */
+    if (buffer.length > 0) {
+      if (isDevEnvironment()) {
+        console.warn(
+          `[lessonkit] dropped ${buffer.length} buffered telemetry event(s) after dispose flush cap`,
+        );
+      }
+      buffer.length = 0;
+    }
   };
 
   intervalId = flushIntervalMs > 0 ? globalThis.setInterval(() => void flush(), flushIntervalMs) : undefined;
@@ -105,13 +123,14 @@ export function createTrackingClient(opts?: {
     track: (event) => {
       if (disposed || disposing) return;
       if (buffer.length >= maxBufferSize) {
-        buffer.shift();
+        opts?.onBufferDrop?.();
         if (!warnedBufferCap && isDevEnvironment()) {
           warnedBufferCap = true;
           console.warn(
-            `[lessonkit] telemetry batch buffer capped at ${maxBufferSize} events; oldest events are dropped while the sink is unavailable.`,
+            `[lessonkit] telemetry batch buffer capped at ${maxBufferSize} events; new events are dropped until the buffer drains.`,
           );
         }
+        return;
       }
       buffer.push(event);
       if (buffer.length >= maxBatchSize) void flush();

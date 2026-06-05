@@ -37,7 +37,6 @@ body:
         - cli
         - lxpack
         - xapi
-        - studio
         - docs
         - other
     validations:

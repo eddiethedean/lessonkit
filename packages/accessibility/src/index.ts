@@ -60,11 +60,29 @@ function isHTMLElement(v: unknown): v is HTMLElement {
 }
 
 export function prefersReducedMotion(): boolean {
+  return getPrefersReducedMotionSnapshot();
+}
+
+/** One-shot read of the prefers-reduced-motion media query. */
+export function getPrefersReducedMotionSnapshot(): boolean {
   return (
     typeof window !== "undefined" &&
     typeof window.matchMedia === "function" &&
     window.matchMedia("(prefers-reduced-motion: reduce)").matches
   );
+}
+
+/** Subscribe to OS reduced-motion preference changes; returns an unsubscribe function. */
+export function subscribeReducedMotion(listener: (reduce: boolean) => void): () => void {
+  if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
+    listener(false);
+    return () => {};
+  }
+  const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const onChange = () => listener(mq.matches);
+  listener(mq.matches);
+  mq.addEventListener("change", onChange);
+  return () => mq.removeEventListener("change", onChange);
 }
 
 export function getReducedMotionPreference(): "reduce" | "no-preference" | "unknown" {
@@ -81,16 +99,7 @@ export function shouldAnimate(opts?: { default?: boolean }): boolean {
 
 export function focusFirst(container: FocusContainer | null): boolean {
   if (!container) return false;
-  const el = container.querySelector<Focusable>(
-    [
-      "a[href]",
-      "button:not([disabled])",
-      "input:not([disabled])",
-      "select:not([disabled])",
-      "textarea:not([disabled])",
-      "[tabindex]:not([tabindex='-1'])",
-    ].join(","),
-  );
+  const el = container.querySelector<Focusable>(FOCUSABLE_SELECTORS);
   el?.focus();
   return Boolean(el);
 }
@@ -149,7 +158,7 @@ export function trapFocus(
     (focusables[0] ?? container).focus?.();
   };
 
-  const onPointerDownCapture = (e: MouseEvent) => {
+  const onPointerDownCapture = (e: Event) => {
     if (!active) return;
     if (allowOutsideClick) return;
     const target = e.target;
@@ -167,11 +176,13 @@ export function trapFocus(
 
     document.addEventListener("keydown", onKeyDown);
     document.addEventListener("focusin", onFocusIn);
+    document.addEventListener("pointerdown", onPointerDownCapture, true);
     document.addEventListener("mousedown", onPointerDownCapture, true);
 
     removeListeners = () => {
       document.removeEventListener("keydown", onKeyDown);
       document.removeEventListener("focusin", onFocusIn);
+      document.removeEventListener("pointerdown", onPointerDownCapture, true);
       document.removeEventListener("mousedown", onPointerDownCapture, true);
     };
 

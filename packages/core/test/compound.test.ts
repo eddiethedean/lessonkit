@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import {
   clampCompoundPageIndex,
   createCompoundResumeState,
@@ -44,6 +44,40 @@ describe("compound resume state", () => {
     });
     expect(parsed?.childStates).toEqual({ valid: { a: 1 } });
   });
+
+  it("accepts one-level string maps in child states (drag/fill resume)", () => {
+    const dragState = {
+      zones: { "zone-0": "cats", "zone-1": "dogs" },
+      pool: ["birds"],
+      passed: false,
+      submitted: true,
+    };
+    const fillState = {
+      values: { "blank-0": "Paris", "blank-1": "France" },
+      passed: true,
+      submitted: true,
+      showSolutions: false,
+    };
+    const parsed = parseCompoundResumeState({
+      schemaVersion: COMPOUND_RESUME_SCHEMA_VERSION,
+      activePageIndex: 0,
+      childStates: { drag: dragState, fill: fillState },
+    });
+    expect(parsed?.childStates).toEqual({ drag: dragState, fill: fillState });
+  });
+
+  it("rejects child states with functions or deeply nested objects", () => {
+    const parsed = parseCompoundResumeState({
+      schemaVersion: COMPOUND_RESUME_SCHEMA_VERSION,
+      activePageIndex: 0,
+      childStates: {
+        ok: { answer: "a", picks: [1, 2] },
+        nested: { payload: { nested: { deep: true } } },
+        fn: { run: () => {} },
+      },
+    });
+    expect(parsed?.childStates).toEqual({ ok: { answer: "a", picks: [1, 2] } });
+  });
 });
 
 describe("compound session storage", () => {
@@ -51,7 +85,10 @@ describe("compound session storage", () => {
     const storage = createNoopStorage();
     const map = new Map<string, string>();
     storage.getItem = (k) => map.get(k) ?? null;
-    storage.setItem = (k, v) => map.set(k, v);
+    storage.setItem = (k, v) => {
+      map.set(k, v);
+      return true;
+    };
     storage.removeItem = (k) => map.delete(k);
 
     const state = createCompoundResumeState({ activePageIndex: 1 });
@@ -60,6 +97,35 @@ describe("compound session storage", () => {
     expect(loadCompoundState(storage, "course-1", "book-1")).toEqual(state);
     clearCompoundState(storage, "course-1", "book-1");
     expect(loadCompoundState(storage, "course-1", "book-1")).toBeNull();
+  });
+
+  it("warns in dev when compound state is corrupt", () => {
+    vi.stubEnv("NODE_ENV", "development");
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const storage = createNoopStorage();
+    const map = new Map<string, string>();
+    storage.getItem = (k) => map.get(k) ?? null;
+    storage.setItem = (k, v) => {
+      map.set(k, v);
+      return true;
+    };
+
+    map.set(compoundStateStorageKey("course-1", "book-1"), "not-json");
+    expect(loadCompoundState(storage, "course-1", "book-1")).toBeNull();
+    expect(warn).toHaveBeenCalledWith(
+      expect.stringContaining("lessonkit:compound:course-1:book-1"),
+    );
+
+    warn.mockClear();
+    map.set(
+      compoundStateStorageKey("course-1", "book-2"),
+      JSON.stringify({ schemaVersion: 99 }),
+    );
+    expect(loadCompoundState(storage, "course-1", "book-2")).toBeNull();
+    expect(warn).toHaveBeenCalled();
+
+    warn.mockRestore();
+    vi.unstubAllEnvs();
   });
 });
 
@@ -71,12 +137,25 @@ describe("compound allowlists", () => {
   it("InteractiveBook only allows Page", () => {
     expect(getAllowedChildTypes("InteractiveBook")).toEqual(["Page"]);
   });
+
+  it("SlideDeck only allows Slide", () => {
+    expect(getAllowedChildTypes("SlideDeck")).toEqual(["Slide"]);
+  });
+
+  it("allows TrueFalse under Slide", () => {
+    expect(isChildTypeAllowed("Slide", "TrueFalse")).toBe(true);
+  });
+
+  it("excludes ProgressTracker from Slide", () => {
+    expect(isChildTypeAllowed("Slide", "ProgressTracker")).toBe(false);
+  });
 });
 
 describe("telemetry catalog v3", () => {
-  it("includes book_page_viewed", () => {
+  it("includes book_page_viewed and slide_viewed", () => {
     const names = buildTelemetryCatalogV3().map((e) => e.name);
     expect(names).toContain("book_page_viewed");
+    expect(names).toContain("slide_viewed");
   });
 
   it("builds book_page_viewed events", () => {
@@ -90,6 +169,21 @@ describe("telemetry catalog v3", () => {
     expect(event.name).toBe("book_page_viewed");
     if (event.name === "book_page_viewed") {
       expect(event.data.pageIndex).toBe(0);
+    }
+  });
+
+  it("builds slide_viewed events", () => {
+    const event = buildTelemetryEvent({
+      name: "slide_viewed",
+      courseId: "c1",
+      lessonId: "l1",
+      sessionId: "s1",
+      data: { blockId: "deck-1", slideIndex: 1, slideTitle: "Overview" },
+    });
+    expect(event.name).toBe("slide_viewed");
+    if (event.name === "slide_viewed") {
+      expect(event.data.slideIndex).toBe(1);
+      expect(event.data.slideTitle).toBe("Overview");
     }
   });
 });

@@ -1,6 +1,7 @@
 import type { CourseId } from "./identityTypes";
 import type { BlockId } from "./identityTypes";
 import { parseCompoundResumeState, type CompoundResumeState } from "./compound";
+import { isDevEnvironment } from "./internal/env";
 import type { StoragePort } from "./ports";
 
 const COMPOUND_STATE_PREFIX = "lessonkit:compound:";
@@ -14,11 +15,19 @@ export function loadCompoundState(
   courseId: CourseId,
   compoundId: BlockId,
 ): CompoundResumeState | null {
-  const raw = storage.getItem(compoundStateStorageKey(courseId, compoundId));
+  const key = compoundStateStorageKey(courseId, compoundId);
+  const raw = storage.getItem(key);
   if (!raw) return null;
   try {
-    return parseCompoundResumeState(JSON.parse(raw) as unknown);
+    const parsed = parseCompoundResumeState(JSON.parse(raw) as unknown);
+    if (parsed === null && isDevEnvironment()) {
+      console.warn(`[lessonkit] Ignoring corrupt compound resume state at ${key}`);
+    }
+    return parsed;
   } catch {
+    if (isDevEnvironment()) {
+      console.warn(`[lessonkit] Ignoring corrupt compound resume state at ${key}`);
+    }
     return null;
   }
 }
@@ -28,8 +37,8 @@ export function saveCompoundState(
   courseId: CourseId,
   compoundId: BlockId,
   state: CompoundResumeState,
-): void {
-  storage.setItem(compoundStateStorageKey(courseId, compoundId), JSON.stringify(state));
+): boolean {
+  return storage.setItem(compoundStateStorageKey(courseId, compoundId), JSON.stringify(state));
 }
 
 export function clearCompoundState(

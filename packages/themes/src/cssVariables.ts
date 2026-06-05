@@ -1,5 +1,16 @@
 import type { LessonkitThemeV1 } from "./schema";
 
+/** Reject values that could break out of a CSS declaration block. */
+export function sanitizeCssCustomPropertyValue(value: string): string | null {
+  if (/[;}\r\n]/.test(value) || value.includes("/*")) return null;
+  return value;
+}
+
+function assignCssVar(vars: Record<string, string>, key: string, value: string): void {
+  const safe = sanitizeCssCustomPropertyValue(value);
+  if (safe !== null) vars[key] = safe;
+}
+
 /** Map a token path segment to kebab-case for CSS custom property names. */
 export function tokenKeyToKebab(key: string): string {
   return key.replace(/([A-Z])/g, "-$1").toLowerCase();
@@ -41,27 +52,27 @@ export function themeToCssVariables(theme: LessonkitThemeV1): Record<string, str
   for (const [key, value] of Object.entries(theme.colors)) {
     if (key === "extra" && value && typeof value === "object") {
       for (const [ek, ev] of Object.entries(value as Record<string, string>)) {
-        vars[colorExtraVarName(ek)] = ev;
+        assignCssVar(vars, colorExtraVarName(ek), ev);
       }
     } else if (key !== "extra") {
-      vars[colorVarName(key)] = value as string;
+      assignCssVar(vars, colorVarName(key), value as string);
     }
   }
 
   for (const [key, value] of Object.entries(theme.spacing)) {
-    vars[spacingVarName(key)] = value;
+    assignCssVar(vars, spacingVarName(key), value);
   }
 
   for (const [key, value] of Object.entries(theme.typography)) {
-    vars[typographyVarName(key)] = value;
+    assignCssVar(vars, typographyVarName(key), value);
   }
 
   for (const [key, value] of Object.entries(theme.radius)) {
-    vars[radiusVarName(key)] = value;
+    assignCssVar(vars, radiusVarName(key), value);
   }
 
   for (const [key, value] of Object.entries(theme.shadows)) {
-    vars[shadowVarName(key)] = value;
+    assignCssVar(vars, shadowVarName(key), value);
   }
 
   const sorted: Record<string, string> = {};

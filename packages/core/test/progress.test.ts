@@ -25,4 +25,19 @@ describe("createProgressController", () => {
     const duplicateCourse = progress.completeCourse();
     expect(duplicateCourse.didComplete).toBe(false);
   });
+
+  it("clears activeLessonId after revisiting an already completed lesson", () => {
+    const progress = createProgressController();
+    progress.setActiveLesson("l1", 0);
+    progress.completeLesson("l1", 100);
+    progress.setActiveLesson("l1", 200);
+    expect(progress.getState().activeLessonId).toBe("l1");
+
+    progress.completeLesson("l1", 300);
+    expect(progress.getState().activeLessonId).toBeUndefined();
+
+    progress.completeCourse();
+    expect(progress.getState().activeLessonId).toBeUndefined();
+    expect(progress.getState().courseCompleted).toBe(true);
+  });
 });

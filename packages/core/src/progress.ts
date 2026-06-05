@@ -35,7 +35,12 @@ export function createProgressController(): ProgressController {
       return { previousLessonId };
     },
     completeLesson: (lessonId, completedAtMs) => {
-      if (completedLessonIds.has(lessonId)) return { didComplete: false };
+      if (completedLessonIds.has(lessonId)) {
+        if (activeLessonId === lessonId) {
+          activeLessonId = undefined;
+        }
+        return { didComplete: false };
+      }
       completedLessonIds = new Set(completedLessonIds).add(lessonId);
       if (activeLessonId === lessonId) {
         activeLessonId = undefined;

@@ -11,6 +11,7 @@ import {
   resolveSpaLessons,
   themeToLxpackRuntime,
   validateDescriptor,
+  validateDescriptorForTarget,
   writeLxpackProject,
 } from "../src/index";
 
@@ -45,6 +46,17 @@ const baseDescriptor = {
 };
 
 describe("validateDescriptor", () => {
+  it("rejects unknown assessment kinds", () => {
+    const result = validateDescriptor({
+      ...baseDescriptor,
+      assessments: [{ kind: "fillInBlank", checkId: "bad-1", question: "Q?", template: "a *b*" }],
+    });
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.issues.some((i) => i.path.includes("kind"))).toBe(true);
+    }
+  });
+
   it("accepts trueFalse and fillInBlanks assessment kinds", () => {
     const tf = validateDescriptor({
       ...baseDescriptor,
@@ -112,6 +124,18 @@ describe("validateDescriptor", () => {
       ],
     });
     expect(findMany.ok).toBe(true);
+
+    const invalidHotspot = validateDescriptor({
+      ...baseDescriptor,
+      assessments: [
+        {
+          kind: "findHotspot",
+          checkId: "hs-bad",
+          question: "Find",
+        },
+      ],
+    });
+    expect(invalidHotspot.ok).toBe(false);
   });
 
   it("rejects duplicate lesson ids", () => {
@@ -434,6 +458,17 @@ describe("writeLxpackProject errors", () => {
 });
 
 describe("validateDescriptor edge cases", () => {
+  it("rejects mcq assessments missing choices", () => {
+    const result = validateDescriptor({
+      ...baseDescriptor,
+      assessments: [{ checkId: "q1", question: "Pick one", answer: "A" }],
+    });
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.issues.some((i) => i.path.endsWith(".choices"))).toBe(true);
+    }
+  });
+
   it("rejects empty title and mismatched answer", () => {
     expect(validateDescriptor({ ...baseDescriptor, title: "  " }).ok).toBe(false);
     expect(
@@ -516,7 +551,7 @@ describe("validateDescriptor edge cases", () => {
     expect(result.ok).toBe(false);
   });
 
-  it("accepts passingScore as absolute points (not capped by choice count)", () => {
+  it("rejects passingScore above achievable score for mcq", () => {
     const result = validateDescriptor({
       ...baseDescriptor,
       assessments: [
@@ -529,9 +564,29 @@ describe("validateDescriptor edge cases", () => {
         },
       ],
     });
-    expect(result.ok).toBe(true);
-    if (result.ok) {
-      expect(result.descriptor.assessments?.[0]?.passingScore).toBe(2);
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.issues.some((i) => i.path.includes("passingScore"))).toBe(true);
+    }
+  });
+
+  it("validateDescriptorForTarget rejects non-injectable assessments for LMS targets", () => {
+    const descriptor = {
+      ...baseDescriptor,
+      assessments: [
+        {
+          kind: "fillInBlanks" as const,
+          checkId: "fib-pack",
+          question: "Fill",
+          template: "Type *here*",
+        },
+      ],
+    };
+    expect(validateDescriptor(descriptor).ok).toBe(true);
+    const packaged = validateDescriptorForTarget(descriptor, "scorm12");
+    expect(packaged.ok).toBe(false);
+    if (!packaged.ok) {
+      expect(packaged.issues[0]?.message).toContain("not injected into LMS shell quizzes");
     }
   });
 });
@@ -575,6 +630,7 @@ describe("packageLessonkitCourse", () => {
       descriptor: { ...baseDescriptor, assessments: [] },
       outDir,
       spaDistDir: dist,
+      projectRoot: root,
       target: "scorm12",
       output: ".lxpack/out/course-scorm12.zip",
     });
@@ -602,6 +658,7 @@ describe("packageLessonkitCourse", () => {
       descriptor: { ...baseDescriptor, assessments: [] },
       outDir,
       spaDistDir: dist,
+      projectRoot: root,
       target: "standalone",
       output: ".lxpack/out/standalone",
       dir: true,

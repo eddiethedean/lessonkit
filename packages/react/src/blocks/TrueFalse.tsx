@@ -3,7 +3,11 @@ import type { AssessmentBaseProps, AssessmentHandle, AssessmentInteractionType }
 import type { LessonId } from "@lessonkit/core";
 import { AssessmentLessonGuard } from "../assessment/AssessmentLessonGuard";
 import { buildAssessmentHandle } from "../assessment/internal/buildAssessmentHandle";
-import { readBooleanField, readBooleanStateField } from "../assessment/internal/resumeState";
+import {
+  readBooleanField,
+  readBooleanStateField,
+  readNumberField,
+} from "../assessment/internal/resumeState";
 import { useAssessmentHandleRegistration } from "../assessment/internal/useAssessmentHandleRegistration";
 import { usePluginScoring } from "../assessment/internal/usePluginScoring";
 import { useAssessmentState } from "../assessment/useAssessmentState";
@@ -30,42 +34,93 @@ function TrueFalseInner(
   const [selectionCorrect, setSelectionCorrect] = useState<boolean | null>(null);
   const [showSolutions, setShowSolutions] = useState(false);
   const [passed, setPassed] = useState(false);
+  const [completedScore, setCompletedScore] = useState<number | null>(null);
+  const [completedMaxScore, setCompletedMaxScore] = useState<number | null>(null);
   const completedRef = useRef(false);
+  const telemetryReplayedRef = useRef(false);
   const questionId = React.useId();
 
   const reset = () => {
     completedRef.current = false;
+    telemetryReplayedRef.current = false;
     setPassed(false);
     setSelected(null);
     setSelectionCorrect(null);
     setShowSolutions(false);
+    setCompletedScore(null);
+    setCompletedMaxScore(null);
   };
 
   useEffect(() => {
     reset();
   }, [checkId, props.answer, props.question, config.courseId, enclosingLessonId]);
 
+  const resolveScores = () => {
+    const maxScore = completedMaxScore ?? 1;
+    if (passed) {
+      return { score: completedScore ?? maxScore, maxScore };
+    }
+    if (selectionCorrect) {
+      return { score: completedMaxScore ?? maxScore, maxScore };
+    }
+    return { score: 0, maxScore };
+  };
+
+  const replayTelemetry = (
+    nextSelected: boolean | null,
+    nextCorrect: boolean | null,
+    nextPassed: boolean,
+    nextScore: number,
+    nextMaxScore: number,
+  ) => {
+    if (!nextPassed || telemetryReplayedRef.current) return;
+    telemetryReplayedRef.current = true;
+    if (nextSelected !== null) {
+      assessment.answer({
+        checkId,
+        interactionType: INTERACTION,
+        question: props.question,
+        response: nextSelected,
+        correct: nextCorrect ?? false,
+      });
+    }
+    assessment.complete({
+      checkId,
+      interactionType: INTERACTION,
+      score: nextScore,
+      maxScore: nextMaxScore,
+      passingScore: props.passingScore ?? nextMaxScore,
+    });
+  };
+
   const handle = useMemo(
     () =>
       buildAssessmentHandle({
         checkId,
-        getScore: () => {
-          const maxScore = 1;
-          return passed ? maxScore : selected === null ? 0 : selected === props.answer ? maxScore : 0;
-        },
-        getMaxScore: () => 1,
+        getScore: () => resolveScores().score,
+        getMaxScore: () => resolveScores().maxScore,
         getAnswerGiven: () => selected !== null,
         resetTask: reset,
         showSolutions: () => setShowSolutions(true),
-        getXAPIData: () => ({
-          checkId,
-          interactionType: INTERACTION,
-          response: selected ?? undefined,
-          correct: selected === props.answer,
-          score: passed ? 1 : selected === null ? 0 : selected === props.answer ? 1 : 0,
-          maxScore: 1,
+        getXAPIData: () => {
+          const { score, maxScore } = resolveScores();
+          return {
+            checkId,
+            interactionType: INTERACTION,
+            response: selected ?? undefined,
+            correct: selectionCorrect ?? undefined,
+            score,
+            maxScore,
+          };
+        },
+        getCurrentState: () => ({
+          selected,
+          selectionCorrect,
+          passed,
+          showSolutions,
+          completedScore,
+          completedMaxScore,
         }),
-        getCurrentState: () => ({ selected, selectionCorrect, passed, showSolutions }),
         resume: (state) => {
           const nextSelected = readBooleanField(state, "selected");
           if (nextSelected === true || nextSelected === false || nextSelected === null) {
@@ -75,14 +130,35 @@ function TrueFalseInner(
           if (nextCorrect === true || nextCorrect === false || nextCorrect === null) {
             setSelectionCorrect(nextCorrect);
           }
-          readBooleanStateField(state, "passed", (value) => {
-            setPassed(value);
-            completedRef.current = value;
-          });
+          const nextCompletedScore = readNumberField(state, "completedScore");
+          if (typeof nextCompletedScore === "number") setCompletedScore(nextCompletedScore);
+          const nextCompletedMaxScore = readNumberField(state, "completedMaxScore");
+          if (typeof nextCompletedMaxScore === "number") setCompletedMaxScore(nextCompletedMaxScore);
+          const nextPassed = readBooleanField(state, "passed");
+          if (nextPassed === true || nextPassed === false) {
+            setPassed(nextPassed);
+            completedRef.current = nextPassed;
+            if (nextPassed) {
+              const maxScore = nextCompletedMaxScore ?? completedMaxScore ?? 1;
+              const score = nextCompletedScore ?? completedScore ?? maxScore;
+              replayTelemetry(nextSelected ?? null, nextCorrect ?? null, nextPassed, score, maxScore);
+            }
+          }
           readBooleanStateField(state, "showSolutions", setShowSolutions);
         },
       }),
-    [checkId, passed, props.answer, selected, selectionCorrect, showSolutions],
+    [
+      assessment,
+      checkId,
+      completedMaxScore,
+      completedScore,
+      passed,
+      props.passingScore,
+      props.question,
+      selected,
+      selectionCorrect,
+      showSolutions,
+    ],
   );
 
   useAssessmentHandleRegistration(checkId, handle, ref);
@@ -103,6 +179,8 @@ function TrueFalseInner(
     if (scored.passed && !completedRef.current) {
       completedRef.current = true;
       setPassed(true);
+      setCompletedScore(scored.score);
+      setCompletedMaxScore(scored.maxScore);
       assessment.complete({
         checkId,
         interactionType: INTERACTION,

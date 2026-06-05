@@ -69,6 +69,21 @@ export function parseAssessmentDescriptor(raw: unknown): import("../types").Asse
         : [],
     };
   }
+  if (
+    typeof kind === "string" &&
+    kind !== "mcq" &&
+    kind !== "trueFalse" &&
+    kind !== "fillInBlanks" &&
+    kind !== "findHotspot" &&
+    kind !== "findMultipleHotspots"
+  ) {
+    return {
+      kind,
+      ...base,
+      choices: [],
+      answer: "",
+    } as import("../types").AssessmentDescriptor;
+  }
   return {
     kind: kind === "mcq" ? "mcq" : undefined,
     ...base,

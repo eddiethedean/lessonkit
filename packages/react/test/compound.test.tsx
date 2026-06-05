@@ -1,17 +1,21 @@
 import React, { createRef } from "react";
-import { afterEach, describe, expect, it } from "vitest";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import type { CompoundHandle } from "@lessonkit/core";
 import { compoundStateStorageKey, createCompoundResumeState, saveCompoundState } from "@lessonkit/core";
 import { createSessionStoragePort } from "@lessonkit/core";
 import {
   AssessmentSequence,
   Course,
+  DragTheWords,
+  FillInTheBlanks,
   FindHotspot,
   InteractiveBook,
   Lesson,
   Page,
   Quiz,
+  Slide,
+  SlideDeck,
   Text,
   TrueFalse,
 } from "../src";
@@ -176,6 +180,146 @@ describe("InteractiveBook", () => {
     expect(parsed.childStates["hs-1"]?.checked).toBe(true);
   });
 
+  it("round-trips FillInTheBlanks child state through sessionStorage", () => {
+    saveCompoundState(
+      createSessionStoragePort(),
+      COURSE_ID,
+      "book-fill",
+      createCompoundResumeState({
+        activePageIndex: 0,
+        childStates: {
+          "fib-1": {
+            values: { "blank-0": "Paris" },
+            passed: false,
+            submitted: true,
+            showSolutions: false,
+          },
+        },
+      }),
+    );
+
+    render(
+      wrap(
+        <InteractiveBook blockId="book-fill" title="Book">
+          <Page blockId="p1" title="Blanks">
+            <FillInTheBlanks checkId="fib-1" template="Capital is *Paris*." />
+          </Page>
+        </InteractiveBook>,
+        true,
+      ),
+    );
+
+    expect(screen.getByDisplayValue("Paris")).toBeTruthy();
+    const raw = sessionStorage.getItem(compoundStateStorageKey(COURSE_ID, "book-fill"));
+    expect(raw).toBeTruthy();
+    const parsed = JSON.parse(raw!) as {
+      childStates: Record<string, { values?: Record<string, string> }>;
+    };
+    expect(parsed.childStates["fib-1"]?.values?.["blank-0"]).toBe("Paris");
+  });
+
+  it("round-trips DragTheWords child state through sessionStorage", () => {
+    saveCompoundState(
+      createSessionStoragePort(),
+      COURSE_ID,
+      "book-drag",
+      createCompoundResumeState({
+        activePageIndex: 0,
+        childStates: {
+          "dtw-1": {
+            zones: { "zone-0": "cats" },
+            pool: ["dogs"],
+            passed: false,
+            submitted: false,
+            keyboardWord: null,
+          },
+        },
+      }),
+    );
+
+    render(
+      wrap(
+        <InteractiveBook blockId="book-drag" title="Book">
+          <Page blockId="p1" title="Drag">
+            <DragTheWords
+              checkId="dtw-1"
+              template="I like *cats*."
+              words={["cats", "dogs"]}
+            />
+          </Page>
+        </InteractiveBook>,
+        true,
+      ),
+    );
+
+    expect(screen.getByTestId("zone-0").textContent).toContain("cats");
+    const raw = sessionStorage.getItem(compoundStateStorageKey(COURSE_ID, "book-drag"));
+    expect(raw).toBeTruthy();
+    const parsed = JSON.parse(raw!) as {
+      childStates: Record<string, { zones?: Record<string, string> }>;
+    };
+    expect(parsed.childStates["dtw-1"]?.zones?.["zone-0"]).toBe("cats");
+  });
+
+  it("persists page index when saved childStates have no registered handles", () => {
+    saveCompoundState(
+      createSessionStoragePort(),
+      COURSE_ID,
+      "book-orphan",
+      createCompoundResumeState({
+        activePageIndex: 0,
+        childStates: { "removed-quiz": { selected: "a" } },
+      }),
+    );
+
+    render(
+      wrap(
+        <InteractiveBook blockId="book-orphan" title="Book">
+          <Page blockId="p1" title="One">
+            <Text>Page one</Text>
+          </Page>
+          <Page blockId="p2" title="Two">
+            <Text>Page two</Text>
+          </Page>
+        </InteractiveBook>,
+        true,
+      ),
+    );
+
+    fireEvent.click(screen.getByTestId("book-next"));
+    const raw = sessionStorage.getItem(compoundStateStorageKey(COURSE_ID, "book-orphan"));
+    expect(raw).toBeTruthy();
+    const parsed = JSON.parse(raw!) as { activePageIndex: number };
+    expect(parsed.activePageIndex).toBe(1);
+  });
+
+  it("imperative resume hydrates child states after handles mount", async () => {
+    const ref = createRef<CompoundHandle>();
+    render(
+      wrap(
+        <InteractiveBook blockId="book-imperative" title="Book" ref={ref}>
+          <Page blockId="p1" title="Quiz page">
+            <TrueFalse checkId="tf-imperative" question="True?" answer={true} />
+          </Page>
+        </InteractiveBook>,
+        true,
+      ),
+    );
+
+    ref.current?.resume(
+      createCompoundResumeState({
+        activePageIndex: 0,
+        childStates: {
+          "tf-imperative": { selected: true, selectionCorrect: true, passed: true, showSolutions: false },
+        },
+      }),
+    );
+
+    await waitFor(() => {
+      expect((screen.getByLabelText("True") as HTMLInputElement).checked).toBe(true);
+    });
+  });
+
   it("clamps corrupt activePageIndex from sessionStorage", () => {
     saveCompoundState(
       createSessionStoragePort(),
@@ -199,7 +343,57 @@ describe("InteractiveBook", () => {
     expect(screen.getByText("Page 1 of 1")).toBeTruthy();
   });
 
-  it("restores TrueFalse answer state from sessionStorage", () => {
+  it("replays assessment telemetry after sessionStorage resume", async () => {
+    const events: Array<{ name: string; data?: unknown }> = [];
+    const captureEvent = (e: { name: string; data?: unknown }) => {
+      events.push(e);
+    };
+    saveCompoundState(
+      createSessionStoragePort(),
+      COURSE_ID,
+      "book-tel",
+      createCompoundResumeState({
+        activePageIndex: 0,
+        childStates: {
+          "tf-tel": {
+            selected: true,
+            selectionCorrect: true,
+            passed: true,
+            showSolutions: false,
+            completedScore: 1,
+            completedMaxScore: 1,
+          },
+        },
+      }),
+    );
+
+    render(
+      <Course
+        title="Compound"
+        courseId={COURSE_ID}
+        config={{
+          xapi: { enabled: false },
+          session: { persistCompoundState: true },
+          tracking: { sink: captureEvent },
+        }}
+      >
+        <Lesson title="L1" lessonId="lesson-1">
+          <InteractiveBook blockId="book-tel" title="Book">
+            <Page blockId="p1" title="Quiz">
+              <TrueFalse checkId="tf-tel" question="True?" answer={true} />
+            </Page>
+          </InteractiveBook>
+        </Lesson>
+      </Course>,
+    );
+
+    await waitFor(() => {
+      expect(events.some((e) => e.name === "assessment_answered")).toBe(true);
+      expect(events.some((e) => e.name === "assessment_completed")).toBe(true);
+    });
+  });
+
+  it("restores TrueFalse answer state from sessionStorage", async () => {
     saveCompoundState(
       createSessionStoragePort(),
       COURSE_ID,
@@ -223,7 +417,9 @@ describe("InteractiveBook", () => {
       ),
     );
 
-    expect((screen.getByLabelText("True") as HTMLInputElement).checked).toBe(true);
+    await waitFor(() => {
+      expect((screen.getByLabelText("True") as HTMLInputElement).checked).toBe(true);
+    });
   });
 
   it("uses persistCompoundState true by default", () => {
@@ -250,6 +446,245 @@ describe("InteractiveBook", () => {
     );
 
     expect(screen.getByText("Page two")).toBeTruthy();
+  });
+});
+
+describe("SlideDeck", () => {
+  afterEach(() => {
+    cleanup();
+    sessionStorage.clear();
+  });
+
+  it("navigates between slides", () => {
+    render(
+      wrap(
+        <SlideDeck blockId="deck-1" title="Training">
+          <Slide blockId="s1" title="One">
+            <Text>Slide one</Text>
+          </Slide>
+          <Slide blockId="s2" title="Two">
+            <Text>Slide two</Text>
+          </Slide>
+        </SlideDeck>,
+      ),
+    );
+    expect(screen.getByText("Slide one")).toBeTruthy();
+    fireEvent.click(screen.getByTestId("slide-next"));
+    expect(screen.getByText("Slide two")).toBeTruthy();
+  });
+
+  it("navigates with keyboard arrow keys", () => {
+    render(
+      wrap(
+        <SlideDeck blockId="deck-kb" title="Training">
+          <Slide blockId="s1" title="One">
+            <Text>Slide one</Text>
+          </Slide>
+          <Slide blockId="s2" title="Two">
+            <Text>Slide two</Text>
+          </Slide>
+        </SlideDeck>,
+      ),
+    );
+    const deck = screen.getByTestId("slide-deck");
+    deck.focus();
+    fireEvent.keyDown(deck, { key: "ArrowRight" });
+    expect(screen.getByText("Slide two")).toBeTruthy();
+    fireEvent.keyDown(deck, { key: "ArrowLeft" });
+    expect(screen.getByText("Slide one")).toBeTruthy();
+  });
+
+  it("jumps to first and last slide with Home and End", () => {
+    render(
+      wrap(
+        <SlideDeck blockId="deck-jump" title="Training">
+          <Slide blockId="s1" title="One">
+            <Text>Slide one</Text>
+          </Slide>
+          <Slide blockId="s2" title="Two">
+            <Text>Slide two</Text>
+          </Slide>
+          <Slide blockId="s3" title="Three">
+            <Text>Slide three</Text>
+          </Slide>
+        </SlideDeck>,
+      ),
+    );
+    const deck = screen.getByTestId("slide-deck");
+    deck.focus();
+    fireEvent.keyDown(deck, { key: "End" });
+    expect(screen.getByText("Slide three")).toBeTruthy();
+    fireEvent.keyDown(deck, { key: "Home" });
+    expect(screen.getByText("Slide one")).toBeTruthy();
+  });
+
+  it("exposes compound handle scores from child assessments", () => {
+    const ref = createRef<CompoundHandle>();
+    render(
+      wrap(
+        <SlideDeck blockId="deck-2" title="Training" ref={ref}>
+          <Slide blockId="s1" title="Quiz slide">
+            <TrueFalse checkId="tf-deck-1" question="True?" answer={true} />
+          </Slide>
+        </SlideDeck>,
+      ),
+    );
+    fireEvent.click(screen.getByLabelText("True"));
+    expect(ref.current?.getAnswerGiven()).toBe(true);
+    expect(ref.current?.getScore()).toBe(1);
+  });
+
+  it("aggregates scores across hidden slides with showDeckScore", () => {
+    const ref = createRef<CompoundHandle>();
+    render(
+      wrap(
+        <SlideDeck blockId="deck-3" title="Training" showDeckScore ref={ref}>
+          <Slide blockId="s1" title="Intro">
+            <Text>Intro</Text>
+          </Slide>
+          <Slide blockId="s2" title="Quiz">
+            <TrueFalse checkId="tf-deck-2" question="2+2=4?" answer={true} />
+          </Slide>
+        </SlideDeck>,
+      ),
+    );
+    fireEvent.click(screen.getByTestId("slide-next"));
+    fireEvent.click(screen.getByLabelText("True"));
+    fireEvent.click(screen.getByTestId("slide-prev"));
+    expect(screen.getByTestId("deck-score").textContent).toContain("Score: 1");
+    expect(ref.current?.getScore()).toBe(1);
+    expect(ref.current?.getMaxScore()).toBe(1);
+  });
+
+  it("BUG-R03: persists child state after handle registration completes", async () => {
+    render(
+      wrap(
+        <SlideDeck blockId="deck-r03" title="Training">
+          <Slide blockId="s1" title="Intro">
+            <Text>Intro</Text>
+          </Slide>
+          <Slide blockId="s2" title="Quiz">
+            <TrueFalse checkId="tf-r03" question="True?" answer={true} />
+          </Slide>
+        </SlideDeck>,
+        true,
+      ),
+    );
+    fireEvent.click(screen.getByTestId("slide-next"));
+    fireEvent.click(screen.getByLabelText("True"));
+
+    await waitFor(() => {
+      const raw = sessionStorage.getItem(compoundStateStorageKey(COURSE_ID, "deck-r03"));
+      expect(raw).toBeTruthy();
+      const parsed = JSON.parse(raw!) as {
+        childStates: Record<string, { selected?: boolean; passed?: boolean }>;
+      };
+      expect(parsed.childStates["tf-r03"]?.selected).toBe(true);
+      expect(parsed.childStates["tf-r03"]?.passed).toBe(true);
+    });
+  });
+
+  it("persists TrueFalse child state to sessionStorage after answer", async () => {
+    render(
+      wrap(
+        <SlideDeck blockId="deck-child-save" title="Training">
+          <Slide blockId="s1" title="Intro">
+            <Text>Intro</Text>
+          </Slide>
+          <Slide blockId="s2" title="Quiz">
+            <TrueFalse checkId="tf-save" question="True?" answer={true} />
+          </Slide>
+        </SlideDeck>,
+        true,
+      ),
+    );
+    fireEvent.click(screen.getByTestId("slide-next"));
+    fireEvent.click(screen.getByLabelText("True"));
+
+    await vi.waitFor(() => {
+      const raw = sessionStorage.getItem(compoundStateStorageKey(COURSE_ID, "deck-child-save"));
+      expect(raw).toBeTruthy();
+      const parsed = JSON.parse(raw!) as {
+        childStates: Record<string, { selected?: boolean; passed?: boolean }>;
+      };
+      expect(parsed.childStates["tf-save"]?.selected).toBe(true);
+      expect(parsed.childStates["tf-save"]?.passed).toBe(true);
+    });
+  });
+
+  it("restores activePageIndex from sessionStorage when persistCompoundState is true", () => {
+    saveCompoundState(
+      createSessionStoragePort(),
+      COURSE_ID,
+      "deck-persist",
+      createCompoundResumeState({ activePageIndex: 1 }),
+    );
+
+    render(
+      wrap(
+        <SlideDeck blockId="deck-persist" title="Training">
+          <Slide blockId="s1" title="One">
+            <Text>Slide one</Text>
+          </Slide>
+          <Slide blockId="s2" title="Two">
+            <Text>Slide two</Text>
+          </Slide>
+        </SlideDeck>,
+        true,
+      ),
+    );
+    expect(screen.getByText("Slide two")).toBeTruthy();
+    expect(screen.getByText("Slide 2 of 2")).toBeTruthy();
+  });
+
+  it("persists activePageIndex to sessionStorage on navigation", () => {
+    render(
+      wrap(
+        <SlideDeck blockId="deck-save" title="Training">
+          <Slide blockId="s1" title="One">
+            <Text>Slide one</Text>
+          </Slide>
+          <Slide blockId="s2" title="Two">
+            <Text>Slide two</Text>
+          </Slide>
+        </SlideDeck>,
+        true,
+      ),
+    );
+    fireEvent.click(screen.getByTestId("slide-next"));
+    const raw = sessionStorage.getItem(compoundStateStorageKey(COURSE_ID, "deck-save"));
+    expect(raw).toBeTruthy();
+    const parsed = JSON.parse(raw!) as { activePageIndex: number };
+    expect(parsed.activePageIndex).toBe(1);
+  });
+
+  it("restores TrueFalse answer state from sessionStorage", async () => {
+    saveCompoundState(
+      createSessionStoragePort(),
+      COURSE_ID,
+      "deck-tf",
+      createCompoundResumeState({
+        activePageIndex: 0,
+        childStates: {
+          "tf-deck-resume": { selected: true, selectionCorrect: true, passed: true, showSolutions: false },
+        },
+      }),
+    );
+
+    render(
+      wrap(
+        <SlideDeck blockId="deck-tf" title="Training">
+          <Slide blockId="s1" title="Quiz">
+            <TrueFalse checkId="tf-deck-resume" question="True?" answer={true} />
+          </Slide>
+        </SlideDeck>,
+        true,
+      ),
+    );
+
+    await waitFor(() => {
+      expect((screen.getByLabelText("True") as HTMLInputElement).checked).toBe(true);
+    });
   });
 });
 

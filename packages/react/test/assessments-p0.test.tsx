@@ -1,13 +1,15 @@
 import React from "react";
 import { afterEach, describe, expect, it } from "vitest";
-import { cleanup, render, screen, fireEvent } from "@testing-library/react";
+import { cleanup, render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { defineAssessmentPlugin } from "@lessonkit/core";
+import type { TelemetryEvent } from "@lessonkit/core";
 import {
   AssessmentSequence,
   Course,
   DragAndDrop,
   DragTheWords,
   FillInTheBlanks,
+  FindHotspot,
   Lesson,
   MarkTheWords,
   TrueFalse,
@@ -110,6 +112,22 @@ describe("1.1.x P0 assessment blocks", () => {
     expect(screen.getByRole("status").textContent).toContain("Correct");
   });
 
+  it("DragAndDrop with empty targets is not answerable", () => {
+    const ref = React.createRef<import("@lessonkit/core").AssessmentHandle>();
+    render(
+      wrap(
+        <DragAndDrop
+          ref={ref}
+          checkId="dad-empty"
+          items={[{ id: "a", label: "Apple" }]}
+          targets={[]}
+        />,
+      ),
+    );
+    expect(ref.current?.getAnswerGiven()).toBe(false);
+    expect((screen.getByTestId("check-drag-drop") as HTMLButtonElement).disabled).toBe(true);
+  });
+
   it("DragAndDrop assigns items to targets", () => {
     render(
       wrap(
@@ -132,6 +150,43 @@ describe("1.1.x P0 assessment blocks", () => {
     fireEvent.click(screen.getByTestId("drop-t2"));
     fireEvent.click(screen.getByTestId("check-drag-drop"));
     expect(screen.getByRole("status").textContent).toContain("Correct");
+  });
+
+  it("FindHotspot defaults passingScore to 1 when prop is omitted", async () => {
+    const events: TelemetryEvent[] = [];
+    render(
+      <Course
+        title="Course"
+        courseId="course-1"
+        config={{
+          tracking: { sink: (e) => void events.push(e) },
+          xapi: { enabled: false },
+        }}
+      >
+        <Lesson title="Lesson" lessonId="lesson-1">
+          <FindHotspot
+            checkId="hs-1"
+            src="/img.png"
+            alt="Map"
+            targets={[{ id: "t1", label: "Target", x: 10, y: 10 }]}
+            correctTargetId="t1"
+          />
+        </Lesson>
+      </Course>,
+    );
+
+    fireEvent.click(screen.getByTestId("target-t1"));
+    fireEvent.click(screen.getByTestId("check-hotspot"));
+    await waitFor(() =>
+      expect(
+        events.some(
+          (e) =>
+            e.name === "assessment_completed" &&
+            e.data?.checkId === "hs-1" &&
+            e.data?.passingScore === 1,
+        ),
+      ).toBe(true),
+    );
   });
 
   it("AssessmentSequence shows sequential steps", () => {

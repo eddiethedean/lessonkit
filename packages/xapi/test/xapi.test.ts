@@ -150,8 +150,10 @@ describe("@lessonkit/xapi", () => {
     expect(calls).toBe(2);
     expect(client.queueSize()).toBe(1);
     transport.mockImplementation(async () => {});
-    await client.flush();
+    const flushPromise = client.flush();
+    await new Promise((r) => setTimeout(r, 0));
     expect(client.queueSize()).toBe(0);
+    await flushPromise;
   });
 
   it("does not send duplicate in-flight statements with the same id", async () => {
@@ -194,6 +196,79 @@ describe("@lessonkit/xapi", () => {
     await new Promise((r) => setTimeout(r, 0));
 
     expect(client.queueSize()).toBe(1);
+  });
+
+  it("auto-generates statement ids and dedupes empty-id sends on transport failure", async () => {
+    const queue = createInMemoryXAPIQueue();
+    const transport = vi.fn(async () => {
+      throw new Error("network");
+    });
+    const client = createXAPIClient({ transport, courseId, queue });
+    const statement: XAPIStatement = {
+      id: "",
+      timestamp: "t",
+      verb: "http://adlnet.gov/expapi/verbs/experienced",
+      object: { id: "o" },
+    };
+
+    client.send(statement);
+    client.send(statement);
+    await new Promise((r) => setTimeout(r, 0));
+
+    expect(statement.id).toBeTruthy();
+    expect(client.queueSize()).toBe(1);
+  });
+
+  it("emit() does not throw when mapper fails", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    vi.stubEnv("NODE_ENV", "development");
+    const mapModule = await import("../src/telemetryMap");
+    const mapSpy = vi
+      .spyOn(mapModule, "telemetryEventToXAPIStatement")
+      .mockImplementation(() => {
+        throw new Error("bad mapping");
+      });
+    const transport = vi.fn(async () => {});
+    const client = createXAPIClient({ courseId, transport });
+
+    try {
+      expect(() => client.startedLesson({ lessonId: "lesson-1" })).not.toThrow();
+      await Promise.resolve();
+      expect(warn).toHaveBeenCalledWith("[lessonkit] xAPI mapping skipped:", "bad mapping");
+      expect(transport).not.toHaveBeenCalled();
+    } finally {
+      mapSpy.mockRestore();
+      vi.unstubAllEnvs();
+      warn.mockRestore();
+    }
+  });
+
+  it("drops oldest non-head statement at cap while the head is in flight", async () => {
+    const onCap = vi.fn();
+    const queue = createInMemoryXAPIQueue({ maxSize: 2, onCap });
+    let release!: () => void;
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const transport = vi.fn(async () => {
+      await gate;
+    });
+
+    queue.enqueue({ id: "head", timestamp: "t", verb: "http://adlnet.gov/expapi/verbs/experienced", object: { id: "o1" } });
+    queue.enqueue({ id: "tail", timestamp: "t", verb: "http://adlnet.gov/expapi/verbs/experienced", object: { id: "o2" } });
+
+    const flushPromise = queue.flush(transport);
+    await new Promise((r) => setTimeout(r, 0));
+
+    expect(queue.size()).toBe(2);
+    queue.enqueue({ id: "new", timestamp: "t", verb: "http://adlnet.gov/expapi/verbs/experienced", object: { id: "o3" } });
+    expect(queue.size()).toBe(2);
+    expect(onCap).toHaveBeenCalledTimes(1);
+
+    release();
+    await flushPromise;
+    expect(queue.size()).toBe(0);
+    expect(transport).toHaveBeenCalledTimes(2);
   });
 
   it("queue flush stops on first transport error and keeps remainder queued", async () => {

@@ -27,4 +27,21 @@ describe("resolveViteJs", () => {
   it("throws when vite.js is missing", () => {
     expect(() => resolveViteJs(dir)).toThrow(CliError);
   });
+
+  it("does not resolve vite.js from ancestor node_modules", async () => {
+    const parent = join(dir, "parent");
+    const child = join(parent, "child");
+    const parentViteJs = join(parent, "node_modules", "vite", "bin", "vite.js");
+    await mkdir(join(parent, "node_modules", "vite", "bin"), { recursive: true });
+    await mkdir(child, { recursive: true });
+    await writeFile(parentViteJs, "", "utf8");
+    await writeFile(
+      join(child, "package.json"),
+      JSON.stringify({ name: "child", devDependencies: { other: "1.0.0" } }),
+      "utf8",
+    );
+
+    expect(() => resolveViteJs(child)).toThrow(CliError);
+  });
+
 });

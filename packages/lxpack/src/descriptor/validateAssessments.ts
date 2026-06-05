@@ -11,7 +11,12 @@ type AssessmentValidator = (
 ) => void;
 
 const validateMcqLike: AssessmentValidator = (assessment, path, issues) => {
-  if (!("choices" in assessment) || !("answer" in assessment) || typeof assessment.answer !== "string") {
+  if (!("choices" in assessment) || !Array.isArray(assessment.choices)) {
+    issues.push({ path: `${path}.choices`, message: "choices is required for mcq" });
+    return;
+  }
+  if (!("answer" in assessment) || typeof assessment.answer !== "string") {
+    issues.push({ path: `${path}.answer`, message: "answer is required for mcq" });
     return;
   }
   const trimmedChoices = assessment.choices.map((c) => c.trim()).filter((c) => c.length > 0);
@@ -25,6 +30,27 @@ const validateMcqLike: AssessmentValidator = (assessment, path, issues) => {
   }
 };
 
+function countStarDelimitedBlanks(template: string): number {
+  const matches = template.match(/\*[^*]+\*/g);
+  return matches?.length ?? 0;
+}
+
+/** Maximum points achievable for this assessment in runtime and LMS shell injection. */
+export function maxAchievableAssessmentScore(assessment: AssessmentDescriptor): number {
+  const kind = assessment.kind ?? "mcq";
+  if (kind === "fillInBlanks" && assessment.kind === "fillInBlanks") {
+    const explicit = assessment.blanks?.filter((b) => b?.id?.trim() && b?.answer?.trim()).length ?? 0;
+    if (explicit > 0) return explicit;
+    return countStarDelimitedBlanks(assessment.template ?? "");
+  }
+  if (kind === "findMultipleHotspots" && assessment.kind === "findMultipleHotspots") {
+    return (
+      assessment.correctTargetIds?.map((id) => id.trim()).filter((id) => id.length > 0).length ?? 0
+    );
+  }
+  return 1;
+}
+
 export const ASSESSMENT_VALIDATORS: Record<AssessmentKind, AssessmentValidator> = {
   mcq: validateMcqLike,
   trueFalse: (assessment, path, issues) => {
@@ -37,8 +63,34 @@ export const ASSESSMENT_VALIDATORS: Record<AssessmentKind, AssessmentValidator> 
       issues.push({ path: `${path}.template`, message: "template is required for fillInBlanks" });
     }
   },
-  findHotspot: () => {},
-  findMultipleHotspots: () => {},
+  findHotspot: (assessment, path, issues) => {
+    if (assessment.kind !== "findHotspot") return;
+    if (!assessment.src?.trim()) {
+      issues.push({ path: `${path}.src`, message: "src is required for findHotspot" });
+    }
+    if (!assessment.alt?.trim()) {
+      issues.push({ path: `${path}.alt`, message: "alt is required for findHotspot" });
+    }
+    if (!assessment.correctTargetId?.trim()) {
+      issues.push({ path: `${path}.correctTargetId`, message: "correctTargetId is required for findHotspot" });
+    }
+  },
+  findMultipleHotspots: (assessment, path, issues) => {
+    if (assessment.kind !== "findMultipleHotspots") return;
+    if (!assessment.src?.trim()) {
+      issues.push({ path: `${path}.src`, message: "src is required for findMultipleHotspots" });
+    }
+    if (!assessment.alt?.trim()) {
+      issues.push({ path: `${path}.alt`, message: "alt is required for findMultipleHotspots" });
+    }
+    const ids = assessment.correctTargetIds?.map((id) => id.trim()).filter((id) => id.length > 0) ?? [];
+    if (!ids.length) {
+      issues.push({
+        path: `${path}.correctTargetIds`,
+        message: "at least one non-empty correctTargetId is required for findMultipleHotspots",
+      });
+    }
+  },
 };
 
 export function validateAssessmentEntry(
@@ -59,13 +111,41 @@ export function validateAssessmentEntry(
   if (!assessment.question?.trim()) {
     issues.push({ path: `${path}.question`, message: "question is required" });
   }
+  const knownKinds = Object.keys(ASSESSMENT_VALIDATORS) as AssessmentKind[];
+  if (
+    assessment.kind !== undefined &&
+    assessment.kind !== "mcq" &&
+    !knownKinds.includes(assessment.kind as AssessmentKind)
+  ) {
+    issues.push({
+      path: `${path}.kind`,
+      message: `unknown kind; use one of: ${knownKinds.join(", ")}`,
+    });
+    return;
+  }
   const kind = assessment.kind ?? "mcq";
-  ASSESSMENT_VALIDATORS[kind](assessment, path, issues);
+  const validator = ASSESSMENT_VALIDATORS[kind];
+  if (!validator) {
+    issues.push({
+      path: `${path}.kind`,
+      message: `unknown kind; use one of: ${knownKinds.join(", ")}`,
+    });
+    return;
+  }
+  validator(assessment, path, issues);
   const passingScore = assessment.passingScore;
   if (passingScore !== undefined && !(Number.isFinite(passingScore) && passingScore > 0)) {
     issues.push({
       path: `${path}.passingScore`,
       message: "passingScore must be greater than 0 (absolute point threshold)",
     });
+  } else if (passingScore !== undefined) {
+    const maxAchievable = maxAchievableAssessmentScore(assessment);
+    if (maxAchievable > 0 && passingScore > maxAchievable) {
+      issues.push({
+        path: `${path}.passingScore`,
+        message: `passingScore cannot exceed achievable score (${maxAchievable}) for this assessment kind`,
+      });
+    }
   }
 }

@@ -21,7 +21,7 @@ npm run test:integration
 | `activity-iri.test.ts` | xAPI/cmi5 `activityIri` validation |
 | `assessments-p0-package.test.ts` | assessments-p0 SCORM packaging |
 | `interactive-book-package.test.ts` | interactive-book SCORM packaging |
-| `studio-export-package.test.ts` | Studio export pipeline packaging |
+| `slide-deck-package.test.ts` | slide-deck SCORM packaging (1.3 golden path) |
 
 Fixtures: [`fixtures/minimal-course/`](https://github.com/eddiethedean/lessonkit/tree/main/integration/fixtures/minimal-course) — rewrites deps to monorepo `file:` URLs.
 

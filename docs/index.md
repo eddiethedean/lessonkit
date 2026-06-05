@@ -37,24 +37,12 @@ Pick the path that matches how you work:
 **Open developer guides →**
 :::
 
-:::{grid-item-card} LessonKit Studio
-:link: guides/studio/index
-:link-type: doc
-
-**Visual authoring (Alpha).** Drag-and-drop blocks, live preview, export to React/Vite—try the **[live app](guides/studio/app.md)** in the docs.
-
-**Status:** Studio is **Alpha** (npm **0.3.2**, pins framework **1.2.0** when published with `studio-v0.3.2`). Framework **1.2** blocks may ship before Studio palette parity on older Studio lines.
-
-+++
-**Open Studio →**
-:::
-
 ::::
 
 :::{admonition} Coming from H5P?
 :class: tip
 
-You can map familiar H5P content types to LessonKit components and Studio blocks. **`Quiz`** is H5P Multiple Choice; more types are on the roadmap with the same names where possible. Start with **[Coming from H5P?](guides/h5p-for-lessonkit-authors.md)** and the **[H5P capability map](project/h5p-capability-map.md)**.
+You can map familiar H5P content types to LessonKit components. **`Quiz`** is H5P Multiple Choice; more types are on the roadmap with the same names where possible. Start with **[Coming from H5P?](guides/h5p-for-lessonkit-authors.md)** and the **[H5P capability map](project/h5p-capability-map.md)**.
 :::
 
 :::{admonition} New to React?
@@ -128,17 +116,6 @@ guides/react-developers/contributing-to-the-monorepo
 ```
 
 ```{toctree}
-:maxdepth: 2
-:caption: LessonKit Studio
-
-guides/studio/index
-guides/studio/app
-guides/studio/project-format-v1
-guides/studio/editor
-guides/studio/export
-```
-
-```{toctree}
 :maxdepth: 1
 :caption: Reference
 
@@ -167,10 +144,8 @@ project/good-first-contributions
 project/security
 project/roadmap
 project/h5p-capability-map
-project/studio-readiness
-project/studio-spec
-project/studio-plan
 MIGRATION-0.x-to-1.0
 MIGRATION-1.0-to-1.1
 MIGRATION-1.1-to-1.2
+MIGRATION-1.2-to-1.3
 ```

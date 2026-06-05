@@ -5,6 +5,7 @@ import { AssessmentLessonGuard } from "../assessment/AssessmentLessonGuard";
 import { buildAssessmentHandle } from "../assessment/internal/buildAssessmentHandle";
 import { readBooleanStateField } from "../assessment/internal/resumeState";
 import { useAssessmentHandleRegistration } from "../assessment/internal/useAssessmentHandleRegistration";
+import { meetsPassingThreshold } from "../assessment/scoring";
 import { useAssessmentState } from "../assessment/useAssessmentState";
 import { normalizeComponentId } from "../runtime/validateComponentId";
 
@@ -30,11 +31,13 @@ function DragAndDropInner(
   const [pool, setPool] = useState<string[]>(() => props.items.map((i) => i.id));
   const [keyboardItem, setKeyboardItem] = useState<string | null>(null);
   const [passed, setPassed] = useState(false);
+  const [checked, setChecked] = useState(false);
   const completedRef = useRef(false);
 
   const reset = () => {
     completedRef.current = false;
     setPassed(false);
+    setChecked(false);
     setAssignments(Object.fromEntries(props.targets.map((t) => [t.id, ""])));
     setPool(props.items.map((i) => i.id));
     setKeyboardItem(null);
@@ -44,31 +47,32 @@ function DragAndDropInner(
     reset();
   }, [checkId, props.items.map((i) => i.id).join(","), props.targets.map((t) => t.id).join(",")]);
 
-  const allFilled = props.targets.every((t) => (assignments[t.id] ?? "").length > 0);
-  const allCorrect = props.targets.every((t) => assignments[t.id] === t.accepts);
+  const hasTargets = props.targets.length > 0;
+  const allFilled = hasTargets && props.targets.every((t) => (assignments[t.id] ?? "").length > 0);
+  let score = 0;
+  props.targets.forEach((t) => {
+    if (assignments[t.id] === t.accepts) score += 1;
+  });
+  const maxScore = props.targets.length || 1;
+  const passedThreshold = meetsPassingThreshold(score, maxScore, props.passingScore);
 
   const handle = useMemo(() => {
-    const maxScore = props.targets.length || 1;
-    let score = 0;
-    props.targets.forEach((t) => {
-      if (assignments[t.id] === t.accepts) score += 1;
-    });
     return buildAssessmentHandle({
       checkId,
       getScore: () => score,
       getMaxScore: () => maxScore,
-      getAnswerGiven: () => allFilled,
+      getAnswerGiven: () => hasTargets && allFilled,
       resetTask: reset,
       showSolutions: () => {},
       getXAPIData: () => ({
         checkId,
         interactionType: INTERACTION,
         response: assignments,
-        correct: allCorrect,
+        correct: passedThreshold,
         score,
         maxScore,
       }),
-      getCurrentState: () => ({ assignments, pool, passed, keyboardItem }),
+      getCurrentState: () => ({ assignments, pool, passed, checked, keyboardItem }),
       resume: (state) => {
         const rawAssignments = state.assignments;
         if (rawAssignments && typeof rawAssignments === "object") {
@@ -79,16 +83,18 @@ function DragAndDropInner(
           setPassed(value);
           completedRef.current = value;
         });
+        readBooleanStateField(state, "checked", setChecked);
         const item = state.keyboardItem;
         if (item === null || typeof item === "string") setKeyboardItem(item ?? null);
       },
     });
-  }, [allCorrect, allFilled, assignments, checkId, keyboardItem, passed, pool, props.targets]);
+  }, [allFilled, assignments, checkId, checked, hasTargets, keyboardItem, maxScore, passed, passedThreshold, pool, props.targets, score]);
 
   useAssessmentHandleRegistration(checkId, handle, ref);
 
   const place = (targetId: string, itemId: string) => {
     if (passed && !props.enableRetry) return;
+    setChecked(false);
     const prev = assignments[targetId];
     setAssignments((a) => ({ ...a, [targetId]: itemId }));
     setPool((p) => {
@@ -101,21 +107,22 @@ function DragAndDropInner(
 
   const check = () => {
     if (!allFilled) return;
+    setChecked(true);
     assessment.answer({
       checkId,
       interactionType: INTERACTION,
       response: assignments,
-      correct: allCorrect,
+      correct: passedThreshold,
     });
-    if (allCorrect && !completedRef.current) {
+    if (passedThreshold && !completedRef.current) {
       completedRef.current = true;
       setPassed(true);
       assessment.complete({
         checkId,
         interactionType: INTERACTION,
-        score: props.targets.length,
-        maxScore: props.targets.length,
-        passingScore: props.passingScore ?? props.targets.length,
+        score,
+        maxScore,
+        passingScore: props.passingScore ?? maxScore,
       });
     }
   };
@@ -124,8 +131,9 @@ function DragAndDropInner(
     <section aria-label="Drag and Drop" data-lk-check-id={checkId}>
       <p>Match each item to the correct target (drag or use keyboard: select item, then activate target).</p>
       <div role="list" aria-label="Draggable items">
-        {pool.map((id) => {
-          const item = props.items.find((i) => i.id === id)!;
+        {pool.flatMap((id) => {
+          const item = props.items.find((i) => i.id === id);
+          if (!item) return [];
           return (
             <button
               key={id}
@@ -178,12 +186,12 @@ function DragAndDropInner(
           );
         })}
       </ul>
-      <button type="button" data-testid="check-drag-drop" disabled={!allFilled || passed} onClick={check}>
+      <button type="button" data-testid="check-drag-drop" disabled={!hasTargets || !allFilled || passed} onClick={check}>
         Check
       </button>
-      {allFilled ? (
+      {checked ? (
         <p role="status" aria-live="polite">
-          {passed || allCorrect ? "Correct" : "Try again"}
+          {passedThreshold ? "Correct" : "Try again"}
         </p>
       ) : null}
     </section>

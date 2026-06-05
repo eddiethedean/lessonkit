@@ -31,6 +31,7 @@ export {
   colorExtraVarName,
   colorVarName,
   radiusVarName,
+  sanitizeCssCustomPropertyValue,
   shadowVarName,
   spacingVarName,
   themeToCssDeclarationBlock,
