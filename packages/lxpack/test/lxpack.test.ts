@@ -45,6 +45,17 @@ const baseDescriptor = {
 };
 
 describe("validateDescriptor", () => {
+  it("rejects unknown assessment kinds", () => {
+    const result = validateDescriptor({
+      ...baseDescriptor,
+      assessments: [{ kind: "fillInBlank", checkId: "bad-1", question: "Q?", template: "a *b*" }],
+    });
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.issues.some((i) => i.path.includes("kind"))).toBe(true);
+    }
+  });
+
   it("accepts trueFalse and fillInBlanks assessment kinds", () => {
     const tf = validateDescriptor({
       ...baseDescriptor,

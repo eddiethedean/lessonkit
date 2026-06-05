@@ -198,6 +198,7 @@ export async function packageLessonkitCourse(
     await ensureOutDirParent(outDir);
     await promoteStagingToOutDir(stagingDir, outDir);
   } catch (err) {
+    await fsp.rm(stagingDir, { recursive: true, force: true }).catch(/* v8 ignore next */ () => undefined);
     return {
       ok: false,
       courseDir: outDir,

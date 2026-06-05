@@ -36,6 +36,7 @@ function DragTheWordsInner(
   const [pool, setPool] = useState<string[]>(() => [...props.words]);
   const [keyboardWord, setKeyboardWord] = useState<string | null>(null);
   const [passed, setPassed] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
   const completedRef = useRef(false);
   const answeredRef = useRef(false);
 
@@ -43,6 +44,7 @@ function DragTheWordsInner(
     completedRef.current = false;
     answeredRef.current = false;
     setPassed(false);
+    setSubmitted(false);
     setZones(Object.fromEntries(answers.map((_, i) => [`zone-${i}`, ""])));
     setPool([...props.words]);
     setKeyboardWord(null);
@@ -129,6 +131,7 @@ function DragTheWordsInner(
     if (!allFilled) return;
     if (!answeredRef.current) {
       answeredRef.current = true;
+      setSubmitted(true);
       assessment.answer({
         checkId,
         interactionType: INTERACTION,
@@ -211,7 +214,7 @@ function DragTheWordsInner(
       {!hasZones ? (
         <p role="alert">This activity has no drop zones. Wrap answers in asterisks in the template.</p>
       ) : null}
-      {allFilled ? (
+      {submitted ? (
         <p role="status" aria-live="polite">
           {passed || passedThreshold ? "Correct" : "Try again"}
         </p>

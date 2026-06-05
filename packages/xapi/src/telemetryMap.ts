@@ -92,7 +92,8 @@ const TELEMETRY_XAPI_MAPPERS = {
     const data = event.data;
     const result: XAPIResult = {};
     if (typeof data?.durationMs === "number") {
-      result.duration = formatDurationMs(data.durationMs);
+      const duration = formatDurationMs(data.durationMs);
+      if (duration !== undefined) result.duration = duration;
     }
     if (typeof data?.success === "boolean") result.success = data.success;
     const score = buildXapiScoreResult({ score: data?.score, maxScore: data?.maxScore });

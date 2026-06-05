@@ -269,7 +269,7 @@ describe("packageLessonkitCourse errors", () => {
     }
   });
 
-  it("returns ok false when promote fails without deleting staging", async () => {
+  it("returns ok false when promote fails and deletes staging", async () => {
     packageLessonkit.mockImplementationOnce(async (opts) => {
       const { realpath } = await import("node:fs/promises");
       const stagingRoot = await realpath(String(opts.courseDir));

@@ -8,6 +8,7 @@ import {
   defineTelemetryPlugin,
   deriveId,
   slugifyId,
+  validateId,
 } from "../src";
 import { createNoopStorage } from "../src/ports";
 import {
@@ -80,7 +81,9 @@ describe("coverage-full", () => {
 
   it("slugifyId prefixes non-letter slugs and falls back when validation fails", () => {
     expect(slugifyId("123foo")).toBe("id-123foo");
-    expect(slugifyId("1".repeat(100))).toBe("id");
+    const longNumeric = slugifyId("1".repeat(100));
+    expect(longNumeric).not.toBe("id");
+    expect(validateId(longNumeric).ok).toBe(true);
   });
 
   it("deriveId returns the base slug when unused", () => {
@@ -379,6 +382,7 @@ describe("coverage-full", () => {
     runtime.completeCourse(emit);
     expect(events.filter((e) => e === "lesson_completed")).toHaveLength(1);
     expect(events.filter((e) => e === "course_completed")).toHaveLength(1);
+    expect(runtime.getProgressState().activeLessonId).toBeUndefined();
   });
 
   it("headless runtime skips lesson_time_on_task when duration is unknown", () => {

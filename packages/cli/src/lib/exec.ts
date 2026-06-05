@@ -10,7 +10,7 @@ function resolveCommandTimeoutMs(explicit?: number): number | undefined {
   const raw = process.env.LESSONKIT_CMD_TIMEOUT_MS;
   if (raw === undefined || raw === "") return DEFAULT_CMD_TIMEOUT_MS;
   const parsed = Number(raw);
-  if (!Number.isFinite(parsed) || parsed <= 0) return undefined;
+  if (!Number.isFinite(parsed) || parsed <= 0) return DEFAULT_CMD_TIMEOUT_MS;
   return parsed;
 }
 

@@ -218,7 +218,35 @@ describe("@lessonkit/core", () => {
     expect(sink).not.toHaveBeenCalled();
   });
 
-  it("drops oldest events when the batch buffer exceeds the cap", () => {
+  it("re-queues the full batch when per-event sink fails mid-batch", async () => {
+    const sink = vi
+      .fn(async () => {})
+      .mockResolvedValueOnce(undefined)
+      .mockResolvedValueOnce(undefined)
+      .mockRejectedValueOnce(new Error("fail"))
+      .mockResolvedValue(undefined);
+
+    const client = createTrackingClient({
+      sink,
+      batch: { enabled: true, flushIntervalMs: 0, maxBatchSize: 100 },
+    });
+
+    client.track(interactionEvent("t1"));
+    client.track(interactionEvent("t2"));
+    client.track(interactionEvent("t3"));
+
+    await client.flush?.();
+    await new Promise((r) => setTimeout(r, 0));
+
+    expect(sink).toHaveBeenCalledTimes(3);
+
+    await client.flush?.();
+    await new Promise((r) => setTimeout(r, 0));
+
+    expect(sink.mock.calls.length).toBeGreaterThanOrEqual(4);
+  });
+
+  it("refuses new events when the batch buffer is at cap", () => {
     vi.stubEnv("NODE_ENV", "development");
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
     const batchSink = vi.fn(async () => {
@@ -235,7 +263,7 @@ describe("@lessonkit/core", () => {
     }
 
     expect(warn).toHaveBeenCalledTimes(1);
-    expect(warn.mock.calls[0]?.[0]).toContain("telemetry batch buffer capped");
+    expect(warn.mock.calls[0]?.[0]).toContain("new events are dropped");
     vi.unstubAllEnvs();
     warn.mockRestore();
   });

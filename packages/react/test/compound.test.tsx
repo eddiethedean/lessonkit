@@ -178,6 +178,65 @@ describe("InteractiveBook", () => {
     expect(parsed.childStates["hs-1"]?.checked).toBe(true);
   });
 
+  it("persists page index when saved childStates have no registered handles", () => {
+    saveCompoundState(
+      createSessionStoragePort(),
+      COURSE_ID,
+      "book-orphan",
+      createCompoundResumeState({
+        activePageIndex: 0,
+        childStates: { "removed-quiz": { selected: "a" } },
+      }),
+    );
+
+    render(
+      wrap(
+        <InteractiveBook blockId="book-orphan" title="Book">
+          <Page blockId="p1" title="One">
+            <Text>Page one</Text>
+          </Page>
+          <Page blockId="p2" title="Two">
+            <Text>Page two</Text>
+          </Page>
+        </InteractiveBook>,
+        true,
+      ),
+    );
+
+    fireEvent.click(screen.getByTestId("book-next"));
+    const raw = sessionStorage.getItem(compoundStateStorageKey(COURSE_ID, "book-orphan"));
+    expect(raw).toBeTruthy();
+    const parsed = JSON.parse(raw!) as { activePageIndex: number };
+    expect(parsed.activePageIndex).toBe(1);
+  });
+
+  it("imperative resume hydrates child states after handles mount", async () => {
+    const ref = createRef<CompoundHandle>();
+    render(
+      wrap(
+        <InteractiveBook blockId="book-imperative" title="Book" ref={ref}>
+          <Page blockId="p1" title="Quiz page">
+            <TrueFalse checkId="tf-imperative" question="True?" answer={true} />
+          </Page>
+        </InteractiveBook>,
+        true,
+      ),
+    );
+
+    ref.current?.resume(
+      createCompoundResumeState({
+        activePageIndex: 0,
+        childStates: {
+          "tf-imperative": { selected: true, selectionCorrect: true, passed: true, showSolutions: false },
+        },
+      }),
+    );
+
+    await waitFor(() => {
+      expect((screen.getByLabelText("True") as HTMLInputElement).checked).toBe(true);
+    });
+  });
+
   it("clamps corrupt activePageIndex from sessionStorage", () => {
     saveCompoundState(
       createSessionStoragePort(),

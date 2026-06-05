@@ -42,6 +42,7 @@ function FillInTheBlanksInner(
   );
   const [passed, setPassed] = useState(false);
   const [showSolutions, setShowSolutions] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
   const completedRef = useRef(false);
   const answeredRef = useRef(false);
 
@@ -51,6 +52,7 @@ function FillInTheBlanksInner(
     setPassed(false);
     setValues(Object.fromEntries(blanks.map((b) => [b.id, ""])));
     setShowSolutions(false);
+    setSubmitted(false);
   };
 
   useEffect(() => {
@@ -110,6 +112,7 @@ function FillInTheBlanksInner(
     if (!allFilled) return;
     if (!answeredRef.current) {
       answeredRef.current = true;
+      setSubmitted(true);
       assessment.answer({
         checkId,
         interactionType: INTERACTION,
@@ -175,7 +178,7 @@ function FillInTheBlanksInner(
       {!hasBlanks ? (
         <p role="alert">This activity has no blanks. Add text wrapped in asterisks, e.g. The *answer* here.</p>
       ) : null}
-      {allFilled ? (
+      {submitted ? (
         <p role="status" aria-live="polite">
           {passed || passedThreshold ? "Correct" : "Try again"}
         </p>

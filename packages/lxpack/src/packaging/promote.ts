@@ -28,6 +28,26 @@ function promoteLockPath(outDir: string): string {
   return join(parent, `.lk-promote-lock-${hash}`);
 }
 
+const STALE_LOCK_TTL_MS = 5 * 60 * 1000;
+
+async function isStalePromoteLock(lockPath: string): Promise<boolean> {
+  try {
+    const stat = await fsp.stat(lockPath);
+    if (Date.now() - stat.mtimeMs > STALE_LOCK_TTL_MS) return true;
+    const content = await fsp.readFile(lockPath, "utf8");
+    const pid = Number.parseInt(content.trim(), 10);
+    if (!Number.isFinite(pid) || pid <= 0) return true;
+    try {
+      process.kill(pid, 0);
+      return false;
+    } catch {
+      return true;
+    }
+  } catch {
+    return true;
+  }
+}
+
 async function withPromoteLock<T>(outDir: string, fn: () => Promise<T>): Promise<T> {
   const lockPath = promoteLockPath(outDir);
   await fsp.mkdir(dirname(outDir), { recursive: true });
@@ -42,6 +62,10 @@ async function withPromoteLock<T>(outDir: string, fn: () => Promise<T>): Promise
       const code =
         err && typeof err === "object" && "code" in err ? String((err as NodeJS.ErrnoException).code) : "";
       if (code !== "EEXIST") throw err;
+      if (await isStalePromoteLock(lockPath)) {
+        await fsp.rm(lockPath, { force: true }).catch(/* v8 ignore next */ () => undefined);
+        continue;
+      }
       await new Promise((resolveWait) => setTimeout(resolveWait, 25));
     }
   }

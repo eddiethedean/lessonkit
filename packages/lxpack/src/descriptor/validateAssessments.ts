@@ -85,8 +85,28 @@ export function validateAssessmentEntry(
   if (!assessment.question?.trim()) {
     issues.push({ path: `${path}.question`, message: "question is required" });
   }
+  const knownKinds = Object.keys(ASSESSMENT_VALIDATORS) as AssessmentKind[];
+  if (
+    assessment.kind !== undefined &&
+    assessment.kind !== "mcq" &&
+    !knownKinds.includes(assessment.kind as AssessmentKind)
+  ) {
+    issues.push({
+      path: `${path}.kind`,
+      message: `unknown kind; use one of: ${knownKinds.join(", ")}`,
+    });
+    return;
+  }
   const kind = assessment.kind ?? "mcq";
-  ASSESSMENT_VALIDATORS[kind](assessment, path, issues);
+  const validator = ASSESSMENT_VALIDATORS[kind];
+  if (!validator) {
+    issues.push({
+      path: `${path}.kind`,
+      message: `unknown kind; use one of: ${knownKinds.join(", ")}`,
+    });
+    return;
+  }
+  validator(assessment, path, issues);
   const passingScore = assessment.passingScore;
   if (passingScore !== undefined && !(Number.isFinite(passingScore) && passingScore > 0)) {
     issues.push({

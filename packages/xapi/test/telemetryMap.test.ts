@@ -9,7 +9,29 @@ const base = {
   timestamp: "2026-05-28T12:00:00.000Z",
 } as const;
 
+import { formatDurationMs } from "../src/duration";
+
+describe("formatDurationMs", () => {
+  it("returns undefined for non-finite durations", () => {
+    expect(formatDurationMs(Number.NaN)).toBeUndefined();
+    expect(formatDurationMs(Number.POSITIVE_INFINITY)).toBeUndefined();
+    expect(formatDurationMs(-1)).toBeUndefined();
+  });
+});
+
 describe("telemetryEventToXAPIStatement", () => {
+  it("omits invalid lesson duration from completion statements", () => {
+    const statement = telemetryEventToXAPIStatement({
+      name: "lesson_completed",
+      courseId: base.courseId,
+      lessonId: base.lessonId,
+      sessionId: base.sessionId,
+      timestamp: base.timestamp,
+      data: { durationMs: Number.NaN, lessonId: base.lessonId },
+    });
+    expect(statement?.result?.duration).toBeUndefined();
+  });
+
   it("maps course and lesson lifecycle events", () => {
     expect(
       telemetryEventToXAPIStatement({

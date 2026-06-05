@@ -112,7 +112,12 @@ export function useCompoundPersistence(opts: {
     if (!pending || !ctx) return;
     const handles = ctx.getHandles();
     const applied = resumeChildHandles(handles, pending.childStates, { waitForHandles: true });
-    if (!applied) return;
+    if (!applied) {
+      if (handles.size === 0 && Object.keys(pending.childStates).length > 0) {
+        finalizeHydration({});
+      }
+      return;
+    }
     const registeredOnly = stripOrphanChildStates(handles, pending.childStates);
     finalizeHydration(registeredOnly);
   }, [ctx, finalizeHydration]);
@@ -135,21 +140,29 @@ export function useCompoundPersistence(opts: {
 
   const persistNow = useCallback(() => {
     if (!opts.enabled || !opts.courseId) return;
-    if (skipSaveUntilHydratedRef.current) return;
+    if (skipSaveUntilHydratedRef.current) {
+      saveResume(
+        createCompoundResumeState({
+          activePageIndex: clampCompoundPageIndex(opts.index, opts.pageCount),
+          childStates: { ...loadedChildStatesRef.current },
+        }),
+      );
+      return;
+    }
     saveResume(buildStateRef.current());
-  }, [opts.enabled, opts.courseId, saveResume]);
+  }, [opts.enabled, opts.courseId, opts.index, opts.pageCount, saveResume]);
 
   const notifyImperativeResume = useCallback(
     (state: CompoundResumeState) => {
       const clamped = clampCompoundPageIndex(state.activePageIndex, opts.pageCount);
       const childStates = ctx ? stripOrphanChildStates(ctx.getHandles(), state.childStates) : state.childStates;
       loadedChildStatesRef.current = { ...childStates };
-      skipSaveUntilHydratedRef.current = false;
-      pendingChildResumeRef.current = null;
+      skipSaveUntilHydratedRef.current = Object.keys(childStates).length > 0;
       opts.setIndex(clamped);
-      queueMicrotask(() => persistNow());
+      pendingChildResumeRef.current = { ...state, activePageIndex: clamped, childStates };
+      queueMicrotask(() => applyPendingChildResume());
     },
-    [ctx, opts.pageCount, opts.setIndex, persistNow],
+    [ctx, opts.pageCount, opts.setIndex, applyPendingChildResume],
   );
 
   useEffect(() => {

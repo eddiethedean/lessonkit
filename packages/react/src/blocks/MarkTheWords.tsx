@@ -123,7 +123,7 @@ function MarkTheWordsInner(
       interactionType: INTERACTION,
       question: props.text,
       response: [...marked].map((i) => tokens[i]),
-      correct: passedThreshold && allMarked,
+      correct: passedThreshold,
     });
     assessment.complete({
       checkId,

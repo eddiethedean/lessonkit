@@ -23,6 +23,8 @@ function QuizInner(
   const [selected, setSelected] = useState<string | null>(null);
   const [selectionCorrect, setSelectionCorrect] = useState<boolean | null>(null);
   const [quizPassed, setQuizPassed] = useState(false);
+  const [completedScore, setCompletedScore] = useState<number | null>(null);
+  const [completedMaxScore, setCompletedMaxScore] = useState<number | null>(null);
   const completedRef = useRef(false);
   const questionId = useId();
   const choicesKey = props.choices.join("\0");
@@ -32,6 +34,8 @@ function QuizInner(
     setQuizPassed(false);
     setSelected(null);
     setSelectionCorrect(null);
+    setCompletedScore(null);
+    setCompletedMaxScore(null);
   }, [checkId, props.answer, props.question, choicesKey]);
 
   const passed = quizPassed;
@@ -41,18 +45,20 @@ function QuizInner(
       buildAssessmentHandle({
         checkId,
         getScore: () => {
-          const maxScore = 1;
-          if (quizPassed && selected !== null) return maxScore;
+          if (quizPassed) return completedScore ?? 1;
           if (selected === null) return 0;
+          const maxScore = completedMaxScore ?? 1;
           return selectionCorrect ? maxScore : 0;
         },
-        getMaxScore: () => 1,
+        getMaxScore: () => completedMaxScore ?? 1,
         getAnswerGiven: () => selected !== null,
         resetTask: () => {
           completedRef.current = false;
           setQuizPassed(false);
           setSelected(null);
           setSelectionCorrect(null);
+          setCompletedScore(null);
+          setCompletedMaxScore(null);
         },
         showSolutions: () => {},
         getXAPIData: () => ({
@@ -84,7 +90,7 @@ function QuizInner(
           });
         },
       }),
-    [checkId, quizPassed, selected, selectionCorrect],
+    [checkId, completedMaxScore, completedScore, quizPassed, selected, selectionCorrect],
   );
 
   useAssessmentHandleRegistration(checkId, handle, ref);
@@ -119,9 +125,12 @@ function QuizInner(
                   completedRef.current = true;
                   setQuizPassed(true);
                   const maxScore = custom?.maxScore ?? 1;
+                  const score = custom?.score ?? maxScore;
+                  setCompletedScore(score);
+                  setCompletedMaxScore(maxScore);
                   quiz.complete({
                     checkId,
-                    score: custom?.score ?? maxScore,
+                    score,
                     maxScore,
                     passingScore: props.passingScore ?? maxScore,
                   });

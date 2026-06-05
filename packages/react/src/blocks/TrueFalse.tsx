@@ -30,6 +30,8 @@ function TrueFalseInner(
   const [selectionCorrect, setSelectionCorrect] = useState<boolean | null>(null);
   const [showSolutions, setShowSolutions] = useState(false);
   const [passed, setPassed] = useState(false);
+  const [completedScore, setCompletedScore] = useState<number | null>(null);
+  const [completedMaxScore, setCompletedMaxScore] = useState<number | null>(null);
   const completedRef = useRef(false);
   const questionId = React.useId();
 
@@ -39,6 +41,8 @@ function TrueFalseInner(
     setSelected(null);
     setSelectionCorrect(null);
     setShowSolutions(false);
+    setCompletedScore(null);
+    setCompletedMaxScore(null);
   };
 
   useEffect(() => {
@@ -50,11 +54,11 @@ function TrueFalseInner(
       buildAssessmentHandle({
         checkId,
         getScore: () => {
-          const maxScore = 1;
-          if (passed) return maxScore;
+          if (passed) return completedScore ?? 1;
+          const maxScore = completedMaxScore ?? 1;
           return selectionCorrect ? maxScore : 0;
         },
-        getMaxScore: () => 1,
+        getMaxScore: () => completedMaxScore ?? 1,
         getAnswerGiven: () => selected !== null,
         resetTask: reset,
         showSolutions: () => setShowSolutions(true),
@@ -83,7 +87,7 @@ function TrueFalseInner(
           readBooleanStateField(state, "showSolutions", setShowSolutions);
         },
       }),
-    [checkId, passed, props.answer, selected, selectionCorrect, showSolutions],
+    [checkId, completedMaxScore, completedScore, passed, props.answer, selected, selectionCorrect, showSolutions],
   );
 
   useAssessmentHandleRegistration(checkId, handle, ref);
@@ -104,6 +108,8 @@ function TrueFalseInner(
     if (scored.passed && !completedRef.current) {
       completedRef.current = true;
       setPassed(true);
+      setCompletedScore(scored.score);
+      setCompletedMaxScore(scored.maxScore);
       assessment.complete({
         checkId,
         interactionType: INTERACTION,

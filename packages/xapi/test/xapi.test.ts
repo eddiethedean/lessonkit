@@ -196,6 +196,31 @@ describe("@lessonkit/xapi", () => {
     expect(client.queueSize()).toBe(1);
   });
 
+  it("refuses enqueue at cap while the head statement is in flight", async () => {
+    const queue = createInMemoryXAPIQueue({ maxSize: 2 });
+    let release!: () => void;
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const transport = vi.fn(async () => {
+      await gate;
+    });
+
+    queue.enqueue({ id: "head", timestamp: "t", verb: "http://adlnet.gov/expapi/verbs/experienced", object: { id: "o1" } });
+    queue.enqueue({ id: "tail", timestamp: "t", verb: "http://adlnet.gov/expapi/verbs/experienced", object: { id: "o2" } });
+
+    const flushPromise = queue.flush(transport);
+    await new Promise((r) => setTimeout(r, 0));
+
+    expect(queue.size()).toBe(2);
+    queue.enqueue({ id: "new", timestamp: "t", verb: "http://adlnet.gov/expapi/verbs/experienced", object: { id: "o3" } });
+    expect(queue.size()).toBe(2);
+
+    release();
+    await flushPromise;
+    expect(transport).toHaveBeenCalled();
+  });
+
   it("queue flush stops on first transport error and keeps remainder queued", async () => {
     const queue = createInMemoryXAPIQueue();
     queue.enqueue({ id: "1", timestamp: "t", verb: "http://adlnet.gov/expapi/verbs/experienced", object: { id: "o" } });

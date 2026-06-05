@@ -8,7 +8,6 @@ import {
 } from "./CompoundHydrationBridge";
 import { useCompoundPageIndex } from "./CompoundPageIndexContext";
 import { isDevEnvironment } from "../runtime/validateComponentId";
-import { resumeChildHandles } from "./resumeChildHandles";
 
 export type RegisteredAssessmentHandle = {
   handle: AssessmentHandle;
@@ -101,7 +100,7 @@ export function useCompoundHandlesVersion(): number {
 export function useRegisterAssessmentHandle(checkId: CheckId, handle: AssessmentHandle | null) {
   const registry = useContext(CompoundRegistryContext);
   const pageIndex = useCompoundPageIndex();
-  React.useEffect(() => {
+  React.useLayoutEffect(() => {
     if (!registry || !handle) return;
     return registry.register(checkId, handle, pageIndex);
   }, [registry, checkId, handle, pageIndex]);
@@ -157,8 +156,6 @@ export function useCompoundHandleRef(
         return createCompoundResumeState({ activePageIndex, childStates });
       },
       resume: (state: CompoundResumeState) => {
-        setIndexClamped(state.activePageIndex);
-        resumeChildHandles(getHandles(), state.childStates, { waitForHandles: true });
         bridgeRef?.current?.notifyImperativeResume(state);
       },
     }),

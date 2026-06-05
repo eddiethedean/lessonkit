@@ -1,5 +1,5 @@
 import { validateId } from "@lessonkit/core";
-import type { LessonkitThemeV1, ThemePresetName } from "@lessonkit/themes";
+import { validateTheme, type ThemePresetName } from "@lessonkit/themes";
 import type { LessonkitCourseDescriptor, SpaLayout } from "../types";
 import { isSafeRelativeSpaPath } from "../spaPath";
 import { themeToLxpackRuntime } from "../theme";
@@ -42,13 +42,23 @@ export function validateCourseDescriptor(input: LessonkitCourseDescriptor): Vali
   }
 
   if (input.theme?.theme) {
-    try {
-      themeToLxpackRuntime({ preset: themePreset, theme: input.theme.theme as LessonkitThemeV1 });
-    } catch (err) {
-      issues.push({
-        path: "theme.theme",
-        message: err instanceof Error ? err.message : "invalid custom theme",
-      });
+    const themeResult = validateTheme(input.theme.theme);
+    if (!themeResult.ok) {
+      for (const issue of themeResult.issues) {
+        issues.push({
+          path: issue.path ? `theme.theme.${issue.path}` : "theme.theme",
+          message: issue.message,
+        });
+      }
+    } else {
+      try {
+        themeToLxpackRuntime({ preset: themePreset, theme: themeResult.theme });
+      } catch (err) {
+        issues.push({
+          path: "theme.theme",
+          message: err instanceof Error ? err.message : "invalid custom theme",
+        });
+      }
     }
   }
 

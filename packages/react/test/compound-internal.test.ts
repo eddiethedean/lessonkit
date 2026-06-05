@@ -54,6 +54,16 @@ describe("resumeChildHandles", () => {
     expect(applied).toBe(true);
     expect(resume).toHaveBeenCalledWith({ selected: false });
   });
+
+  it("finalizes orphan keys when no handles will register", () => {
+    const handles = new Map<string, AssessmentHandle>();
+    const applied = resumeChildHandles(
+      handles,
+      { "check-1": { selected: true } },
+      { waitForHandles: true },
+    );
+    expect(applied).toBe(false);
+  });
 });
 
 describe("readCompoundInitialIndex", () => {

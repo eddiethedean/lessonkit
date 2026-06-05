@@ -53,7 +53,6 @@ export function createTrackingClient(opts?: {
     /* v8 ignore stop */
 
     const events = buffer.splice(0, buffer.length);
-    let sent = 0;
     let succeeded = false;
 
     return Promise.resolve()
@@ -63,13 +62,13 @@ export function createTrackingClient(opts?: {
         } else {
           for (const e of events) {
             await sink?.(e);
-            sent += 1;
           }
         }
         succeeded = true;
       })
       .catch(() => {
-        buffer.unshift(...events.slice(sent));
+        // Re-queue the full batch on failure. Per-event sinks may redeliver already-sent events.
+        buffer.unshift(...events);
       })
       .then(() => {
         if (succeeded && buffer.length > 0 && !disposed) {
@@ -105,13 +104,13 @@ export function createTrackingClient(opts?: {
     track: (event) => {
       if (disposed || disposing) return;
       if (buffer.length >= maxBufferSize) {
-        buffer.shift();
         if (!warnedBufferCap && isDevEnvironment()) {
           warnedBufferCap = true;
           console.warn(
-            `[lessonkit] telemetry batch buffer capped at ${maxBufferSize} events; oldest events are dropped while the sink is unavailable.`,
+            `[lessonkit] telemetry batch buffer capped at ${maxBufferSize} events; new events are dropped until the buffer drains.`,
           );
         }
+        return;
       }
       buffer.push(event);
       if (buffer.length >= maxBatchSize) void flush();

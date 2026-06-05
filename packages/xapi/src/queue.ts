@@ -15,6 +15,7 @@ export function createInMemoryXAPIQueue(opts?: InMemoryXAPIQueueOptions): XAPIQu
   const maxSize = opts?.maxSize ?? DEFAULT_MAX_QUEUE_SIZE;
   const buffer: XAPIStatement[] = [];
   let flushInFlight: Promise<void> | null = null;
+  let headInFlight = false;
 
   const notifyDepth = () => {
     opts?.onDepth?.(buffer.length);
@@ -23,6 +24,7 @@ export function createInMemoryXAPIQueue(opts?: InMemoryXAPIQueueOptions): XAPIQu
   const runFlush = async (transport: XAPITransport): Promise<void> => {
     while (buffer.length) {
       const statement = buffer[0]!;
+      headInFlight = true;
       try {
         await transport(statement);
         buffer.shift();
@@ -30,6 +32,8 @@ export function createInMemoryXAPIQueue(opts?: InMemoryXAPIQueueOptions): XAPIQu
       } catch {
         // Stop flushing on first error; keep remainder queued.
         return;
+      } finally {
+        headInFlight = false;
       }
     }
   };
@@ -38,6 +42,10 @@ export function createInMemoryXAPIQueue(opts?: InMemoryXAPIQueueOptions): XAPIQu
     enqueue: (statement) => {
       if (statement.id && buffer.some((s) => s.id === statement.id)) return;
       if (buffer.length >= maxSize) {
+        if (headInFlight) {
+          opts?.onCap?.();
+          return;
+        }
         buffer.shift();
         opts?.onCap?.();
       }
