@@ -11,7 +11,12 @@ type AssessmentValidator = (
 ) => void;
 
 const validateMcqLike: AssessmentValidator = (assessment, path, issues) => {
-  if (!("choices" in assessment) || !("answer" in assessment) || typeof assessment.answer !== "string") {
+  if (!("choices" in assessment) || !Array.isArray(assessment.choices)) {
+    issues.push({ path: `${path}.choices`, message: "choices is required for mcq" });
+    return;
+  }
+  if (!("answer" in assessment) || typeof assessment.answer !== "string") {
+    issues.push({ path: `${path}.answer`, message: "answer is required for mcq" });
     return;
   }
   const trimmedChoices = assessment.choices.map((c) => c.trim()).filter((c) => c.length > 0);

@@ -48,6 +48,7 @@ export type CliSuccessResult =
       outputPath?: string;
       outputDir?: string;
       fileCount: number;
+      warnings?: CliIssue[];
     };
 
 export type CliFailureResult = {

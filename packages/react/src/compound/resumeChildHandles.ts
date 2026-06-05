@@ -33,6 +33,14 @@ export function resumeChildHandles(
     if (registeredPending.length === 0) {
       return true;
     }
+    if (registeredPending.length < pendingKeys.length) {
+      for (const key of registeredPending) {
+        const handle = handles.get(key as CheckId);
+        const child = childStates[key];
+        if (handle?.resume && child) handle.resume(child);
+      }
+      return false;
+    }
   }
   for (const [checkId, handle] of handles) {
     const child = childStates[checkId];

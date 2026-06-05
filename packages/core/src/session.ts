@@ -4,6 +4,13 @@ import type { StoragePort } from "./ports";
 
 export const SESSION_STORAGE_KEY = "lessonkit:sessionId";
 
+const volatileSessionIds = new WeakMap<StoragePort, string>();
+
+function isDevEnvironment(): boolean {
+  const g = globalThis as typeof globalThis & { process?: { env?: { NODE_ENV?: string } } };
+  return typeof g.process !== "undefined" && g.process.env?.NODE_ENV !== "production";
+}
+
 export function getTabSessionId(storage: StoragePort): string | null {
   return storage.getItem(SESSION_STORAGE_KEY);
 }
@@ -16,8 +23,18 @@ export function resolveSessionId(storage: StoragePort, provided?: string): strin
   if (provided) return provided;
   const existing = storage.getItem(SESSION_STORAGE_KEY);
   if (existing) return existing;
+  const volatile = volatileSessionIds.get(storage);
+  if (volatile) return volatile;
   const id = createSessionId();
-  storage.setItem(SESSION_STORAGE_KEY, id);
+  const persisted = storage.setItem(SESSION_STORAGE_KEY, id);
+  if (!persisted) {
+    volatileSessionIds.set(storage, id);
+    if (isDevEnvironment()) {
+      console.warn(
+        "[lessonkit] session id could not be persisted; reusing in-memory id for this tab.",
+      );
+    }
+  }
   return id;
 }
 

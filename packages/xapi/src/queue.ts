@@ -1,4 +1,15 @@
+import { cryptoRandomId } from "./id";
 import type { XAPIQueue, XAPIStatement, XAPITransport } from "./types";
+
+function withStatementId(statement: XAPIStatement): XAPIStatement {
+  const trimmed = statement.id?.trim();
+  if (trimmed) {
+    if (trimmed !== statement.id) statement.id = trimmed;
+    return statement;
+  }
+  statement.id = cryptoRandomId();
+  return statement;
+}
 
 export type InMemoryXAPIQueueOptions = {
   /** Maximum queued statements (default 1000). Oldest entries are dropped when full. */
@@ -40,7 +51,8 @@ export function createInMemoryXAPIQueue(opts?: InMemoryXAPIQueueOptions): XAPIQu
 
   return {
     enqueue: (statement) => {
-      if (statement.id && buffer.some((s) => s.id === statement.id)) return;
+      const normalized = withStatementId(statement);
+      if (buffer.some((s) => s.id === normalized.id)) return;
       if (buffer.length >= maxSize) {
         if (headInFlight) {
           opts?.onCap?.();
@@ -49,7 +61,7 @@ export function createInMemoryXAPIQueue(opts?: InMemoryXAPIQueueOptions): XAPIQu
         buffer.shift();
         opts?.onCap?.();
       }
-      buffer.push(statement);
+      buffer.push(normalized);
       notifyDepth();
     },
     size: () => buffer.length,

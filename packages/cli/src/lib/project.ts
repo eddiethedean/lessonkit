@@ -1,5 +1,6 @@
 import { readFileSync, existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
+import { createRequire } from "node:module";
 import { dirname, join, parse, resolve } from "node:path";
 import { parseLessonkitManifest } from "@lessonkit/lxpack";
 import type { LessonkitManifest } from "@lessonkit/lxpack";
@@ -170,15 +171,25 @@ export function assertViteProject(pkg: PackageJson, projectRoot: string): void {
   }
 }
 
-export function resolveViteJs(projectRoot: string): string {
-  let dir = resolve(projectRoot);
-  const fsRoot = parse(dir).root;
+function projectDeclaresVite(pkg: PackageJson): boolean {
+  return !!(pkg.devDependencies?.vite ?? pkg.dependencies?.vite);
+}
 
-  while (true) {
-    const viteJs = join(dir, "node_modules", "vite", "bin", "vite.js");
-    if (existsSync(viteJs)) return viteJs;
-    if (dir === fsRoot) break;
-    dir = dirname(dir);
+export function resolveViteJs(projectRoot: string): string {
+  const root = resolve(projectRoot);
+  const localViteJs = join(root, "node_modules", "vite", "bin", "vite.js");
+  if (existsSync(localViteJs)) return localViteJs;
+
+  try {
+    const pkg = JSON.parse(readFileSync(join(root, PACKAGE_JSON), "utf8")) as PackageJson;
+    if (projectDeclaresVite(pkg)) {
+      const req = createRequire(join(root, "package.json"));
+      const vitePkg = req.resolve("vite/package.json");
+      const hoistedViteJs = join(dirname(vitePkg), "bin", "vite.js");
+      if (existsSync(hoistedViteJs)) return hoistedViteJs;
+    }
+  } catch {
+    // fall through to CliError below
   }
 
   throw new CliError(

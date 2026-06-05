@@ -99,6 +99,14 @@ export async function runPackage(opts: PackageOptions): Promise<CliJsonResult> {
     });
   }
 
+  const warnings = result.validation?.issues?.length ? result.validation.issues : undefined;
+  if (warnings?.length && !opts.json) {
+    for (const issue of warnings) {
+      const location = issue.path ?? "course";
+      process.stderr.write(`[lessonkit] packaging warning: ${location}: ${issue.message}\n`);
+    }
+  }
+
   return {
     ok: true,
     command: "package",
@@ -107,5 +115,6 @@ export async function runPackage(opts: PackageOptions): Promise<CliJsonResult> {
     outputPath: result.outputPath,
     outputDir: result.outputDir,
     fileCount: result.fileCount,
+    ...(warnings?.length ? { warnings } : {}),
   };
 }

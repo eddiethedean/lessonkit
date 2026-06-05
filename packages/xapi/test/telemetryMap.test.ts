@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { TelemetryEvent } from "@lessonkit/core";
 import { createXAPIClient, telemetryEventToXAPIStatement } from "../src";
+import { buildXapiScoreResult } from "../src/telemetryMap";
 
 const base = {
   courseId: "cyber-basics",
@@ -16,6 +17,28 @@ describe("formatDurationMs", () => {
     expect(formatDurationMs(Number.NaN)).toBeUndefined();
     expect(formatDurationMs(Number.POSITIVE_INFINITY)).toBeUndefined();
     expect(formatDurationMs(-1)).toBeUndefined();
+  });
+});
+
+describe("buildXapiScoreResult", () => {
+  it("omits scaled when raw exceeds max or inputs are non-finite", () => {
+    expect(buildXapiScoreResult({ score: 15, maxScore: 10 })).toEqual({
+      raw: 15,
+      max: 10,
+      min: 0,
+    });
+    expect(buildXapiScoreResult({ score: Number.NaN, maxScore: 10 })).toBeUndefined();
+    expect(buildXapiScoreResult({ score: 5, maxScore: 0 })).toBeUndefined();
+    expect(buildXapiScoreResult({ score: -1, maxScore: 10 })).toBeUndefined();
+  });
+
+  it("includes scaled for valid in-range scores", () => {
+    expect(buildXapiScoreResult({ score: 7, maxScore: 10 })).toEqual({
+      raw: 7,
+      max: 10,
+      min: 0,
+      scaled: 0.7,
+    });
   });
 });
 
@@ -115,21 +138,23 @@ describe("telemetryEventToXAPIStatement", () => {
       ...base,
       data: { lessonId: base.lessonId, score: 3 },
     });
-    expect(scoreOnly?.result?.score).toMatchObject({ raw: 3, max: undefined, scaled: undefined });
+    expect(scoreOnly?.result?.score).toMatchObject({ raw: 3, min: 0 });
+    expect(scoreOnly?.result?.score).not.toHaveProperty("scaled");
 
     const maxOnly = telemetryEventToXAPIStatement({
       name: "lesson_completed",
       ...base,
       data: { lessonId: base.lessonId, maxScore: 10 },
     });
-    expect(maxOnly?.result?.score).toMatchObject({ raw: undefined, max: 10, scaled: undefined });
+    expect(maxOnly?.result?.score).toMatchObject({ max: 10, min: 0 });
+    expect(maxOnly?.result?.score).not.toHaveProperty("scaled");
 
     const zeroMax = telemetryEventToXAPIStatement({
       name: "lesson_completed",
       ...base,
       data: { lessonId: base.lessonId, score: 1, maxScore: 0 },
     });
-    expect(zeroMax?.result?.score?.scaled).toBeUndefined();
+    expect(zeroMax?.result?.score).toBeUndefined();
 
     const bare = telemetryEventToXAPIStatement({
       name: "lesson_completed",
@@ -153,14 +178,14 @@ describe("telemetryEventToXAPIStatement", () => {
       ...base,
       data: { checkId: "c1", score: 2 },
     });
-    expect(scoreOnly?.result?.score).toMatchObject({ raw: 2, max: undefined, scaled: undefined });
+    expect(scoreOnly?.result?.score).toMatchObject({ raw: 2, min: 0 });
 
     const maxOnly = telemetryEventToXAPIStatement({
       name: "quiz_completed",
       ...base,
       data: { checkId: "c1", maxScore: 4 },
     });
-    expect(maxOnly?.result?.score).toMatchObject({ raw: undefined, max: 4, scaled: undefined });
+    expect(maxOnly?.result?.score).toMatchObject({ max: 4, min: 0 });
 
     const bare = telemetryEventToXAPIStatement({
       name: "quiz_completed",
@@ -239,14 +264,14 @@ describe("telemetryEventToXAPIStatement", () => {
       ...base,
       data: { checkId: "fib-1", interactionType: "fillInBlanks", score: 1 },
     });
-    expect(scoreOnly?.result?.score).toMatchObject({ raw: 1, max: undefined, scaled: undefined });
+    expect(scoreOnly?.result?.score).toMatchObject({ raw: 1, min: 0 });
 
     const maxOnly = telemetryEventToXAPIStatement({
       name: "assessment_completed",
       ...base,
       data: { checkId: "fib-1", interactionType: "fillInBlanks", maxScore: 2 },
     });
-    expect(maxOnly?.result?.score).toMatchObject({ raw: undefined, max: 2, scaled: undefined });
+    expect(maxOnly?.result?.score).toMatchObject({ max: 2, min: 0 });
   });
 
   it("maps v3 content and compound events to experienced block URNs", () => {

@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { createNoopStorage } from "../src/ports";
 import {
   getTabSessionId,
@@ -29,6 +29,27 @@ describe("session", () => {
       },
     };
     expect(resolveSessionId(storage, undefined)).toBe("tab-1");
+  });
+
+  it("resolveSessionId reuses volatile id when persistence fails", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    vi.stubEnv("NODE_ENV", "development");
+    const storage = {
+      getItem: () => null,
+      setItem: () => false,
+    };
+
+    try {
+      const id1 = resolveSessionId(storage, undefined);
+      const id2 = resolveSessionId(storage, undefined);
+      expect(id1).toBe(id2);
+      expect(warn).toHaveBeenCalledWith(
+        "[lessonkit] session id could not be persisted; reusing in-memory id for this tab.",
+      );
+    } finally {
+      vi.unstubAllEnvs();
+      warn.mockRestore();
+    }
   });
 
   it("resolveSessionId creates and persists a new id", () => {

@@ -44,6 +44,19 @@ describe("compound resume state", () => {
     });
     expect(parsed?.childStates).toEqual({ valid: { a: 1 } });
   });
+
+  it("rejects child states with functions or nested objects", () => {
+    const parsed = parseCompoundResumeState({
+      schemaVersion: COMPOUND_RESUME_SCHEMA_VERSION,
+      activePageIndex: 0,
+      childStates: {
+        ok: { answer: "a", picks: [1, 2] },
+        nested: { payload: { deep: true } },
+        fn: { run: () => {} },
+      },
+    });
+    expect(parsed?.childStates).toEqual({ ok: { answer: "a", picks: [1, 2] } });
+  });
 });
 
 describe("compound session storage", () => {

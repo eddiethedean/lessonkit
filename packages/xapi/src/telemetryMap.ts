@@ -18,12 +18,26 @@ export function buildXapiScoreResult(opts: {
   const max = typeof opts.maxScore === "number" ? opts.maxScore : undefined;
   const raw = typeof opts.score === "number" ? opts.score : undefined;
   if (typeof raw !== "number" && typeof max !== "number") return undefined;
-  return {
-    raw,
-    max,
-    min: 0,
-    scaled: typeof raw === "number" && typeof max === "number" && max > 0 ? raw / max : undefined,
-  };
+  if (
+    (typeof raw === "number" && !Number.isFinite(raw)) ||
+    (typeof max === "number" && !Number.isFinite(max))
+  ) {
+    return undefined;
+  }
+  if (typeof max === "number" && max <= 0) return undefined;
+  if (typeof raw === "number" && raw < 0) return undefined;
+  const result: NonNullable<XAPIResult["score"]> = { min: 0 };
+  if (typeof raw === "number") result.raw = raw;
+  if (typeof max === "number") result.max = max;
+  if (
+    typeof raw === "number" &&
+    typeof max === "number" &&
+    max > 0 &&
+    raw <= max
+  ) {
+    result.scaled = raw / max;
+  }
+  return result;
 }
 
 type MapperContext = { courseId: TelemetryEvent["courseId"]; timestamp: string };

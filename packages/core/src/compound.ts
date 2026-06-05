@@ -39,6 +39,28 @@ export function clampCompoundPageIndex(index: number, pageCount: number): number
   return Math.min(Math.max(0, Math.floor(index)), pageCount - 1);
 }
 
+function isJsonPrimitive(value: unknown): boolean {
+  return (
+    value === null ||
+    typeof value === "boolean" ||
+    typeof value === "string" ||
+    (typeof value === "number" && Number.isFinite(value))
+  );
+}
+
+function isValidChildResumeValue(value: unknown): boolean {
+  if (isJsonPrimitive(value)) return true;
+  if (Array.isArray(value)) return value.every((item) => isJsonPrimitive(item));
+  return false;
+}
+
+function isPlainSerializableChildState(value: unknown): value is AssessmentResumeState {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  return Object.values(value as Record<string, unknown>).every((entry) =>
+    isValidChildResumeValue(entry),
+  );
+}
+
 export function parseCompoundResumeState(raw: unknown): CompoundResumeState | null {
   if (!raw || typeof raw !== "object") return null;
   const obj = raw as Record<string, unknown>;
@@ -47,8 +69,8 @@ export function parseCompoundResumeState(raw: unknown): CompoundResumeState | nu
   const childStates: Record<string, AssessmentResumeState> = {};
   if (obj.childStates && typeof obj.childStates === "object" && !Array.isArray(obj.childStates)) {
     for (const [key, value] of Object.entries(obj.childStates as Record<string, unknown>)) {
-      if (value !== null && typeof value === "object" && !Array.isArray(value)) {
-        childStates[key] = value as AssessmentResumeState;
+      if (isPlainSerializableChildState(value)) {
+        childStates[key] = value;
       }
     }
   }

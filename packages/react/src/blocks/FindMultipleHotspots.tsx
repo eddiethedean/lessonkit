@@ -89,7 +89,7 @@ function FindMultipleHotspotsInner(
         interactionType: INTERACTION,
         score: 1,
         maxScore: 1,
-        passingScore: props.passingScore,
+        passingScore: props.passingScore ?? 1,
       });
     }
   };

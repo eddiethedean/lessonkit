@@ -457,6 +457,17 @@ describe("writeLxpackProject errors", () => {
 });
 
 describe("validateDescriptor edge cases", () => {
+  it("rejects mcq assessments missing choices", () => {
+    const result = validateDescriptor({
+      ...baseDescriptor,
+      assessments: [{ checkId: "q1", question: "Pick one", answer: "A" }],
+    });
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.issues.some((i) => i.path.endsWith(".choices"))).toBe(true);
+    }
+  });
+
   it("rejects empty title and mismatched answer", () => {
     expect(validateDescriptor({ ...baseDescriptor, title: "  " }).ok).toBe(false);
     expect(

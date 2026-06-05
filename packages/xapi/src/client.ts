@@ -1,8 +1,19 @@
 import type { CourseId, LessonId } from "@lessonkit/core";
 import { nowIso } from "@lessonkit/core";
 import type { XAPIClient, XAPIQueue, XAPIStatement, XAPITransport } from "./types";
+import { cryptoRandomId } from "./id";
 import { createInMemoryXAPIQueue } from "./queue";
 import { telemetryEventToXAPIStatement } from "./telemetryMap";
+
+function withStatementId(statement: XAPIStatement): XAPIStatement {
+  const trimmed = statement.id?.trim();
+  if (trimmed) {
+    if (trimmed !== statement.id) statement.id = trimmed;
+    return statement;
+  }
+  statement.id = cryptoRandomId();
+  return statement;
+}
 
 function isDevEnvironment(): boolean {
   const g = globalThis as typeof globalThis & { process?: { env?: { NODE_ENV?: string } } };
@@ -32,8 +43,9 @@ export function createXAPIClient(opts?: {
   const inflightById = new Map<string, Promise<void>>();
 
   const sendOrQueue = (statement: XAPIStatement) => {
+    const normalized = withStatementId(statement);
     if (!transport) {
-      queue.enqueue(statement);
+      queue.enqueue(normalized);
       if (isDevEnvironment() && !warnedNoTransport) {
         warnedNoTransport = true;
         console.warn(
@@ -42,41 +54,51 @@ export function createXAPIClient(opts?: {
       }
       return;
     }
-    const existing = inflightById.get(statement.id);
+    const existing = inflightById.get(normalized.id);
     if (existing) {
       void existing.then(
         () => undefined,
         () => {
-          sendOrQueue(statement);
+          sendOrQueue(normalized);
         },
       );
       return;
     }
 
-    const transportFlight = Promise.resolve().then(() => transport(statement));
-    const flight = transportFlight
+    const flight = Promise.resolve()
+      .then(() => transport(normalized))
       .catch(() => {
-        queue.enqueue(statement);
+        queue.enqueue(normalized);
         if (isDevEnvironment() && !warnedTransportFailure) {
           warnedTransportFailure = true;
           console.warn(
             "[lessonkit] xAPI transport failed; statement re-queued. Check your LRS endpoint or transport implementation.",
           );
         }
+        throw new Error("xAPI transport failed");
       })
       .finally(() => {
-        inflightById.delete(statement.id);
+        inflightById.delete(normalized.id);
       });
-    inflightById.set(statement.id, transportFlight);
-    void flight;
+    inflightById.set(normalized.id, flight);
+    void flight.catch(() => {});
   };
 
   const emit = (event: Parameters<typeof telemetryEventToXAPIStatement>[0]) => {
-    const statement = telemetryEventToXAPIStatement(event);
-    /* v8 ignore start -- public emit paths always map to a statement */
-    if (!statement) return;
-    /* v8 ignore stop */
-    sendOrQueue(statement);
+    try {
+      const statement = telemetryEventToXAPIStatement(event);
+      /* v8 ignore start -- public emit paths always map to a statement */
+      if (!statement) return;
+      /* v8 ignore stop */
+      sendOrQueue(statement);
+    } catch (err) {
+      if (isDevEnvironment()) {
+        console.warn(
+          "[lessonkit] xAPI mapping skipped:",
+          err instanceof Error ? err.message : err,
+        );
+      }
+    }
   };
 
   return {

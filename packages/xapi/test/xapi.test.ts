@@ -150,8 +150,10 @@ describe("@lessonkit/xapi", () => {
     expect(calls).toBe(2);
     expect(client.queueSize()).toBe(1);
     transport.mockImplementation(async () => {});
-    await client.flush();
+    const flushPromise = client.flush();
+    await new Promise((r) => setTimeout(r, 0));
     expect(client.queueSize()).toBe(0);
+    await flushPromise;
   });
 
   it("does not send duplicate in-flight statements with the same id", async () => {
@@ -194,6 +196,51 @@ describe("@lessonkit/xapi", () => {
     await new Promise((r) => setTimeout(r, 0));
 
     expect(client.queueSize()).toBe(1);
+  });
+
+  it("auto-generates statement ids and dedupes empty-id sends on transport failure", async () => {
+    const queue = createInMemoryXAPIQueue();
+    const transport = vi.fn(async () => {
+      throw new Error("network");
+    });
+    const client = createXAPIClient({ transport, courseId, queue });
+    const statement: XAPIStatement = {
+      id: "",
+      timestamp: "t",
+      verb: "http://adlnet.gov/expapi/verbs/experienced",
+      object: { id: "o" },
+    };
+
+    client.send(statement);
+    client.send(statement);
+    await new Promise((r) => setTimeout(r, 0));
+
+    expect(statement.id).toBeTruthy();
+    expect(client.queueSize()).toBe(1);
+  });
+
+  it("emit() does not throw when mapper fails", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    vi.stubEnv("NODE_ENV", "development");
+    const mapModule = await import("../src/telemetryMap");
+    const mapSpy = vi
+      .spyOn(mapModule, "telemetryEventToXAPIStatement")
+      .mockImplementation(() => {
+        throw new Error("bad mapping");
+      });
+    const transport = vi.fn(async () => {});
+    const client = createXAPIClient({ courseId, transport });
+
+    try {
+      expect(() => client.startedLesson({ lessonId: "lesson-1" })).not.toThrow();
+      await Promise.resolve();
+      expect(warn).toHaveBeenCalledWith("[lessonkit] xAPI mapping skipped:", "bad mapping");
+      expect(transport).not.toHaveBeenCalled();
+    } finally {
+      mapSpy.mockRestore();
+      vi.unstubAllEnvs();
+      warn.mockRestore();
+    }
   });
 
   it("refuses enqueue at cap while the head statement is in flight", async () => {

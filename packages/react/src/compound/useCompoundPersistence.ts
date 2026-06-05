@@ -100,7 +100,10 @@ export function useCompoundPersistence(opts: {
 
   const finalizeHydration = useCallback(
     (childStates: Record<string, AssessmentResumeState>) => {
-      loadedChildStatesRef.current = { ...childStates };
+      loadedChildStatesRef.current = {
+        ...loadedChildStatesRef.current,
+        ...childStates,
+      };
       skipSaveUntilHydratedRef.current = false;
       pendingChildResumeRef.current = null;
     },
@@ -115,7 +118,17 @@ export function useCompoundPersistence(opts: {
     if (!applied) {
       if (handles.size === 0 && Object.keys(pending.childStates).length > 0) {
         finalizeHydration({});
+        return;
       }
+      const handlesAtWait = handles.size;
+      queueMicrotask(() => {
+        if (pendingChildResumeRef.current !== pending) return;
+        const handlesNow = ctx.getHandles();
+        if (handlesNow.size !== handlesAtWait) return;
+        const registeredOnly = stripOrphanChildStates(handlesNow, pending.childStates);
+        resumeChildHandles(handlesNow, registeredOnly);
+        finalizeHydration(registeredOnly);
+      });
       return;
     }
     const registeredOnly = stripOrphanChildStates(handles, pending.childStates);
