@@ -66,8 +66,8 @@ async function globalSetup(): Promise<void> {
   }
 
   console.log("e2e: packaging golden artifacts…");
-  const courseOutDir = join(ARTIFACTS_DIR, "lxpack-course");
-  const scormCourseOutDir = join(ARTIFACTS_DIR, "lxpack-course-scorm");
+  const courseOutDir = join(GOLDEN_DIR, ".lxpack/e2e-standalone-course");
+  const scormCourseOutDir = join(GOLDEN_DIR, ".lxpack/e2e-scorm-course");
   const scorm12UnpackedDir = join(ARTIFACTS_DIR, "scorm12-unpacked");
   const scorm2004UnpackedDir = join(ARTIFACTS_DIR, "scorm2004-unpacked");
   const xapiUnpackedDir = join(ARTIFACTS_DIR, "xapi-unpacked");
@@ -109,9 +109,9 @@ async function globalSetup(): Promise<void> {
   }
 
   const scorm12Zip = await packageZip("scorm12", scormCourseOutDir);
-  const scorm2004Zip = await packageZip("scorm2004", join(ARTIFACTS_DIR, "lxpack-course-scorm2004"));
-  const xapiZip = await packageZip("xapi", join(ARTIFACTS_DIR, "lxpack-course-xapi"));
-  const cmi5Zip = await packageZip("cmi5", join(ARTIFACTS_DIR, "lxpack-course-cmi5"));
+  const scorm2004Zip = await packageZip("scorm2004", join(GOLDEN_DIR, ".lxpack/e2e-scorm2004-course"));
+  const xapiZip = await packageZip("xapi", join(GOLDEN_DIR, ".lxpack/e2e-xapi-course"));
+  const cmi5Zip = await packageZip("cmi5", join(GOLDEN_DIR, ".lxpack/e2e-cmi5-course"));
 
   await unpackScormZip(scorm12Zip, scorm12UnpackedDir);
   await unpackScormZip(scorm2004Zip, scorm2004UnpackedDir);
