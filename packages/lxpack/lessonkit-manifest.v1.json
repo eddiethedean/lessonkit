@@ -82,19 +82,111 @@
       }
     },
     "AssessmentDescriptor": {
+      "oneOf": [
+        { "$ref": "#/$defs/McqAssessmentDescriptor" },
+        { "$ref": "#/$defs/TrueFalseAssessmentDescriptor" },
+        { "$ref": "#/$defs/FillInBlanksAssessmentDescriptor" },
+        { "$ref": "#/$defs/FindHotspotAssessmentDescriptor" },
+        { "$ref": "#/$defs/FindMultipleHotspotsAssessmentDescriptor" }
+      ]
+    },
+    "AssessmentBase": {
       "type": "object",
-      "required": ["checkId", "question", "choices", "answer"],
+      "required": ["checkId", "question"],
       "properties": {
         "checkId": { "$ref": "#/$defs/LessonkitId" },
         "question": { "type": "string", "minLength": 1 },
-        "choices": {
-          "type": "array",
-          "minItems": 1,
-          "items": { "type": "string", "minLength": 1 }
-        },
-        "answer": { "type": "string", "minLength": 1 },
         "passingScore": { "type": "number", "exclusiveMinimum": 0 }
       }
+    },
+    "McqAssessmentDescriptor": {
+      "allOf": [
+        { "$ref": "#/$defs/AssessmentBase" },
+        {
+          "type": "object",
+          "properties": {
+            "kind": { "const": "mcq" },
+            "choices": {
+              "type": "array",
+              "minItems": 1,
+              "items": { "type": "string", "minLength": 1 }
+            },
+            "answer": { "type": "string", "minLength": 1 }
+          },
+          "required": ["choices", "answer"]
+        }
+      ]
+    },
+    "TrueFalseAssessmentDescriptor": {
+      "allOf": [
+        { "$ref": "#/$defs/AssessmentBase" },
+        {
+          "type": "object",
+          "required": ["kind", "answer"],
+          "properties": {
+            "kind": { "const": "trueFalse" },
+            "answer": { "type": "boolean" }
+          }
+        }
+      ]
+    },
+    "FillInBlanksAssessmentDescriptor": {
+      "allOf": [
+        { "$ref": "#/$defs/AssessmentBase" },
+        {
+          "type": "object",
+          "required": ["kind", "template"],
+          "properties": {
+            "kind": { "const": "fillInBlanks" },
+            "template": { "type": "string", "minLength": 1 },
+            "blanks": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["id", "answer"],
+                "properties": {
+                  "id": { "type": "string", "minLength": 1 },
+                  "answer": { "type": "string", "minLength": 1 }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "FindHotspotAssessmentDescriptor": {
+      "allOf": [
+        { "$ref": "#/$defs/AssessmentBase" },
+        {
+          "type": "object",
+          "required": ["kind", "src", "alt", "correctTargetId"],
+          "properties": {
+            "kind": { "const": "findHotspot" },
+            "src": { "type": "string", "minLength": 1 },
+            "alt": { "type": "string", "minLength": 1 },
+            "correctTargetId": { "type": "string", "minLength": 1 }
+          }
+        }
+      ]
+    },
+    "FindMultipleHotspotsAssessmentDescriptor": {
+      "allOf": [
+        { "$ref": "#/$defs/AssessmentBase" },
+        {
+          "type": "object",
+          "required": ["kind", "src", "alt", "correctTargetIds"],
+          "properties": {
+            "kind": { "const": "findMultipleHotspots" },
+            "src": { "type": "string", "minLength": 1 },
+            "alt": { "type": "string", "minLength": 1 },
+            "correctTargetIds": {
+              "type": "array",
+              "minItems": 1,
+              "items": { "type": "string", "minLength": 1 }
+            }
+          }
+        }
+      ]
     }
   }
 }

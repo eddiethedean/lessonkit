@@ -1,6 +1,6 @@
 import React, { createRef } from "react";
 import { afterEach, describe, expect, it } from "vitest";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { defineAssessmentPlugin, type AssessmentHandle } from "@lessonkit/core";
 import {
   Course,
@@ -71,6 +71,93 @@ describe("AssessmentHandle (imperative API)", () => {
     expect(ref.current?.getXAPIData()).toEqual(
       expect.objectContaining({ score: 4, maxScore: 4 }),
     );
+  });
+
+  it("Quiz getScore and getXAPIData agree when resumed passed without selected", async () => {
+    const ref = createRef<AssessmentHandle>();
+    render(
+      wrap(
+        <Quiz
+          ref={ref}
+          checkId="quiz-split"
+          question="Pick one"
+          choices={["A", "B"]}
+          answer="B"
+        />,
+      ),
+    );
+    act(() => {
+      ref.current?.resume?.({ quizPassed: true, selected: null, selectionCorrect: null });
+    });
+    await waitFor(() => {
+      expect(ref.current?.getScore()).toBe(1);
+      expect(ref.current?.getXAPIData()).toEqual(
+        expect.objectContaining({ score: 1, maxScore: 1, interactionType: "mcq" }),
+      );
+    });
+  });
+
+  it("Quiz round-trips plugin custom scores through resume", async () => {
+    const plugin = defineAssessmentPlugin({
+      id: "quiz-resume-scorer",
+      version: "1",
+      kind: "assessment",
+      scoreAssessment: () => ({ passed: true, score: 4, maxScore: 4 }),
+    });
+    const ref = createRef<AssessmentHandle>();
+    render(
+      <Course
+        title="Handles"
+        courseId="handle-course"
+        config={{ xapi: { enabled: false }, plugins: [plugin] }}
+      >
+        <Lesson title="L1" lessonId="lesson-1">
+          <Quiz
+            ref={ref}
+            checkId="quiz-resume"
+            question="Pick one"
+            choices={["A", "B"]}
+            answer="B"
+          />
+        </Lesson>
+      </Course>,
+    );
+    fireEvent.click(screen.getByLabelText("B"));
+    const saved = ref.current?.getCurrentState?.();
+    expect(saved).toEqual(
+      expect.objectContaining({ quizPassed: true, completedScore: 4, completedMaxScore: 4 }),
+    );
+
+    cleanup();
+    sessionStorage.clear();
+
+    const ref2 = createRef<AssessmentHandle>();
+    render(
+      <Course
+        title="Handles"
+        courseId="handle-course"
+        config={{ xapi: { enabled: false }, plugins: [plugin] }}
+      >
+        <Lesson title="L1" lessonId="lesson-1">
+          <Quiz
+            ref={ref2}
+            checkId="quiz-resume"
+            question="Pick one"
+            choices={["A", "B"]}
+            answer="B"
+          />
+        </Lesson>
+      </Course>,
+    );
+    act(() => {
+      ref2.current?.resume?.(saved!);
+    });
+    await waitFor(() => {
+      expect(ref2.current?.getScore()).toBe(4);
+      expect(ref2.current?.getXAPIData()).toEqual(
+        expect.objectContaining({ score: 4, maxScore: 4 }),
+      );
+    });
   });
 
   it("Quiz getXAPIData reflects plugin custom scores", () => {

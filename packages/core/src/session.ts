@@ -61,9 +61,13 @@ export function hasCourseStarted(storage: StoragePort, sessionId: string, course
   return storage.getItem(courseStartedStorageKey(sessionId, courseId)) === "1";
 }
 
-export function markCourseStarted(storage: StoragePort, sessionId: string, courseId?: CourseId): void {
-  if (!courseId) return;
-  storage.setItem(courseStartedStorageKey(sessionId, courseId), "1");
+export function markCourseStarted(
+  storage: StoragePort,
+  sessionId: string,
+  courseId?: CourseId,
+): boolean {
+  if (!courseId) return false;
+  return storage.setItem(courseStartedStorageKey(sessionId, courseId), "1");
 }
 
 export function hasCourseStartedEmittedToTracking(

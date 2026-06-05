@@ -59,7 +59,7 @@ function FindHotspotInner(
         getCurrentState: () => ({ selected, checked }),
         resume: (state) => {
           const nextSelected = readStringField(state, "selected");
-          if (typeof nextSelected === "string") setSelected(nextSelected);
+          if (typeof nextSelected === "string" || nextSelected === null) setSelected(nextSelected);
           readBooleanStateField(state, "checked", setChecked);
         },
       }),

@@ -42,14 +42,14 @@ export function createTrackingClient(opts?: {
   }
 
   const buffer: TelemetryEvent[] = [];
-  let flushInFlight: Promise<void> | null = null;
+  let flushInFlight: Promise<boolean> | null = null;
   let disposed = false;
   let disposing = false;
   let intervalId: ReturnType<typeof globalThis.setInterval> | undefined;
 
-  const runFlush = (): Promise<void> => {
+  const runFlush = (): Promise<boolean> => {
     /* v8 ignore start -- flush() never invokes runFlush with an empty buffer */
-    if (!buffer.length) return Promise.resolve();
+    if (!buffer.length) return Promise.resolve(true);
     /* v8 ignore stop */
 
     const events = buffer.splice(0, buffer.length);
@@ -70,17 +70,18 @@ export function createTrackingClient(opts?: {
         // Re-queue the full batch on failure. Per-event sinks may redeliver already-sent events.
         buffer.unshift(...events);
       })
-      .then(() => {
+      .then(async () => {
         if (succeeded && buffer.length > 0 && !disposed) {
           return runFlush();
         }
+        return succeeded;
       });
   };
 
-  const flush = (): Promise<void> => {
-    if (disposed) return Promise.resolve();
+  const flush = (): Promise<boolean> => {
+    if (disposed) return Promise.resolve(true);
     if (flushInFlight) return flushInFlight;
-    if (!buffer.length) return Promise.resolve();
+    if (!buffer.length) return Promise.resolve(true);
 
     flushInFlight = runFlush().finally(() => {
       flushInFlight = null;
@@ -88,13 +89,23 @@ export function createTrackingClient(opts?: {
     return flushInFlight;
   };
 
+  const MAX_DISPOSE_FLUSH_ATTEMPTS = 10;
+
   const drainAll = async (): Promise<void> => {
-    await flush();
-    /* v8 ignore start -- second flush pass; covered indirectly via dispose integration tests */
-    while (buffer.length > 0) {
-      await flush();
+    let attempts = 0;
+    while (buffer.length > 0 && attempts < MAX_DISPOSE_FLUSH_ATTEMPTS) {
+      const delivered = await flush();
+      attempts += 1;
+      if (!delivered) break;
     }
-    /* v8 ignore end */
+    if (buffer.length > 0) {
+      if (isDevEnvironment()) {
+        console.warn(
+          `[lessonkit] dropped ${buffer.length} buffered telemetry event(s) after dispose flush cap`,
+        );
+      }
+      buffer.length = 0;
+    }
   };
 
   intervalId = flushIntervalMs > 0 ? globalThis.setInterval(() => void flush(), flushIntervalMs) : undefined;

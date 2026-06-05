@@ -260,6 +260,56 @@ describe("InteractiveBook", () => {
     expect(screen.getByText("Page 1 of 1")).toBeTruthy();
   });
 
+  it("replays assessment telemetry after sessionStorage resume", async () => {
+    const events: Array<{ name: string; data?: unknown }> = [];
+    const captureEvent = (e: { name: string; data?: unknown }) => {
+      events.push(e);
+    };
+    saveCompoundState(
+      createSessionStoragePort(),
+      COURSE_ID,
+      "book-tel",
+      createCompoundResumeState({
+        activePageIndex: 0,
+        childStates: {
+          "tf-tel": {
+            selected: true,
+            selectionCorrect: true,
+            passed: true,
+            showSolutions: false,
+            completedScore: 1,
+            completedMaxScore: 1,
+          },
+        },
+      }),
+    );
+
+    render(
+      <Course
+        title="Compound"
+        courseId={COURSE_ID}
+        config={{
+          xapi: { enabled: false },
+          session: { persistCompoundState: true },
+          tracking: { sink: captureEvent },
+        }}
+      >
+        <Lesson title="L1" lessonId="lesson-1">
+          <InteractiveBook blockId="book-tel" title="Book">
+            <Page blockId="p1" title="Quiz">
+              <TrueFalse checkId="tf-tel" question="True?" answer={true} />
+            </Page>
+          </InteractiveBook>
+        </Lesson>
+      </Course>,
+    );
+
+    await waitFor(() => {
+      expect(events.some((e) => e.name === "assessment_answered")).toBe(true);
+      expect(events.some((e) => e.name === "assessment_completed")).toBe(true);
+    });
+  });
+
   it("restores TrueFalse answer state from sessionStorage", async () => {
     saveCompoundState(
       createSessionStoragePort(),

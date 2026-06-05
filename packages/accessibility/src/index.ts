@@ -99,16 +99,7 @@ export function shouldAnimate(opts?: { default?: boolean }): boolean {
 
 export function focusFirst(container: FocusContainer | null): boolean {
   if (!container) return false;
-  const el = container.querySelector<Focusable>(
-    [
-      "a[href]",
-      "button:not([disabled])",
-      "input:not([disabled])",
-      "select:not([disabled])",
-      "textarea:not([disabled])",
-      "[tabindex]:not([tabindex='-1'])",
-    ].join(","),
-  );
+  const el = container.querySelector<Focusable>(FOCUSABLE_SELECTORS);
   el?.focus();
   return Boolean(el);
 }

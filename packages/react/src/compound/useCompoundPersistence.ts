@@ -45,6 +45,7 @@ export function useCompoundPersistence(opts: {
   const handlesVersion = useCompoundHandlesVersion();
   const bridgeRef = useCompoundHydrationBridgeRef();
   const pendingChildResumeRef = useRef<CompoundResumeState | null>(null);
+  const resumedChildKeysRef = useRef(new Set<string>());
   /** Loaded child states merged into saves until live handles overwrite them. */
   const loadedChildStatesRef = useRef<Record<string, AssessmentResumeState>>({});
   const skipSaveUntilHydratedRef = useRef(false);
@@ -58,6 +59,7 @@ export function useCompoundPersistence(opts: {
     loadedChildStatesRef.current = {};
     skipSaveUntilHydratedRef.current = false;
     pendingChildResumeRef.current = null;
+    resumedChildKeysRef.current = new Set();
   }
 
   if (!hydrationInitRef.current && opts.enabled && opts.courseId) {
@@ -114,19 +116,20 @@ export function useCompoundPersistence(opts: {
     const pending = pendingChildResumeRef.current;
     if (!pending || !ctx) return;
     const handles = ctx.getHandles();
-    const applied = resumeChildHandles(handles, pending.childStates, { waitForHandles: true });
+    const applied = resumeChildHandles(handles, pending.childStates, {
+      waitForHandles: true,
+      alreadyResumed: resumedChildKeysRef.current,
+    });
     if (!applied) {
-      if (handles.size === 0 && Object.keys(pending.childStates).length > 0) {
-        finalizeHydration({});
-        return;
-      }
       const handlesAtWait = handles.size;
       queueMicrotask(() => {
         if (pendingChildResumeRef.current !== pending) return;
         const handlesNow = ctx.getHandles();
         if (handlesNow.size !== handlesAtWait) return;
         const registeredOnly = stripOrphanChildStates(handlesNow, pending.childStates);
-        resumeChildHandles(handlesNow, registeredOnly);
+        resumeChildHandles(handlesNow, registeredOnly, {
+          alreadyResumed: resumedChildKeysRef.current,
+        });
         finalizeHydration(registeredOnly);
       });
       return;
@@ -142,11 +145,11 @@ export function useCompoundPersistence(opts: {
     storage,
     onResume: (state) => {
       const clamped = clampCompoundPageIndex(state.activePageIndex, opts.pageCount);
-      const childStates = ctx ? stripOrphanChildStates(ctx.getHandles(), state.childStates) : state.childStates;
-      loadedChildStatesRef.current = { ...childStates };
-      skipSaveUntilHydratedRef.current = Object.keys(childStates).length > 0;
+      loadedChildStatesRef.current = { ...state.childStates };
+      skipSaveUntilHydratedRef.current = Object.keys(state.childStates).length > 0;
       opts.setIndex(clamped);
-      pendingChildResumeRef.current = { ...state, activePageIndex: clamped, childStates };
+      resumedChildKeysRef.current = new Set();
+      pendingChildResumeRef.current = { ...state, activePageIndex: clamped, childStates: state.childStates };
       queueMicrotask(() => applyPendingChildResume());
     },
   });
@@ -168,14 +171,14 @@ export function useCompoundPersistence(opts: {
   const notifyImperativeResume = useCallback(
     (state: CompoundResumeState) => {
       const clamped = clampCompoundPageIndex(state.activePageIndex, opts.pageCount);
-      const childStates = ctx ? stripOrphanChildStates(ctx.getHandles(), state.childStates) : state.childStates;
-      loadedChildStatesRef.current = { ...childStates };
-      skipSaveUntilHydratedRef.current = Object.keys(childStates).length > 0;
+      loadedChildStatesRef.current = { ...state.childStates };
+      skipSaveUntilHydratedRef.current = Object.keys(state.childStates).length > 0;
       opts.setIndex(clamped);
-      pendingChildResumeRef.current = { ...state, activePageIndex: clamped, childStates };
+      resumedChildKeysRef.current = new Set();
+      pendingChildResumeRef.current = { ...state, activePageIndex: clamped, childStates: state.childStates };
       queueMicrotask(() => applyPendingChildResume());
     },
-    [ctx, opts.pageCount, opts.setIndex, applyPendingChildResume],
+    [opts.pageCount, opts.setIndex, applyPendingChildResume],
   );
 
   useEffect(() => {

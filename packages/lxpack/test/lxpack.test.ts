@@ -11,6 +11,7 @@ import {
   resolveSpaLessons,
   themeToLxpackRuntime,
   validateDescriptor,
+  validateDescriptorForTarget,
   writeLxpackProject,
 } from "../src/index";
 
@@ -550,7 +551,7 @@ describe("validateDescriptor edge cases", () => {
     expect(result.ok).toBe(false);
   });
 
-  it("accepts passingScore as absolute points (not capped by choice count)", () => {
+  it("rejects passingScore above achievable score for mcq", () => {
     const result = validateDescriptor({
       ...baseDescriptor,
       assessments: [
@@ -563,9 +564,29 @@ describe("validateDescriptor edge cases", () => {
         },
       ],
     });
-    expect(result.ok).toBe(true);
-    if (result.ok) {
-      expect(result.descriptor.assessments?.[0]?.passingScore).toBe(2);
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.issues.some((i) => i.path.includes("passingScore"))).toBe(true);
+    }
+  });
+
+  it("validateDescriptorForTarget rejects non-injectable assessments for LMS targets", () => {
+    const descriptor = {
+      ...baseDescriptor,
+      assessments: [
+        {
+          kind: "fillInBlanks" as const,
+          checkId: "fib-pack",
+          question: "Fill",
+          template: "Type *here*",
+        },
+      ],
+    };
+    expect(validateDescriptor(descriptor).ok).toBe(true);
+    const packaged = validateDescriptorForTarget(descriptor, "scorm12");
+    expect(packaged.ok).toBe(false);
+    if (!packaged.ok) {
+      expect(packaged.issues[0]?.message).toContain("not injected into LMS shell quizzes");
     }
   });
 });

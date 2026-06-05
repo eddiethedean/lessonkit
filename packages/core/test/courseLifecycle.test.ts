@@ -81,6 +81,23 @@ describe("courseLifecycle", () => {
     expect(result.marked).toBe(false);
   });
 
+  it("tryEmitCourseStarted reports unmarked when markCourseStarted storage write fails", () => {
+    const storage = {
+      getItem: () => null,
+      setItem: () => false,
+    };
+    const ctx = {
+      courseId: "c" as const,
+      sessionId: "s",
+      storage,
+      pluginHost: null,
+      lxpackBridge: "auto" as const,
+    };
+    const result = tryEmitCourseStarted(ctx, { emitCourseStartedEvent: () => true }, false);
+    expect(result.emitted).toBe(true);
+    expect(result.marked).toBe(false);
+  });
+
   it("tryEmitCourseStarted retries emit when storage is marked but sink has not received event", () => {
     const store: Record<string, string> = {};
     const storage = {

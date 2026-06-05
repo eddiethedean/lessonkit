@@ -18,6 +18,16 @@ export function readStringField(
   return undefined;
 }
 
+export function readNumberField(
+  state: AssessmentResumeState,
+  key: string,
+): number | null | undefined {
+  const value = state[key];
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (value === null) return null;
+  return undefined;
+}
+
 export function readBooleanStateField(
   state: AssessmentResumeState,
   key: string,

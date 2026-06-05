@@ -13,6 +13,10 @@ export type BuildAssessmentHandleOpts = {
   resetTask: () => void;
   showSolutions: () => void;
   getXAPIData: () => AssessmentXAPIData;
+  /**
+   * Snapshot for compound sessionStorage resume. When provided, the handle identity must
+   * change whenever this snapshot would change (or call persistence explicitly on navigation).
+   */
   getCurrentState?: () => AssessmentResumeState;
   resume?: (state: AssessmentResumeState) => void;
 };

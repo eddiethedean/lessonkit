@@ -80,7 +80,7 @@ function DragTheWordsInner(
           score,
           maxScore: maxScore || 1,
         }),
-        getCurrentState: () => ({ zones, pool, passed, keyboardWord }),
+        getCurrentState: () => ({ zones, pool, passed, keyboardWord, submitted }),
         resume: (state) => {
           const rawZones = state.zones;
           if (rawZones && typeof rawZones === "object") setZones({ ...(rawZones as Record<string, string>) });
@@ -90,11 +90,12 @@ function DragTheWordsInner(
             completedRef.current = value;
             answeredRef.current = value;
           });
+          readBooleanStateField(state, "submitted", setSubmitted);
           const kw = state.keyboardWord;
           if (kw === null || typeof kw === "string") setKeyboardWord(kw ?? null);
         },
       }),
-    [allFilled, checkId, keyboardWord, maxScore, passed, passedThreshold, pool, score, zones],
+    [allFilled, checkId, keyboardWord, maxScore, passed, passedThreshold, pool, score, submitted, zones],
   );
 
   useAssessmentHandleRegistration(checkId, handle, ref);

@@ -174,6 +174,7 @@ export type TelemetryBatchSink = (events: TelemetryEvent[]) => void | Promise<vo
 
 export type TrackingClient = {
   track: (event: TelemetryEvent) => void;
-  flush?: () => void | Promise<void>;
+  /** Resolves to true when all buffered events were delivered; false when a sink failure re-queued events. */
+  flush?: () => void | Promise<boolean>;
   dispose?: () => void | Promise<void>;
 };

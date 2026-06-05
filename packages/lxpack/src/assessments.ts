@@ -63,6 +63,7 @@ export function assessmentDescriptorToLxpack(
   if (kind === "fillInBlanks") {
     return null;
   }
+  // findHotspot is represented as a simplified 2-choice MCQ in LMS shell exports.
   if (kind === "findHotspot" && assessment.kind === "findHotspot") {
     return mcqToLxpack({
       kind: "mcq",

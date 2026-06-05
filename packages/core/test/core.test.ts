@@ -235,14 +235,16 @@ describe("@lessonkit/core", () => {
     client.track(interactionEvent("t2"));
     client.track(interactionEvent("t3"));
 
-    await client.flush?.();
+    const firstFlush = await client.flush?.();
+    expect(firstFlush).toBe(false);
     await new Promise((r) => setTimeout(r, 0));
 
     expect(sink).toHaveBeenCalledTimes(3);
     expect(sink.mock.calls[0]?.[0]?.timestamp).toBe("t1");
     expect(sink.mock.calls[1]?.[0]?.timestamp).toBe("t2");
 
-    await client.flush?.();
+    const secondFlush = await client.flush?.();
+    expect(secondFlush).toBe(true);
     await new Promise((r) => setTimeout(r, 0));
 
     expect(sink.mock.calls.length).toBeGreaterThanOrEqual(5);
@@ -250,6 +252,33 @@ describe("@lessonkit/core", () => {
     expect(redelivered).toContain("t1");
     expect(redelivered).toContain("t2");
     expect(redelivered).toContain("t3");
+  });
+
+  it("flush resolves true when sink delivers successfully", async () => {
+    const batchSink = vi.fn(async () => {});
+    const client = createTrackingClient({
+      batchSink,
+      batch: { enabled: true, flushIntervalMs: 0, maxBatchSize: 100 },
+    });
+    client.track(interactionEvent("t1"));
+    await expect(client.flush?.()).resolves.toBe(true);
+  });
+
+  it("dispose completes when sink permanently fails", async () => {
+    vi.stubEnv("NODE_ENV", "development");
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const batchSink = vi.fn(async () => {
+      throw new Error("down");
+    });
+    const client = createTrackingClient({
+      batchSink,
+      batch: { enabled: true, flushIntervalMs: 0, maxBatchSize: 100 },
+    });
+    client.track(interactionEvent("t1"));
+    await expect(client.dispose?.()).resolves.toBeUndefined();
+    expect(warn).toHaveBeenCalled();
+    vi.unstubAllEnvs();
+    warn.mockRestore();
   });
 
   it("refuses new events when the batch buffer is at cap", () => {

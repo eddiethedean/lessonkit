@@ -30,6 +30,27 @@ const validateMcqLike: AssessmentValidator = (assessment, path, issues) => {
   }
 };
 
+function countStarDelimitedBlanks(template: string): number {
+  const matches = template.match(/\*[^*]+\*/g);
+  return matches?.length ?? 0;
+}
+
+/** Maximum points achievable for this assessment in runtime and LMS shell injection. */
+export function maxAchievableAssessmentScore(assessment: AssessmentDescriptor): number {
+  const kind = assessment.kind ?? "mcq";
+  if (kind === "fillInBlanks" && assessment.kind === "fillInBlanks") {
+    const explicit = assessment.blanks?.filter((b) => b?.id?.trim() && b?.answer?.trim()).length ?? 0;
+    if (explicit > 0) return explicit;
+    return countStarDelimitedBlanks(assessment.template ?? "");
+  }
+  if (kind === "findMultipleHotspots" && assessment.kind === "findMultipleHotspots") {
+    return (
+      assessment.correctTargetIds?.map((id) => id.trim()).filter((id) => id.length > 0).length ?? 0
+    );
+  }
+  return 1;
+}
+
 export const ASSESSMENT_VALIDATORS: Record<AssessmentKind, AssessmentValidator> = {
   mcq: validateMcqLike,
   trueFalse: (assessment, path, issues) => {
@@ -118,5 +139,13 @@ export function validateAssessmentEntry(
       path: `${path}.passingScore`,
       message: "passingScore must be greater than 0 (absolute point threshold)",
     });
+  } else if (passingScore !== undefined) {
+    const maxAchievable = maxAchievableAssessmentScore(assessment);
+    if (maxAchievable > 0 && passingScore > maxAchievable) {
+      issues.push({
+        path: `${path}.passingScore`,
+        message: `passingScore cannot exceed achievable score (${maxAchievable}) for this assessment kind`,
+      });
+    }
   }
 }

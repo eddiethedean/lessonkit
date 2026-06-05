@@ -85,7 +85,7 @@ function FillInTheBlanksInner(
           score,
           maxScore: maxScore || 1,
         }),
-        getCurrentState: () => ({ values, passed, showSolutions }),
+        getCurrentState: () => ({ values, passed, showSolutions, submitted }),
         resume: (state) => {
           const raw = state.values;
           if (raw && typeof raw === "object") setValues({ ...(raw as Record<string, string>) });
@@ -95,9 +95,10 @@ function FillInTheBlanksInner(
             answeredRef.current = value;
           });
           readBooleanStateField(state, "showSolutions", setShowSolutions);
+          readBooleanStateField(state, "submitted", setSubmitted);
         },
       }),
-    [allFilled, checkId, maxScore, passed, passedThreshold, score, showSolutions, values],
+    [allFilled, checkId, maxScore, passed, passedThreshold, score, showSolutions, submitted, values],
   );
 
   useAssessmentHandleRegistration(checkId, handle, ref);

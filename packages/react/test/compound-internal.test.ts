@@ -79,13 +79,14 @@ describe("resumeChildHandles", () => {
   it("waits for lazy mounts when only some pending keys are registered", () => {
     const resumeA = vi.fn();
     const resumeB = vi.fn();
+    const alreadyResumed = new Set<string>();
     const handles = new Map<string, AssessmentHandle>([
       ["check-1", { resume: resumeA } as unknown as AssessmentHandle],
     ]);
     const applied = resumeChildHandles(
       handles,
       { "check-1": { selected: "a" }, "check-2": { selected: "b" } },
-      { waitForHandles: true },
+      { waitForHandles: true, alreadyResumed },
     );
     expect(applied).toBe(false);
     expect(resumeA).toHaveBeenCalledWith({ selected: "a" });
@@ -95,10 +96,25 @@ describe("resumeChildHandles", () => {
     const completed = resumeChildHandles(
       handles,
       { "check-1": { selected: "a" }, "check-2": { selected: "b" } },
-      { waitForHandles: true },
+      { waitForHandles: true, alreadyResumed },
     );
     expect(completed).toBe(true);
+    expect(resumeA).toHaveBeenCalledTimes(1);
     expect(resumeB).toHaveBeenCalledWith({ selected: "b" });
+  });
+
+  it("waits when pending keys match no registered handles yet", () => {
+    const resume = vi.fn();
+    const handles = new Map<string, AssessmentHandle>([
+      ["check-B", { resume } as unknown as AssessmentHandle],
+    ]);
+    const applied = resumeChildHandles(
+      handles,
+      { "check-A": { selected: true } },
+      { waitForHandles: true },
+    );
+    expect(applied).toBe(false);
+    expect(resume).not.toHaveBeenCalled();
   });
 });
 
