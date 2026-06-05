@@ -6,8 +6,9 @@ import {
   createSessionStoragePort,
   loadCompoundState,
 } from "@lessonkit/core";
+import { useCompoundHydrationBridgeRef } from "./CompoundHydrationBridge";
 import { useCompoundHandlesVersion, useCompoundRegistry } from "./CompoundProvider";
-import { resumeChildHandles } from "./resumeChildHandles";
+import { filterRegisteredChildStates, resumeChildHandles } from "./resumeChildHandles";
 import { useCompoundResume } from "./useCompoundResume";
 
 export function readCompoundInitialIndex(
@@ -23,6 +24,13 @@ export function readCompoundInitialIndex(
   return clampCompoundPageIndex(saved.activePageIndex, pageCount);
 }
 
+function stripOrphanChildStates(
+  handles: Map<string, unknown>,
+  childStates: Record<string, AssessmentResumeState>,
+): Record<string, AssessmentResumeState> {
+  return filterRegisteredChildStates(handles as Parameters<typeof filterRegisteredChildStates>[0], childStates);
+}
+
 export function useCompoundPersistence(opts: {
   courseId: CourseId | undefined;
   compoundId: BlockId;
@@ -35,6 +43,7 @@ export function useCompoundPersistence(opts: {
   const storage = opts.storage ?? createSessionStoragePort();
   const ctx = useCompoundRegistry();
   const handlesVersion = useCompoundHandlesVersion();
+  const bridgeRef = useCompoundHydrationBridgeRef();
   const pendingChildResumeRef = useRef<CompoundResumeState | null>(null);
   /** Loaded child states merged into saves until live handles overwrite them. */
   const loadedChildStatesRef = useRef<Record<string, AssessmentResumeState>>({});
@@ -89,15 +98,24 @@ export function useCompoundPersistence(opts: {
   const buildStateRef = useRef(buildState);
   buildStateRef.current = buildState;
 
+  const finalizeHydration = useCallback(
+    (childStates: Record<string, AssessmentResumeState>) => {
+      loadedChildStatesRef.current = { ...childStates };
+      skipSaveUntilHydratedRef.current = false;
+      pendingChildResumeRef.current = null;
+    },
+    [],
+  );
+
   const applyPendingChildResume = useCallback(() => {
     const pending = pendingChildResumeRef.current;
     if (!pending || !ctx) return;
     const handles = ctx.getHandles();
     const applied = resumeChildHandles(handles, pending.childStates, { waitForHandles: true });
     if (!applied) return;
-    pendingChildResumeRef.current = null;
-    skipSaveUntilHydratedRef.current = false;
-  }, [ctx]);
+    const registeredOnly = stripOrphanChildStates(handles, pending.childStates);
+    finalizeHydration(registeredOnly);
+  }, [ctx, finalizeHydration]);
 
   const saveResume = useCompoundResume({
     courseId: opts.courseId,
@@ -106,10 +124,11 @@ export function useCompoundPersistence(opts: {
     storage,
     onResume: (state) => {
       const clamped = clampCompoundPageIndex(state.activePageIndex, opts.pageCount);
-      loadedChildStatesRef.current = { ...state.childStates };
-      skipSaveUntilHydratedRef.current = Object.keys(state.childStates).length > 0;
+      const childStates = ctx ? stripOrphanChildStates(ctx.getHandles(), state.childStates) : state.childStates;
+      loadedChildStatesRef.current = { ...childStates };
+      skipSaveUntilHydratedRef.current = Object.keys(childStates).length > 0;
       opts.setIndex(clamped);
-      pendingChildResumeRef.current = { ...state, activePageIndex: clamped };
+      pendingChildResumeRef.current = { ...state, activePageIndex: clamped, childStates };
       queueMicrotask(() => applyPendingChildResume());
     },
   });
@@ -120,14 +139,32 @@ export function useCompoundPersistence(opts: {
     saveResume(buildStateRef.current());
   }, [opts.enabled, opts.courseId, saveResume]);
 
+  const notifyImperativeResume = useCallback(
+    (state: CompoundResumeState) => {
+      const clamped = clampCompoundPageIndex(state.activePageIndex, opts.pageCount);
+      const childStates = ctx ? stripOrphanChildStates(ctx.getHandles(), state.childStates) : state.childStates;
+      loadedChildStatesRef.current = { ...childStates };
+      skipSaveUntilHydratedRef.current = false;
+      pendingChildResumeRef.current = null;
+      opts.setIndex(clamped);
+      queueMicrotask(() => persistNow());
+    },
+    [ctx, opts.pageCount, opts.setIndex, persistNow],
+  );
+
+  useEffect(() => {
+    if (!bridgeRef) return;
+    bridgeRef.current = { notifyImperativeResume };
+    return () => {
+      if (bridgeRef.current?.notifyImperativeResume === notifyImperativeResume) {
+        bridgeRef.current = null;
+      }
+    };
+  }, [bridgeRef, notifyImperativeResume]);
+
   useLayoutEffect(() => {
     persistNow();
-  }, [
-    persistNow,
-    opts.index,
-    opts.pageCount,
-    handlesVersion,
-  ]);
+  }, [persistNow, opts.index, opts.pageCount, handlesVersion]);
 
   useEffect(() => {
     applyPendingChildResume();

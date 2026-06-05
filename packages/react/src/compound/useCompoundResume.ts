@@ -3,6 +3,17 @@ import type { BlockId, CompoundResumeState, CourseId } from "@lessonkit/core";
 import { loadCompoundState, saveCompoundState } from "@lessonkit/core";
 import { createSessionStoragePort } from "@lessonkit/core";
 import type { StoragePort } from "@lessonkit/core";
+import { isDevEnvironment } from "../runtime/validateComponentId";
+
+let warnedCompoundPersistFailure = false;
+
+function warnCompoundPersistFailure(): void {
+  if (warnedCompoundPersistFailure || !isDevEnvironment()) return;
+  warnedCompoundPersistFailure = true;
+  console.warn(
+    "[lessonkit] compound resume state could not be saved to sessionStorage (quota or privacy mode); progress may be lost on reload.",
+  );
+}
 
 export function useCompoundResume(opts: {
   courseId: CourseId | undefined;
@@ -36,7 +47,8 @@ export function useCompoundResume(opts: {
   return useCallback(
     (state: CompoundResumeState) => {
       if (!opts.enabled || !opts.courseId) return;
-      saveCompoundState(storageRef.current, opts.courseId, opts.compoundId, state);
+      const persisted = saveCompoundState(storageRef.current, opts.courseId, opts.compoundId, state);
+      if (!persisted) warnCompoundPersistFailure();
     },
     [opts.enabled, opts.courseId, opts.compoundId],
   );

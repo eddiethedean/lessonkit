@@ -1,4 +1,5 @@
-import React, { forwardRef, useCallback, useEffect, useMemo, useState } from "react";
+import React, { forwardRef, useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
+import { deriveId } from "@lessonkit/core";
 import type { AssessmentBehaviour, BlockId, CompoundHandle } from "@lessonkit/core";
 import { CompoundProvider } from "../compound/CompoundProvider";
 import { useCompoundInitialIndex, useCompoundShell } from "../compound/useCompoundShell";
@@ -91,11 +92,16 @@ const AssessmentSequenceInner = forwardRef<CompoundHandle, AssessmentSequenceInn
 
 export const AssessmentSequence = forwardRef<CompoundHandle, AssessmentSequenceProps>(
   function AssessmentSequence(props, ref) {
+    const reactInstanceId = useId();
+    const autoCompoundIdRef = useRef<BlockId | null>(null);
+    if (!props.blockId && !autoCompoundIdRef.current) {
+      autoCompoundIdRef.current = deriveId(`assessment-sequence-${reactInstanceId}`) as BlockId;
+    }
     const compoundId = useMemo(
       () =>
         props.blockId
           ? (normalizeComponentId(props.blockId, "blockId") as BlockId)
-          : (DEFAULT_ASSESSMENT_SEQUENCE_COMPOUND_ID as BlockId),
+          : (autoCompoundIdRef.current ?? (DEFAULT_ASSESSMENT_SEQUENCE_COMPOUND_ID as BlockId)),
       [props.blockId],
     );
     const childArray = React.Children.toArray(props.children).filter(

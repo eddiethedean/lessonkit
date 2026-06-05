@@ -2,7 +2,12 @@ import React, { createContext, useCallback, useContext, useImperativeHandle, use
 import type { AssessmentHandle, CheckId, CompoundHandle, CompoundResumeState } from "@lessonkit/core";
 import { clampCompoundPageIndex, createCompoundResumeState } from "@lessonkit/core";
 import { aggregateAssessmentScores } from "./aggregateScores";
+import {
+  CompoundHydrationBridgeProvider,
+  useCompoundHydrationBridgeRef,
+} from "./CompoundHydrationBridge";
 import { useCompoundPageIndex } from "./CompoundPageIndexContext";
+import { isDevEnvironment } from "../runtime/validateComponentId";
 import { resumeChildHandles } from "./resumeChildHandles";
 
 export type RegisteredAssessmentHandle = {
@@ -35,6 +40,14 @@ export function CompoundProvider({
 
   const register = useCallback((checkId: CheckId, handle: AssessmentHandle, pageIndex?: number) => {
     const prev = registryRef.current.get(checkId);
+    if (prev && prev.handle !== handle) {
+      const message = `[lessonkit] duplicate checkId "${checkId}" registered in the same compound container; the previous handle was replaced.`;
+      if (isDevEnvironment()) {
+        console.error(message);
+      } else {
+        console.warn(message);
+      }
+    }
     registryRef.current.set(checkId, { handle, pageIndex });
     if (prev?.handle !== handle || prev?.pageIndex !== pageIndex) {
       setHandlesVersion((v) => v + 1);
@@ -64,11 +77,13 @@ export function CompoundProvider({
   );
 
   return (
-    <CompoundRegistryContext.Provider value={registryValue}>
-      <CompoundHandlesVersionContext.Provider value={handlesVersion}>
-        {children}
-      </CompoundHandlesVersionContext.Provider>
-    </CompoundRegistryContext.Provider>
+    <CompoundHydrationBridgeProvider>
+      <CompoundRegistryContext.Provider value={registryValue}>
+        <CompoundHandlesVersionContext.Provider value={handlesVersion}>
+          {children}
+        </CompoundHandlesVersionContext.Provider>
+      </CompoundRegistryContext.Provider>
+    </CompoundHydrationBridgeProvider>
   );
 }
 
@@ -104,6 +119,7 @@ export function useCompoundHandleRef(
   },
 ) {
   const { activePageIndex, setActivePageIndex, getHandles, getRegisteredHandles, pageCount } = opts;
+  const bridgeRef = useCompoundHydrationBridgeRef();
 
   const setIndexClamped = useCallback(
     (index: number) => {
@@ -143,9 +159,10 @@ export function useCompoundHandleRef(
       resume: (state: CompoundResumeState) => {
         setIndexClamped(state.activePageIndex);
         resumeChildHandles(getHandles(), state.childStates, { waitForHandles: true });
+        bridgeRef?.current?.notifyImperativeResume(state);
       },
     }),
-    [activePageIndex, setIndexClamped, getHandles, getRegisteredHandles, opts.enableSolutionsButton],
+    [activePageIndex, setIndexClamped, getHandles, getRegisteredHandles, opts.enableSolutionsButton, bridgeRef],
   );
 }
 

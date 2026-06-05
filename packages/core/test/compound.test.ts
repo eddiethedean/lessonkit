@@ -51,7 +51,10 @@ describe("compound session storage", () => {
     const storage = createNoopStorage();
     const map = new Map<string, string>();
     storage.getItem = (k) => map.get(k) ?? null;
-    storage.setItem = (k, v) => map.set(k, v);
+    storage.setItem = (k, v) => {
+      map.set(k, v);
+      return true;
+    };
     storage.removeItem = (k) => map.delete(k);
 
     const state = createCompoundResumeState({ activePageIndex: 1 });

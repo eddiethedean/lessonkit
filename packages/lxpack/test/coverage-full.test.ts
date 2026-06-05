@@ -645,6 +645,18 @@ describe("coverage-full lxpack", () => {
       expect(result.ok).toBe(false);
     });
 
+    it("accepts absolute output path confined under projectRoot", async () => {
+      const root = await makeTempDir("lk-val-abs-out-");
+      const output = join(root, "artifacts", "course-scorm12.zip");
+      const result = validatePackageInputs({
+        target: "scorm12",
+        outDir: join(root, "course"),
+        projectRoot: root,
+        output,
+      });
+      expect(result.ok).toBe(true);
+    });
+
     it("rejects outputBaseDir outside projectRoot", async () => {
       const root = await makeTempDir("lk-val-in-");
       const result = validatePackageInputs({

@@ -25,6 +25,7 @@ describe("session", () => {
       getItem: (k: string) => store[k] ?? null,
       setItem: (k: string, v: string) => {
         store[k] = v;
+        return true;
       },
     };
     expect(resolveSessionId(storage, undefined)).toBe("tab-1");
@@ -36,6 +37,7 @@ describe("session", () => {
       getItem: (k: string) => store[k] ?? null,
       setItem: (k: string, v: string) => {
         store[k] = v;
+        return true;
       },
     };
     const id = resolveSessionId(storage, undefined);
@@ -46,7 +48,7 @@ describe("session", () => {
   it("getTabSessionId reads session key", () => {
     const storage = {
       getItem: (k: string) => (k === SESSION_STORAGE_KEY ? "s1" : null),
-      setItem: () => {},
+      setItem: () => true,
     };
     expect(getTabSessionId(storage)).toBe("s1");
   });
@@ -57,6 +59,7 @@ describe("session", () => {
       getItem: (k: string) => store[k] ?? null,
       setItem: (k: string, v: string) => {
         store[k] = v;
+        return true;
       },
       removeItem: (k: string) => {
         delete store[k];
@@ -77,6 +80,7 @@ describe("session", () => {
       getItem: (k: string) => store[k] ?? null,
       setItem: (k: string, v: string) => {
         store[k] = v;
+        return true;
       },
       removeItem: (k: string) => {
         delete store[k];
@@ -97,6 +101,7 @@ describe("session", () => {
       getItem: (k: string) => store[k] ?? null,
       setItem: (k: string, v: string) => {
         store[k] = v;
+        return true;
       },
       removeItem: (k: string) => {
         delete store[k];
@@ -117,6 +122,7 @@ describe("session", () => {
       getItem: (k: string) => store[k] ?? null,
       setItem: (k: string, v: string) => {
         store[k] = v;
+        return true;
       },
       removeItem: (k: string) => {
         delete store[k];
@@ -134,6 +140,7 @@ describe("session", () => {
       getItem: (k: string) => store[k] ?? null,
       setItem: (k: string, v: string) => {
         store[k] = v;
+        return true;
       },
       removeItem: (k: string) => {
         delete store[k];

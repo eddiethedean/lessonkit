@@ -66,6 +66,7 @@ describe("coverage-full", () => {
       getItem: (k: string) => store[k] ?? null,
       setItem: (k: string, v: string) => {
         store[k] = v;
+        return true;
       },
       removeItem: (k: string) => {
         delete store[k];

@@ -24,7 +24,7 @@ export function Page(props: PageProps) {
   const lessonId = useEnclosingLessonId();
 
   useEffect(() => {
-    if (props.hidden || !lessonId) return;
+    if (props.hidden || !lessonId || props.parentType) return;
     track(
       "compound_page_viewed",
       {

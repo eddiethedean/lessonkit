@@ -112,6 +112,18 @@ describe("validateDescriptor", () => {
       ],
     });
     expect(findMany.ok).toBe(true);
+
+    const invalidHotspot = validateDescriptor({
+      ...baseDescriptor,
+      assessments: [
+        {
+          kind: "findHotspot",
+          checkId: "hs-bad",
+          question: "Find",
+        },
+      ],
+    });
+    expect(invalidHotspot.ok).toBe(false);
   });
 
   it("rejects duplicate lesson ids", () => {

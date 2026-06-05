@@ -47,7 +47,8 @@ function DragAndDropInner(
     reset();
   }, [checkId, props.items.map((i) => i.id).join(","), props.targets.map((t) => t.id).join(",")]);
 
-  const allFilled = props.targets.every((t) => (assignments[t.id] ?? "").length > 0);
+  const hasTargets = props.targets.length > 0;
+  const allFilled = hasTargets && props.targets.every((t) => (assignments[t.id] ?? "").length > 0);
   let score = 0;
   props.targets.forEach((t) => {
     if (assignments[t.id] === t.accepts) score += 1;
@@ -60,7 +61,7 @@ function DragAndDropInner(
       checkId,
       getScore: () => score,
       getMaxScore: () => maxScore,
-      getAnswerGiven: () => allFilled,
+      getAnswerGiven: () => hasTargets && allFilled,
       resetTask: reset,
       showSolutions: () => {},
       getXAPIData: () => ({
@@ -87,7 +88,7 @@ function DragAndDropInner(
         if (item === null || typeof item === "string") setKeyboardItem(item ?? null);
       },
     });
-  }, [allFilled, assignments, checkId, checked, keyboardItem, maxScore, passed, passedThreshold, pool, props.targets, score]);
+  }, [allFilled, assignments, checkId, checked, hasTargets, keyboardItem, maxScore, passed, passedThreshold, pool, props.targets, score]);
 
   useAssessmentHandleRegistration(checkId, handle, ref);
 
@@ -130,8 +131,9 @@ function DragAndDropInner(
     <section aria-label="Drag and Drop" data-lk-check-id={checkId}>
       <p>Match each item to the correct target (drag or use keyboard: select item, then activate target).</p>
       <div role="list" aria-label="Draggable items">
-        {pool.map((id) => {
-          const item = props.items.find((i) => i.id === id)!;
+        {pool.flatMap((id) => {
+          const item = props.items.find((i) => i.id === id);
+          if (!item) return [];
           return (
             <button
               key={id}
@@ -184,7 +186,7 @@ function DragAndDropInner(
           );
         })}
       </ul>
-      <button type="button" data-testid="check-drag-drop" disabled={!allFilled || passed} onClick={check}>
+      <button type="button" data-testid="check-drag-drop" disabled={!hasTargets || !allFilled || passed} onClick={check}>
         Check
       </button>
       {checked ? (

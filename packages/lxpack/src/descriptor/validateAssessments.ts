@@ -37,8 +37,34 @@ export const ASSESSMENT_VALIDATORS: Record<AssessmentKind, AssessmentValidator> 
       issues.push({ path: `${path}.template`, message: "template is required for fillInBlanks" });
     }
   },
-  findHotspot: () => {},
-  findMultipleHotspots: () => {},
+  findHotspot: (assessment, path, issues) => {
+    if (assessment.kind !== "findHotspot") return;
+    if (!assessment.src?.trim()) {
+      issues.push({ path: `${path}.src`, message: "src is required for findHotspot" });
+    }
+    if (!assessment.alt?.trim()) {
+      issues.push({ path: `${path}.alt`, message: "alt is required for findHotspot" });
+    }
+    if (!assessment.correctTargetId?.trim()) {
+      issues.push({ path: `${path}.correctTargetId`, message: "correctTargetId is required for findHotspot" });
+    }
+  },
+  findMultipleHotspots: (assessment, path, issues) => {
+    if (assessment.kind !== "findMultipleHotspots") return;
+    if (!assessment.src?.trim()) {
+      issues.push({ path: `${path}.src`, message: "src is required for findMultipleHotspots" });
+    }
+    if (!assessment.alt?.trim()) {
+      issues.push({ path: `${path}.alt`, message: "alt is required for findMultipleHotspots" });
+    }
+    const ids = assessment.correctTargetIds?.map((id) => id.trim()).filter((id) => id.length > 0) ?? [];
+    if (!ids.length) {
+      issues.push({
+        path: `${path}.correctTargetIds`,
+        message: "at least one non-empty correctTargetId is required for findMultipleHotspots",
+      });
+    }
+  },
 };
 
 export function validateAssessmentEntry(

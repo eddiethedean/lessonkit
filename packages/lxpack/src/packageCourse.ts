@@ -9,7 +9,7 @@ import {
   type ValidateCourseResult,
 } from "@lxpack/api";
 import { validateDescriptorForTarget } from "./validateDescriptor";
-import type { LxpackInjectedAssessment } from "./assessments";
+import { assessmentDescriptorToLxpack, type LxpackInjectedAssessment } from "./assessments";
 import type { WriteLxpackProjectOptions } from "./writeProject";
 import {
   remapArtifactPaths,
@@ -125,6 +125,21 @@ export async function packageLessonkitCourse(
   }
 
   const descriptor = descriptorValidation.descriptor;
+
+  const nonInjectableAssessments = (descriptor.assessments ?? [])
+    .map((assessment, index) => ({ assessment, index }))
+    .filter(({ assessment }) => assessmentDescriptorToLxpack(assessment) === null);
+  if (nonInjectableAssessments.length > 0) {
+    return {
+      ok: false,
+      courseDir: outDir,
+      target,
+      issues: nonInjectableAssessments.map(({ assessment, index }) => ({
+        path: `assessments[${index}]`,
+        message: `assessment kind "${assessment.kind ?? "mcq"}" (checkId "${assessment.checkId}") is not injected into LMS shell quizzes for target "${target}"`,
+      })),
+    };
+  }
 
   const staged = await buildStagingPackage({
     ...writeOpts,

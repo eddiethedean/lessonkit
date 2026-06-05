@@ -110,6 +110,22 @@ describe("1.1.x P0 assessment blocks", () => {
     expect(screen.getByRole("status").textContent).toContain("Correct");
   });
 
+  it("DragAndDrop with empty targets is not answerable", () => {
+    const ref = React.createRef<import("@lessonkit/core").AssessmentHandle>();
+    render(
+      wrap(
+        <DragAndDrop
+          ref={ref}
+          checkId="dad-empty"
+          items={[{ id: "a", label: "Apple" }]}
+          targets={[]}
+        />,
+      ),
+    );
+    expect(ref.current?.getAnswerGiven()).toBe(false);
+    expect((screen.getByTestId("check-drag-drop") as HTMLButtonElement).disabled).toBe(true);
+  });
+
   it("DragAndDrop assigns items to targets", () => {
     render(
       wrap(

@@ -20,7 +20,7 @@ export default function App() {
     <ThemeProvider mode="light">
       <Course title="Assessment blocks (1.1.0)" courseId={COURSE_ID} config={config}>
         <Lesson title="P0 interactions" lessonId="p0-lesson">
-          <AssessmentSequence>
+          <AssessmentSequence blockId="p0-assessment-sequence">
             <TrueFalse
               checkId="phishing-tf"
               question="Phishing emails are always easy to spot."

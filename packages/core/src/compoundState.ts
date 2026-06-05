@@ -28,8 +28,8 @@ export function saveCompoundState(
   courseId: CourseId,
   compoundId: BlockId,
   state: CompoundResumeState,
-): void {
-  storage.setItem(compoundStateStorageKey(courseId, compoundId), JSON.stringify(state));
+): boolean {
+  return storage.setItem(compoundStateStorageKey(courseId, compoundId), JSON.stringify(state));
 }
 
 export function clearCompoundState(

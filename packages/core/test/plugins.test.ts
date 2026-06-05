@@ -148,6 +148,33 @@ describe("createPluginRegistry", () => {
     expect(ctxCourseIds).toEqual(["course-a", "course-b"]);
   });
 
+  it("recomposes wrapTrackingSink when user identity changes", async () => {
+    const userIds: string[] = [];
+    const host = createPluginRegistry([
+      defineTelemetryPlugin({
+        id: "user-track",
+        version: "1",
+        kind: "analytics",
+        wrapTrackingSink: (sink, pluginCtx) => (event) => {
+          userIds.push(pluginCtx.user?.id ?? "");
+          return sink(event);
+        },
+      }),
+    ]);
+
+    let currentUser = { id: "user-a" };
+    const sink = vi.fn(async () => {});
+    const wrapped = host.composeTrackingSink(sink, () => ({
+      courseId: "course-a",
+      user: currentUser,
+    }))!;
+    await wrapped(baseEvent);
+    currentUser = { id: "user-b" };
+    await wrapped(baseEvent);
+
+    expect(userIds).toEqual(["user-a", "user-b"]);
+  });
+
   it("warns on duplicate plugin ids in development", () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
     vi.stubEnv("NODE_ENV", "development");

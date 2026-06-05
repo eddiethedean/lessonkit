@@ -61,12 +61,30 @@ export function validatePackageInputs(
   }
 
   if (output && !isSafeRelativeSpaPath(output)) {
-    return {
-      ok: false,
-      courseDir: outDir,
-      target,
-      issues: [{ path: "output", message: `unsafe output: ${output}` }],
-    };
+    if (isAbsolute(output)) {
+      try {
+        assertRealPathUnderRoot(projectRoot, resolve(output));
+      } catch (err) {
+        return {
+          ok: false,
+          courseDir: outDir,
+          target,
+          issues: [
+            {
+              path: "output",
+              message: /* v8 ignore next */ err instanceof Error ? err.message : `unsafe output: ${output}`,
+            },
+          ],
+        };
+      }
+    } else {
+      return {
+        ok: false,
+        courseDir: outDir,
+        target,
+        issues: [{ path: "output", message: `unsafe output: ${output}` }],
+      };
+    }
   }
 
   if (outputBaseDir) {
@@ -89,7 +107,7 @@ export function validatePackageInputs(
   }
 
   if (output) {
-    const resolvedOutput = resolve(projectRoot, output);
+    const resolvedOutput = isAbsolute(output) ? resolve(output) : resolve(projectRoot, output);
     try {
       assertRealPathUnderRoot(projectRoot, resolvedOutput);
     } catch (err) {
