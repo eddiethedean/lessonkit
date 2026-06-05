@@ -20,8 +20,8 @@ if (!loaded.ok) {
 await writeReactViteProject(loaded.project, {
   outDir: OUT,
   exportMode: "renderer",
-  lessonkitVersion: "1.0.2",
-  studioVersion: "0.3.0",
+  lessonkitVersion: "1.2.0",
+  studioVersion: "0.3.2",
 });
 
 console.log(`Wrote React/Vite project to ${OUT}`);

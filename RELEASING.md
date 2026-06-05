@@ -28,13 +28,15 @@ Normal `v1.0.3` tags **do not** publish or re-version Studio packages. Studio us
 
 | Item | Status |
 |------|--------|
-| All seven `@lessonkit/*` packages at `1.2.0` | Verify on `release/1.2.0` |
+| All seven `@lessonkit/*` packages at `1.2.0` | Done |
 | [CHANGELOG.md](CHANGELOG.md) `## [1.2.0]` includes **Changed** (catalog v3 default, compound persistence, AssessmentSequence scores) | Done |
 | [MIGRATION-1.1-to-1.2.md](docs/MIGRATION-1.1-to-1.2.md) in Sphinx toctree | Done |
 | `package-lock.json` includes all workspace examples (`npm ci` clean) | Verify before tag |
 | Sphinx `docs/conf.py` `release` = `1.2.0` | Done |
-| `main` / release branch CI green | Verify before tag |
+| `release/1.2.0` CI green ([PR #1](https://github.com/eddiethedean/lessonkit/pull/1)) | Done — merge to `main` before tag |
 | Headless `createLessonkitRuntime` runs `plugins` hooks | Done |
+| `lessonkit init` template pins `^1.2.0` | Done |
+| npm latest `@lessonkit/react` | **1.1.0** — publish with `v1.2.0` |
 | Git tag `v1.2.0` | **Create when ready** |
 
 > **Do not create or push `v1.2.0`** until you intend to publish to npm.
@@ -43,12 +45,15 @@ Normal `v1.0.3` tags **do not** publish or re-version Studio packages. Studio us
 
 | Item | Status |
 |------|--------|
-| Studio packages at `0.3.2` (schema, renderer, builder, ui, codegen) | Verify on branch |
-| Root `studio-version` = `0.3.2` | Verify |
-| [CHANGELOG.md](CHANGELOG.md) `## [studio-v0.3.2]` | Add when bumping Studio |
+| Studio packages at `0.3.2` (schema, renderer, builder, ui, codegen) | Done |
+| Root `studio-version` = `0.3.2` | Done |
+| [CHANGELOG.md](CHANGELOG.md) `## [studio-v0.3.2]` | Done |
 | `prepare-publish.mjs studio 0.3.2` pins `@lessonkit/*` to **1.2.0** | Run at publish time |
 | Framework **1.2.0** on npm before `studio-v0.3.2` tag | Required |
-| Studio palette/codegen covers 1.2 blocks (see [ROADMAP](ROADMAP.md)) | Verify |
+| `@lessonkit/studio-codegen` default export pins `@lessonkit/studio-*` **0.3.2** | Done |
+| Integration test `studio-export-package.test.ts` (`studioVersion: 0.3.2`, `lessonkitVersion: 1.2.0`) | Done |
+| Studio palette/codegen covers 1.2 blocks (see [ROADMAP](ROADMAP.md)) | Done |
+| npm latest `@lessonkit/studio-schema` | **0.3.1** — publish with `studio-v0.3.2` |
 | Git tag `studio-v0.3.2` | **Create when ready** |
 
 > Publish **framework `v1.2.0` first**, then `studio-v0.3.2`.

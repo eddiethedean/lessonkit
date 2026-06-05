@@ -2,7 +2,7 @@
   "name": "lessonkit-studio-web",
   "private": true,
   "type": "module",
-  "studioVersion": "0.3.1",
+  "studioVersion": "0.3.2",
   "scripts": {
     "dev": "vite",
     "build": "vite build",

@@ -7,19 +7,7 @@ All notable changes to the LessonKit monorepo are documented here.
 
 ## Unreleased
 
-### Added
-
-- Onboarding docs: [Getting started in 5 minutes](docs/guides/react-developers/getting-started-in-5-minutes.md), [Glossary](docs/reference/glossary.md), [API reference index](docs/reference/api.md), [ARCHITECTURE.md](https://github.com/eddiethedean/lessonkit/blob/main/ARCHITECTURE.md), [CODE_OF_CONDUCT.md](https://github.com/eddiethedean/lessonkit/blob/main/CODE_OF_CONDUCT.md), [good first contributions](docs/project/good-first-contributions.md).
-- Library Skills remote installer: `library-skills/install-remote.sh`.
-- GitHub Actions workflow to publish Storybook to GitHub Pages (`.github/workflows/storybook-pages.yml`).
-- Example: `examples/framework-12-showcase` — full LessonKit 1.2 block catalog in one course.
-- Example: `examples/framework-11-showcase` — full LessonKit 1.1 foundation + P0 assessments.
-
-### Changed
-
-- README and quickstart: npm-first funnel, `npm run dev`, Studio live-demo path, package install table, examples index.
-- npm package `homepage` fields point to Read the Docs.
-- CLI template Vitest aligned to v4.x.
+_No changes yet._
 
 ## [studio-v0.3.2] - 2026-06-03
 
@@ -32,7 +20,7 @@ Studio packages at **0.3.2**, pinned to framework **1.2.0** at publish time.
 
 ### Changed
 
-- All Studio packages bumped to **0.3.2**; export defaults pin `@lessonkit/*` **1.2.0**.
+- All Studio packages bumped to **0.3.2**; export defaults pin `@lessonkit/*` **1.2.0** and `@lessonkit/studio-*` **0.3.2**.
 
 ## [1.2.0] - 2026-06-03
 
@@ -43,8 +31,10 @@ Framework **1.2.x** — Compound containers, resume state, and Tier C/D P0 block
 - **@lessonkit/core**: `CompoundHandle`, `CompoundResumeState`, compound session storage v2, `compoundAllowlists`, telemetry catalog v3 (`book_page_viewed`, content interaction events).
 - **@lessonkit/react**: `Page`, `InteractiveBook`, `Text`, `Heading`, `Image`; Tier C/D blocks (`Accordion`, `DialogCards`, `Flashcards`, `ImageHotspots`, `ImageSlider`, `FindHotspot`, `FindMultipleHotspots`); `AssessmentSequence` implements `CompoundHandle`; `block-catalog.v3.json` (default `buildBlockCatalog({ version: 3 })`).
 - **@lessonkit/lxpack**: `findHotspot` / `findMultipleHotspots` assessment descriptor kinds.
-- Example: `examples/interactive-book`, **`examples/framework-12-showcase`** (full 1.2 catalog).
-- **Docs**: [MIGRATION-1.1-to-1.2.md](docs/MIGRATION-1.1-to-1.2.md); ROADMAP 1.2.x milestone; H5P capability map updates.
+- Example: `examples/interactive-book`, **`examples/framework-12-showcase`** (full 1.2 catalog), **`examples/framework-11-showcase`** (full 1.1 foundation + P0 assessments).
+- **Docs**: [MIGRATION-1.1-to-1.2.md](docs/MIGRATION-1.1-to-1.2.md); ROADMAP 1.2.x milestone; H5P capability map updates; onboarding funnel ([Getting started in 5 minutes](docs/guides/react-developers/getting-started-in-5-minutes.md), [Glossary](docs/reference/glossary.md), [API reference index](docs/reference/api.md), [ARCHITECTURE.md](https://github.com/eddiethedean/lessonkit/blob/main/ARCHITECTURE.md), [CODE_OF_CONDUCT.md](https://github.com/eddiethedean/lessonkit/blob/main/CODE_OF_CONDUCT.md), [good first contributions](docs/project/good-first-contributions.md)).
+- Library Skills remote installer: `library-skills/install-remote.sh`.
+- GitHub Actions workflow to publish Storybook to GitHub Pages (`.github/workflows/storybook-pages.yml`).
 - **@lessonkit/core**: Headless `createLessonkitRuntime` runs plugin telemetry hooks and `scoreAssessment`; `buildPluginContext` exported.
 
 ### Changed
@@ -53,6 +43,9 @@ Framework **1.2.x** — Compound containers, resume state, and Tier C/D P0 block
 - **`AssessmentSequence`** implements `CompoundHandle` and may surface parent-level scores when using a ref.
 - **`persistCompoundState`** defaults to **`true`**; provide a unique `blockId` on each compound container to avoid shared `sessionStorage` keys.
 - **`runtimeVersion: "v1"`** logs a development deprecation warning; **v2** remains the default.
+- README and quickstart: npm-first funnel, `npm run dev`, Studio live-demo path, package install table, examples index.
+- npm package `homepage` fields point to Read the Docs.
+- `lessonkit init` template pins `^1.2.0` for `@lessonkit/*`; CLI template Vitest aligned to v4.x.
 
 ## [studio-v0.3.1] - 2026-06-03
 
@@ -558,8 +551,10 @@ Last version published to npm before 0.2.x.
 - Initial public packages: `@lessonkit/core`, `@lessonkit/react`, `@lessonkit/xapi`, `@lessonkit/accessibility`, `@lessonkit/themes`, `@lessonkit/cli`.
 - Tag-based publish workflow and CI checks (build, typecheck, test, coverage).
 
+[studio-v0.3.2]: https://github.com/eddiethedean/lessonkit/compare/studio-v0.3.1...studio-v0.3.2
 [studio-v0.3.1]: https://github.com/eddiethedean/lessonkit/compare/studio-v0.3.0...studio-v0.3.1
 [studio-v0.3.0]: https://github.com/eddiethedean/lessonkit/compare/studio-v0.2.0...studio-v0.3.0
+[1.2.0]: https://github.com/eddiethedean/lessonkit/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/eddiethedean/lessonkit/compare/v1.0.2...v1.1.0
 [0.5.0]: https://github.com/eddiethedean/lessonkit/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/eddiethedean/lessonkit/compare/v0.3.1...v0.4.0
