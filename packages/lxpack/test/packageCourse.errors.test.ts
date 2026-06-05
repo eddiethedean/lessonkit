@@ -69,7 +69,7 @@ describe("packageLessonkitCourse errors", () => {
     }
   });
 
-  it("returns ok false for unsafe relative output without projectRoot", async () => {
+  it("returns ok false when projectRoot is omitted", async () => {
     const root = await makeTempDir();
     const dist = join(root, "dist");
     await mkdir(dist, { recursive: true });
@@ -85,7 +85,7 @@ describe("packageLessonkitCourse errors", () => {
 
     expect(result.ok).toBe(false);
     if (!result.ok) {
-      expect(result.issues.some((i) => i.path === "output")).toBe(true);
+      expect(result.issues.some((i) => i.path === "projectRoot")).toBe(true);
     }
   });
 
@@ -99,6 +99,7 @@ describe("packageLessonkitCourse errors", () => {
       descriptor,
       outDir: join(root, "course"),
       spaDistDir: dist,
+      projectRoot: root,
       target: "scorm12",
       outputBaseDir: "../../../evil",
     });
@@ -137,6 +138,7 @@ describe("packageLessonkitCourse errors", () => {
       descriptor: { ...descriptor, courseId: "" },
       outDir: join(root, "course"),
       spaDistDir: join(root, "dist"),
+      projectRoot: root,
       target: "scorm12",
     });
 
@@ -162,6 +164,7 @@ describe("packageLessonkitCourse errors", () => {
       descriptor,
       outDir: join(root, "course"),
       spaDistDir: dist,
+      projectRoot: root,
       target: "scorm12",
     });
 
@@ -179,6 +182,7 @@ describe("packageLessonkitCourse errors", () => {
       descriptor,
       outDir: join(root, "course"),
       spaDistDir: dist,
+      projectRoot: root,
       target: "xapi",
     });
 
@@ -194,6 +198,7 @@ describe("packageLessonkitCourse errors", () => {
       descriptor,
       outDir: join(root, "course"),
       spaDistDir: join(root, "missing-dist"),
+      projectRoot: root,
       target: "scorm12",
     });
 
@@ -223,6 +228,7 @@ describe("packageLessonkitCourse errors", () => {
       descriptor,
       outDir: join(root, "course"),
       spaDistDir: dist,
+      projectRoot: root,
       target: "scorm12",
     });
 
@@ -260,6 +266,7 @@ describe("packageLessonkitCourse errors", () => {
       descriptor,
       outDir: join(root, "course"),
       spaDistDir: dist,
+      projectRoot: root,
       target: "scorm12",
     });
 
@@ -291,6 +298,7 @@ describe("packageLessonkitCourse errors", () => {
       descriptor,
       outDir: join(root, "course"),
       spaDistDir: dist,
+      projectRoot: root,
       target: "standalone",
       dir: true,
     });
@@ -317,6 +325,7 @@ describe("packageLessonkitCourse errors", () => {
       descriptor,
       outDir: join(root, "course"),
       spaDistDir: dist,
+      projectRoot: root,
       target: "scorm12",
     });
 

@@ -37,6 +37,7 @@ export function useCompoundShell(opts: {
     activePageIndex: visibleIndex,
     setActivePageIndex: opts.setIndex,
     getHandles: () => ctx?.getHandles() ?? new Map(),
+    getRegisteredHandles: () => ctx?.getRegisteredHandles() ?? new Map(),
     pageCount: opts.pageCount,
     enableSolutionsButton: opts.enableSolutionsButton,
   });

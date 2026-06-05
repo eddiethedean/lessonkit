@@ -144,6 +144,7 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
         runtimeVersion: "v2",
         session: normalizedConfig.session,
         plugins: pluginHostRef.current ?? normalizedConfig.plugins,
+        deferPluginSetup: true,
       });
       progressRef.current = headlessRef.current.progress;
     } else {
@@ -159,6 +160,7 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
       runtimeVersion: "v2",
       session: normalizedConfig.session,
       plugins: pluginHostRef.current ?? normalizedConfig.plugins,
+      deferPluginSetup: true,
     });
   }
 

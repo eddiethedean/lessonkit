@@ -33,6 +33,8 @@ export type HeadlessLessonkitConfig = {
   };
   /** Plugin list or registry; hooks run on {@link HeadlessLessonkitRuntime.track} and lifecycle emits. */
   plugins?: HeadlessLessonkitPlugins;
+  /** When true, skip initial {@link PluginHost.setupAll}; host caller runs setup (React v2 provider). */
+  deferPluginSetup?: boolean;
 };
 
 export type HeadlessRuntimePorts = {
@@ -110,6 +112,10 @@ export function createLessonkitRuntime(
       attemptId,
       user,
     });
+
+  if (!configSnapshot.deferPluginSetup) {
+    pluginHost?.setupAll(getPluginCtx());
+  }
 
   const getSession = () => ({ sessionId, attemptId, user });
 
@@ -191,11 +197,8 @@ export function createLessonkitRuntime(
     getProgressState: () => progress.getState(),
     getSession,
     updateConfig(next) {
-      if (next.plugins !== undefined && next.plugins !== pluginHost) {
-        pluginHost?.disposeAll();
-        configSnapshot.plugins = next.plugins;
-        pluginHost = resolvePluginHost(configSnapshot.plugins);
-      }
+      const previousCourseId = courseId;
+      const sessionKeyBefore = JSON.stringify({ sessionId, attemptId, user });
       if (next.courseId !== undefined) configSnapshot.courseId = next.courseId;
       if (next.runtimeVersion !== undefined) {
         if (next.runtimeVersion === "v1") warnRuntimeV1Deprecated();
@@ -205,6 +208,24 @@ export function createLessonkitRuntime(
         configSnapshot.session = { ...configSnapshot.session, ...next.session };
       }
       syncSessionFromConfig(configSnapshot);
+      const sessionKeyAfter = JSON.stringify({ sessionId, attemptId, user });
+      if (next.courseId !== undefined && next.courseId !== previousCourseId) {
+        progress = createProgressController();
+      }
+      if (next.plugins !== undefined && next.plugins !== pluginHost) {
+        pluginHost?.disposeAll();
+        configSnapshot.plugins = next.plugins;
+        pluginHost = resolvePluginHost(configSnapshot.plugins);
+        pluginHost?.setupAll(getPluginCtx());
+      } else if (
+        next.session !== undefined &&
+        sessionKeyBefore !== sessionKeyAfter &&
+        pluginHost &&
+        !configSnapshot.deferPluginSetup
+      ) {
+        pluginHost.disposeAll();
+        pluginHost.setupAll(getPluginCtx());
+      }
     },
     setActiveLesson(lessonId, emitFn) {
       const wrapped = wrapEmitFn(emitFn);

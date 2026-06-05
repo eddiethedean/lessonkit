@@ -8,8 +8,12 @@ export function resumeChildHandles(
   childStates: Record<string, AssessmentResumeState>,
   opts?: { waitForHandles?: boolean },
 ): boolean {
-  if (opts?.waitForHandles && handles.size === 0 && Object.keys(childStates).length > 0) {
-    return false;
+  const childKeys = Object.keys(childStates);
+  if (opts?.waitForHandles && childKeys.length > 0) {
+    if (handles.size === 0) return false;
+    for (const checkId of childKeys) {
+      if (!handles.has(checkId as CheckId)) return false;
+    }
   }
   for (const [checkId, handle] of handles) {
     const child = childStates[checkId];

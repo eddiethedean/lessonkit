@@ -129,6 +129,10 @@ export const InteractiveBook = forwardRef<CompoundHandle, InteractiveBookProps>(
   const [index, setIndex] = useState(initialIndex);
   const setIndexStable = useCallback((i: number) => setIndex(i), []);
 
+  useEffect(() => {
+    setIndex(initialIndex);
+  }, [config.courseId, blockId, initialIndex]);
+
   return (
     <CompoundProvider activePageIndex={index} onActivePageIndexChange={setIndexStable}>
       <InteractiveBookInner

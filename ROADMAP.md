@@ -5,7 +5,7 @@ pragmatic: small, shippable milestones with clear outputs.
 
 ## Product
 
-**LessonKit (framework)** — React components, telemetry, xAPI, CLI, and packaging for code-first authoring.
+**LessonKit (framework)** — React components, telemetry, xAPI, CLI, and packaging for code-first authoring. **Planned:** `@lessonkit/react-native` for iOS/Android (see [2.x](#2x--lessonkitreact-native-planned)).
 
 | Doc | Link |
 |-----|------|
@@ -344,6 +344,40 @@ Framework **1.0.0** shipped **2026-05-30**.
 
 ---
 
+### 2.x — `@lessonkit/react-native` (planned)
+
+#### Goals
+
+- Bring LessonKit authoring and runtime to **iOS and Android** with a React Native UI layer that shares the same contracts as `@lessonkit/react` (identity, assessment scoring, telemetry, resume).
+- Reuse headless packages where possible; avoid duplicating business logic in platform-specific code.
+
+#### Deliverables
+
+- **`@lessonkit/react-native`** (new package):
+  - `LessonkitProvider`, `Course`, `Lesson`, and core assessment blocks (`Quiz`, `TrueFalse`, compound containers as demand dictates)
+  - Parity with `@lessonkit/core` assessment and compound contracts (`AssessmentHandle`, `CompoundHandle`, resume state)
+  - Native accessibility: screen reader labels, focus order, reduced-motion hooks via `@lessonkit/accessibility` patterns
+- **Shared packages** (consume, do not fork):
+  - `@lessonkit/core` — runtime, progress, plugins, telemetry builder
+  - `@lessonkit/xapi` — offline queue with pluggable persistence (AsyncStorage adapter)
+  - `@lessonkit/themes` — token contract mapped to native style props / CSS-in-JS where applicable
+- **Persistence**: compound and assessment resume via pluggable storage port (AsyncStorage / secure store)
+- **Examples**: Expo or bare React Native golden path app mirroring `examples/react-vite` scope
+- **Docs**: React Native quickstart, platform limitations, and block parity matrix vs `@lessonkit/react`
+
+#### Out of scope for initial `@lessonkit/react-native`
+
+- In-app SCORM/xAPI LMS packaging (remains **`@lessonkit/lxpack`** + web build pipeline)
+- Full H5P backlog parity on day one — ship Tier B P0 assessments + `Course`/`Lesson` shell first
+- Embedded WebView fallback as the primary block renderer (native-first blocks only)
+
+#### Depends on
+
+- Stable **1.x** web API (`Assessment` contract, compound resume, plugin host)
+- Export parity and conformance patterns from **0.9.x** / **1.x** e2e harness (adapt for Detox or Maestro where feasible)
+
+---
+
 ## H5P-aligned capability backlog
 
 [H5P](https://h5p.org/) is a mature catalog of **50+ interactive content types** plus **compound containers** (Interactive Book, Course Presentation, Interactive Video, Branching Scenario) and **platform services** (Hub, `.h5p` transport, question-type contracts, xAPI). LessonKit should **not** embed H5P runtimes in iframes—we should **incorporate the interaction patterns** as native `@lessonkit/react` primitives with the same guarantees we already ship: identity v1, WCAG 2.1 AA, telemetry catalog, export parity, and machine-readable block contracts.
@@ -470,6 +504,7 @@ Lower priority unless a customer/LMS parity request surfaces; still catalog for 
 | **Hub OER / content reuse** | Template gallery + import from shared examples repo | Examples + docs **1.x** |
 | **Community / third-party blocks** | Plugin `interactionBlocks` + marketplace | Framework plugins **2.x** |
 | **LTI / embed** | Already via LMS packaging; document embed snippet for standalone | Docs + lxpack **1.x** |
+| **Mobile (iOS / Android)** | **`@lessonkit/react-native`** — shared core contracts, native UI blocks, offline xAPI queue | Framework **2.x** |
 | **Fresh UI / theming per widget** | Single `--lk-*` theme across all blocks (advantage over H5P per-library CSS) | Ongoing `@lessonkit/themes` |
 
 ### Implementation principles (learned from H5P)
@@ -512,6 +547,7 @@ Framework 1.4.x   InteractiveVideo + timed overlays + H5P docs
 Framework 1.5.x   BranchingScenario + branch telemetry + H5P docs
 Framework 1.6.x   Interchange format + optional H5P import spike + import guide callouts
 Framework 1.7.x+  Tier C–E blocks by demand; plugin marketplace; H5P doc checklist each
+Framework 2.x     @lessonkit/react-native (iOS/Android) + shared core/xapi contracts
 ```
 
 **Documentation:** [`docs/project/h5p-capability-map.md`](docs/project/h5p-capability-map.md) — traceability matrix (status ✅ as blocks ship). **Per-block gate:** [H5P documentation checklist](#h5p-documentation-checklist-per-block) required for every new H5P-parity feature. **Hub pages:** [`docs/guides/h5p-for-lessonkit-authors.md`](docs/guides/h5p-for-lessonkit-authors.md), [docs index](docs/index.md), [block catalog](docs/reference/block-catalog.md), components guide.
@@ -526,6 +562,7 @@ Framework 1.7.x+  Tier C–E blocks by demand; plugin marketplace; H5P doc check
 0.1.x → 0.2.0 → 0.3.0 → 0.4.0 → 0.5.0 → 0.6.0 → 0.7.0 → 0.8.0+ → 0.9.x → 1.0.0
                                                                               │
 Framework 1.1.x → 1.2.x → 1.3.x → 1.4.x → 1.5.x → 1.6.x+  (blocks + compounds)
+Framework 2.x     @lessonkit/react-native (mobile delivery)
         ▲
         └── driven by H5P-aligned backlog (see above)
 ```

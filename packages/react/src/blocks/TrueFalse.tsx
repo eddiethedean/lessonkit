@@ -51,7 +51,8 @@ function TrueFalseInner(
         checkId,
         getScore: () => {
           const maxScore = 1;
-          return passed ? maxScore : selected === null ? 0 : selected === props.answer ? maxScore : 0;
+          if (passed) return maxScore;
+          return selectionCorrect ? maxScore : 0;
         },
         getMaxScore: () => 1,
         getAnswerGiven: () => selected !== null,
@@ -61,8 +62,8 @@ function TrueFalseInner(
           checkId,
           interactionType: INTERACTION,
           response: selected ?? undefined,
-          correct: selected === props.answer,
-          score: passed ? 1 : selected === null ? 0 : selected === props.answer ? 1 : 0,
+          correct: selectionCorrect ?? undefined,
+          score: passed ? 1 : selectionCorrect ? 1 : 0,
           maxScore: 1,
         }),
         getCurrentState: () => ({ selected, selectionCorrect, passed, showSolutions }),

@@ -575,6 +575,7 @@ describe("packageLessonkitCourse", () => {
       descriptor: { ...baseDescriptor, assessments: [] },
       outDir,
       spaDistDir: dist,
+      projectRoot: root,
       target: "scorm12",
       output: ".lxpack/out/course-scorm12.zip",
     });
@@ -602,6 +603,7 @@ describe("packageLessonkitCourse", () => {
       descriptor: { ...baseDescriptor, assessments: [] },
       outDir,
       spaDistDir: dist,
+      projectRoot: root,
       target: "standalone",
       output: ".lxpack/out/standalone",
       dir: true,

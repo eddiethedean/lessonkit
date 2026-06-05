@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { defineTelemetryPlugin } from "../src/plugins/define";
+import { defineLifecyclePlugin, defineTelemetryPlugin } from "../src/plugins/define";
 import { createLessonkitRuntime } from "../src/runtime/createLessonkitRuntime";
 
 describe("createLessonkitRuntime", () => {
@@ -110,6 +110,56 @@ describe("createLessonkitRuntime", () => {
     runtime.track("course_completed", undefined, (e) => names.push(e.name));
     expect(names).toEqual(["course_completed"]);
     expect(runtime.pluginHost?.plugins).toHaveLength(1);
+  });
+
+  it("updateConfig resets progress when courseId changes", () => {
+    const runtime = createLessonkitRuntime({ courseId: "c" });
+    runtime.setActiveLesson("lesson-1", () => {});
+    runtime.completeLesson("lesson-1", () => {});
+    expect(runtime.getProgressState().completedLessonIds.has("lesson-1")).toBe(true);
+
+    runtime.updateConfig({ courseId: "c2" });
+    expect(runtime.config.courseId).toBe("c2");
+    expect(runtime.getProgressState().completedLessonIds.size).toBe(0);
+    expect(runtime.getProgressState().activeLessonId).toBeUndefined();
+  });
+
+  it("calls plugin setup on create and after plugin update", () => {
+    const setup = vi.fn();
+    const plugin = defineLifecyclePlugin({
+      id: "setup-test",
+      version: "1",
+      kind: "analytics",
+      setup,
+    });
+    const runtime = createLessonkitRuntime({ courseId: "c", plugins: [plugin] });
+    expect(setup).toHaveBeenCalledTimes(1);
+
+    runtime.updateConfig({ plugins: [] });
+    expect(setup).toHaveBeenCalledTimes(1);
+  });
+
+  it("updateConfig re-runs plugin setup when session.user changes", () => {
+    const log: string[] = [];
+    const plugin = defineLifecyclePlugin({
+      id: "lifecycle-user",
+      version: "1",
+      kind: "lms",
+      setup: () => {
+        log.push("setup");
+      },
+      dispose: () => {
+        log.push("dispose");
+      },
+    });
+    const runtime = createLessonkitRuntime({
+      courseId: "c",
+      session: { user: { id: "user-a" } },
+      plugins: [plugin],
+    });
+    expect(log).toEqual(["setup"]);
+    runtime.updateConfig({ session: { user: { id: "user-b" } } });
+    expect(log).toEqual(["setup", "dispose", "setup"]);
   });
 
   it("warns when runtimeVersion is v1 in development", () => {

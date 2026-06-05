@@ -13,8 +13,18 @@ export function useCompoundResume(opts: {
 }): (state: CompoundResumeState) => void {
   const storageRef = useRef(opts.storage ?? createSessionStoragePort());
   const resumedRef = useRef(false);
+  const resumeKeyRef = useRef("");
 
   useEffect(() => {
+    storageRef.current = opts.storage ?? createSessionStoragePort();
+  }, [opts.storage]);
+
+  useEffect(() => {
+    const key = `${opts.courseId ?? ""}:${opts.compoundId}`;
+    if (resumeKeyRef.current !== key) {
+      resumeKeyRef.current = key;
+      resumedRef.current = false;
+    }
     if (!opts.enabled || !opts.courseId || resumedRef.current) return;
     const saved = loadCompoundState(storageRef.current, opts.courseId, opts.compoundId);
     if (saved) {

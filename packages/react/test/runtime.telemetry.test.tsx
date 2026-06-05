@@ -288,6 +288,7 @@ it("re-runs plugin setup and dispose when session.user changes", async () => {
       <LessonkitProvider
         config={{
           courseId: "course-1",
+          runtimeVersion: "v1",
           plugins: [plugin],
           session: { user: { id: "user-a" } },
           xapi: { enabled: false },
@@ -303,6 +304,7 @@ it("re-runs plugin setup and dispose when session.user changes", async () => {
       <LessonkitProvider
         config={{
           courseId: "course-1",
+          runtimeVersion: "v1",
           plugins: [plugin],
           session: { user: { id: "user-b" } },
           xapi: { enabled: false },

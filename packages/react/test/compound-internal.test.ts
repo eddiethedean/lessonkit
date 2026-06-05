@@ -15,10 +15,18 @@ describe("resumeChildHandles", () => {
     expect(resume).toHaveBeenCalledWith({ selected: true });
   });
 
-  it("waits for handles when child states exist but registry is empty", () => {
-    const handles = new Map<string, AssessmentHandle>();
-    const applied = resumeChildHandles(handles, { "check-1": { selected: true } }, { waitForHandles: true });
+  it("waits until all child state keys have registered handles", () => {
+    const resume = vi.fn();
+    const handles = new Map<string, AssessmentHandle>([
+      ["check-1", { resume } as unknown as AssessmentHandle],
+    ]);
+    const applied = resumeChildHandles(
+      handles,
+      { "check-1": { selected: true }, "check-2": { selected: false } },
+      { waitForHandles: true },
+    );
     expect(applied).toBe(false);
+    expect(resume).not.toHaveBeenCalled();
   });
 });
 

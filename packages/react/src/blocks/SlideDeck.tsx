@@ -143,10 +143,14 @@ export const SlideDeck = forwardRef<CompoundHandle, SlideDeckProps>(function Sli
     persistEnabled,
   });
 
-  const [index, setIndex] = useState(initialIndex);
-  const setIndexStable = useCallback((i: number) => setIndex(i), []);
+    const [index, setIndex] = useState(initialIndex);
+    const setIndexStable = useCallback((i: number) => setIndex(i), []);
 
-  return (
+    useEffect(() => {
+      setIndex(initialIndex);
+    }, [config.courseId, blockId, initialIndex]);
+
+    return (
     <CompoundProvider activePageIndex={index} onActivePageIndexChange={setIndexStable}>
       <SlideDeckInner
         {...props}

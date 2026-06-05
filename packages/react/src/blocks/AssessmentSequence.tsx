@@ -2,6 +2,7 @@ import React, { forwardRef, useCallback, useEffect, useMemo, useState } from "re
 import type { AssessmentBehaviour, BlockId, CompoundHandle } from "@lessonkit/core";
 import { CompoundProvider } from "../compound/CompoundProvider";
 import { useCompoundInitialIndex, useCompoundShell } from "../compound/useCompoundShell";
+import { CompoundPageIndexProvider } from "../compound/CompoundPageIndexContext";
 import { validateCompoundChildren } from "../compound/validateChildren";
 import { setLessonkitBlockType } from "../compound/blockType";
 import { useLessonkit } from "../hooks";
@@ -61,7 +62,7 @@ const AssessmentSequenceInner = forwardRef<CompoundHandle, AssessmentSequenceInn
         <div data-testid="assessment-sequence-step">
           {childArray.map((child, i) => (
             <div key={child.key ?? i} hidden={i !== visibleIndex}>
-              {child}
+              <CompoundPageIndexProvider pageIndex={i}>{child}</CompoundPageIndexProvider>
             </div>
           ))}
         </div>
@@ -120,6 +121,10 @@ export const AssessmentSequence = forwardRef<CompoundHandle, AssessmentSequenceP
 
     const [index, setIndex] = useState(initialIndex);
     const setIndexStable = useCallback((i: number) => setIndex(i), []);
+
+    useEffect(() => {
+      setIndex(initialIndex);
+    }, [config.courseId, compoundId, initialIndex]);
 
     return (
       <CompoundProvider activePageIndex={index} onActivePageIndexChange={setIndexStable}>

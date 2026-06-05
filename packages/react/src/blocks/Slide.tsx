@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import type { BlockId } from "@lessonkit/core";
 import { setLessonkitBlockType } from "../compound/blockType";
+import { CompoundPageIndexProvider } from "../compound/CompoundPageIndexContext";
 import { validateCompoundChildren } from "../compound/validateChildren";
 import { useLessonkit } from "../hooks";
 import { useEnclosingLessonId } from "../lessonContext";
@@ -43,7 +44,9 @@ export function Slide(props: SlideProps) {
       hidden={props.hidden ? true : undefined}
     >
       {props.title ? <h3>{props.title}</h3> : null}
-      <div>{props.children}</div>
+      <CompoundPageIndexProvider pageIndex={props.slideIndex ?? 0}>
+        <div>{props.children}</div>
+      </CompoundPageIndexProvider>
     </section>
   );
 }

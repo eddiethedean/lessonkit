@@ -68,8 +68,13 @@ function FindHotspotInner(
 
   useAssessmentHandleRegistration(checkId, handle, ref);
 
+  const selectTarget = (id: string) => {
+    setSelected(id);
+    setChecked(false);
+  };
+
   const submit = () => {
-    if (!selected) return;
+    if (!selected || checked) return;
     setChecked(true);
     assessment.answer({
       checkId,
@@ -105,7 +110,7 @@ function FindHotspotInner(
               top: `${t.y}%`,
               transform: "translate(-50%, -50%)",
             }}
-            onClick={() => setSelected(t.id)}
+            onClick={() => selectTarget(t.id)}
           >
             {t.label}
           </button>

@@ -28,6 +28,7 @@ describe("xAPI packaging preflight", () => {
       },
       outDir: join(root, "course"),
       spaDistDir: dist,
+      projectRoot: root,
       target: "xapi",
     });
 

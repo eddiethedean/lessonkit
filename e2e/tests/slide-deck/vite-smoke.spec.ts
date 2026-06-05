@@ -18,5 +18,8 @@ test.describe("slide-deck vite preview", () => {
     await page.reload();
     await expect(page.getByTestId("slide-deck")).toBeVisible();
     await expect(page.getByText("Slide 3 of 4")).toBeVisible();
+    await expect(page.getByText("Correct")).toBeVisible();
+    await expect(page.getByTestId("deck-score")).toHaveText(/Score: 1 \/ 1/);
+    await expect(page.getByRole("radio", { name: "False" })).toBeChecked();
   });
 });

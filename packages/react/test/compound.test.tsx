@@ -1,6 +1,6 @@
 import React, { createRef } from "react";
-import { afterEach, describe, expect, it } from "vitest";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import type { CompoundHandle } from "@lessonkit/core";
 import { compoundStateStorageKey, createCompoundResumeState, saveCompoundState } from "@lessonkit/core";
 import { createSessionStoragePort } from "@lessonkit/core";
@@ -201,7 +201,7 @@ describe("InteractiveBook", () => {
     expect(screen.getByText("Page 1 of 1")).toBeTruthy();
   });
 
-  it("restores TrueFalse answer state from sessionStorage", () => {
+  it("restores TrueFalse answer state from sessionStorage", async () => {
     saveCompoundState(
       createSessionStoragePort(),
       COURSE_ID,
@@ -225,7 +225,9 @@ describe("InteractiveBook", () => {
       ),
     );
 
-    expect((screen.getByLabelText("True") as HTMLInputElement).checked).toBe(true);
+    await waitFor(() => {
+      expect((screen.getByLabelText("True") as HTMLInputElement).checked).toBe(true);
+    });
   });
 
   it("uses persistCompoundState true by default", () => {
@@ -362,6 +364,34 @@ describe("SlideDeck", () => {
     expect(ref.current?.getMaxScore()).toBe(1);
   });
 
+  it("persists TrueFalse child state to sessionStorage after answer", async () => {
+    render(
+      wrap(
+        <SlideDeck blockId="deck-child-save" title="Training">
+          <Slide blockId="s1" title="Intro">
+            <Text>Intro</Text>
+          </Slide>
+          <Slide blockId="s2" title="Quiz">
+            <TrueFalse checkId="tf-save" question="True?" answer={true} />
+          </Slide>
+        </SlideDeck>,
+        true,
+      ),
+    );
+    fireEvent.click(screen.getByTestId("slide-next"));
+    fireEvent.click(screen.getByLabelText("True"));
+
+    await vi.waitFor(() => {
+      const raw = sessionStorage.getItem(compoundStateStorageKey(COURSE_ID, "deck-child-save"));
+      expect(raw).toBeTruthy();
+      const parsed = JSON.parse(raw!) as {
+        childStates: Record<string, { selected?: boolean; passed?: boolean }>;
+      };
+      expect(parsed.childStates["tf-save"]?.selected).toBe(true);
+      expect(parsed.childStates["tf-save"]?.passed).toBe(true);
+    });
+  });
+
   it("restores activePageIndex from sessionStorage when persistCompoundState is true", () => {
     saveCompoundState(
       createSessionStoragePort(),
@@ -408,7 +438,7 @@ describe("SlideDeck", () => {
     expect(parsed.activePageIndex).toBe(1);
   });
 
-  it("restores TrueFalse answer state from sessionStorage", () => {
+  it("restores TrueFalse answer state from sessionStorage", async () => {
     saveCompoundState(
       createSessionStoragePort(),
       COURSE_ID,
@@ -432,7 +462,9 @@ describe("SlideDeck", () => {
       ),
     );
 
-    expect((screen.getByLabelText("True") as HTMLInputElement).checked).toBe(true);
+    await waitFor(() => {
+      expect((screen.getByLabelText("True") as HTMLInputElement).checked).toBe(true);
+    });
   });
 });
 

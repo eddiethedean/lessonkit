@@ -12,7 +12,7 @@ import type { PackageLessonkitCourseOptions } from "../packageCourse";
 export type PackageValidationIssue = { path?: string; message: string; severity?: string };
 
 export type ValidatePackageInputsResult =
-  | { ok: true; outDir: string; projectRoot?: string }
+  | { ok: true; outDir: string; projectRoot: string }
   | { ok: false; courseDir: string; target: ExportTarget; issues: PackageValidationIssue[] };
 
 export function validatePackageInputs(
@@ -23,24 +23,32 @@ export function validatePackageInputs(
 ): ValidatePackageInputsResult {
   const { target, output, outputBaseDir } = options;
   const outDir = resolve(options.outDir);
-  const projectRoot = options.projectRoot ? resolve(options.projectRoot) : undefined;
 
-  if (projectRoot) {
-    try {
-      assertRealPathUnderRoot(projectRoot, outDir);
-    } catch (err) {
-      return {
-        ok: false,
-        courseDir: outDir,
-        target,
-        issues: [
-          {
-            path: "outDir",
-            message: /* v8 ignore next */ err instanceof Error ? err.message : String(err),
-          },
-        ],
-      };
-    }
+  if (!options.projectRoot) {
+    return {
+      ok: false,
+      courseDir: outDir,
+      target,
+      issues: [{ path: "projectRoot", message: "projectRoot is required for packageLessonkitCourse" }],
+    };
+  }
+
+  const projectRoot = resolve(options.projectRoot);
+
+  try {
+    assertRealPathUnderRoot(projectRoot, outDir);
+  } catch (err) {
+    return {
+      ok: false,
+      courseDir: outDir,
+      target,
+      issues: [
+        {
+          path: "outDir",
+          message: /* v8 ignore next */ err instanceof Error ? err.message : String(err),
+        },
+      ],
+    };
   }
 
   if (outputBaseDir && !isSafeRelativeSpaPath(outputBaseDir)) {
@@ -52,7 +60,7 @@ export function validatePackageInputs(
     };
   }
 
-  if (output && !projectRoot && !isSafeRelativeSpaPath(output)) {
+  if (output && !isSafeRelativeSpaPath(output)) {
     return {
       ok: false,
       courseDir: outDir,
@@ -61,7 +69,7 @@ export function validatePackageInputs(
     };
   }
 
-  if (projectRoot && outputBaseDir) {
+  if (outputBaseDir) {
     const resolvedOutputBase = resolve(projectRoot, outputBaseDir);
     try {
       assertRealPathUnderRoot(projectRoot, resolvedOutputBase);
@@ -80,7 +88,7 @@ export function validatePackageInputs(
     }
   }
 
-  if (projectRoot && output) {
+  if (output) {
     const resolvedOutput = resolve(projectRoot, output);
     try {
       assertRealPathUnderRoot(projectRoot, resolvedOutput);

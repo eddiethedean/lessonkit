@@ -622,6 +622,18 @@ describe("coverage-full lxpack", () => {
   });
 
   describe("validatePackageInputs and remapArtifactPaths", () => {
+    it("requires projectRoot", async () => {
+      const root = await makeTempDir("lk-val-root-");
+      const result = validatePackageInputs({
+        target: "scorm12",
+        outDir: join(root, "course"),
+      });
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.issues.some((i) => i.path === "projectRoot")).toBe(true);
+      }
+    });
+
     it("rejects unsafe output path under projectRoot", async () => {
       const root = await makeTempDir("lk-val-out-");
       const result = validatePackageInputs({
@@ -807,6 +819,7 @@ describe("coverage-full lxpack", () => {
         descriptor: { ...baseDescriptor, assessments: [] },
         outDir: join(root, "course"),
         spaDistDir: dist,
+        projectRoot: root,
         target: "scorm12",
       });
       expect(result.ok).toBe(false);
