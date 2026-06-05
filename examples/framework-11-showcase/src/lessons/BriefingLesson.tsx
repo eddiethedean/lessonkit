@@ -1,4 +1,4 @@
-import { KnowledgeCheck, Quiz, Reflection, Scenario } from "@lessonkit/react";
+import { Quiz, Reflection, Scenario } from "@lessonkit/react";
 
 export function BriefingLesson() {
   return (

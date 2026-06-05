@@ -28,7 +28,7 @@ Browser bridge (`window.parent.lxpackBridge.v1`) used when a packaged course run
 
 ## .lxpack/
 
-Working directories created during packaging (descriptor staging, output zips). Default output base: **`.lxpack/out/`** (see [getting started in 5 minutes](../guides/react-developers/getting-started-in-5-minutes.md#package-for-your-lms)).
+Working directories created during packaging (descriptor staging, output zips). Default output base: **`.lxpack/out/`** (see section **Package for your LMS** in [Getting started in 5 minutes](../guides/react-developers/getting-started-in-5-minutes.md)).
 
 ## single-spa
 

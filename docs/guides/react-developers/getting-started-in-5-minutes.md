@@ -44,8 +44,7 @@ npm run build
 
 Output goes to `dist/` (Vite SPA).
 
-(package-for-your-lms)=
-## 5. Package for your LMS
+## 5. Package for your LMS {#package-for-your-lms}
 
 ```bash
 npm run package:scorm12

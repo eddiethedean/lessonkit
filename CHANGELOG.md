@@ -12,8 +12,8 @@ All notable changes to the LessonKit monorepo are documented here.
 - Onboarding docs: [Getting started in 5 minutes](docs/guides/react-developers/getting-started-in-5-minutes.md), [Glossary](docs/reference/glossary.md), [API reference index](docs/reference/api.md), [ARCHITECTURE.md](https://github.com/eddiethedean/lessonkit/blob/main/ARCHITECTURE.md), [CODE_OF_CONDUCT.md](https://github.com/eddiethedean/lessonkit/blob/main/CODE_OF_CONDUCT.md), [good first contributions](docs/project/good-first-contributions.md).
 - Library Skills remote installer: `library-skills/install-remote.sh`.
 - GitHub Actions workflow to publish Storybook to GitHub Pages (`.github/workflows/storybook-pages.yml`).
-- Example: [`examples/framework-12-showcase`](examples/framework-12-showcase) — full LessonKit 1.2 block catalog in one course.
-- Example: [`examples/framework-11-showcase`](examples/framework-11-showcase) — full LessonKit 1.1 foundation + P0 assessments.
+- Example: `examples/framework-12-showcase` — full LessonKit 1.2 block catalog in one course.
+- Example: `examples/framework-11-showcase` — full LessonKit 1.1 foundation + P0 assessments.
 
 ### Changed
 

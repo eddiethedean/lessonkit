@@ -3,14 +3,15 @@ import {
   Lesson,
   ProgressTracker,
   ThemeProvider,
+  type ThemeMode,
 } from "@lessonkit/react";
 import { CourseTopbar, LessonIntro, SidebarLessons } from "../course-ui";
 import { BlockLegend } from "./BlockLegend";
 import type { ShowcaseShellProps } from "./types";
 
 function ThemeToggle(props: {
-  mode: "light" | "dark";
-  onChange: (mode: "light" | "dark") => void;
+  mode: ThemeMode;
+  onChange: (mode: ThemeMode) => void;
 }) {
   return (
     <div className="showcase-theme-toggle" role="group" aria-label="Theme mode">
