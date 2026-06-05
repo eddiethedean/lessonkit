@@ -67,6 +67,20 @@ describe("courseLifecycle", () => {
     expect(emit).toHaveBeenCalledTimes(1);
   });
 
+  it("tryEmitCourseStarted reports unmarked storage when alreadyEmittedToSink is true", () => {
+    const storage = createNoopStorage();
+    const ctx = {
+      courseId: "c" as const,
+      sessionId: "s",
+      storage,
+      pluginHost: null,
+      lxpackBridge: "auto" as const,
+    };
+    const result = tryEmitCourseStarted(ctx, { emitCourseStartedEvent: () => true }, true);
+    expect(result.emitted).toBe(true);
+    expect(result.marked).toBe(false);
+  });
+
   it("tryEmitCourseStarted retries emit when storage is marked but sink has not received event", () => {
     const store: Record<string, string> = {};
     const storage = {

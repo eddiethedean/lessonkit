@@ -218,9 +218,9 @@ describe("@lessonkit/core", () => {
     expect(sink).not.toHaveBeenCalled();
   });
 
-  it("re-queues the full batch when per-event sink fails mid-batch", async () => {
+  it("re-queues the full batch when per-event sink fails mid-batch (at-most-once per-event caveat)", async () => {
     const sink = vi
-      .fn(async () => {})
+      .fn<(event: TelemetryEvent) => Promise<void>>(async () => {})
       .mockResolvedValueOnce(undefined)
       .mockResolvedValueOnce(undefined)
       .mockRejectedValueOnce(new Error("fail"))
@@ -239,11 +239,17 @@ describe("@lessonkit/core", () => {
     await new Promise((r) => setTimeout(r, 0));
 
     expect(sink).toHaveBeenCalledTimes(3);
+    expect(sink.mock.calls[0]?.[0]?.timestamp).toBe("t1");
+    expect(sink.mock.calls[1]?.[0]?.timestamp).toBe("t2");
 
     await client.flush?.();
     await new Promise((r) => setTimeout(r, 0));
 
-    expect(sink.mock.calls.length).toBeGreaterThanOrEqual(4);
+    expect(sink.mock.calls.length).toBeGreaterThanOrEqual(5);
+    const redelivered = sink.mock.calls.slice(3).map((call) => call[0]?.timestamp);
+    expect(redelivered).toContain("t1");
+    expect(redelivered).toContain("t2");
+    expect(redelivered).toContain("t3");
   });
 
   it("refuses new events when the batch buffer is at cap", () => {

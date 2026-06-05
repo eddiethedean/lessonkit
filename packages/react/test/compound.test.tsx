@@ -423,6 +423,34 @@ describe("SlideDeck", () => {
     expect(ref.current?.getMaxScore()).toBe(1);
   });
 
+  it("BUG-R03: persists child state after handle registration completes", async () => {
+    render(
+      wrap(
+        <SlideDeck blockId="deck-r03" title="Training">
+          <Slide blockId="s1" title="Intro">
+            <Text>Intro</Text>
+          </Slide>
+          <Slide blockId="s2" title="Quiz">
+            <TrueFalse checkId="tf-r03" question="True?" answer={true} />
+          </Slide>
+        </SlideDeck>,
+        true,
+      ),
+    );
+    fireEvent.click(screen.getByTestId("slide-next"));
+    fireEvent.click(screen.getByLabelText("True"));
+
+    await waitFor(() => {
+      const raw = sessionStorage.getItem(compoundStateStorageKey(COURSE_ID, "deck-r03"));
+      expect(raw).toBeTruthy();
+      const parsed = JSON.parse(raw!) as {
+        childStates: Record<string, { selected?: boolean; passed?: boolean }>;
+      };
+      expect(parsed.childStates["tf-r03"]?.selected).toBe(true);
+      expect(parsed.childStates["tf-r03"]?.passed).toBe(true);
+    });
+  });
+
   it("persists TrueFalse child state to sessionStorage after answer", async () => {
     render(
       wrap(

@@ -91,8 +91,22 @@ const RADIUS_KEYS: ThemeRadiusKey[] = ["sm", "md", "lg"];
 
 const SHADOW_KEYS: ThemeShadowKey[] = ["sm", "md", "lg"];
 
+const EXTRA_COLOR_KEY_PATTERN = /^[a-zA-Z][a-zA-Z0-9_-]*$/;
+
 function isNonEmptyString(v: unknown): v is string {
   return typeof v === "string" && v.trim().length > 0;
+}
+
+function isSafeCssCustomPropertyValue(value: string): boolean {
+  return !/[;}\r\n]/.test(value) && !value.includes("/*");
+}
+
+function validateCssTokenValue(path: string, value: string, issues: ThemeValidationIssue[]): boolean {
+  if (!isSafeCssCustomPropertyValue(value)) {
+    issues.push({ path, message: "must not contain CSS-breaking characters (;, }, newlines, or comments)" });
+    return false;
+  }
+  return true;
 }
 
 function validateRequiredGroup<T extends string>(
@@ -111,7 +125,7 @@ function validateRequiredGroup<T extends string>(
     const v = obj[key];
     if (!isNonEmptyString(v)) {
       issues.push({ path: `${group}.${key}`, message: "required non-empty string" });
-    } else {
+    } else if (validateCssTokenValue(`${group}.${key}`, v, issues)) {
       out[key] = v;
     }
   }
@@ -126,9 +140,16 @@ function validateColorsExtra(value: unknown, issues: ThemeValidationIssue[]): Re
   }
   const extra: Record<string, string> = {};
   for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
+    if (!EXTRA_COLOR_KEY_PATTERN.test(k)) {
+      issues.push({
+        path: `colors.extra.${k}`,
+        message: "key must match [a-zA-Z][a-zA-Z0-9_-]*",
+      });
+      continue;
+    }
     if (!isNonEmptyString(v)) {
       issues.push({ path: `colors.extra.${k}`, message: "must be a non-empty string" });
-    } else {
+    } else if (validateCssTokenValue(`colors.extra.${k}`, v, issues)) {
       extra[k] = v;
     }
   }

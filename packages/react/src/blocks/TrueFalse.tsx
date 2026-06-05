@@ -62,14 +62,23 @@ function TrueFalseInner(
         getAnswerGiven: () => selected !== null,
         resetTask: reset,
         showSolutions: () => setShowSolutions(true),
-        getXAPIData: () => ({
-          checkId,
-          interactionType: INTERACTION,
-          response: selected ?? undefined,
-          correct: selectionCorrect ?? undefined,
-          score: passed ? 1 : selectionCorrect ? 1 : 0,
-          maxScore: 1,
-        }),
+        getXAPIData: () => {
+          const maxScore = completedMaxScore ?? 1;
+          let score = 0;
+          if (passed) {
+            score = completedScore ?? maxScore;
+          } else if (selectionCorrect) {
+            score = completedMaxScore ?? maxScore;
+          }
+          return {
+            checkId,
+            interactionType: INTERACTION,
+            response: selected ?? undefined,
+            correct: selectionCorrect ?? undefined,
+            score,
+            maxScore,
+          };
+        },
         getCurrentState: () => ({ selected, selectionCorrect, passed, showSolutions }),
         resume: (state) => {
           const nextSelected = readBooleanField(state, "selected");

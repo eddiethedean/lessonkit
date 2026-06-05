@@ -1,7 +1,7 @@
 import React, { createRef } from "react";
 import { afterEach, describe, expect, it } from "vitest";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
-import type { AssessmentHandle } from "@lessonkit/core";
+import { defineAssessmentPlugin, type AssessmentHandle } from "@lessonkit/core";
 import {
   Course,
   DragAndDrop,
@@ -9,6 +9,7 @@ import {
   FillInTheBlanks,
   Lesson,
   MarkTheWords,
+  Quiz,
   TrueFalse,
 } from "../src";
 
@@ -45,6 +46,62 @@ describe("AssessmentHandle (imperative API)", () => {
     expect(ref.current?.getScore()).toBe(1);
     expect(ref.current?.getXAPIData()?.interactionType).toBe("trueFalse");
     expect(typeof ref.current?.resetTask).toBe("function");
+  });
+
+  it("TrueFalse getXAPIData reflects plugin custom scores", () => {
+    const plugin = defineAssessmentPlugin({
+      id: "tf-xapi-scorer",
+      version: "1",
+      kind: "assessment",
+      scoreAssessment: () => ({ passed: true, score: 4, maxScore: 4 }),
+    });
+    const ref = createRef<AssessmentHandle>();
+    render(
+      <Course
+        title="Handles"
+        courseId="handle-course"
+        config={{ xapi: { enabled: false }, plugins: [plugin] }}
+      >
+        <Lesson title="L1" lessonId="lesson-1">
+          <TrueFalse ref={ref} checkId="tf-xapi" question="True?" answer={true} />
+        </Lesson>
+      </Course>,
+    );
+    fireEvent.click(screen.getByLabelText("True"));
+    expect(ref.current?.getXAPIData()).toEqual(
+      expect.objectContaining({ score: 4, maxScore: 4 }),
+    );
+  });
+
+  it("Quiz getXAPIData reflects plugin custom scores", () => {
+    const plugin = defineAssessmentPlugin({
+      id: "quiz-xapi-scorer",
+      version: "1",
+      kind: "assessment",
+      scoreAssessment: () => ({ passed: true, score: 4, maxScore: 4 }),
+    });
+    const ref = createRef<AssessmentHandle>();
+    render(
+      <Course
+        title="Handles"
+        courseId="handle-course"
+        config={{ xapi: { enabled: false }, plugins: [plugin] }}
+      >
+        <Lesson title="L1" lessonId="lesson-1">
+          <Quiz
+            ref={ref}
+            checkId="quiz-xapi"
+            question="Pick one"
+            choices={["A", "B"]}
+            answer="B"
+          />
+        </Lesson>
+      </Course>,
+    );
+    fireEvent.click(screen.getByLabelText("B"));
+    expect(ref.current?.getXAPIData()).toEqual(
+      expect.objectContaining({ score: 4, maxScore: 4, interactionType: "mcq" }),
+    );
   });
 
   it("MarkTheWords handle reflects selection state", () => {

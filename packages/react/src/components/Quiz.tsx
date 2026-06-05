@@ -61,21 +61,23 @@ function QuizInner(
           setCompletedMaxScore(null);
         },
         showSolutions: () => {},
-        getXAPIData: () => ({
-          checkId,
-          interactionType: "mcq" as const,
-          response: selected ?? undefined,
-          correct: selectionCorrect ?? undefined,
-          score:
-            quizPassed && selected !== null
-              ? 1
-              : selected === null
-                ? 0
-                : selectionCorrect
-                  ? 1
-                  : 0,
-          maxScore: 1,
-        }),
+        getXAPIData: () => {
+          const maxScore = completedMaxScore ?? 1;
+          let score = 0;
+          if (quizPassed && selected !== null) {
+            score = completedScore ?? maxScore;
+          } else if (selected !== null && selectionCorrect) {
+            score = completedMaxScore ?? maxScore;
+          }
+          return {
+            checkId,
+            interactionType: "mcq" as const,
+            response: selected ?? undefined,
+            correct: selectionCorrect ?? undefined,
+            score,
+            maxScore,
+          };
+        },
         getCurrentState: () => ({ selected, selectionCorrect, quizPassed }),
         resume: (state) => {
           const nextSelected = readStringField(state, "selected");

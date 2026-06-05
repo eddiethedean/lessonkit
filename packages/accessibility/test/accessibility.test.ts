@@ -3,9 +3,11 @@ import {
   createRovingTabIndex,
   focusFirst,
   getFocusableElements,
+  getPrefersReducedMotionSnapshot,
   getReducedMotionPreference,
   prefersReducedMotion,
   shouldAnimate,
+  subscribeReducedMotion,
   trapFocus,
   visuallyHiddenStyle,
 } from "../src";
@@ -52,6 +54,39 @@ describe("@lessonkit/accessibility", () => {
     vi.stubGlobal("window", {});
     expect(shouldAnimate()).toBe(true);
     expect(shouldAnimate({ default: false })).toBe(false);
+  });
+
+  it("getPrefersReducedMotionSnapshot mirrors prefersReducedMotion", () => {
+    vi.stubGlobal("window", {
+      matchMedia: vi.fn(() => ({ matches: true })),
+    });
+    expect(getPrefersReducedMotionSnapshot()).toBe(true);
+    expect(prefersReducedMotion()).toBe(true);
+  });
+
+  it("subscribeReducedMotion notifies on preference changes", () => {
+    const listeners: Array<(event: { matches: boolean }) => void> = [];
+    const mq = {
+      matches: false,
+      addEventListener: vi.fn((_type: string, listener: (event: { matches: boolean }) => void) => {
+        listeners.push(listener);
+      }),
+      removeEventListener: vi.fn(),
+    };
+    vi.stubGlobal("window", {
+      matchMedia: vi.fn(() => mq),
+    });
+
+    const received: boolean[] = [];
+    const unsubscribe = subscribeReducedMotion((reduce) => received.push(reduce));
+    expect(received).toEqual([false]);
+
+    mq.matches = true;
+    listeners[0]?.({ matches: true });
+    expect(received).toEqual([false, true]);
+
+    unsubscribe();
+    expect(mq.removeEventListener).toHaveBeenCalledWith("change", listeners[0]);
   });
 
   it("focusFirst returns false for null container", () => {
@@ -307,7 +342,7 @@ describe("@lessonkit/accessibility", () => {
     expect(() => r.getItemProps(0).onKeyDown({ key: "Home", preventDefault: () => {} })).not.toThrow();
   });
 
-  it("trapFocus prevents outside click by default", () => {
+  it("trapFocus prevents outside pointer interaction by default", () => {
     document.body.innerHTML = `
       <button id="outside">Outside</button>
       <div id="modal">
@@ -326,7 +361,33 @@ describe("@lessonkit/accessibility", () => {
     trap.deactivate();
   });
 
-  it("trapFocus ignores inside clicks and non-element mousedown targets", () => {
+  it("trapFocus blocks outside pointerdown in capture phase", () => {
+    document.body.innerHTML = `
+      <button id="outside">Outside</button>
+      <div id="modal">
+        <button id="first">First</button>
+      </div>
+    `;
+    const outside = document.getElementById("outside") as HTMLButtonElement;
+    const modal = document.getElementById("modal") as HTMLDivElement;
+    const trap = trapFocus(modal, { initialFocus: "first" });
+    trap.activate();
+
+    class FakePointerEvent extends Event {
+      constructor(type: string, init?: EventInit) {
+        super(type, init);
+      }
+    }
+    vi.stubGlobal("PointerEvent", FakePointerEvent);
+
+    const ev = new FakePointerEvent("pointerdown", { bubbles: true, cancelable: true });
+    Object.defineProperty(ev, "target", { value: outside });
+    outside.dispatchEvent(ev);
+    expect(ev.defaultPrevented).toBe(true);
+    trap.deactivate();
+  });
+
+  it("trapFocus ignores inside clicks and non-element pointer targets", () => {
     document.body.innerHTML = `
       <div id="modal">
         <button id="first">First</button>
@@ -455,7 +516,7 @@ describe("@lessonkit/accessibility", () => {
     trap.deactivate();
   });
 
-  it("trapFocus ignores focusin and mousedown after deactivate", () => {
+  it("trapFocus ignores focusin and pointerdown after deactivate", () => {
     document.body.innerHTML = `
       <button id="outside">Outside</button>
       <div id="modal">
@@ -472,10 +533,10 @@ describe("@lessonkit/accessibility", () => {
     Object.defineProperty(focusEv, "target", { value: outside });
     document.dispatchEvent(focusEv);
 
-    const mouseEv = new MouseEvent("mousedown", { bubbles: true, cancelable: true });
-    Object.defineProperty(mouseEv, "target", { value: outside });
-    outside.dispatchEvent(mouseEv);
-    expect(mouseEv.defaultPrevented).toBe(false);
+    const pointerEv = new MouseEvent("mousedown", { bubbles: true, cancelable: true });
+    Object.defineProperty(pointerEv, "target", { value: outside });
+    outside.dispatchEvent(pointerEv);
+    expect(pointerEv.defaultPrevented).toBe(false);
   });
 
   it("trapFocus skips invalid initialFocus values", () => {

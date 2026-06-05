@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import {
   clampCompoundPageIndex,
   createCompoundResumeState,
@@ -76,6 +76,35 @@ describe("compound session storage", () => {
     expect(loadCompoundState(storage, "course-1", "book-1")).toEqual(state);
     clearCompoundState(storage, "course-1", "book-1");
     expect(loadCompoundState(storage, "course-1", "book-1")).toBeNull();
+  });
+
+  it("warns in dev when compound state is corrupt", () => {
+    vi.stubEnv("NODE_ENV", "development");
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const storage = createNoopStorage();
+    const map = new Map<string, string>();
+    storage.getItem = (k) => map.get(k) ?? null;
+    storage.setItem = (k, v) => {
+      map.set(k, v);
+      return true;
+    };
+
+    map.set(compoundStateStorageKey("course-1", "book-1"), "not-json");
+    expect(loadCompoundState(storage, "course-1", "book-1")).toBeNull();
+    expect(warn).toHaveBeenCalledWith(
+      expect.stringContaining("lessonkit:compound:course-1:book-1"),
+    );
+
+    warn.mockClear();
+    map.set(
+      compoundStateStorageKey("course-1", "book-2"),
+      JSON.stringify({ schemaVersion: 99 }),
+    );
+    expect(loadCompoundState(storage, "course-1", "book-2")).toBeNull();
+    expect(warn).toHaveBeenCalled();
+
+    warn.mockRestore();
+    vi.unstubAllEnvs();
   });
 });
 

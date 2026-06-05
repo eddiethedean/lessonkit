@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useLayoutEffect, useRef } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import type { AssessmentResumeState, BlockId, CompoundResumeState, CourseId, StoragePort } from "@lessonkit/core";
 import {
   clampCompoundPageIndex,
@@ -188,7 +188,7 @@ export function useCompoundPersistence(opts: {
     };
   }, [bridgeRef, notifyImperativeResume]);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     persistNow();
   }, [persistNow, opts.index, opts.pageCount, handlesVersion]);
 
