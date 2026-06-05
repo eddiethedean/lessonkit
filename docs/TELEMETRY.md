@@ -48,6 +48,20 @@ For block-level xAPI on `interaction` events:
 
 Without `blockId`, interaction events are tracked but do not emit xAPI.
 
+## Batching and buffer limits
+
+When `config.tracking.batch.enabled` is `true` (or `batchSink` is set), events are queued in an in-memory buffer before delivery.
+
+| Setting | Default | Behavior |
+|---------|---------|----------|
+| `batch.flushIntervalMs` | `5000` | Periodic flush while the sink is slow or unavailable |
+| `batch.maxBatchSize` | `25` | Flush when the buffer reaches this size |
+| Internal buffer cap | **1000** events | When full, the **oldest** events are dropped until the sink recovers |
+
+If the sink throws or rejects, failed events are re-queued. Under prolonged outage the buffer can hit the cap; in development, LessonKit logs a one-time console warning. Monitor sink failures via `config.observability.onTelemetrySinkError` in React (see [production checklist](../guides/react-developers/production-checklist.md)). Prefer a resilient `batchSink` for high-volume production telemetry.
+
+Non-batched mode (`batch.enabled: false`) invokes `sink` synchronously per event with no buffer cap.
+
 ## Identity
 
 All events require `courseId`. Lesson-scoped events require `lessonId`. Component ids are **trimmed** at the React provider boundary (`assertValidId`) so telemetry payloads and xAPI URNs stay aligned. See [Identity reference](reference/identity.md).

@@ -1,6 +1,26 @@
 # Releasing LessonKit
 
-Published packages (`v*.*.*` tag → [Release](.github/workflows/release.yml)): `@lessonkit/core`, `@lessonkit/xapi`, `@lessonkit/accessibility`, `@lessonkit/react`, `@lessonkit/themes`, `@lessonkit/lxpack`, `@lessonkit/cli`
+Published packages (`v*.*.*` tag → [Release](.github/workflows/release.yml)): `@lessonkit/core`, `@lessonkit/xapi`, `@lessonkit/accessibility`, `@lessonkit/themes`, `@lessonkit/lxpack`, `@lessonkit/react`, `@lessonkit/cli`
+
+## Publishing 1.3.0
+
+### 1.3.0 checklist (ready to publish)
+
+| Item | Status |
+|------|--------|
+| All seven `@lessonkit/*` packages at `1.3.0` | Done |
+| [CHANGELOG.md](CHANGELOG.md) `## [1.3.0]` documents `Slide`, `SlideDeck`, `slide_viewed` | Done |
+| [MIGRATION-1.2-to-1.3.md](docs/MIGRATION-1.2-to-1.3.md) in Sphinx toctree | Done |
+| `package-lock.json` includes all workspace examples (`npm ci` clean) | Verify before tag |
+| Sphinx `docs/conf.py` `release` = `1.3.0` | Done |
+| `release/1.3.0` CI green | Verify before tag |
+| `lessonkit init` template pins `^1.3.0` | Done |
+| `examples/slide-deck` integration + e2e golden path | Done |
+| npm publish order: core → xapi → accessibility → themes → lxpack → react → cli | Done |
+| npm latest `@lessonkit/react` | **1.2.0** — publish with `v1.3.0` |
+| Git tag `v1.3.0` | **Create when ready** |
+
+> **Do not create or push `v1.3.0`** until you intend to publish to npm.
 
 ## Publishing 1.2.0
 

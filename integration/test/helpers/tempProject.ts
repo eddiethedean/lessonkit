@@ -111,3 +111,15 @@ export async function ensureInteractiveBookBuilt(): Promise<void> {
     stdio: "inherit",
   });
 }
+
+export async function ensureSlideDeckBuilt(): Promise<void> {
+  const { existsSync } = await import("node:fs");
+  const distIndex = join(REPO_ROOT, "examples/slide-deck/dist/index.html");
+  if (existsSync(distIndex)) return;
+
+  const { execSync } = await import("node:child_process");
+  execSync("npm run build -w lessonkit-example-slide-deck", {
+    cwd: REPO_ROOT,
+    stdio: "inherit",
+  });
+}

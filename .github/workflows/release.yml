@@ -91,10 +91,10 @@ jobs:
           }
           publish_workspace @lessonkit/core
           publish_workspace @lessonkit/xapi
-          publish_workspace @lessonkit/react
           publish_workspace @lessonkit/accessibility
           publish_workspace @lessonkit/themes
           publish_workspace @lessonkit/lxpack
+          publish_workspace @lessonkit/react
           publish_workspace @lessonkit/cli
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
