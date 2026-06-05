@@ -33,6 +33,22 @@ export const LESSONS = [
   },
 ] as const;
 
+/** Every assessment checkId in React — must match lessonkit.json assessments[].checkId */
+export const ASSESSMENT_CHECK_IDS = [
+  "briefing-quiz",
+  "signal-tf",
+  "token-mtw",
+  "verify-kc",
+  "escalate-fib",
+  "runbook-dtw",
+  "tier-dad",
+  "cert-tf",
+  "cert-fib",
+  "cert-mtw",
+  "cert-dtw",
+  "cert-dad",
+] as const;
+
 export type LessonId = (typeof LESSONS)[number]["id"];
 
 export const SHOWCASE_META: Omit<ShowcaseMeta, "courseConfig"> = {

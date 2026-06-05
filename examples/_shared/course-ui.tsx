@@ -89,7 +89,7 @@ export function SidebarLessons(props: {
           );
         })}
       </ol>
-      {props.footer ? <div className="lms-sidebar-footer">{props.footer}</div> : null}
+      {props.footer ? <div className="lms-sidebar-extra">{props.footer}</div> : null}
     </nav>
   );
 }

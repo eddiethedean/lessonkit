@@ -18,7 +18,7 @@ export function BriefingLesson() {
 
       <ul className="showcase-objectives">
         <li>Structure — Course, Lesson, Scenario, ProgressTracker</li>
-        <li>MCQ — Quiz and KnowledgeCheck (unchanged in 1.1)</li>
+        <li>MCQ — Quiz (this lesson) and KnowledgeCheck (next lesson)</li>
         <li>Reflection — open response with telemetry</li>
       </ul>
 

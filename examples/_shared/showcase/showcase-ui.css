@@ -32,7 +32,7 @@
 }
 
 .showcase-sibling-hint {
-  margin: 0.75rem 0 0;
+  margin: 0;
   font-size: 0.6875rem;
   line-height: 1.45;
   color: var(--lk-color-muted);
@@ -105,7 +105,7 @@
 .showcase-theme-toggle {
   display: flex;
   gap: 0.5rem;
-  margin-top: 0.75rem;
+  margin-top: 0;
 }
 
 .showcase-theme-toggle button {

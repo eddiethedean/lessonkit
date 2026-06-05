@@ -31,7 +31,7 @@ export default function App() {
 
   const courseConfig = React.useMemo(
     () => ({
-      session: { persistCompoundState: false },
+      session: { persistCompoundState: true },
       tracking: {
         sink: (event: TelemetryEvent) => {
           console.log("[telemetry]", event);

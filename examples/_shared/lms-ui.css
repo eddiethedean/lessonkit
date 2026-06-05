@@ -207,17 +207,53 @@
   transition: width 0.3s ease;
 }
 
-.lms-sidebar-footer {
+.lms-sidebar-extra {
   display: flex;
-  gap: 0.5rem;
+  flex-direction: column;
+  gap: 0.75rem;
   margin-top: 1rem;
   padding-top: 1rem;
   border-top: 1px solid var(--lk-color-border);
 }
 
+.lms-sidebar-footer {
+  display: flex;
+  gap: 0.5rem;
+}
+
 .lms-sidebar-footer button {
   flex: 1;
+  font: inherit;
   font-size: 0.8125rem;
+  font-weight: 600;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--lms-radius-sm);
+  border: 1px solid var(--lk-color-border);
+  background: var(--lk-color-surface);
+  color: var(--lk-color-text);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.lms-sidebar-footer button:hover:enabled {
+  border-color: var(--lk-color-primary);
+  background: color-mix(in srgb, var(--lk-color-primary) 8%, var(--lk-color-surface));
+}
+
+.lms-sidebar-footer button:last-child:not(:disabled) {
+  background: var(--lk-color-primary);
+  color: var(--lk-color-primary-foreground, #fff);
+  border-color: var(--lk-color-primary);
+}
+
+.lms-sidebar-footer button:last-child:hover:enabled {
+  background: color-mix(in srgb, var(--lk-color-primary) 88%, #000);
+  border-color: color-mix(in srgb, var(--lk-color-primary) 88%, #000);
+}
+
+.lms-sidebar-footer button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 
 .lms-main {

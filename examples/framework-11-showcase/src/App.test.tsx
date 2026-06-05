@@ -2,9 +2,9 @@ import { readFileSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import App from "./App";
-import { SHOWCASE_META } from "./constants";
+import { ASSESSMENT_CHECK_IDS, SHOWCASE_META } from "./constants";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -29,6 +29,31 @@ describe("framework 1.1 showcase App", () => {
     expect(screen.getByText("KnowledgeCheck")).toBeDefined();
     vi.mocked(console.log).mockRestore();
   });
+
+  it("walks the full curriculum and shows block chips per lesson", () => {
+    vi.spyOn(console, "log").mockImplementation(() => {});
+    render(<App />);
+
+    for (const lesson of SHOWCASE_META.lessons) {
+      fireEvent.click(screen.getByTestId(`lesson-nav-${lesson.id}`));
+      expect(screen.getByTestId(`lesson-nav-${lesson.id}`).getAttribute("aria-current")).toBe("step");
+      const legend = screen.getByLabelText("Blocks in this lesson");
+      for (const block of lesson.blocks) {
+        expect(within(legend).getByText(block)).toBeDefined();
+      }
+    }
+
+    vi.mocked(console.log).mockRestore();
+  });
+
+  it("renders sidebar navigation controls", () => {
+    vi.spyOn(console, "log").mockImplementation(() => {});
+    render(<App />);
+    expect(screen.getByRole("button", { name: "Previous" })).toBeDefined();
+    expect(screen.getByRole("button", { name: "Continue" })).toBeDefined();
+    expect(screen.getByRole("group", { name: "Theme mode" })).toBeDefined();
+    vi.mocked(console.log).mockRestore();
+  });
 });
 
 describe("framework 1.1 showcase lessonkit.json", () => {
@@ -49,6 +74,8 @@ describe("framework 1.1 showcase lessonkit.json", () => {
     expect(manifest.course.courseId).toBe(SHOWCASE_META.courseId);
     expect(manifest.course.lessons.length).toBe(1);
     expect(manifest.course.lessons[0]?.id).toBe(manifest.course.spaLessonId);
-    expect(manifest.course.assessments.length).toBeGreaterThan(0);
+    const manifestIds = manifest.course.assessments.map((a) => a.checkId).sort();
+    const expectedIds = [...ASSESSMENT_CHECK_IDS].sort();
+    expect(manifestIds).toEqual(expectedIds);
   });
 });
