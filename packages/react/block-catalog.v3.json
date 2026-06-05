@@ -89,6 +89,8 @@
         "Lesson",
         "Page",
         "InteractiveBook",
+        "Slide",
+        "SlideDeck",
         "AssessmentSequence"
       ],
       "a11y": {
@@ -135,6 +137,8 @@
         "Lesson",
         "Page",
         "InteractiveBook",
+        "Slide",
+        "SlideDeck",
         "AssessmentSequence"
       ],
       "a11y": {
@@ -205,6 +209,8 @@
         "Lesson",
         "Page",
         "InteractiveBook",
+        "Slide",
+        "SlideDeck",
         "AssessmentSequence"
       ],
       "a11y": {
@@ -272,6 +278,8 @@
         "Lesson",
         "Page",
         "InteractiveBook",
+        "Slide",
+        "SlideDeck",
         "AssessmentSequence"
       ],
       "a11y": {
@@ -314,6 +322,8 @@
         "Lesson",
         "Page",
         "InteractiveBook",
+        "Slide",
+        "SlideDeck",
         "AssessmentSequence"
       ],
       "a11y": {
@@ -388,7 +398,9 @@
         "Lesson",
         "AssessmentSequence",
         "Page",
-        "InteractiveBook"
+        "InteractiveBook",
+        "Slide",
+        "SlideDeck"
       ],
       "a11y": {
         "element": "section",
@@ -470,7 +482,9 @@
         "Lesson",
         "AssessmentSequence",
         "Page",
-        "InteractiveBook"
+        "InteractiveBook",
+        "Slide",
+        "SlideDeck"
       ],
       "a11y": {
         "element": "section",
@@ -551,7 +565,9 @@
         "Lesson",
         "AssessmentSequence",
         "Page",
-        "InteractiveBook"
+        "InteractiveBook",
+        "Slide",
+        "SlideDeck"
       ],
       "a11y": {
         "element": "section",
@@ -632,7 +648,9 @@
         "Lesson",
         "AssessmentSequence",
         "Page",
-        "InteractiveBook"
+        "InteractiveBook",
+        "Slide",
+        "SlideDeck"
       ],
       "a11y": {
         "element": "section",
@@ -713,7 +731,9 @@
         "Lesson",
         "AssessmentSequence",
         "Page",
-        "InteractiveBook"
+        "InteractiveBook",
+        "Slide",
+        "SlideDeck"
       ],
       "a11y": {
         "element": "section",
@@ -779,6 +799,8 @@
         "Lesson",
         "Page",
         "InteractiveBook",
+        "Slide",
+        "SlideDeck",
         "AssessmentSequence"
       ],
       "a11y": {
@@ -832,6 +854,8 @@
         "Lesson",
         "Page",
         "InteractiveBook",
+        "Slide",
+        "SlideDeck",
         "AssessmentSequence"
       ],
       "a11y": {
@@ -877,6 +901,8 @@
         "Lesson",
         "Page",
         "InteractiveBook",
+        "Slide",
+        "SlideDeck",
         "AssessmentSequence"
       ],
       "a11y": {
@@ -922,6 +948,8 @@
         "Lesson",
         "Page",
         "InteractiveBook",
+        "Slide",
+        "SlideDeck",
         "AssessmentSequence"
       ],
       "a11y": {
@@ -1074,6 +1102,139 @@
       }
     },
     {
+      "type": "Slide",
+      "category": "container",
+      "compoundContract": true,
+      "h5pMachineName": "H5P.CoursePresentation",
+      "h5pAlias": "Course Presentation slide",
+      "description": "Single slide row in a SlideDeck. Planned allowlist expansion: Video, Summary.",
+      "allowedChildTypes": [
+        "Text",
+        "Heading",
+        "Image",
+        "Scenario",
+        "Reflection",
+        "Quiz",
+        "KnowledgeCheck",
+        "TrueFalse",
+        "FillInTheBlanks",
+        "DragAndDrop",
+        "DragTheWords",
+        "MarkTheWords",
+        "Accordion",
+        "DialogCards",
+        "Flashcards",
+        "ImageHotspots",
+        "FindHotspot",
+        "FindMultipleHotspots",
+        "ImageSlider"
+      ],
+      "maxNestingDepth": 1,
+      "props": [
+        {
+          "name": "blockId",
+          "type": "BlockId",
+          "required": true,
+          "description": "Stable block id."
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "required": false,
+          "description": "Slide title."
+        },
+        {
+          "name": "children",
+          "type": "ReactNode",
+          "required": true,
+          "description": "Slide content."
+        }
+      ],
+      "requiredIds": [],
+      "optionalIds": [
+        "blockId"
+      ],
+      "parentConstraints": [
+        "SlideDeck"
+      ],
+      "a11y": {
+        "element": "section",
+        "ariaLabel": "Slide",
+        "keyboard": "N/A",
+        "notes": "H5P Course Presentation slide row."
+      },
+      "theming": {
+        "surface": "global-inherit",
+        "stylingNotes": "Container."
+      },
+      "telemetry": {
+        "emits": [
+          "compound_page_viewed"
+        ],
+        "requiresActiveLesson": true
+      }
+    },
+    {
+      "type": "SlideDeck",
+      "category": "container",
+      "compoundContract": true,
+      "h5pMachineName": "H5P.CoursePresentation",
+      "h5pAlias": "Course Presentation",
+      "description": "Multi-slide presentation with keyboard navigation.",
+      "allowedChildTypes": [
+        "Slide"
+      ],
+      "maxNestingDepth": 2,
+      "props": [
+        {
+          "name": "blockId",
+          "type": "BlockId",
+          "required": true,
+          "description": "Stable block id."
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "required": true,
+          "description": "Deck title."
+        },
+        {
+          "name": "showDeckScore",
+          "type": "boolean",
+          "required": false,
+          "description": "Show aggregate score."
+        },
+        {
+          "name": "children",
+          "type": "Slide[]",
+          "required": true,
+          "description": "Slides."
+        }
+      ],
+      "requiredIds": [
+        "blockId"
+      ],
+      "parentConstraints": [
+        "Lesson"
+      ],
+      "a11y": {
+        "element": "section",
+        "ariaLabel": "Slide deck",
+        "keyboard": "Arrow keys, Home, End, Previous/Next slide buttons.",
+        "notes": "H5P Course Presentation equivalent."
+      },
+      "theming": {
+        "surface": "global-inherit",
+        "stylingNotes": "Deck chrome."
+      },
+      "telemetry": {
+        "emits": [
+          "slide_viewed"
+        ],
+        "requiresActiveLesson": true
+      }
+    },
+    {
       "type": "Accordion",
       "category": "content",
       "h5pMachineName": "H5P.Accordion",
@@ -1100,6 +1261,8 @@
         "Lesson",
         "Page",
         "InteractiveBook",
+        "Slide",
+        "SlideDeck",
         "AssessmentSequence"
       ],
       "a11y": {
@@ -1145,6 +1308,8 @@
         "Lesson",
         "Page",
         "InteractiveBook",
+        "Slide",
+        "SlideDeck",
         "AssessmentSequence"
       ],
       "a11y": {
@@ -1194,6 +1359,8 @@
         "Lesson",
         "Page",
         "InteractiveBook",
+        "Slide",
+        "SlideDeck",
         "AssessmentSequence"
       ],
       "a11y": {
@@ -1251,6 +1418,8 @@
         "Lesson",
         "Page",
         "InteractiveBook",
+        "Slide",
+        "SlideDeck",
         "AssessmentSequence"
       ],
       "a11y": {
@@ -1296,6 +1465,8 @@
         "Lesson",
         "Page",
         "InteractiveBook",
+        "Slide",
+        "SlideDeck",
         "AssessmentSequence"
       ],
       "a11y": {
@@ -1384,6 +1555,8 @@
         "Lesson",
         "Page",
         "InteractiveBook",
+        "Slide",
+        "SlideDeck",
         "AssessmentSequence"
       ],
       "a11y": {
@@ -1477,6 +1650,8 @@
         "Lesson",
         "Page",
         "InteractiveBook",
+        "Slide",
+        "SlideDeck",
         "AssessmentSequence"
       ],
       "a11y": {

@@ -28,9 +28,9 @@ the framework adapter exists (see 0.6.0).
 
 ## Status
 
-- **Framework:** **1.2.0** — Compound containers + Tier C/D P0 (see [1.2.x](#12x--compound-containers--tier-cd-p0))
+- **Framework:** **1.3.0** — `SlideDeck` (Course Presentation) (see [1.3.x](#13x--slidedeck-course-presentation))
 - **Studio:** **unblocked** — framework gate met; see [Studio milestones](#lessonkit-studio-milestones)
-- **Focus (now):** LessonKit Studio 0.4.x+ (GitHub, AI, hosted) and **1.3.x** `SlideDeck`
+- **Focus (now):** LessonKit Studio 0.4.x+ (GitHub, AI, hosted) and **1.4.x** `InteractiveVideo`
 
 ## Guiding principles
 
@@ -342,9 +342,34 @@ begins**—including schema spikes, renderer prototypes, or `lessonkit-studio` p
 
 #### Out of scope for 1.2.x
 
-- `SlideDeck` (Course Presentation) — **1.3.x**
+- `SlideDeck` (Course Presentation) — shipped in **1.3.x**
 - H5P `.h5p` import — **1.6.x** research spike
 - Tier C–E media/game blocks — later framework minors per [capability map](docs/project/h5p-capability-map.md)
+
+---
+
+### 1.3.x — SlideDeck (Course Presentation)
+
+**Status:** **Shipped in 1.3.0**.
+
+#### Goals
+
+- Ship H5P-aligned `SlideDeck` compound container with per-slide allowlists and keyboard slide navigation.
+- Extend telemetry catalog v3 with `slide_viewed`.
+
+#### Deliverables
+
+- [x] **`Slide`**, **`SlideDeck`** in `@lessonkit/react`; `CompoundHandle` + session resume
+- [x] **`slide_viewed`** telemetry + xAPI mapping
+- [x] **`block-catalog.v3.json`** — `Slide`, `SlideDeck` entries with H5P `CoursePresentation` mapping
+- [x] **Golden example** — `examples/slide-deck`
+- [x] **Docs** — [MIGRATION-1.2-to-1.3.md](docs/MIGRATION-1.2-to-1.3.md); H5P capability map updates
+
+#### Out of scope for 1.3.x
+
+- Studio 0.9.x slide-strip editor — paired Studio milestone
+- Framework `Video` block on slides — **1.4.x** / InteractiveVideo
+- `Summary` assessment block — Tier B P1
 
 ---
 

@@ -13,7 +13,7 @@ Developer tooling, not a timeline authoring tool: **React + telemetry + packagin
 
 | | |
 | --- | --- |
-| **Release** | Framework [1.2.0](https://github.com/eddiethedean/lessonkit/blob/main/CHANGELOG.md#120---2026-06-03) · Studio [0.3.2](https://github.com/eddiethedean/lessonkit/blob/main/CHANGELOG.md#studio-v032---2026-06-03) |
+| **Release** | Framework [1.3.0](https://github.com/eddiethedean/lessonkit/blob/main/CHANGELOG.md#130---2026-06-04) · Studio [0.3.2](https://github.com/eddiethedean/lessonkit/blob/main/CHANGELOG.md#studio-v032---2026-06-03) |
 | **npm** | [`@lessonkit/*`](https://www.npmjs.com/org/lessonkit) |
 | **Docs** | [lessonkit.readthedocs.io](https://lessonkit.readthedocs.io/en/latest/) |
 | **Node.js** | 18+ (dev, build, LMS packaging); **20+** for Playwright e2e when [contributing](CONTRIBUTING.md) |
@@ -59,14 +59,14 @@ Developer tooling, not a timeline authoring tool: **React + telemetry + packagin
 | **Accessibility** | Semantic structure, focus utilities, reduced-motion helpers, documented WCAG targets |
 | **Delivery teams** | Modern SPA via Vite plus LMS artifacts through [`@lessonkit/lxpack`](https://lessonkit.readthedocs.io/en/latest/reference/packaging.html) |
 
-Migrating from 0.9.x? See [MIGRATION-0.x-to-1.0.md](https://github.com/eddiethedean/lessonkit/blob/main/docs/MIGRATION-0.x-to-1.0.md). From 1.0.x? See [MIGRATION-1.0-to-1.1.md](https://github.com/eddiethedean/lessonkit/blob/main/docs/MIGRATION-1.0-to-1.1.md). From 1.1.x? See [MIGRATION-1.1-to-1.2.md](https://github.com/eddiethedean/lessonkit/blob/main/docs/MIGRATION-1.1-to-1.2.md).
+Migrating from 0.9.x? See [MIGRATION-0.x-to-1.0.md](https://github.com/eddiethedean/lessonkit/blob/main/docs/MIGRATION-0.x-to-1.0.md). From 1.0.x? See [MIGRATION-1.0-to-1.1.md](https://github.com/eddiethedean/lessonkit/blob/main/docs/MIGRATION-1.0-to-1.1.md). From 1.1.x? See [MIGRATION-1.1-to-1.2.md](https://github.com/eddiethedean/lessonkit/blob/main/docs/MIGRATION-1.1-to-1.2.md). From 1.2.x? See [MIGRATION-1.2-to-1.3.md](https://github.com/eddiethedean/lessonkit/blob/main/docs/MIGRATION-1.2-to-1.3.md).
 
 ---
 
 ## Features
 
 - **Structure** — `Course`, `Lesson`, `Scenario`, `Quiz`, `KnowledgeCheck`, `Reflection`, `ProgressTracker`, `LessonkitProvider`; hooks for progress, tracking, and completion
-- **Compound & resume** — `Page`, `InteractiveBook`, `AssessmentSequence` (`CompoundHandle`, session resume)
+- **Compound & resume** — `Page`, `InteractiveBook`, `Slide`, `SlideDeck`, `AssessmentSequence` (`CompoundHandle`, session resume)
 - **Content** — `Text`, `Heading`, `Image`
 - **Assessments (P0)** — `TrueFalse`, `MarkTheWords`, `FillInTheBlanks`, `DragTheWords`, `DragAndDrop`, `FindHotspot`, `FindMultipleHotspots`
 - **Presentation (Tier C/D)** — `Accordion`, `DialogCards`, `Flashcards`, `ImageHotspots`, `ImageSlider`
@@ -213,6 +213,12 @@ export default function SecurityTraining() {
 Component gallery: [Storybook on GitHub Pages](https://eddiethedean.github.io/lessonkit/storybook/) (also `npm run storybook` in this repo).
 
 ---
+
+## Upgrading to 1.3
+
+> **New project?** Skip this section.
+
+If you are on **1.2.x**, see [MIGRATION-1.2-to-1.3.md](https://github.com/eddiethedean/lessonkit/blob/main/docs/MIGRATION-1.2-to-1.3.md) for the additive `SlideDeck` API.
 
 ## Upgrading to 1.2
 

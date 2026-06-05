@@ -95,7 +95,7 @@ H5P **machine names** follow common library ids (e.g. `H5P.MultiChoice`). Displa
 | — | Scenario (narrative) | `Scenario` | — | — | ✅ | 1.0 | 0.1+ |
 | — | Reflection (open text) | `Reflection` | — | — | ✅ | 1.0 | — |
 | `H5P.InteractiveBook` | Interactive Book | `InteractiveBook` | A | P0 | ✅ | 1.2.x | 0.3.2 |
-| `H5P.CoursePresentation` | Course Presentation | `SlideDeck` | A | P0 | ⬜ | 1.3.x | 0.9.x |
+| `H5P.CoursePresentation` | Course Presentation | `SlideDeck` | A | P0 | ✅ | 1.3.x | 0.9.x |
 | `H5P.InteractiveVideo` | Interactive Video | `InteractiveVideo` | A | P0 | ⬜ | 1.4.x | 0.10.x |
 | `H5P.BranchingScenario` | Branching Scenario | `BranchingScenario` | A | P0 | ⬜ | 1.5.x | 0.11.x |
 | `H5P.Column` | Column / Page | `Page` | A | P1 | ✅ | 1.2.x | 0.8.x (`container`) |

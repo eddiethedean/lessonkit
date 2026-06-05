@@ -71,12 +71,25 @@ describe("compound allowlists", () => {
   it("InteractiveBook only allows Page", () => {
     expect(getAllowedChildTypes("InteractiveBook")).toEqual(["Page"]);
   });
+
+  it("SlideDeck only allows Slide", () => {
+    expect(getAllowedChildTypes("SlideDeck")).toEqual(["Slide"]);
+  });
+
+  it("allows TrueFalse under Slide", () => {
+    expect(isChildTypeAllowed("Slide", "TrueFalse")).toBe(true);
+  });
+
+  it("excludes ProgressTracker from Slide", () => {
+    expect(isChildTypeAllowed("Slide", "ProgressTracker")).toBe(false);
+  });
 });
 
 describe("telemetry catalog v3", () => {
-  it("includes book_page_viewed", () => {
+  it("includes book_page_viewed and slide_viewed", () => {
     const names = buildTelemetryCatalogV3().map((e) => e.name);
     expect(names).toContain("book_page_viewed");
+    expect(names).toContain("slide_viewed");
   });
 
   it("builds book_page_viewed events", () => {
@@ -90,6 +103,21 @@ describe("telemetry catalog v3", () => {
     expect(event.name).toBe("book_page_viewed");
     if (event.name === "book_page_viewed") {
       expect(event.data.pageIndex).toBe(0);
+    }
+  });
+
+  it("builds slide_viewed events", () => {
+    const event = buildTelemetryEvent({
+      name: "slide_viewed",
+      courseId: "c1",
+      lessonId: "l1",
+      sessionId: "s1",
+      data: { blockId: "deck-1", slideIndex: 1, slideTitle: "Overview" },
+    });
+    expect(event.name).toBe("slide_viewed");
+    if (event.name === "slide_viewed") {
+      expect(event.data.slideIndex).toBe(1);
+      expect(event.data.slideTitle).toBe("Overview");
     }
   });
 });

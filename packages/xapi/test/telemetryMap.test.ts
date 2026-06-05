@@ -238,6 +238,16 @@ describe("telemetryEventToXAPIStatement", () => {
       "urn:lessonkit:course:cyber-basics:lesson:phishing-101:block:safety-book",
     );
 
+    const slideViewed = telemetryEventToXAPIStatement({
+      name: "slide_viewed",
+      ...base,
+      data: { blockId: "training-deck", slideIndex: 0, slideTitle: "Intro" },
+    });
+    expect(slideViewed?.verb).toBe("http://adlnet.gov/expapi/verbs/experienced");
+    expect(slideViewed?.object.id).toBe(
+      "urn:lessonkit:course:cyber-basics:lesson:phishing-101:block:training-deck",
+    );
+
     const compoundPage = telemetryEventToXAPIStatement({
       name: "compound_page_viewed",
       ...base,

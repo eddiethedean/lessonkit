@@ -9,6 +9,18 @@ All notable changes to the LessonKit monorepo are documented here.
 
 _No changes yet._
 
+## [1.3.0] - 2026-06-04
+
+Framework **1.3.x** — `SlideDeck` (H5P Course Presentation). `@lessonkit/core`, `@lessonkit/react`, `@lessonkit/lxpack`, `@lessonkit/xapi`, `@lessonkit/themes`, `@lessonkit/accessibility`, and `@lessonkit/cli` ship at **1.3.0**.
+
+### Added
+
+- **@lessonkit/core**: `SLIDE_ALLOWED_CHILD_TYPES`, `SLIDE_DECK_ALLOWED_CHILD_TYPES`; `slide_viewed` in telemetry catalog v3.
+- **@lessonkit/react**: `Slide`, `SlideDeck`; `useCompoundKeyboardNav` (Arrow keys, Home, End); block catalog v3 entries for Course Presentation.
+- **@lessonkit/xapi**: xAPI mapping for `slide_viewed`.
+- Example: `examples/slide-deck` — golden path for slide navigation, scoring, and session resume.
+- **Docs**: [MIGRATION-1.2-to-1.3.md](docs/MIGRATION-1.2-to-1.3.md); H5P capability map marks `H5P.CoursePresentation` → `SlideDeck` as shipped.
+
 ## [studio-v0.3.2] - 2026-06-03
 
 Studio packages at **0.3.2**, pinned to framework **1.2.0** at publish time.

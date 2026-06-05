@@ -190,6 +190,17 @@ Adds content primitives (`Text`, `Heading`, `Image`), compound containers (`Page
 | `FindHotspot` | Find the Hotspot |
 | `FindMultipleHotspots` | Find Multiple Hotspots |
 
+### Catalog v3 additions (framework 1.3.0)
+
+| Block | H5P display name | Notes |
+| --- | --- | --- |
+| `Slide` | Course Presentation (slide row) | `compoundContract`; per-slide allowlist (no `ProgressTracker`) |
+| `SlideDeck` | Course Presentation | `Slide[]` children; `slide_viewed` telemetry; keyboard nav |
+
+**SlideDeck props:** `blockId` (required), `title`, `showDeckScore`, `Slide` children. Implements `CompoundHandle` with session resume (`persistCompoundState` default `true`).
+
+**Planned slide children:** `Video`, `Summary` — not in 1.3.0 allowlist yet.
+
 Import `@lessonkit/react/block-catalog.v3.json` or pin `{ version: 2 }` until generators are updated.
 
 ---

@@ -10,6 +10,14 @@
       "urnPattern": "urn:lessonkit:course:{courseId}:lesson:{lessonId}:block:{blockId}"
     },
     {
+      "name": "slide_viewed",
+      "description": "Learner viewed a slide in a SlideDeck (Course Presentation)",
+      "requiredFields": ["courseId", "lessonId", "sessionId", "timestamp"],
+      "dataFields": ["blockId", "slideIndex", "slideTitle"],
+      "xapiVerb": "http://adlnet.gov/expapi/verbs/experienced",
+      "urnPattern": "urn:lessonkit:course:{courseId}:lesson:{lessonId}:block:{blockId}"
+    },
+    {
       "name": "compound_page_viewed",
       "description": "Learner activated a page inside a compound container",
       "requiredFields": ["courseId", "lessonId", "sessionId", "timestamp"],

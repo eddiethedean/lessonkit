@@ -2,11 +2,20 @@ import {
   ASSESSMENT_SEQUENCE_ALLOWED_CHILD_TYPES,
   INTERACTIVE_BOOK_ALLOWED_CHILD_TYPES,
   PAGE_ALLOWED_CHILD_TYPES,
+  SLIDE_ALLOWED_CHILD_TYPES,
+  SLIDE_DECK_ALLOWED_CHILD_TYPES,
   COMPOUND_MAX_NESTING_DEPTH,
 } from "@lessonkit/core";
 import type { BlockCatalogEntryV2 } from "./blockCatalog";
 
-const COMPOUND_PARENTS = ["Lesson", "Page", "InteractiveBook", "AssessmentSequence"] as const;
+const COMPOUND_PARENTS = [
+  "Lesson",
+  "Page",
+  "InteractiveBook",
+  "Slide",
+  "SlideDeck",
+  "AssessmentSequence",
+] as const;
 
 function extendParents(entry: BlockCatalogEntryV2): BlockCatalogEntryV2 {
   if (!entry.parentConstraints?.length) return entry;
@@ -112,6 +121,54 @@ export const v3CompoundAndContentEntries = [
     },
     theming: { surface: "global-inherit" as const, stylingNotes: "Book chrome." },
     telemetry: { emits: ["book_page_viewed"], requiresActiveLesson: true },
+  },
+  {
+    type: "Slide",
+    category: "container" as const,
+    compoundContract: true as const,
+    h5pMachineName: "H5P.CoursePresentation",
+    h5pAlias: "Course Presentation slide",
+    description:
+      "Single slide row in a SlideDeck. Planned allowlist expansion: Video, Summary.",
+    allowedChildTypes: [...SLIDE_ALLOWED_CHILD_TYPES],
+    maxNestingDepth: COMPOUND_MAX_NESTING_DEPTH.Slide,
+    props: [
+      { name: "blockId", type: "BlockId", required: true, description: "Stable block id." },
+      { name: "title", type: "string", required: false, description: "Slide title." },
+      { name: "children", type: "ReactNode", required: true, description: "Slide content." },
+    ],
+    requiredIds: [],
+    optionalIds: ["blockId"],
+    parentConstraints: ["SlideDeck"],
+    a11y: { element: "section", ariaLabel: "Slide", keyboard: "N/A", notes: "H5P Course Presentation slide row." },
+    theming: { surface: "global-inherit" as const, stylingNotes: "Container." },
+    telemetry: { emits: ["compound_page_viewed"], requiresActiveLesson: true },
+  },
+  {
+    type: "SlideDeck",
+    category: "container" as const,
+    compoundContract: true as const,
+    h5pMachineName: "H5P.CoursePresentation",
+    h5pAlias: "Course Presentation",
+    description: "Multi-slide presentation with keyboard navigation.",
+    allowedChildTypes: [...SLIDE_DECK_ALLOWED_CHILD_TYPES],
+    maxNestingDepth: COMPOUND_MAX_NESTING_DEPTH.SlideDeck,
+    props: [
+      { name: "blockId", type: "BlockId", required: true, description: "Stable block id." },
+      { name: "title", type: "string", required: true, description: "Deck title." },
+      { name: "showDeckScore", type: "boolean", required: false, description: "Show aggregate score." },
+      { name: "children", type: "Slide[]", required: true, description: "Slides." },
+    ],
+    requiredIds: ["blockId"],
+    parentConstraints: ["Lesson"],
+    a11y: {
+      element: "section",
+      ariaLabel: "Slide deck",
+      keyboard: "Arrow keys, Home, End, Previous/Next slide buttons.",
+      notes: "H5P Course Presentation equivalent.",
+    },
+    theming: { surface: "global-inherit" as const, stylingNotes: "Deck chrome." },
+    telemetry: { emits: ["slide_viewed"], requiresActiveLesson: true },
   },
   {
     type: "Accordion",

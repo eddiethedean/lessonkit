@@ -12,10 +12,12 @@
 | `DragTheWords` | Drag the Words |
 | `MarkTheWords` | Mark the Words |
 | `AssessmentSequence` | Question Set |
+| `SlideDeck` / `Slide` | Course Presentation |
+| `InteractiveBook` / `Page` | Interactive Book / Column |
 | `Scenario` | Scenario / narrative block |
 | `Reflection` | Open response (manual scoring) |
 
-More types (`InteractiveVideo`, `SlideDeck`, …) are on the roadmap. See **[Coming from H5P?](../h5p-for-lessonkit-authors.md)** and the **[capability map](../../project/h5p-capability-map.md)**.
+More types (`InteractiveVideo`, `BranchingScenario`, …) are on the roadmap. See **[Coming from H5P?](../h5p-for-lessonkit-authors.md)** and the **[capability map](../../project/h5p-capability-map.md)**.
 :::
 
 Canonical block list, props, and contracts: [Block catalog reference](../../reference/block-catalog.md).
@@ -34,6 +36,10 @@ Canonical block list, props, and contracts: [Block catalog reference](../../refe
 | `DragAndDrop` | `checkId`, `question`, `items[]`, `targets[]` | Drag items to targets; keyboard alternative |
 | `MarkTheWords` | `checkId`, `question`, `tokens[]` | Select correct word tokens |
 | `AssessmentSequence` | `checkId`, children with `checkId` | Question-set container; aggregates child handles |
+| `SlideDeck` | `blockId`, `title`, `Slide` children | Course Presentation; keyboard slide nav; `CompoundHandle` |
+| `Slide` | `blockId`, optional `title` | Single slide row inside `SlideDeck` |
+| `InteractiveBook` | `blockId`, `title`, `Page` children | Multi-chapter book; `CompoundHandle` |
+| `Page` | `blockId`, optional `title` | Column/chapter inside `InteractiveBook` |
 | `Reflection` | optional `prompt`, `blockId` | Textarea reflection block |
 | `ProgressTracker` | — | Shows completed lesson count |
 

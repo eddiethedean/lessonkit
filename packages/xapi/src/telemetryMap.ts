@@ -146,6 +146,7 @@ const TELEMETRY_XAPI_MAPPERS = {
   },
   interaction: experiencedBlockMapper,
   book_page_viewed: experiencedBlockMapper,
+  slide_viewed: experiencedBlockMapper,
   compound_page_viewed: experiencedBlockMapper,
   hotspot_opened: experiencedBlockMapper,
   accordion_section_toggled: experiencedBlockMapper,

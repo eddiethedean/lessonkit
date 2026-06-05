@@ -12,6 +12,8 @@ import {
   Lesson,
   Page,
   Quiz,
+  Slide,
+  SlideDeck,
   Text,
   TrueFalse,
 } from "../src";
@@ -250,6 +252,187 @@ describe("InteractiveBook", () => {
     );
 
     expect(screen.getByText("Page two")).toBeTruthy();
+  });
+});
+
+describe("SlideDeck", () => {
+  afterEach(() => {
+    cleanup();
+    sessionStorage.clear();
+  });
+
+  it("navigates between slides", () => {
+    render(
+      wrap(
+        <SlideDeck blockId="deck-1" title="Training">
+          <Slide blockId="s1" title="One">
+            <Text>Slide one</Text>
+          </Slide>
+          <Slide blockId="s2" title="Two">
+            <Text>Slide two</Text>
+          </Slide>
+        </SlideDeck>,
+      ),
+    );
+    expect(screen.getByText("Slide one")).toBeTruthy();
+    fireEvent.click(screen.getByTestId("slide-next"));
+    expect(screen.getByText("Slide two")).toBeTruthy();
+  });
+
+  it("navigates with keyboard arrow keys", () => {
+    render(
+      wrap(
+        <SlideDeck blockId="deck-kb" title="Training">
+          <Slide blockId="s1" title="One">
+            <Text>Slide one</Text>
+          </Slide>
+          <Slide blockId="s2" title="Two">
+            <Text>Slide two</Text>
+          </Slide>
+        </SlideDeck>,
+      ),
+    );
+    const deck = screen.getByTestId("slide-deck");
+    deck.focus();
+    fireEvent.keyDown(deck, { key: "ArrowRight" });
+    expect(screen.getByText("Slide two")).toBeTruthy();
+    fireEvent.keyDown(deck, { key: "ArrowLeft" });
+    expect(screen.getByText("Slide one")).toBeTruthy();
+  });
+
+  it("jumps to first and last slide with Home and End", () => {
+    render(
+      wrap(
+        <SlideDeck blockId="deck-jump" title="Training">
+          <Slide blockId="s1" title="One">
+            <Text>Slide one</Text>
+          </Slide>
+          <Slide blockId="s2" title="Two">
+            <Text>Slide two</Text>
+          </Slide>
+          <Slide blockId="s3" title="Three">
+            <Text>Slide three</Text>
+          </Slide>
+        </SlideDeck>,
+      ),
+    );
+    const deck = screen.getByTestId("slide-deck");
+    deck.focus();
+    fireEvent.keyDown(deck, { key: "End" });
+    expect(screen.getByText("Slide three")).toBeTruthy();
+    fireEvent.keyDown(deck, { key: "Home" });
+    expect(screen.getByText("Slide one")).toBeTruthy();
+  });
+
+  it("exposes compound handle scores from child assessments", () => {
+    const ref = createRef<CompoundHandle>();
+    render(
+      wrap(
+        <SlideDeck blockId="deck-2" title="Training" ref={ref}>
+          <Slide blockId="s1" title="Quiz slide">
+            <TrueFalse checkId="tf-deck-1" question="True?" answer={true} />
+          </Slide>
+        </SlideDeck>,
+      ),
+    );
+    fireEvent.click(screen.getByLabelText("True"));
+    expect(ref.current?.getAnswerGiven()).toBe(true);
+    expect(ref.current?.getScore()).toBe(1);
+  });
+
+  it("aggregates scores across hidden slides with showDeckScore", () => {
+    const ref = createRef<CompoundHandle>();
+    render(
+      wrap(
+        <SlideDeck blockId="deck-3" title="Training" showDeckScore ref={ref}>
+          <Slide blockId="s1" title="Intro">
+            <Text>Intro</Text>
+          </Slide>
+          <Slide blockId="s2" title="Quiz">
+            <TrueFalse checkId="tf-deck-2" question="2+2=4?" answer={true} />
+          </Slide>
+        </SlideDeck>,
+      ),
+    );
+    fireEvent.click(screen.getByTestId("slide-next"));
+    fireEvent.click(screen.getByLabelText("True"));
+    fireEvent.click(screen.getByTestId("slide-prev"));
+    expect(screen.getByTestId("deck-score").textContent).toContain("Score: 1");
+    expect(ref.current?.getScore()).toBe(1);
+    expect(ref.current?.getMaxScore()).toBe(1);
+  });
+
+  it("restores activePageIndex from sessionStorage when persistCompoundState is true", () => {
+    saveCompoundState(
+      createSessionStoragePort(),
+      COURSE_ID,
+      "deck-persist",
+      createCompoundResumeState({ activePageIndex: 1 }),
+    );
+
+    render(
+      wrap(
+        <SlideDeck blockId="deck-persist" title="Training">
+          <Slide blockId="s1" title="One">
+            <Text>Slide one</Text>
+          </Slide>
+          <Slide blockId="s2" title="Two">
+            <Text>Slide two</Text>
+          </Slide>
+        </SlideDeck>,
+        true,
+      ),
+    );
+    expect(screen.getByText("Slide two")).toBeTruthy();
+    expect(screen.getByText("Slide 2 of 2")).toBeTruthy();
+  });
+
+  it("persists activePageIndex to sessionStorage on navigation", () => {
+    render(
+      wrap(
+        <SlideDeck blockId="deck-save" title="Training">
+          <Slide blockId="s1" title="One">
+            <Text>Slide one</Text>
+          </Slide>
+          <Slide blockId="s2" title="Two">
+            <Text>Slide two</Text>
+          </Slide>
+        </SlideDeck>,
+        true,
+      ),
+    );
+    fireEvent.click(screen.getByTestId("slide-next"));
+    const raw = sessionStorage.getItem(compoundStateStorageKey(COURSE_ID, "deck-save"));
+    expect(raw).toBeTruthy();
+    const parsed = JSON.parse(raw!) as { activePageIndex: number };
+    expect(parsed.activePageIndex).toBe(1);
+  });
+
+  it("restores TrueFalse answer state from sessionStorage", () => {
+    saveCompoundState(
+      createSessionStoragePort(),
+      COURSE_ID,
+      "deck-tf",
+      createCompoundResumeState({
+        activePageIndex: 0,
+        childStates: {
+          "tf-deck-resume": { selected: true, selectionCorrect: true, passed: true, showSolutions: false },
+        },
+      }),
+    );
+
+    render(
+      wrap(
+        <SlideDeck blockId="deck-tf" title="Training">
+          <Slide blockId="s1" title="Quiz">
+            <TrueFalse checkId="tf-deck-resume" question="True?" answer={true} />
+          </Slide>
+        </SlideDeck>,
+        true,
+      ),
+    );
+
+    expect((screen.getByLabelText("True") as HTMLInputElement).checked).toBe(true);
   });
 });
 

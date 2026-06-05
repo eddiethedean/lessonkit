@@ -12,7 +12,7 @@ LessonKit is **React-first**, not a plugin inside your LMS’s content bank. You
 
 Use the **[H5P capability map](../project/h5p-capability-map.md)** for the full table (machine name, display name, LessonKit id, roadmap status).
 
-### Available today (framework 1.2.0)
+### Available today (framework 1.3.0)
 
 | H5P name | LessonKit | Import / notes |
 | --- | --- | --- |
@@ -24,6 +24,7 @@ Use the **[H5P capability map](../project/h5p-capability-map.md)** for the full 
 | **Mark the Words** | `MarkTheWords` | Selectable tokens; SPA + bridge scoring |
 | **Question Set** | `AssessmentSequence` | Aggregates child assessments by `checkId` |
 | **Interactive Book** | `InteractiveBook` + `Page` | Compound navigation + session resume |
+| **Course Presentation** | `SlideDeck` + `Slide` | Slide navigation + keyboard controls + session resume |
 | **Accordion** | `Accordion` | Expand/collapse sections |
 | **Dialog Cards** | `DialogCards` | Flip-card dialog |
 | **Flashcards** | `Flashcards` | Card deck |
@@ -42,7 +43,6 @@ Use the **[H5P capability map](../project/h5p-capability-map.md)** for the full 
 | H5P | LessonKit (planned) |
 | --- | --- |
 | Interactive Video | `InteractiveVideo` |
-| Course Presentation | `SlideDeck` |
 | Branching Scenario | `BranchingScenario` |
 
 :::{admonition} Renamed on purpose

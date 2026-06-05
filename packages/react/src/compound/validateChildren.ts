@@ -12,6 +12,8 @@ const warnedPairs = new Set<string>();
 const COMPOUND_CONTAINER_TYPES = new Set<CompoundParentType>([
   "Page",
   "InteractiveBook",
+  "Slide",
+  "SlideDeck",
   "AssessmentSequence",
 ]);
 
