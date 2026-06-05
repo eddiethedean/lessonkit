@@ -3,7 +3,6 @@
 All notable changes to the LessonKit monorepo are documented here.
 
 - [`@lessonkit/*`](https://www.npmjs.com/org/lessonkit) — core platform (tag `v*.*.*`)
-- [`@lessonkit/studio-schema`](https://www.npmjs.com/package/@lessonkit/studio-schema), [`@lessonkit/studio-renderer`](https://www.npmjs.com/package/@lessonkit/studio-renderer), [`@lessonkit/studio-builder`](https://www.npmjs.com/package/@lessonkit/studio-builder), [`@lessonkit/studio-ui`](https://www.npmjs.com/package/@lessonkit/studio-ui), [`@lessonkit/studio-codegen`](https://www.npmjs.com/package/@lessonkit/studio-codegen) — Studio authoring (tag `studio-v*`, same `@lessonkit` org)
 
 ## Unreleased
 
@@ -20,19 +19,6 @@ Framework **1.3.x** — `SlideDeck` (H5P Course Presentation). `@lessonkit/core`
 - **@lessonkit/xapi**: xAPI mapping for `slide_viewed`.
 - Example: `examples/slide-deck` — golden path for slide navigation, scoring, and session resume.
 - **Docs**: [MIGRATION-1.2-to-1.3.md](docs/MIGRATION-1.2-to-1.3.md); H5P capability map marks `H5P.CoursePresentation` → `SlideDeck` as shipped.
-
-## [studio-v0.3.2] - 2026-06-03
-
-Studio packages at **0.3.2**, pinned to framework **1.2.0** at publish time.
-
-### Added
-
-- **@lessonkit/studio-schema**: Registry/catalog tests; H5P-familiar palette labels for 1.2 blocks (`Question Set`, `Find the Hotspot`, etc.).
-- **@lessonkit/studio-renderer** / **@lessonkit/studio-codegen**: 1.2 compound and Tier C/D block parity with `@lessonkit/react`.
-
-### Changed
-
-- All Studio packages bumped to **0.3.2**; export defaults pin `@lessonkit/*` **1.2.0** and `@lessonkit/studio-*` **0.3.2**.
 
 ## [1.2.0] - 2026-06-03
 
@@ -55,29 +41,13 @@ Framework **1.2.x** — Compound containers, resume state, and Tier C/D P0 block
 - **`AssessmentSequence`** implements `CompoundHandle` and may surface parent-level scores when using a ref.
 - **`persistCompoundState`** defaults to **`true`**; provide a unique `blockId` on each compound container to avoid shared `sessionStorage` keys.
 - **`runtimeVersion: "v1"`** logs a development deprecation warning; **v2** remains the default.
-- README and quickstart: npm-first funnel, `npm run dev`, Studio live-demo path, package install table, examples index.
+- README and quickstart: npm-first funnel, `npm run dev`, package install table, examples index.
 - npm package `homepage` fields point to Read the Docs.
 - `lessonkit init` template pins `^1.2.0` for `@lessonkit/*`; CLI template Vitest aligned to v4.x.
 
-## [studio-v0.3.1] - 2026-06-03
-
-Maintenance release for all five Studio packages at **0.3.1** (framework **1.1.0** on `main`; npm publish pins framework at release time).
-
-### Fixed
-
-- **@lessonkit/studio-schema:** `validateStudioProject` matches `parse` constraints; duplicate `checkId`; scenario nesting depth.
-- **@lessonkit/studio-builder:** Autosave skips projects with validation errors.
-- **@lessonkit/studio-codegen:** JSX export parity with renderer (button, input, checklist, video); multi-page LXPack warning; default export pins `@lessonkit/*` **1.1.0**.
-- **@lessonkit/studio-renderer:** Invalid projects always show validation panel (not dev-only); checklist/video blocks in `media.tsx`.
-- **@lessonkit/studio-ui:** Export panel shows multi-page LXPack warnings.
-
-### Changed
-
-- All Studio packages bumped to **0.3.1**.
-
 ## [1.1.0] - 2026-06-03
 
-Framework **1.1.x** — Assessment contract and Tier B P0 blocks. All seven `@lessonkit/*` packages ship at **1.1.0** (no Studio package changes in this release).
+Framework **1.1.x** — Assessment contract and Tier B P0 blocks. All seven `@lessonkit/*` packages ship at **1.1.0**.
 
 ### Added
 
@@ -97,54 +67,6 @@ Framework **1.1.x** — Assessment contract and Tier B P0 blocks. All seven `@le
 
 - **@lessonkit/react:** `TrueFalse` feedback respects plugin `passed`; `passingScore` applied in `scoreFromCustom`; `autoCheck` dedupes `assessment_answered`; empty FIB/DragTheWords templates and zero-token `MarkTheWords` show author-facing errors.
 - **Docs / policy:** Version badges, SECURITY supported versions, README migration link, broken CHANGELOG paths.
-
-## [studio-v0.3.0] - 2026-06-01
-
-Code generation and export: `@lessonkit/studio-codegen`, export panel in studio-web, canvas performance, and SCORM integration test. Requires **@lessonkit/core**, **@lessonkit/react**, and **@lessonkit/themes** at **1.0.2** (pinned at publish time).
-
-### Added
-
-- **@lessonkit/studio-codegen** (0.3.0): `generateExportFiles`, renderer + JSX React/Vite export, `studioProjectToDescriptor`, Node helpers (`writeReactViteProject`, `writeLxpackProjectFromStudio`, `packageStudioProject`).
-- **@lessonkit/studio-ui** (0.3.0): `ExportPanel`; lazy block previews; virtualized canvas for large pages.
-- **apps/studio-web**: React/Vite zip download (JSZip); export options in header.
-- **Integration test:** Studio codegen → Vite build → SCORM 1.2 package.
-- **Docs:** [Studio export guide](docs/guides/studio/export.md); `examples/studio-export`.
-
-### Changed
-
-- All Studio packages bumped to **0.3.0**; Studio Release publishes five packages.
-
-> **Not included:** GitHub sync, hosted Studio, `lessonkit-studio` CLI (see [STUDIO_READINESS.md](https://github.com/eddiethedean/lessonkit/blob/main/docs/STUDIO_READINESS.md)).
-
-## [studio-v0.2.0] - 2026-06-01
-
-Visual editor MVP: headless builder, React editor UI, and local `apps/studio-web`. Requires **@lessonkit/core**, **@lessonkit/react**, and **@lessonkit/themes** at **1.0.2** (pinned at publish time).
-
-### Added
-
-- **@lessonkit/studio-builder** (0.2.0): editor store, `dispatch` commands, undo/redo, `subscribeAutosave`, tree helpers, `createDefaultBlock`.
-- **@lessonkit/studio-ui** (0.2.0): `StudioEditor` with palette, dnd-kit canvas (nested containers), property inspector, preview pane.
-- **apps/studio-web**: local Vite editor; `localStorage` autosave; import/export JSON.
-- **Docs:** [Studio editor guide](docs/guides/studio/editor.md).
-
-### Changed
-
-- **@lessonkit/studio-schema** / **@lessonkit/studio-renderer** (0.2.0): checklist and video blocks use minimal real preview UI (replacing 0.1 stubs).
-- **Monorepo:** `build:packages` and Studio Release workflow include builder and ui.
-
-> **Not included:** codegen, GitHub sync, hosted Studio, `lessonkit-studio` CLI (see [STUDIO_READINESS.md](https://github.com/eddiethedean/lessonkit/blob/main/docs/STUDIO_READINESS.md)).
-
-## [studio-v0.1.0] - 2026-06-01
-
-First public preview of LessonKit Studio packages. Requires **@lessonkit/core**, **@lessonkit/react**, and **@lessonkit/themes** at **1.0.2** (pinned at publish time from `packages/core` on the release commit).
-
-### Added
-
-- **@lessonkit/studio-schema**: `schemaVersion: 1` project model; `parseStudioProject`, `validateStudioProject`, `normalizeStudioProject`, `migrateStudioProject`, `loadStudioProject`, `buildStudioBlockCatalog`; shipped `studio-project.v1.json` and `studio-block-catalog.v1.json`.
-- **@lessonkit/studio-renderer**: `StudioRenderer` mapping Studio blocks to `@lessonkit/react` (`Course`, `Lesson`, `Quiz`, `Scenario`) and presentational primitives; checklist/video stubs.
-- **Monorepo**: `examples/studio-minimal`, [Studio project format v1](docs/guides/studio/project-format-v1.md), [Studio Release](https://github.com/eddiethedean/lessonkit/blob/main/.github/workflows/studio-release.yml) workflow (`studio-v*` tags).
-
-> **Not included in 0.1.0:** visual editor app, `lessonkit-studio` CLI, builder/codegen packages (planned 0.2+). See [STUDIO_READINESS.md](https://github.com/eddiethedean/lessonkit/blob/main/docs/STUDIO_READINESS.md).
 
 ## [1.0.2] - 2026-06-01
 
@@ -193,7 +115,7 @@ Patch release: stronger TypeScript typing across the monorepo with no intended r
 
 ## [1.0.0] - 2026-05-30
 
-**Stable public API** — Studio development gate is open. See [MIGRATION-0.x-to-1.0.md](docs/MIGRATION-0.x-to-1.0.md).
+**Stable public API.** See [MIGRATION-0.x-to-1.0.md](docs/MIGRATION-0.x-to-1.0.md).
 
 ### Fixed
 
@@ -406,14 +328,14 @@ SOLID monorepo refactor: headless runtime, telemetry pipeline, segregated plugin
 ### Changed
 
 - Monorepo packages bumped to **0.8.0**.
-- **Docs**: `STUDIO_READINESS.md` 0.8.x checklist complete; vibe-coding and components guides link to block catalog.
+- **Docs**: Block catalog reference complete; vibe-coding and components guides link to block catalog.
 
 ## [0.7.0] - 2026-05-28
 
 ### Added
 
 - **@lessonkit/cli**: Real `init`, `dev`, `build`, and `package` commands with dual export (`react-vite` + LMS targets via `@lessonkit/lxpack`).
-- **`lessonkit.json` v1**: Canonical project manifest for packaging and future Studio alignment.
+- **`lessonkit.json` v1**: Canonical project manifest for packaging.
 - **CLI**: Structured errors, stable exit codes, `--json` output mode, `--skip-install` / `--force` for automation.
 - **Template bundling**: Vite + React starter copied into `@lessonkit/cli` for `lessonkit init`.
 - **Docs**: [`docs/CLI.md`](docs/reference/cli.md).
@@ -563,9 +485,6 @@ Last version published to npm before 0.2.x.
 - Initial public packages: `@lessonkit/core`, `@lessonkit/react`, `@lessonkit/xapi`, `@lessonkit/accessibility`, `@lessonkit/themes`, `@lessonkit/cli`.
 - Tag-based publish workflow and CI checks (build, typecheck, test, coverage).
 
-[studio-v0.3.2]: https://github.com/eddiethedean/lessonkit/compare/studio-v0.3.1...studio-v0.3.2
-[studio-v0.3.1]: https://github.com/eddiethedean/lessonkit/compare/studio-v0.3.0...studio-v0.3.1
-[studio-v0.3.0]: https://github.com/eddiethedean/lessonkit/compare/studio-v0.2.0...studio-v0.3.0
 [1.2.0]: https://github.com/eddiethedean/lessonkit/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/eddiethedean/lessonkit/compare/v1.0.2...v1.1.0
 [0.5.0]: https://github.com/eddiethedean/lessonkit/compare/v0.4.0...v0.5.0

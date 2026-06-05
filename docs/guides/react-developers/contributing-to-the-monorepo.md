@@ -52,7 +52,7 @@ Tag-based npm publish — [RELEASING.md](https://github.com/eddiethedean/lessonk
 
 ## Roadmap
 
-Studio and 1.0 API stability are tracked in [ROADMAP.md](https://github.com/eddiethedean/lessonkit/blob/main/ROADMAP.md).
+Framework milestones and 1.0 API stability are tracked in [ROADMAP.md](https://github.com/eddiethedean/lessonkit/blob/main/ROADMAP.md).
 
 ## E2E and conformance
 

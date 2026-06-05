@@ -17,10 +17,8 @@ These workspaces use `file:../../packages/*` dependencies—they are for **monor
 | [`framework-11-showcase/`](framework-11-showcase/) | `lessonkit-example-framework-11-showcase` | Incident Response | **Full 1.1 catalog** — foundation + P0 assessments |
 | [`framework-12-showcase/`](framework-12-showcase/) | `lessonkit-example-framework-12-showcase` | Atlas Analytics | **Full 1.2 catalog** — content, compound, Tier C/D, hotspots |
 | [`assessments-p0/`](assessments-p0/) | `lessonkit-example-assessments-p0` | Assessment showcase | Minimal P0 sample (subset of 1.1) |
-| [`studio-minimal/`](studio-minimal/) | `lessonkit-example-studio-minimal` | Studio sample | `StudioProjectV1` + renderer preview |
-| [`studio-export/`](studio-export/) | — | Export pipeline | Node script demo (not a dev server); see [README](studio-export/README.md) |
 
-Each runnable app (except `studio-export`) shares a modern LMS shell (`_shared/lms-ui.css`, `_shared/course-ui.tsx`) with themed variants.
+Each runnable app shares a modern LMS shell (`_shared/lms-ui.css`, `_shared/course-ui.tsx`) with themed variants.
 
 ## Run locally
 

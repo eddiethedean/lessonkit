@@ -68,7 +68,6 @@ If you add or change a workspace in the root `package.json`, run `npm install` a
 | `packages/react`, `packages/core`, examples | `npm test`, often `npm run test:e2e` |
 | `packages/cli`, `packages/lxpack`, templates | `npm run test:integration` |
 | `docs/` (Sphinx) | `cd docs && pip install -r requirements.txt && sphinx-build -W -b html . _build/html` (or rely on CI `docs` job) |
-| Studio packages / `apps/studio-web` | Package tests + Studio smoke as noted in [RELEASING.md](RELEASING.md) when relevant |
 
 ## Pull request expectations
 

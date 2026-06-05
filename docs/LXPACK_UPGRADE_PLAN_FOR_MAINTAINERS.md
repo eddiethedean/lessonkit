@@ -105,7 +105,7 @@ flowchart TB
 
 | Concern | Should live in | Rationale |
 |---------|----------------|-----------|
-| React components, block catalog, WCAG helpers | LessonKit | Authoring UX and Studio (future) |
+| React components, block catalog, WCAG helpers | LessonKit | Authoring UX |
 | `courseId` / `lessonId` / `checkId` validation rules | LessonKit (`@lessonkit/core`) | Framework identity; LXPack should *accept* ids, not define pedagogy |
 | Interchange schema (`lessonkit.json` v1+) | **LXPack validators** | Single schema for any React toolchain, not only LessonKit |
 | Materialize SPA + `course.yaml` from interchange | **LXPack API** | Removes YAML emitters from LessonKit |
@@ -359,7 +359,7 @@ lxpack preview --lessonkit ./lessonkit.json --spa dist/
 - React component library and hooks (`Course`, `Lesson`, `Quiz`, …).
 - Authoring-time telemetry sinks and `@lessonkit/xapi` client (distinct from LMS-export xAPI inside LXPack).
 - Vite template, `lessonkit init`, `lessonkit dev`, `lessonkit build`.
-- Block catalog for AI/Studio (`block-catalog.v1.json`).
+- Block catalog for AI/codegen (`block-catalog.v1.json`).
 - WCAG primitives (`@lessonkit/accessibility`).
 
 **Non-goals (both projects):**

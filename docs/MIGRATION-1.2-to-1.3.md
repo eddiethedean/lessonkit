@@ -47,4 +47,4 @@ Example:
 
 ## Golden example
 
-[`examples/slide-deck`](../examples/slide-deck/) demonstrates a four-slide deck with `TrueFalse` scoring and `lessonkit.json` parity.
+The [`examples/slide-deck`](https://github.com/eddiethedean/lessonkit/tree/main/examples/slide-deck) app demonstrates a four-slide deck with `TrueFalse` scoring and `lessonkit.json` parity.

@@ -1,28 +1,9 @@
 # Releasing LessonKit
 
-Published packages:
+Published packages (`v*.*.*` tag → [Release](.github/workflows/release.yml)): `@lessonkit/core`, `@lessonkit/xapi`, `@lessonkit/accessibility`, `@lessonkit/react`, `@lessonkit/themes`, `@lessonkit/lxpack`, `@lessonkit/cli`
 
-- **LessonKit** (`v*.*.*` tag → [Release](.github/workflows/release.yml)): `@lessonkit/core`, `@lessonkit/xapi`, `@lessonkit/accessibility`, `@lessonkit/react`, `@lessonkit/themes`, `@lessonkit/lxpack`, `@lessonkit/cli`
-- **Studio** (`studio-v*` tag → [Studio Release](.github/workflows/studio-release.yml)): `@lessonkit/studio-schema`, `@lessonkit/studio-renderer`, `@lessonkit/studio-builder`, `@lessonkit/studio-ui`, `@lessonkit/studio-codegen`
+## Publishing 1.2.0
 
-Normal `v1.0.3` tags **do not** publish or re-version Studio packages. Studio uses its own semver line (e.g. `0.1.0`) and tag prefix.
-
-## Publishing 1.2.0 + Studio 0.3.2 (recommended order)
-
-1. Confirm [1.2.0](#120-checklist-ready-to-publish) and [Studio 0.3.2](#studio-032-checklist-ready-to-publish) checklists below.
-2. Tag and push **framework first** (publishes seven `@lessonkit/*` packages at **1.2.0**):
-
-   ```bash
-   git tag v1.2.0
-   git push origin v1.2.0
-   ```
-
-3. After `v1.2.0` is on npm, tag and push **Studio** (pins `@lessonkit/*` to **1.2.0** via `prepare-publish.mjs`):
-
-   ```bash
-   git tag studio-v0.3.2
-   git push origin studio-v0.3.2
-   ```
 
 ### 1.2.0 checklist (ready to publish)
 
@@ -41,105 +22,15 @@ Normal `v1.0.3` tags **do not** publish or re-version Studio packages. Studio us
 
 > **Do not create or push `v1.2.0`** until you intend to publish to npm.
 
-### Studio 0.3.2 checklist (ready to publish)
-
-| Item | Status |
-|------|--------|
-| Studio packages at `0.3.2` (schema, renderer, builder, ui, codegen) | Done |
-| Root `studio-version` = `0.3.2` | Done |
-| [CHANGELOG.md](CHANGELOG.md) `## [studio-v0.3.2]` | Done |
-| `prepare-publish.mjs studio 0.3.2` pins `@lessonkit/*` to **1.2.0** | Run at publish time |
-| Framework **1.2.0** on npm before `studio-v0.3.2` tag | Required |
-| `@lessonkit/studio-codegen` default export pins `@lessonkit/studio-*` **0.3.2** | Done |
-| Integration test `studio-export-package.test.ts` (`studioVersion: 0.3.2`, `lessonkitVersion: 1.2.0`) | Done |
-| Studio palette/codegen covers 1.2 blocks (see [ROADMAP](ROADMAP.md)) | Done |
-| npm latest `@lessonkit/studio-schema` | **0.3.1** — publish with `studio-v0.3.2` |
-| Git tag `studio-v0.3.2` | **Create when ready** |
-
-> Publish **framework `v1.2.0` first**, then `studio-v0.3.2`.
-
-## Publishing 1.1.0 + Studio 0.3.1 (recommended order)
-
-1. Confirm [1.1.0](#110-checklist-ready-to-publish) and [Studio 0.3.1](#studio-031-checklist-ready-to-publish) checklists below.
-2. Tag and push **framework first** (re-runs CI, then publishes seven `@lessonkit/*` packages):
-
-   ```bash
-   git tag v1.1.0
-   git push origin v1.1.0
-   ```
-
-3. After `v1.1.0` is on npm, tag and push **Studio** (pins `@lessonkit/*` to **1.1.0** via `prepare-publish.mjs`):
-
-   ```bash
-   git tag studio-v0.3.1
-   git push origin studio-v0.3.1
-   ```
 
 ## Prerequisites
 
 - `main` is green (see [CI workflow](.github/workflows/ci.yml)).
-- All `packages/*/package.json` versions match the release (framework `1.1.0`, Studio `0.3.1` on `main`).
+- All `packages/*/package.json` versions match the release.
 - [CHANGELOG.md](CHANGELOG.md) documents the release.
 - No pending files in [`.changeset/`](.changeset/) that would run `changeset version` and bump versions unexpectedly (this repo publishes via **git tags**, not `changeset publish`).
 
 > **1.0.0** is the stable public API release. See [MIGRATION-0.x-to-1.0.md](docs/MIGRATION-0.x-to-1.0.md).
-
-### Studio 0.3.1 checklist (ready to publish)
-
-| Item | Status |
-|------|--------|
-| Studio packages at `0.3.1` (schema, renderer, builder, ui, codegen) | Done |
-| Root `studio-version` = `0.3.1` | Done |
-| [CHANGELOG.md](CHANGELOG.md) `## [studio-v0.3.1]` | Done |
-| [studio-release.yml](.github/workflows/studio-release.yml) publishes all five packages | Done |
-| `prepare-publish.mjs studio 0.3.1` pins `@lessonkit/*` to `packages/core` version (**1.1.0**) | Done |
-| Integration test `studio-export-package.test.ts` (`studioVersion: 0.3.1`) | Done |
-| `main` CI green | Done — [CI run 26893507343](https://github.com/eddiethedean/lessonkit/actions/runs/26893507343) |
-| npm latest `@lessonkit/studio-schema` | **0.3.0** — publish with `studio-v0.3.1` |
-| Git tag `studio-v0.3.1` | **Create when ready** |
-
-> Publish **framework `v1.1.0` first**, then `studio-v0.3.1`, so Studio tarballs pin the published **1.1.0** line.
-
-> **Do not create or push `studio-v0.3.1`** until you intend to publish to npm. Normal `v*` tags do not publish Studio.
-
-### Studio 0.3.0 checklist (published on npm)
-
-| Item | Status |
-|------|--------|
-| Studio packages at `0.3.0` | Published |
-| Git tag `studio-v0.3.0` | Shipped 2026-06-01 |
-
-### Studio 0.2.0 checklist (ready to publish)
-
-| Item | Status |
-|------|--------|
-| Studio packages at `0.2.0` (`studio-schema`, `studio-renderer`, `studio-builder`, `studio-ui`) | Done |
-| [CHANGELOG.md](CHANGELOG.md) `## [studio-v0.2.0]` | Done |
-| [studio-release.yml](.github/workflows/studio-release.yml) publishes all four packages | Done |
-| `apps/studio-web` in `build:apps` (CI smoke) | Done |
-| [Studio editor guide](docs/guides/studio/editor.md) + [STUDIO_READINESS.md](docs/STUDIO_READINESS.md) 0.2 section | Done |
-| `main` CI green | Verify before tag |
-| Local pack smoke (optional): [Publish Studio packages](#publish-studio-packages-to-npm-studiov-tags) | Optional |
-| Git tag `studio-v0.2.0` | **Create when ready** |
-
-> **Do not create or push `studio-v0.2.0`** until you intend to publish to npm. Normal `v*` tags do not publish Studio.
-
-### Studio 0.1.0 checklist (ready to publish)
-
-| Item | Status |
-|------|--------|
-| `@lessonkit/studio-schema` and `@lessonkit/studio-renderer` at `0.1.0` | Done |
-| `private: false`, `publishConfig`, `prepublishOnly`, README on both packages | Done |
-| [CHANGELOG.md](CHANGELOG.md) `## [studio-v0.1.0]` | Done |
-| [studio-release.yml](.github/workflows/studio-release.yml) + [prepare-publish.mjs](scripts/release/prepare-publish.mjs) | Done |
-| `packages/core` at `1.0.2` (Studio publish pins `@lessonkit/*` to this version) | Done |
-| `main` CI green | Verify before tag |
-| `npm run lint` + `typecheck` + `test` + `coverage` | Verify before tag |
-| `NPM_TOKEN` can publish `@lessonkit` (same org as core/react) | Done — Studio uses `@lessonkit/studio-schema` and `@lessonkit/studio-renderer` |
-| Local pack smoke: `node scripts/release/prepare-publish.mjs studio 0.1.0 && npm run build:packages && npm pack -w @lessonkit/studio-schema --dry-run` (then `git checkout -- packages/studio-*/package.json`) | Optional |
-| Git tag `studio-v0.1.0` | **Create when ready** — triggers Studio npm publish |
-
-> **Do not create or push `studio-v0.1.0`** until you intend to publish to npm. Normal `v*` tags do not publish Studio.
 
 ### 1.1.0 checklist (ready to publish)
 
@@ -316,7 +207,7 @@ Normal `v1.0.3` tags **do not** publish or re-version Studio packages. Studio us
 | `@lessonkit/react` / `@lessonkit/lxpack` / `@lessonkit/cli` depend on matching `@lessonkit/*@0.8.0` | Required |
 | `lessonkit init` template (`packages/cli/scripts/copy-template.mjs`) pins `^0.8.0` for `@lessonkit/*` | Required |
 | [CHANGELOG.md](CHANGELOG.md) `## [0.8.0]` includes Added / Changed | Required |
-| `docs/STUDIO_READINESS.md` 0.8.x block catalog items complete | Required |
+| Block catalog reference docs complete | Required |
 | `@lessonkit/react/block-catalog.v1.json` shipped in package `files` + `exports` | Required |
 | Golden example packages via `lessonkit package` in CI | Required |
 | `lessonkit init` template bundled in `@lessonkit/cli` | Required |
@@ -354,34 +245,6 @@ Normal `v1.0.3` tags **do not** publish or re-version Studio packages. Studio us
 4. Verify the **Release** workflow on GitHub Actions and packages on [npm](https://www.npmjs.com/org/lessonkit).
 
 The release job sets each **LessonKit** package version from the tag, aligns `@lessonkit/*` dependency ranges, builds, and runs `npm publish` for all seven packages. Requires the `NPM_TOKEN` repository secret (publish access to the `@lessonkit` org).
-
-## Publish Studio packages to npm (`studio-v*` tags)
-
-Studio versions are **independent** of LessonKit tags. When you push `studio-v0.2.0` (or any `studio-v*` tag):
-
-1. [Studio Release](.github/workflows/studio-release.yml) runs full CI (`checks.yml`), then `node scripts/release/prepare-publish.mjs studio <version>`.
-2. That sets all `@lessonkit/studio-*` packages to the tag version and pins other `@lessonkit/*` deps in Studio packages to the version in `packages/core/package.json` on that commit (e.g. `1.0.2`).
-3. Publishes, in order: **`@lessonkit/studio-schema`**, **`@lessonkit/studio-builder`**, **`@lessonkit/studio-renderer`**, **`@lessonkit/studio-ui`** (same `@lessonkit` npm org as core/react).
-
-```bash
-# After CI is green on main and packages/studio-*/package.json are at the release version:
-git tag studio-v0.2.0
-git push origin studio-v0.2.0
-```
-
-**Local pack smoke (optional):**
-
-```bash
-node scripts/release/prepare-publish.mjs studio 0.2.0
-npm run build:packages
-npm pack -w @lessonkit/studio-schema --dry-run
-npm pack -w @lessonkit/studio-builder --dry-run
-npm pack -w @lessonkit/studio-renderer --dry-run
-npm pack -w @lessonkit/studio-ui --dry-run
-git checkout -- packages/studio-*/package.json
-```
-
-Re-run a failed publish: **Actions** → **Studio Release** → **Re-run failed jobs** (no new tag needed if the tag already points at a commit with these package names).
 
 ## After release
 

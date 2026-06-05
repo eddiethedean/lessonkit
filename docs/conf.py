@@ -38,9 +38,6 @@ exclude_patterns = [
     "LXPACK_BRIDGE.md",
     "LXPACK_UPGRADES_FOR_LESSONKIT.md",
     "LXPACK_UPGRADE_PLAN_FOR_MAINTAINERS.md",
-    "LessonKit_Studio_PLAN.md",
-    "LessonKit_Studio_SPEC.md",
-    "STUDIO_READINESS.md",
 ]
 
 source_suffix = {

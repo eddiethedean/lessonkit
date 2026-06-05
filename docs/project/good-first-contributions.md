@@ -6,7 +6,7 @@ Maintainers: label suitable issues **`good first issue`** or **`help wanted`** i
 
 ## Documentation
 
-- Fix broken links or version numbers (Studio **0.3.2**, framework **1.2.0**).
+- Fix broken links or version numbers (framework **1.3.0**).
 - Add a short “how I debugged X” note to [troubleshooting](../guides/vibe-coding/troubleshooting.md).
 - Improve [glossary](../reference/glossary.md) definitions from your onboarding experience.
 
@@ -19,11 +19,6 @@ Maintainers: label suitable issues **`good first issue`** or **`help wanted`** i
 
 - Extend a Vitest test in `packages/react` for a block you use in production.
 - Run `npm run test:integration` after CLI changes and document any new flags in [CLI reference](../reference/cli.md).
-
-## Studio (alpha)
-
-- Reproduce a Studio export bug with `examples/studio-export` and file an issue with `project.json` attached.
-- Align a Studio palette label with [H5P capability map](h5p-capability-map.md).
 
 ## Before you start
 

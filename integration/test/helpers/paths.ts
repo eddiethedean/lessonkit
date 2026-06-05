@@ -17,9 +17,6 @@ export const LESSONKIT_PACKAGES = [
   "@lessonkit/lxpack",
   "@lessonkit/react",
   "@lessonkit/cli",
-  "@lessonkit/studio-schema",
-  "@lessonkit/studio-renderer",
-  "@lessonkit/studio-codegen",
 ] as const;
 
 export function packageDir(name: string): string {

@@ -6,7 +6,7 @@
 | --- | --- | --- |
 | Compound containers | `AssessmentSequence` (navigation only) | `Page`, `InteractiveBook`, full `CompoundHandle` on sequences |
 | Resume state | — | `getCurrentState` / `resume` on assessments; session storage for compounds |
-| Content blocks | Studio-only primitives | Framework `Text`, `Heading`, `Image` |
+| Content blocks | — | Framework `Text`, `Heading`, `Image` |
 | Tier C/D (H5P) | — | `Accordion`, `DialogCards`, `Flashcards`, `ImageHotspots`, `ImageSlider`, `FindHotspot`, `FindMultipleHotspots` |
 | Block catalog | v2 default | **v3 default** (`buildBlockCatalog({ version: 3 })`) |
 | Telemetry | v1 + v2 assessment events | + v3 compound/content events (`book_page_viewed`, …) |

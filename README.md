@@ -9,11 +9,11 @@
 
 Developer tooling, not a timeline authoring tool: **React + telemetry + packaging**, not Storyline-in-a-box.
 
-> **Building a course?** You do not need to clone this repo. Run `npx @lessonkit/cli init my-course` and follow the [5-minute getting started guide](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/getting-started-in-5-minutes.html). Clone only if you are [contributing](CONTRIBUTING.md), running [examples](examples/README.md), or hacking [LessonKit Studio](https://lessonkit.readthedocs.io/en/latest/guides/studio/index.html) (alpha).
+> **Building a course?** You do not need to clone this repo. Run `npx @lessonkit/cli init my-course` and follow the [5-minute getting started guide](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/getting-started-in-5-minutes.html). Clone only if you are [contributing](CONTRIBUTING.md) or running [examples](examples/README.md).
 
 | | |
 | --- | --- |
-| **Release** | Framework [1.3.0](https://github.com/eddiethedean/lessonkit/blob/main/CHANGELOG.md#130---2026-06-04) · Studio [0.3.2](https://github.com/eddiethedean/lessonkit/blob/main/CHANGELOG.md#studio-v032---2026-06-03) |
+| **Release** | [1.3.0](https://github.com/eddiethedean/lessonkit/blob/main/CHANGELOG.md#130---2026-06-04) |
 | **npm** | [`@lessonkit/*`](https://www.npmjs.com/org/lessonkit) |
 | **Docs** | [lessonkit.readthedocs.io](https://lessonkit.readthedocs.io/en/latest/) |
 | **Node.js** | 18+ (dev, build, LMS packaging); **20+** for Playwright e2e when [contributing](CONTRIBUTING.md) |
@@ -26,8 +26,7 @@ Developer tooling, not a timeline authoring tool: **React + telemetry + packagin
 | --- | --- |
 | **New course (CLI)** | `npx @lessonkit/cli init` → [5-minute guide](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/getting-started-in-5-minutes.html) · [Quickstart](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/quickstart.html#cli-scaffold) |
 | **Existing React app** | `npm install @lessonkit/react` (+ CLI as devDep) → [Quickstart — add to Vite](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/quickstart.html#add-to-an-existing-vite-react-app) |
-| **LessonKit Studio (Alpha)** | [Live editor on Read the Docs](https://lessonkit.readthedocs.io/en/latest/guides/studio/app.html) (no install) · [Studio guides](https://lessonkit.readthedocs.io/en/latest/guides/studio/index.html) |
-| **Contribute / run Studio locally** | Clone this repo → [Contributing](CONTRIBUTING.md) · Studio dev: `npm run dev -w lessonkit-studio-web` after `npm run build:packages` |
+| **Contribute** | Clone this repo → [Contributing](CONTRIBUTING.md) |
 
 **Live demos:** [Examples on Read the Docs](https://lessonkit.readthedocs.io/en/latest/examples/index.html) · **Block catalogs:** [1.1](examples/framework-11-showcase) · [1.2](examples/framework-12-showcase)
 
@@ -246,10 +245,6 @@ Full guide: [MIGRATION-1.1-to-1.2.md](https://github.com/eddiethedean/lessonkit/
 | [`@lessonkit/cli`](https://github.com/eddiethedean/lessonkit/tree/main/packages/cli) | [![npm](https://img.shields.io/npm/v/@lessonkit/cli.svg)](https://www.npmjs.com/package/@lessonkit/cli) | `lessonkit init`, `dev`, `build`, `package` |
 | [`@lessonkit/themes`](https://github.com/eddiethedean/lessonkit/tree/main/packages/themes) | [![npm](https://img.shields.io/npm/v/@lessonkit/themes.svg)](https://www.npmjs.com/package/@lessonkit/themes) | Theme presets and design tokens |
 | [`@lessonkit/accessibility`](https://github.com/eddiethedean/lessonkit/tree/main/packages/accessibility) | [![npm](https://img.shields.io/npm/v/@lessonkit/accessibility.svg)](https://www.npmjs.com/package/@lessonkit/accessibility) | Focus trap, roving tabindex, reduced motion |
-
-**LessonKit Studio (Alpha)** (publish with `studio-v*` tags): [`@lessonkit/studio-schema`](packages/studio-schema) · [`@lessonkit/studio-renderer`](packages/studio-renderer) · [`@lessonkit/studio-builder`](packages/studio-builder) · [`@lessonkit/studio-codegen`](packages/studio-codegen) · [`@lessonkit/studio-ui`](packages/studio-ui) · [project format v1](docs/guides/studio/project-format-v1.md) · [visual editor](docs/guides/studio/editor.md) (`apps/studio-web`)
-
-Studio is **Alpha**: expect breaking changes to the editor UI, exported output, and `StudioProjectV1` format between Studio releases. Pin `@lessonkit/studio-*` versions and review the changelog before upgrading.
 
 ---
 

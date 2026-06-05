@@ -58,8 +58,8 @@ jobs:
             echo "Could not parse version from tag: ${GITHUB_REF_NAME}"
             exit 1
           fi
-          echo "Publishing @lessonkit/* version: $VERSION (Studio packages are not included)"
-          node scripts/release/prepare-publish.mjs lessonkit "$VERSION"
+          echo "Publishing @lessonkit/* version: $VERSION"
+          node scripts/release/prepare-publish.mjs "$VERSION"
 
       - name: Build
         run: npm run build

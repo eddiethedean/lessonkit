@@ -6,7 +6,7 @@
 Many LessonKit blocks mirror **[H5P](https://h5p.org/content-types-and-applications)** content types as native React components (not embedded H5P). **`Quiz`** = H5P **Multiple Choice**; Tier B P0 question types ship in [Catalog v2](#catalog-v2-framework-110--shipped) (framework 1.1.0). Full mapping: **[H5P capability map](../project/h5p-capability-map.md)** · guide: **[Coming from H5P?](../guides/h5p-for-lessonkit-authors.md)**.
 :::
 
-The block catalog describes every **framework-owned** learning primitive in `@lessonkit/react`. Use it to validate generated code, document supported props, and align Studio/AI workflows with the same runtime components authors use today.
+The block catalog describes every **framework-owned** learning primitive in `@lessonkit/react`. Use it to validate generated code, document supported props, and align AI/codegen workflows with the same runtime components authors use today.
 
 ## H5P names for v1 blocks
 
@@ -223,6 +223,6 @@ Import `@lessonkit/react/block-catalog.v3.json` or pin `{ version: 2 }` until ge
 2. Validate required props and IDs per entry (`requiredIds`, `props`).
 3. Keep `courseId` and every `checkId` in sync with `lessonkit.json`. For `single-spa` layouts, manifest `lessons[].id` lists LMS shell lesson(s) only; additional in-app `lessonId`s may exist only in React (see [Identity](reference/identity.md#single-spa-manifest-vs-in-app-steps)).
 4. Nest blocks per `parentConstraints` (Quiz inside Lesson, etc.).
-5. Do not invent Studio-only blocks (`text`, `heading`, …) in **framework** codegen until they ship in a future runtime catalog version (Studio schema is separate; see [H5P capability map](../project/h5p-capability-map.md)).
+5. Do not invent non-catalog blocks in **framework** codegen until they ship in a future runtime catalog version (see [H5P capability map](../project/h5p-capability-map.md)).
 6. For new assessments, see [catalog v2](#catalog-v2-framework-110--shipped) and implement `checkId` before shipping.
 7. When shipping an H5P-parity block, complete the [H5P documentation checklist](../project/roadmap.md#h5p-documentation-checklist-per-block) (capability map ✅, H5P names here, authors guide, Storybook).
