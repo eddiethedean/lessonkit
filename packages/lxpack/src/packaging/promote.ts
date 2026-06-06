@@ -138,6 +138,7 @@ export async function promoteStagingToOutDir(stagingDir: string, outDir: string)
           throw new Error(
             `[lessonkit/lxpack] promote failed (${promoteMsg}) and could not restore ${outDir} (${restoreMsg}). ` +
               `Recovery: previous output may be in ${backup}; staged package may be in ${failedPromote}.`,
+            { cause: restoreError },
           );
         }
       } else {
