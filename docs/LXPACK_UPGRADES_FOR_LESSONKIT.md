@@ -13,15 +13,15 @@ so it works better as the **packaging and LMS export layer** for
 
 ## LXPack compatibility matrix (LessonKit 1.4.x)
 
-`@lessonkit/lxpack` pins these packages to **exact `0.6.2`** in patch releases. Bump them only in a LessonKit minor/major release after running conformance and e2e.
+`@lessonkit/lxpack` pins these packages to **exact `0.6.4`** in patch releases. Bump them only in a LessonKit minor/major release after running conformance and e2e.
 
 | `@lxpack/*` package | Pinned version | Used for |
 | ------------------- | -------------- | -------- |
-| `@lxpack/api` | `0.6.2` | `validateCourse`, `buildCourse`, `packageLessonkit`, `ExportTarget` |
-| `@lxpack/spa-bridge` | `0.6.2` | Parent-frame LMS bridge (`window.parent.lxpackBridge.v1`) |
-| `@lxpack/tracking-schema` | `0.6.2` | Telemetry → bridge action mapping |
-| `@lxpack/validators` | `0.6.2` | `lessonkit.json` interchange schema |
-| `@lxpack/conformance` (dev/e2e only) | `0.6.2` | CI conformance harness |
+| `@lxpack/api` | `0.6.4` | `validateCourse`, `buildCourse`, `packageLessonkit`, `ExportTarget` |
+| `@lxpack/spa-bridge` | `0.6.4` | Parent-frame LMS bridge (`window.parent.lxpackBridge.v1`) |
+| `@lxpack/tracking-schema` | `0.6.4` | Telemetry → bridge action mapping |
+| `@lxpack/validators` | `0.6.4` | `lessonkit.json` interchange schema |
+| `@lxpack/conformance` (dev/e2e only) | `0.6.4` | CI conformance harness |
 
 **Upgrade procedure:** run `npm run conformance:lxpack` and `npm run test:e2e` in the monorepo; update this table and [CHANGELOG.md](https://github.com/eddiethedean/lessonkit/blob/main/CHANGELOG.md) when changing pins.
 

@@ -47,13 +47,13 @@
   "dependencies": {
     "@lessonkit/core": "1.4.0",
     "@lessonkit/lxpack": "1.4.0",
-    "commander": "^14.0.1"
+    "commander": "^15.0.0"
   },
   "engines": {
     "node": ">=18"
   },
   "devDependencies": {
-    "@types/node": "^24.0.0",
+    "@types/node": "^25.9.2",
     "tsup": "^8.5.0",
     "typescript": "^5.8.3",
     "vitest": "^4.1.8"

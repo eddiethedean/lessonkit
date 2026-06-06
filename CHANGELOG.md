@@ -6,6 +6,11 @@ All notable changes to the LessonKit monorepo are documented here.
 
 ## Unreleased
 
+### Changed
+
+- **Dependencies**: bump ESLint 10, React 19, Vite 8, `@vitejs/plugin-react` 6, jsdom 29, `@types/node` 25, commander 15, `@lxpack/*` 0.6.4, and GitHub Actions (checkout/setup-node/setup-python v6, CodeQL v4, deploy-pages/upload-pages-artifact); add npm overrides for React types and `@testing-library/dom` for RTL 16; CI checks run on Node 20 only (Vite 8 engine requirement).
+- **@lessonkit/lxpack**: `@lxpack/*` pins updated to exact `0.6.4`; ESLint 10 `preserve-caught-error` fixes in promote/spa dist validation.
+
 ## [1.4.0] - 2026-06-06
 
 Framework **1.4.x** — `InteractiveVideo` (H5P Interactive Video), bundled Tier B/C/D blocks, Studio removal, and a production-hardening audit pass. All seven `@lessonkit/*` packages ship at **1.4.0**.

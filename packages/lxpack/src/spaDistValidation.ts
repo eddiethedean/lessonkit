@@ -37,6 +37,7 @@ async function walkDistDir(rootReal: string, current: string, label: string): Pr
   } catch (err) {
     throw new Error(
       `spa dist for "${label}" is not readable: ${err instanceof Error ? err.message : String(err)}`,
+      { cause: err },
     );
   }
 
@@ -46,7 +47,7 @@ async function walkDistDir(rootReal: string, current: string, label: string): Pr
     if (stat.isSymbolicLink()) {
       throw new Error(`spa dist for "${label}" contains symlink: ${entryPath}`);
     }
-    let entryReal = entryPath;
+    let entryReal: string;
     try {
       entryReal = realpathSync(entryPath);
     } catch {
