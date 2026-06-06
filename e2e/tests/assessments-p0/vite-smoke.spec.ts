@@ -5,6 +5,8 @@ test.describe("assessments-p0 vite preview", () => {
   test("TrueFalse completes in SPA", async ({ page }) => {
     await page.goto("/");
     await completeAssessmentsP0ViteTrueFalse(page);
-    await expect(page.getByText(/Question 1 of/)).toBeVisible();
+    await expect(page.locator('[data-lk-check-id="phishing-tf"]').getByRole("status")).toContainText(
+      "Correct",
+    );
   });
 });

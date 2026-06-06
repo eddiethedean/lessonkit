@@ -68,8 +68,9 @@ describe("@lessonkit/core", () => {
   it("tracks via sink when batching is disabled", async () => {
     const sink = vi.fn(async () => {});
     const client = createTrackingClient({ sink, batch: { enabled: false } });
-    client.track(interactionEvent("t"));
-    expect(sink).toHaveBeenCalledTimes(1);
+    const event = interactionEvent("t");
+    client.track(event);
+    expect(sink).toHaveBeenCalledWith(event);
   });
 
   it("is a safe no-op when batching enabled but no sinks provided", () => {

@@ -24,15 +24,8 @@ test.describe("golden scorm2004 LMS", () => {
     await completeScorm2004Assessments(page, baseUrl);
 
     const state = await readScorm2004State(page);
-    const completed =
-      state.store["cmi.completion_status"] === "completed" ||
-      state.log.some(
-        (e) =>
-          e.element.includes("completion_status") &&
-          (e.value === "completed" || e.value === "passed"),
-      ) ||
-      state.log.some((e) => e.element.includes("score"));
-
-    expect(completed).toBe(true);
+    const completionStatus = state.store["cmi.completion_status"] ?? "";
+    expect(["completed", "passed"]).toContain(completionStatus);
+    expect(state.store["cmi.score.raw"]).toBeTruthy();
   });
 });

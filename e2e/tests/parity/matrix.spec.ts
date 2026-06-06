@@ -40,10 +40,9 @@ test.describe("export parity matrix", () => {
       results.scorm12_ui = true;
 
       const scorm = await readScorm12State(page);
+      const scormStatus = scorm.store["cmi.core.lesson_status"] ?? "";
       results.scorm12_lms =
-        scorm.log.length > 0 ||
-        scorm.store["cmi.core.lesson_status"] === "completed" ||
-        scorm.store["cmi.core.lesson_status"] === "passed";
+        scormStatus === "completed" || scormStatus === "passed";
     } finally {
       if (scormServer) await stopServer(scormServer);
     }

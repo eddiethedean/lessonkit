@@ -149,14 +149,19 @@ describe("coverage-full", () => {
     warn.mockRestore();
   });
 
-  it("tracking client flush resolves for empty buffer and after dispose", async () => {
+  it("flush on empty buffer is a no-op; post-dispose flush does not invoke batchSink", async () => {
+    const batchSink = vi.fn(async () => {});
     const client = createTrackingClient({
-      batchSink: async () => {},
+      batchSink,
       batch: { enabled: true, flushIntervalMs: 0, maxBatchSize: 10 },
     });
+
     await client.flush?.();
+    expect(batchSink).not.toHaveBeenCalled();
+
     await client.dispose?.();
     await client.flush?.();
+    expect(batchSink).not.toHaveBeenCalled();
   });
 
   it("tracking client enables batching by default when batchSink is set", () => {

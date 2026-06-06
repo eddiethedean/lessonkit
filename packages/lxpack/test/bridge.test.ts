@@ -111,7 +111,12 @@ describe("@lessonkit/lxpack/bridge", () => {
 
     try {
       forwardTelemetryToBridge(event, "auto");
-      expect(submitAssessment).toHaveBeenCalled();
+      expect(submitAssessment).toHaveBeenCalledWith({
+        id: "tf-1",
+        score: 1,
+        maxScore: 1,
+        passingScore: 0.7,
+      });
     } finally {
       vi.unstubAllGlobals();
     }

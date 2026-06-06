@@ -3,12 +3,11 @@ import { mkdtemp, rm, writeFile, mkdir } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 
+// packageLessonkitCourse is stubbed for fast CLI wiring tests; real lxpack paths live in package.integration.test.ts
 vi.mock("@lessonkit/lxpack", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@lessonkit/lxpack")>();
   return {
     ...actual,
-    validateDescriptor: vi.fn((input: unknown) => ({ ok: true, descriptor: input })),
-    validateProjectPaths: vi.fn(() => []),
     packageLessonkitCourse: vi.fn(),
   };
 });

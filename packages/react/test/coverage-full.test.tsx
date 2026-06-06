@@ -580,8 +580,9 @@ describe("coverage-full", () => {
     expect(events.some((e) => e.name === "quiz_answered")).toBe(false);
   });
 
-  it("provider returns early when all course_started dedupe marks exist", async () => {
+  it("does not re-emit course_started when all dedupe marks exist", async () => {
     const sessionId = "fully-settled-session";
+    const events: TelemetryEvent[] = [];
     seedStorage(`lessonkit:course_started:${sessionId}:course-1`);
     seedStorage(`lessonkit:course_started_tracking:${sessionId}:course-1`);
     seedStorage(`lessonkit:course_started_pipeline:${sessionId}:course-1`);
@@ -591,7 +592,7 @@ describe("coverage-full", () => {
         config={{
           courseId: "course-1",
           session: { sessionId },
-          tracking: { sink: () => {} },
+          tracking: { sink: (e) => events.push(e) },
           xapi: { enabled: false },
         }}
       >
@@ -602,6 +603,8 @@ describe("coverage-full", () => {
     await act(async () => {
       await Promise.resolve();
     });
+
+    expect(events.filter((e) => e.name === "course_started")).toHaveLength(0);
   });
 
   it("provider setActiveLesson skips completion when previous lesson already completed", async () => {

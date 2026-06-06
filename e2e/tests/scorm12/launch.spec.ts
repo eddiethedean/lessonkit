@@ -30,16 +30,7 @@ test.describe("golden scorm12 LMS", () => {
 
     const state = await readScorm12State(page);
     const status = state.store["cmi.core.lesson_status"] ?? "";
-    const completed =
-      status === "completed" ||
-      status === "passed" ||
-      state.log.some(
-        (e) =>
-          e.element.includes("lesson_status") &&
-          (e.value === "completed" || e.value === "passed"),
-      ) ||
-      state.log.some((e) => e.element.includes("score"));
-
-    expect(completed).toBe(true);
+    expect(["completed", "passed"]).toContain(status);
+    expect(state.store["cmi.core.score.raw"]).toBeTruthy();
   });
 });
