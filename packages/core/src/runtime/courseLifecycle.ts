@@ -6,6 +6,13 @@ import type { ProgressController } from "../progress";
 import type { StoragePort } from "../ports";
 import { hasCourseStarted, markCourseStarted } from "../session";
 
+const courseStartedEmitFlights = new Set<string>();
+
+/** @internal Reset in-flight course_started guard between tests. */
+export function resetCourseStartedEmitFlightForTests(): void {
+  courseStartedEmitFlights.clear();
+}
+
 export type CourseLifecycleContext = {
   courseId: CourseId;
   sessionId: string;
@@ -25,18 +32,27 @@ export function tryEmitCourseStarted(
   deps: CourseLifecycleDeps,
   alreadyEmittedToSink: boolean,
 ): { emitted: boolean; marked: boolean } {
+  const flightKey = `${ctx.sessionId}:${ctx.courseId}`;
   const marked = hasCourseStarted(ctx.storage, ctx.sessionId, ctx.courseId);
   if (alreadyEmittedToSink) {
     return { emitted: true, marked };
   }
-  const emitted = deps.emitCourseStartedEvent(ctx);
-  if (emitted && !marked) {
-    markCourseStarted(ctx.storage, ctx.sessionId, ctx.courseId);
+  if (courseStartedEmitFlights.has(flightKey)) {
+    return { emitted: false, marked };
   }
-  return {
-    emitted,
-    marked: hasCourseStarted(ctx.storage, ctx.sessionId, ctx.courseId),
-  };
+  courseStartedEmitFlights.add(flightKey);
+  try {
+    const emitted = deps.emitCourseStartedEvent(ctx);
+    if (emitted && !marked) {
+      markCourseStarted(ctx.storage, ctx.sessionId, ctx.courseId);
+    }
+    return {
+      emitted,
+      marked: hasCourseStarted(ctx.storage, ctx.sessionId, ctx.courseId),
+    };
+  } finally {
+    courseStartedEmitFlights.delete(flightKey);
+  }
 }
 
 export function buildCourseStartedTelemetryEvent(ctx: CourseLifecycleContext) {

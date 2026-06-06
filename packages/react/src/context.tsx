@@ -31,6 +31,8 @@ export type LessonkitConfig = {
     enabled?: boolean;
     sink?: (event: Parameters<TrackingClient["track"]>[0]) => void | Promise<void>;
     batchSink?: (events: Parameters<TrackingClient["track"]>[0][]) => void | Promise<void>;
+    /** Keepalive batch delivery for pagehide (e.g. from createFetchBatchSink). */
+    exitBatchSink?: (events: Parameters<TrackingClient["track"]>[0][]) => void | Promise<void>;
     batch?: {
       enabled?: boolean;
       flushIntervalMs?: number;
@@ -40,6 +42,8 @@ export type LessonkitConfig = {
   xapi?: {
     enabled?: boolean;
     transport?: XAPITransport;
+    /** Keepalive transport for pagehide (e.g. from createFetchTransport). */
+    exitTransport?: import("@lessonkit/xapi").XAPIExitTransport;
     client?: XAPIClient;
   };
   lxpack?: {

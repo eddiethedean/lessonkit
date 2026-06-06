@@ -148,12 +148,71 @@ describe("@lessonkit/xapi", () => {
     await new Promise((r) => setTimeout(r, 0));
 
     expect(calls).toBe(2);
-    expect(client.queueSize()).toBe(1);
-    transport.mockImplementation(async () => {});
-    const flushPromise = client.flush();
-    await new Promise((r) => setTimeout(r, 0));
     expect(client.queueSize()).toBe(0);
+    transport.mockImplementation(async () => {});
+    await client.flush();
+    expect(transport).toHaveBeenCalledTimes(2);
+  });
+
+  it("does not duplicate delivery when retry succeeds before flush", async () => {
+    let calls = 0;
+    const transport = vi.fn(async () => {
+      calls += 1;
+      if (calls === 1) {
+        throw new Error("network");
+      }
+    });
+    const client = createXAPIClient({ transport, courseId });
+    const statement: XAPIStatement = {
+      id: "retry-success-1",
+      timestamp: "t",
+      verb: "http://adlnet.gov/expapi/verbs/experienced",
+      object: { id: "o" },
+    };
+
+    client.send(statement);
+    client.send(statement);
+    await new Promise((r) => setTimeout(r, 10));
+
+    expect(client.queueSize()).toBe(0);
+    await client.flush();
+    expect(transport).toHaveBeenCalledTimes(2);
+  });
+
+  it("flushOnExit skips in-flight queue head to avoid duplicate delivery", async () => {
+    const exitCalls: XAPIStatement[] = [];
+    const queue = createInMemoryXAPIQueue();
+    let release!: () => void;
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const transport = vi.fn(async () => {
+      await gate;
+    });
+
+    queue.enqueue({
+      id: "head",
+      timestamp: "t",
+      verb: "http://adlnet.gov/expapi/verbs/experienced",
+      object: { id: "o1" },
+    });
+    queue.enqueue({
+      id: "tail",
+      timestamp: "t",
+      verb: "http://adlnet.gov/expapi/verbs/experienced",
+      object: { id: "o2" },
+    });
+
+    const flushPromise = queue.flush(transport);
+    await new Promise((r) => setTimeout(r, 0));
+    queue.flushOnExit((s) => {
+      exitCalls.push(s);
+    });
+    expect(exitCalls.map((s) => s.id)).toEqual(["tail"]);
+
+    release();
     await flushPromise;
+    expect(exitCalls.map((s) => s.id)).toEqual(["tail"]);
   });
 
   it("does not send duplicate in-flight statements with the same id", async () => {
@@ -434,5 +493,23 @@ describe("@lessonkit/xapi", () => {
 
     expect(statements).toHaveLength(1);
     expect(statements[0].result).toBeUndefined();
+  });
+
+  it("flushOnExit drains queue via exitTransport", () => {
+    const exitCalls: XAPIStatement[] = [];
+    const queue = createInMemoryXAPIQueue();
+    const client = createXAPIClient({
+      courseId,
+      queue,
+      exitTransport: (s) => {
+        exitCalls.push(s);
+      },
+    });
+
+    client.completeCourse();
+    expect(client.queueSize()).toBe(1);
+    client.flushOnExit?.();
+    expect(exitCalls).toHaveLength(1);
+    expect(client.queueSize()).toBe(0);
   });
 });

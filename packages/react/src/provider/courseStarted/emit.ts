@@ -37,11 +37,16 @@ export type CourseStartedEmitResult = "emitted" | "filtered" | "failed";
 
 type StoragePort = ReturnType<typeof createSessionStoragePort>;
 
-let courseStartedTrackingFlightKey: string | null = null;
+const courseStartedTrackingFlights = new Map<string, Promise<boolean>>();
 
 /** @internal Reset in-flight course_started tracking guard between tests. */
 export function resetCourseStartedTrackingFlightForTests(): void {
-  courseStartedTrackingFlightKey = null;
+  courseStartedTrackingFlights.clear();
+}
+
+/** Clear in-flight tracking emits (e.g. when the tracking client is recreated). */
+export function resetCourseStartedTrackingFlights(): void {
+  courseStartedTrackingFlights.clear();
 }
 
 export function isTrackingActive(tracking?: { enabled?: boolean }): boolean {
@@ -81,25 +86,43 @@ export async function emitCourseStartedToTracking(
   if (hasCourseStartedEmittedToTracking(storage, sessionId, courseId)) {
     return true;
   }
-  if (courseStartedTrackingFlightKey === flightKey) {
-    return false;
+  const existing = courseStartedTrackingFlights.get(flightKey);
+  if (existing) {
+    const settled = await existing;
+    if (settled) return true;
   }
-  courseStartedTrackingFlightKey = flightKey;
-  try {
-    if (shouldCommit && !shouldCommit()) return false;
-    tracking.track(event);
-    markCourseStartedEmittedToTracking(storage, sessionId, courseId);
-    const delivered = await tracking.flush?.();
-    if (delivered === false) return false;
-    if (shouldCommit && !shouldCommit()) return false;
-    return true;
-  } catch {
-    return false;
-  } finally {
-    if (courseStartedTrackingFlightKey === flightKey) {
-      courseStartedTrackingFlightKey = null;
+
+  let resolveFlight!: (value: boolean) => void;
+  const flight = new Promise<boolean>((resolve) => {
+    resolveFlight = resolve;
+  });
+  courseStartedTrackingFlights.set(flightKey, flight);
+
+  void (async () => {
+    try {
+      if (shouldCommit && !shouldCommit()) {
+        resolveFlight(false);
+        return;
+      }
+      tracking.track(event);
+      const delivered = await tracking.flush?.();
+      if (delivered === false) {
+        resolveFlight(false);
+        return;
+      }
+      if (markCourseStartedEmittedToTracking(storage, sessionId, courseId) === false) {
+        resolveFlight(false);
+        return;
+      }
+      resolveFlight(true);
+    } catch {
+      resolveFlight(false);
+    } finally {
+      courseStartedTrackingFlights.delete(flightKey);
     }
-  }
+  })();
+
+  return flight;
 }
 
 export async function emitCourseStartedPipelineOnly(
@@ -122,8 +145,10 @@ export async function emitCourseStartedPipelineOnly(
       skipXapi: opts.skipXapi,
     });
     if (opts.shouldCommit && !opts.shouldCommit()) return "failed";
-    markCourseStarted(opts.storage, opts.sessionId, opts.courseId);
-    markCourseStartedPipelineDelivered(opts.storage, opts.sessionId, opts.courseId);
+    if (markCourseStarted(opts.storage, opts.sessionId, opts.courseId) === false) return "failed";
+    if (markCourseStartedPipelineDelivered(opts.storage, opts.sessionId, opts.courseId) === false) {
+      return "failed";
+    }
     if (xapiStatementSent) {
       opts.onXapiStatementSent?.();
     }
@@ -191,7 +216,9 @@ export async function emitCourseStartedToTrackingOnly(
       extraSinks: opts.extraSinks,
       skipXapi: true,
     });
-    markCourseStartedPipelineDelivered(opts.storage, opts.sessionId, opts.courseId);
+    if (markCourseStartedPipelineDelivered(opts.storage, opts.sessionId, opts.courseId) === false) {
+      return "failed";
+    }
     return "emitted";
   } catch {
     return "failed";

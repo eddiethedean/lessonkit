@@ -22,6 +22,8 @@ function isDevEnvironment(): boolean {
 
 export function createXAPIClient(opts?: {
   transport?: XAPITransport;
+  /** Keepalive transport for pagehide flush (e.g. from createFetchTransport). */
+  exitTransport?: import("./types").XAPIExitTransport;
   courseId?: CourseId;
   queue?: XAPIQueue;
   /** When creating the default in-memory queue (max size 1000 unless overridden). */
@@ -30,6 +32,7 @@ export function createXAPIClient(opts?: {
   onQueueCap?: () => void;
 }): XAPIClient {
   const transport = opts?.transport;
+  const exitTransport = opts?.exitTransport;
   const courseId = opts?.courseId;
   const queue =
     opts?.queue ??
@@ -41,6 +44,7 @@ export function createXAPIClient(opts?: {
   let warnedNoTransport = false;
   let warnedTransportFailure = false;
   const inflightById = new Map<string, Promise<void>>();
+  const inflightStatements = new Map<string, XAPIStatement>();
 
   const sendOrQueue = (statement: XAPIStatement) => {
     const normalized = withStatementId(statement);
@@ -65,8 +69,12 @@ export function createXAPIClient(opts?: {
       return;
     }
 
+    inflightStatements.set(normalized.id, normalized);
     const flight = Promise.resolve()
-      .then(() => transport(normalized))
+      .then(async () => {
+        await transport(normalized);
+        queue.removeById(normalized.id);
+      })
       .catch(() => {
         queue.enqueue(normalized);
         if (isDevEnvironment() && !warnedTransportFailure) {
@@ -79,6 +87,7 @@ export function createXAPIClient(opts?: {
       })
       .finally(() => {
         inflightById.delete(normalized.id);
+        inflightStatements.delete(normalized.id);
       });
     inflightById.set(normalized.id, flight);
     void flight.catch(() => {});
@@ -114,6 +123,25 @@ export function createXAPIClient(opts?: {
         await Promise.allSettled(flights);
       }
     },
+    flushOnExit: exitTransport
+      ? () => {
+          const exitSentIds = new Set<string>();
+          for (const statement of inflightStatements.values()) {
+            if (exitSentIds.has(statement.id)) continue;
+            try {
+              exitTransport(statement);
+              exitSentIds.add(statement.id);
+            } catch {
+              // page is unloading
+            }
+          }
+          queue.flushOnExit((statement) => {
+            if (exitSentIds.has(statement.id)) return;
+            exitTransport(statement);
+            exitSentIds.add(statement.id);
+          });
+        }
+      : undefined,
     startedLesson: ({ lessonId }: { lessonId: LessonId }) => {
       if (!courseId) return;
       emit({

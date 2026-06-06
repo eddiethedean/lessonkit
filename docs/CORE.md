@@ -57,18 +57,23 @@ pipeline.emit(event);
 
 ```typescript
 import { createTrackingClient } from "@lessonkit/core";
+import { createFetchBatchSink } from "@lessonkit/xapi";
+
+const { batchSink, exitBatchSink } = createFetchBatchSink({ url: "/api/telemetry/batch" });
 
 const client = createTrackingClient({
-  sink: (event) => console.log(event),
+  batchSink,
+  exitBatchSink,
   batch: { enabled: true, flushIntervalMs: 5000, maxBatchSize: 50 },
-  batchSink: (events) => sendBatch(events),
 });
 ```
 
+For local debugging only, a per-event `sink` or `console.log` is fine; production courses should use batched delivery and [observability hooks](../guides/react-developers/production-checklist.md).
+
 ### Catalog
 
-- `TELEMETRY_EVENT_CATALOG`, `buildTelemetryCatalog()`, `telemetryCatalogVersion`
-- JSON: `@lessonkit/core/telemetry-catalog.v1.json`
+- `TELEMETRY_EVENT_CATALOG`, `buildTelemetryCatalog()`, `telemetryCatalogVersion` (default **v3** in 1.2+)
+- JSON: `@lessonkit/core/telemetry-catalog.v3.json` (v1/v2 files retained for older generators)
 
 See [Telemetry reference](reference/telemetry.md).
 

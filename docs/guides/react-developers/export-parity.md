@@ -28,6 +28,8 @@ LessonKit **1.0.0** extends the **0.9.x conformance harness** with Vitest CLI in
 | xAPI | `tests/xapi/launch.spec.ts` | Packaged shell completes native assessments |
 | cmi5 | `tests/cmi5/launch.spec.ts` | Packaged shell completes native assessments |
 | CLI pipeline | `npm run test:integration` | Real `init` / `build` / `package` without mocks |
+| Manifest ↔ React IDs | `integration/test/showcase-parity.test.ts` | `courseId` and `checkId` in `lessonkit.json` appear in example `src/` |
+| Package-time ID guard | `lessonkit package` | `validateReactManifestParity` fails when React source omits manifest IDs |
 | All LMS packages | `npm run conformance:lxpack` | `@lxpack/conformance` validate + build (standalone, scorm12, scorm2004, xapi, cmi5) |
 | Golden artifacts | `npm run conformance:golden` | `examples/lxpack-golden` produces standalone dir + scorm12 zip |
 

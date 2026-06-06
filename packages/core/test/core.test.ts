@@ -331,5 +331,24 @@ describe("@lessonkit/core", () => {
     const totalDelivered = batchSink.mock.calls.reduce((n, [events]) => n + events.length, 0);
     expect(totalDelivered).toBe(7);
   });
+
+  it("flushOnExit delivers buffered events via exitBatchSink", () => {
+    const exitEvents: TelemetryEvent[][] = [];
+    const batchSink = vi.fn(async () => {
+      throw new Error("offline");
+    });
+    const client = createTrackingClient({
+      batchSink,
+      exitBatchSink: (events) => {
+        exitEvents.push([...events]);
+      },
+      batch: { enabled: true, flushIntervalMs: 0, maxBatchSize: 100 },
+    });
+
+    client.track(interactionEvent("exit-1"));
+    client.flushOnExit?.();
+    expect(exitEvents).toHaveLength(1);
+    expect(exitEvents[0]).toHaveLength(1);
+  });
 });
 

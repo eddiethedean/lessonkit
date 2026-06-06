@@ -17,9 +17,34 @@ Peer usage: `@lessonkit/core` (telemetry types and URNs).
 | Export | Purpose |
 |--------|---------|
 | `telemetryEventToXAPIStatement(event)` | Canonical mapper from `@lessonkit/core` `TelemetryEvent` to `XAPIStatement` (or `null`) |
-| `createXAPIClient({ courseId, transport, queue? })` | Imperative lifecycle helpers + queued send |
+| `createXAPIClient({ courseId, transport, exitTransport?, queue? })` | Imperative lifecycle helpers + queued send; optional `flushOnExit()` when `exitTransport` is set |
+| `createFetchTransport({ url, timeoutMs?, retries?, backoffMs?, headers? })` | Production fetch transport with timeout, retry backoff, and keepalive `exitTransport` |
+| `createFetchBatchSink({ url, … })` | Batch analytics POST with matching `exitBatchSink` for pagehide |
 | `createInMemoryXAPIQueue({ maxSize?, onDepth?, onCap? })` | Default queue when transport fails or is async (max **1000** statements; oldest dropped when full) |
-| `XAPIStatement`, `XAPITransport`, `XAPIClient`, `XAPIQueue` | Types |
+| `XAPIStatement`, `XAPITransport`, `XAPIExitTransport`, `XAPIClient`, `XAPIQueue` | Types |
+
+## Recommended transport (production)
+
+```typescript
+import { createFetchTransport, createXAPIClient } from "@lessonkit/xapi";
+
+const { transport, exitTransport } = createFetchTransport({
+  url: "/api/xapi/statements",
+  timeoutMs: 30_000,
+  headers: () => ({ Authorization: `Bearer ${getShortLivedToken()}` }),
+});
+
+const client = createXAPIClient({
+  courseId: "my-course",
+  transport,
+  exitTransport,
+});
+
+await client.flush();
+client.flushOnExit?.(); // pagehide keepalive drain
+```
+
+Custom `fetch` transports should use `AbortSignal.timeout(ms)` and handle non-OK responses by throwing so statements re-queue.
 
 ## Telemetry → xAPI mapping
 
@@ -40,12 +65,17 @@ For block-level `interaction` events, set `blockId` on `Scenario` / `Reflection`
 
 ## React runtime
 
-`LessonkitProvider` / `Course` call `telemetryEventToXAPIStatement` after each tracked event when `config.xapi.transport` or `config.xapi.client` is set. Course-level `initialized` is sent once per session when both tracking and xAPI are enabled.
+`LessonkitProvider` / `Course` call `telemetryEventToXAPIStatement` after each tracked event when `config.xapi.transport` or `config.xapi.client` is set. Pass `exitTransport` alongside `transport` (from `createFetchTransport`) for pagehide delivery. Course-level `initialized` is sent once per session when both tracking and xAPI are enabled.
 
 Direct `createXAPIClient` usage is optional for non-React tooling; prefer the mapper for parity with telemetry URNs.
 
 ## Transport errors
 
-If `transport` throws or rejects, statements are retained in the in-memory queue. Call `await client.flush()` to retry. The React provider flushes on client/course changes, unmount, and when the tab is hidden (`visibilitychange` / `pagehide`).
+If `transport` throws or rejects, statements are retained in the in-memory queue. Call `await client.flush()` to retry. The React provider calls `flushOnExit()` then `flush()` when the tab is hidden (`visibilitychange` / `pagehide`).
 
 When the queue exceeds `maxSize` (default **1000**), the oldest statement is dropped and `onCap` runs (wire via `config.observability.onXapiQueueCap` in React). Under prolonged LRS outage, statements are lost silently unless you monitor queue depth via `onXapiQueueDepth` or handle `onXapiQueueCap`. See [production checklist](../guides/react-developers/production-checklist.md).
+
+## Related
+
+- [Production checklist](../guides/react-developers/production-checklist.md)
+- [Telemetry reference](telemetry.md)

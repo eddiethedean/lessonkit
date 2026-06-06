@@ -40,4 +40,8 @@ Stable identifiers for telemetry, xAPI URNs, and LMS descriptors. Required on `C
 
 ## Block catalog
 
-Machine-readable list of block types and props. **`buildBlockCatalog()`** defaults to **catalog v3** in framework 1.2. JSON files are named `block-catalog.v1.json` … `v3.json` on `@lessonkit/react`—the filename is the schema generation, not necessarily the default you pass at runtime.
+Machine-readable list of block types and props. **`buildBlockCatalog()`** defaults to **catalog v3** (framework 1.2+; extended with `Slide` / `SlideDeck` in **1.3.0**). JSON files are named `block-catalog.v1.json` … `v3.json` on `@lessonkit/react`—the filename is the schema generation, not necessarily the default you pass at runtime.
+
+## Observability hooks
+
+Optional React `config.observability` callbacks for production monitoring: `onTelemetrySinkError`, `onTelemetryBufferDrop`, `onXapiQueueDepth`, `onXapiQueueCap`, `onLxpackBridgeMiss`. See [production checklist](../guides/react-developers/production-checklist.md).

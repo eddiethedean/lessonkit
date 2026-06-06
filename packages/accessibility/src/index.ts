@@ -24,6 +24,8 @@ export type RovingTabIndexOptions = {
   orientation?: "horizontal" | "vertical" | "both";
   loop?: boolean;
   initialIndex?: number;
+  /** Called when the active index changes so consumers can re-render. */
+  onActiveIndexChange?: (index: number) => void;
 };
 
 /** Screen-reader-only styles (no external CSS required). */
@@ -106,7 +108,25 @@ export function focusFirst(container: FocusContainer | null): boolean {
 
 export function getFocusableElements(container: Element): HTMLElement[] {
   const candidates = Array.from(container.querySelectorAll(FOCUSABLE_SELECTORS));
-  return candidates.filter((n): n is HTMLElement => isHTMLElement(n) && !n.hasAttribute("disabled"));
+  return candidates.filter(
+    (n): n is HTMLElement => isHTMLElement(n) && !n.hasAttribute("disabled") && isVisibleFocusable(n),
+  );
+}
+
+function isVisibleFocusable(el: HTMLElement): boolean {
+  if (el.closest("[inert], [aria-hidden='true']")) return false;
+  if (typeof el.checkVisibility === "function") {
+    try {
+      return el.checkVisibility();
+    } catch {
+      // fall through to style checks
+    }
+  }
+  if (typeof window !== "undefined" && typeof window.getComputedStyle === "function") {
+    const style = window.getComputedStyle(el);
+    if (style.display === "none" || style.visibility === "hidden") return false;
+  }
+  return true;
 }
 
 export function trapFocus(
@@ -224,8 +244,21 @@ export function createRovingTabIndex(opts: RovingTabIndexOptions): {
   const orientation = opts.orientation ?? "both";
   let activeIndex = clampIndex(opts.initialIndex ?? 0, itemCount);
 
+  const focusActiveItem = () => {
+    if (!opts.getId || typeof document === "undefined") return;
+    const id = opts.getId(activeIndex);
+    if (!id) return;
+    document.getElementById(id)?.focus();
+  };
+
+  const notifyActiveChange = () => {
+    opts.onActiveIndexChange?.(activeIndex);
+  };
+
   const setActiveIndex = (next: number) => {
     activeIndex = clampIndex(next, itemCount);
+    notifyActiveChange();
+    focusActiveItem();
   };
 
   const move = (delta: number) => {
@@ -235,9 +268,11 @@ export function createRovingTabIndex(opts: RovingTabIndexOptions): {
     const next = activeIndex + delta;
     if (loop) {
       activeIndex = ((next % itemCount) + itemCount) % itemCount;
-      return;
+    } else {
+      activeIndex = clampIndex(next, itemCount);
     }
-    activeIndex = clampIndex(next, itemCount);
+    notifyActiveChange();
+    focusActiveItem();
   };
 
   const onKeyDown = (e: KeyboardEvent | { key: string; preventDefault: () => void }) => {
@@ -245,11 +280,11 @@ export function createRovingTabIndex(opts: RovingTabIndexOptions): {
     switch (e.key) {
       case "Home":
         e.preventDefault();
-        activeIndex = 0;
+        setActiveIndex(0);
         return;
       case "End":
         e.preventDefault();
-        activeIndex = itemCount - 1;
+        setActiveIndex(itemCount - 1);
         return;
       case "ArrowLeft":
         if (orientation === "vertical") return;

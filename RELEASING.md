@@ -2,6 +2,24 @@
 
 Published packages (`v*.*.*` tag → [Release](.github/workflows/release.yml)): `@lessonkit/core`, `@lessonkit/xapi`, `@lessonkit/accessibility`, `@lessonkit/themes`, `@lessonkit/lxpack`, `@lessonkit/react`, `@lessonkit/cli`
 
+## Publishing 1.3.1
+
+### 1.3.1 checklist
+
+| Item | Status |
+|------|--------|
+| All seven `@lessonkit/*` packages at `1.3.1` | Done |
+| [CHANGELOG.md](CHANGELOG.md) `## [1.3.1]` documents production hardening patch | Done |
+| Sphinx `docs/conf.py` `release` = `1.3.1` | Done |
+| `lessonkit init` template pins `^1.3.1` | Done |
+| No pending `.changeset/*.md` files | Done |
+| `npm run copy-template -w @lessonkit/cli` (template in sync) | Done |
+| `npm run lint` + `typecheck` + `test` + `test:integration` | Verify before tag |
+| `npm audit --omit=dev --audit-level=high` | 0 vulnerabilities (2026-06-05) |
+| Git tag `v1.3.1` | **Create when ready** |
+
+> **Do not create or push `v1.3.1`** until you intend to publish to npm.
+
 ## Publishing 1.3.0
 
 ### 1.3.0 checklist (ready to publish)

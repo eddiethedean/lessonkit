@@ -1,4 +1,4 @@
-import type { TelemetryEvent } from "@lessonkit/core";
+import type { TelemetryEvent, TelemetryBatchSink } from "@lessonkit/core";
 import type { InMemoryXAPIQueueOptions } from "@lessonkit/xapi";
 import { createInMemoryXAPIQueue } from "@lessonkit/xapi";
 import type { LessonkitConfig } from "../context";
@@ -30,6 +30,54 @@ export function createXapiQueueFromObservability(
 }
 
 type TrackingSink = NonNullable<LessonkitConfig["tracking"]>["sink"];
+
+export function wrapBatchSink(
+  batchSink: TelemetryBatchSink | undefined,
+  observability?: LessonkitObservabilityConfig,
+): TelemetryBatchSink | undefined {
+  if (!batchSink || !observability?.onTelemetrySinkError) return batchSink;
+  const onError = observability.onTelemetrySinkError;
+  return async (events) => {
+    try {
+      await batchSink(events);
+    } catch (err) {
+      onError(err, { sinkId: "tracking-batch" });
+      throw err;
+    }
+  };
+}
+
+export function warnMissingProductionObservability(
+  observability: LessonkitObservabilityConfig | undefined,
+  opts: { trackingEnabled: boolean; xapiEnabled: boolean },
+): void {
+  let isProduction = false;
+  try {
+    isProduction = (import.meta as { env?: { PROD?: boolean } }).env?.PROD === true;
+  } catch {
+    // no import.meta
+  }
+  if (!isProduction) {
+    const g = globalThis as typeof globalThis & { process?: { env?: { NODE_ENV?: string } } };
+    isProduction =
+      typeof g.process !== "undefined" && g.process.env?.NODE_ENV === "production";
+  }
+  if (!isProduction) return;
+  if (!opts.trackingEnabled && !opts.xapiEnabled) return;
+  const hooks = [
+    observability?.onTelemetrySinkError,
+    observability?.onTelemetryBufferDrop,
+    observability?.onXapiQueueDepth,
+    observability?.onXapiQueueCap,
+    observability?.onLxpackBridgeMiss,
+  ];
+  if (hooks.some(Boolean)) return;
+  if (typeof console !== "undefined") {
+    console.warn(
+      "[lessonkit] Production deployment without observability hooks — telemetry/xAPI failures and buffer drops will be silent. See https://lessonkit.readthedocs.io/en/latest/guides/react-developers/production-checklist.html",
+    );
+  }
+}
 
 export function wrapTrackingSink(
   sink: TrackingSink,

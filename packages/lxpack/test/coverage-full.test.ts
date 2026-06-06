@@ -22,6 +22,7 @@ import {
   validatePackageInputs,
   writeLxpackProject,
 } from "../src/index";
+import { writeMinimalParitySource } from "./helpers/writeMinimalParitySource";
 import {
   assertRealPathUnderRoot,
   assertResolvedPathUnderRoot,
@@ -829,8 +830,10 @@ describe("coverage-full lxpack", () => {
       const dist = join(root, "dist");
       await mkdir(dist, { recursive: true });
       await writeFile(join(dist, "index.html"), "<!DOCTYPE html><html></html>", "utf8");
+      const packDescriptor = { ...baseDescriptor, assessments: [] as typeof baseDescriptor.assessments };
+      await writeMinimalParitySource(root, packDescriptor);
       const result = await packageLessonkitCourse({
-        descriptor: { ...baseDescriptor, assessments: [] },
+        descriptor: packDescriptor,
         outDir: join(root, "course"),
         spaDistDir: dist,
         projectRoot: root,

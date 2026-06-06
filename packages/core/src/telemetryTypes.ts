@@ -176,5 +176,7 @@ export type TrackingClient = {
   track: (event: TelemetryEvent) => void;
   /** Resolves to true when all buffered events were delivered; false when a sink failure re-queued events. */
   flush?: () => void | Promise<boolean>;
+  /** Best-effort synchronous flush for pagehide (keepalive batch sink when configured). */
+  flushOnExit?: () => void;
   dispose?: () => void | Promise<void>;
 };

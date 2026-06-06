@@ -92,9 +92,9 @@ export function markCourseStartedEmittedToTracking(
   storage: StoragePort,
   sessionId: string,
   courseId?: CourseId,
-): void {
-  if (!courseId) return;
-  storage.setItem(courseStartedTrackingStorageKey(sessionId, courseId), "1");
+): boolean {
+  if (!courseId) return false;
+  return storage.setItem(courseStartedTrackingStorageKey(sessionId, courseId), "1");
 }
 
 export function hasCourseStartedPipelineDelivered(
@@ -110,9 +110,9 @@ export function markCourseStartedPipelineDelivered(
   storage: StoragePort,
   sessionId: string,
   courseId?: CourseId,
-): void {
-  if (!courseId) return;
-  storage.setItem(courseStartedPipelineStorageKey(sessionId, courseId), "1");
+): boolean {
+  if (!courseId) return false;
+  return storage.setItem(courseStartedPipelineStorageKey(sessionId, courseId), "1");
 }
 
 /** @internal Reset shared volatile session id between tests. */

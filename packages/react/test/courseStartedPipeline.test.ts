@@ -27,15 +27,31 @@ describe("emitCourseStartedNonTrackingPipeline", () => {
     vi.restoreAllMocks();
   });
 
-  it("sends xAPI and reports xapiStatementSent", async () => {
+  it("sends xAPI, awaits flush, and reports xapiStatementSent", async () => {
     const send = vi.fn();
+    const flush = vi.fn(async () => {});
     const result = await emitCourseStartedNonTrackingPipeline({
       event: courseStartedEvent,
-      xapi: mockXapiClient(send),
+      xapi: { ...mockXapiClient(send), flush },
       lxpackBridge: "off",
     });
     expect(send).toHaveBeenCalledTimes(1);
+    expect(flush).toHaveBeenCalledTimes(1);
     expect(result.xapiStatementSent).toBe(true);
+  });
+
+  it("does not report xapiStatementSent when flush fails", async () => {
+    const send = vi.fn();
+    const flush = vi.fn(async () => {
+      throw new Error("flush failed");
+    });
+    await expect(
+      emitCourseStartedNonTrackingPipeline({
+        event: courseStartedEvent,
+        xapi: { ...mockXapiClient(send), flush },
+        lxpackBridge: "off",
+      }),
+    ).rejects.toThrow("flush failed");
   });
 
   it("skips xAPI when skipXapi is true", async () => {

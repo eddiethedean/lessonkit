@@ -17,20 +17,33 @@ npm install @lessonkit/xapi @lessonkit/core
 ## Usage
 
 ```typescript
-import { createXAPIClient, telemetryEventToXAPIStatement } from "@lessonkit/xapi";
+import { createFetchTransport, createXAPIClient, telemetryEventToXAPIStatement } from "@lessonkit/xapi";
+
+const { transport, exitTransport } = createFetchTransport({
+  url: "/api/xapi/statements",
+  timeoutMs: 30_000,
+});
 
 const xapi = createXAPIClient({
   courseId: "my-course",
-  transport: async (statement) => {
-    await fetch("/xapi/statements", { method: "POST", body: JSON.stringify(statement) });
-  },
+  transport,
+  exitTransport,
 });
 
 xapi.completeLesson({ lessonId: "lesson-1", durationMs: 1200, success: true });
 await xapi.flush();
+xapi.flushOnExit?.(); // pagehide keepalive delivery
 ```
 
 Map from telemetry events: `telemetryEventToXAPIStatement(event)` — uses canonical LessonKit URNs.
+
+Batch analytics sink:
+
+```typescript
+import { createFetchBatchSink } from "@lessonkit/xapi";
+
+const { batchSink, exitBatchSink } = createFetchBatchSink({ url: "/api/telemetry/batch" });
+```
 
 ## Behavior
 
@@ -38,6 +51,7 @@ Map from telemetry events: `telemetryEventToXAPIStatement(event)` — uses canon
 - Transport failure → re-queue; call `flush()` to retry.
 - Queue capped at **1000** statements by default; oldest dropped when full (`onCap` / `createInMemoryXAPIQueue({ onCap })`).
 - Concurrent `flush()` calls are coalesced.
+- `createFetchTransport` retries with exponential backoff and uses `AbortSignal.timeout` when available.
 
 ## Docs
 

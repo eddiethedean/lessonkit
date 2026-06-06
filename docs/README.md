@@ -21,7 +21,7 @@ sphinx-build -b html docs docs/_build/html
 - `guides/` — tutorials and how-tos
 - `reference/` — Sphinx wrappers pointing at root markdown (`CLI.md`, `PACKAGING.md`, etc.)
 - `storybook/` — component gallery notes
-- `conf.py` — Sphinx config (`release = "1.3.0"`)
+- `conf.py` — Sphinx config (`release = "1.3.1"`)
 
 Publishing: [READTHEDOCS.md](https://github.com/eddiethedean/lessonkit/blob/main/docs/READTHEDOCS.md) · [`.readthedocs.yaml`](https://github.com/eddiethedean/lessonkit/blob/main/.readthedocs.yaml)
 

@@ -39,10 +39,14 @@ function DragTheWordsInner(
   const [submitted, setSubmitted] = useState(false);
   const completedRef = useRef(false);
   const answeredRef = useRef(false);
+  const checkSnapshotRef = useRef<string | null>(null);
+  const telemetryReplayedRef = useRef(false);
 
   const reset = () => {
     completedRef.current = false;
     answeredRef.current = false;
+    checkSnapshotRef.current = null;
+    telemetryReplayedRef.current = false;
     setPassed(false);
     setSubmitted(false);
     setZones(Object.fromEntries(answers.map((_, i) => [`zone-${i}`, ""])));
@@ -62,6 +66,38 @@ function DragTheWordsInner(
   });
   const maxScore = answers.length;
   const passedThreshold = meetsPassingThreshold(score, maxScore || 1, props.passingScore);
+
+  const replayTelemetry = (
+    nextZones: Record<string, string>,
+    nextPassed: boolean,
+    nextSubmitted: boolean,
+    nextScore: number,
+    nextMaxScore: number,
+  ) => {
+    if (telemetryReplayedRef.current || (!nextSubmitted && !nextPassed)) return;
+    telemetryReplayedRef.current = true;
+    const nextPassedThreshold = meetsPassingThreshold(
+      nextScore,
+      nextMaxScore || 1,
+      props.passingScore,
+    );
+    assessment.answer({
+      checkId,
+      interactionType: INTERACTION,
+      question: props.template,
+      response: nextZones,
+      correct: nextPassedThreshold,
+    });
+    if (nextPassed || nextPassedThreshold) {
+      assessment.complete({
+        checkId,
+        interactionType: INTERACTION,
+        score: nextScore,
+        maxScore: nextMaxScore,
+        passingScore: props.passingScore ?? nextMaxScore,
+      });
+    }
+  };
 
   const handle = useMemo(
     () =>
@@ -83,22 +119,35 @@ function DragTheWordsInner(
         getCurrentState: () => ({ zones, pool, passed, keyboardWord, submitted }),
         resume: (state) => {
           const rawZones = state.zones;
-          if (rawZones && typeof rawZones === "object") setZones({ ...(rawZones as Record<string, string>) });
+          let nextZones = zones;
+          if (rawZones && typeof rawZones === "object") {
+            nextZones = { ...(rawZones as Record<string, string>) };
+            setZones(nextZones);
+          }
           if (Array.isArray(state.pool)) setPool([...(state.pool as string[])]);
+          let nextPassed = passed;
+          let nextSubmitted = submitted;
           readBooleanStateField(state, "passed", (value) => {
+            nextPassed = value;
             setPassed(value);
             completedRef.current = value;
             answeredRef.current = value;
           });
           readBooleanStateField(state, "submitted", (value) => {
+            nextSubmitted = value;
             setSubmitted(value);
             if (value) answeredRef.current = true;
           });
           const kw = state.keyboardWord;
           if (kw === null || typeof kw === "string") setKeyboardWord(kw ?? null);
+          let nextScore = 0;
+          answers.forEach((ans, i) => {
+            if ((nextZones[`zone-${i}`] ?? "").trim().toLowerCase() === ans.toLowerCase()) nextScore += 1;
+          });
+          replayTelemetry(nextZones, nextPassed, nextSubmitted, nextScore, answers.length);
         },
       }),
-    [allFilled, checkId, keyboardWord, maxScore, passed, passedThreshold, pool, score, submitted, zones],
+    [allFilled, answers, assessment, checkId, keyboardWord, maxScore, passed, passedThreshold, pool, props.passingScore, props.template, score, submitted, zones],
   );
 
   useAssessmentHandleRegistration(checkId, handle, ref);
@@ -133,7 +182,10 @@ function DragTheWordsInner(
       return;
     }
     if (!allFilled) return;
-    if (answeredRef.current || submitted) return;
+    if (passed) return;
+    const snapshot = JSON.stringify(zones);
+    if (checkSnapshotRef.current === snapshot) return;
+    checkSnapshotRef.current = snapshot;
     answeredRef.current = true;
     setSubmitted(true);
     assessment.answer({
@@ -159,13 +211,14 @@ function DragTheWordsInner(
   useEffect(() => {
     if (!allFilled) {
       answeredRef.current = false;
+      checkSnapshotRef.current = null;
       setSubmitted(false);
     }
   }, [allFilled]);
 
   useEffect(() => {
-    if (props.autoCheck && allFilled) check();
-  }, [allFilled, props.autoCheck, zones, passedThreshold]);
+    if (props.autoCheck && allFilled && !passed) check();
+  }, [allFilled, props.autoCheck, zones, passedThreshold, passed]);
 
   return (
     <section aria-label="Drag the Words" data-lk-check-id={checkId}>

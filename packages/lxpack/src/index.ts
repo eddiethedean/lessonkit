@@ -12,6 +12,7 @@ export type {
 
 export type { DescriptorValidationIssue, DescriptorValidationResult } from "./validateDescriptor";
 export { validateDescriptor, validateDescriptorForTarget } from "./validateDescriptor";
+export { validateReactManifestParity, type ReactParityIssue } from "./validateReactParity";
 export type { ValidationIssue } from "./validationIssue";
 export type { ProjectPathsInput } from "./validateProjectPaths";
 export {

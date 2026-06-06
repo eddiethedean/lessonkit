@@ -23,7 +23,7 @@ cd my-course
 npm run dev
 ```
 
-Open the URL Vite prints (usually `http://localhost:5173`). Open the browser console to see sample telemetry and xAPI logs from the starter template.
+Open the URL Vite prints (usually `http://localhost:5173`). The starter template uses noop telemetry sinks with comments pointing to the [production checklist](production-checklist.md)—wire `createFetchTransport` / `createFetchBatchSink` before go-live.
 
 Alternative: `npx lessonkit dev` (same as the `dev` script).
 
@@ -79,6 +79,7 @@ Override the path with `--out path/to/custom.zip` (must stay inside the project 
 ## Next steps
 
 - [Quickstart](quickstart.md) — add LessonKit to an existing Vite app
+- [Production checklist](production-checklist.md) — observability hooks, transport timeouts, LMS bridge
 - [Packaging and CLI](packaging-and-cli.md) — all `--target` values
 - [Glossary](../../reference/glossary.md) — LXPack, IDs, catalogs
 - [Live examples](../../examples/index.md) — full demo courses

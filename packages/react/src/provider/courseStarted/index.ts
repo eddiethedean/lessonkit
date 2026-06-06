@@ -9,6 +9,7 @@ export {
   isCourseStartedSinkSettled,
   isTrackingActive,
   resetCourseStartedTrackingFlightForTests,
+  resetCourseStartedTrackingFlights,
   type CourseStartedEmitOpts,
   type CourseStartedEmitResult,
 } from "./emit";

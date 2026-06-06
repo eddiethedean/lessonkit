@@ -2,8 +2,16 @@ import type { LessonkitThemeV1 } from "./schema";
 
 /** Reject values that could break out of a CSS declaration block. */
 export function sanitizeCssCustomPropertyValue(value: string): string | null {
-  if (/[;}\r\n]/.test(value) || value.includes("/*")) return null;
+  if (/[;}\r\n\\<>]/.test(value) || value.includes("/*")) return null;
   return value;
+}
+
+function isSafeCssSelector(selector: string): boolean {
+  if (selector === ":root") return true;
+  if (/^\.[a-zA-Z_][\w-]*$/.test(selector)) return true;
+  if (/^#[a-zA-Z_][\w-]*$/.test(selector)) return true;
+  if (/^\[data-lk-theme=(["'])[^"']+\1\]$/.test(selector)) return true;
+  return false;
 }
 
 function assignCssVar(vars: Record<string, string>, key: string, value: string): void {
@@ -88,6 +96,9 @@ export function themeToCssDeclarationBlock(
   opts?: { selector?: string },
 ): string {
   const selector = opts?.selector ?? ":root";
+  if (!isSafeCssSelector(selector)) {
+    throw new Error(`[lessonkit] unsafe CSS selector for theme block: ${selector}`);
+  }
   const vars = themeToCssVariables(theme);
   const body = Object.entries(vars)
     .map(([k, v]) => `  ${k}: ${v};`)

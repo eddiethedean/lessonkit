@@ -1,6 +1,33 @@
 import { describe, expect, it, vi } from "vitest";
 import type { TelemetryEvent } from "@lessonkit/core";
-import { wrapTrackingSink } from "../src/runtime/observability";
+import {
+  wrapBatchSink,
+  wrapTrackingSink,
+  warnMissingProductionObservability,
+} from "../src/runtime/observability";
+
+describe("wrapBatchSink", () => {
+  it("reports batchSink errors via onTelemetrySinkError", async () => {
+    const onTelemetrySinkError = vi.fn();
+    const batchSink = vi.fn(() => Promise.reject(new Error("batch fail")));
+    const wrapped = wrapBatchSink(batchSink, { onTelemetrySinkError });
+    await expect(wrapped?.([{ name: "interaction" } as TelemetryEvent])).rejects.toThrow(
+      "batch fail",
+    );
+    expect(onTelemetrySinkError).toHaveBeenCalledWith(expect.any(Error), {
+      sinkId: "tracking-batch",
+    });
+  });
+});
+
+describe("warnMissingProductionObservability", () => {
+  it("does not warn in test environment", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    warnMissingProductionObservability(undefined, { trackingEnabled: true, xapiEnabled: true });
+    expect(warn).not.toHaveBeenCalled();
+    warn.mockRestore();
+  });
+});
 
 describe("wrapTrackingSink", () => {
   it("reports sync sink errors without rethrowing", () => {

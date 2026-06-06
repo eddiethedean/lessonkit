@@ -124,6 +124,10 @@ const PRESETS: Record<ThemePresetName, LessonkitThemeV1> = {
   brand: brandTheme,
 };
 
+function cloneTheme(theme: LessonkitThemeV1): LessonkitThemeV1 {
+  return JSON.parse(JSON.stringify(theme)) as LessonkitThemeV1;
+}
+
 export function getPresetTheme(preset: ThemePresetName): LessonkitThemeV1 {
-  return PRESETS[preset];
+  return cloneTheme(PRESETS[preset]);
 }

@@ -12,6 +12,8 @@ export function createTrackingClient(opts?: {
   batchSink?: TelemetryBatchSink;
   /** Called when an event is dropped because the batch buffer is at cap (including in production). */
   onBufferDrop?: () => void;
+  /** Keepalive batch delivery for pagehide (e.g. from createFetchBatchSink). */
+  exitBatchSink?: TelemetryBatchSink;
 }): TrackingClient {
   const sink = opts?.sink;
   const batchSink = opts?.batchSink;
@@ -45,6 +47,7 @@ export function createTrackingClient(opts?: {
 
   const buffer: TelemetryEvent[] = [];
   let flushInFlight: Promise<boolean> | null = null;
+  let inflightExitBatch: TelemetryEvent[] | null = null;
   let disposed = false;
   let disposing = false;
   let intervalId: ReturnType<typeof globalThis.setInterval> | undefined;
@@ -55,6 +58,7 @@ export function createTrackingClient(opts?: {
     /* v8 ignore stop */
 
     const events = buffer.splice(0, buffer.length);
+    inflightExitBatch = events;
     let succeeded = false;
 
     return Promise.resolve()
@@ -83,6 +87,9 @@ export function createTrackingClient(opts?: {
           return runFlush();
         }
         return succeeded;
+      })
+      .finally(() => {
+        inflightExitBatch = null;
       });
   };
 
@@ -136,6 +143,24 @@ export function createTrackingClient(opts?: {
       if (buffer.length >= maxBatchSize) void flush();
     },
     flush,
+    flushOnExit: opts?.exitBatchSink
+      ? () => {
+          const fromBuffer = buffer.splice(0, buffer.length);
+          const fromInflight = inflightExitBatch ? [...inflightExitBatch] : [];
+          const events = [...fromInflight, ...fromBuffer];
+          if (!events.length) return;
+          try {
+            const result = opts.exitBatchSink!(events);
+            if (result != null && typeof (result as Promise<void>).catch === "function") {
+              void (result as Promise<void>).catch(() => {
+                buffer.unshift(...events);
+              });
+            }
+          } catch {
+            buffer.unshift(...events);
+          }
+        }
+      : undefined,
     dispose: () => {
       if (disposed || disposing) return Promise.resolve();
       disposing = true;

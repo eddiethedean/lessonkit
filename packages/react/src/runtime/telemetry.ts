@@ -6,6 +6,7 @@ export type TelemetryConfig = {
   enabled?: boolean;
   sink?: (event: TelemetryEvent) => void | Promise<void>;
   batchSink?: (events: TelemetryEvent[]) => void | Promise<void>;
+  exitBatchSink?: (events: TelemetryEvent[]) => void | Promise<void>;
   createClient?: () => TrackingClient;
   batch?: {
     enabled?: boolean;
@@ -24,6 +25,7 @@ export function createTrackingClientFromConfig(
     sink: config.tracking?.sink,
     batchSink: config.tracking?.batchSink,
     batch: config.tracking?.batch,
+    exitBatchSink: config.tracking?.exitBatchSink,
     onBufferDrop: observability?.onTelemetryBufferDrop,
   });
 }

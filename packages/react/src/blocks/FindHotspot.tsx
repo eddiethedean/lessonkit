@@ -1,4 +1,4 @@
-import React, { forwardRef, useEffect, useMemo, useState } from "react";
+import React, { forwardRef, useEffect, useMemo, useRef, useState } from "react";
 import type { AssessmentBaseProps, AssessmentHandle, AssessmentInteractionType } from "@lessonkit/core";
 import type { LessonId } from "@lessonkit/core";
 import { AssessmentLessonGuard } from "../assessment/AssessmentLessonGuard";
@@ -32,6 +32,7 @@ function FindHotspotInner(
   const checkId = useMemo(() => normalizeComponentId(props.checkId, "checkId"), [props.checkId]);
   const [selected, setSelected] = useState<string | null>(null);
   const [checked, setChecked] = useState(false);
+  const telemetryReplayedRef = useRef(false);
   const assessment = useAssessmentState(props.enclosingLessonId);
 
   const targetIdsKey = props.targets.map((t) => t.id).join("\0");
@@ -39,9 +40,34 @@ function FindHotspotInner(
   useEffect(() => {
     setSelected(null);
     setChecked(false);
+    telemetryReplayedRef.current = false;
   }, [checkId, props.correctTargetId, targetIdsKey]);
 
   const correct = selected === props.correctTargetId;
+
+  const replayTelemetry = (
+    nextSelected: string | null,
+    nextChecked: boolean,
+    nextCorrect: boolean,
+  ) => {
+    if (telemetryReplayedRef.current || !nextChecked || nextSelected === null) return;
+    telemetryReplayedRef.current = true;
+    assessment.answer({
+      checkId,
+      interactionType: INTERACTION,
+      response: nextSelected,
+      correct: nextCorrect,
+    });
+    if (nextCorrect) {
+      assessment.complete({
+        checkId,
+        interactionType: INTERACTION,
+        score: 1,
+        maxScore: 1,
+        passingScore: props.passingScore ?? 1,
+      });
+    }
+  };
 
   const handle = useMemo(
     () =>
@@ -53,6 +79,7 @@ function FindHotspotInner(
         resetTask: () => {
           setSelected(null);
           setChecked(false);
+          telemetryReplayedRef.current = false;
         },
         showSolutions: () => setSelected(props.correctTargetId),
         getXAPIData: () => ({
@@ -65,17 +92,24 @@ function FindHotspotInner(
         }),
         getCurrentState: () => ({ selected, checked }),
         resume: (state) => {
-          const nextSelected = readStringField(state, "selected");
-          if (typeof nextSelected === "string" || nextSelected === null) {
+          let nextSelected: string | null = selected;
+          const rawSelected = readStringField(state, "selected");
+          if (typeof rawSelected === "string" || rawSelected === null) {
             const valid =
-              nextSelected === null ||
-              props.targets.some((t) => t.id === nextSelected);
-            setSelected(valid ? nextSelected : null);
+              rawSelected === null || props.targets.some((t) => t.id === rawSelected);
+            nextSelected = valid ? rawSelected : null;
+            setSelected(nextSelected);
           }
-          readBooleanStateField(state, "checked", setChecked);
+          let nextChecked = checked;
+          readBooleanStateField(state, "checked", (value) => {
+            nextChecked = value;
+            setChecked(value);
+          });
+          const nextCorrect = nextSelected === props.correctTargetId;
+          replayTelemetry(nextSelected, nextChecked, nextCorrect);
         },
       }),
-    [checkId, selected, checked, correct, props.correctTargetId, props.targets],
+    [assessment, checkId, checked, correct, props.correctTargetId, props.passingScore, props.targets, selected],
   );
 
   useAssessmentHandleRegistration(checkId, handle, ref);

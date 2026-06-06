@@ -29,22 +29,32 @@ Wrap your app (or course subtree):
 
 ```tsx
 import { useMemo } from "react";
-import type { TelemetryEvent } from "@lessonkit/core";
 import { Course, Lesson, Quiz, Scenario, ThemeProvider } from "@lessonkit/react";
-import type { XAPIStatement } from "@lessonkit/xapi";
+import { createFetchBatchSink, createFetchTransport } from "@lessonkit/xapi";
 
 export default function App() {
-  const config = useMemo(
-    () => ({
+  const config = useMemo(() => {
+    const xapiFetch = createFetchTransport({ url: "/api/xapi/statements", timeoutMs: 30_000 });
+    const analytics = createFetchBatchSink({ url: "/api/telemetry/batch", timeoutMs: 30_000 });
+    return {
       tracking: {
-        sink: (event: TelemetryEvent) => console.log(event),
+        batchSink: analytics.batchSink,
+        exitBatchSink: analytics.exitBatchSink,
+        batch: { enabled: true, flushIntervalMs: 5000, maxBatchSize: 25 },
       },
       xapi: {
-        transport: (statement: XAPIStatement) => console.log(statement),
+        transport: xapiFetch.transport,
+        exitTransport: xapiFetch.exitTransport,
       },
-    }),
-    [],
-  );
+      observability: {
+        onTelemetrySinkError: (err) => console.error("[telemetry]", err),
+        onTelemetryBufferDrop: () => console.warn("[telemetry] buffer cap"),
+        onXapiQueueDepth: (depth) => depth > 100 && console.warn("[xapi] queue", depth),
+        onXapiQueueCap: () => console.warn("[xapi] queue cap"),
+        onLxpackBridgeMiss: (event) => console.warn("[bridge]", event.name),
+      },
+    };
+  }, []);
 
   return (
     <ThemeProvider mode="light" preset="default">
@@ -67,10 +77,16 @@ export default function App() {
 }
 ```
 
+:::{admonition} Local development only
+:class: note
+
+The example above uses `console.*` in observability hooks for visibility while building. In production, send these signals to your monitoring stack—see [production checklist](production-checklist.md).
+:::
+
 (keep-react-ids-in-sync-with-lessonkitjson)=
 ## Keep React IDs in sync with lessonkit.json
 
-Packaging reads **`lessonkit.json`** and validates it against your built SPA. Mismatched IDs are a common first failure at `lessonkit package`, not at `npm run dev`.
+Packaging reads **`lessonkit.json`** and validates it against your built SPA. As of **1.3.0**, `lessonkit package` also scans `src/**/*.{ts,tsx}` and **fails** when `course.courseId` or any manifest `checkId` is missing from React source (`validateReactManifestParity` in `@lessonkit/lxpack`).
 
 ```text
 lessonkit.json                    src/App.tsx
@@ -91,8 +107,8 @@ Rules of thumb:
 
 | Symptom | Fix |
 | --- | --- |
-| Unknown or missing `checkId` | Add the assessment to `lessonkit.json` or fix the React prop |
-| `courseId` mismatch | Align `Course` and `course.courseId` |
+| Unknown or missing `checkId` in React source | Add `checkId="…"` in React **and** the assessment in `lessonkit.json` |
+| `courseId` mismatch | Align `Course` and `course.courseId` (package validates React source) |
 | Empty `dist/` | Run `npm run build` before `lessonkit package` |
 | Wrong layout | Use `"layout": "single-spa"` for standard CLI package |
 :::
@@ -110,6 +126,7 @@ npm -w lessonkit-example-react-vite run dev
 ## Next steps
 
 - [Getting started in 5 minutes](getting-started-in-5-minutes.md)
+- [Production checklist](production-checklist.md)
 - [Project structure](project-structure.md)
 - [Components and hooks](components-and-hooks.md)
 - [Glossary](../../reference/glossary.md)

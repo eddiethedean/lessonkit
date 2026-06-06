@@ -1,5 +1,6 @@
 export type {
   XAPIClient,
+  XAPIExitTransport,
   XAPIObjectDefinition,
   XAPIQueue,
   XAPIResult,
@@ -10,4 +11,12 @@ export type {
 } from "./types";
 export { createInMemoryXAPIQueue, type InMemoryXAPIQueueOptions } from "./queue";
 export { createXAPIClient } from "./client";
+export {
+  createFetchTransport,
+  createFetchBatchSink,
+  type CreateFetchTransportOptions,
+  type FetchTransportBundle,
+  type CreateFetchBatchSinkOptions,
+  type FetchBatchSinkBundle,
+} from "./fetchTransport";
 export { telemetryEventToXAPIStatement } from "./telemetryMap";

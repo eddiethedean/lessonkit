@@ -19,6 +19,7 @@ import {
 import { promoteStagingToOutDir } from "./packaging/promote";
 import { buildStagingPackage, ensureOutDirParent } from "./packaging/staging";
 import { findPackagingErrorIssues } from "./packaging/issueSeverity";
+import { validateReactManifestParity } from "./validateReactParity";
 
 export type { ExportTarget } from "@lxpack/api";
 
@@ -126,6 +127,26 @@ export async function packageLessonkitCourse(
   }
 
   const descriptor = descriptorValidation.descriptor;
+
+  if (writeOpts.projectRoot) {
+    const parityIssues = validateReactManifestParity({
+      projectRoot: writeOpts.projectRoot,
+      descriptor,
+    });
+    const parityErrors = parityIssues.filter((i) => i.severity === "error");
+    if (parityErrors.length > 0) {
+      return {
+        ok: false,
+        courseDir: outDir,
+        target,
+        issues: parityErrors.map((i) => ({
+          path: i.path,
+          message: i.message,
+          severity: i.severity,
+        })),
+      };
+    }
+  }
 
   const nonInjectableAssessments = (descriptor.assessments ?? [])
     .map((assessment, index) => ({ assessment, index }))

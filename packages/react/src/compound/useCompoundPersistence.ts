@@ -95,6 +95,7 @@ export function useCompoundPersistence(opts: {
 
   const buildStateRef = useRef(buildState);
   buildStateRef.current = buildState;
+  const persistNowRef = useRef<() => void>(() => {});
 
   const finalizeHydration = useCallback(
     (childStates: Record<string, AssessmentResumeState>) => {
@@ -104,6 +105,7 @@ export function useCompoundPersistence(opts: {
       };
       skipSaveUntilHydratedRef.current = false;
       pendingChildResumeRef.current = null;
+      queueMicrotask(() => persistNowRef.current());
     },
     [],
   );
@@ -117,6 +119,14 @@ export function useCompoundPersistence(opts: {
       alreadyResumed: resumedChildKeysRef.current,
     });
     if (!applied) {
+      if (handles.size === 0) {
+        const registeredOnly = stripOrphanChildStates(handles, pending.childStates);
+        resumeChildHandles(handles, registeredOnly, {
+          alreadyResumed: resumedChildKeysRef.current,
+        });
+        finalizeHydration(registeredOnly);
+        return;
+      }
       const handlesAtWait = handles.size;
       queueMicrotask(() => {
         if (pendingChildResumeRef.current !== pending) return;
@@ -152,8 +162,13 @@ export function useCompoundPersistence(opts: {
 
   const persistNow = useCallback(() => {
     if (!opts.enabled || !opts.courseId) return;
+    if (skipSaveUntilHydratedRef.current) return;
     saveResume(buildStateRef.current());
   }, [opts.enabled, opts.courseId, saveResume]);
+
+  useEffect(() => {
+    persistNowRef.current = persistNow;
+  }, [persistNow]);
 
   const notifyImperativeResume = useCallback(
     (state: CompoundResumeState) => {
@@ -179,12 +194,12 @@ export function useCompoundPersistence(opts: {
   }, [bridgeRef, notifyImperativeResume]);
 
   useEffect(() => {
-    persistNow();
-  }, [persistNow, opts.index, opts.pageCount, handlesVersion]);
-
-  useEffect(() => {
     applyPendingChildResume();
   }, [opts.index, handlesVersion, applyPendingChildResume]);
+
+  useEffect(() => {
+    persistNow();
+  }, [persistNow, opts.index, opts.pageCount, handlesVersion]);
 
   useEffect(() => {
     if (!opts.enabled || !opts.courseId || typeof document === "undefined") return;

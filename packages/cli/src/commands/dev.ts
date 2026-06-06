@@ -20,7 +20,10 @@ export async function runDev(opts: DevBuildOptions): Promise<CliJsonResult> {
   assertViteProject(pkg, project.root);
   const viteJs = resolveViteJs(project.root);
 
-  await runCommand(process.execPath, [viteJs, ...(opts.viteArgs ?? [])], { cwd: project.root });
+  await runCommand(process.execPath, [viteJs, ...(opts.viteArgs ?? [])], {
+    cwd: project.root,
+    timeoutMs: 0,
+  });
 
   return { ok: true, command: "dev", projectRoot: project.root };
 }

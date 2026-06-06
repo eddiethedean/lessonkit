@@ -1,5 +1,5 @@
 import { cryptoRandomId } from "./id";
-import type { XAPIQueue, XAPIStatement, XAPITransport } from "./types";
+import type { XAPIExitTransport, XAPIQueue, XAPIStatement, XAPITransport } from "./types";
 
 function withStatementId(statement: XAPIStatement): XAPIStatement {
   const trimmed = statement.id?.trim();
@@ -30,6 +30,14 @@ export function createInMemoryXAPIQueue(opts?: InMemoryXAPIQueueOptions): XAPIQu
 
   const notifyDepth = () => {
     opts?.onDepth?.(buffer.length);
+  };
+
+  const removeById = (id: string) => {
+    const idx = buffer.findIndex((s) => s.id === id);
+    if (idx >= 0) {
+      buffer.splice(idx, 1);
+      notifyDepth();
+    }
   };
 
   const runFlush = async (transport: XAPITransport): Promise<void> => {
@@ -68,6 +76,7 @@ export function createInMemoryXAPIQueue(opts?: InMemoryXAPIQueueOptions): XAPIQu
       buffer.push(normalized);
       notifyDepth();
     },
+    removeById,
     size: () => buffer.length,
     flush: async (transport: XAPITransport) => {
       if (flushInFlight) return flushInFlight;
@@ -78,6 +87,22 @@ export function createInMemoryXAPIQueue(opts?: InMemoryXAPIQueueOptions): XAPIQu
       });
       return flushInFlight;
     },
+    flushOnExit: (exitTransport: XAPIExitTransport) => {
+      const startIdx = headInFlight && buffer.length > 0 ? 1 : 0;
+      for (let i = startIdx; i < buffer.length; i++) {
+        const statement = buffer[i]!;
+        try {
+          exitTransport(statement);
+        } catch {
+          // page is unloading
+        }
+      }
+      if (startIdx === 0) {
+        buffer.length = 0;
+      } else if (buffer.length > 1) {
+        buffer.splice(1);
+      }
+      notifyDepth();
+    },
   };
 }
-

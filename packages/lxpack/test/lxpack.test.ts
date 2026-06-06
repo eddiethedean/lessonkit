@@ -14,6 +14,7 @@ import {
   validateDescriptorForTarget,
   writeLxpackProject,
 } from "../src/index";
+import { writeMinimalParitySource } from "./helpers/writeMinimalParitySource";
 
 const tempDirs: string[] = [];
 
@@ -625,9 +626,12 @@ describe("packageLessonkitCourse", () => {
     const { writeFile } = await import("node:fs/promises");
     await writeFile(join(dist, "index.html"), "<!DOCTYPE html><html><body>ok</body></html>", "utf-8");
 
+    const packDescriptor = { ...baseDescriptor, assessments: [] as typeof baseDescriptor.assessments };
+    await writeMinimalParitySource(root, packDescriptor);
+
     const outDir = join(root, "course");
     const result = await packageLessonkitCourse({
-      descriptor: { ...baseDescriptor, assessments: [] },
+      descriptor: packDescriptor,
       outDir,
       spaDistDir: dist,
       projectRoot: root,
@@ -653,9 +657,12 @@ describe("packageLessonkitCourse", () => {
     const { writeFile } = await import("node:fs/promises");
     await writeFile(join(dist, "index.html"), "<!DOCTYPE html><html><body>ok</body></html>", "utf-8");
 
+    const packDescriptor = { ...baseDescriptor, assessments: [] as typeof baseDescriptor.assessments };
+    await writeMinimalParitySource(root, packDescriptor);
+
     const outDir = join(root, "course");
     const result = await packageLessonkitCourse({
-      descriptor: { ...baseDescriptor, assessments: [] },
+      descriptor: packDescriptor,
       outDir,
       spaDistDir: dist,
       projectRoot: root,

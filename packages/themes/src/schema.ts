@@ -98,7 +98,7 @@ function isNonEmptyString(v: unknown): v is string {
 }
 
 function isSafeCssCustomPropertyValue(value: string): boolean {
-  return !/[;}\r\n]/.test(value) && !value.includes("/*");
+  return !/[;}\r\n\\<>]/.test(value) && !value.includes("/*");
 }
 
 function validateCssTokenValue(path: string, value: string, issues: ThemeValidationIssue[]): boolean {

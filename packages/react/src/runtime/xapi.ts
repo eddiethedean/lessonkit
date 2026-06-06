@@ -5,6 +5,7 @@ import { createXAPIClient } from "@lessonkit/xapi";
 export type XapiConfig = {
   enabled?: boolean;
   transport?: XAPITransport;
+  exitTransport?: import("@lessonkit/xapi").XAPIExitTransport;
   client?: XAPIClient;
 };
 
@@ -17,6 +18,7 @@ export function createXapiClientFromConfig(config: { courseId?: CourseId; xapi?:
   return createXAPIClient({
     courseId: config.courseId,
     transport: config.xapi?.transport,
+    exitTransport: config.xapi?.exitTransport,
     queue,
   });
 }

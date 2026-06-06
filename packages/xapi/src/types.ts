@@ -42,13 +42,20 @@ export type XAPITransport = (statement: XAPIStatement) => void | Promise<void>;
 
 export type XAPIQueue = {
   enqueue: (statement: XAPIStatement) => void;
+  /** Remove a queued statement by id (e.g. after successful direct transport). */
+  removeById: (id: string) => void;
   flush: (transport: XAPITransport) => Promise<void>;
+  flushOnExit: (exitTransport: XAPIExitTransport) => void;
   size: () => number;
 };
+
+export type XAPIExitTransport = (statement: XAPIStatement) => void;
 
 export type XAPIClient = {
   send: (statement: XAPIStatement) => void;
   flush: () => Promise<void>;
+  /** Best-effort synchronous flush for pagehide using keepalive transport when configured. */
+  flushOnExit?: () => void;
   queueSize: () => number;
   startedLesson: (opts: { lessonId: LessonId }) => void;
   completeLesson: (opts: {

@@ -45,10 +45,14 @@ function FillInTheBlanksInner(
   const [submitted, setSubmitted] = useState(false);
   const completedRef = useRef(false);
   const answeredRef = useRef(false);
+  const checkSnapshotRef = useRef<string | null>(null);
+  const telemetryReplayedRef = useRef(false);
 
   const reset = () => {
     completedRef.current = false;
     answeredRef.current = false;
+    checkSnapshotRef.current = null;
+    telemetryReplayedRef.current = false;
     setPassed(false);
     setValues(Object.fromEntries(blanks.map((b) => [b.id, ""])));
     setShowSolutions(false);
@@ -67,6 +71,38 @@ function FillInTheBlanksInner(
   });
   const maxScore = blanks.length;
   const passedThreshold = meetsPassingThreshold(score, maxScore || 1, props.passingScore);
+
+  const replayTelemetry = (
+    nextValues: Record<string, string>,
+    nextPassed: boolean,
+    nextSubmitted: boolean,
+    nextScore: number,
+    nextMaxScore: number,
+  ) => {
+    if (telemetryReplayedRef.current || (!nextSubmitted && !nextPassed)) return;
+    telemetryReplayedRef.current = true;
+    const nextPassedThreshold = meetsPassingThreshold(
+      nextScore,
+      nextMaxScore || 1,
+      props.passingScore,
+    );
+    assessment.answer({
+      checkId,
+      interactionType: INTERACTION,
+      question: props.template,
+      response: nextValues,
+      correct: nextPassedThreshold,
+    });
+    if (nextPassed || nextPassedThreshold) {
+      assessment.complete({
+        checkId,
+        interactionType: INTERACTION,
+        score: nextScore,
+        maxScore: nextMaxScore,
+        passingScore: props.passingScore ?? nextMaxScore,
+      });
+    }
+  };
 
   const handle = useMemo(
     () =>
@@ -88,20 +124,33 @@ function FillInTheBlanksInner(
         getCurrentState: () => ({ values, passed, showSolutions, submitted }),
         resume: (state) => {
           const raw = state.values;
-          if (raw && typeof raw === "object") setValues({ ...(raw as Record<string, string>) });
+          let nextValues = values;
+          if (raw && typeof raw === "object") {
+            nextValues = { ...(raw as Record<string, string>) };
+            setValues(nextValues);
+          }
+          let nextPassed = passed;
+          let nextSubmitted = submitted;
           readBooleanStateField(state, "passed", (value) => {
+            nextPassed = value;
             setPassed(value);
             completedRef.current = value;
             answeredRef.current = value;
           });
           readBooleanStateField(state, "showSolutions", setShowSolutions);
           readBooleanStateField(state, "submitted", (value) => {
+            nextSubmitted = value;
             setSubmitted(value);
             if (value) answeredRef.current = true;
           });
+          let nextScore = 0;
+          blanks.forEach((b) => {
+            if ((nextValues[b.id] ?? "").trim().toLowerCase() === b.answer.toLowerCase()) nextScore += 1;
+          });
+          replayTelemetry(nextValues, nextPassed, nextSubmitted, nextScore, blanks.length);
         },
       }),
-    [allFilled, checkId, maxScore, passed, passedThreshold, score, showSolutions, submitted, values],
+    [allFilled, assessment, blanks, checkId, maxScore, passed, passedThreshold, props.passingScore, props.template, score, showSolutions, submitted, values],
   );
 
   useAssessmentHandleRegistration(checkId, handle, ref);
@@ -114,7 +163,10 @@ function FillInTheBlanksInner(
       return;
     }
     if (!allFilled) return;
-    if (answeredRef.current || submitted) return;
+    if (passed) return;
+    const snapshot = JSON.stringify(values);
+    if (checkSnapshotRef.current === snapshot) return;
+    checkSnapshotRef.current = snapshot;
     answeredRef.current = true;
     setSubmitted(true);
     assessment.answer({
@@ -140,13 +192,14 @@ function FillInTheBlanksInner(
   useEffect(() => {
     if (!allFilled) {
       answeredRef.current = false;
+      checkSnapshotRef.current = null;
       setSubmitted(false);
     }
   }, [allFilled]);
 
   useEffect(() => {
-    if (props.autoCheck && allFilled) check();
-  }, [allFilled, props.autoCheck, values, passedThreshold]);
+    if (props.autoCheck && allFilled && !passed) check();
+  }, [allFilled, props.autoCheck, values, passedThreshold, passed]);
 
   const reveal = showSolutions || (passed && props.enableSolutionsButton);
 

@@ -14,9 +14,10 @@ Verify the parent exposes `window.parent.lxpackBridge.v1` in SCORM previews befo
 ## xAPI and analytics
 
 1. **Configure a transport** — `config.xapi.transport` or `config.xapi.client`. Without it, statements queue in memory only.
-2. **Flush on tab exit** — `LessonkitProvider` flushes on `visibilitychange` (hidden) and `pagehide`. Custom clients must call `flush()` themselves.
-3. **Monitor queue depth** — use `config.observability.onXapiQueueDepth` and handle `onXapiQueueCap` when the queue drops oldest statements (default cap: 1000).
-4. **Never embed LRS secrets in the bundle** — use short-lived tokens from your backend or LMS proxy; do not ship Basic auth passwords in client JavaScript.
+2. **Use timeout + backoff** — prefer `createFetchTransport` from `@lessonkit/xapi` (uses `AbortSignal.timeout` and retry backoff). Wire `exitTransport` for pagehide keepalive delivery.
+3. **Flush on tab exit** — `LessonkitProvider` calls `flushOnExit` (keepalive) then async `flush` on `visibilitychange` (hidden) and `pagehide`. Custom clients must implement `flushOnExit` themselves.
+4. **Monitor queue depth** — use `config.observability.onXapiQueueDepth` and handle `onXapiQueueCap` when the queue drops oldest statements (default cap: 1000).
+5. **Never embed LRS secrets in the bundle** — use short-lived tokens from your backend or LMS proxy; do not ship Basic auth passwords in client JavaScript.
 
 ## Session and resume
 
@@ -27,14 +28,17 @@ Verify the parent exposes `window.parent.lxpackBridge.v1` in SCORM previews befo
 ## Authoring guardrails
 
 1. **Every assessment inside `<Lesson>`** — otherwise production shows an alert and skips telemetry/xAPI.
-2. **Align IDs** — `courseId`, `lessonId`, and `checkId` must match `lessonkit.json` for packaging.
+2. **Align IDs** — `courseId`, `lessonId`, and `checkId` must match `lessonkit.json` for packaging. `lessonkit package` fails when React source and manifest IDs diverge.
 3. **Run export parity** — `npm run test:e2e` in the monorepo or package smoke in CI after changing assessments or `lessonkit.json`.
 
-## Observability (recommended)
+## Observability (required in production)
+
+Wire **all five** hooks so silent data loss surfaces in your monitoring stack:
 
 ```tsx
 observability: {
   onTelemetrySinkError: (err, ctx) => reportError({ ...ctx, err }),
+  onTelemetryBufferDrop: () => metrics.increment("lessonkit.telemetry.buffer_cap"),
   onXapiQueueDepth: (depth) => metrics.gauge("lessonkit.xapi.queue", depth),
   onXapiQueueCap: () => metrics.increment("lessonkit.xapi.queue_cap"),
   onLxpackBridgeMiss: (event) =>
@@ -42,10 +46,12 @@ observability: {
 },
 ```
 
+`onTelemetryBufferDrop` fires when the telemetry batch buffer (cap 1000) drops new events. `onTelemetrySinkError` covers both per-event sinks and `batchSink` failures.
+
 ## CI / build
 
-- Pin aligned `@lessonkit/*` versions (framework 1.2.x).
-- `lessonkit build` and `lessonkit package` run under Node 18+; set `LESSONKIT_CMD_TIMEOUT_MS` if builds need a limit (default 30 minutes per subprocess).
+- Pin aligned `@lessonkit/*` versions (framework 1.3.x).
+- `lessonkit build` and `lessonkit package` run under Node 18+; set `LESSONKIT_CMD_TIMEOUT_MS` if builds need a limit (default 30 minutes per subprocess). `lessonkit dev` has no subprocess timeout.
 
 ## Related docs
 

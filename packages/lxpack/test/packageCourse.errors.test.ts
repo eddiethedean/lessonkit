@@ -14,6 +14,7 @@ vi.mock("@lxpack/api", () => ({
 }));
 
 import { packageLessonkitCourse } from "../src/packageCourse";
+import { writeMinimalParitySource } from "./helpers/writeMinimalParitySource";
 
 const tempDirs: string[] = [];
 
@@ -54,19 +55,22 @@ describe("packageLessonkitCourse errors", () => {
     await mkdir(dist, { recursive: true });
     await writeFile(join(dist, "index.html"), "<html></html>", "utf-8");
 
+    const packDescriptor = {
+      ...descriptor,
+      assessments: [
+        {
+          kind: "fillInBlanks" as const,
+          checkId: "fib-only",
+          question: "Fill",
+          template: "Type *x*",
+          blanks: [{ id: "b1", answer: "x" }],
+        },
+      ],
+    };
+    await writeMinimalParitySource(root, packDescriptor);
+
     const result = await packageLessonkitCourse({
-      descriptor: {
-        ...descriptor,
-        assessments: [
-          {
-            kind: "fillInBlanks",
-            checkId: "fib-only",
-            question: "Fill",
-            template: "Type *x*",
-            blanks: [{ id: "b1", answer: "x" }],
-          },
-        ],
-      },
+      descriptor: packDescriptor,
       outDir: join(root, "course"),
       spaDistDir: dist,
       projectRoot: root,
@@ -84,6 +88,7 @@ describe("packageLessonkitCourse errors", () => {
     const dist = join(root, "dist");
     await mkdir(dist, { recursive: true });
     await writeFile(join(dist, "index.html"), "<html></html>", "utf-8");
+    await writeMinimalParitySource(root, descriptor);
 
     const result = await packageLessonkitCourse({
       descriptor,
@@ -105,6 +110,7 @@ describe("packageLessonkitCourse errors", () => {
     const dist = join(root, "dist");
     await mkdir(dist, { recursive: true });
     await writeFile(join(dist, "index.html"), "<html></html>", "utf-8");
+    await writeMinimalParitySource(root, descriptor);
 
     const result = await packageLessonkitCourse({
       descriptor,
@@ -125,6 +131,7 @@ describe("packageLessonkitCourse errors", () => {
     const dist = join(root, "dist");
     await mkdir(dist, { recursive: true });
     await writeFile(join(dist, "index.html"), "<html></html>", "utf-8");
+    await writeMinimalParitySource(root, descriptor);
 
     const result = await packageLessonkitCourse({
       descriptor,
@@ -146,6 +153,7 @@ describe("packageLessonkitCourse errors", () => {
     const dist = join(root, "dist");
     await mkdir(dist, { recursive: true });
     await writeFile(join(dist, "index.html"), "<html></html>", "utf-8");
+    await writeMinimalParitySource(root, descriptor);
 
     const result = await packageLessonkitCourse({
       descriptor,
@@ -190,6 +198,7 @@ describe("packageLessonkitCourse errors", () => {
     const dist = join(root, "dist");
     await mkdir(dist, { recursive: true });
     await writeFile(join(dist, "index.html"), "<html></html>", "utf-8");
+    await writeMinimalParitySource(root, descriptor);
 
     const result = await packageLessonkitCourse({
       descriptor,
@@ -208,6 +217,7 @@ describe("packageLessonkitCourse errors", () => {
     const dist = join(root, "dist");
     await mkdir(dist, { recursive: true });
     await writeFile(join(dist, "index.html"), "<html></html>", "utf-8");
+    await writeMinimalParitySource(root, descriptor);
 
     const result = await packageLessonkitCourse({
       descriptor,
@@ -225,6 +235,7 @@ describe("packageLessonkitCourse errors", () => {
 
   it("returns ok false when spaDistDir is missing", async () => {
     const root = await makeTempDir();
+    await writeMinimalParitySource(root, descriptor);
     const result = await packageLessonkitCourse({
       descriptor,
       outDir: join(root, "course"),
@@ -254,6 +265,7 @@ describe("packageLessonkitCourse errors", () => {
     const dist = join(root, "dist");
     await mkdir(dist, { recursive: true });
     await writeFile(join(dist, "index.html"), "<html></html>", "utf-8");
+    await writeMinimalParitySource(root, descriptor);
 
     const result = await packageLessonkitCourse({
       descriptor,
@@ -292,6 +304,7 @@ describe("packageLessonkitCourse errors", () => {
     const dist = join(root, "dist");
     await mkdir(dist, { recursive: true });
     await writeFile(join(dist, "index.html"), "<html></html>", "utf-8");
+    await writeMinimalParitySource(root, descriptor);
 
     const result = await packageLessonkitCourse({
       descriptor,
@@ -324,6 +337,7 @@ describe("packageLessonkitCourse errors", () => {
     const dist = join(root, "dist");
     await mkdir(dist, { recursive: true });
     await writeFile(join(dist, "index.html"), "<html></html>", "utf-8");
+    await writeMinimalParitySource(root, descriptor);
 
     const result = await packageLessonkitCourse({
       descriptor,
@@ -351,6 +365,7 @@ describe("packageLessonkitCourse errors", () => {
     const dist = join(root, "dist");
     await mkdir(dist, { recursive: true });
     await writeFile(join(dist, "index.html"), "<html></html>", "utf-8");
+    await writeMinimalParitySource(root, descriptor);
 
     const result = await packageLessonkitCourse({
       descriptor,

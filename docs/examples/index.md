@@ -1,6 +1,12 @@
 # Live examples
 
-These pages embed **production builds** of the monorepo examples, compiled when the documentation site is built (CI and Read the Docs). Each course uses the same modern LMS layout (sidebar curriculum, progress ring, lesson cards) with a different color theme and scenario content. Open your browser developer console to see telemetry and xAPI log output.
+These pages embed **production builds** of the monorepo examples, compiled when the documentation site is built (CI and Read the Docs). Each course uses the same modern LMS layout (sidebar curriculum, progress ring, lesson cards) with a different color theme and scenario content.
+
+:::{admonition} Demo telemetry
+:class: warning
+
+Embedded demos and some examples still log telemetry/xAPI to the browser console for illustration. **Do not copy that pattern for production**—use the [production checklist](../guides/react-developers/production-checklist.md) and `createFetchTransport` instead.
+:::
 
 :::{admonition} Local preview
 :class: tip

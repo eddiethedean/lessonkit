@@ -13,7 +13,7 @@ Developer tooling, not a timeline authoring tool: **React + telemetry + packagin
 
 | | |
 | --- | --- |
-| **Release** | [1.3.0](https://github.com/eddiethedean/lessonkit/blob/main/CHANGELOG.md#130---2026-06-04) |
+| **Release** | [1.3.1](https://github.com/eddiethedean/lessonkit/blob/main/CHANGELOG.md#131---2026-06-05) |
 | **npm** | [`@lessonkit/*`](https://www.npmjs.com/org/lessonkit) |
 | **Docs** | [lessonkit.readthedocs.io](https://lessonkit.readthedocs.io/en/latest/) |
 | **Node.js** | 18+ (dev, build, LMS packaging); **20+** for Playwright e2e when [contributing](CONTRIBUTING.md) |
@@ -217,7 +217,7 @@ Component gallery: [Storybook on GitHub Pages](https://eddiethedean.github.io/le
 
 > **New project?** Skip this section.
 
-If you are on **1.2.x**, see [MIGRATION-1.2-to-1.3.md](https://github.com/eddiethedean/lessonkit/blob/main/docs/MIGRATION-1.2-to-1.3.md) for the additive `SlideDeck` API.
+If you are on **1.2.x**, see [MIGRATION-1.2-to-1.3.md](https://github.com/eddiethedean/lessonkit/blob/main/docs/MIGRATION-1.2-to-1.3.md) for the additive `SlideDeck` API and production transport/observability helpers.
 
 ## Upgrading to 1.2
 
@@ -259,7 +259,7 @@ Full site: **[lessonkit.readthedocs.io](https://lessonkit.readthedocs.io/en/late
 | Glossary | [Terms (LXPack, IDs, catalogs)](https://lessonkit.readthedocs.io/en/latest/reference/glossary.html) |
 | LMS packaging | [Packaging reference](https://lessonkit.readthedocs.io/en/latest/reference/packaging.html) |
 | Identity & URNs | [Identity reference](https://lessonkit.readthedocs.io/en/latest/reference/identity.html) |
-| Telemetry & xAPI | [Telemetry](https://lessonkit.readthedocs.io/en/latest/reference/telemetry.html) · [xAPI](https://lessonkit.readthedocs.io/en/latest/reference/xapi.html) |
+| Telemetry & xAPI | [Telemetry](https://lessonkit.readthedocs.io/en/latest/reference/telemetry.html) · [xAPI](https://lessonkit.readthedocs.io/en/latest/reference/xapi.html) · [Production checklist](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/production-checklist.html) |
 | Theming & accessibility | [Theming](https://lessonkit.readthedocs.io/en/latest/reference/theming.html) · [Accessibility](https://lessonkit.readthedocs.io/en/latest/reference/accessibility.html) |
 | Coming from H5P | [H5P → LessonKit guide](https://lessonkit.readthedocs.io/en/latest/guides/h5p-for-lessonkit-authors.html) · [Capability map](https://lessonkit.readthedocs.io/en/latest/project/h5p-capability-map.html) |
 

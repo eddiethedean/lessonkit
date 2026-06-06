@@ -70,6 +70,7 @@ export async function emitCourseStartedNonTrackingPipeline(
     const statement = telemetryEventToXAPIStatement(opts.event);
     if (statement) {
       opts.xapi.send(statement);
+      await opts.xapi.flush();
       xapiStatementSent = true;
     }
   }

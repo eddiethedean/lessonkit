@@ -209,7 +209,7 @@ Import `@lessonkit/react/block-catalog.v3.json` or pin `{ version: 2 }` until ge
 
 - **H5P mapping:** [H5P capability map](../project/h5p-capability-map.md)
 - **Identity:** [Identity reference](reference/identity.md) — id format and URNs (`@lessonkit/core/identity-contract.v1.json`)
-- **Telemetry events:** [Telemetry reference](reference/telemetry.md) — event catalog (`@lessonkit/core/telemetry-catalog.v1.json`)
+- **Telemetry events:** [Telemetry reference](reference/telemetry.md) — event catalog (`@lessonkit/core/telemetry-catalog.v3.json`)
 - **Theming:** [Theming reference](reference/theming.md) — token catalog (`@lessonkit/themes/theme-catalog.v1.json`)
 - **Accessibility:** [Accessibility reference](reference/accessibility.md)
 

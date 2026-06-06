@@ -8,6 +8,33 @@ All notable changes to the LessonKit monorepo are documented here.
 
 _No changes yet._
 
+## [1.3.1] - 2026-06-05
+
+Framework **1.3.x** patch — production hardening and documentation. All seven `@lessonkit/*` packages ship at **1.3.1**.
+
+### Added
+
+- **@lessonkit/xapi**: `createFetchTransport` and `createFetchBatchSink` (timeout, retry backoff, keepalive pagehide delivery); `XAPIClient.flushOnExit()`.
+- **@lessonkit/core**: `TrackingClient.flushOnExit()` via optional `exitBatchSink`; `wrapBatchSink` routes batch failures to `onTelemetrySinkError`.
+- **@lessonkit/lxpack**: `validateReactManifestParity` — `lessonkit package` fails when React `src/` omits manifest `courseId` or `checkId` values.
+- **@lessonkit/react**: production observability warning when hooks are missing; pagehide calls `flushOnExit` before async flush.
+
+### Changed
+
+- **@lessonkit/react**: `course_started` tracking dedupe mark is written only after a successful flush.
+- **@lessonkit/cli**: `lessonkit dev` has no subprocess timeout; init template uses noop telemetry sinks (no `console.log` PII).
+- **Docs**: production checklist, telemetry/xAPI guides, Sphinx reference pages updated for 1.3.x observability and transport helpers.
+
+### Fixed
+
+- **@lessonkit/react**: `batchSink` failures now invoke `onTelemetrySinkError`.
+- **@lessonkit/react**: `course_started` dedupe is atomic under concurrent emit; backup path skips xAPI when primary flush fails; compound persistence waits for resume hydration before saving.
+- **@lessonkit/react**: `autoCheck` retry no longer locks out learners in DragTheWords and FillInTheBlanks; resume telemetry replay for drag, fill, and hotspot blocks.
+- **@lessonkit/core**: `markCourseStarted` returns a boolean; in-flight telemetry batches included in `flushOnExit`.
+- **@lessonkit/xapi**: successful queue delivery removes statements by id; `flushOnExit` skips in-flight head; fetch transport with timeout, retry, and keepalive pagehide delivery.
+- **@lessonkit/lxpack**: strict React manifest parity (comment stripping, `.jsx`/`.js` scan, constant indirection, fail on missing source); promote lock checks PID liveness before TTL expiry.
+- **@lessonkit/accessibility** / **@lessonkit/themes**: CSS selector escaping hardening, cloned theme presets, roving focus and trap filtering improvements.
+
 ## [1.3.0] - 2026-06-04
 
 Framework **1.3.x** — `SlideDeck` (H5P Course Presentation). `@lessonkit/core`, `@lessonkit/react`, `@lessonkit/lxpack`, `@lessonkit/xapi`, `@lessonkit/themes`, `@lessonkit/accessibility`, and `@lessonkit/cli` ship at **1.3.0**.
