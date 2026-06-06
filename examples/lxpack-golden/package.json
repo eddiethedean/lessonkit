@@ -21,12 +21,12 @@
     "@lessonkit/themes": "file:../../packages/themes",
     "@lessonkit/xapi": "file:../../packages/xapi",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^19.2.7"
   },
   "devDependencies": {
     "@lessonkit/cli": "file:../../packages/cli",
     "@types/react": "^18.3.23",
-    "@types/react-dom": "^18.3.7",
+    "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^4.6.0",
     "typescript": "^5.8.3",
     "vite": "^7.1.3",
