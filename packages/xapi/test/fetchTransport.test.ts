@@ -1,12 +1,8 @@
-import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
+import { describe, expect, it, vi, afterEach } from "vitest";
 import { createFetchTransport, createFetchBatchSink } from "../src/fetchTransport";
 
 describe("createFetchTransport", () => {
   const originalFetch = globalThis.fetch;
-
-  beforeEach(() => {
-    vi.useFakeTimers();
-  });
 
   afterEach(() => {
     globalThis.fetch = originalFetch;
@@ -41,6 +37,7 @@ describe("createFetchTransport", () => {
   });
 
   it("retries with backoff then throws", async () => {
+    vi.useFakeTimers();
     const fetchMock = vi
       .fn()
       .mockRejectedValueOnce(new Error("network"))
@@ -52,6 +49,7 @@ describe("createFetchTransport", () => {
       url: "https://lrs.example/statements",
       retries: 2,
       backoffMs: 100,
+      timeoutMs: 0,
     });
 
     const promise = transport({
@@ -98,7 +96,7 @@ describe("createFetchBatchSink", () => {
     const fetchMock = vi.fn(() => Promise.resolve(new Response(null, { status: 204 })));
     globalThis.fetch = fetchMock as typeof fetch;
 
-    const { batchSink } = createFetchBatchSink({ url: "/api/batch", retries: 0 });
+    const { batchSink } = createFetchBatchSink({ url: "/api/batch", retries: 0, timeoutMs: 0 });
     await batchSink([{ name: "course_started" }]);
 
     expect(fetchMock).toHaveBeenCalledWith(
