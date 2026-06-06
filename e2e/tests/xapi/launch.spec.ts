@@ -24,6 +24,6 @@ test.describe("golden xAPI package", () => {
       timeout: 30_000,
     });
     await completePackagedAssessments(page);
-    await expect(page.getByRole("status").filter({ hasText: "Correct" }).first()).toBeVisible();
+    await expect(page.getByRole("button", { name: /safety-check.*✓/ })).toBeVisible();
   });
 });

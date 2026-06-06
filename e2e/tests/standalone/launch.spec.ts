@@ -23,6 +23,6 @@ test.describe("golden standalone", () => {
     await page.goto(`${baseUrl}/index.html`);
     await expect(page.getByRole("button", { name: /safety-check/i })).toBeVisible();
     await completePackagedAssessments(page);
-    await expect(page.getByRole("status").filter({ hasText: "Correct" }).first()).toBeVisible();
+    await expect(page.getByRole("button", { name: /ppe-acknowledgment.*✓/ })).toBeVisible();
   });
 });
