@@ -17,6 +17,8 @@ export type TelemetryCatalogV3EventName = Extract<
   | "information_wall_search"
   | "parallax_slide_viewed"
   | "questionnaire_submitted"
+  | "branch_node_viewed"
+  | "branch_selected"
 >;
 
 export type TelemetryCatalogV3Entry = {
@@ -132,6 +134,24 @@ export const TELEMETRY_EVENT_CATALOG_V3: TelemetryCatalogV3Entry[] = [
     dataFields: ["blockId", "fieldCount"],
     xapiVerb: "http://adlnet.gov/expapi/verbs/completed",
     urnPattern: "urn:lessonkit:course:{courseId}:lesson:{lessonId}:block:{blockId}",
+  },
+  {
+    name: "branch_node_viewed",
+    description: "Learner viewed a node in a BranchingScenario",
+    requiredFields: ["courseId", "lessonId", "sessionId", "timestamp"],
+    dataFields: ["blockId", "nodeId", "nodeIndex", "nodeTitle"],
+    xapiVerb: "http://adlnet.gov/expapi/verbs/experienced",
+    urnPattern:
+      "urn:lessonkit:course:{courseId}:lesson:{lessonId}:block:{blockId}:node:{nodeId}",
+  },
+  {
+    name: "branch_selected",
+    description: "Learner selected a branch choice in a BranchingScenario",
+    requiredFields: ["courseId", "lessonId", "sessionId", "timestamp"],
+    dataFields: ["blockId", "fromNodeId", "toNodeId", "label", "scoreWeight"],
+    xapiVerb: "http://adlnet.gov/expapi/verbs/answered",
+    urnPattern:
+      "urn:lessonkit:course:{courseId}:lesson:{lessonId}:block:{blockId}:node:{toNodeId}",
   },
 ];
 

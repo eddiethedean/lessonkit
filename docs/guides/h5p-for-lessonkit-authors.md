@@ -12,7 +12,7 @@ LessonKit is **React-first**, not a plugin inside your LMS’s content bank. You
 
 Use the **[H5P capability map](../project/h5p-capability-map.md)** for the full table (machine name, display name, LessonKit id, roadmap status).
 
-### Available today (framework 1.4.0)
+### Available today (framework 1.5.0)
 
 | H5P name | LessonKit | Import / notes |
 | --- | --- | --- |
@@ -26,6 +26,7 @@ Use the **[H5P capability map](../project/h5p-capability-map.md)** for the full 
 | **Interactive Book** | `InteractiveBook` + `Page` | Compound navigation + session resume |
 | **Course Presentation** | `SlideDeck` + `Slide` | Slide navigation + keyboard controls + session resume |
 | **Interactive Video** | `InteractiveVideo` + `TimedCue` | Timeline cues; pause on interaction; session resume |
+| **Branching Scenario** | `BranchingScenario` + `BranchNode` + `BranchChoice` | Graph navigation; visited-path scoring; session resume |
 | **Summary** | `Summary` | Statement-bank construct task |
 | **Image Pairing** | `ImagePairing` | Match image pairs |
 | **Image Sequencing** | `ImageSequencing` | Order images |
@@ -36,6 +37,8 @@ Use the **[H5P capability map](../project/h5p-capability-map.md)** for the full 
 | **Information Wall** | `InformationWall` | Searchable panels |
 | **Slideshow (parallax)** | `ParallaxSlideshow` | Parallax slides with reduced-motion fallback |
 | **Video** (self-hosted) | `Video` | Native `<video>` on slides and pages |
+| **Iframe Embedder** | `Embed` | Sandboxed iframe; opt-in `allow` sandbox tokens |
+| **Chart** | `Chart` | Bar/pie with accessible data table |
 | **Accordion** | `Accordion` | Expand/collapse sections |
 | **Dialog Cards** | `DialogCards` | Flip-card dialog |
 | **Flashcards** | `Flashcards` | Card deck |
@@ -51,9 +54,7 @@ Use the **[H5P capability map](../project/h5p-capability-map.md)** for the full 
 
 ### Planned (roadmap / capability map)
 
-| H5P | LessonKit (planned) |
-| --- | --- |
-| Branching Scenario | `BranchingScenario` |
+See the [capability map](../project/h5p-capability-map.md) for Tier A–E blocks not yet shipped (e.g. `GameMap`, H5P import in 1.6.x).
 
 :::{admonition} Renamed on purpose
 :class: important

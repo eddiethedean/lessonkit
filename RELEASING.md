@@ -2,6 +2,24 @@
 
 Published packages (`v*.*.*` tag → [Release](.github/workflows/release.yml)): `@lessonkit/core`, `@lessonkit/xapi`, `@lessonkit/accessibility`, `@lessonkit/themes`, `@lessonkit/lxpack`, `@lessonkit/react`, `@lessonkit/cli`
 
+## Publishing 1.5.0
+
+### 1.5.0 checklist
+
+| Item | Status |
+|------|--------|
+| All seven `@lessonkit/*` packages at `1.5.0` | Done |
+| [CHANGELOG.md](CHANGELOG.md) `## [1.5.0]` documents BranchingScenario, Embed, Chart, branch telemetry | Done |
+| Sphinx `docs/conf.py` `release` = `1.5.0` | Done |
+| [MIGRATION-1.4-to-1.5.md](docs/MIGRATION-1.4-to-1.5.md) in Sphinx toctree | Done |
+| `lessonkit init` template pins `^1.5.0` | Done |
+| `npm run copy-template -w @lessonkit/cli` | Verify before tag |
+| `examples/branching-scenario` integration + e2e golden path | Done |
+| `npm run lint` + `typecheck` + `test` + `test:integration` + `test:e2e` | Verify before tag |
+| Git tag `v1.5.0` | **Create when ready** |
+
+> **Do not create or push `v1.5.0`** until you intend to publish to npm.
+
 ## Publishing 1.4.0
 
 ### 1.4.0 checklist

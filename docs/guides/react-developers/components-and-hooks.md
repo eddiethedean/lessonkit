@@ -28,7 +28,7 @@
 | `Scenario` | Scenario / narrative block |
 | `Reflection` | Open response (manual scoring) |
 
-More types (`BranchingScenario`, …) are on the roadmap. See **[Coming from H5P?](../h5p-for-lessonkit-authors.md)** and the **[capability map](../../project/h5p-capability-map.md)**.
+Compound containers include `InteractiveBook`, `SlideDeck`, `InteractiveVideo`, and **`BranchingScenario`** (1.5). See **[Coming from H5P?](../h5p-for-lessonkit-authors.md)** and the **[capability map](../../project/h5p-capability-map.md)**.
 :::
 
 Canonical block list, props, and contracts: [Block catalog reference](../../reference/block-catalog.md).

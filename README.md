@@ -13,7 +13,7 @@ Developer tooling, not a timeline authoring tool: **React + telemetry + packagin
 
 | | |
 | --- | --- |
-| **Release** | [1.4.0](https://github.com/eddiethedean/lessonkit/blob/main/CHANGELOG.md#140---2026-06-06) |
+| **Release** | [1.5.0](https://github.com/eddiethedean/lessonkit/blob/main/CHANGELOG.md#150---2026-06-06) |
 | **npm** | [`@lessonkit/*`](https://www.npmjs.com/org/lessonkit) |
 | **Docs** | [lessonkit.readthedocs.io](https://lessonkit.readthedocs.io/en/latest/) |
 | **Node.js** | **20+** (dev, build, LMS packaging, and CI); Vite 8 requires Node 20.19+ |
@@ -63,10 +63,10 @@ Developer tooling, not a timeline authoring tool: **React + telemetry + packagin
 ## Features
 
 - **Structure** — `Course`, `Lesson`, `Scenario`, `Quiz`, `KnowledgeCheck`, `Reflection`, `ProgressTracker`, `LessonkitProvider`; hooks for progress, tracking, and completion
-- **Compound & resume** — `Page`, `InteractiveBook`, `Slide`, `SlideDeck`, `InteractiveVideo`, `TimedCue`, `AssessmentSequence` (`CompoundHandle`, session resume)
+- **Compound & resume** — `Page`, `InteractiveBook`, `Slide`, `SlideDeck`, `InteractiveVideo`, `TimedCue`, `BranchingScenario`, `BranchNode`, `BranchChoice`, `AssessmentSequence` (`CompoundHandle`, session resume)
 - **Content** — `Text`, `Heading`, `Image`, `Video`
 - **Assessments (P0 + 1.4)** — `TrueFalse`, `MarkTheWords`, `FillInTheBlanks`, `DragTheWords`, `DragAndDrop`, `FindHotspot`, `FindMultipleHotspots`, `Summary`, `ImagePairing`, `ImageSequencing`, `ArithmeticQuiz`, `Essay`
-- **Presentation (Tier C/D)** — `Accordion`, `DialogCards`, `Flashcards`, `ImageHotspots`, `ImageSlider`, `MemoryGame`, `InformationWall`, `ParallaxSlideshow`, `Questionnaire`
+- **Presentation (Tier C/D)** — `Accordion`, `DialogCards`, `Flashcards`, `ImageHotspots`, `ImageSlider`, `MemoryGame`, `InformationWall`, `ParallaxSlideshow`, `Questionnaire`, `Embed`, `Chart`
 - **Identity v1** — Required `courseId`, `lessonId`, and `checkId`; stable URNs for telemetry and xAPI
 - **Telemetry** — Session-aware events, optional batching, pluggable pipeline sinks
 - **xAPI** — Statement generation, in-memory queueing, and transport hooks via `@lessonkit/xapi`

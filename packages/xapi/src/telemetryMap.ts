@@ -193,6 +193,37 @@ const TELEMETRY_XAPI_MAPPERS = {
       ctx.timestamp,
     );
   },
+  branch_node_viewed: (event, ctx) => {
+    if (event.name !== "branch_node_viewed") return null;
+    const lessonId = event.lessonId;
+    const blockId = event.data.blockId;
+    const nodeId = event.data.nodeId;
+    if (!lessonId || !blockId || !nodeId) return null;
+    return statementFor(
+      buildLessonkitUrn({ courseId: ctx.courseId, lessonId, blockId, nodeId }),
+      XAPIVerbs.experienced,
+      ctx.timestamp,
+    );
+  },
+  branch_selected: (event, ctx) => {
+    if (event.name !== "branch_selected") return null;
+    const lessonId = event.lessonId;
+    const blockId = event.data.blockId;
+    const toNodeId = event.data.toNodeId;
+    if (!lessonId || !blockId || !toNodeId) return null;
+    const verb =
+      typeof event.data.scoreWeight === "number" ? XAPIVerbs.answered : XAPIVerbs.experienced;
+    const result =
+      typeof event.data.scoreWeight === "number"
+        ? { score: buildXapiScoreResult({ score: event.data.scoreWeight, maxScore: event.data.scoreWeight }) }
+        : undefined;
+    return statementFor(
+      buildLessonkitUrn({ courseId: ctx.courseId, lessonId, blockId, nodeId: toNodeId }),
+      verb,
+      ctx.timestamp,
+      result?.score ? { result: result } : undefined,
+    );
+  },
 } as const satisfies Record<TelemetryEvent["name"], EventMapper>;
 
 /**

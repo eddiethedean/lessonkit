@@ -44,6 +44,8 @@ export type {
   InformationWallSearchData,
   ParallaxSlideViewedData,
   QuestionnaireSubmittedData,
+  BranchNodeViewedData,
+  BranchSelectedData,
   TelemetryBatchSink,
   TelemetryEvent,
   TelemetryEventBase,
@@ -94,6 +96,8 @@ export {
   TIMED_CUE_ALLOWED_CHILD_TYPES,
   INTERACTIVE_VIDEO_ALLOWED_CHILD_TYPES,
   ASSESSMENT_SEQUENCE_ALLOWED_CHILD_TYPES,
+  BRANCHING_SCENARIO_ALLOWED_CHILD_TYPES,
+  BRANCH_NODE_ALLOWED_CHILD_TYPES,
   COMPOUND_MAX_NESTING_DEPTH,
   ACCORDION_FORBIDDEN_CHILD_TYPES,
   BLOCKS_14_PAGE_SLIDE,
@@ -101,6 +105,13 @@ export {
   isChildTypeAllowed,
   type CompoundParentType,
 } from "./compoundAllowlists";
+
+export {
+  validateBranchGraph,
+  type BranchGraphNodeInput,
+  type BranchGraphValidationIssue,
+  type BranchGraphValidationResult,
+} from "./branchGraph";
 
 export {
   buildTelemetryCatalog,

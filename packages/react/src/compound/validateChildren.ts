@@ -17,6 +17,8 @@ const COMPOUND_CONTAINER_TYPES = new Set<CompoundParentType>([
   "TimedCue",
   "InteractiveVideo",
   "AssessmentSequence",
+  "BranchingScenario",
+  "BranchNode",
 ]);
 
 function warnOrThrow(msg: string, strict?: boolean): void {

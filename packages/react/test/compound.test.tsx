@@ -20,6 +20,11 @@ import {
   TimedCue,
   Text,
   TrueFalse,
+  BranchingScenario,
+  BranchNode,
+  BranchChoice,
+  Scenario,
+  Reflection,
 } from "../src";
 
 const COURSE_ID = "compound-course";
@@ -837,5 +842,90 @@ describe("InteractiveVideo", () => {
     fireEvent.timeUpdate(video);
     fireEvent.click(screen.getByRole("radio", { name: "True" }));
     expect(screen.getByTestId("video-score").textContent).toContain("Score: 1 / 2");
+  });
+});
+
+describe("BranchingScenario", () => {
+  afterEach(() => {
+    cleanup();
+    sessionStorage.clear();
+  });
+
+  it("navigates via branch choices", () => {
+    render(
+      wrap(
+        <BranchingScenario blockId="resolution-paths" title="Resolution paths" startNodeId="offer">
+          <BranchNode nodeId="offer">
+            <Scenario>
+              <p>Choose how to close the loop.</p>
+            </Scenario>
+            <BranchChoice label="Offer credit" targetNodeId="credit" />
+            <BranchChoice label="Supervisor" targetNodeId="supervisor" />
+          </BranchNode>
+          <BranchNode nodeId="credit" terminal>
+            <Text>Credit path complete.</Text>
+          </BranchNode>
+          <BranchNode nodeId="supervisor" terminal>
+            <Text>Supervisor path complete.</Text>
+          </BranchNode>
+        </BranchingScenario>,
+      ),
+    );
+    expect(screen.getByText("Choose how to close the loop.")).toBeTruthy();
+    fireEvent.click(screen.getByTestId("branch-choice-credit"));
+    expect(screen.getByText("Credit path complete.")).toBeTruthy();
+  });
+
+  it("scores only the visited branch assessments", () => {
+    const ref = createRef<CompoundHandle>();
+    render(
+      wrap(
+        <BranchingScenario
+          ref={ref}
+          blockId="branch-score"
+          title="Scored paths"
+          startNodeId="offer"
+          showPathScore
+        >
+          <BranchNode nodeId="offer">
+            <BranchChoice label="Credit" targetNodeId="credit" />
+            <BranchChoice label="Supervisor" targetNodeId="supervisor" />
+          </BranchNode>
+          <BranchNode nodeId="credit" terminal>
+            <TrueFalse checkId="credit-check" question="Document credit?" answer={true} />
+          </BranchNode>
+          <BranchNode nodeId="supervisor" terminal>
+            <TrueFalse checkId="supervisor-check" question="Cold transfer?" answer={false} />
+          </BranchNode>
+        </BranchingScenario>,
+      ),
+    );
+    fireEvent.click(screen.getByTestId("branch-choice-credit"));
+    fireEvent.click(screen.getByRole("radio", { name: "True" }));
+    expect(ref.current?.getScore()).toBe(1);
+    expect(ref.current?.getMaxScore()).toBe(1);
+    expect(screen.getByTestId("branch-score").textContent).toContain("Score: 1 / 1");
+  });
+
+  it("persists graph position in session storage", async () => {
+    render(
+      wrap(
+        <BranchingScenario blockId="branch-resume" title="Resume" startNodeId="offer" showPathRecap>
+          <BranchNode nodeId="offer" title="Offer">
+            <BranchChoice label="Credit" targetNodeId="credit" />
+          </BranchNode>
+          <BranchNode nodeId="credit" terminal title="Credit">
+            <Text>Done</Text>
+          </BranchNode>
+        </BranchingScenario>,
+        true,
+      ),
+    );
+    fireEvent.click(screen.getByTestId("branch-choice-credit"));
+    expect(screen.getByText("Done")).toBeTruthy();
+    await waitFor(() => {
+      const key = compoundStateStorageKey(COURSE_ID, "branch-resume");
+      expect(sessionStorage.getItem(key)).toBeTruthy();
+    });
   });
 });

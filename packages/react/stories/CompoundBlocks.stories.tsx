@@ -1,7 +1,12 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import {
   Accordion,
+  BranchChoice,
+  BranchingScenario,
+  BranchNode,
+  Chart,
   Course,
+  Embed,
   Heading,
   InteractiveBook,
   InteractiveVideo,
@@ -142,6 +147,59 @@ export const MemoryGameBlock: Story = {
             { id: "b", label: "Hat" },
             { id: "c", label: "Vest" },
             { id: "d", label: "Vest" },
+          ]}
+        />
+      </Lesson>
+    </Course>
+  ),
+};
+
+/** H5P: Branching Scenario */
+export const BranchingScenarioBlock: Story = {
+  render: () => (
+    <Course title="Branching" courseId="storybook-branch" config={storyConfig}>
+      <Lesson title="Paths" lessonId="lesson-branch">
+        <BranchingScenario blockId="paths" title="Resolution paths" startNodeId="offer" showPathScore>
+          <BranchNode nodeId="offer">
+            <Text>Choose a resolution path.</Text>
+            <BranchChoice label="Credit" targetNodeId="credit" />
+            <BranchChoice label="Supervisor" targetNodeId="supervisor" />
+          </BranchNode>
+          <BranchNode nodeId="credit" terminal>
+            <TrueFalse checkId="branch-tf" question="Document credit?" answer={true} />
+          </BranchNode>
+          <BranchNode nodeId="supervisor" terminal>
+            <Text>Supervisor path selected.</Text>
+          </BranchNode>
+        </BranchingScenario>
+      </Lesson>
+    </Course>
+  ),
+};
+
+/** H5P: Iframe Embedder */
+export const EmbedBlock: Story = {
+  render: () => (
+    <Course title="Embed" courseId="storybook-embed" config={storyConfig}>
+      <Lesson title="External" lessonId="lesson-embed">
+        <Embed blockId="ext" src="https://example.com" title="Example embed" />
+      </Lesson>
+    </Course>
+  ),
+};
+
+/** H5P: Chart */
+export const ChartBlock: Story = {
+  render: () => (
+    <Course title="Chart" courseId="storybook-chart" config={storyConfig}>
+      <Lesson title="Metrics" lessonId="lesson-chart">
+        <Chart
+          blockId="incidents"
+          type="bar"
+          title="Incidents"
+          data={[
+            { label: "Phishing", value: 8 },
+            { label: "Malware", value: 3 },
           ]}
         />
       </Lesson>

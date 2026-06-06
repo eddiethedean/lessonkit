@@ -389,6 +389,47 @@ describe("telemetryEventToXAPIStatement", () => {
         data: { blockId: "survey-1", fieldCount: 3 },
       })?.verb,
     ).toBe("http://adlnet.gov/expapi/verbs/completed");
+
+    const branchViewed = telemetryEventToXAPIStatement({
+      name: "branch_node_viewed",
+      ...base,
+      data: { blockId: "branch-1", nodeId: "offer", nodeIndex: 0, nodeTitle: "Offer" },
+    });
+    expect(branchViewed?.verb).toBe("http://adlnet.gov/expapi/verbs/experienced");
+    expect(branchViewed?.object.id).toBe(
+      "urn:lessonkit:course:cyber-basics:lesson:phishing-101:block:branch-1:node:offer",
+    );
+
+    const branchSelected = telemetryEventToXAPIStatement({
+      name: "branch_selected",
+      ...base,
+      data: {
+        blockId: "branch-1",
+        fromNodeId: "offer",
+        toNodeId: "credit",
+        label: "Credit",
+        scoreWeight: 1,
+      },
+    });
+    expect(branchSelected?.verb).toBe("http://adlnet.gov/expapi/verbs/answered");
+    expect(branchSelected?.object.id).toContain(":node:credit");
+  });
+
+  it("maps branch_selected without scoreWeight as experienced", () => {
+    const branchSelected = telemetryEventToXAPIStatement({
+      name: "branch_selected",
+      courseId: "c1",
+      lessonId: "l1",
+      timestamp: "2026-01-01T00:00:00.000Z",
+      sessionId: "s1",
+      data: {
+        blockId: "branch-1",
+        fromNodeId: "offer",
+        toNodeId: "supervisor",
+        label: "Supervisor",
+      },
+    });
+    expect(branchSelected?.verb).toBe("http://adlnet.gov/expapi/verbs/experienced");
   });
 
   it("throws for unknown event names", () => {

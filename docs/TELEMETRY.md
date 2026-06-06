@@ -27,6 +27,8 @@ LessonKit emits versioned telemetry events from `@lessonkit/react` and maps them
 | `information_wall_search` | `InformationWall` search (1.4+) | `blockId`, `query` |
 | `parallax_slide_viewed` | `ParallaxSlideshow` slide view (1.4+) | `blockId`, `slideIndex` |
 | `questionnaire_submitted` | `Questionnaire` submit (1.4+) | `blockId`, `fieldCount` |
+| `branch_node_viewed` | `BranchingScenario` node activation (1.5+) | `blockId`, `nodeId`, `nodeIndex`, `nodeTitle?` |
+| `branch_selected` | `BranchChoice` selection (1.5+) | `blockId`, `fromNodeId`, `toNodeId`, `label`, `scoreWeight?` |
 
 Session fields on all events: `sessionId`, optional `attemptId`, optional `user`.
 

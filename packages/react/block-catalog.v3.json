@@ -93,7 +93,9 @@
         "SlideDeck",
         "TimedCue",
         "InteractiveVideo",
-        "AssessmentSequence"
+        "AssessmentSequence",
+        "BranchingScenario",
+        "BranchNode"
       ],
       "a11y": {
         "element": "article",
@@ -143,7 +145,9 @@
         "SlideDeck",
         "TimedCue",
         "InteractiveVideo",
-        "AssessmentSequence"
+        "AssessmentSequence",
+        "BranchingScenario",
+        "BranchNode"
       ],
       "a11y": {
         "element": "section",
@@ -217,7 +221,9 @@
         "SlideDeck",
         "TimedCue",
         "InteractiveVideo",
-        "AssessmentSequence"
+        "AssessmentSequence",
+        "BranchingScenario",
+        "BranchNode"
       ],
       "a11y": {
         "element": "section",
@@ -288,7 +294,9 @@
         "SlideDeck",
         "TimedCue",
         "InteractiveVideo",
-        "AssessmentSequence"
+        "AssessmentSequence",
+        "BranchingScenario",
+        "BranchNode"
       ],
       "a11y": {
         "element": "section",
@@ -334,7 +342,9 @@
         "SlideDeck",
         "TimedCue",
         "InteractiveVideo",
-        "AssessmentSequence"
+        "AssessmentSequence",
+        "BranchingScenario",
+        "BranchNode"
       ],
       "a11y": {
         "element": "aside",
@@ -412,7 +422,9 @@
         "Slide",
         "SlideDeck",
         "TimedCue",
-        "InteractiveVideo"
+        "InteractiveVideo",
+        "BranchingScenario",
+        "BranchNode"
       ],
       "a11y": {
         "element": "section",
@@ -498,7 +510,9 @@
         "Slide",
         "SlideDeck",
         "TimedCue",
-        "InteractiveVideo"
+        "InteractiveVideo",
+        "BranchingScenario",
+        "BranchNode"
       ],
       "a11y": {
         "element": "section",
@@ -583,7 +597,9 @@
         "Slide",
         "SlideDeck",
         "TimedCue",
-        "InteractiveVideo"
+        "InteractiveVideo",
+        "BranchingScenario",
+        "BranchNode"
       ],
       "a11y": {
         "element": "section",
@@ -668,7 +684,9 @@
         "Slide",
         "SlideDeck",
         "TimedCue",
-        "InteractiveVideo"
+        "InteractiveVideo",
+        "BranchingScenario",
+        "BranchNode"
       ],
       "a11y": {
         "element": "section",
@@ -753,7 +771,9 @@
         "Slide",
         "SlideDeck",
         "TimedCue",
-        "InteractiveVideo"
+        "InteractiveVideo",
+        "BranchingScenario",
+        "BranchNode"
       ],
       "a11y": {
         "element": "section",
@@ -823,7 +843,9 @@
         "SlideDeck",
         "TimedCue",
         "InteractiveVideo",
-        "AssessmentSequence"
+        "AssessmentSequence",
+        "BranchingScenario",
+        "BranchNode"
       ],
       "a11y": {
         "element": "section",
@@ -920,7 +942,9 @@
         "InteractiveBook",
         "Slide",
         "SlideDeck",
-        "InteractiveVideo"
+        "InteractiveVideo",
+        "BranchingScenario",
+        "BranchNode"
       ],
       "a11y": {
         "element": "section",
@@ -999,7 +1023,9 @@
         "InteractiveBook",
         "Slide",
         "SlideDeck",
-        "InteractiveVideo"
+        "InteractiveVideo",
+        "BranchingScenario",
+        "BranchNode"
       ],
       "a11y": {
         "element": "section",
@@ -1084,7 +1110,9 @@
         "InteractiveBook",
         "Slide",
         "SlideDeck",
-        "InteractiveVideo"
+        "InteractiveVideo",
+        "BranchingScenario",
+        "BranchNode"
       ],
       "a11y": {
         "element": "section",
@@ -1169,7 +1197,9 @@
         "InteractiveBook",
         "Slide",
         "SlideDeck",
-        "InteractiveVideo"
+        "InteractiveVideo",
+        "BranchingScenario",
+        "BranchNode"
       ],
       "a11y": {
         "element": "section",
@@ -1254,7 +1284,9 @@
         "InteractiveBook",
         "Slide",
         "SlideDeck",
-        "InteractiveVideo"
+        "InteractiveVideo",
+        "BranchingScenario",
+        "BranchNode"
       ],
       "a11y": {
         "element": "section",
@@ -1304,7 +1336,9 @@
         "SlideDeck",
         "TimedCue",
         "InteractiveVideo",
-        "AssessmentSequence"
+        "AssessmentSequence",
+        "BranchingScenario",
+        "BranchNode"
       ],
       "a11y": {
         "element": "p",
@@ -1353,7 +1387,9 @@
         "SlideDeck",
         "TimedCue",
         "InteractiveVideo",
-        "AssessmentSequence"
+        "AssessmentSequence",
+        "BranchingScenario",
+        "BranchNode"
       ],
       "a11y": {
         "element": "h1-h3",
@@ -1402,7 +1438,9 @@
         "SlideDeck",
         "TimedCue",
         "InteractiveVideo",
-        "AssessmentSequence"
+        "AssessmentSequence",
+        "BranchingScenario",
+        "BranchNode"
       ],
       "a11y": {
         "element": "img",
@@ -1465,7 +1503,9 @@
         "SlideDeck",
         "TimedCue",
         "InteractiveVideo",
-        "AssessmentSequence"
+        "AssessmentSequence",
+        "BranchingScenario",
+        "BranchNode"
       ],
       "a11y": {
         "element": "video",
@@ -1518,6 +1558,8 @@
         "FindHotspot",
         "FindMultipleHotspots",
         "ImageSlider",
+        "Embed",
+        "Chart",
         "ProgressTracker"
       ],
       "maxNestingDepth": 1,
@@ -1662,7 +1704,9 @@
         "ImageHotspots",
         "FindHotspot",
         "FindMultipleHotspots",
-        "ImageSlider"
+        "ImageSlider",
+        "Embed",
+        "Chart"
       ],
       "maxNestingDepth": 1,
       "props": [
@@ -1916,6 +1960,353 @@
       }
     },
     {
+      "type": "BranchNode",
+      "category": "container",
+      "compoundContract": true,
+      "h5pMachineName": "H5P.BranchingScenario",
+      "h5pAlias": "Branching Scenario node",
+      "description": "Graph node in a BranchingScenario with content and choices.",
+      "allowedChildTypes": [
+        "Text",
+        "Heading",
+        "Image",
+        "Video",
+        "Scenario",
+        "Reflection",
+        "Quiz",
+        "KnowledgeCheck",
+        "TrueFalse",
+        "FillInTheBlanks",
+        "DragAndDrop",
+        "DragTheWords",
+        "MarkTheWords",
+        "Summary",
+        "ImagePairing",
+        "ImageSequencing",
+        "MemoryGame",
+        "InformationWall",
+        "ParallaxSlideshow",
+        "Questionnaire",
+        "Essay",
+        "ArithmeticQuiz",
+        "Accordion",
+        "DialogCards",
+        "Flashcards",
+        "ImageHotspots",
+        "FindHotspot",
+        "FindMultipleHotspots",
+        "ImageSlider",
+        "Embed",
+        "Chart",
+        "BranchChoice"
+      ],
+      "maxNestingDepth": 1,
+      "props": [
+        {
+          "name": "nodeId",
+          "type": "string",
+          "required": true,
+          "description": "Unique node id within the scenario."
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "required": false,
+          "description": "Node title."
+        },
+        {
+          "name": "terminal",
+          "type": "boolean",
+          "required": false,
+          "description": "End state node."
+        },
+        {
+          "name": "children",
+          "type": "ReactNode",
+          "required": true,
+          "description": "Content and BranchChoice controls."
+        }
+      ],
+      "requiredIds": [],
+      "parentConstraints": [
+        "BranchingScenario"
+      ],
+      "a11y": {
+        "element": "section",
+        "ariaLabel": "Branch node",
+        "keyboard": "Branch choices are buttons.",
+        "notes": "H5P Branching Scenario node."
+      },
+      "theming": {
+        "surface": "global-inherit",
+        "stylingNotes": "Node panel."
+      },
+      "telemetry": {
+        "emits": [
+          "branch_node_viewed"
+        ],
+        "requiresActiveLesson": true
+      }
+    },
+    {
+      "type": "BranchChoice",
+      "category": "content",
+      "h5pMachineName": "H5P.BranchingScenario",
+      "h5pAlias": "Branching Scenario choice",
+      "description": "Transition control linking to a target BranchNode.",
+      "props": [
+        {
+          "name": "label",
+          "type": "string",
+          "required": true,
+          "description": "Choice label."
+        },
+        {
+          "name": "targetNodeId",
+          "type": "string",
+          "required": true,
+          "description": "Target node id."
+        },
+        {
+          "name": "scoreWeight",
+          "type": "number",
+          "required": false,
+          "description": "Optional choice score weight."
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "required": false,
+          "description": "Disable choice."
+        }
+      ],
+      "requiredIds": [],
+      "parentConstraints": [
+        "BranchNode"
+      ],
+      "a11y": {
+        "element": "button",
+        "ariaLabel": "Branch choice",
+        "keyboard": "Activate to follow branch.",
+        "notes": "Radio group pattern."
+      },
+      "theming": {
+        "surface": "global-inherit",
+        "stylingNotes": "Choice button."
+      },
+      "telemetry": {
+        "emits": [
+          "branch_selected"
+        ],
+        "requiresActiveLesson": true
+      }
+    },
+    {
+      "type": "BranchingScenario",
+      "category": "container",
+      "compoundContract": true,
+      "h5pMachineName": "H5P.BranchingScenario",
+      "h5pAlias": "Branching Scenario",
+      "description": "Graph-based branching narrative with scored paths.",
+      "allowedChildTypes": [
+        "BranchNode"
+      ],
+      "maxNestingDepth": 2,
+      "props": [
+        {
+          "name": "blockId",
+          "type": "BlockId",
+          "required": true,
+          "description": "Stable block id."
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "required": true,
+          "description": "Scenario title."
+        },
+        {
+          "name": "startNodeId",
+          "type": "string",
+          "required": true,
+          "description": "Entry node id."
+        },
+        {
+          "name": "showPathScore",
+          "type": "boolean",
+          "required": false,
+          "description": "Show visited-path score."
+        },
+        {
+          "name": "showPathRecap",
+          "type": "boolean",
+          "required": false,
+          "description": "Show path recap on terminal nodes."
+        },
+        {
+          "name": "children",
+          "type": "BranchNode[]",
+          "required": true,
+          "description": "Branch nodes."
+        }
+      ],
+      "requiredIds": [
+        "blockId"
+      ],
+      "parentConstraints": [
+        "Lesson"
+      ],
+      "a11y": {
+        "element": "section",
+        "ariaLabel": "Branching scenario",
+        "keyboard": "Branch choices; assessments in nodes.",
+        "notes": "H5P Branching Scenario equivalent."
+      },
+      "theming": {
+        "surface": "global-inherit",
+        "stylingNotes": "Scenario chrome."
+      },
+      "telemetry": {
+        "emits": [
+          "branch_node_viewed",
+          "branch_selected"
+        ],
+        "requiresActiveLesson": true
+      }
+    },
+    {
+      "type": "Embed",
+      "category": "content",
+      "h5pMachineName": "H5P.IFrameEmbed",
+      "h5pAlias": "Iframe Embedder",
+      "description": "Sandboxed iframe embed with restrictive defaults.",
+      "props": [
+        {
+          "name": "blockId",
+          "type": "BlockId",
+          "required": true,
+          "description": "Stable block id."
+        },
+        {
+          "name": "src",
+          "type": "string",
+          "required": true,
+          "description": "Embed URL."
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "required": true,
+          "description": "Accessible title."
+        },
+        {
+          "name": "allow",
+          "type": "string",
+          "required": false,
+          "description": "Extra sandbox allow tokens."
+        },
+        {
+          "name": "aspectRatio",
+          "type": "string",
+          "required": false,
+          "description": "CSS aspect-ratio."
+        }
+      ],
+      "requiredIds": [
+        "blockId"
+      ],
+      "parentConstraints": [
+        "Lesson",
+        "Page",
+        "InteractiveBook",
+        "Slide",
+        "SlideDeck",
+        "TimedCue",
+        "InteractiveVideo",
+        "AssessmentSequence",
+        "BranchingScenario",
+        "BranchNode"
+      ],
+      "a11y": {
+        "element": "iframe",
+        "ariaLabel": "Embedded content",
+        "keyboard": "Focus enters iframe.",
+        "notes": "Sandboxed; opt-in allow list."
+      },
+      "theming": {
+        "surface": "global-inherit",
+        "stylingNotes": "Responsive iframe."
+      },
+      "telemetry": {
+        "emits": [
+          "interaction"
+        ]
+      }
+    },
+    {
+      "type": "Chart",
+      "category": "content",
+      "h5pMachineName": "H5P.Chart",
+      "h5pAlias": "Chart",
+      "description": "Simple bar or pie chart with accessible data table.",
+      "props": [
+        {
+          "name": "blockId",
+          "type": "BlockId",
+          "required": true,
+          "description": "Stable block id."
+        },
+        {
+          "name": "type",
+          "type": "bar | pie",
+          "required": true,
+          "description": "Chart type."
+        },
+        {
+          "name": "data",
+          "type": "ChartDatum[]",
+          "required": true,
+          "description": "Chart data."
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "required": false,
+          "description": "Chart title."
+        }
+      ],
+      "requiredIds": [
+        "blockId"
+      ],
+      "parentConstraints": [
+        "Lesson",
+        "Page",
+        "InteractiveBook",
+        "Slide",
+        "SlideDeck",
+        "TimedCue",
+        "InteractiveVideo",
+        "AssessmentSequence",
+        "BranchingScenario",
+        "BranchNode"
+      ],
+      "a11y": {
+        "element": "figure",
+        "ariaLabel": "Chart",
+        "keyboard": "Data table fallback.",
+        "notes": "Table exposes values to screen readers."
+      },
+      "theming": {
+        "surface": "global-inherit",
+        "stylingNotes": "Simple SVG/CSS chart."
+      },
+      "telemetry": {
+        "emits": [
+          "interaction"
+        ]
+      }
+    },
+    {
       "type": "Questionnaire",
       "category": "content",
       "h5pMachineName": "H5P.Questionnaire",
@@ -1946,7 +2337,9 @@
         "SlideDeck",
         "TimedCue",
         "InteractiveVideo",
-        "AssessmentSequence"
+        "AssessmentSequence",
+        "BranchingScenario",
+        "BranchNode"
       ],
       "a11y": {
         "element": "form",
@@ -2002,7 +2395,9 @@
         "SlideDeck",
         "TimedCue",
         "InteractiveVideo",
-        "AssessmentSequence"
+        "AssessmentSequence",
+        "BranchingScenario",
+        "BranchNode"
       ],
       "a11y": {
         "element": "section",
@@ -2051,7 +2446,9 @@
         "SlideDeck",
         "TimedCue",
         "InteractiveVideo",
-        "AssessmentSequence"
+        "AssessmentSequence",
+        "BranchingScenario",
+        "BranchNode"
       ],
       "a11y": {
         "element": "section",
@@ -2100,7 +2497,9 @@
         "SlideDeck",
         "TimedCue",
         "InteractiveVideo",
-        "AssessmentSequence"
+        "AssessmentSequence",
+        "BranchingScenario",
+        "BranchNode"
       ],
       "a11y": {
         "element": "section",
@@ -2149,7 +2548,9 @@
         "SlideDeck",
         "TimedCue",
         "InteractiveVideo",
-        "AssessmentSequence"
+        "AssessmentSequence",
+        "BranchingScenario",
+        "BranchNode"
       ],
       "a11y": {
         "element": "section",
@@ -2198,7 +2599,9 @@
         "SlideDeck",
         "TimedCue",
         "InteractiveVideo",
-        "AssessmentSequence"
+        "AssessmentSequence",
+        "BranchingScenario",
+        "BranchNode"
       ],
       "a11y": {
         "element": "section",
@@ -2251,7 +2654,9 @@
         "SlideDeck",
         "TimedCue",
         "InteractiveVideo",
-        "AssessmentSequence"
+        "AssessmentSequence",
+        "BranchingScenario",
+        "BranchNode"
       ],
       "a11y": {
         "element": "section",
@@ -2312,7 +2717,9 @@
         "SlideDeck",
         "TimedCue",
         "InteractiveVideo",
-        "AssessmentSequence"
+        "AssessmentSequence",
+        "BranchingScenario",
+        "BranchNode"
       ],
       "a11y": {
         "element": "section",
@@ -2361,7 +2768,9 @@
         "SlideDeck",
         "TimedCue",
         "InteractiveVideo",
-        "AssessmentSequence"
+        "AssessmentSequence",
+        "BranchingScenario",
+        "BranchNode"
       ],
       "a11y": {
         "element": "section",
@@ -2453,7 +2862,9 @@
         "SlideDeck",
         "TimedCue",
         "InteractiveVideo",
-        "AssessmentSequence"
+        "AssessmentSequence",
+        "BranchingScenario",
+        "BranchNode"
       ],
       "a11y": {
         "element": "section",
@@ -2550,7 +2961,9 @@
         "SlideDeck",
         "TimedCue",
         "InteractiveVideo",
-        "AssessmentSequence"
+        "AssessmentSequence",
+        "BranchingScenario",
+        "BranchNode"
       ],
       "a11y": {
         "element": "section",

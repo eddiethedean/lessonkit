@@ -43,8 +43,48 @@ export const PAGE_ALLOWED_CHILD_TYPES = [
   "FindHotspot",
   "FindMultipleHotspots",
   "ImageSlider",
+  "Embed",
+  "Chart",
   "ProgressTracker",
 ] as const;
+
+/** Branch node content (Page-like minus ProgressTracker). */
+export const BRANCH_NODE_ALLOWED_CHILD_TYPES = [
+  "Text",
+  "Heading",
+  "Image",
+  "Video",
+  "Scenario",
+  "Reflection",
+  "Quiz",
+  "KnowledgeCheck",
+  "TrueFalse",
+  "FillInTheBlanks",
+  "DragAndDrop",
+  "DragTheWords",
+  "MarkTheWords",
+  "Summary",
+  "ImagePairing",
+  "ImageSequencing",
+  "MemoryGame",
+  "InformationWall",
+  "ParallaxSlideshow",
+  "Questionnaire",
+  "Essay",
+  "ArithmeticQuiz",
+  "Accordion",
+  "DialogCards",
+  "Flashcards",
+  "ImageHotspots",
+  "FindHotspot",
+  "FindMultipleHotspots",
+  "ImageSlider",
+  "Embed",
+  "Chart",
+  "BranchChoice",
+] as const;
+
+export const BRANCHING_SCENARIO_ALLOWED_CHILD_TYPES = ["BranchNode"] as const;
 
 export const INTERACTIVE_BOOK_ALLOWED_CHILD_TYPES = ["Page"] as const;
 
@@ -79,6 +119,8 @@ export const SLIDE_ALLOWED_CHILD_TYPES = [
   "FindHotspot",
   "FindMultipleHotspots",
   "ImageSlider",
+  "Embed",
+  "Chart",
 ] as const;
 
 export const SLIDE_DECK_ALLOWED_CHILD_TYPES = ["Slide"] as const;
@@ -125,7 +167,9 @@ export type CompoundParentType =
   | "SlideDeck"
   | "TimedCue"
   | "InteractiveVideo"
-  | "AssessmentSequence";
+  | "AssessmentSequence"
+  | "BranchingScenario"
+  | "BranchNode";
 
 const ALLOWLISTS: Record<CompoundParentType, readonly string[]> = {
   Page: PAGE_ALLOWED_CHILD_TYPES,
@@ -135,6 +179,8 @@ const ALLOWLISTS: Record<CompoundParentType, readonly string[]> = {
   TimedCue: TIMED_CUE_ALLOWED_CHILD_TYPES,
   InteractiveVideo: INTERACTIVE_VIDEO_ALLOWED_CHILD_TYPES,
   AssessmentSequence: ASSESSMENT_SEQUENCE_ALLOWED_CHILD_TYPES,
+  BranchingScenario: BRANCHING_SCENARIO_ALLOWED_CHILD_TYPES,
+  BranchNode: BRANCH_NODE_ALLOWED_CHILD_TYPES,
 };
 
 export const COMPOUND_MAX_NESTING_DEPTH: Record<CompoundParentType, number> = {
@@ -145,6 +191,8 @@ export const COMPOUND_MAX_NESTING_DEPTH: Record<CompoundParentType, number> = {
   TimedCue: 1,
   InteractiveVideo: 2,
   AssessmentSequence: 1,
+  BranchingScenario: 2,
+  BranchNode: 1,
 };
 
 export function getAllowedChildTypes(parent: CompoundParentType): readonly string[] {

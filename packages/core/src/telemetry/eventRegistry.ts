@@ -19,6 +19,8 @@ import type {
   InformationWallSearchData,
   ParallaxSlideViewedData,
   QuestionnaireSubmittedData,
+  BranchNodeViewedData,
+  BranchSelectedData,
   QuizAnsweredData,
   QuizCompletedData,
   TelemetryEvent,
@@ -313,6 +315,34 @@ export const TELEMETRY_EVENT_REGISTRY: Record<BuildTelemetryEventInput["name"], 
         ...base,
         lessonId,
         data: opts.data as QuestionnaireSubmittedData,
+      };
+    },
+  },
+  branch_node_viewed: {
+    requiresLessonId: true,
+    build: (opts, base) => {
+      if (opts.name !== "branch_node_viewed") throw new Error("unexpected event");
+      const lessonId = opts.lessonId;
+      if (!lessonId) throw new Error("branch_node_viewed requires active lessonId");
+      return {
+        name: "branch_node_viewed",
+        ...base,
+        lessonId,
+        data: opts.data as BranchNodeViewedData,
+      };
+    },
+  },
+  branch_selected: {
+    requiresLessonId: true,
+    build: (opts, base) => {
+      if (opts.name !== "branch_selected") throw new Error("unexpected event");
+      const lessonId = opts.lessonId;
+      if (!lessonId) throw new Error("branch_selected requires active lessonId");
+      return {
+        name: "branch_selected",
+        ...base,
+        lessonId,
+        data: opts.data as BranchSelectedData,
       };
     },
   },

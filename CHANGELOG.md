@@ -6,6 +6,19 @@ All notable changes to the LessonKit monorepo are documented here.
 
 ## Unreleased
 
+## [1.5.0] - 2026-06-06
+
+Framework **1.5.x** — `BranchingScenario` graph compound, `Embed` and `Chart` content blocks, branch telemetry, and `useBranchingScenario()`. All seven `@lessonkit/*` packages ship at **1.5.0**.
+
+### Added
+
+- **`BranchingScenario`**, **`BranchNode`**, **`BranchChoice`** — H5P Branching Scenario–aligned graph navigation with visited-path scoring, session resume, optional path recap UI, and `useBranchingScenario()` hook
+- **`Embed`** — sandboxed iframe block (`H5P.IFrameEmbed`) with restrictive defaults
+- **`Chart`** — bar/pie chart with accessible data table fallback (`H5P.Chart`)
+- **Telemetry** — `branch_node_viewed`, `branch_selected` (catalog v3 + xAPI node IRIs)
+- **Golden example** — `examples/branching-scenario`; `customer-service` uses declarative branching
+- **Docs** — [MIGRATION-1.4-to-1.5.md](docs/MIGRATION-1.4-to-1.5.md); H5P capability map updates
+
 ## [1.4.0] - 2026-06-06
 
 Framework **1.4.x** — `InteractiveVideo` (H5P Interactive Video), bundled Tier B/C/D blocks, Studio removal, production-hardening audit pass, and dependency/toolchain refresh. All seven `@lessonkit/*` packages ship at **1.4.0**.

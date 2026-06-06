@@ -170,6 +170,8 @@ describe("telemetry catalog v3", () => {
     expect(names).toContain("slide_viewed");
     expect(names).toContain("video_cue_reached");
     expect(names).toContain("video_segment_completed");
+    expect(names).toContain("branch_node_viewed");
+    expect(names).toContain("branch_selected");
   });
 
   it("builds book_page_viewed events", () => {
@@ -258,5 +260,36 @@ describe("telemetry catalog v3", () => {
       data: { blockId: "survey-1", fieldCount: 3 },
     });
     expect(survey.name).toBe("questionnaire_submitted");
+
+    const branchViewed = buildTelemetryEvent({
+      name: "branch_node_viewed",
+      courseId: "c1",
+      lessonId: "l1",
+      sessionId: "s1",
+      data: { blockId: "bs-1", nodeId: "offer", nodeIndex: 0, nodeTitle: "Offer" },
+    });
+    expect(branchViewed.name).toBe("branch_node_viewed");
+
+    const branchSelected = buildTelemetryEvent({
+      name: "branch_selected",
+      courseId: "c1",
+      lessonId: "l1",
+      sessionId: "s1",
+      data: {
+        blockId: "bs-1",
+        fromNodeId: "offer",
+        toNodeId: "credit",
+        label: "Credit",
+        scoreWeight: 1,
+      },
+    });
+    expect(branchSelected.name).toBe("branch_selected");
+  });
+
+  it("allows BranchNode under BranchingScenario", () => {
+    expect(isChildTypeAllowed("BranchingScenario", "BranchNode")).toBe(true);
+    expect(isChildTypeAllowed("BranchNode", "BranchChoice")).toBe(true);
+    expect(isChildTypeAllowed("BranchNode", "Embed")).toBe(true);
+    expect(isChildTypeAllowed("BranchNode", "Chart")).toBe(true);
   });
 });

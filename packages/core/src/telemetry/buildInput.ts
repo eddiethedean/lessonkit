@@ -16,6 +16,8 @@ import type {
   InformationWallSearchData,
   ParallaxSlideViewedData,
   QuestionnaireSubmittedData,
+  BranchNodeViewedData,
+  BranchSelectedData,
   QuizAnsweredData,
   QuizCompletedData,
   TelemetryUser,
@@ -138,4 +140,14 @@ export type BuildTelemetryEventInput =
       name: "questionnaire_submitted";
       lessonId?: LessonId;
       data: QuestionnaireSubmittedData;
+    })
+  | (BuildTelemetryEventContext & {
+      name: "branch_node_viewed";
+      lessonId?: LessonId;
+      data: BranchNodeViewedData;
+    })
+  | (BuildTelemetryEventContext & {
+      name: "branch_selected";
+      lessonId?: LessonId;
+      data: BranchSelectedData;
     });

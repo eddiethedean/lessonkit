@@ -94,7 +94,7 @@ H5P **machine names** follow common library ids (e.g. `H5P.MultiChoice`). Displa
 | `H5P.InteractiveBook` | Interactive Book | `InteractiveBook` | A | P0 | ✅ | 1.2.x |
 | `H5P.CoursePresentation` | Course Presentation | `SlideDeck` | A | P0 | ✅ | 1.3.x |
 | `H5P.InteractiveVideo` | Interactive Video | `InteractiveVideo` | A | P0 | ✅ | 1.4.0 |
-| `H5P.BranchingScenario` | Branching Scenario | `BranchingScenario` | A | P0 | ⬜ | 1.5.x |
+| `H5P.BranchingScenario` | Branching Scenario | `BranchingScenario` | A | P0 | ✅ | 1.5.0 |
 | `H5P.Column` | Column / Page | `Page` | A | P1 | ✅ | 1.2.x |
 | `H5P.GameMap` | Game Map | `GameMap` | A | P2 | ⬜ | 1.7.x |
 | `H5P.ThreeSixty` | Virtual Tour (360) | `VirtualTour` | A | P2 | ⬜ | 1.9.x |
@@ -110,8 +110,8 @@ H5P **machine names** follow common library ids (e.g. `H5P.MultiChoice`). Displa
 | `H5P.ImagePair` | Image Pairing | `ImagePairing` | C | P2 | ✅ | 1.4.0 |
 | `H5P.ImageSequencing` | Image Sequencing | `ImageSequencing` | C | P2 | ✅ | 1.4.0 |
 | `H5P.MemoryGame` | Memory Game | `MemoryGame` | C | P2 | ✅ | 1.4.0 |
-| `H5P.IFrameEmbed` | Iframe Embedder | `Embed` | C | P3 | ⬜ | 1.5.x |
-| `H5P.Chart` | Chart | `Chart` | C | P3 | ⬜ | 1.5.x |
+| `H5P.IFrameEmbed` | Iframe Embedder | `Embed` | C | P3 | ✅ | 1.5.0 |
+| `H5P.Chart` | Chart | `Chart` | C | P3 | ✅ | 1.5.0 |
 | `H5P.Accordion` | Accordion | `Accordion` | D | P1 | ✅ | 1.2.x |
 | `H5P.Dialogcards` | Dialog Cards | `DialogCards` | D | P1 | ✅ | 1.2.x |
 | `H5P.Flashcards` | Flashcards | `Flashcards` | D | P1 | ✅ | 1.2.x |
@@ -159,7 +159,7 @@ Mirrors H5P maintainer curation ([why sub-content differs](https://snordian.de/2
 | `SlideDeck` | Per-slide: text, image, `Video`, assessments, `Summary`, `MemoryGame`, … |
 | `InteractiveVideo` | `TimedCue` only; each cue wraps one allowed block (`Quiz`, `TrueFalse`, `Summary`, `ImagePairing`, …). Excludes `ParallaxSlideshow`, `InformationWall`, `Video`. |
 | `TimedCue` | Single child from `TIMED_CUE_ALLOWED_CHILD_TYPES` in `@lessonkit/core` |
-| `BranchingScenario` | Scored nodes + `Scenario` content; branch telemetry (planned **1.5.x**) |
+| `BranchingScenario` | Scored nodes + `Scenario` content; branch telemetry (**1.5.0** ✅) |
 | `AssessmentSequence` | All **Assessment contract** blocks |
 
 **Shipped in 1.4.0:** `Video`, `TimedCue`, `InteractiveVideo`, `Summary`, `ImagePairing`, `ImageSequencing`, `MemoryGame`, `InformationWall`, `ParallaxSlideshow`, `Questionnaire`, `Essay`, `ArithmeticQuiz`. See [ROADMAP — 1.4.x](roadmap.md#14x--interactivevideo--bundled-blocks).

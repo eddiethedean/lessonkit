@@ -27,6 +27,7 @@ These workspaces use `file:../../packages/*` dependencies—they are for **monor
 | [`interactive-book/`](interactive-book/README.md) | `lessonkit-example-interactive-book` | Interactive book | Compound `Page` / `InteractiveBook` (1.2) |
 | [`slide-deck/`](slide-deck/) | `lessonkit-example-slide-deck` | Onboarding presentation | Compound `Slide` / `SlideDeck` (1.3) |
 | [`interactive-video/`](interactive-video/) | `lessonkit-example-interactive-video` | Safety briefing | Compound `InteractiveVideo` / `TimedCue` (1.4) |
+| [`branching-scenario/`](branching-scenario/) | `lessonkit-example-branching-scenario` | Resolution paths | Compound `BranchingScenario` / graph branches (1.5) |
 | [`framework-11-showcase/`](framework-11-showcase/) | `lessonkit-example-framework-11-showcase` | Incident Response | **Full 1.1 catalog** — foundation + P0 assessments |
 | [`framework-12-showcase/`](framework-12-showcase/) | `lessonkit-example-framework-12-showcase` | Atlas Analytics | **Full 1.2 catalog** — content, compound, Tier C/D, hotspots |
 | [`assessments-p0/`](assessments-p0/README.md) | `lessonkit-example-assessments-p0` | Assessment showcase | Minimal P0 sample (subset of 1.1) |

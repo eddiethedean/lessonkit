@@ -26,7 +26,9 @@ export type TelemetryEventName =
   | "memory_card_flipped"
   | "information_wall_search"
   | "parallax_slide_viewed"
-  | "questionnaire_submitted";
+  | "questionnaire_submitted"
+  | "branch_node_viewed"
+  | "branch_selected";
 
 export type TelemetryUser = {
   id?: string;
@@ -164,6 +166,21 @@ export type QuestionnaireSubmittedData = {
   fieldCount: number;
 };
 
+export type BranchNodeViewedData = {
+  blockId: BlockId;
+  nodeId: string;
+  nodeIndex: number;
+  nodeTitle?: string;
+};
+
+export type BranchSelectedData = {
+  blockId: BlockId;
+  fromNodeId: string;
+  toNodeId: string;
+  label: string;
+  scoreWeight?: number;
+};
+
 export type TelemetryEvent =
   | (TelemetryEventBase & { name: "course_started"; lessonId?: LessonId; data?: undefined })
   | (TelemetryEventBase & { name: "course_completed"; lessonId?: LessonId; data?: undefined })
@@ -223,6 +240,16 @@ export type TelemetryEvent =
       name: "questionnaire_submitted";
       lessonId: LessonId;
       data: QuestionnaireSubmittedData;
+    })
+  | (TelemetryEventBase & {
+      name: "branch_node_viewed";
+      lessonId: LessonId;
+      data: BranchNodeViewedData;
+    })
+  | (TelemetryEventBase & {
+      name: "branch_selected";
+      lessonId: LessonId;
+      data: BranchSelectedData;
     });
 
 /** Payload shape for a telemetry event name. */
