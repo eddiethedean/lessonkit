@@ -592,7 +592,7 @@ describe("coverage-full", () => {
         config={{
           courseId: "course-1",
           session: { sessionId },
-          tracking: { sink: (e) => events.push(e) },
+          tracking: { sink: (e) => { events.push(e); } },
           xapi: { enabled: false },
         }}
       >

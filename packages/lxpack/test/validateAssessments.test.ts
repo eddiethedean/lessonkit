@@ -4,6 +4,7 @@ import {
   validateAssessmentEntry,
 } from "../src/descriptor/validateAssessments";
 import type { AssessmentDescriptor } from "../src/types";
+import type { ValidationIssue } from "../src/validationIssue";
 
 describe("maxAchievableAssessmentScore", () => {
   it("returns 1 for mcq and trueFalse", () => {
@@ -33,7 +34,6 @@ describe("maxAchievableAssessmentScore", () => {
         question: "Fill",
         template: "Type *here* and *there*",
         blanks: [
-          null,
           { id: "b1", answer: "here" },
           { id: "b2", answer: "there" },
         ],
@@ -70,7 +70,7 @@ describe("validateAssessmentEntry", () => {
   const checkIds = new Set<string>();
 
   function collect(assessment: AssessmentDescriptor, index = 0) {
-    const issues: Array<{ path?: string; message: string }> = [];
+    const issues: ValidationIssue[] = [];
     validateAssessmentEntry(assessment, index, issues, checkIds);
     return issues;
   }

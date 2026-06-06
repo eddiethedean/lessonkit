@@ -133,7 +133,6 @@ describe("Tier B/C/D block components", () => {
       wrap(
         <Summary
           checkId="summary-1"
-          question="Build the summary"
           statements={["First", "Second", "Noise"]}
           correct={["First", "Second"]}
         />,
@@ -150,7 +149,6 @@ describe("Tier B/C/D block components", () => {
       wrap(
         <ImageSequencing
           checkId="seq-1"
-          question="Order the steps"
           images={[
             { id: "step-1", src: "/1.png", alt: "Step 1" },
             { id: "step-2", src: "/2.png", alt: "Step 2" },
@@ -169,7 +167,6 @@ describe("Tier B/C/D block components", () => {
       wrap(
         <ImagePairing
           checkId="pair-1"
-          question="Match pairs"
           pairs={[
             { id: "p1", label: "Helmet", imageSrc: "/helmet.png" },
             { id: "p2", label: "Gloves", imageSrc: "/gloves.png" },
