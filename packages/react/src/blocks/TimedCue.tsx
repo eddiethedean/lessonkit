@@ -1,6 +1,5 @@
 import React, { useEffect, useRef } from "react";
 import { trapFocus } from "@lessonkit/accessibility";
-import type { BlockId } from "@lessonkit/core";
 import { setLessonkitBlockType } from "../compound/blockType";
 import { CompoundPageIndexProvider } from "../compound/CompoundPageIndexContext";
 import { validateCompoundChildren } from "../compound/validateChildren";
