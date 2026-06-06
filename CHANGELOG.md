@@ -18,8 +18,12 @@ All notable changes to the LessonKit monorepo are documented here.
 - **@lessonkit/react**: `QuizProps` and `KnowledgeCheckProps` now use `McqAssessmentProps` from `@lessonkit/core` (was `McqAssessmentDescriptor` from lxpack).
 - **@lessonkit/lxpack**: `@lxpack/*` dependencies pinned to exact `0.6.2`; LXPack compatibility matrix in [LXPack interoperability](docs/reference/lxpack-upgrades.md).
 - **@lessonkit/cli**: `exports` field now includes TypeScript types.
-- **Docs**: `SECURITY.md` lists 1.4.x; README clarifies lxpack bundles `@lxpack/*`; CONTRIBUTING documents studio packages as not shipped.
+- **Docs**: `SECURITY.md` lists 1.4.x; README clarifies lxpack bundles `@lxpack/*`; onboarding docs (API subpaths, example READMEs, init template packaging scripts).
 - Test reset helpers on main package entries are **deprecated**; use `@lessonkit/core/testing` and `@lessonkit/react/testing`.
+
+### Removed
+
+- **Studio**: Visual Studio authoring packages (`packages/studio-*`, `apps/studio-web`, `examples/studio-minimal`) removed from the monorepo. LessonKit is React-first only; historical `studio-v*` git tags remain for archaeology.
 
 ## [1.4.0] - 2026-06-05
 

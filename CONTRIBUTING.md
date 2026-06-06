@@ -10,19 +10,17 @@ We follow the [Contributor Covenant](CODE_OF_CONDUCT.md). Be respectful and cons
 
 ## Before you open a PR
 
-1. Fork the repository and create a branch from `main`.
+1. Fork the repository and create a branch from **`main`**.
 2. Keep each PR focused on one logical change (feature, fix, or docs update).
 3. Search [existing issues](https://github.com/eddiethedean/lessonkit/issues) to avoid duplicate work.
+
+**Branch policy:** Open pull requests against **`main`**. Release branches (for example `release/1.4.0`) are maintainer-only for version stabilization—do not target them unless a maintainer asks you to.
 
 ## Good first contributions
 
 Look for issues labeled **`good first issue`** or **`help wanted`**. Starter ideas (no issue required—comment on an existing thread first): [Good first contributions](https://lessonkit.readthedocs.io/en/latest/project/good-first-contributions.html).
 
 Maintainers: create those labels in GitHub (**Settings → Labels**) if they are not present yet.
-
-## Studio packages (not shipped)
-
-The `packages/studio-*` directories (`studio-builder`, `studio-codegen`, `studio-renderer`, `studio-schema`, `studio-ui`) and `apps/studio-web` are **experimental and not published** to npm. They are excluded from workspace `package.json` files and CI. Do not depend on them for course authoring or packaging — use `@lessonkit/react` and `@lessonkit/cli` instead. If you touch studio code, treat it as archival R&D unless a maintainer re-enables it in workspaces.
 
 ## Development setup
 

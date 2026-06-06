@@ -5,7 +5,7 @@ pragmatic: small, shippable milestones with clear outputs.
 
 ## Product
 
-**LessonKit (framework)** — React components, telemetry, xAPI, CLI, and packaging for code-first authoring. **Planned:** `@lessonkit/react-native` for iOS/Android (see [2.x](#2x--lessonkitreact-native-planned)).
+**LessonKit (framework)** — React components, telemetry, xAPI, CLI, and packaging for code-first authoring. Visual Studio authoring was explored and removed; LessonKit is React-first only. **Planned:** `@lessonkit/react-native` for iOS/Android (see [2.x](#2x--lessonkitreact-native-planned)).
 
 | Doc | Link |
 |-----|------|

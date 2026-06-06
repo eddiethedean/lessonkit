@@ -105,6 +105,13 @@ function checkIdPresent(source: string, checkId: string): boolean {
   return idUsedViaConstant(stripped, "checkId", checkId, extractStringConstants(source));
 }
 
+const ID_SYNC_DOC =
+  "https://lessonkit.readthedocs.io/en/latest/guides/react-developers/quickstart.html#keep-react-ids-in-sync-with-lessonkitjson";
+
+function parityHint(message: string): string {
+  return `${message} See ${ID_SYNC_DOC}`;
+}
+
 /**
  * Validates that React app source references the same courseId and assessment checkIds
  * as the lessonkit.json descriptor (prevents LMS/runtime ID drift at package time).
@@ -135,7 +142,9 @@ export function validateReactManifestParity(
   if (!courseIdPresent(source, courseId)) {
     issues.push({
       path: "course.courseId",
-      message: `React app source does not reference courseId="${courseId}" from lessonkit.json`,
+      message: parityHint(
+        `React app source does not reference courseId="${courseId}" from lessonkit.json.`,
+      ),
       severity: "error",
     });
   }
@@ -146,7 +155,9 @@ export function validateReactManifestParity(
     if (!checkIdPresent(source, checkId)) {
       issues.push({
         path: `assessments.checkId:${checkId}`,
-        message: `React app source missing checkId="${checkId}" declared in lessonkit.json`,
+        message: parityHint(
+          `React app source missing checkId="${checkId}" declared in lessonkit.json.`,
+        ),
         severity: "error",
       });
     }

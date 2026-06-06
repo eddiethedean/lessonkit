@@ -4,14 +4,14 @@
 [![Documentation](https://readthedocs.org/projects/lessonkit/badge/?version=latest)](https://lessonkit.readthedocs.io/en/latest/reference/packaging.html)
 [![License](https://img.shields.io/github/license/eddiethedean/lessonkit)](https://github.com/eddiethedean/lessonkit/blob/main/LICENSE)
 
-Package Vite SPAs for LMS delivery — SCORM 1.2/2004, standalone, xAPI, and cmi5 via [`@lxpack/api`](https://www.npmjs.com/package/@lxpack/api).
+Package Vite SPAs for LMS delivery — SCORM 1.2/2004, standalone, xAPI, and cmi5. `@lessonkit/lxpack` bundles [`@lxpack/*`](https://www.npmjs.com/org/lxpack) as direct dependencies (no separate `@lxpack/api` install).
 
 Requires Node.js **18+**.
 
 ## Install
 
 ```bash
-npm install @lessonkit/lxpack @lxpack/api
+npm install @lessonkit/lxpack
 ```
 
 ## Usage

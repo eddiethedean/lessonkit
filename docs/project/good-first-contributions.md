@@ -6,13 +6,13 @@ Maintainers: label suitable issues **`good first issue`** or **`help wanted`** i
 
 ## Documentation
 
-- Fix broken links or version numbers (framework **1.3.0**).
+- Fix broken links or version numbers (framework **1.4.0**).
 - Add a short “how I debugged X” note to [troubleshooting](../guides/vibe-coding/troubleshooting.md).
 - Improve [glossary](../reference/glossary.md) definitions from your onboarding experience.
 
 ## Examples
 
-- Add a one-paragraph “what to look at in `App.tsx`” to an example README under `examples/`.
+- Add or extend a short README in an `examples/` directory that lacks one — explain what to look at in `App.tsx`, which blocks the course demonstrates, and how to run it (`npm -w <workspace> run dev` after `npm run build:packages`). Good targets: `react-vite`, `data-privacy`, `customer-service`, `interactive-book`, `assessments-p0`.
 - Verify [examples/README](https://github.com/eddiethedean/lessonkit/blob/main/examples/README.md) matches workspace names in root `package.json`.
 
 ## Tests and tooling
