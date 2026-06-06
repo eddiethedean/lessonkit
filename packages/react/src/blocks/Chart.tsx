@@ -39,7 +39,7 @@ export function Chart(props: ChartProps) {
       {props.title ? <figcaption>{props.title}</figcaption> : null}
       {rows.length === 0 ? (
         <p data-testid="chart-empty">No chart data.</p>
-      ) : chartType === "bar" ? (
+      ) : chartType === "table" ? null : chartType === "bar" ? (
         <div role="img" aria-label={props.title ?? "Bar chart"} aria-describedby={`${blockId}-table`}>
           {rows.map((datum) => (
             <div key={datum.key} style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>

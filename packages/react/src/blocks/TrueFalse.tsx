@@ -141,7 +141,9 @@ function TrueFalseInner(
             if (nextPassed) {
               const maxScore = nextCompletedMaxScore ?? completedMaxScore ?? 1;
               const score = nextCompletedScore ?? completedScore ?? maxScore;
-              replayTelemetry(nextSelected ?? null, nextCorrect ?? null, nextPassed, score, maxScore);
+              if (config.tracking?.replayResumeEvents === true) {
+                replayTelemetry(nextSelected ?? null, nextCorrect ?? null, nextPassed, score, maxScore);
+              }
             }
           }
           readBooleanStateField(state, "showSolutions", setShowSolutions);
@@ -158,6 +160,7 @@ function TrueFalseInner(
       selected,
       selectionCorrect,
       showSolutions,
+      config.tracking?.replayResumeEvents,
     ],
   );
 

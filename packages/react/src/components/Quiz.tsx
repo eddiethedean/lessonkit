@@ -11,7 +11,7 @@ import {
 } from "../assessment/internal/resumeState";
 import { useAssessmentHandleRegistration } from "../assessment/internal/useAssessmentHandleRegistration";
 import { usePluginScoring } from "../assessment/internal/usePluginScoring";
-import { useQuizState } from "../hooks";
+import { useLessonkit, useQuizState } from "../hooks";
 import { normalizeComponentId } from "../runtime/validateComponentId";
 
 export type QuizProps = McqAssessmentProps;
@@ -23,6 +23,7 @@ function QuizInner(
   const { enclosingLessonId } = props;
   const checkId = useMemo(() => normalizeComponentId(props.checkId, "checkId"), [props.checkId]);
   const quiz = useQuizState(enclosingLessonId);
+  const { config } = useLessonkit();
   const { getPluginScore, isChoiceCorrect } = usePluginScoring(checkId, enclosingLessonId);
   const [selected, setSelected] = useState<string | null>(null);
   const [selectionCorrect, setSelectionCorrect] = useState<boolean | null>(null);
@@ -132,7 +133,7 @@ function QuizInner(
           if (nextPassed === true || nextPassed === false) {
             setQuizPassed(nextPassed);
             completedRef.current = nextPassed;
-            if (nextPassed) {
+            if (nextPassed && config.tracking?.replayResumeEvents === true) {
               const maxScore = nextCompletedMaxScore ?? completedMaxScore ?? 1;
               const score = nextCompletedScore ?? completedScore ?? maxScore;
               replayTelemetry(
@@ -150,6 +151,7 @@ function QuizInner(
       checkId,
       completedMaxScore,
       completedScore,
+      config.tracking?.replayResumeEvents,
       props.passingScore,
       props.question,
       quiz,

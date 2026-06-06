@@ -69,3 +69,5 @@ See [H5P capability map](project/h5p-capability-map.md).
 ## Breaking changes
 
 None for existing 1.4.x courses. All additions are opt-in imports.
+
+**Branch resume (legacy):** Session saves without `__lk_bs__` branch meta (pre-1.5.0 or third-party state) no longer map `activePageIndex` to JSX node order. The learner restarts at `startNodeId` instead.

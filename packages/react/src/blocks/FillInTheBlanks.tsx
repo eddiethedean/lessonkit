@@ -8,6 +8,7 @@ import { readBooleanStateField } from "../assessment/internal/resumeState";
 import { useAssessmentHandleRegistration } from "../assessment/internal/useAssessmentHandleRegistration";
 import { meetsPassingThreshold } from "../assessment/scoring";
 import { useAssessmentState } from "../assessment/useAssessmentState";
+import { useLessonkit } from "../hooks";
 import { isDevEnvironment, normalizeComponentId } from "../runtime/validateComponentId";
 
 export type FillInBlankSpec = { id: string; answer: string };
@@ -35,6 +36,7 @@ function FillInTheBlanksInner(
 ) {
   const checkId = useMemo(() => normalizeComponentId(props.checkId, "checkId"), [props.checkId]);
   const assessment = useAssessmentState(props.enclosingLessonId);
+  const { config } = useLessonkit();
   const parsed = useMemo(() => parseTemplate(props.template), [props.template]);
   const blanks = props.blanks ?? parsed.blanks;
   const [values, setValues] = useState<Record<string, string>>(() =>
@@ -147,10 +149,12 @@ function FillInTheBlanksInner(
           blanks.forEach((b) => {
             if ((nextValues[b.id] ?? "").trim().toLowerCase() === b.answer.toLowerCase()) nextScore += 1;
           });
-          replayTelemetry(nextValues, nextPassed, nextSubmitted, nextScore, blanks.length);
+          if (config.tracking?.replayResumeEvents === true) {
+            replayTelemetry(nextValues, nextPassed, nextSubmitted, nextScore, blanks.length);
+          }
         },
       }),
-    [allFilled, assessment, blanks, checkId, maxScore, passed, passedThreshold, props.passingScore, props.template, score, showSolutions, submitted, values],
+    [allFilled, assessment, blanks, checkId, config.tracking?.replayResumeEvents, maxScore, passed, passedThreshold, props.passingScore, props.template, score, showSolutions, submitted, values],
   );
 
   useAssessmentHandleRegistration(checkId, handle, ref);

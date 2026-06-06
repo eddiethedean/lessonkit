@@ -82,6 +82,12 @@ function getBridge(parentWindow?: Window): LxpackBridgeV1 | null {
 export type LxpackBridgeMode = LmsBridgeMode;
 
 function isDevEnvironment(): boolean {
+  try {
+    if ((import.meta as { env?: { DEV?: boolean; PROD?: boolean } }).env?.DEV === true) return true;
+    if ((import.meta as { env?: { PROD?: boolean } }).env?.PROD === true) return false;
+  } catch {
+    // no import.meta
+  }
   const g = globalThis as typeof globalThis & { process?: { env?: { NODE_ENV?: string } } };
   return typeof g.process !== "undefined" && g.process.env?.NODE_ENV !== "production";
 }

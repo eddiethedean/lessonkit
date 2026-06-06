@@ -11,6 +11,8 @@ Use this checklist before shipping a LessonKit course to learners in an LMS, sta
 
 The `lessonkit init` template scaffolds `lxpack.bridge: "off"`. Set `"auto"` before packaging for LMS iframe targets.
 
+Do **not** ship `config.preview.allowConsoleTelemetry` in learner-facing production builds — it is for Read the Docs demo bundles only. Wire real sinks and all `config.observability` hooks instead.
+
 Verify the parent exposes `window.parent.lxpackBridge.v1` in SCORM previews before go-live. If the bridge is missing, completions stay in the UI only.
 
 ## xAPI and analytics
@@ -63,7 +65,7 @@ observability: {
 
 ## CI / build
 
-- Pin aligned `@lessonkit/*` versions (framework 1.4.x).
+- Pin aligned `@lessonkit/*` versions (framework 1.5.x).
 - Set `VITE_XAPI_PROXY_URL` and `VITE_ANALYTICS_URL` (see `.env.example` in scaffolded projects).
 - `tracking.xapi.activityIri` in `lessonkit.json` must be **HTTPS** for xAPI/cmi5 packaging.
 - `lessonkit build` and `lessonkit package` run under Node 18+; set `LESSONKIT_CMD_TIMEOUT_MS` if builds need a limit (default 30 minutes per subprocess). `lessonkit dev` has no subprocess timeout.

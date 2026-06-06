@@ -7,7 +7,7 @@ import type { CliLogger } from "../lib/logger.js";
 import { CliError, EXIT_INVALID_PROJECT, type CliJsonResult } from "../lib/errors.js";
 import { runNpmInstall } from "../lib/exec.js";
 
-const SKIP_DIRS = new Set(["node_modules", "dist", ".lxpack", ".git"]);
+const SKIP_DIRS = new Set(["node_modules", "dist", ".lxpack", ".git", "coverage", ".nyc_output"]);
 const SKIP_FILES = new Set([".DS_Store"]);
 
 export type InitOptions = {
@@ -50,6 +50,8 @@ function escapeJsxString(value: string): string {
     .replace(/\{/g, "\\{")
     .replace(/\}/g, "\\}")
     .replace(/</g, "\\u003c")
+    .replace(/\u2028/g, "\\u2028")
+    .replace(/\u2029/g, "\\u2029")
     .replace(/\r\n|\n|\r/g, "\\n");
 }
 
@@ -148,7 +150,7 @@ export async function runInit(opts: InitOptions, logger: CliLogger): Promise<Cli
     );
   }
 
-  if (opts.here && !(await isDirEmpty(projectDir)) && !opts.force) {
+  if (opts.here && !(await isDirEmptyOrDotfilesOnly(projectDir)) && !opts.force) {
     throw new CliError(`Directory is not empty: ${projectDir}. Use --force to initialize anyway.`, {
       code: "INVALID_PROJECT",
       exitCode: EXIT_INVALID_PROJECT,

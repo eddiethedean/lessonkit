@@ -1,4 +1,5 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
+import { existsSync } from "node:fs";
 import { mkdtemp, rm, writeFile, mkdir, readFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { tmpdir } from "node:os";
@@ -464,6 +465,17 @@ describe("runInit", () => {
     expect(lessonkit.course.courseId).toBe("id-9th-grade");
     const appSource = await readFile(join(projectDir, "src/App.tsx"), "utf8");
     expect(appSource).toContain('courseId="id-9th-grade"');
+  });
+
+  it("initializes with --here when the directory contains only dotfiles", async () => {
+    const here = join(parentDir, "git-only");
+    await mkdir(here, { recursive: true });
+    await mkdir(join(here, ".git"), { recursive: true });
+    process.chdir(here);
+
+    await runInit({ here: true, skipInstall: true }, { log: () => {}, error: () => {} });
+
+    expect(existsSync(join(here, "package.json"))).toBe(true);
   });
 
   it("rejects --force without --here", async () => {

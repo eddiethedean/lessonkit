@@ -6,6 +6,7 @@ import { buildAssessmentHandle } from "../assessment/internal/buildAssessmentHan
 import { readBooleanStateField, readStringField } from "../assessment/internal/resumeState";
 import { useAssessmentHandleRegistration } from "../assessment/internal/useAssessmentHandleRegistration";
 import { useAssessmentState } from "../assessment/useAssessmentState";
+import { useLessonkit } from "../hooks";
 import { setLessonkitBlockType } from "../compound/blockType";
 import { normalizeComponentId } from "../runtime/validateComponentId";
 
@@ -30,6 +31,7 @@ function FindHotspotInner(
   ref: React.Ref<AssessmentHandle>,
 ) {
   const checkId = useMemo(() => normalizeComponentId(props.checkId, "checkId"), [props.checkId]);
+  const { config } = useLessonkit();
   const [selected, setSelected] = useState<string | null>(null);
   const [checked, setChecked] = useState(false);
   const telemetryReplayedRef = useRef(false);
@@ -106,10 +108,12 @@ function FindHotspotInner(
             setChecked(value);
           });
           const nextCorrect = nextSelected === props.correctTargetId;
-          replayTelemetry(nextSelected, nextChecked, nextCorrect);
+          if (config.tracking?.replayResumeEvents === true) {
+            replayTelemetry(nextSelected, nextChecked, nextCorrect);
+          }
         },
       }),
-    [assessment, checkId, checked, correct, props.correctTargetId, props.passingScore, props.targets, selected],
+    [assessment, checkId, checked, config.tracking?.replayResumeEvents, correct, props.correctTargetId, props.passingScore, props.targets, selected],
   );
 
   useAssessmentHandleRegistration(checkId, handle, ref);

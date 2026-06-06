@@ -11,14 +11,11 @@ export function useCompoundBranchHandle(
   ref: React.Ref<CompoundHandle>,
   opts: {
     activePageIndex: number;
-    setActivePageIndex: (index: number) => void;
     getRegisteredHandles: () => Map<string, RegisteredAssessmentHandle>;
-    pageCount?: number;
     visitedNodeIndices: ReadonlySet<number>;
     choiceScores: Record<string, number>;
     meta: BranchingScenarioMeta;
     onResetMeta: () => void;
-    onApplyResumeState?: (state: CompoundResumeState) => void;
     enableSolutionsButton?: boolean;
   },
 ) {
@@ -26,12 +23,10 @@ export function useCompoundBranchHandle(
   const {
     activePageIndex,
     getRegisteredHandles,
-    pageCount,
     visitedNodeIndices,
     choiceScores,
     meta,
     onResetMeta,
-    onApplyResumeState,
     enableSolutionsButton,
   } = opts;
 
@@ -57,7 +52,7 @@ export function useCompoundBranchHandle(
       },
       getMaxScore: () => {
         const assessment = aggregateAssessmentScores(filterVisited(getRegisteredHandles().values()));
-        return assessment.maxScore + sumChoiceScores(choiceScores);
+        return assessment.maxScore;
       },
       getAnswerGiven: () =>
         aggregateAssessmentScores(filterVisited(getRegisteredHandles().values())).allAnswered,
@@ -88,7 +83,6 @@ export function useCompoundBranchHandle(
         );
       },
       resume: (state: CompoundResumeState) => {
-        onApplyResumeState?.(state);
         bridgeRef?.current?.notifyImperativeResume(state);
       },
     }),
@@ -101,8 +95,6 @@ export function useCompoundBranchHandle(
       getRegisteredHandles,
       meta,
       onResetMeta,
-      onApplyResumeState,
-      pageCount,
       visitedNodeIndices,
     ],
   );

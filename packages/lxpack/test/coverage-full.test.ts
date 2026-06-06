@@ -516,7 +516,7 @@ describe("coverage-full lxpack", () => {
           timestamp: new Date().toISOString(),
           data: { notCheckId: true },
         } as unknown as TelemetryEvent),
-      ).toMatchObject({ name: "quiz_completed", lessonId: "l" });
+      ).toBeNull();
     });
 
     it("defaults preset when theme is omitted", () => {

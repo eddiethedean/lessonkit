@@ -108,9 +108,9 @@ export function validateAccordionSections(
   sections: { content: React.ReactNode }[],
   strict?: boolean,
 ): void {
-  if (!isDevEnvironment() && !strict) return;
+  const enforceStrict = strict ?? !isDevEnvironment();
   for (const section of sections) {
-    validateSubtreeForForbidden(section.content, ACCORDION_FORBIDDEN_CHILD_TYPES, strict);
+    validateSubtreeForForbidden(section.content, ACCORDION_FORBIDDEN_CHILD_TYPES, enforceStrict);
   }
 }
 
@@ -119,8 +119,8 @@ export function validateCompoundChildren(
   children: React.ReactNode,
   strict?: boolean,
 ): void {
-  if (!isDevEnvironment() && !strict) return;
-  validateNode(parent, children, 0, strict);
+  const enforceStrict = strict ?? !isDevEnvironment();
+  validateNode(parent, children, 0, enforceStrict);
 }
 
 /** @internal Reset dev warnings between tests. */

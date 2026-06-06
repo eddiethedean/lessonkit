@@ -35,6 +35,7 @@ export function sanitizeBranchMeta(
   meta: BranchingScenarioMeta,
   nodeIndexMap: ReadonlyMap<string, number>,
   startNodeId: string,
+  validChoiceKeys?: ReadonlySet<string>,
 ): BranchingScenarioMeta {
   const knownIds = new Set(nodeIndexMap.keys());
   const activeNodeId = knownIds.has(meta.activeNodeId) ? meta.activeNodeId : startNodeId;
@@ -47,10 +48,9 @@ export function sanitizeBranchMeta(
   }
   const choiceScores = meta.choiceScores
     ? Object.fromEntries(
-        Object.entries(meta.choiceScores).filter(([key]) => {
-          const fromId = key.split(":")[0];
-          return fromId !== undefined && knownIds.has(fromId);
-        }),
+        Object.entries(meta.choiceScores).filter(([key]) =>
+          validChoiceKeys ? validChoiceKeys.has(key) : knownIds.has(key.split(":")[0] ?? ""),
+        ),
       )
     : undefined;
   return {

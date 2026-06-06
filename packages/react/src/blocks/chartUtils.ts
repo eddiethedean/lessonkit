@@ -1,3 +1,4 @@
+import { isDevEnvironment } from "../runtime/validateComponentId";
 import type { ChartDatum } from "./Chart";
 
 export type NormalizedChartDatum = {
@@ -6,8 +7,14 @@ export type NormalizedChartDatum = {
   key: string;
 };
 
-export function normalizeChartType(type: string | undefined): "bar" | "pie" {
-  return type === "bar" ? "bar" : "pie";
+export type NormalizedChartType = "bar" | "pie" | "table";
+
+export function normalizeChartType(type: string | undefined): NormalizedChartType {
+  if (type === "bar" || type === "pie") return type;
+  if (type !== undefined && isDevEnvironment()) {
+    console.warn(`[lessonkit] Chart: unknown type "${type}"; rendering data table only.`);
+  }
+  return type === undefined ? "pie" : "table";
 }
 
 export function normalizeChartData(data: unknown): NormalizedChartDatum[] {

@@ -8,6 +8,7 @@ import { readBooleanStateField } from "../assessment/internal/resumeState";
 import { useAssessmentHandleRegistration } from "../assessment/internal/useAssessmentHandleRegistration";
 import { meetsPassingThreshold } from "../assessment/scoring";
 import { useAssessmentState } from "../assessment/useAssessmentState";
+import { useLessonkit } from "../hooks";
 import { isDevEnvironment, normalizeComponentId } from "../runtime/validateComponentId";
 
 export type DragTheWordsProps = AssessmentBaseProps & {
@@ -29,6 +30,7 @@ function DragTheWordsInner(
 ) {
   const checkId = useMemo(() => normalizeComponentId(props.checkId, "checkId"), [props.checkId]);
   const assessment = useAssessmentState(props.enclosingLessonId);
+  const { config } = useLessonkit();
   const { parts, answers } = useMemo(() => parseZones(props.template), [props.template]);
   const [zones, setZones] = useState<Record<string, string>>(() =>
     Object.fromEntries(answers.map((_, i) => [`zone-${i}`, ""])),
@@ -144,10 +146,12 @@ function DragTheWordsInner(
           answers.forEach((ans, i) => {
             if ((nextZones[`zone-${i}`] ?? "").trim().toLowerCase() === ans.toLowerCase()) nextScore += 1;
           });
-          replayTelemetry(nextZones, nextPassed, nextSubmitted, nextScore, answers.length);
+          if (config.tracking?.replayResumeEvents === true) {
+            replayTelemetry(nextZones, nextPassed, nextSubmitted, nextScore, answers.length);
+          }
         },
       }),
-    [allFilled, answers, assessment, checkId, keyboardWord, maxScore, passed, passedThreshold, pool, props.passingScore, props.template, score, submitted, zones],
+    [allFilled, answers, assessment, checkId, config.tracking?.replayResumeEvents, keyboardWord, maxScore, passed, passedThreshold, pool, props.passingScore, props.template, score, submitted, zones],
   );
 
   useAssessmentHandleRegistration(checkId, handle, ref);

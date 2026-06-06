@@ -7,7 +7,8 @@ import {
   createCompoundResumeState,
   saveCompoundState,
 } from "@lessonkit/core";
-import { filterRegisteredChildStates, resumeChildHandles } from "../src/compound/resumeChildHandles";
+import { filterRegisteredChildStates, registerablePendingKeys, resumeChildHandles } from "../src/compound/resumeChildHandles";
+import { BS_META_KEY } from "../src/compound/useCompoundBranchShell";
 import { useCompoundResume } from "../src/compound/useCompoundResume";
 import { readCompoundInitialIndex } from "../src/compound/useCompoundPersistence";
 import { createSessionStoragePort } from "../src/runtime/ports";
@@ -74,6 +75,32 @@ describe("resumeChildHandles", () => {
       { waitForHandles: true },
     );
     expect(applied).toBe(false);
+  });
+
+  it("completes wait-for-handles when only preserved meta keys are pending", () => {
+    const resume = vi.fn();
+    const handles = new Map<string, AssessmentHandle>([
+      ["check-1", { resume } as unknown as AssessmentHandle],
+    ]);
+    const applied = resumeChildHandles(
+      handles,
+      {
+        [BS_META_KEY]: { activeNodeId: "start" },
+        "check-1": { selected: true },
+      },
+      { waitForHandles: true },
+    );
+    expect(applied).toBe(true);
+    expect(resume).toHaveBeenCalledWith({ selected: true });
+  });
+
+  it("registerablePendingKeys excludes branch meta", () => {
+    expect(
+      registerablePendingKeys({
+        [BS_META_KEY]: { activeNodeId: "start" },
+        "check-1": { selected: true },
+      }),
+    ).toEqual(["check-1"]);
   });
 
   it("waits for lazy mounts when only some pending keys are registered", () => {

@@ -151,7 +151,7 @@ describe("@lessonkit/react block catalog", () => {
     expect(buildBlockCatalogV1()).toEqual(buildBlockCatalog({ version: 1 }));
   });
 
-  it("renders every catalog block type in a minimal Course/Lesson tree", () => {
+  it("smoke-renders core catalog block types in a minimal Course/Lesson tree", () => {
     render(
       <Course title="Catalog smoke" courseId="catalog-smoke" config={{ xapi: { enabled: false } }}>
         <ProgressTracker />

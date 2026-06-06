@@ -25,9 +25,19 @@ describe("embedSecurity", () => {
     expect(telemetryEmbedSrc("https://example.com/doc?token=secret")).toBe("https://example.com/doc");
   });
 
-  it("validates aspect ratio format", () => {
-    expect(resolveEmbedAspectRatio("16 / 9")).toBe("16 / 9");
-    expect(resolveEmbedAspectRatio("not-a-ratio")).toBeUndefined();
+  it("strips credentials from telemetry src", () => {
+    expect(telemetryEmbedSrc("https://user:secret@example.com/doc")).toBe("https://example.com/doc");
+  });
+
+  it("never allows popups-to-escape-sandbox", () => {
+    expect(buildEmbedSandbox("allow-popups allow-popups-to-escape-sandbox")).toBe(
+      "allow-scripts allow-popups",
+    );
+  });
+
+  it("rejects invalid aspect ratio denominators", () => {
+    expect(resolveEmbedAspectRatio("16 / 0")).toBeUndefined();
+    expect(resolveEmbedAspectRatio("0 / 9")).toBeUndefined();
   });
 });
 
@@ -45,8 +55,8 @@ describe("chartUtils", () => {
     ]);
   });
 
-  it("defaults unknown chart type to pie", () => {
-    expect(normalizeChartType("line")).toBe("pie");
+  it("defaults unknown chart type to table", () => {
+    expect(normalizeChartType("line")).toBe("table");
   });
 
   it("chartMaxValue avoids zero division", () => {

@@ -21,8 +21,8 @@ import type {
 import { createLessonkitRuntime, createTrackingClient, assertValidId } from "@lessonkit/core";
 import type { XAPIClient } from "@lessonkit/xapi";
 
-import { createXapiQueueFromObservability, wrapBatchSink, wrapTrackingSink } from "../runtime/observability";
-import { assertProductionCourseConfig, shouldEnforceProductionGuard } from "../runtime/productionGuard";
+import { createXapiQueueFromObservability, wrapBatchSink, wrapTrackingSink, warnMissingProductionObservability } from "../runtime/observability";
+import { assertProductionCourseConfig, isTrackingDeliveryConfigured, isXapiDeliveryConfigured, shouldEnforceProductionGuard } from "../runtime/productionGuard";
 import { telemetryEventToXAPIStatement } from "@lessonkit/xapi";
 import { tryBuildTelemetryEvent } from "../runtime/emitTelemetry";
 import type { LxpackBridgeMode } from "../runtime/lxpackBridge";
@@ -87,6 +87,11 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
 
   if (shouldEnforceProductionGuard()) {
     assertProductionCourseConfig(normalizedConfig);
+  } else {
+    warnMissingProductionObservability(normalizedConfig.observability, {
+      trackingEnabled: isTrackingDeliveryConfigured(normalizedConfig.tracking),
+      xapiEnabled: isXapiDeliveryConfigured(normalizedConfig.xapi),
+    });
   }
 
   const useV2Runtime = normalizedConfig.runtimeVersion !== "v1";

@@ -39,6 +39,10 @@ Import from `@lessonkit/core` (re-exported by `@lessonkit/react` where relevant)
 
 See the [production checklist](../guides/react-developers/production-checklist.md) for the full observability hook matrix (1–6 hooks depending on tracking/xAPI configuration).
 
+### Framework 1.5 blocks
+
+Export from `@lessonkit/react`: `BranchingScenario`, `BranchNode`, `BranchChoice`, `Embed`, `Chart`, `useBranchingScenario`. See [Block catalog — 1.5](block-catalog.md#catalog-v3-additions-framework-150) and [Migration 1.4 → 1.5](../MIGRATION-1.4-to-1.5.md).
+
 ## Machine-readable contracts
 
 | Artifact | Package path |

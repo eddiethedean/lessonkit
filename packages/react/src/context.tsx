@@ -31,6 +31,10 @@ export type LessonkitConfig = {
     enabled?: boolean;
     sink?: (event: Parameters<TrackingClient["track"]>[0]) => void | Promise<void>;
     batchSink?: (events: Parameters<TrackingClient["track"]>[0][]) => void | Promise<void>;
+    /** Explicit opt-in for console sinks in production builds. */
+    consoleSink?: boolean;
+    /** Re-emit assessment telemetry when restoring session state (default false). */
+    replayResumeEvents?: boolean;
     /** Keepalive batch delivery for pagehide (e.g. from createFetchBatchSink). */
     exitBatchSink?: (events: Parameters<TrackingClient["track"]>[0][]) => void | Promise<void>;
     batch?: {
@@ -42,6 +46,8 @@ export type LessonkitConfig = {
   xapi?: {
     enabled?: boolean;
     transport?: XAPITransport;
+    /** Explicit opt-in for console transport in production builds. */
+    consoleTransport?: boolean;
     /** Keepalive transport for pagehide (e.g. from createFetchTransport). */
     exitTransport?: import("@lessonkit/xapi").XAPIExitTransport;
     /** Abort in-flight transport by statement id (e.g. from createFetchTransport). */

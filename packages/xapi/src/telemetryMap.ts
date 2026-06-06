@@ -78,7 +78,26 @@ const experiencedBlockMapper: EventMapper = (event, ctx) => {
     const lessonId = event.lessonId;
     const blockId = event.data?.blockId;
     if (!lessonId || !blockId || typeof blockId !== "string") return null;
-    return experiencedBlockStatement(ctx.courseId, lessonId, blockId, ctx.timestamp);
+    const kind = event.data?.kind;
+    const extensions: Record<string, unknown> = {};
+    if (kind === "embed_viewed" || kind === "chart_viewed") {
+      extensions["https://lessonkit.dev/xapi/interactionKind"] = kind;
+      const data = event.data;
+      if (kind === "embed_viewed" && data && typeof data.src === "string") {
+        extensions["https://lessonkit.dev/xapi/embedSrc"] = data.src;
+      }
+      if (kind === "chart_viewed" && data && typeof data.chartType === "string") {
+        extensions["https://lessonkit.dev/xapi/chartType"] = data.chartType;
+      }
+    }
+    return statementFor(
+      buildLessonkitUrn({ courseId: ctx.courseId, lessonId, blockId }),
+      XAPIVerbs.experienced,
+      ctx.timestamp,
+      Object.keys(extensions).length > 0
+        ? { context: { extensions } as XAPIStatement["context"] }
+        : undefined,
+    );
   }
   const lessonId = event.lessonId;
   const blockId = "data" in event && event.data && "blockId" in event.data ? event.data.blockId : undefined;
@@ -211,17 +230,10 @@ const TELEMETRY_XAPI_MAPPERS = {
     const blockId = event.data.blockId;
     const toNodeId = event.data.toNodeId;
     if (!lessonId || !blockId || !toNodeId) return null;
-    const scored =
-      typeof event.data.scoreWeight === "number" && Number.isFinite(event.data.scoreWeight);
-    const verb = scored ? XAPIVerbs.answered : XAPIVerbs.experienced;
-    const result = scored
-      ? { score: buildXapiScoreResult({ score: event.data.scoreWeight!, maxScore: event.data.scoreWeight! }) }
-      : undefined;
     return statementFor(
       buildLessonkitUrn({ courseId: ctx.courseId, lessonId, blockId, nodeId: toNodeId }),
-      verb,
+      XAPIVerbs.experienced,
       ctx.timestamp,
-      result?.score ? { result: result } : undefined,
     );
   },
 } as const satisfies Record<TelemetryEvent["name"], EventMapper>;

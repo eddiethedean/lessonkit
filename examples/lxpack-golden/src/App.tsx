@@ -32,7 +32,7 @@ export default function App() {
   return (
     <ThemeProvider preset="brand" mode="light">
       <div className="lms-app lms-theme-field">
-        <Course title="Workplace Safety: Warehouse Briefing" courseId={COURSE_ID}>
+        <Course title="Workplace Safety: Warehouse Briefing" courseId={COURSE_ID} config={{ tracking: { enabled: false }, xapi: { enabled: false } }}>
           <CourseTopbar
             title="Warehouse Safety Briefing"
             subtitle="DC-14 new hire · Supervisor M. Okonkwo · Valid 12 months"

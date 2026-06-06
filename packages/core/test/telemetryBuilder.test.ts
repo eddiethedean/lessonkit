@@ -163,7 +163,7 @@ describe("buildTelemetryEvent", () => {
         name: "hotspot_opened",
         courseId: "c",
         lessonId: "l1",
-        data: { blockId: "hs-1", hotspotIndex: 0 },
+        data: { blockId: "hs-1", hotspotId: "spot-1" },
       }).name,
     ).toBe("hotspot_opened");
     expect(
@@ -171,7 +171,7 @@ describe("buildTelemetryEvent", () => {
         name: "accordion_section_toggled",
         courseId: "c",
         lessonId: "l1",
-        data: { blockId: "acc-1", sectionIndex: 1, expanded: true },
+        data: { blockId: "acc-1", sectionId: "section-1", expanded: true },
       }).name,
     ).toBe("accordion_section_toggled");
     expect(
@@ -197,7 +197,7 @@ describe("buildTelemetryEvent", () => {
       buildTelemetryEvent({
         name: "assessment_answered",
         courseId: "c",
-        data: { checkId: "tf-1", interactionType: "trueFalse", answer: true },
+        data: { checkId: "tf-1", interactionType: "trueFalse", response: true },
       }),
     ).toThrow(/lessonId/);
   });

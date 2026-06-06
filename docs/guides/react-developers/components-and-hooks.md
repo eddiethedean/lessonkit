@@ -25,6 +25,9 @@
 | `ArithmeticQuiz` | Arithmetic Quiz |
 | `InformationWall` | Information Wall |
 | `ParallaxSlideshow` | Slideshow (parallax) |
+| `BranchingScenario` / `BranchNode` / `BranchChoice` | Branching Scenario |
+| `Embed` | Iframe Embedder |
+| `Chart` | Chart (bar / list pie + table) |
 | `Scenario` | Scenario / narrative block |
 | `Reflection` | Open response (manual scoring) |
 
@@ -54,6 +57,9 @@ Canonical block list, props, and contracts: [Block catalog reference](../../refe
 | `Video` | `blockId`, `src`, optional `poster`, `captions` | Self-hosted video primitive |
 | `Summary` | `checkId`, `statements[]`, `correct[]` | Statement-bank construct task |
 | `InteractiveBook` | `blockId`, `title`, `Page` children | Multi-chapter book; `CompoundHandle` |
+| `BranchingScenario` | `blockId`, `title`, `startNodeId`, `BranchNode` children | Graph navigation; `CompoundHandle` |
+| `Embed` | `blockId`, `src`, optional `title`, `allow`, `aspectRatio` | Sandboxed iframe |
+| `Chart` | `blockId`, `type` (`bar` \| `pie`), `data[]`, optional `title` | Bar chart or list-style pie + data table |
 | `Page` | `blockId`, optional `title` | Column/chapter inside `InteractiveBook` |
 | `Reflection` | optional `prompt`, `blockId` | Textarea reflection block |
 | `ProgressTracker` | — | Shows completed lesson count |
@@ -82,6 +88,7 @@ See [packages/react/stories](https://github.com/eddiethedean/lessonkit/tree/main
 | `useQuizState()` | `{ answer, complete }` — MCQ helper; requires `checkId` |
 | `useAssessmentState()` | Generalized assessment lifecycle + `assessment_*` telemetry |
 | `useCompletion()` | `{ completeLesson, completeCourse }` |
+| `useBranchingScenario()` | Active node, visited path, `navigateToNode`, `choicesLocked` (1.5) |
 | `useTheme()` | Theme context from `ThemeProvider` |
 
 ## Lesson lifecycle

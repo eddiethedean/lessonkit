@@ -8,9 +8,12 @@ import {
 } from "@lessonkit/core";
 import { useCompoundHydrationBridgeRef } from "./CompoundHydrationBridge";
 import { useCompoundHandlesVersion, useCompoundRegistry } from "./CompoundProvider";
-import { filterRegisteredChildStates, resumeChildHandles } from "./resumeChildHandles";
+import { filterRegisteredChildStates, registerablePendingKeys, resumeChildHandles } from "./resumeChildHandles";
 import { useCompoundResume } from "./useCompoundResume";
 import { LessonkitContext } from "../context";
+import { isDevEnvironment } from "../runtime/validateComponentId";
+
+const MAX_HYDRATION_RETRIES = 10;
 
 export function readCompoundInitialIndex(
   courseId: CourseId | undefined,
@@ -59,6 +62,7 @@ export function useCompoundPersistence(opts: {
   const skipSaveUntilHydratedRef = useRef(false);
   const hydrationKeyRef = useRef("");
   const hydrationInitRef = useRef(false);
+  const hydrationRetryRef = useRef(0);
 
   const hydrationKey = `${opts.courseId ?? ""}:${opts.compoundId}`;
   if (hydrationKeyRef.current !== hydrationKey) {
@@ -68,15 +72,21 @@ export function useCompoundPersistence(opts: {
     skipSaveUntilHydratedRef.current = false;
     pendingChildResumeRef.current = null;
     resumedChildKeysRef.current = new Set();
+    hydrationRetryRef.current = 0;
   }
 
   if (!hydrationInitRef.current && opts.enabled && opts.courseId) {
     hydrationInitRef.current = true;
     const saved = loadCompoundState(storage, opts.courseId, opts.compoundId);
-    if (saved && Object.keys(saved.childStates).length > 0) {
-      loadedChildStatesRef.current = { ...saved.childStates };
-      skipSaveUntilHydratedRef.current = true;
-      pendingChildResumeRef.current = saved;
+    if (saved) {
+      if (Object.keys(saved.childStates).length > 0) {
+        loadedChildStatesRef.current = { ...saved.childStates };
+        skipSaveUntilHydratedRef.current = true;
+        pendingChildResumeRef.current = saved;
+      }
+      const clamped = clampCompoundPageIndex(saved.activePageIndex, opts.pageCount);
+      opts.onCompoundResume?.({ ...saved, activePageIndex: clamped });
+      opts.setIndex(clamped);
     }
   }
 
@@ -118,10 +128,13 @@ export function useCompoundPersistence(opts: {
       };
       skipSaveUntilHydratedRef.current = false;
       pendingChildResumeRef.current = null;
+      hydrationRetryRef.current = 0;
       queueMicrotask(() => persistNowRef.current());
     },
     [],
   );
+
+  const applyPendingChildResumeRef = useRef<() => void>(() => {});
 
   const applyPendingChildResume = useCallback(() => {
     const pending = pendingChildResumeRef.current;
@@ -132,30 +145,30 @@ export function useCompoundPersistence(opts: {
       alreadyResumed: resumedChildKeysRef.current,
     });
     if (!applied) {
-      if (handles.size === 0) {
-        const registeredOnly = stripOrphanChildStates(handles, pending.childStates);
-        resumeChildHandles(handles, registeredOnly, {
-          alreadyResumed: resumedChildKeysRef.current,
-        });
-        finalizeHydration(registeredOnly);
+      const registerable = registerablePendingKeys(pending.childStates);
+      const missing = registerable.filter((k) => !handles.has(k as CheckId));
+      if (missing.length > 0 && hydrationRetryRef.current < MAX_HYDRATION_RETRIES) {
+        hydrationRetryRef.current += 1;
+        requestAnimationFrame(() => applyPendingChildResumeRef.current());
         return;
       }
-      const handlesAtWait = handles.size;
-      queueMicrotask(() => {
-        if (pendingChildResumeRef.current !== pending) return;
-        const handlesNow = ctx.getHandles();
-        if (handlesNow.size !== handlesAtWait) return;
-        const registeredOnly = stripOrphanChildStates(handlesNow, pending.childStates);
-        resumeChildHandles(handlesNow, registeredOnly, {
-          alreadyResumed: resumedChildKeysRef.current,
-        });
-        finalizeHydration(registeredOnly);
+      if (missing.length > 0 && isDevEnvironment()) {
+        console.warn(
+          `[lessonkit] Compound hydration: ${missing.length} child state(s) not restored (missing handles: ${missing.join(", ")})`,
+        );
+      }
+      const registeredOnly = stripOrphanChildStates(handles, pending.childStates);
+      resumeChildHandles(handles, registeredOnly, {
+        alreadyResumed: resumedChildKeysRef.current,
       });
+      finalizeHydration(registeredOnly);
       return;
     }
     const registeredOnly = stripOrphanChildStates(handles, pending.childStates);
     finalizeHydration(registeredOnly);
   }, [ctx, finalizeHydration]);
+
+  applyPendingChildResumeRef.current = applyPendingChildResume;
 
   const saveResume = useCompoundResume({
     courseId: opts.courseId,
@@ -169,6 +182,7 @@ export function useCompoundPersistence(opts: {
       onCompoundResumeRef.current?.({ ...state, activePageIndex: clamped });
       opts.setIndex(clamped);
       resumedChildKeysRef.current = new Set();
+      hydrationRetryRef.current = 0;
       pendingChildResumeRef.current = { ...state, activePageIndex: clamped, childStates: state.childStates };
       queueMicrotask(() => applyPendingChildResume());
     },
@@ -194,6 +208,7 @@ export function useCompoundPersistence(opts: {
       onCompoundResumeRef.current?.({ ...state, activePageIndex: clamped });
       opts.setIndex(clamped);
       resumedChildKeysRef.current = new Set();
+      hydrationRetryRef.current = 0;
       pendingChildResumeRef.current = { ...state, activePageIndex: clamped, childStates: state.childStates };
       queueMicrotask(() => applyPendingChildResume());
     },

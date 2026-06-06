@@ -1,4 +1,5 @@
 import type { LessonkitConfig } from "../context";
+import { isDevEnvironment } from "./validateComponentId";
 
 function isProductionEnvironment(): boolean {
   try {
@@ -41,6 +42,7 @@ export function isXapiDeliveryConfigured(xapi: LessonkitConfig["xapi"] | undefin
 function trackingUsesConsole(config: Pick<LessonkitConfig, "tracking">): boolean {
   const tracking = config.tracking;
   if (!tracking || tracking.enabled === false) return false;
+  if (tracking.consoleSink === true) return true;
   if (tracking.batchSink && looksLikeConsoleSink(tracking.batchSink)) return true;
   if (tracking.sink && looksLikeConsoleSink(tracking.sink)) return true;
   return false;
@@ -49,6 +51,7 @@ function trackingUsesConsole(config: Pick<LessonkitConfig, "tracking">): boolean
 function xapiUsesConsole(config: Pick<LessonkitConfig, "xapi">): boolean {
   const xapi = config.xapi;
   if (!xapi || xapi.enabled === false || xapi.client) return false;
+  if (xapi.consoleTransport === true) return true;
   return typeof xapi.transport === "function" && looksLikeConsoleSink(xapi.transport);
 }
 
@@ -78,6 +81,21 @@ function requiredObservabilityHookCount(opts: { trackingEnabled: boolean; xapiEn
   return count;
 }
 
+function warnConsoleSinkHeuristic(config: Pick<LessonkitConfig, "tracking" | "xapi" | "preview">): void {
+  if (!isDevEnvironment()) return;
+  if (config.preview?.allowConsoleTelemetry) return;
+  if (looksLikeConsoleSink(config.tracking?.sink) || looksLikeConsoleSink(config.tracking?.batchSink)) {
+    console.warn(
+      "[lessonkit] Telemetry sink looks like console.log; use preview.allowConsoleTelemetry for docs or wire a real sink.",
+    );
+  }
+  if (looksLikeConsoleSink(config.xapi?.transport)) {
+    console.warn(
+      "[lessonkit] xAPI transport looks like console.log; use preview.allowConsoleTelemetry for docs or wire createFetchTransport.",
+    );
+  }
+}
+
 /**
  * Throws in production when course config still uses dev-only console sinks or
  * omits observability hooks while telemetry/xAPI are enabled.
@@ -88,29 +106,34 @@ export function assertProductionCourseConfig(
     "tracking" | "xapi" | "observability" | "lxpack" | "preview"
   >,
 ): void {
-  if (!isProductionEnvironment()) return;
+  if (!isProductionEnvironment()) {
+    warnConsoleSinkHeuristic(config);
+    return;
+  }
 
-  if (
-    config.tracking &&
-    config.tracking.enabled !== false &&
-    !isTrackingDeliveryConfigured(config.tracking)
-  ) {
+  const trackingImplicitlyEnabled = config.tracking === undefined || config.tracking.enabled !== false;
+  if (trackingImplicitlyEnabled && !isTrackingDeliveryConfigured(config.tracking)) {
     throw new Error(
       "[lessonkit] Production build has tracking enabled but no sink or batchSink configured.",
     );
   }
 
-  if (config.preview?.allowConsoleTelemetry === true) return;
+  if (config.xapi?.enabled !== false && config.xapi !== undefined && !isXapiDeliveryConfigured(config.xapi)) {
+    throw new Error(
+      "[lessonkit] Production build has xAPI enabled but no transport or client configured.",
+    );
+  }
 
+  const allowConsole = config.preview?.allowConsoleTelemetry === true;
   const trackingEnabled = isTrackingDeliveryConfigured(config.tracking);
   const xapiEnabled = isXapiDeliveryConfigured(config.xapi);
 
-  if (trackingUsesConsole(config)) {
+  if (!allowConsole && trackingUsesConsole(config)) {
     throw new Error(
       "[lessonkit] Production build uses console telemetry sinks. Wire createFetchBatchSink or a real sink. See production checklist.",
     );
   }
-  if (xapiUsesConsole(config)) {
+  if (!allowConsole && xapiUsesConsole(config)) {
     throw new Error(
       "[lessonkit] Production build uses console xAPI transport. Wire createFetchTransport to your LRS proxy. See production checklist.",
     );

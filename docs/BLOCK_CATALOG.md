@@ -224,6 +224,22 @@ Import `@lessonkit/react/block-catalog.v3.json` or pin `{ version: 2 }` until ge
 
 ---
 
+## Catalog v3 additions (framework 1.5.0)
+
+| Block | Role | Notes |
+| --- | --- | --- |
+| `BranchingScenario` | Compound | Graph navigation with `BranchNode` / `BranchChoice`; persists `__lk_bs__` branch meta |
+| `BranchNode` | Compound child | Page-like content container; `terminal` locks choices |
+| `BranchChoice` | Navigation | Emits `branch_selected` via parent scenario |
+| `Embed` | Content | Sandboxed iframe (`https` in production); telemetry strips credentials from `src` |
+| `Chart` | Content | `bar` or list-style `pie` plus accessible data table; unknown types fall back to table |
+
+**Chart note:** `type="pie"` renders segment labels as a list (not geometric slices). Use `bar` or the table for precise comparisons.
+
+**Branching resume:** Sessions without `__lk_bs__` meta restart at `startNodeId` (legacy saves before 1.5.0).
+
+---
+
 ## Cross-references
 
 - **H5P mapping:** [H5P capability map](../project/h5p-capability-map.md)
@@ -234,7 +250,7 @@ Import `@lessonkit/react/block-catalog.v3.json` or pin `{ version: 2 }` until ge
 
 ## Reference example
 
-[examples/lxpack-golden](https://github.com/eddiethedean/lessonkit/tree/main/examples/lxpack-golden) renders every catalog block (`Course`, `Lesson`, `Scenario`, `Quiz`, `KnowledgeCheck`, `Reflection`, `ProgressTracker`) and is the packaging golden path for CI.
+[examples/lxpack-golden](https://github.com/eddiethedean/lessonkit/tree/main/examples/lxpack-golden) smoke-renders core catalog blocks (`Course`, `Lesson`, `Scenario`, `Quiz`, `KnowledgeCheck`, `Reflection`, `ProgressTracker`) and is the packaging golden path for CI.
 
 ## Generator checklist
 

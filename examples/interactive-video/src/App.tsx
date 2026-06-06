@@ -20,7 +20,10 @@ const SAMPLE_VIDEO =
   "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4";
 
 export default function App() {
-  const config = useMemo(() => ({ xapi: { enabled: false } }), []);
+  const config = useMemo(
+    () => ({ tracking: { enabled: false }, xapi: { enabled: false } }),
+    [],
+  );
 
   return (
     <ThemeProvider mode="light">

@@ -267,7 +267,7 @@ describe("InteractiveBook", () => {
     expect(parsed.childStates["dtw-1"]?.zones?.["zone-0"]).toBe("cats");
   });
 
-  it("persists page index when saved childStates have no registered handles", () => {
+  it("persists page index when saved childStates have no registered handles", async () => {
     saveCompoundState(
       createSessionStoragePort(),
       COURSE_ID,
@@ -293,10 +293,12 @@ describe("InteractiveBook", () => {
     );
 
     fireEvent.click(screen.getByTestId("book-next"));
-    const raw = sessionStorage.getItem(compoundStateStorageKey(COURSE_ID, "book-orphan"));
-    expect(raw).toBeTruthy();
-    const parsed = JSON.parse(raw!) as { activePageIndex: number };
-    expect(parsed.activePageIndex).toBe(1);
+    await waitFor(() => {
+      const raw = sessionStorage.getItem(compoundStateStorageKey(COURSE_ID, "book-orphan"));
+      expect(raw).toBeTruthy();
+      const parsed = JSON.parse(raw!) as { activePageIndex: number };
+      expect(parsed.activePageIndex).toBe(1);
+    });
   });
 
   it("imperative resume hydrates child states after handles mount", async () => {
@@ -349,7 +351,7 @@ describe("InteractiveBook", () => {
     expect(screen.getByText("Page 1 of 1")).toBeTruthy();
   });
 
-  it("replays assessment telemetry after sessionStorage resume", async () => {
+  it("restores TrueFalse UI without replaying telemetry after sessionStorage resume", async () => {
     const events: Array<{ name: string; data?: unknown }> = [];
     const captureEvent = (e: { name: string; data?: unknown }) => {
       events.push(e);
@@ -387,6 +389,59 @@ describe("InteractiveBook", () => {
           <InteractiveBook blockId="book-tel" title="Book">
             <Page blockId="p1" title="Quiz">
               <TrueFalse checkId="tf-tel" question="True?" answer={true} />
+            </Page>
+          </InteractiveBook>
+        </Lesson>
+      </Course>,
+    );
+
+    await waitFor(() => {
+      const trueRadio = screen.getByRole("radio", { name: "True" }) as HTMLInputElement;
+      expect(trueRadio.checked).toBe(true);
+    });
+
+    expect(events.some((e) => e.name === "assessment_answered")).toBe(false);
+    expect(events.some((e) => e.name === "assessment_completed")).toBe(false);
+  });
+
+  it("replays assessment telemetry when replayResumeEvents is enabled", async () => {
+    const events: Array<{ name: string; data?: unknown }> = [];
+    const captureEvent = (e: { name: string; data?: unknown }) => {
+      events.push(e);
+    };
+    saveCompoundState(
+      createSessionStoragePort(),
+      COURSE_ID,
+      "book-tel-replay",
+      createCompoundResumeState({
+        activePageIndex: 0,
+        childStates: {
+          "tf-tel-replay": {
+            selected: true,
+            selectionCorrect: true,
+            passed: true,
+            showSolutions: false,
+            completedScore: 1,
+            completedMaxScore: 1,
+          },
+        },
+      }),
+    );
+
+    render(
+      <Course
+        title="Compound"
+        courseId={COURSE_ID}
+        config={{
+          xapi: { enabled: false },
+          session: { persistCompoundState: true },
+          tracking: { sink: captureEvent, replayResumeEvents: true },
+        }}
+      >
+        <Lesson title="L1" lessonId="lesson-1">
+          <InteractiveBook blockId="book-tel-replay" title="Book">
+            <Page blockId="p1" title="Quiz">
+              <TrueFalse checkId="tf-tel-replay" question="True?" answer={true} />
             </Page>
           </InteractiveBook>
         </Lesson>
@@ -587,34 +642,6 @@ describe("SlideDeck", () => {
       };
       expect(parsed.childStates["tf-r03"]?.selected).toBe(true);
       expect(parsed.childStates["tf-r03"]?.passed).toBe(true);
-    });
-  });
-
-  it("persists TrueFalse child state to sessionStorage after answer", async () => {
-    render(
-      wrap(
-        <SlideDeck blockId="deck-child-save" title="Training">
-          <Slide blockId="s1" title="Intro">
-            <Text>Intro</Text>
-          </Slide>
-          <Slide blockId="s2" title="Quiz">
-            <TrueFalse checkId="tf-save" question="True?" answer={true} />
-          </Slide>
-        </SlideDeck>,
-        true,
-      ),
-    );
-    fireEvent.click(screen.getByTestId("slide-next"));
-    fireEvent.click(screen.getByLabelText("True"));
-
-    await vi.waitFor(() => {
-      const raw = sessionStorage.getItem(compoundStateStorageKey(COURSE_ID, "deck-child-save"));
-      expect(raw).toBeTruthy();
-      const parsed = JSON.parse(raw!) as {
-        childStates: Record<string, { selected?: boolean; passed?: boolean }>;
-      };
-      expect(parsed.childStates["tf-save"]?.selected).toBe(true);
-      expect(parsed.childStates["tf-save"]?.passed).toBe(true);
     });
   });
 
@@ -837,10 +864,13 @@ describe("InteractiveVideo", () => {
     );
     expect(screen.getByTestId("video-score").textContent).toContain("Score: 0 / 2");
     const video = screen.getByTestId("interactive-video-player") as HTMLVideoElement;
-    Object.defineProperty(video, "currentTime", { value: 0.5, writable: true });
+    Object.defineProperty(video, "currentTime", { value: 0.5, writable: true, configurable: true });
     fireEvent.timeUpdate(video);
     fireEvent.click(screen.getByRole("radio", { name: "True" }));
     expect(screen.getByTestId("video-score").textContent).toContain("Score: 1 / 2");
+    Object.defineProperty(video, "currentTime", { value: 10.5, writable: true, configurable: true });
+    fireEvent.timeUpdate(video);
+    expect(screen.getAllByRole("radio", { name: "False" }).length).toBeGreaterThan(0);
   });
 });
 

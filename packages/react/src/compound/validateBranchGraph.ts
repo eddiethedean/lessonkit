@@ -15,7 +15,11 @@ export function extractBranchGraph(nodes: React.ReactElement<BranchNodeProps>[])
         choices.push({ targetNodeId: normalizeComponentId(targetNodeId, "blockId") });
       }
     });
-    return { nodeId: normalizeComponentId(node.props.nodeId, "blockId"), choices };
+    return {
+      nodeId: normalizeComponentId(node.props.nodeId, "blockId"),
+      terminal: Boolean(node.props.terminal),
+      choices,
+    };
   });
 }
 
@@ -24,12 +28,24 @@ export function validateBranchGraphAtMount(
   nodes: React.ReactElement<BranchNodeProps>[],
   strict?: boolean,
 ): void {
-  if (!isDevEnvironment() && !strict) return;
   const graph = extractBranchGraph(nodes);
-  const result = validateBranchGraph(startNodeId, graph);
+  const result = validateBranchGraph(startNodeId, graph.map(({ nodeId, choices }) => ({ nodeId, choices })));
+
+  for (const node of graph) {
+    if (node.terminal && node.choices.length > 0) {
+      const msg = `[lessonkit] BranchingScenario: terminal node "${node.nodeId}" must not contain BranchChoice children`;
+      if (strict || !isDevEnvironment()) {
+        throw new Error(msg);
+      }
+      console.warn(msg);
+    }
+  }
+
   for (const issue of result.issues) {
     const msg = `[lessonkit] BranchingScenario: ${issue.message}`;
-    if (strict) throw new Error(msg);
+    if (strict || !isDevEnvironment()) {
+      throw new Error(msg);
+    }
     console.warn(msg);
   }
 }

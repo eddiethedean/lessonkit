@@ -18,7 +18,8 @@ function isQuizAnsweredData(data: unknown): data is QuizAnsweredData {
   return (
     typeof data === "object" &&
     data !== null &&
-    typeof (data as QuizAnsweredData).checkId === "string"
+    typeof (data as QuizAnsweredData).checkId === "string" &&
+    (data as QuizAnsweredData).checkId.length > 0
   );
 }
 
@@ -26,7 +27,8 @@ function isQuizCompletedData(data: unknown): data is QuizCompletedData {
   return (
     typeof data === "object" &&
     data !== null &&
-    typeof (data as QuizCompletedData).checkId === "string"
+    typeof (data as QuizCompletedData).checkId === "string" &&
+    (data as QuizCompletedData).checkId.length > 0
   );
 }
 
@@ -70,15 +72,16 @@ export function telemetryEventToLessonkit(
 
   if (mapped.name === "quiz_completed" || mapped.name === "quiz_answered") {
     const data = event.data;
-    if (isQuizAnsweredData(data) || isQuizCompletedData(data)) {
-      mapped.assessmentId = data.checkId;
+    if (!isQuizAnsweredData(data) && !isQuizCompletedData(data)) {
+      return null;
+    }
+    mapped.assessmentId = data.checkId;
       if ("score" in data) {
         mapped.score = data.score;
         mapped.maxScore = data.maxScore;
         mapped.passingScore = data.passingScore;
       }
       mapped.data = data;
-    }
   } else if (mapped.name === "interaction" && event.data && isInteractionData(event.data)) {
     mapped.data = event.data;
   } else if (event.name === "branch_node_viewed" && isBranchNodeViewedData(event.data)) {

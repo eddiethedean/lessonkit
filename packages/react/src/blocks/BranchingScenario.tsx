@@ -1,6 +1,5 @@
-import React, { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { forwardRef, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { BlockId, CompoundHandle, CompoundResumeState } from "@lessonkit/core";
-import { clampCompoundPageIndex, loadCompoundState } from "@lessonkit/core";
 import { CompoundProvider, useCompoundRegistry } from "../compound/CompoundProvider";
 import { useCompoundPersistence } from "../compound/useCompoundPersistence";
 import {
@@ -33,33 +32,9 @@ export type BranchingScenarioProps = {
   startNodeId: string;
   showPathScore?: boolean;
   showPathRecap?: boolean;
+  enableSolutionsButton?: boolean;
   children: React.ReactElement<BranchNodeProps> | React.ReactElement<BranchNodeProps>[];
 };
-
-function loadBranchMeta(
-  storage: ReturnType<typeof useLessonkit>["storage"],
-  courseId: string | undefined,
-  blockId: BlockId,
-  persistEnabled: boolean,
-  startNodeId: string,
-  nodeIndexMap: ReadonlyMap<string, number>,
-  pageCount: number,
-): BranchingScenarioMeta {
-  const fallback = createInitialBranchMeta(startNodeId);
-  if (!persistEnabled || !courseId || pageCount < 1) {
-    return fallback;
-  }
-  const saved = loadCompoundState(storage, courseId, blockId);
-  if (!saved) return fallback;
-  const fromMeta = readBranchingScenarioMeta(saved.childStates);
-  if (fromMeta) {
-    return sanitizeBranchMeta(fromMeta, nodeIndexMap, startNodeId);
-  }
-  const nodeIds = [...nodeIndexMap.keys()];
-  const clamped = clampCompoundPageIndex(saved.activePageIndex, pageCount);
-  const nodeId = nodeIds[clamped] ?? startNodeId;
-  return sanitizeBranchMeta(createInitialBranchMeta(nodeId), nodeIndexMap, startNodeId);
-}
 
 const BranchingScenarioInner = forwardRef<
   CompoundHandle,
@@ -67,12 +42,14 @@ const BranchingScenarioInner = forwardRef<
     blockId: BlockId;
     nodes: React.ReactElement<BranchNodeProps>[];
     persistEnabled: boolean;
-    initialMeta: BranchingScenarioMeta;
+    startNodeId: string;
   }
 >(function BranchingScenarioInner(props, ref) {
-  const { blockId, nodes, persistEnabled, initialMeta } = props;
+  const { blockId, nodes, persistEnabled, startNodeId } = props;
   validateCompoundChildren("BranchingScenario", nodes);
-  validateBranchGraphAtMount(props.startNodeId, nodes);
+  useLayoutEffect(() => {
+    validateBranchGraphAtMount(startNodeId, nodes);
+  }, [startNodeId, nodes]);
 
   const { config, track, storage } = useLessonkit();
   const lessonId = useEnclosingLessonId();
@@ -81,9 +58,10 @@ const BranchingScenarioInner = forwardRef<
   const nodeIndexMap = useMemo(() => buildNodeIndexMap(nodes), [nodes]);
   const nodeLabels = useMemo(() => buildNodeLabels(nodes), [nodes]);
 
-  const [meta, setMeta] = useState<BranchingScenarioMeta>(initialMeta);
+  const [meta, setMeta] = useState<BranchingScenarioMeta>(() => createInitialBranchMeta(startNodeId));
   const metaRef = useRef(meta);
   const branchViewedRef = useRef(new Set<string>());
+  const legacyResumeWarnedRef = useRef(false);
 
   const commitMeta = useCallback((next: BranchingScenarioMeta) => {
     metaRef.current = next;
@@ -101,25 +79,49 @@ const BranchingScenarioInner = forwardRef<
     return indices;
   }, [meta.visitedNodeIds, nodeIndexMap]);
 
+  const syncBranchViewedRef = useCallback(
+    (restoredMeta: BranchingScenarioMeta) => {
+      const next = new Set<string>();
+      for (const nodeId of restoredMeta.visitedNodeIds) {
+        if (nodeId !== restoredMeta.activeNodeId) {
+          next.add(`${blockId}:${nodeId}`);
+        }
+      }
+      branchViewedRef.current = next;
+    },
+    [blockId],
+  );
+
   const applyResumeState = useCallback(
     (state: CompoundResumeState) => {
       const fromMeta = readBranchingScenarioMeta(state.childStates);
       if (fromMeta) {
-        commitMeta(sanitizeBranchMeta(fromMeta, nodeIndexMap, props.startNodeId));
+        const sanitized = sanitizeBranchMeta(fromMeta, nodeIndexMap, startNodeId);
+        commitMeta(sanitized);
+        syncBranchViewedRef(sanitized);
         return;
       }
-      const nodeIds = [...nodeIndexMap.keys()];
-      const clamped = clampCompoundPageIndex(state.activePageIndex, nodes.length);
-      const nodeId = nodeIds[clamped] ?? props.startNodeId;
-      commitMeta(sanitizeBranchMeta(createInitialBranchMeta(nodeId), nodeIndexMap, props.startNodeId));
+      if (
+        !legacyResumeWarnedRef.current &&
+        isDevEnvironment() &&
+        (state.activePageIndex !== 0 || Object.keys(state.childStates).length > 0)
+      ) {
+        legacyResumeWarnedRef.current = true;
+        console.warn(
+          "[lessonkit] BranchingScenario: legacy save without branch meta; starting at startNodeId",
+        );
+      }
+      const fresh = sanitizeBranchMeta(createInitialBranchMeta(startNodeId), nodeIndexMap, startNodeId);
+      commitMeta(fresh);
+      syncBranchViewedRef(fresh);
     },
-    [commitMeta, nodeIndexMap, nodes.length, props.startNodeId],
+    [commitMeta, nodeIndexMap, startNodeId, syncBranchViewedRef],
   );
 
   const resetBranchMeta = useCallback(() => {
-    commitMeta(createInitialBranchMeta(props.startNodeId));
+    commitMeta(createInitialBranchMeta(startNodeId));
     branchViewedRef.current = new Set();
-  }, [commitMeta, props.startNodeId]);
+  }, [commitMeta, startNodeId]);
 
   const transformState = useCallback(
     (state: CompoundResumeState) => mergeBranchMetaIntoState(state, metaRef.current),
@@ -147,20 +149,18 @@ const BranchingScenarioInner = forwardRef<
 
   useCompoundBranchHandle(ref, {
     activePageIndex: activeIndex,
-    setActivePageIndex: () => {},
     getRegisteredHandles: () => ctx?.getRegisteredHandles() ?? new Map(),
-    pageCount: nodes.length,
     visitedNodeIndices,
     choiceScores: meta.choiceScores ?? {},
     meta,
     onResetMeta: resetBranchMeta,
-    onApplyResumeState: applyResumeState,
+    enableSolutionsButton: props.enableSolutionsButton,
   });
 
   const activeNode = nodes[activeIndex];
   const isTerminal =
     Boolean(activeNode?.props.terminal) ||
-    (activeNode ? !nodeHasChoices(activeNode) && meta.activeNodeId !== props.startNodeId : false);
+    (activeNode ? !nodeHasChoices(activeNode) && meta.activeNodeId !== startNodeId : false);
 
   const visitedLabels = useMemo(
     () =>
@@ -232,14 +232,16 @@ const BranchingScenarioInner = forwardRef<
             choiceScores,
           },
           nodeIndexMap,
-          props.startNodeId,
+          startNodeId,
         );
         metaRef.current = next;
         return next;
       });
     },
-    [blockId, lessonId, nodeIndexMap, props.startNodeId, track],
+    [blockId, lessonId, nodeIndexMap, startNodeId, track],
   );
+
+  const choicesLocked = isTerminal;
 
   const contextValue = useMemo(
     () => ({
@@ -249,9 +251,9 @@ const BranchingScenarioInner = forwardRef<
       visitedLabels: visitedLabels.map((entry) => entry.label),
       navigateToNode,
       isTerminal,
-      choicesLocked: false,
+      choicesLocked,
     }),
-    [blockId, isTerminal, meta.activeNodeId, meta.visitedNodeIds, navigateToNode, visitedLabels],
+    [blockId, choicesLocked, isTerminal, meta.activeNodeId, meta.visitedNodeIds, navigateToNode, visitedLabels],
   );
 
   const pathScore = ctx
@@ -262,7 +264,7 @@ const BranchingScenarioInner = forwardRef<
   const pathMaxScore = ctx
     ? Array.from(ctx.getRegisteredHandles().values())
         .filter((h) => h.pageIndex !== undefined && visitedNodeIndices.has(h.pageIndex))
-        .reduce((s, h) => s + h.handle.getMaxScore(), 0) + sumChoiceScores(meta.choiceScores)
+        .reduce((s, h) => s + h.handle.getMaxScore(), 0)
     : 0;
 
   return (
@@ -319,22 +321,16 @@ export const BranchingScenario = forwardRef<CompoundHandle, BranchingScenarioPro
     const nodes = React.Children.toArray(props.children).filter(
       React.isValidElement,
     ) as React.ReactElement<BranchNodeProps>[];
-    const { config, storage } = useLessonkit();
+    const { config } = useLessonkit();
     const persistEnabled = config.session?.persistCompoundState !== false;
 
     const nodeIndexMap = useMemo(() => buildNodeIndexMap(nodes), [nodes]);
+    const initialIndex = nodeIndexMap.get(startNodeId) ?? 0;
     const hydrationKey = `${config.courseId ?? "no-course"}:${blockId}`;
-
-    const initialMeta = useMemo(
-      () => loadBranchMeta(storage, config.courseId, blockId, persistEnabled, startNodeId, nodeIndexMap, nodes.length),
-      [blockId, config.courseId, nodeIndexMap, nodes.length, persistEnabled, startNodeId, storage],
-    );
-
-    const activeIndex = nodeIndexMap.get(initialMeta.activeNodeId) ?? 0;
     const setIndexStable = useCallback(() => {}, []);
 
     return (
-      <CompoundProvider activePageIndex={activeIndex} onActivePageIndexChange={setIndexStable}>
+      <CompoundProvider activePageIndex={initialIndex} onActivePageIndexChange={setIndexStable}>
         <BranchingScenarioInner
           key={hydrationKey}
           {...props}
@@ -343,7 +339,6 @@ export const BranchingScenario = forwardRef<CompoundHandle, BranchingScenarioPro
           blockId={blockId}
           nodes={nodes}
           persistEnabled={persistEnabled}
-          initialMeta={initialMeta}
         />
       </CompoundProvider>
     );
