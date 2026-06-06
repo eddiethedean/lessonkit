@@ -1,5 +1,5 @@
 import React, { createRef } from "react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import type { CompoundHandle } from "@lessonkit/core";
 import { compoundStateStorageKey, createCompoundResumeState, saveCompoundState } from "@lessonkit/core";
@@ -16,6 +16,8 @@ import {
   Quiz,
   Slide,
   SlideDeck,
+  InteractiveVideo,
+  TimedCue,
   Text,
   TrueFalse,
 } from "../src";
@@ -748,5 +750,52 @@ describe("AssessmentSequence compound handle", () => {
     expect(screen.getByText("Question 1 of 2")).toBeTruthy();
     fireEvent.click(screen.getByTestId("sequence-next"));
     expect(screen.getByText("Question 2 of 2")).toBeTruthy();
+  });
+});
+
+describe("InteractiveVideo", () => {
+  beforeAll(() => {
+    HTMLMediaElement.prototype.play = vi.fn(() => Promise.resolve());
+    HTMLMediaElement.prototype.pause = vi.fn();
+  });
+
+  afterEach(() => {
+    cleanup();
+    sessionStorage.clear();
+  });
+
+  it("renders video player and timed cue overlay on timeupdate", () => {
+    render(
+      wrap(
+        <InteractiveVideo blockId="iv-1" title="Briefing" src="/sample.mp4">
+          <TimedCue atSeconds={1} label="Check">
+            <TrueFalse checkId="iv-tf" question="Ready?" answer={true} />
+          </TimedCue>
+        </InteractiveVideo>,
+      ),
+    );
+    const video = screen.getByTestId("interactive-video-player") as HTMLVideoElement;
+    Object.defineProperty(video, "currentTime", { value: 1.5, writable: true });
+    fireEvent.timeUpdate(video);
+    expect(screen.getByTestId("timed-cue-0")).toBeTruthy();
+    expect(screen.getByTestId("cue-continue")).toBeTruthy();
+  });
+
+  it("continues after cue dismisses overlay", () => {
+    render(
+      wrap(
+        <InteractiveVideo blockId="iv-2" title="Briefing" src="/sample.mp4">
+          <TimedCue atSeconds={0} label="Check">
+            <Text>Pause message</Text>
+          </TimedCue>
+        </InteractiveVideo>,
+      ),
+    );
+    const video = screen.getByTestId("interactive-video-player") as HTMLVideoElement;
+    Object.defineProperty(video, "currentTime", { value: 0.5, writable: true });
+    fireEvent.timeUpdate(video);
+    expect(screen.getByTestId("cue-continue")).toBeTruthy();
+    fireEvent.click(screen.getByTestId("cue-continue"));
+    expect(screen.queryByTestId("cue-continue")).toBeNull();
   });
 });

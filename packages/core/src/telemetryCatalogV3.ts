@@ -11,6 +11,12 @@ export type TelemetryCatalogV3EventName = Extract<
   | "accordion_section_toggled"
   | "flashcard_flipped"
   | "image_slider_changed"
+  | "video_cue_reached"
+  | "video_segment_completed"
+  | "memory_card_flipped"
+  | "information_wall_search"
+  | "parallax_slide_viewed"
+  | "questionnaire_submitted"
 >;
 
 export type TelemetryCatalogV3Entry = {
@@ -77,6 +83,54 @@ export const TELEMETRY_EVENT_CATALOG_V3: TelemetryCatalogV3Entry[] = [
     requiredFields: ["courseId", "sessionId", "timestamp"],
     dataFields: ["blockId", "slideIndex"],
     xapiVerb: "http://adlnet.gov/expapi/verbs/experienced",
+    urnPattern: "urn:lessonkit:course:{courseId}:lesson:{lessonId}:block:{blockId}",
+  },
+  {
+    name: "video_cue_reached",
+    description: "Learner reached a timed cue in an Interactive Video",
+    requiredFields: ["courseId", "lessonId", "sessionId", "timestamp"],
+    dataFields: ["blockId", "cueIndex", "atSeconds", "cueLabel"],
+    xapiVerb: "http://adlnet.gov/expapi/verbs/experienced",
+    urnPattern: "urn:lessonkit:course:{courseId}:lesson:{lessonId}:block:{blockId}",
+  },
+  {
+    name: "video_segment_completed",
+    description: "Learner completed a timed segment in an Interactive Video",
+    requiredFields: ["courseId", "lessonId", "sessionId", "timestamp"],
+    dataFields: ["blockId", "segmentIndex", "atSeconds", "segmentLabel"],
+    xapiVerb: "http://adlnet.gov/expapi/verbs/completed",
+    urnPattern: "urn:lessonkit:course:{courseId}:lesson:{lessonId}:block:{blockId}",
+  },
+  {
+    name: "memory_card_flipped",
+    description: "Learner flipped a memory game card",
+    requiredFields: ["courseId", "sessionId", "timestamp"],
+    dataFields: ["blockId", "cardIndex", "face"],
+    xapiVerb: "http://adlnet.gov/expapi/verbs/experienced",
+    urnPattern: "urn:lessonkit:course:{courseId}:lesson:{lessonId}:block:{blockId}",
+  },
+  {
+    name: "information_wall_search",
+    description: "Learner searched an information wall",
+    requiredFields: ["courseId", "sessionId", "timestamp"],
+    dataFields: ["blockId", "query", "resultCount"],
+    xapiVerb: "http://adlnet.gov/expapi/verbs/experienced",
+    urnPattern: "urn:lessonkit:course:{courseId}:lesson:{lessonId}:block:{blockId}",
+  },
+  {
+    name: "parallax_slide_viewed",
+    description: "Learner viewed a slide in a parallax slideshow",
+    requiredFields: ["courseId", "sessionId", "timestamp"],
+    dataFields: ["blockId", "slideIndex"],
+    xapiVerb: "http://adlnet.gov/expapi/verbs/experienced",
+    urnPattern: "urn:lessonkit:course:{courseId}:lesson:{lessonId}:block:{blockId}",
+  },
+  {
+    name: "questionnaire_submitted",
+    description: "Learner submitted an unscored questionnaire",
+    requiredFields: ["courseId", "lessonId", "sessionId", "timestamp"],
+    dataFields: ["blockId", "fieldCount"],
+    xapiVerb: "http://adlnet.gov/expapi/verbs/completed",
     urnPattern: "urn:lessonkit:course:{courseId}:lesson:{lessonId}:block:{blockId}",
   },
 ];

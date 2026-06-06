@@ -8,6 +8,22 @@ All notable changes to the LessonKit monorepo are documented here.
 
 _No changes yet._
 
+## [1.4.0] - 2026-06-05
+
+Framework **1.4.x** — `InteractiveVideo` (H5P Interactive Video) and bundled Tier B/C/D blocks in a single release. All seven `@lessonkit/*` packages ship at **1.4.0**.
+
+### Added
+
+- **@lessonkit/react**: `Video`, `TimedCue`, `InteractiveVideo`; assessments `Summary`, `ImagePairing`, `ImageSequencing`, `ArithmeticQuiz`, `Essay`; content `Questionnaire`, `MemoryGame`, `InformationWall`, `ParallaxSlideshow`.
+- **@lessonkit/core**: compound allowlists for `InteractiveVideo` / `TimedCue`; telemetry catalog v3 events (`video_cue_reached`, `video_segment_completed`, `memory_card_flipped`, `information_wall_search`, `parallax_slide_viewed`, `questionnaire_submitted`); assessment interaction types for 1.4 blocks.
+- **@lessonkit/xapi**: xAPI mappers for new telemetry events.
+- **Examples**: `examples/interactive-video` golden path; integration SCORM packaging test; Playwright smoke.
+
+### Changed
+
+- **Block catalog v3**: 38 entries (was 26); `Slide` allowlist includes `Video` and 1.4 blocks.
+- **Docs**: [MIGRATION-1.3-to-1.4.md](docs/MIGRATION-1.3-to-1.4.md); H5P capability map rows marked ✅ at 1.4.0.
+
 ## [1.3.1] - 2026-06-05
 
 Framework **1.3.x** patch — production hardening and documentation. All seven `@lessonkit/*` packages ship at **1.3.1**.

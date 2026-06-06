@@ -14,6 +14,8 @@ const COMPOUND_CONTAINER_TYPES = new Set<CompoundParentType>([
   "InteractiveBook",
   "Slide",
   "SlideDeck",
+  "TimedCue",
+  "InteractiveVideo",
   "AssessmentSequence",
 ]);
 

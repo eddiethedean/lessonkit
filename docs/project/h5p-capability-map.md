@@ -77,7 +77,7 @@ H5P **machine names** follow common library ids (e.g. `H5P.MultiChoice`). Displa
 | `H5P.DragText` | Drag the Words | `DragTheWords` | B | P0 | ✅ | 1.1.x |
 | `H5P.MarkTheWords` | Mark the Words | `MarkTheWords` | B | P0 | ✅ | 1.1.x |
 | `H5P.SingleChoiceSet` | Single Choice Set | `SingleChoiceSet` | B | P1 | ⬜ | 1.1.1+ |
-| `H5P.Summary` | Summary | `Summary` | B | P1 | ⬜ | 1.1.1+ |
+| `H5P.Summary` | Summary | `Summary` | B | P1 | ✅ | 1.4.0 |
 | `H5P.SortParagraphs` | Sort the Paragraphs | `SortParagraphs` | B | P1 | ⬜ | 1.1.1+ |
 | `H5P.GuessTheAnswer` | Guess the Answer | `GuessTheAnswer` | B | P1 | ⬜ | 1.1.1+ |
 | `H5P.ImageMultipleHotspotQuestion` | Multimedia Choice | `MultimediaChoice` | B | P1 | ⬜ | 1.1.1+ |
@@ -85,15 +85,15 @@ H5P **machine names** follow common library ids (e.g. `H5P.MultiChoice`). Displa
 | `H5P.SpeakTheWordsSet` | Speak the Words Set | `SpeakTheWordsSet` | B | P2 | ⬜ | 1.2.x |
 | `H5P.Dictation` | Dictation | `Dictation` | B | P2 | ⬜ | 1.2.x |
 | `H5P.AdvancedBlanks` / `H5P.ComplexQuestion` | Complex Fill in the Blanks | `AdvancedBlanks` | B | P2 | ⬜ | 1.3.x |
-| `H5P.ArithmeticQuiz` | Arithmetic Quiz | `ArithmeticQuiz` | B | P3 | ⬜ | 1.4.x |
-| `H5P.Essay` | Essay | `Essay` | B | P3 | ⬜ | 1.4.x |
-| `H5P.Questionnaire` | Questionnaire | `Questionnaire` | B | P3 | ⬜ | 1.4.x |
+| `H5P.ArithmeticQuiz` | Arithmetic Quiz | `ArithmeticQuiz` | B | P3 | ✅ | 1.4.0 |
+| `H5P.Essay` | Essay | `Essay` | B | P3 | ✅ | 1.4.0 |
+| `H5P.Questionnaire` | Questionnaire | `Questionnaire` | B | P3 | ✅ | 1.4.0 |
 | `H5P.QuestionSet` | Question Set (Quiz) | `AssessmentSequence` | A | P1 | ✅ | 1.1.x |
 | — | Scenario (narrative) | `Scenario` | — | — | ✅ | 1.0 |
 | — | Reflection (open text) | `Reflection` | — | — | ✅ | 1.0 |
 | `H5P.InteractiveBook` | Interactive Book | `InteractiveBook` | A | P0 | ✅ | 1.2.x |
 | `H5P.CoursePresentation` | Course Presentation | `SlideDeck` | A | P0 | ✅ | 1.3.x |
-| `H5P.InteractiveVideo` | Interactive Video | `InteractiveVideo` | A | P0 | ⬜ | 1.4.x |
+| `H5P.InteractiveVideo` | Interactive Video | `InteractiveVideo` | A | P0 | ✅ | 1.4.0 |
 | `H5P.BranchingScenario` | Branching Scenario | `BranchingScenario` | A | P0 | ⬜ | 1.5.x |
 | `H5P.Column` | Column / Page | `Page` | A | P1 | ✅ | 1.2.x |
 | `H5P.GameMap` | Game Map | `GameMap` | A | P2 | ⬜ | 1.7.x |
@@ -107,9 +107,9 @@ H5P **machine names** follow common library ids (e.g. `H5P.MultiChoice`). Displa
 | `H5P.ImageJuxtaposition` | Image Juxtaposition | `ImageJuxtaposition` | C | P2 | ⬜ | 1.3.x |
 | `H5P.Agamotto` | Agamotto (Image Blender) | `ImageSequence` | C | P2 | ⬜ | 1.3.x |
 | `H5P.Collage` | Collage | `Collage` | C | P2 | ⬜ | 1.3.x |
-| `H5P.ImagePair` | Image Pairing | `ImagePairing` | C | P2 | ⬜ | 1.4.x |
-| `H5P.ImageSequencing` | Image Sequencing | `ImageSequencing` | C | P2 | ⬜ | 1.4.x |
-| `H5P.MemoryGame` | Memory Game | `MemoryGame` | C | P2 | ⬜ | 1.4.x |
+| `H5P.ImagePair` | Image Pairing | `ImagePairing` | C | P2 | ✅ | 1.4.0 |
+| `H5P.ImageSequencing` | Image Sequencing | `ImageSequencing` | C | P2 | ✅ | 1.4.0 |
+| `H5P.MemoryGame` | Memory Game | `MemoryGame` | C | P2 | ✅ | 1.4.0 |
 | `H5P.IFrameEmbed` | Iframe Embedder | `Embed` | C | P3 | ⬜ | 1.5.x |
 | `H5P.Chart` | Chart | `Chart` | C | P3 | ⬜ | 1.5.x |
 | `H5P.Accordion` | Accordion | `Accordion` | D | P1 | ✅ | 1.2.x |
@@ -117,9 +117,9 @@ H5P **machine names** follow common library ids (e.g. `H5P.MultiChoice`). Displa
 | `H5P.Flashcards` | Flashcards | `Flashcards` | D | P1 | ✅ | 1.2.x |
 | `H5P.Timeline` | Timeline | `Timeline` | D | P2 | ⬜ | 1.3.x |
 | `H5P.Table` | Table | `Table` | D | P2 | ⬜ | 1.2.x |
-| `H5P.InformationWall` | Information Wall | `InformationWall` | D | P2 | ⬜ | 1.4.x |
+| `H5P.InformationWall` | Information Wall | `InformationWall` | D | P2 | ✅ | 1.4.0 |
 | `H5P.AudioRecorder` | Audio Recorder | `AudioRecorder` | D | P1 | ⬜ | 1.2.x |
-| `H5P.ImpressivePresentation` | Slideshow (parallax) | `ParallaxSlideshow` | D | P2 | ⬜ | 1.4.x |
+| `H5P.ImpressivePresentation` | Slideshow (parallax) | `ParallaxSlideshow` | D | P2 | ✅ | 1.4.0 |
 | `H5P.ExportableTextArea` | Exportable Text Area | `ExportableNotes` | D | P3 | ⬜ | 2.x |
 | `H5P.PersonalityQuiz` | Personality Quiz | `PersonalityQuiz` | D | P3 | ⬜ | 2.x |
 | `H5P.Crossword` | Crossword | `Crossword` | E | P3 | ⬜ | 1.6.x |
@@ -148,18 +148,21 @@ H5P **machine names** follow common library ids (e.g. `H5P.MultiChoice`). Displa
 
 ---
 
-## Compound nesting (planned allowlists)
+## Compound nesting (allowlists)
 
 Mirrors H5P maintainer curation ([why sub-content differs](https://snordian.de/2023/11/16/why-isnt-h5p-content-type-x-available-as-a-subcontent-option-in-content-type-y/)). Exact lists ship with each compound in **1.2.x+**.
 
-| Parent (LessonKit) | Planned child blocks (initial) |
+| Parent (LessonKit) | Child blocks (shipped) |
 | --- | --- |
-| `Page` | text, heading, image, video, audio, link, accordion, `TrueFalse`, `FillInTheBlanks`, `Quiz`, … |
+| `Page` | Text, Heading, Image, Video, assessments, Tier C/D content blocks, … |
 | `InteractiveBook` | `Page` chapters + same assessment set as H5P Interactive Book launch set |
-| `SlideDeck` | Per-slide: text, image, video, assessments, `Summary`, … |
-| `InteractiveVideo` | Timed: `Quiz`, `TrueFalse`, `FillInTheBlanks`, text, image, … |
-| `BranchingScenario` | Scored nodes + `Scenario` content; branch telemetry |
+| `SlideDeck` | Per-slide: text, image, `Video`, assessments, `Summary`, `MemoryGame`, … |
+| `InteractiveVideo` | `TimedCue` only; each cue wraps one allowed block (`Quiz`, `TrueFalse`, `Summary`, `ImagePairing`, …). Excludes `ParallaxSlideshow`, `InformationWall`, `Video`. |
+| `TimedCue` | Single child from `TIMED_CUE_ALLOWED_CHILD_TYPES` in `@lessonkit/core` |
+| `BranchingScenario` | Scored nodes + `Scenario` content; branch telemetry (planned **1.5.x**) |
 | `AssessmentSequence` | All **Assessment contract** blocks |
+
+**Shipped in 1.4.0:** `Video`, `TimedCue`, `InteractiveVideo`, `Summary`, `ImagePairing`, `ImageSequencing`, `MemoryGame`, `InformationWall`, `ParallaxSlideshow`, `Questionnaire`, `Essay`, `ArithmeticQuiz`. See [ROADMAP — 1.4.x](roadmap.md#14x--interactivevideo--bundled-blocks).
 
 **Excluded from nesting (initial policy):** `WordSearch` (keyboard), nested `Accordion`, unrestricted `Embed`, unmaintained H5P third-party types.
 

@@ -96,7 +96,7 @@ All assessment components require `checkId` and sync with `lessonkit.json` `asse
 
 ## Runtime interface (target)
 
-Parent containers (`AssessmentSequence`, future `SlideDeck`, `InteractiveVideo`) may call:
+Parent containers (`AssessmentSequence`, `SlideDeck`, `InteractiveVideo`, `TimedCue`) may call:
 
 | Method | Purpose |
 | --- | --- |

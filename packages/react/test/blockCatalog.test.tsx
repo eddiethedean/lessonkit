@@ -6,6 +6,7 @@ import catalogV3Json from "../block-catalog.v3.json";
 import contractJson from "../block-contract.v1.json";
 import identityContractJson from "@lessonkit/core/identity-contract.v1.json";
 import telemetryCatalogJson from "@lessonkit/core/telemetry-catalog.v1.json";
+import telemetryCatalogV3Json from "@lessonkit/core/telemetry-catalog.v3.json";
 import {
   BLOCK_CATALOG,
   buildBlockCatalog,
@@ -79,15 +80,11 @@ describe("@lessonkit/react block catalog", () => {
     const telemetryNames = new Set(
       (telemetryCatalogJson as { entries: { name: string }[] }).entries.map((e) => e.name),
     );
+    for (const entry of (telemetryCatalogV3Json as { entries: { name: string }[] }).entries) {
+      telemetryNames.add(entry.name);
+    }
     telemetryNames.add("assessment_answered");
     telemetryNames.add("assessment_completed");
-    telemetryNames.add("book_page_viewed");
-    telemetryNames.add("slide_viewed");
-    telemetryNames.add("compound_page_viewed");
-    telemetryNames.add("hotspot_opened");
-    telemetryNames.add("accordion_section_toggled");
-    telemetryNames.add("flashcard_flipped");
-    telemetryNames.add("image_slider_changed");
 
     for (const entry of buildBlockCatalog({ version: 3 })) {
       for (const event of entry.telemetry.emits) {

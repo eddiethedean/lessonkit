@@ -24,8 +24,8 @@ Packaging and LMS delivery lean on **LXPack** via `@lessonkit/lxpack` (see 0.6.x
 
 ## Status
 
-- **Framework:** **1.3.0** — `SlideDeck` (Course Presentation) (see [1.3.x](#13x--slidedeck-course-presentation))
-- **Focus (now):** **1.4.x** `InteractiveVideo`
+- **Framework:** **1.4.0** — `InteractiveVideo` + bundled Tier B/C/D blocks (see [1.4.x](#14x--interactivevideo--bundled-blocks))
+- **Focus (now):** **1.5.x** — `BranchingScenario`
 
 ## Guiding principles
 
@@ -331,16 +331,75 @@ Framework **1.0.0** shipped **2026-05-30**.
 
 #### Out of scope for 1.3.x
 
-- Framework `Video` block on slides — **1.4.x** / InteractiveVideo
-- `Summary` assessment block — Tier B P1
+- Framework `Video` block on slides — **1.4.0** (shipped; see [1.4.x](#14x--interactivevideo--bundled-blocks))
+- `Summary` assessment block — **1.4.0** (shipped; see [1.4.x](#14x--interactivevideo--bundled-blocks))
 
 ---
 
-### 1.4.x — InteractiveVideo (planned)
+### 1.4.x — InteractiveVideo + bundled blocks
 
-- `InteractiveVideo` compound with timed overlays and question contract
-- Video block primitive; telemetry for segments and interactions
-- See [H5P-aligned backlog](#h5p-aligned-capability-backlog) Tier A
+**Status:** **Shipped in 1.4.0**.
+
+#### Goals
+
+- Ship H5P-aligned **`InteractiveVideo`** compound (`H5P.InteractiveVideo`) with timeline-driven overlays, playback pause on interaction, and `CompoundHandle` score aggregation + session resume.
+- Ship shared **`Video`** content primitive (deferred from 1.3.x; also unblocks `Slide` allowlist expansion).
+- Extend **telemetry catalog v3** with video timeline events (`video_cue_reached`, `video_segment_completed`).
+- Ship **selected Tier B/C/D blocks** in the same **1.4.0** release, each completing the [H5P documentation checklist](#h5p-documentation-checklist-per-block).
+
+#### Architecture note
+
+`InteractiveVideo` reuses the same compound machinery as `SlideDeck` / `InteractiveBook` (`CompoundHandle`, `useCompoundShell`, session resume v2). The main divergence is **time-based cue navigation** instead of discrete slide index navigation.
+
+| SlideDeck (1.3.x) | InteractiveVideo (1.4.x) |
+| --- | --- |
+| Discrete slide index navigation | Time-based `TimedCue` overlays on a video timeline |
+| `useCompoundKeyboardNav` (Arrow, Home, End) | Native `<video>` controls + cue-driven pause |
+| `slide_viewed` telemetry | `video_cue_reached`, `video_segment_completed` |
+| `Slide` child rows | `TimedCue` children wrapping allowed blocks |
+
+**Author API** (additive):
+
+```tsx
+<InteractiveVideo blockId="safety-briefing" title="PPE overview" src="/video/ppe.mp4" showVideoScore>
+  <TimedCue atSeconds={30} label="Check">
+    <TrueFalse checkId="ppe-tf" question="PPE required?" answer={true} />
+  </TimedCue>
+  <TimedCue atSeconds={90}>
+    <Text>Report hazards to your supervisor.</Text>
+  </TimedCue>
+</InteractiveVideo>
+```
+
+#### Deliverables — 1.4.0
+
+- [x] **`Video`** primitive — `src`, `poster`, optional WebVTT `captions`; native controls
+- [x] **`TimedCue`** — `atSeconds`, `label?`, `mustComplete?`; single allowed child
+- [x] **`InteractiveVideo`** — `CompoundHandle` + session resume (video time, cue index, child assessment state)
+- [x] **Playback semantics** — pause on cue reveal; block seek past incomplete mandatory cues
+- [x] **Allowlists** — `TIMED_CUE_ALLOWED_CHILD_TYPES`, `INTERACTIVE_VIDEO_ALLOWED_CHILD_TYPES`; `Video` + 1.4 blocks on `Page` / `Slide`
+- [x] **Telemetry** — `video_cue_reached`, `video_segment_completed`, block interaction events; xAPI mapping
+- [x] **`block-catalog.v3.json`** — 38 entries including all 1.4 blocks
+- [x] **Tier B assessments** — `Summary`, `ImagePairing`, `ImageSequencing`, `ArithmeticQuiz`, `Essay`
+- [x] **Tier C/D content** — `MemoryGame`, `InformationWall`, `ParallaxSlideshow`, `Questionnaire`
+- [x] **Tests** — unit, integration SCORM packaging, Playwright e2e smoke
+- [x] **Golden example** — `examples/interactive-video`
+- [x] **Docs** — [MIGRATION-1.3-to-1.4.md](docs/MIGRATION-1.3-to-1.4.md); H5P capability map updates
+
+#### Out of scope for 1.4.x
+
+- **H5P runtime embedding** and **`.h5p` import** for Interactive Video (P2, timeline complexity — stays **1.6.x**)
+- **`BranchingScenario`** — **1.5.x**
+- **YouTube/Vimeo embed-first video** — self-hosted `<video>` + optional `src` URL only in 1.4.0; external embeds research later
+- **Adaptive bitrate / HLS/DASH** — out of scope
+- **Drag-and-drop inside video canvas**, **bookmarks/chapters UI**, **“go to time” author UI** — defer unless golden example needs a subset
+- **Full H5P Interactive Video parity** on day one — document as incremental allowlist expansion
+- **`WordSearch`**, nested **`Accordion`**, unrestricted **`Embed`** — remain excluded from compounds (existing policy)
+
+#### Depends on
+
+- 1.3.x compound infrastructure — `CompoundHandle`, catalog v3, session resume v2, `useCompoundShell`
+- 1.1.x assessment contract — scored timed overlays call `getScore`, `resetTask`, `getCurrentState`, etc.
 
 ---
 
@@ -406,7 +465,7 @@ These are H5P's "course builders." Each becomes a **framework container** with a
 |----------|------------------|------------------|-----------|------------|
 | P0 | **Interactive Book** | `InteractiveBook` | **1.2.x** ✅ | Page layout, resume state, sub-block catalog |
 | P0 | **Course Presentation** | `SlideDeck` | **1.3.x** ✅ | Slide schema, per-slide block allowlist, keyboard slide nav |
-| P0 | **Interactive Video** | `InteractiveVideo` | **1.4.x** | Video block, timed overlays, question contract |
+| P0 | **Interactive Video** | `InteractiveVideo` | **1.4.0** | Video block, `TimedCue`, timed overlays, question contract; Tier B/C/D blocks in **1.4.1–1.4.2** |
 | P0 | **Branching Scenario** | `BranchingScenario` | **1.5.x** | Branch graph, scoring, xAPI branching verbs |
 | P1 | **Question Set (Quiz)** | `AssessmentSequence` | **1.1.x** ✅ | Question-type contract (below) |
 | P1 | **Column** → **Page** | `Page` | **1.2.x** ✅ | Unified semantics with Interactive Book chapters |
@@ -418,7 +477,7 @@ These are H5P's "course builders." Each becomes a **framework container** with a
 **Deliverables (cross-cutting for Tier A):**
 
 - **Compound block contract** in `block-contract.v1.json`: allowed child types, max nesting depth, score aggregation, `resetTask` / `getCurrentState` for resume
-- **Telemetry**: `branch_selected`, `slide_viewed`, `video_segment_completed`, `book_page_viewed` (extend telemetry catalog v2+)
+- **Telemetry**: `branch_selected`, `slide_viewed`, `video_cue_reached`, `video_segment_completed`, `book_page_viewed` (extend telemetry catalog v3+)
 - **Docs**: composition guide (which blocks nest where), parity with export targets
 
 ### Tier B — Questions and scored tasks
@@ -434,16 +493,16 @@ Extend beyond MCQ via a formal **assessment contract** (H5P's `H5P.Question` pat
 | P0 | **Mark the Words** | `MarkTheWords` ✅ | Click/highlight; keyboard-selectable tokens |
 | P1 | **Single Choice Set** | `SingleChoiceSet` | Sequential single-question slides |
 | P1 | **Multiple Choice** (variants) | Extend `Quiz` | Multi-select, shuffle, feedback modes |
-| P1 | **Summary** | `Summary` | Construct summary from statement bank |
+| P1 | **Summary** | `Summary` | Construct summary from statement bank; ships **1.4.1** |
 | P1 | **Sort the Paragraphs** | `SortParagraphs` | Ordering task; drag or keyboard reorder |
 | P1 | **Guess the Answer** | `GuessTheAnswer` | Reveal answer; optional scoring |
 | P1 | **Multimedia Choice** | `MultimediaChoice` | Image/audio options (a11y captions required) |
 | P2 | **Speak the Words** / **Speak the Words Set** | `SpeakTheWords`, `SpeakTheWordsSet` | Web Speech API; graceful degradation |
 | P2 | **Dictation** | `Dictation` | Audio prompt + text compare |
 | P2 | **Complex / Advanced Fill in the Blanks** | `AdvancedBlanks` | Dropdown/markup blanks; higher a11y bar |
-| P3 | **Arithmetic Quiz** | `ArithmeticQuiz` | Timed math; optional (no H5P Question Set contract) |
-| P3 | **Essay** (third-party in H5P) | `Essay` | AI/manual grading hooks via `scoreAssessment` plugin |
-| P3 | **Questionnaire** | `Questionnaire` | Unscored survey; feedback export |
+| P3 | **Arithmetic Quiz** | `ArithmeticQuiz` | Timed math; optional (no H5P Question Set contract); ships **1.4.2** |
+| P3 | **Essay** (third-party in H5P) | `Essay` | AI/manual grading hooks via `scoreAssessment` plugin; ships **1.4.2** |
+| P3 | **Questionnaire** | `Questionnaire` | Unscored survey; feedback export; ships **1.4.2** |
 
 **Framework milestone:** **1.1.x — Assessment contract v1** — shared `Assessment` base, catalog entries, Storybook, e2e for Tier B P0 items.
 
@@ -457,8 +516,8 @@ Extend beyond MCQ via a formal **assessment contract** (H5P's `H5P.Question` pat
 | P2 | **Image Juxtaposition** | `ImageJuxtaposition` | Before/after slider |
 | P2 | **Agamotto (Image Blender)** | `ImageSequence` | Progressive image sequence |
 | P2 | **Collage** | `Collage` | Multi-image layout block |
-| P2 | **Image Pairing** / **Image Sequencing** | `ImagePairing`, `ImageSequencing` | Memory/order games |
-| P2 | **Memory Game** | `MemoryGame` | Card flip; focus management |
+| P2 | **Image Pairing** / **Image Sequencing** | `ImagePairing`, `ImageSequencing` | Memory/order games; ships **1.4.1** |
+| P2 | **Memory Game** | `MemoryGame` | Card flip; focus management; ships **1.4.1** |
 | P3 | **Iframe Embedder** | `Embed` (restricted) | Sandboxed, responsive; opt-in for security |
 | P3 | **Chart** | `Chart` | Bar/pie; accessible data table fallback |
 
@@ -471,11 +530,11 @@ Extend beyond MCQ via a formal **assessment contract** (H5P's `H5P.Question` pat
 | P1 | **Flashcards** | `Flashcards` ✅ | Study mode; optional self-score |
 | P2 | **Timeline** | `Timeline` | Events + media; fragile as sub-content in H5P—test resize |
 | P2 | **Table** | `Table` | Rich text table |
-| P2 | **Information Wall** | `InformationWall` | Searchable panels |
+| P2 | **Information Wall** | `InformationWall` | Searchable panels; ships **1.4.2** |
 | P3 | **Exportable Text Area / Cornell** | `CornellNotes`, `ExportableNotes` | Learner export (PDF/text) |
 | P3 | **Personality Quiz** | `PersonalityQuiz` | Outcome buckets; community pattern, lower priority |
 | P1 | **Audio Recorder** | `AudioRecorder` | Learner recording; consent + storage policy |
-| P2 | **Slideshow (parallax)** | `ParallaxSlideshow` | Presentation variant; respect `prefers-reduced-motion` |
+| P2 | **Slideshow (parallax)** | `ParallaxSlideshow` | Presentation variant; respect `prefers-reduced-motion`; ships **1.4.2** |
 
 **Primitives (H5P sub-content):** `Text`, `Heading`, `Image`, and media blocks with shared semantics for compounds.
 
@@ -543,7 +602,9 @@ When implementing backlog items, follow H5P's constraints **in React form**:
 Framework 1.1.x   Assessment contract + Tier B P0 + H5P doc checklist per block
 Framework 1.2.x   Page/InteractiveBook foundation + resume state + catalog allowlists + H5P docs
 Framework 1.3.x   SlideDeck (Course Presentation) + H5P docs
-Framework 1.4.x   InteractiveVideo + timed overlays + H5P docs
+Framework 1.4.0   InteractiveVideo + Video + TimedCue + video telemetry + golden example
+Framework 1.4.1   Summary + ImagePairing + ImageSequencing + MemoryGame
+Framework 1.4.2   InformationWall + ParallaxSlideshow + Questionnaire + Essay + ArithmeticQuiz
 Framework 1.5.x   BranchingScenario + branch telemetry + H5P docs
 Framework 1.6.x   Interchange format + optional H5P import spike + import guide callouts
 Framework 1.7.x+  Tier C–E blocks by demand; plugin marketplace; H5P doc checklist each

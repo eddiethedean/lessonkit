@@ -149,6 +149,18 @@ describe("compound allowlists", () => {
   it("excludes ProgressTracker from Slide", () => {
     expect(isChildTypeAllowed("Slide", "ProgressTracker")).toBe(false);
   });
+
+  it("InteractiveVideo only allows TimedCue", () => {
+    expect(getAllowedChildTypes("InteractiveVideo")).toEqual(["TimedCue"]);
+  });
+
+  it("allows Video under Slide", () => {
+    expect(isChildTypeAllowed("Slide", "Video")).toBe(true);
+  });
+
+  it("allows Summary under TimedCue", () => {
+    expect(isChildTypeAllowed("TimedCue", "Summary")).toBe(true);
+  });
 });
 
 describe("telemetry catalog v3", () => {
@@ -156,6 +168,8 @@ describe("telemetry catalog v3", () => {
     const names = buildTelemetryCatalogV3().map((e) => e.name);
     expect(names).toContain("book_page_viewed");
     expect(names).toContain("slide_viewed");
+    expect(names).toContain("video_cue_reached");
+    expect(names).toContain("video_segment_completed");
   });
 
   it("builds book_page_viewed events", () => {

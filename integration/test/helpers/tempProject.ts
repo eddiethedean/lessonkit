@@ -123,3 +123,15 @@ export async function ensureSlideDeckBuilt(): Promise<void> {
     stdio: "inherit",
   });
 }
+
+export async function ensureInteractiveVideoBuilt(): Promise<void> {
+  const { existsSync } = await import("node:fs");
+  const distIndex = join(REPO_ROOT, "examples/interactive-video/dist/index.html");
+  if (existsSync(distIndex)) return;
+
+  const { execSync } = await import("node:child_process");
+  execSync("npm run build -w lessonkit-example-interactive-video", {
+    cwd: REPO_ROOT,
+    stdio: "inherit",
+  });
+}

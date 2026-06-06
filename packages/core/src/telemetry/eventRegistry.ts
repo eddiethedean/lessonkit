@@ -15,9 +15,15 @@ import type {
   InteractionData,
   LessonId,
   LessonLifecycleData,
+  MemoryCardFlippedData,
+  InformationWallSearchData,
+  ParallaxSlideViewedData,
+  QuestionnaireSubmittedData,
   QuizAnsweredData,
   QuizCompletedData,
   TelemetryEvent,
+  VideoCueReachedData,
+  VideoSegmentCompletedData,
 } from "../telemetryTypes";
 import { nowIso } from "../time";
 
@@ -232,6 +238,81 @@ export const TELEMETRY_EVENT_REGISTRY: Record<BuildTelemetryEventInput["name"], 
         ...base,
         lessonId: opts.lessonId,
         data: opts.data as ImageSliderChangedData,
+      };
+    },
+  },
+  video_cue_reached: {
+    requiresLessonId: true,
+    build: (opts, base) => {
+      if (opts.name !== "video_cue_reached") throw new Error("unexpected event");
+      const lessonId = opts.lessonId;
+      if (!lessonId) throw new Error("video_cue_reached requires active lessonId");
+      return {
+        name: "video_cue_reached",
+        ...base,
+        lessonId,
+        data: opts.data as VideoCueReachedData,
+      };
+    },
+  },
+  video_segment_completed: {
+    requiresLessonId: true,
+    build: (opts, base) => {
+      if (opts.name !== "video_segment_completed") throw new Error("unexpected event");
+      const lessonId = opts.lessonId;
+      if (!lessonId) throw new Error("video_segment_completed requires active lessonId");
+      return {
+        name: "video_segment_completed",
+        ...base,
+        lessonId,
+        data: opts.data as VideoSegmentCompletedData,
+      };
+    },
+  },
+  memory_card_flipped: {
+    build: (opts, base) => {
+      if (opts.name !== "memory_card_flipped") throw new Error("unexpected event");
+      return {
+        name: "memory_card_flipped",
+        ...base,
+        lessonId: opts.lessonId,
+        data: opts.data as MemoryCardFlippedData,
+      };
+    },
+  },
+  information_wall_search: {
+    build: (opts, base) => {
+      if (opts.name !== "information_wall_search") throw new Error("unexpected event");
+      return {
+        name: "information_wall_search",
+        ...base,
+        lessonId: opts.lessonId,
+        data: opts.data as InformationWallSearchData,
+      };
+    },
+  },
+  parallax_slide_viewed: {
+    build: (opts, base) => {
+      if (opts.name !== "parallax_slide_viewed") throw new Error("unexpected event");
+      return {
+        name: "parallax_slide_viewed",
+        ...base,
+        lessonId: opts.lessonId,
+        data: opts.data as ParallaxSlideViewedData,
+      };
+    },
+  },
+  questionnaire_submitted: {
+    requiresLessonId: true,
+    build: (opts, base) => {
+      if (opts.name !== "questionnaire_submitted") throw new Error("unexpected event");
+      const lessonId = opts.lessonId;
+      if (!lessonId) throw new Error("questionnaire_submitted requires active lessonId");
+      return {
+        name: "questionnaire_submitted",
+        ...base,
+        lessonId,
+        data: opts.data as QuestionnaireSubmittedData,
       };
     },
   },

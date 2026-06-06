@@ -167,6 +167,32 @@ const TELEMETRY_XAPI_MAPPERS = {
   accordion_section_toggled: experiencedBlockMapper,
   flashcard_flipped: experiencedBlockMapper,
   image_slider_changed: experiencedBlockMapper,
+  video_cue_reached: experiencedBlockMapper,
+  video_segment_completed: (event, ctx) => {
+    if (event.name !== "video_segment_completed") return null;
+    const lessonId = event.lessonId;
+    const blockId = event.data.blockId;
+    if (!lessonId || !blockId) return null;
+    return statementFor(
+      buildLessonkitUrn({ courseId: ctx.courseId, lessonId, blockId }),
+      XAPIVerbs.completed,
+      ctx.timestamp,
+    );
+  },
+  memory_card_flipped: experiencedBlockMapper,
+  information_wall_search: experiencedBlockMapper,
+  parallax_slide_viewed: experiencedBlockMapper,
+  questionnaire_submitted: (event, ctx) => {
+    if (event.name !== "questionnaire_submitted") return null;
+    const lessonId = event.lessonId;
+    const blockId = event.data.blockId;
+    if (!lessonId || !blockId) return null;
+    return statementFor(
+      buildLessonkitUrn({ courseId: ctx.courseId, lessonId, blockId }),
+      XAPIVerbs.completed,
+      ctx.timestamp,
+    );
+  },
 } as const satisfies Record<TelemetryEvent["name"], EventMapper>;
 
 /**

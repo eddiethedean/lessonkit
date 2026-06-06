@@ -10,7 +10,13 @@ export type AssessmentInteractionType =
   | "dragAndDrop"
   | "assessmentSequence"
   | "findHotspot"
-  | "findMultipleHotspots";
+  | "findMultipleHotspots"
+  | "summary"
+  | "imagePairing"
+  | "imageSequencing"
+  | "essay"
+  | "arithmeticQuiz"
+  | "memoryGame";
 
 /** Serializable resume blob for a single assessment block. */
 export type AssessmentResumeState = Record<string, unknown>;
