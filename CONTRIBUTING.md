@@ -10,9 +10,11 @@ We follow the [Contributor Covenant](CODE_OF_CONDUCT.md). Be respectful and cons
 
 ## Before you open a PR
 
-1. Fork the repository and create a branch from `main`.
+1. Fork the repository and create a branch from **`main`**.
 2. Keep each PR focused on one logical change (feature, fix, or docs update).
 3. Search [existing issues](https://github.com/eddiethedean/lessonkit/issues) to avoid duplicate work.
+
+**Branch policy:** Open pull requests against **`main`**. Release branches (for example `release/1.4.0`) are maintainer-only for version stabilization—do not target them unless a maintainer asks you to.
 
 ## Good first contributions
 

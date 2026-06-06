@@ -1,6 +1,6 @@
 {
   "name": "@lessonkit/react",
-  "version": "1.3.1",
+  "version": "1.4.0",
   "private": false,
   "description": "React components and hooks for building learning experiences with LessonKit.",
   "license": "Apache-2.0",
@@ -32,6 +32,16 @@
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
+    "./blocks": {
+      "types": "./dist/blocks-entry.d.ts",
+      "import": "./dist/blocks-entry.js",
+      "require": "./dist/blocks-entry.cjs"
+    },
+    "./testing": {
+      "types": "./dist/testing.d.ts",
+      "import": "./dist/testing.js",
+      "require": "./dist/testing.cjs"
+    },
     "./block-catalog.v1.json": "./block-catalog.v1.json",
     "./block-catalog.v2.json": "./block-catalog.v2.json",
     "./block-catalog.v3.json": "./block-catalog.v3.json",
@@ -49,8 +59,8 @@
     "block-contract.v3.json"
   ],
   "scripts": {
-    "build": "tsup src/index.tsx --format esm,cjs --dts --external react --external react-dom --external @lessonkit/accessibility --external @lessonkit/lxpack --external @lessonkit/themes",
-    "dev": "tsup src/index.tsx --format esm,cjs --dts --watch --external react --external react-dom --external @lessonkit/accessibility --external @lessonkit/lxpack --external @lessonkit/themes",
+    "build": "tsup src/index.tsx src/testing.ts src/blocks-entry.ts --format esm,cjs --dts --external react --external react-dom --external @lessonkit/accessibility --external @lessonkit/lxpack --external @lessonkit/themes",
+    "dev": "tsup src/index.tsx src/testing.ts src/blocks-entry.ts --format esm,cjs --dts --watch --external react --external react-dom --external @lessonkit/accessibility --external @lessonkit/lxpack --external @lessonkit/themes",
     "storybook": "NODE_PATH=./node_modules:../../node_modules node ../../node_modules/storybook/bin/index.cjs dev -c .storybook -p 6006 --disable-telemetry",
     "build-storybook": "NODE_PATH=./node_modules:../../node_modules node ../../node_modules/storybook/bin/index.cjs build -c .storybook --disable-telemetry",
     "prepublishOnly": "npm run build",
@@ -60,15 +70,21 @@
     "lint": "echo \"(no lint configured yet)\""
   },
   "peerDependencies": {
+    "@lessonkit/lxpack": "1.4.0",
     "react": ">=18",
     "react-dom": ">=18"
   },
+  "peerDependenciesMeta": {
+    "@lessonkit/lxpack": {
+      "optional": true
+    }
+  },
   "dependencies": {
-    "@lessonkit/accessibility": "1.3.1",
-    "@lessonkit/core": "1.3.1",
-    "@lessonkit/lxpack": "1.3.1",
-    "@lessonkit/themes": "1.3.1",
-    "@lessonkit/xapi": "1.3.1"
+    "@lessonkit/accessibility": "1.4.0",
+    "@lessonkit/core": "1.4.0",
+    "@lessonkit/lxpack": "1.4.0",
+    "@lessonkit/themes": "1.4.0",
+    "@lessonkit/xapi": "1.4.0"
   },
   "devDependencies": {
     "@storybook/addon-essentials": "8.6.18",

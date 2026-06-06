@@ -9,7 +9,7 @@ import {
   type ValidateCourseResult,
 } from "@lxpack/api";
 import { validateDescriptorForTarget } from "./validateDescriptor";
-import { assessmentDescriptorToLxpack, type LxpackInjectedAssessment } from "./assessments";
+import type { LxpackInjectedAssessment } from "./assessments";
 import type { WriteLxpackProjectOptions } from "./writeProject";
 import {
   remapArtifactPaths,
@@ -22,6 +22,9 @@ import { findPackagingErrorIssues } from "./packaging/issueSeverity";
 import { validateReactManifestParity } from "./validateReactParity";
 
 export type { ExportTarget } from "@lxpack/api";
+
+/** LessonKit-owned alias for LMS export targets (maps to `@lxpack/api` `ExportTarget`). */
+export type LessonkitExportTarget = ExportTarget;
 
 export type ValidateLessonkitProjectOptions = {
   courseDir: string;
@@ -146,21 +149,6 @@ export async function packageLessonkitCourse(
         })),
       };
     }
-  }
-
-  const nonInjectableAssessments = (descriptor.assessments ?? [])
-    .map((assessment, index) => ({ assessment, index }))
-    .filter(({ assessment }) => assessmentDescriptorToLxpack(assessment) === null);
-  if (nonInjectableAssessments.length > 0) {
-    return {
-      ok: false,
-      courseDir: outDir,
-      target,
-      issues: nonInjectableAssessments.map(({ assessment, index }) => ({
-        path: `assessments[${index}]`,
-        message: `assessment kind "${assessment.kind ?? "mcq"}" (checkId "${assessment.checkId}") is not injected into LMS shell quizzes for target "${target}"`,
-      })),
-    };
   }
 
   const staged = await buildStagingPackage({

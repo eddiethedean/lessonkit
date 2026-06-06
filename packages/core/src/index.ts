@@ -38,6 +38,12 @@ export type {
   AccordionSectionToggledData,
   FlashcardFlippedData,
   ImageSliderChangedData,
+  VideoCueReachedData,
+  VideoSegmentCompletedData,
+  MemoryCardFlippedData,
+  InformationWallSearchData,
+  ParallaxSlideViewedData,
+  QuestionnaireSubmittedData,
   TelemetryBatchSink,
   TelemetryEvent,
   TelemetryEventBase,
@@ -55,7 +61,10 @@ export type {
   AssessmentXAPIData,
   AssessmentBaseProps,
   AssessmentResumeState,
+  McqAssessmentProps,
 } from "./assessment";
+
+export type { LmsBridgeMode } from "./bridgeTypes";
 
 export type {
   CompoundHandle,
@@ -82,9 +91,12 @@ export {
   INTERACTIVE_BOOK_ALLOWED_CHILD_TYPES,
   SLIDE_ALLOWED_CHILD_TYPES,
   SLIDE_DECK_ALLOWED_CHILD_TYPES,
+  TIMED_CUE_ALLOWED_CHILD_TYPES,
+  INTERACTIVE_VIDEO_ALLOWED_CHILD_TYPES,
   ASSESSMENT_SEQUENCE_ALLOWED_CHILD_TYPES,
   COMPOUND_MAX_NESTING_DEPTH,
   ACCORDION_FORBIDDEN_CHILD_TYPES,
+  BLOCKS_14_PAGE_SLIDE,
   getAllowedChildTypes,
   isChildTypeAllowed,
   type CompoundParentType,
@@ -119,6 +131,7 @@ export type { BuildTelemetryEventInput } from "./telemetryBuilder";
 export {
   buildTelemetryEvent,
   tryBuildTelemetryEvent,
+  /** @deprecated Import from `@lessonkit/core/testing`. */
   resetTelemetryBuilderWarningsForTests,
 } from "./telemetryBuilder";
 
@@ -131,6 +144,7 @@ export {
   createGlobalTimer,
   createNoopStorage,
   createSessionStoragePort,
+  /** @deprecated Import from `@lessonkit/core/testing`. */
   resetStoragePortForTests,
 } from "./ports";
 
@@ -148,6 +162,7 @@ export {
   markCourseStartedEmittedToTracking,
   hasCourseStartedPipelineDelivered,
   markCourseStartedPipelineDelivered,
+  /** @deprecated Import from `@lessonkit/core/testing`. */
   resetSharedVolatileSessionIdForTests,
 } from "./session";
 

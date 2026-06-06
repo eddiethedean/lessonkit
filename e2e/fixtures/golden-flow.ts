@@ -34,6 +34,14 @@ export async function runViteGoldenFlow(page: Page): Promise<void> {
   await completeSignOffAssessments(page);
 }
 
+/** LXPack shell marks passed quizzes with a ✓ on the nav button (not React role=status). */
+export async function expectPackagedAssessmentPassed(
+  page: Page,
+  assessmentPattern: RegExp,
+): Promise<void> {
+  await expect(page.getByRole("button", { name: assessmentPattern })).toBeVisible();
+}
+
 /**
  * LXPack standalone / SCORM shell: assessments are native quizzes in the shell nav
  * (safety-check, ppe-acknowledgment), not the multi-step React sign-off route.
@@ -42,10 +50,12 @@ export async function completePackagedAssessments(page: Page): Promise<void> {
   await page.getByRole("button", { name: /safety-check/i }).click();
   await page.getByText(QUIZ_CORRECT, { exact: true }).click();
   await page.getByRole("button", { name: /Submit assessment/i }).click();
+  await expectPackagedAssessmentPassed(page, /safety-check.*✓/);
 
   await page.getByRole("button", { name: /ppe-acknowledgment/i }).click();
   await page.getByText(KC_CORRECT, { exact: true }).click();
   await page.getByRole("button", { name: /Submit assessment/i }).click();
+  await expectPackagedAssessmentPassed(page, /ppe-acknowledgment.*✓/);
 }
 
 /** SCORM 2004 multi-SCO layout: one assessment per SCO launch URL. */

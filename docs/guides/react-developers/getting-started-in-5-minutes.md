@@ -56,6 +56,12 @@ Or:
 npx lessonkit package --target scorm12
 ```
 
+:::{admonition} Your SCORM zip is here
+:class: tip
+
+After a successful `package:scorm12` run, upload **`.lxpack/out/course-scorm12.zip`** to your LMS. Other targets use the same folder (for example `course-xapi.zip`, `course-cmi5.zip`). Standalone export writes `.lxpack/out/standalone/`.
+:::
+
 ### Where the SCORM zip lands
 
 By default, `lessonkit.json` sets:

@@ -1,5 +1,4 @@
-import type { TelemetryEvent } from "@lessonkit/core";
-import type { CheckId, LessonId } from "@lessonkit/core";
+import type { CheckId, LessonId, LmsBridgeMode, TelemetryEvent } from "@lessonkit/core";
 import {
   getLxpackBridge as getLxpackBridgeFromParent,
   normalizePassingThreshold,
@@ -79,7 +78,8 @@ function getBridge(parentWindow?: Window): LxpackBridgeV1 | null {
   return parent.lxpackBridge?.v1 ?? parent.lxpack ?? null;
 }
 
-export type LxpackBridgeMode = "auto" | "off";
+/** @deprecated Use `LmsBridgeMode` from `@lessonkit/core`. */
+export type LxpackBridgeMode = LmsBridgeMode;
 
 function isDevEnvironment(): boolean {
   const g = globalThis as typeof globalThis & { process?: { env?: { NODE_ENV?: string } } };

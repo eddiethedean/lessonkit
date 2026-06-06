@@ -24,12 +24,16 @@ export function createXAPIClient(opts?: {
   transport?: XAPITransport;
   /** Keepalive transport for pagehide flush (e.g. from createFetchTransport). */
   exitTransport?: import("./types").XAPIExitTransport;
+  /** Abort in-flight transport by statement id (e.g. from createFetchTransport). */
+  abortInFlight?: (statementId: string) => void;
   courseId?: CourseId;
   queue?: XAPIQueue;
   /** When creating the default in-memory queue (max size 1000 unless overridden). */
   maxQueueSize?: number;
   onQueueDepth?: (size: number) => void;
   onQueueCap?: () => void;
+  /** Called when transport fails after retries (statement is re-queued). */
+  onTransportError?: (err: unknown) => void;
 }): XAPIClient {
   const transport = opts?.transport;
   const exitTransport = opts?.exitTransport;
@@ -45,10 +49,20 @@ export function createXAPIClient(opts?: {
   let warnedTransportFailure = false;
   const inflightById = new Map<string, Promise<void>>();
   const inflightStatements = new Map<string, XAPIStatement>();
+  const exitDeliveredIds = new Set<string>();
+  const exitNetworkSentIds = new Set<string>();
+
+  const deliveryTransport: XAPITransport | undefined = transport
+    ? async (statement) => {
+        if (exitNetworkSentIds.has(statement.id)) return;
+        await transport(statement);
+      }
+    : undefined;
 
   const sendOrQueue = (statement: XAPIStatement) => {
     const normalized = withStatementId(statement);
-    if (!transport) {
+    if (exitDeliveredIds.has(normalized.id)) return;
+    if (!deliveryTransport) {
       queue.enqueue(normalized);
       if (isDevEnvironment() && !warnedNoTransport) {
         warnedNoTransport = true;
@@ -72,18 +86,20 @@ export function createXAPIClient(opts?: {
     inflightStatements.set(normalized.id, normalized);
     const flight = Promise.resolve()
       .then(async () => {
-        await transport(normalized);
+        await deliveryTransport(normalized);
         queue.removeById(normalized.id);
       })
-      .catch(() => {
+      .catch((err) => {
+        if (exitDeliveredIds.has(normalized.id)) return;
         queue.enqueue(normalized);
+        opts?.onTransportError?.(err);
         if (isDevEnvironment() && !warnedTransportFailure) {
           warnedTransportFailure = true;
           console.warn(
             "[lessonkit] xAPI transport failed; statement re-queued. Check your LRS endpoint or transport implementation.",
           );
         }
-        throw new Error("xAPI transport failed");
+        throw err instanceof Error ? err : new Error("xAPI transport failed", { cause: err });
       })
       .finally(() => {
         inflightById.delete(normalized.id);
@@ -116,29 +132,38 @@ export function createXAPIClient(opts?: {
     },
     queueSize: () => queue.size(),
     flush: async () => {
-      if (!transport) return;
-      await queue.flush(transport);
+      if (!deliveryTransport) return;
+      await queue.flush(deliveryTransport);
       const flights = [...inflightById.values()];
       if (flights.length > 0) {
-        await Promise.allSettled(flights);
+        await Promise.all(flights);
+      }
+      if (queue.size() > 0) {
+        throw new Error("xAPI flush incomplete: statements remain queued after flush");
       }
     },
     flushOnExit: exitTransport
       ? () => {
-          const exitSentIds = new Set<string>();
+          const headId = queue.getHeadInFlightId?.();
+          if (headId) {
+            exitNetworkSentIds.add(headId);
+            exitDeliveredIds.add(headId);
+            opts.abortInFlight?.(headId);
+          }
           for (const statement of inflightStatements.values()) {
-            if (exitSentIds.has(statement.id)) continue;
+            exitNetworkSentIds.add(statement.id);
+            exitDeliveredIds.add(statement.id);
+            opts.abortInFlight?.(statement.id);
+          }
+          queue.flushOnExit((statement) => {
+            if (exitDeliveredIds.has(statement.id)) return;
+            exitNetworkSentIds.add(statement.id);
+            exitDeliveredIds.add(statement.id);
             try {
               exitTransport(statement);
-              exitSentIds.add(statement.id);
             } catch {
               // page is unloading
             }
-          }
-          queue.flushOnExit((statement) => {
-            if (exitSentIds.has(statement.id)) return;
-            exitTransport(statement);
-            exitSentIds.add(statement.id);
           });
         }
       : undefined,

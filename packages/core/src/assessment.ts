@@ -10,7 +10,13 @@ export type AssessmentInteractionType =
   | "dragAndDrop"
   | "assessmentSequence"
   | "findHotspot"
-  | "findMultipleHotspots";
+  | "findMultipleHotspots"
+  | "summary"
+  | "imagePairing"
+  | "imageSequencing"
+  | "essay"
+  | "arithmeticQuiz"
+  | "memoryGame";
 
 /** Serializable resume blob for a single assessment block. */
 export type AssessmentResumeState = Record<string, unknown>;
@@ -50,4 +56,12 @@ export type AssessmentHandle = {
 export type AssessmentBaseProps = AssessmentBehaviour & {
   checkId: CheckId;
   passingScore?: number;
+};
+
+/** MCQ assessment props shared by React components and LMS packaging descriptors. */
+export type McqAssessmentProps = AssessmentBaseProps & {
+  kind?: "mcq";
+  question: string;
+  choices: string[];
+  answer: string;
 };

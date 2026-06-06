@@ -47,6 +47,7 @@ const config = {
   xapi: {
     transport: xapiFetch.transport,
     exitTransport: xapiFetch.exitTransport,
+    abortInFlight: xapiFetch.abortInFlight,
   },
 };
 ```
@@ -77,7 +78,7 @@ xapi: { client: myXAPIClient },
 
 ## LXPack bridge (packaged courses)
 
-When embedded in an LXPack export, `@lessonkit/react` can forward completion/scores to `window.parent.lxpackBridge.v1` (`config.lxpack.bridge`, default `auto`). See [LXPack bridge reference](../../reference/lxpack-bridge.md) and [Packaging reference](../../reference/packaging.md).
+When embedded in an LXPack export, `@lessonkit/react` can forward completion/scores to `window.parent.lxpackBridge.v1` when `config.lxpack.bridge` is `"auto"`. The init template defaults to `"off"` — set `"auto"` for SCORM/LMS shells. See [LXPack bridge reference](../../reference/lxpack-bridge.md) and [Packaging reference](../../reference/packaging.md).
 
 `LessonkitProvider` uses `runtimeVersion: "v2"` by default (headless runtime from `@lessonkit/core`). Set `runtimeVersion: "v1"` to opt out; see [Core reference](../../reference/core.md) and [MIGRATION-0.x-to-1.0.md](../../MIGRATION-0.x-to-1.0.md).
 
@@ -87,7 +88,9 @@ Before go-live, complete the [production checklist](production-checklist.md) (LM
 
 ### Observability hooks
 
-Wire **all five** hooks in production:
+Required hooks depend on what you enable — see the [production checklist](production-checklist.md) for the full matrix. When both tracking and xAPI delivery are configured, wire all six hooks including **`onXapiTransportError`** (required for xAPI, not optional).
+
+If you pass a prebuilt `config.xapi.client`, the provider does not attach its internal queue observability wiring; wire `onXapiQueueDepth` / `onXapiQueueCap` yourself or use `config.xapi.transport` from `createFetchTransport`.
 
 ```tsx
 observability: {
@@ -96,6 +99,7 @@ observability: {
   onXapiQueueDepth: (depth) => { /* gauge */ },
   onXapiQueueCap: () => { /* alert: queue dropped oldest statement */ },
   onLxpackBridgeMiss: (event) => { /* LMS bridge missing for completion */ },
+  onXapiTransportError: (err) => { /* alert: LRS transport failed after retries */ },
 },
 ```
 

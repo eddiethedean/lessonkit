@@ -25,8 +25,12 @@ const validateMcqLike: AssessmentValidator = (assessment, path, issues) => {
   }
   if (!assessment.answer.trim()) {
     issues.push({ path: `${path}.answer`, message: "answer is required" });
-  } else if (trimmedChoices.length && !trimmedChoices.includes(assessment.answer.trim())) {
+  } else   if (trimmedChoices.length && !trimmedChoices.includes(assessment.answer.trim())) {
     issues.push({ path: `${path}.answer`, message: "answer must match a choice" });
+  }
+  const uniqueChoices = new Set(trimmedChoices);
+  if (trimmedChoices.length !== uniqueChoices.size) {
+    issues.push({ path: `${path}.choices`, message: "choices must be unique" });
   }
 };
 

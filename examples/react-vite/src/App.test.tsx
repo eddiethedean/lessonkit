@@ -6,11 +6,11 @@ import App from "./App";
 describe("example App", () => {
   afterEach(() => cleanup());
 
-  it("renders without crashing", () => {
+  it("renders the course title in the shell", () => {
     const spy = vi.spyOn(console, "log").mockImplementation(() => {});
-    render(<App />);
+    const { getByRole } = render(<App />);
+    expect(getByRole("heading", { name: /cybersecurity awareness/i })).toBeDefined();
     spy.mockRestore();
-    expect(true).toBe(true);
   });
 
   it("assignment acknowledgment unlocks lab feedback", () => {

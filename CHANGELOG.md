@@ -6,7 +6,41 @@ All notable changes to the LessonKit monorepo are documented here.
 
 ## Unreleased
 
-_No changes yet._
+## [1.4.0] - 2026-06-06
+
+Framework **1.4.x** — `InteractiveVideo` (H5P Interactive Video), bundled Tier B/C/D blocks, Studio removal, and a production-hardening audit pass. All seven `@lessonkit/*` packages ship at **1.4.0**.
+
+### Added
+
+- **@lessonkit/react**: `Video`, `TimedCue`, `InteractiveVideo`; assessments `Summary`, `ImagePairing`, `ImageSequencing`, `ArithmeticQuiz`, `Essay`; content `Questionnaire`, `MemoryGame`, `InformationWall`, `ParallaxSlideshow`.
+- **@lessonkit/core**: compound allowlists for `InteractiveVideo` / `TimedCue`; telemetry catalog v3 events (`video_cue_reached`, `video_segment_completed`, `memory_card_flipped`, `information_wall_search`, `parallax_slide_viewed`, `questionnaire_submitted`); assessment interaction types for 1.4 blocks; `McqAssessmentProps`, `LmsBridgeMode`; `./testing` subpath export for test reset helpers.
+- **@lessonkit/react**: `assertProductionCourseConfig()`; `shouldEnforceProductionGuard()`; `onXapiTransportError` observability hook; `./blocks` and `./testing` subpath exports; optional `@lessonkit/lxpack` peer dependency.
+- **@lessonkit/xapi**: xAPI mappers for new telemetry events; `FetchHttpError`; fetch transport skips retry on 4xx except 429.
+- **@lessonkit/lxpack**: `LessonkitExportTarget` alias for packaging targets.
+- **CLI init template**: `src/courseConfig.ts` with production transports, observability, `.env.example`, and `lxpack.bridge: "off"`.
+- **Examples**: `examples/interactive-video` golden path; integration SCORM packaging test; Playwright smoke.
+- **CI**: Dependabot for npm and GitHub Actions.
+
+### Changed
+
+- **Block catalog v3**: 38 entries (was 26); `Slide` allowlist includes `Video` and 1.4 blocks.
+- **@lessonkit/react**: `QuizProps` and `KnowledgeCheckProps` now use `McqAssessmentProps` from `@lessonkit/core` (was `McqAssessmentDescriptor` from lxpack).
+- **@lessonkit/lxpack**: `@lxpack/*` dependencies pinned to exact `0.6.2`; LXPack compatibility matrix in [LXPack interoperability](docs/reference/lxpack-upgrades.md); `activityIri` must be HTTPS for xAPI/cmi5 packaging targets.
+- **@lessonkit/cli**: `exports` field now includes TypeScript types; `lessonkit init` rewrites `courseConfig.ts` and `activityIri`.
+- **Dependencies**: `@lessonkit/react` transitively installs `@lessonkit/lxpack` (and `@lxpack/*`) for LMS bridge telemetry at runtime; use `@lessonkit/cli` as a devDependency for packaging only.
+- **Docs**: [MIGRATION-1.3-to-1.4.md](docs/MIGRATION-1.3-to-1.4.md); H5P capability map rows marked ✅ at 1.4.0; `SECURITY.md` lists 1.4.x; README clarifies lxpack bundles `@lxpack/*`; onboarding docs (API subpaths, example READMEs, init template packaging scripts); production checklist documents conditional observability hooks (including required `onXapiTransportError`), `shouldEnforceProductionGuard()`, init template `lxpack.bridge: "off"`, and `.env.example`.
+- Test reset helpers on main package entries are **deprecated**; use `@lessonkit/core/testing` and `@lessonkit/react/testing`.
+
+### Removed
+
+- **Studio**: Visual Studio authoring packages (`packages/studio-*`, `apps/studio-web`, `examples/studio-minimal`) removed from the monorepo. LessonKit is React-first only; historical `studio-v*` git tags remain for archaeology.
+
+### Fixed
+
+- **@lessonkit/core**: `TrackingClient.deliver()` settles non-batch sinks; `scoreAssessment` merges `input.lessonId` with the `lessonId` argument; `deferPluginSetup` honored when replacing plugins in `createLessonkitRuntime`.
+- **@lessonkit/react**: `course_started` delivery dedupe uses reference-equality flight cleanup; filtered telemetry counts as settled; production guard rejects `tracking.enabled` without a sink; xAPI queue reads fresh observability refs; removed redundant production observability warning from provider.
+- **@lessonkit/xapi**: fresh `AbortSignal` per fetch retry; pagehide aborts in-flight direct sends and delivers queued statements including flush head; `skipXapi` race fixed when tracking enables mid-flush.
+- **@lessonkit/lxpack**: SPA dist validation resolves symlinks via `realpath`; injectable assessments validated in staging; duplicate MCQ choice labels rejected; `packageCourse` injectable scope aligned with `validateDescriptorForTarget`; validation issue path uses `tracking.xapi.activityIri`.
 
 ## [1.3.1] - 2026-06-05
 

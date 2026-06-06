@@ -29,7 +29,7 @@ describe("@lessonkit/core", () => {
     vi.unstubAllGlobals();
   });
 
-  it("rethrows sync sink errors when batching is disabled", () => {
+  it("does not throw from track when batching is disabled and sync sink fails", async () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
     const prevEnv = process.env.NODE_ENV;
     process.env.NODE_ENV = "development";
@@ -38,8 +38,9 @@ describe("@lessonkit/core", () => {
       throw new Error("sync failed");
     });
     const client = createTrackingClient({ sink, batch: { enabled: false } });
-    expect(() => client.track(interactionEvent("t"))).toThrow("sync failed");
+    expect(() => client.track(interactionEvent("t"))).not.toThrow();
     expect(warn).toHaveBeenCalled();
+    await expect(client.deliver?.(interactionEvent("t"))).resolves.toBe(false);
 
     process.env.NODE_ENV = prevEnv;
     warn.mockRestore();
@@ -68,8 +69,9 @@ describe("@lessonkit/core", () => {
   it("tracks via sink when batching is disabled", async () => {
     const sink = vi.fn(async () => {});
     const client = createTrackingClient({ sink, batch: { enabled: false } });
-    client.track(interactionEvent("t"));
-    expect(sink).toHaveBeenCalledTimes(1);
+    const event = interactionEvent("t");
+    client.track(event);
+    expect(sink).toHaveBeenCalledWith(event);
   });
 
   it("is a safe no-op when batching enabled but no sinks provided", () => {

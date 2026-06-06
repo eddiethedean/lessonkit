@@ -1,6 +1,6 @@
 {
   "name": "lessonkit",
-  "version": "1.3.1",
+  "version": "1.4.0",
   "private": true,
   "packageManager": "npm@10.9.0",
   "workspaces": [
@@ -14,7 +14,7 @@
   "scripts": {
     "build": "npm run build:packages && npm run build:apps",
     "build:packages": "npm run -w @lessonkit/core build && npm run -w @lessonkit/xapi build && npm run -w @lessonkit/accessibility build && npm run -w @lessonkit/themes build && npm run -w @lessonkit/lxpack build && npm run -w @lessonkit/react build && npm run -w @lessonkit/cli build",
-    "build:apps": "npm run -w lessonkit-example-react-vite build && npm run -w lessonkit-example-lxpack-golden build && npm run -w lessonkit-example-assessments-p0 build && npm run -w lessonkit-example-interactive-book build && npm run -w lessonkit-example-slide-deck build && npm run -w lessonkit-example-framework-11-showcase build && npm run -w lessonkit-example-framework-12-showcase build && npm run -w lessonkit-example-data-privacy build && npm run -w lessonkit-example-customer-service build && npm run -w lessonkit-template-vite-react build && npm run -w lessonkit-e2e-telemetry-harness build",
+    "build:apps": "npm run -w lessonkit-example-react-vite build && npm run -w lessonkit-example-lxpack-golden build && npm run -w lessonkit-example-assessments-p0 build && npm run -w lessonkit-example-interactive-book build && npm run -w lessonkit-example-slide-deck build && npm run -w lessonkit-example-interactive-video build && npm run -w lessonkit-example-framework-11-showcase build && npm run -w lessonkit-example-framework-12-showcase build && npm run -w lessonkit-example-data-privacy build && npm run -w lessonkit-example-customer-service build && npm run -w lessonkit-template-vite-react build && npm run -w lessonkit-e2e-telemetry-harness build",
     "dev": "npm run --workspaces --if-present dev",
     "pretest": "npm run build:packages",
     "test": "npm run --workspaces --if-present test",

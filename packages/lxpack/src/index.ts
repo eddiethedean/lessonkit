@@ -1,3 +1,6 @@
+export type { McqAssessmentProps } from "@lessonkit/core";
+export type { LmsBridgeMode } from "@lessonkit/core";
+
 export type {
   AssessmentDescriptor,
   FillInBlanksAssessmentDescriptor,
@@ -46,7 +49,7 @@ export {
   validateLessonkitProject,
 } from "./packageCourse";
 
-export type { ExportTarget } from "./packageCourse";
+export type { ExportTarget, LessonkitExportTarget } from "./packageCourse";
 
 export {
   remapArtifactPaths,

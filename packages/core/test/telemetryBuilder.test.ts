@@ -2,9 +2,9 @@ import { describe, expect, it, vi, afterEach } from "vitest";
 import type { BuildTelemetryEventInput } from "../src/telemetryBuilder";
 import {
   buildTelemetryEvent,
-  resetTelemetryBuilderWarningsForTests,
   tryBuildTelemetryEvent,
 } from "../src/telemetryBuilder";
+import { resetTelemetryBuilderWarningsForTests } from "../src/testing";
 
 afterEach(() => {
   resetTelemetryBuilderWarningsForTests();

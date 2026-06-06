@@ -46,4 +46,34 @@ describe("buildStagingPackage errors", () => {
       }),
     ).rejects.toThrow("boom");
   });
+
+  it("rejects non-injectable assessments before packaging", async () => {
+    const root = await mkdtemp(join(tmpdir(), "lk-staging-injectable-"));
+    tempDirs.push(root);
+    const dist = join(root, "dist");
+    await mkdir(dist, { recursive: true });
+    await writeFile(join(dist, "index.html"), "<html></html>", "utf-8");
+
+    const result = await buildStagingPackage({
+      descriptor: {
+        ...descriptor,
+        assessments: [
+          {
+            checkId: "fib-1",
+            question: "Fill",
+            kind: "fillInBlanks" as const,
+            template: "Hello *world*",
+            blanks: [{ id: "b1", answer: "world" }],
+          },
+        ],
+      },
+      outDir: join(root, "out"),
+      spaDistDir: dist,
+      target: "scorm12",
+    });
+
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.issues.some((i) => i.path === "assessments[0]")).toBe(true);
+  });
 });

@@ -24,6 +24,6 @@ test.describe("golden cmi5 package", () => {
       timeout: 30_000,
     });
     await completePackagedAssessments(page);
-    await expect(page.getByRole("button", { name: /ppe-acknowledgment/i })).toBeVisible();
+    await expect(page.getByRole("button", { name: /safety-check.*✓/ })).toBeVisible();
   });
 });

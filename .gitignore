@@ -19,6 +19,7 @@ e2e/blob-report/
 packages/react/storybook-static/
 .env
 .env.*
+!.env.example
 # Agent skills installed locally (source: library-skills/)
 .cursor/
 .claude/

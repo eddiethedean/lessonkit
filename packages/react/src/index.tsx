@@ -6,6 +6,7 @@ export {
   Quiz,
   Reflection,
   Scenario,
+  /** @deprecated Import from `@lessonkit/react/testing`. */
   resetQuizWarningsForTests,
 } from "./components";
 
@@ -19,10 +20,22 @@ export {
   Text,
   Heading,
   Image,
+  Video,
   Page,
   InteractiveBook,
   Slide,
   SlideDeck,
+  TimedCue,
+  InteractiveVideo,
+  Summary,
+  ImagePairing,
+  ImageSequencing,
+  ArithmeticQuiz,
+  Essay,
+  Questionnaire,
+  MemoryGame,
+  InformationWall,
+  ParallaxSlideshow,
   Accordion,
   DialogCards,
   Flashcards,
@@ -72,6 +85,25 @@ export type {
   FindHotspotProps,
   HotspotTarget,
   FindMultipleHotspotsProps,
+  VideoProps,
+  TimedCueProps,
+  InteractiveVideoProps,
+  SummaryProps,
+  ImagePairingProps,
+  ImagePair,
+  ImageSequencingProps,
+  SequencingImage,
+  ArithmeticQuizProps,
+  ArithmeticProblem,
+  EssayProps,
+  QuestionnaireProps,
+  QuestionnaireField,
+  MemoryGameProps,
+  MemoryPair,
+  InformationWallProps,
+  InformationPanel,
+  ParallaxSlideshowProps,
+  ParallaxSlide,
 } from "./blocks";
 
 export type {
@@ -89,6 +121,7 @@ export {
   useTracking,
 } from "./hooks";
 
+/** @deprecated Import from `@lessonkit/react/testing`. */
 export { resetAssessmentWarningsForTests } from "./assessment/AssessmentLessonGuard";
 
 export type {
@@ -98,6 +131,9 @@ export type {
   LessonkitRuntime,
 } from "./context";
 export { LessonkitProvider } from "./context";
+export { assertProductionCourseConfig, shouldEnforceProductionGuard } from "./runtime/productionGuard";
+
+export type { LmsBridgeMode, McqAssessmentProps } from "@lessonkit/core";
 
 export type {
   AssessmentAnsweredData,

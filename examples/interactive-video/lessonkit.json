@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "name": "interactive-video",
+  "course": {
+    "courseId": "interactive-video-demo",
+    "title": "Interactive Video (1.4.0)",
+    "layout": "single-spa",
+    "spaLessonId": "video-lesson",
+    "lessons": [{ "id": "video-lesson", "title": "Safety briefing" }],
+    "assessments": [
+      {
+        "kind": "trueFalse",
+        "checkId": "ppe-video-tf",
+        "question": "PPE is required in the warehouse.",
+        "answer": true,
+        "passingScore": 1
+      }
+    ],
+    "theme": { "preset": "default" },
+    "tracking": { "completion": { "threshold": 1 } }
+  },
+  "paths": {
+    "spaDistDir": "dist",
+    "lxpackOutDir": ".lxpack/course",
+    "outputBaseDir": ".lxpack/out"
+  }
+}

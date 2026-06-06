@@ -32,8 +32,15 @@ describe("emitTelemetry", () => {
     });
     emitTelemetry(tracking, xapi, event);
 
-    expect(sink).toHaveBeenCalled();
-    expect(send).toHaveBeenCalled();
+    expect(sink).toHaveBeenCalledWith(
+      expect.objectContaining({ name: "course_started", courseId: "course-1", sessionId: "s1" }),
+    );
+    expect(send).toHaveBeenCalledWith(
+      expect.objectContaining({
+        verb: expect.stringContaining("initialized"),
+        object: expect.objectContaining({ id: expect.stringContaining("course-1") }),
+      }),
+    );
   });
 
   it("buildTelemetryEvent throws when lesson lifecycle events lack lessonId", () => {

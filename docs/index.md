@@ -3,7 +3,7 @@
 ```{raw} html
 <div class="lk-hero">
   <div class="lk-hero-badges">
-    <span class="lk-badge lk-badge--accent">v1.3.1</span>
+    <span class="lk-badge lk-badge--accent">v1.4.0</span>
     <span class="lk-badge">React-first</span>
     <span class="lk-badge">SCORM · xAPI · cmi5</span>
   </div>
@@ -148,4 +148,5 @@ MIGRATION-0.x-to-1.0
 MIGRATION-1.0-to-1.1
 MIGRATION-1.1-to-1.2
 MIGRATION-1.2-to-1.3
+MIGRATION-1.3-to-1.4
 ```

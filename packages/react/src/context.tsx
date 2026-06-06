@@ -11,7 +11,7 @@ import type {
   TrackingClient,
 } from "@lessonkit/core";
 import type { XAPIClient, XAPITransport } from "@lessonkit/xapi";
-import type { LxpackBridgeMode } from "@lessonkit/lxpack/bridge";
+import type { LmsBridgeMode } from "@lessonkit/core";
 import type { ProgressState } from "./runtime/progress";
 import type { LessonkitObservabilityConfig } from "./runtime/observability";
 import { useLessonkitProviderRuntime } from "./provider/useLessonkitProviderRuntime";
@@ -44,11 +44,13 @@ export type LessonkitConfig = {
     transport?: XAPITransport;
     /** Keepalive transport for pagehide (e.g. from createFetchTransport). */
     exitTransport?: import("@lessonkit/xapi").XAPIExitTransport;
+    /** Abort in-flight transport by statement id (e.g. from createFetchTransport). */
+    abortInFlight?: (statementId: string) => void;
     client?: XAPIClient;
   };
   lxpack?: {
     /** Forward completion events to `window.parent.lxpackBridge.v1` when embedded (default `auto`). */
-    bridge?: LxpackBridgeMode;
+    bridge?: LmsBridgeMode;
   };
   /** Framework plugins (analytics, LMS, assessment, interaction, AI). */
   plugins?: LessonkitPlugin[];

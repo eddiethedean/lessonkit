@@ -1,20 +1,8 @@
 import React from "react";
 import { Course, Lesson, Quiz, Scenario, ThemeProvider } from "@lessonkit/react";
-import type { TelemetryEvent } from "@lessonkit/core";
-import type { XAPIStatement } from "@lessonkit/xapi";
+import { createCourseConfig } from "./courseConfig";
 
-const courseConfig = {
-  tracking: {
-    sink: (event: TelemetryEvent) => {
-      console.log("[telemetry]", event);
-    },
-  },
-  xapi: {
-    transport: (statement: XAPIStatement) => {
-      console.log("[xapi]", statement);
-    },
-  },
-} as const;
+const courseConfig = createCourseConfig();
 
 export default function App() {
   return (

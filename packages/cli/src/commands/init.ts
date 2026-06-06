@@ -86,7 +86,17 @@ async function applyTemplateSubstitutions(projectDir: string, projectName: strin
   const course = lessonkit.course as Record<string, unknown>;
   course.courseId = slug;
   course.title = projectName;
+  const tracking = (lessonkit.tracking ?? {}) as Record<string, unknown>;
+  const xapi = (tracking.xapi ?? {}) as Record<string, unknown>;
+  xapi.activityIri = `https://example.com/courses/${slug}`;
+  tracking.xapi = xapi;
+  lessonkit.tracking = tracking;
   await writeFile(lessonkitPath, `${JSON.stringify(lessonkit, null, 2)}\n`, "utf8");
+
+  const courseConfigPath = join(projectDir, "src", "courseConfig.ts");
+  let courseConfigSource = await readFile(courseConfigPath, "utf8");
+  courseConfigSource = courseConfigSource.replace(/courseId: "my-course"/g, `courseId: "${slug}"`);
+  await writeFile(courseConfigPath, courseConfigSource, "utf8");
 
   const appPath = join(projectDir, "src", "App.tsx");
   let appSource = await readFile(appPath, "utf8");

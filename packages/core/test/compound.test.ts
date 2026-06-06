@@ -149,6 +149,18 @@ describe("compound allowlists", () => {
   it("excludes ProgressTracker from Slide", () => {
     expect(isChildTypeAllowed("Slide", "ProgressTracker")).toBe(false);
   });
+
+  it("InteractiveVideo only allows TimedCue", () => {
+    expect(getAllowedChildTypes("InteractiveVideo")).toEqual(["TimedCue"]);
+  });
+
+  it("allows Video under Slide", () => {
+    expect(isChildTypeAllowed("Slide", "Video")).toBe(true);
+  });
+
+  it("allows Summary under TimedCue", () => {
+    expect(isChildTypeAllowed("TimedCue", "Summary")).toBe(true);
+  });
 });
 
 describe("telemetry catalog v3", () => {
@@ -156,6 +168,8 @@ describe("telemetry catalog v3", () => {
     const names = buildTelemetryCatalogV3().map((e) => e.name);
     expect(names).toContain("book_page_viewed");
     expect(names).toContain("slide_viewed");
+    expect(names).toContain("video_cue_reached");
+    expect(names).toContain("video_segment_completed");
   });
 
   it("builds book_page_viewed events", () => {
@@ -185,5 +199,64 @@ describe("telemetry catalog v3", () => {
       expect(event.data.slideIndex).toBe(1);
       expect(event.data.slideTitle).toBe("Overview");
     }
+  });
+
+  it("builds 1.4 video and content interaction events", () => {
+    const cue = buildTelemetryEvent({
+      name: "video_cue_reached",
+      courseId: "c1",
+      lessonId: "l1",
+      sessionId: "s1",
+      data: { blockId: "iv-1", cueIndex: 0, atSeconds: 5, cueLabel: "Check" },
+    });
+    expect(cue.name).toBe("video_cue_reached");
+    if (cue.name === "video_cue_reached") {
+      expect(cue.data.cueLabel).toBe("Check");
+    }
+
+    const segment = buildTelemetryEvent({
+      name: "video_segment_completed",
+      courseId: "c1",
+      lessonId: "l1",
+      sessionId: "s1",
+      data: { blockId: "iv-1", segmentIndex: 0, atSeconds: 5, segmentLabel: "Check" },
+    });
+    expect(segment.name).toBe("video_segment_completed");
+
+    const memory = buildTelemetryEvent({
+      name: "memory_card_flipped",
+      courseId: "c1",
+      lessonId: "l1",
+      sessionId: "s1",
+      data: { blockId: "mem-1", cardIndex: 2, face: "back" },
+    });
+    expect(memory.name).toBe("memory_card_flipped");
+
+    const search = buildTelemetryEvent({
+      name: "information_wall_search",
+      courseId: "c1",
+      lessonId: "l1",
+      sessionId: "s1",
+      data: { blockId: "wall-1", query: "ppe", resultCount: 1 },
+    });
+    expect(search.name).toBe("information_wall_search");
+
+    const slide = buildTelemetryEvent({
+      name: "parallax_slide_viewed",
+      courseId: "c1",
+      lessonId: "l1",
+      sessionId: "s1",
+      data: { blockId: "para-1", slideIndex: 1 },
+    });
+    expect(slide.name).toBe("parallax_slide_viewed");
+
+    const survey = buildTelemetryEvent({
+      name: "questionnaire_submitted",
+      courseId: "c1",
+      lessonId: "l1",
+      sessionId: "s1",
+      data: { blockId: "survey-1", fieldCount: 3 },
+    });
+    expect(survey.name).toBe("questionnaire_submitted");
   });
 });

@@ -36,17 +36,25 @@ export type CourseStartedEmitOpts = {
 export type CourseStartedEmitResult = "emitted" | "filtered" | "failed";
 
 type StoragePort = ReturnType<typeof createSessionStoragePort>;
+type TrackingSource = TrackingClient | (() => TrackingClient);
+
+function resolveTrackingClient(source: TrackingSource): TrackingClient {
+  return typeof source === "function" ? source() : source;
+}
 
 const courseStartedTrackingFlights = new Map<string, Promise<boolean>>();
+const courseStartedEmitFlights = new Map<string, Promise<CourseStartedEmitResult>>();
 
 /** @internal Reset in-flight course_started tracking guard between tests. */
 export function resetCourseStartedTrackingFlightForTests(): void {
   courseStartedTrackingFlights.clear();
+  courseStartedEmitFlights.clear();
 }
 
 /** Clear in-flight tracking emits (e.g. when the tracking client is recreated). */
 export function resetCourseStartedTrackingFlights(): void {
   courseStartedTrackingFlights.clear();
+  courseStartedEmitFlights.clear();
 }
 
 export function isTrackingActive(tracking?: { enabled?: boolean }): boolean {
@@ -54,7 +62,18 @@ export function isTrackingActive(tracking?: { enabled?: boolean }): boolean {
 }
 
 export function isCourseStartedSinkSettled(result: CourseStartedEmitResult): boolean {
-  return result === "emitted";
+  return result === "emitted" || result === "filtered";
+}
+
+async function deliverToTracking(client: TrackingClient, event: TelemetryEvent): Promise<boolean> {
+  if (client.deliver) {
+    return client.deliver(event);
+  }
+  client.track(event);
+  const flushed = await client.flush?.();
+  if (flushed === false) return false;
+  if (flushed === true) return true;
+  return false;
 }
 
 export function buildCourseStartedEvent(opts: CourseStartedEmitOpts): TelemetryEvent | null {
@@ -75,7 +94,7 @@ export function buildCourseStartedEvent(opts: CourseStartedEmitOpts): TelemetryE
 }
 
 export async function emitCourseStartedToTracking(
-  tracking: TrackingClient,
+  tracking: TrackingSource,
   storage: StoragePort,
   sessionId: string,
   courseId: CourseId,
@@ -86,10 +105,10 @@ export async function emitCourseStartedToTracking(
   if (hasCourseStartedEmittedToTracking(storage, sessionId, courseId)) {
     return true;
   }
+
   const existing = courseStartedTrackingFlights.get(flightKey);
   if (existing) {
-    const settled = await existing;
-    if (settled) return true;
+    return existing;
   }
 
   let resolveFlight!: (value: boolean) => void;
@@ -104,9 +123,13 @@ export async function emitCourseStartedToTracking(
         resolveFlight(false);
         return;
       }
-      tracking.track(event);
-      const delivered = await tracking.flush?.();
-      if (delivered === false) {
+      const client = resolveTrackingClient(tracking);
+      const delivered = await deliverToTracking(client, event);
+      if (shouldCommit && !shouldCommit()) {
+        resolveFlight(false);
+        return;
+      }
+      if (!delivered) {
         resolveFlight(false);
         return;
       }
@@ -118,7 +141,9 @@ export async function emitCourseStartedToTracking(
     } catch {
       resolveFlight(false);
     } finally {
-      courseStartedTrackingFlights.delete(flightKey);
+      if (courseStartedTrackingFlights.get(flightKey) === flight) {
+        courseStartedTrackingFlights.delete(flightKey);
+      }
     }
   })();
 
@@ -160,7 +185,7 @@ export async function emitCourseStartedPipelineOnly(
 
 export async function emitCourseStarted(
   opts: CourseStartedEmitOpts & {
-    tracking: TrackingClient;
+    tracking: TrackingSource;
     xapi: import("@lessonkit/xapi").XAPIClient | null;
     storage: StoragePort;
   },
@@ -189,7 +214,7 @@ export async function emitCourseStarted(
 
 export async function emitCourseStartedToTrackingOnly(
   opts: CourseStartedEmitOpts & {
-    tracking: TrackingClient;
+    tracking: TrackingSource;
     storage: StoragePort;
   },
 ): Promise<CourseStartedEmitResult> {
@@ -227,7 +252,63 @@ export async function emitCourseStartedToTrackingOnly(
 
 export async function emitPendingCourseStarted(
   opts: CourseStartedEmitOpts & {
-    tracking: TrackingClient;
+    tracking: TrackingSource;
+    xapi: import("@lessonkit/xapi").XAPIClient | null;
+    storage: StoragePort;
+    skipXapi?: boolean;
+    onXapiStatementSent?: () => void;
+  },
+): Promise<CourseStartedEmitResult> {
+  const flightKey = `${opts.sessionId}:${opts.courseId}`;
+
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    const existing = courseStartedEmitFlights.get(flightKey);
+    const flight = existing ?? startPendingCourseStartedFlight(opts, flightKey);
+    const result = await flight;
+    if (result !== "failed") return result;
+    const sessionStarted = hasCourseStarted(opts.storage, opts.sessionId, opts.courseId);
+    const trackingEmitted = hasCourseStartedEmittedToTracking(
+      opts.storage,
+      opts.sessionId,
+      opts.courseId,
+    );
+    const pipelineDelivered = hasCourseStartedPipelineDelivered(
+      opts.storage,
+      opts.sessionId,
+      opts.courseId,
+    );
+    if (sessionStarted && trackingEmitted && pipelineDelivered) {
+      return "emitted";
+    }
+    if (opts.shouldCommit && !opts.shouldCommit()) return "failed";
+  }
+
+  return "failed";
+}
+
+function startPendingCourseStartedFlight(
+  opts: CourseStartedEmitOpts & {
+    tracking: TrackingSource;
+    xapi: import("@lessonkit/xapi").XAPIClient | null;
+    storage: StoragePort;
+    skipXapi?: boolean;
+    onXapiStatementSent?: () => void;
+  },
+  flightKey: string,
+): Promise<CourseStartedEmitResult> {
+  const flight = emitPendingCourseStartedInner(opts);
+  courseStartedEmitFlights.set(flightKey, flight);
+  void flight.finally(() => {
+    if (courseStartedEmitFlights.get(flightKey) === flight) {
+      courseStartedEmitFlights.delete(flightKey);
+    }
+  });
+  return flight;
+}
+
+async function emitPendingCourseStartedInner(
+  opts: CourseStartedEmitOpts & {
+    tracking: TrackingSource;
     xapi: import("@lessonkit/xapi").XAPIClient | null;
     storage: StoragePort;
     skipXapi?: boolean;
@@ -240,6 +321,14 @@ export async function emitPendingCourseStarted(
     opts.courseId,
   );
   const sessionStarted = hasCourseStarted(opts.storage, opts.sessionId, opts.courseId);
+  const pipelineDelivered = hasCourseStartedPipelineDelivered(
+    opts.storage,
+    opts.sessionId,
+    opts.courseId,
+  );
+  if (sessionStarted && trackingEmitted && pipelineDelivered) {
+    return "emitted";
+  }
 
   if (sessionStarted && !trackingEmitted) {
     return emitCourseStartedToTrackingOnly(opts);
@@ -252,14 +341,6 @@ export async function emitPendingCourseStarted(
   if (!trackingEmitted && !sessionStarted) {
     return emitCourseStarted(opts);
   }
-  const pipelineDelivered = hasCourseStartedPipelineDelivered(
-    opts.storage,
-    opts.sessionId,
-    opts.courseId,
-  );
-  if (sessionStarted && trackingEmitted && pipelineDelivered) {
-    return "emitted";
-  }
   if (sessionStarted && trackingEmitted && !pipelineDelivered) {
     const event = buildCourseStartedEvent(opts);
     if (event === null) return "filtered";
@@ -270,7 +351,7 @@ export async function emitPendingCourseStarted(
       onXapiStatementSent: opts.onXapiStatementSent,
     });
   }
-  return "emitted";
+  return "failed";
 }
 
 export function assertTrackingSinkConfig(tracking?: {

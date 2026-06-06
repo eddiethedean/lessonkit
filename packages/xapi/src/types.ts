@@ -47,6 +47,8 @@ export type XAPIQueue = {
   flush: (transport: XAPITransport) => Promise<void>;
   flushOnExit: (exitTransport: XAPIExitTransport) => void;
   size: () => number;
+  /** Statement id currently being delivered via flush, if any. */
+  getHeadInFlightId?: () => string | undefined;
 };
 
 export type XAPIExitTransport = (statement: XAPIStatement) => void;

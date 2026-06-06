@@ -13,7 +13,7 @@ Developer tooling, not a timeline authoring tool: **React + telemetry + packagin
 
 | | |
 | --- | --- |
-| **Release** | [1.3.1](https://github.com/eddiethedean/lessonkit/blob/main/CHANGELOG.md#131---2026-06-05) |
+| **Release** | [1.4.0](https://github.com/eddiethedean/lessonkit/blob/main/CHANGELOG.md#140---2026-06-06) |
 | **npm** | [`@lessonkit/*`](https://www.npmjs.com/org/lessonkit) |
 | **Docs** | [lessonkit.readthedocs.io](https://lessonkit.readthedocs.io/en/latest/) |
 | **Node.js** | 18+ (dev, build, LMS packaging); **20+** for Playwright e2e when [contributing](CONTRIBUTING.md) |
@@ -41,7 +41,7 @@ Developer tooling, not a timeline authoring tool: **React + telemetry + packagin
 - [Quick start](#quick-start)
 - [How it works](#how-it-works)
 - [Example](#example)
-- [Upgrading to 1.2](#upgrading-to-12)
+- [Upgrading from an older version](#upgrading-from-an-older-version)
 - [Packages](#packages)
 - [Documentation](#documentation)
 - [Development](#development)
@@ -58,17 +58,15 @@ Developer tooling, not a timeline authoring tool: **React + telemetry + packagin
 | **Accessibility** | Semantic structure, focus utilities, reduced-motion helpers, documented WCAG targets |
 | **Delivery teams** | Modern SPA via Vite plus LMS artifacts through [`@lessonkit/lxpack`](https://lessonkit.readthedocs.io/en/latest/reference/packaging.html) |
 
-Migrating from 0.9.x? See [MIGRATION-0.x-to-1.0.md](https://github.com/eddiethedean/lessonkit/blob/main/docs/MIGRATION-0.x-to-1.0.md). From 1.0.x? See [MIGRATION-1.0-to-1.1.md](https://github.com/eddiethedean/lessonkit/blob/main/docs/MIGRATION-1.0-to-1.1.md). From 1.1.x? See [MIGRATION-1.1-to-1.2.md](https://github.com/eddiethedean/lessonkit/blob/main/docs/MIGRATION-1.1-to-1.2.md). From 1.2.x? See [MIGRATION-1.2-to-1.3.md](https://github.com/eddiethedean/lessonkit/blob/main/docs/MIGRATION-1.2-to-1.3.md).
-
 ---
 
 ## Features
 
 - **Structure** — `Course`, `Lesson`, `Scenario`, `Quiz`, `KnowledgeCheck`, `Reflection`, `ProgressTracker`, `LessonkitProvider`; hooks for progress, tracking, and completion
-- **Compound & resume** — `Page`, `InteractiveBook`, `Slide`, `SlideDeck`, `AssessmentSequence` (`CompoundHandle`, session resume)
-- **Content** — `Text`, `Heading`, `Image`
-- **Assessments (P0)** — `TrueFalse`, `MarkTheWords`, `FillInTheBlanks`, `DragTheWords`, `DragAndDrop`, `FindHotspot`, `FindMultipleHotspots`
-- **Presentation (Tier C/D)** — `Accordion`, `DialogCards`, `Flashcards`, `ImageHotspots`, `ImageSlider`
+- **Compound & resume** — `Page`, `InteractiveBook`, `Slide`, `SlideDeck`, `InteractiveVideo`, `TimedCue`, `AssessmentSequence` (`CompoundHandle`, session resume)
+- **Content** — `Text`, `Heading`, `Image`, `Video`
+- **Assessments (P0 + 1.4)** — `TrueFalse`, `MarkTheWords`, `FillInTheBlanks`, `DragTheWords`, `DragAndDrop`, `FindHotspot`, `FindMultipleHotspots`, `Summary`, `ImagePairing`, `ImageSequencing`, `ArithmeticQuiz`, `Essay`
+- **Presentation (Tier C/D)** — `Accordion`, `DialogCards`, `Flashcards`, `ImageHotspots`, `ImageSlider`, `MemoryGame`, `InformationWall`, `ParallaxSlideshow`, `Questionnaire`
 - **Identity v1** — Required `courseId`, `lessonId`, and `checkId`; stable URNs for telemetry and xAPI
 - **Telemetry** — Session-aware events, optional batching, pluggable pipeline sinks
 - **xAPI** — Statement generation, in-memory queueing, and transport hooks via `@lessonkit/xapi`
@@ -89,7 +87,7 @@ Migrating from 0.9.x? See [MIGRATION-0.x-to-1.0.md](https://github.com/eddiethed
 | Custom LRS transport or statement helpers | `@lessonkit/xapi` |
 | Custom theme presets | `@lessonkit/themes` |
 | Focus utilities in custom UI | `@lessonkit/accessibility` |
-| Packaging without the CLI | `@lessonkit/lxpack` (+ peer `@lxpack/api`) |
+| Packaging without the CLI | `@lessonkit/lxpack` (bundles `@lxpack/*` as direct dependencies) |
 
 See the [glossary](https://lessonkit.readthedocs.io/en/latest/reference/glossary.html) for terms like LXPack and `LessonkitProvider`.
 
@@ -213,24 +211,22 @@ Component gallery: [Storybook on GitHub Pages](https://eddiethedean.github.io/le
 
 ---
 
-## Upgrading to 1.3
+## Upgrading from an older version
 
-> **New project?** Skip this section.
+<details>
+<summary>Migration guides (skip if you used <code>npx @lessonkit/cli init</code> recently)</summary>
 
-If you are on **1.2.x**, see [MIGRATION-1.2-to-1.3.md](https://github.com/eddiethedean/lessonkit/blob/main/docs/MIGRATION-1.2-to-1.3.md) for the additive `SlideDeck` API and production transport/observability helpers.
+| From | Guide |
+| --- | --- |
+| 1.3.x | [MIGRATION-1.3-to-1.4.md](https://github.com/eddiethedean/lessonkit/blob/main/docs/MIGRATION-1.3-to-1.4.md) — `InteractiveVideo`, `Video`, Tier B/C/D blocks |
+| 1.2.x | [MIGRATION-1.2-to-1.3.md](https://github.com/eddiethedean/lessonkit/blob/main/docs/MIGRATION-1.2-to-1.3.md) — `SlideDeck`, production transport helpers |
+| 1.1.x | [MIGRATION-1.1-to-1.2.md](https://github.com/eddiethedean/lessonkit/blob/main/docs/MIGRATION-1.1-to-1.2.md) — catalog v3 default, compound persistence, `AssessmentSequence` scores |
+| 1.0.x | [MIGRATION-1.0-to-1.1.md](https://github.com/eddiethedean/lessonkit/blob/main/docs/MIGRATION-1.0-to-1.1.md) |
+| 0.9.x | [MIGRATION-0.x-to-1.0.md](https://github.com/eddiethedean/lessonkit/blob/main/docs/MIGRATION-0.x-to-1.0.md) |
 
-## Upgrading to 1.2
+**1.1.x → 1.2.x highlights:** `buildBlockCatalog()` defaults to catalog v3; `persistCompoundState` defaults to `true`; set a unique `blockId` on compound containers.
 
-> **New project?** Skip this section.
-
-If you are on **1.1.x**, review these default changes before upgrading:
-
-- `buildBlockCatalog()` defaults to **catalog v3** (pass `{ version: 2 }` to keep the 1.1.x shape).
-- `persistCompoundState` defaults to **`true`**; set a unique `blockId` on each compound container.
-- `AssessmentSequence` implements `CompoundHandle` (parent-level scores are possible when using a ref).
-- `runtimeVersion: "v1"` logs a development deprecation warning; **v2** remains the default.
-
-Full guide: [MIGRATION-1.1-to-1.2.md](https://github.com/eddiethedean/lessonkit/blob/main/docs/MIGRATION-1.1-to-1.2.md)
+</details>
 
 ---
 

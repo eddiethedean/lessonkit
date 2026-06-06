@@ -1,5 +1,5 @@
 import type { ExportTarget } from "@lxpack/api";
-import { assessmentDescriptorToLxpack } from "../assessments";
+import { validateInjectableAssessments } from "./validateInjectableAssessments";
 import type { LessonkitCourseDescriptor } from "../types";
 import type { ValidationIssue } from "../validationIssue";
 
@@ -21,21 +21,22 @@ export function validateDescriptorForExportTarget(
     const activityIri = descriptor.tracking?.xapi?.activityIri?.trim();
     if (!activityIri) {
       issues.push({
-        path: "course.tracking.xapi.activityIri",
+        path: "tracking.xapi.activityIri",
         message: "tracking.xapi.activityIri is required for xapi and cmi5 export targets",
+      });
+    } else if (!/^https:\/\/.+/i.test(activityIri)) {
+      issues.push({
+        path: "tracking.xapi.activityIri",
+        message: "tracking.xapi.activityIri must be an HTTPS URL for xapi and cmi5 export targets",
       });
     }
   }
 
   if (LMS_SHELL_TARGETS.has(target)) {
-    (descriptor.assessments ?? []).forEach((assessment, index) => {
-      if (assessmentDescriptorToLxpack(assessment) === null) {
-        issues.push({
-          path: `assessments[${index}]`,
-          message: `assessment kind "${assessment.kind ?? "mcq"}" (checkId "${assessment.checkId}") is not injected into LMS shell quizzes for target "${target}"`,
-        });
-      }
-    });
+    issues.push(...validateInjectableAssessments(descriptor).map((issue) => ({
+      ...issue,
+      message: `${issue.message} for target "${target}"`,
+    })));
   }
 
   return issues;

@@ -1,5 +1,5 @@
 import type { TelemetryBatchSink, TelemetryEvent, TelemetrySink, TrackingClient } from "./telemetryTypes";
-import { invokeTrackingSink } from "./internal/sinkInvoke";
+import { invokeTrackingSink, invokeTrackingSinkWithResult } from "./internal/sinkInvoke";
 import { isDevEnvironment } from "./internal/env";
 
 export function createTrackingClient(opts?: {
@@ -33,7 +33,18 @@ export function createTrackingClient(opts?: {
     return {
       track: (event) => {
         if (disposed) return;
-        if (sink) invokeTrackingSink(sink, event);
+        if (sink) {
+          try {
+            invokeTrackingSink(sink, event);
+          } catch {
+            // invokeTrackingSink logs in dev; track must not throw
+          }
+        }
+      },
+      deliver: async (event) => {
+        if (disposed) return false;
+        if (!sink) return true;
+        return invokeTrackingSinkWithResult(sink, event);
       },
       dispose: () => {
         disposed = true;
@@ -126,21 +137,27 @@ export function createTrackingClient(opts?: {
   intervalId = flushIntervalMs > 0 ? globalThis.setInterval(() => void flush(), flushIntervalMs) : undefined;
   (intervalId as unknown as { unref?: () => void } | undefined)?.unref?.();
 
-  return {
-    track: (event) => {
-      if (disposed || disposing) return;
-      if (buffer.length >= maxBufferSize) {
-        opts?.onBufferDrop?.();
-        if (!warnedBufferCap && isDevEnvironment()) {
-          warnedBufferCap = true;
-          console.warn(
-            `[lessonkit] telemetry batch buffer capped at ${maxBufferSize} events; new events are dropped until the buffer drains.`,
-          );
-        }
-        return;
+  const track = (event: TelemetryEvent) => {
+    if (disposed || disposing) return;
+    if (buffer.length >= maxBufferSize) {
+      opts?.onBufferDrop?.();
+      if (!warnedBufferCap && isDevEnvironment()) {
+        warnedBufferCap = true;
+        console.warn(
+          `[lessonkit] telemetry batch buffer capped at ${maxBufferSize} events; new events are dropped until the buffer drains.`,
+        );
       }
-      buffer.push(event);
-      if (buffer.length >= maxBatchSize) void flush();
+      return;
+    }
+    buffer.push(event);
+    if (buffer.length >= maxBatchSize) void flush();
+  };
+
+  return {
+    track,
+    deliver: async (event) => {
+      track(event);
+      return flush();
     },
     flush,
     flushOnExit: opts?.exitBatchSink

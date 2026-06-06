@@ -14,8 +14,30 @@ LessonKit publishes **TypeScript declarations** on npm (`dist/*.d.ts`) and docum
 | Package | Types | Narrative docs |
 | --- | --- | --- |
 | `@lessonkit/react` | `import type { … } from "@lessonkit/react"` | [Components and hooks](../guides/react-developers/components-and-hooks.md) |
+| `@lessonkit/react/blocks` | Block components only (tree-shake friendly) | [Block catalog](block-catalog.md) |
+| `@lessonkit/react/testing` | Test reset helpers (`resetQuizWarningsForTests`, …) | [Contributing](../guides/react-developers/contributing-to-the-monorepo.md) |
 | `@lessonkit/core` | `import type { … } from "@lessonkit/core"` | [Core reference](core.md) |
+| `@lessonkit/core/testing` | Headless test reset helpers | [Contributing](../guides/react-developers/contributing-to-the-monorepo.md) |
 | `@lessonkit/xapi` | `import type { … } from "@lessonkit/xapi"` | [xAPI reference](xapi.md) |
+
+### Shared assessment and bridge types
+
+Import from `@lessonkit/core` (re-exported by `@lessonkit/react` where relevant):
+
+| Type | Purpose |
+| --- | --- |
+| `McqAssessmentProps` | Props shape for `Quiz`, `KnowledgeCheck`, and MCQ-style assessments (replaces deprecated `McqAssessmentDescriptor` from lxpack) |
+| `LmsBridgeMode` | `"auto"` \| `"off"` — controls forwarding telemetry to the LXPack parent iframe bridge |
+
+### Production guardrails
+
+| API | Package | Purpose |
+| --- | --- | --- |
+| `assertProductionCourseConfig(config)` | `@lessonkit/react` | Throws in production when console telemetry/xAPI sinks, tracking enabled without delivery, or required observability hooks are missing |
+| `shouldEnforceProductionGuard()` | `@lessonkit/react` | Returns false in test mode (`import.meta.env.MODE === "test"`) even when `NODE_ENV=production` |
+| `onXapiTransportError` | `config.observability` | Required when xAPI delivery is configured; called when transport fails after retries (statement re-queued) |
+
+See the [production checklist](../guides/react-developers/production-checklist.md) for the full observability hook matrix (1–6 hooks depending on tracking/xAPI configuration).
 
 ## Machine-readable contracts
 
@@ -30,4 +52,4 @@ See [Block catalog](block-catalog.md) and [Glossary](glossary.md) for version na
 
 ## IDE tips
 
-In a scaffolded course, run `npm run dev` and use **Go to Definition** on imports from `@lessonkit/react`. For headless APIs (`createLessonkitRuntime`, plugins), import from `@lessonkit/core` directly.
+In a scaffolded course, run `npm run dev` and use **Go to Definition** on imports from `@lessonkit/react`. For headless APIs (`createLessonkitRuntime`, plugins), import from `@lessonkit/core` directly. In tests, prefer `@lessonkit/react/testing` and `@lessonkit/core/testing` over deprecated main-entry reset helpers.

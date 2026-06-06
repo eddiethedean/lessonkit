@@ -1,4 +1,4 @@
-import type { CheckId, CourseId, LessonId } from "@lessonkit/core";
+import type { CheckId, CourseId, LessonId, McqAssessmentProps } from "@lessonkit/core";
 import type { LessonkitThemeV1, ThemePresetName } from "@lessonkit/themes";
 
 export type SpaLayout = "single-spa" | "per-lesson-spa";
@@ -10,14 +10,8 @@ export type LessonDescriptor = {
   spaPath?: string;
 };
 
-export type McqAssessmentDescriptor = {
-  kind?: "mcq";
-  checkId: CheckId;
-  question: string;
-  choices: string[];
-  answer: string;
-  passingScore?: number;
-};
+/** @deprecated Use `McqAssessmentProps` from `@lessonkit/core`. */
+export type McqAssessmentDescriptor = McqAssessmentProps;
 
 export type TrueFalseAssessmentDescriptor = {
   kind: "trueFalse";

@@ -18,15 +18,23 @@ export type InMemoryXAPIQueueOptions = {
   onDepth?: (size: number) => void;
   /** Called when an oldest statement is dropped because the queue is at maxSize. */
   onCap?: () => void;
+  /** Failures at queue head before skipping (default 10). */
+  maxHeadFailures?: number;
+  /** Called when the queue head is skipped after repeated transport failures. */
+  onHeadSkipped?: (statement: XAPIStatement, err: unknown) => void;
 };
 
 const DEFAULT_MAX_QUEUE_SIZE = 1000;
+const DEFAULT_MAX_HEAD_FAILURES = 10;
 
 export function createInMemoryXAPIQueue(opts?: InMemoryXAPIQueueOptions): XAPIQueue {
   const maxSize = opts?.maxSize ?? DEFAULT_MAX_QUEUE_SIZE;
+  const maxHeadFailures = opts?.maxHeadFailures ?? DEFAULT_MAX_HEAD_FAILURES;
   const buffer: XAPIStatement[] = [];
   let flushInFlight: Promise<void> | null = null;
   let headInFlight = false;
+  let headInFlightId: string | undefined;
+  let headFailureCount = 0;
 
   const notifyDepth = () => {
     opts?.onDepth?.(buffer.length);
@@ -44,15 +52,25 @@ export function createInMemoryXAPIQueue(opts?: InMemoryXAPIQueueOptions): XAPIQu
     while (buffer.length) {
       const statement = buffer[0]!;
       headInFlight = true;
+      headInFlightId = statement.id;
       try {
         await transport(statement);
         buffer.shift();
+        headFailureCount = 0;
         notifyDepth();
-      } catch {
-        // Stop flushing on first error; keep remainder queued.
-        return;
+      } catch (err) {
+        headFailureCount += 1;
+        if (headFailureCount >= maxHeadFailures) {
+          buffer.shift();
+          headFailureCount = 0;
+          notifyDepth();
+          opts?.onHeadSkipped?.(statement, err);
+          continue;
+        }
+        throw err;
       } finally {
         headInFlight = false;
+        headInFlightId = undefined;
       }
     }
   };
@@ -62,12 +80,10 @@ export function createInMemoryXAPIQueue(opts?: InMemoryXAPIQueueOptions): XAPIQu
       const normalized = withStatementId(statement);
       if (buffer.some((s) => s.id === normalized.id)) return;
       if (buffer.length >= maxSize) {
-        if (headInFlight && buffer.length <= 1) {
-          opts?.onCap?.();
-          return;
-        }
         if (headInFlight) {
-          buffer.splice(1, 1);
+          if (buffer.length > 1) {
+            buffer.splice(1, 1);
+          }
         } else {
           buffer.shift();
         }
@@ -88,21 +104,16 @@ export function createInMemoryXAPIQueue(opts?: InMemoryXAPIQueueOptions): XAPIQu
       return flushInFlight;
     },
     flushOnExit: (exitTransport: XAPIExitTransport) => {
-      const startIdx = headInFlight && buffer.length > 0 ? 1 : 0;
-      for (let i = startIdx; i < buffer.length; i++) {
-        const statement = buffer[i]!;
+      for (const statement of buffer) {
         try {
           exitTransport(statement);
         } catch {
           // page is unloading
         }
       }
-      if (startIdx === 0) {
-        buffer.length = 0;
-      } else if (buffer.length > 1) {
-        buffer.splice(1);
-      }
+      buffer.length = 0;
       notifyDepth();
     },
+    getHeadInFlightId: () => headInFlightId,
   };
 }

@@ -12,7 +12,7 @@ LessonKit is **React-first**, not a plugin inside your LMS’s content bank. You
 
 Use the **[H5P capability map](../project/h5p-capability-map.md)** for the full table (machine name, display name, LessonKit id, roadmap status).
 
-### Available today (framework 1.3.0)
+### Available today (framework 1.4.0)
 
 | H5P name | LessonKit | Import / notes |
 | --- | --- | --- |
@@ -25,6 +25,17 @@ Use the **[H5P capability map](../project/h5p-capability-map.md)** for the full 
 | **Question Set** | `AssessmentSequence` | Aggregates child assessments by `checkId` |
 | **Interactive Book** | `InteractiveBook` + `Page` | Compound navigation + session resume |
 | **Course Presentation** | `SlideDeck` + `Slide` | Slide navigation + keyboard controls + session resume |
+| **Interactive Video** | `InteractiveVideo` + `TimedCue` | Timeline cues; pause on interaction; session resume |
+| **Summary** | `Summary` | Statement-bank construct task |
+| **Image Pairing** | `ImagePairing` | Match image pairs |
+| **Image Sequencing** | `ImageSequencing` | Order images |
+| **Arithmetic Quiz** | `ArithmeticQuiz` | Timed math prompts |
+| **Essay** | `Essay` | Open text; plugin grading |
+| **Questionnaire** | `Questionnaire` | Unscored survey |
+| **Memory Game** | `MemoryGame` | Card flip pairs |
+| **Information Wall** | `InformationWall` | Searchable panels |
+| **Slideshow (parallax)** | `ParallaxSlideshow` | Parallax slides with reduced-motion fallback |
+| **Video** (self-hosted) | `Video` | Native `<video>` on slides and pages |
 | **Accordion** | `Accordion` | Expand/collapse sections |
 | **Dialog Cards** | `DialogCards` | Flip-card dialog |
 | **Flashcards** | `Flashcards` | Card deck |
@@ -42,7 +53,6 @@ Use the **[H5P capability map](../project/h5p-capability-map.md)** for the full 
 
 | H5P | LessonKit (planned) |
 | --- | --- |
-| Interactive Video | `InteractiveVideo` |
 | Branching Scenario | `BranchingScenario` |
 
 :::{admonition} Renamed on purpose
@@ -59,7 +69,7 @@ A few LessonKit ids differ from H5P labels where we already shipped or need clea
 | IDs | Per-content params | Required `courseId`, `lessonId`, `checkId` |
 | Analytics | xAPI from library | Telemetry catalog + `@lessonkit/xapi` |
 | Theming | Per content-type CSS | Global `--lk-*` via `@lessonkit/themes` |
-| Nesting | Curated sub-content lists | Same idea via compound blocks + catalog allowlists (planned) |
+| Nesting | Curated sub-content lists | Same idea via compound blocks + catalog allowlists (shipped in 1.2.x+) |
 
 ## Import from existing H5P content
 

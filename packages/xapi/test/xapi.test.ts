@@ -24,6 +24,17 @@ describe("@lessonkit/xapi", () => {
     });
   });
 
+  it("calls onTransportError when transport fails", async () => {
+    const onTransportError = vi.fn();
+    const transport = vi.fn(async () => {
+      throw new Error("network");
+    });
+    const client = createXAPIClient({ transport, courseId, onTransportError });
+    client.startedLesson({ lessonId: "lesson-1" });
+    await new Promise((r) => setTimeout(r, 0));
+    expect(onTransportError).toHaveBeenCalled();
+  });
+
   it("queues when transport fails and flushes later", async () => {
     const queue = createInMemoryXAPIQueue();
     const transport = vi.fn<(statement: unknown) => Promise<void>>(async (_statement: unknown) => {
@@ -42,6 +53,17 @@ describe("@lessonkit/xapi", () => {
 
     expect(client.queueSize()).toBe(0);
     expect(transport).toHaveBeenCalled();
+  });
+
+  it("flush rejects while transport keeps failing", async () => {
+    const queue = createInMemoryXAPIQueue();
+    const transport = vi.fn(async () => {
+      throw new Error("network");
+    });
+    const client = createXAPIClient({ transport, courseId, queue });
+    client.startedLesson({ lessonId: "lesson-1" });
+    await new Promise((r) => setTimeout(r, 0));
+    await expect(client.flush()).rejects.toThrow("network");
   });
 
   it("queues statements when no transport is provided", () => {
@@ -179,7 +201,7 @@ describe("@lessonkit/xapi", () => {
     expect(transport).toHaveBeenCalledTimes(2);
   });
 
-  it("flushOnExit skips in-flight queue head to avoid duplicate delivery", async () => {
+  it("flushOnExit delivers all queued statements including in-flight head after abort", async () => {
     const exitCalls: XAPIStatement[] = [];
     const queue = createInMemoryXAPIQueue();
     let release!: () => void;
@@ -205,14 +227,15 @@ describe("@lessonkit/xapi", () => {
 
     const flushPromise = queue.flush(transport);
     await new Promise((r) => setTimeout(r, 0));
+    expect(queue.getHeadInFlightId?.()).toBe("head");
     queue.flushOnExit((s) => {
       exitCalls.push(s);
     });
-    expect(exitCalls.map((s) => s.id)).toEqual(["tail"]);
+    expect(exitCalls.map((s) => s.id)).toEqual(["head", "tail"]);
 
     release();
     await flushPromise;
-    expect(exitCalls.map((s) => s.id)).toEqual(["tail"]);
+    expect(exitCalls.map((s) => s.id)).toEqual(["head", "tail"]);
   });
 
   it("does not send duplicate in-flight statements with the same id", async () => {
@@ -330,7 +353,7 @@ describe("@lessonkit/xapi", () => {
     expect(transport).toHaveBeenCalledTimes(2);
   });
 
-  it("queue flush stops on first transport error and keeps remainder queued", async () => {
+  it("queue flush rejects on first transport error and keeps remainder queued", async () => {
     const queue = createInMemoryXAPIQueue();
     queue.enqueue({ id: "1", timestamp: "t", verb: "http://adlnet.gov/expapi/verbs/experienced", object: { id: "o" } });
     queue.enqueue({ id: "2", timestamp: "t", verb: "http://adlnet.gov/expapi/verbs/experienced", object: { id: "o" } });
@@ -340,12 +363,42 @@ describe("@lessonkit/xapi", () => {
       .mockRejectedValueOnce(new Error("fail"))
       .mockResolvedValueOnce(undefined);
 
-    await queue.flush(transport);
+    await expect(queue.flush(transport)).rejects.toThrow("fail");
     expect(queue.size()).toBe(2);
     expect(transport).toHaveBeenCalledTimes(1);
 
     await queue.flush(transport);
     expect(queue.size()).toBe(0);
+  });
+
+  it("client flush rejects when queue drain fails", async () => {
+    const queue = createInMemoryXAPIQueue();
+    const transport = vi.fn(async () => {
+      throw new Error("network");
+    });
+    const client = createXAPIClient({ transport, courseId, queue });
+    client.startedLesson({ lessonId: "lesson-1" });
+    await new Promise((r) => setTimeout(r, 0));
+    await expect(client.flush()).rejects.toThrow("network");
+    expect(client.queueSize()).toBeGreaterThan(0);
+  });
+
+  it("skips poison-pill head after repeated failures", async () => {
+    const onHeadSkipped = vi.fn();
+    const queue = createInMemoryXAPIQueue({ maxHeadFailures: 2, onHeadSkipped });
+    queue.enqueue({ id: "bad", timestamp: "t", verb: "http://adlnet.gov/expapi/verbs/experienced", object: { id: "o1" } });
+    queue.enqueue({ id: "good", timestamp: "t", verb: "http://adlnet.gov/expapi/verbs/experienced", object: { id: "o2" } });
+
+    const transport = vi.fn(async (statement: XAPIStatement) => {
+      if (statement.id === "bad") throw new Error("permanent");
+    });
+
+    await expect(queue.flush(transport)).rejects.toThrow("permanent");
+    await queue.flush(transport);
+
+    expect(onHeadSkipped).toHaveBeenCalledTimes(1);
+    expect(queue.size()).toBe(0);
+    expect(transport).toHaveBeenCalledTimes(3);
   });
 
   it("adds duration and score to completion result", async () => {

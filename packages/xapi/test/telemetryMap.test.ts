@@ -342,6 +342,55 @@ describe("telemetryEventToXAPIStatement", () => {
     ).toBeNull();
   });
 
+  it("maps 1.4 video and content interaction events", () => {
+    const cue = telemetryEventToXAPIStatement({
+      name: "video_cue_reached",
+      ...base,
+      data: { blockId: "iv-1", cueIndex: 0, atSeconds: 5, cueLabel: "Check" },
+    });
+    expect(cue?.verb).toBe("http://adlnet.gov/expapi/verbs/experienced");
+    expect(cue?.object.id).toContain(":block:iv-1");
+
+    const segment = telemetryEventToXAPIStatement({
+      name: "video_segment_completed",
+      ...base,
+      data: { blockId: "iv-1", segmentIndex: 0, atSeconds: 5 },
+    });
+    expect(segment?.verb).toBe("http://adlnet.gov/expapi/verbs/completed");
+
+    expect(
+      telemetryEventToXAPIStatement({
+        name: "memory_card_flipped",
+        ...base,
+        data: { blockId: "mem-1", cardIndex: 2, face: "back" },
+      })?.verb,
+    ).toBe("http://adlnet.gov/expapi/verbs/experienced");
+
+    expect(
+      telemetryEventToXAPIStatement({
+        name: "information_wall_search",
+        ...base,
+        data: { blockId: "wall-1", query: "ppe", resultCount: 1 },
+      })?.object.id,
+    ).toContain(":block:wall-1");
+
+    expect(
+      telemetryEventToXAPIStatement({
+        name: "parallax_slide_viewed",
+        ...base,
+        data: { blockId: "para-1", slideIndex: 1 },
+      })?.object.id,
+    ).toContain(":block:para-1");
+
+    expect(
+      telemetryEventToXAPIStatement({
+        name: "questionnaire_submitted",
+        ...base,
+        data: { blockId: "survey-1", fieldCount: 3 },
+      })?.verb,
+    ).toBe("http://adlnet.gov/expapi/verbs/completed");
+  });
+
   it("throws for unknown event names", () => {
     expect(() =>
       telemetryEventToXAPIStatement({

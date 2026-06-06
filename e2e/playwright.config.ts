@@ -28,6 +28,7 @@ export default defineConfig({
         "**/assessments-p0/**",
         "**/interactive-book/**",
         "**/slide-deck/**",
+        "**/interactive-video/**",
       ],
       use: {
         ...devices["Desktop Chrome"],
@@ -64,6 +65,14 @@ export default defineConfig({
       use: {
         ...devices["Desktop Chrome"],
         baseURL: "http://127.0.0.1:4184",
+      },
+    },
+    {
+      name: "interactive-video-vite",
+      testDir: "./tests/interactive-video",
+      use: {
+        ...devices["Desktop Chrome"],
+        baseURL: "http://127.0.0.1:4185",
       },
     },
   ],
@@ -104,6 +113,14 @@ export default defineConfig({
         "npm run build -w lessonkit-example-slide-deck && npm run preview -w lessonkit-example-slide-deck -- --host 127.0.0.1 --port 4184",
       cwd: repoRoot,
       url: "http://127.0.0.1:4184",
+      reuseExistingServer: !process.env.CI,
+      timeout: 180_000,
+    },
+    {
+      command:
+        "npm run build -w lessonkit-example-interactive-video && npm run preview -w lessonkit-example-interactive-video -- --host 127.0.0.1 --port 4185",
+      cwd: repoRoot,
+      url: "http://127.0.0.1:4185",
       reuseExistingServer: !process.env.CI,
       timeout: 180_000,
     },

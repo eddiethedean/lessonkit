@@ -12,9 +12,15 @@ import type {
   InteractionData,
   LessonId,
   LessonLifecycleData,
+  MemoryCardFlippedData,
+  InformationWallSearchData,
+  ParallaxSlideViewedData,
+  QuestionnaireSubmittedData,
   QuizAnsweredData,
   QuizCompletedData,
   TelemetryUser,
+  VideoCueReachedData,
+  VideoSegmentCompletedData,
 } from "../telemetryTypes";
 
 export type BuildTelemetryEventContext = {
@@ -102,4 +108,34 @@ export type BuildTelemetryEventInput =
       name: "image_slider_changed";
       lessonId?: LessonId;
       data: ImageSliderChangedData;
+    })
+  | (BuildTelemetryEventContext & {
+      name: "video_cue_reached";
+      lessonId?: LessonId;
+      data: VideoCueReachedData;
+    })
+  | (BuildTelemetryEventContext & {
+      name: "video_segment_completed";
+      lessonId?: LessonId;
+      data: VideoSegmentCompletedData;
+    })
+  | (BuildTelemetryEventContext & {
+      name: "memory_card_flipped";
+      lessonId?: LessonId;
+      data: MemoryCardFlippedData;
+    })
+  | (BuildTelemetryEventContext & {
+      name: "information_wall_search";
+      lessonId?: LessonId;
+      data: InformationWallSearchData;
+    })
+  | (BuildTelemetryEventContext & {
+      name: "parallax_slide_viewed";
+      lessonId?: LessonId;
+      data: ParallaxSlideViewedData;
+    })
+  | (BuildTelemetryEventContext & {
+      name: "questionnaire_submitted";
+      lessonId?: LessonId;
+      data: QuestionnaireSubmittedData;
     });

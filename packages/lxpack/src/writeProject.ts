@@ -2,9 +2,11 @@ import { join, resolve } from "node:path";
 import { materializeLessonkitProject } from "@lxpack/validators";
 import { descriptorToInterchange } from "./interchange";
 import { resolveSpaDirs } from "./spaDirs";
+import { assertSpaDistContentsSafe } from "./spaDistValidation";
 import type { LessonkitCourseDescriptor } from "./types";
 import { assertRealPathUnderRoot } from "./spaPath";
 import { validateDescriptor } from "./validateDescriptor";
+import { validateInjectableAssessments } from "./descriptor/validateInjectableAssessments";
 
 export type WriteLxpackProjectOptions = {
   descriptor: LessonkitCourseDescriptor;
@@ -43,11 +45,17 @@ export async function writeLxpackProject(
   }
 
   const descriptor = validation.descriptor;
+  const injectableIssues = validateInjectableAssessments(descriptor);
+  if (injectableIssues.length > 0) {
+    throw new Error(injectableIssues.map((i) => `${i.path}: ${i.message}`).join("; "));
+  }
+
   const outDir = resolve(options.outDir);
   if (options.projectRoot) {
     assertRealPathUnderRoot(resolve(options.projectRoot), outDir);
   }
   const spaDirs = await resolveSpaDirs({ ...options, descriptor });
+  await assertSpaDistContentsSafe(spaDirs, options.projectRoot);
   const interchange = descriptorToInterchange(descriptor);
 
   const materialized = await materializeLessonkitProject({

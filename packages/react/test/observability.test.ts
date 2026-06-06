@@ -30,13 +30,15 @@ describe("warnMissingProductionObservability", () => {
 });
 
 describe("wrapTrackingSink", () => {
-  it("reports sync sink errors without rethrowing", () => {
+  it("reports sync sink errors and rethrows", () => {
     const onTelemetrySinkError = vi.fn();
     const sink = vi.fn(() => {
       throw new Error("boom");
     });
     const wrapped = wrapTrackingSink(sink, { onTelemetrySinkError });
-    wrapped?.({ name: "interaction", timestamp: "t", courseId: "c" } as TelemetryEvent);
+    expect(() =>
+      wrapped?.({ name: "interaction", timestamp: "t", courseId: "c" } as TelemetryEvent),
+    ).toThrow("boom");
     expect(onTelemetrySinkError).toHaveBeenCalledWith(expect.any(Error), { sinkId: "tracking" });
   });
 
@@ -44,8 +46,9 @@ describe("wrapTrackingSink", () => {
     const onTelemetrySinkError = vi.fn();
     const sink = vi.fn(() => Promise.reject(new Error("async")));
     const wrapped = wrapTrackingSink(sink, { onTelemetrySinkError });
-    wrapped?.({ name: "interaction", timestamp: "t", courseId: "c" } as TelemetryEvent);
-    await Promise.resolve();
+    await expect(
+      wrapped?.({ name: "interaction", timestamp: "t", courseId: "c" } as TelemetryEvent),
+    ).rejects.toThrow("async");
     expect(onTelemetrySinkError).toHaveBeenCalled();
   });
 });

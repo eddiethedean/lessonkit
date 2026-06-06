@@ -91,6 +91,8 @@
         "InteractiveBook",
         "Slide",
         "SlideDeck",
+        "TimedCue",
+        "InteractiveVideo",
         "AssessmentSequence"
       ],
       "a11y": {
@@ -139,6 +141,8 @@
         "InteractiveBook",
         "Slide",
         "SlideDeck",
+        "TimedCue",
+        "InteractiveVideo",
         "AssessmentSequence"
       ],
       "a11y": {
@@ -211,6 +215,8 @@
         "InteractiveBook",
         "Slide",
         "SlideDeck",
+        "TimedCue",
+        "InteractiveVideo",
         "AssessmentSequence"
       ],
       "a11y": {
@@ -280,6 +286,8 @@
         "InteractiveBook",
         "Slide",
         "SlideDeck",
+        "TimedCue",
+        "InteractiveVideo",
         "AssessmentSequence"
       ],
       "a11y": {
@@ -324,6 +332,8 @@
         "InteractiveBook",
         "Slide",
         "SlideDeck",
+        "TimedCue",
+        "InteractiveVideo",
         "AssessmentSequence"
       ],
       "a11y": {
@@ -400,7 +410,9 @@
         "Page",
         "InteractiveBook",
         "Slide",
-        "SlideDeck"
+        "SlideDeck",
+        "TimedCue",
+        "InteractiveVideo"
       ],
       "a11y": {
         "element": "section",
@@ -484,7 +496,9 @@
         "Page",
         "InteractiveBook",
         "Slide",
-        "SlideDeck"
+        "SlideDeck",
+        "TimedCue",
+        "InteractiveVideo"
       ],
       "a11y": {
         "element": "section",
@@ -567,7 +581,9 @@
         "Page",
         "InteractiveBook",
         "Slide",
-        "SlideDeck"
+        "SlideDeck",
+        "TimedCue",
+        "InteractiveVideo"
       ],
       "a11y": {
         "element": "section",
@@ -650,7 +666,9 @@
         "Page",
         "InteractiveBook",
         "Slide",
-        "SlideDeck"
+        "SlideDeck",
+        "TimedCue",
+        "InteractiveVideo"
       ],
       "a11y": {
         "element": "section",
@@ -733,7 +751,9 @@
         "Page",
         "InteractiveBook",
         "Slide",
-        "SlideDeck"
+        "SlideDeck",
+        "TimedCue",
+        "InteractiveVideo"
       ],
       "a11y": {
         "element": "section",
@@ -801,6 +821,8 @@
         "InteractiveBook",
         "Slide",
         "SlideDeck",
+        "TimedCue",
+        "InteractiveVideo",
         "AssessmentSequence"
       ],
       "a11y": {
@@ -827,9 +849,433 @@
         "Quiz",
         "KnowledgeCheck",
         "FindHotspot",
-        "FindMultipleHotspots"
+        "FindMultipleHotspots",
+        "Summary",
+        "ImagePairing",
+        "ImageSequencing",
+        "ArithmeticQuiz",
+        "Essay"
       ],
       "maxNestingDepth": 1
+    },
+    {
+      "type": "Summary",
+      "category": "assessment",
+      "assessmentContract": true,
+      "h5pMachineName": "H5P.Summary",
+      "h5pAlias": "Summary",
+      "description": "Construct a summary from a statement bank in correct order.",
+      "props": [
+        {
+          "name": "checkId",
+          "type": "CheckId",
+          "required": true,
+          "description": "Stable check id."
+        },
+        {
+          "name": "statements",
+          "type": "string[]",
+          "required": true,
+          "description": "Available statements."
+        },
+        {
+          "name": "correct",
+          "type": "string[]",
+          "required": true,
+          "description": "Correct ordered summary."
+        },
+        {
+          "name": "enableRetry",
+          "type": "boolean",
+          "required": false,
+          "description": "Allow retry after completion."
+        },
+        {
+          "name": "enableSolutionsButton",
+          "type": "boolean",
+          "required": false,
+          "description": "Show solution control."
+        },
+        {
+          "name": "autoCheck",
+          "type": "boolean",
+          "required": false,
+          "description": "Check answers automatically when possible."
+        },
+        {
+          "name": "passingScore",
+          "type": "number",
+          "required": false,
+          "description": "Minimum score to pass."
+        }
+      ],
+      "requiredIds": [
+        "checkId"
+      ],
+      "parentConstraints": [
+        "Lesson",
+        "AssessmentSequence",
+        "TimedCue",
+        "Page",
+        "InteractiveBook",
+        "Slide",
+        "SlideDeck",
+        "InteractiveVideo"
+      ],
+      "a11y": {
+        "element": "section",
+        "ariaLabel": "Summary",
+        "keyboard": "Select statements in order.",
+        "notes": "H5P Summary equivalent."
+      },
+      "theming": {
+        "surface": "global-inherit",
+        "dataAttributes": [
+          "data-lk-check-id"
+        ],
+        "stylingNotes": "Uses data-lk-check-id."
+      },
+      "telemetry": {
+        "emits": [
+          "assessment_answered",
+          "assessment_completed"
+        ],
+        "requiresActiveLesson": true
+      }
+    },
+    {
+      "type": "ImagePairing",
+      "category": "assessment",
+      "assessmentContract": true,
+      "h5pMachineName": "H5P.ImagePair",
+      "h5pAlias": "Image Pairing",
+      "description": "Match image pairs in a memory-style task.",
+      "props": [
+        {
+          "name": "checkId",
+          "type": "CheckId",
+          "required": true,
+          "description": "Stable check id."
+        },
+        {
+          "name": "pairs",
+          "type": "ImagePair[]",
+          "required": true,
+          "description": "Image pairs to match."
+        },
+        {
+          "name": "enableRetry",
+          "type": "boolean",
+          "required": false,
+          "description": "Allow retry after completion."
+        },
+        {
+          "name": "enableSolutionsButton",
+          "type": "boolean",
+          "required": false,
+          "description": "Show solution control."
+        },
+        {
+          "name": "autoCheck",
+          "type": "boolean",
+          "required": false,
+          "description": "Check answers automatically when possible."
+        },
+        {
+          "name": "passingScore",
+          "type": "number",
+          "required": false,
+          "description": "Minimum score to pass."
+        }
+      ],
+      "requiredIds": [
+        "checkId"
+      ],
+      "parentConstraints": [
+        "Lesson",
+        "AssessmentSequence",
+        "TimedCue",
+        "Page",
+        "InteractiveBook",
+        "Slide",
+        "SlideDeck",
+        "InteractiveVideo"
+      ],
+      "a11y": {
+        "element": "section",
+        "ariaLabel": "Image Pairing",
+        "keyboard": "Select two cards to match.",
+        "notes": "H5P Image Pairing equivalent."
+      },
+      "theming": {
+        "surface": "global-inherit",
+        "dataAttributes": [
+          "data-lk-check-id"
+        ],
+        "stylingNotes": "Uses data-lk-check-id."
+      },
+      "telemetry": {
+        "emits": [
+          "assessment_answered",
+          "assessment_completed"
+        ],
+        "requiresActiveLesson": true
+      }
+    },
+    {
+      "type": "ImageSequencing",
+      "category": "assessment",
+      "assessmentContract": true,
+      "h5pMachineName": "H5P.ImageSequencing",
+      "h5pAlias": "Image Sequencing",
+      "description": "Order images in the correct sequence.",
+      "props": [
+        {
+          "name": "checkId",
+          "type": "CheckId",
+          "required": true,
+          "description": "Stable check id."
+        },
+        {
+          "name": "images",
+          "type": "SequencingImage[]",
+          "required": true,
+          "description": "Images to order."
+        },
+        {
+          "name": "correctOrder",
+          "type": "string[]",
+          "required": true,
+          "description": "Correct id order."
+        },
+        {
+          "name": "enableRetry",
+          "type": "boolean",
+          "required": false,
+          "description": "Allow retry after completion."
+        },
+        {
+          "name": "enableSolutionsButton",
+          "type": "boolean",
+          "required": false,
+          "description": "Show solution control."
+        },
+        {
+          "name": "autoCheck",
+          "type": "boolean",
+          "required": false,
+          "description": "Check answers automatically when possible."
+        },
+        {
+          "name": "passingScore",
+          "type": "number",
+          "required": false,
+          "description": "Minimum score to pass."
+        }
+      ],
+      "requiredIds": [
+        "checkId"
+      ],
+      "parentConstraints": [
+        "Lesson",
+        "AssessmentSequence",
+        "TimedCue",
+        "Page",
+        "InteractiveBook",
+        "Slide",
+        "SlideDeck",
+        "InteractiveVideo"
+      ],
+      "a11y": {
+        "element": "section",
+        "ariaLabel": "Image Sequencing",
+        "keyboard": "Reorder with up/down.",
+        "notes": "H5P Image Sequencing equivalent."
+      },
+      "theming": {
+        "surface": "global-inherit",
+        "dataAttributes": [
+          "data-lk-check-id"
+        ],
+        "stylingNotes": "Uses data-lk-check-id."
+      },
+      "telemetry": {
+        "emits": [
+          "assessment_answered",
+          "assessment_completed"
+        ],
+        "requiresActiveLesson": true
+      }
+    },
+    {
+      "type": "ArithmeticQuiz",
+      "category": "assessment",
+      "assessmentContract": true,
+      "h5pMachineName": "H5P.ArithmeticQuiz",
+      "h5pAlias": "Arithmetic Quiz",
+      "description": "Timed arithmetic problems with optional timer.",
+      "props": [
+        {
+          "name": "checkId",
+          "type": "CheckId",
+          "required": true,
+          "description": "Stable check id."
+        },
+        {
+          "name": "problems",
+          "type": "ArithmeticProblem[]",
+          "required": true,
+          "description": "Math problems."
+        },
+        {
+          "name": "timeLimitSeconds",
+          "type": "number",
+          "required": false,
+          "description": "Optional time limit."
+        },
+        {
+          "name": "enableRetry",
+          "type": "boolean",
+          "required": false,
+          "description": "Allow retry after completion."
+        },
+        {
+          "name": "enableSolutionsButton",
+          "type": "boolean",
+          "required": false,
+          "description": "Show solution control."
+        },
+        {
+          "name": "autoCheck",
+          "type": "boolean",
+          "required": false,
+          "description": "Check answers automatically when possible."
+        },
+        {
+          "name": "passingScore",
+          "type": "number",
+          "required": false,
+          "description": "Minimum score to pass."
+        }
+      ],
+      "requiredIds": [
+        "checkId"
+      ],
+      "parentConstraints": [
+        "Lesson",
+        "AssessmentSequence",
+        "TimedCue",
+        "Page",
+        "InteractiveBook",
+        "Slide",
+        "SlideDeck",
+        "InteractiveVideo"
+      ],
+      "a11y": {
+        "element": "section",
+        "ariaLabel": "Arithmetic Quiz",
+        "keyboard": "Text input per problem.",
+        "notes": "H5P Arithmetic Quiz equivalent."
+      },
+      "theming": {
+        "surface": "global-inherit",
+        "dataAttributes": [
+          "data-lk-check-id"
+        ],
+        "stylingNotes": "Uses data-lk-check-id."
+      },
+      "telemetry": {
+        "emits": [
+          "assessment_answered",
+          "assessment_completed"
+        ],
+        "requiresActiveLesson": true
+      }
+    },
+    {
+      "type": "Essay",
+      "category": "assessment",
+      "assessmentContract": true,
+      "h5pMachineName": "H5P.Essay",
+      "h5pAlias": "Essay",
+      "description": "Open text response; manual or plugin grading.",
+      "props": [
+        {
+          "name": "checkId",
+          "type": "CheckId",
+          "required": true,
+          "description": "Stable check id."
+        },
+        {
+          "name": "question",
+          "type": "string",
+          "required": true,
+          "description": "Essay prompt."
+        },
+        {
+          "name": "minLength",
+          "type": "number",
+          "required": false,
+          "description": "Minimum character length."
+        },
+        {
+          "name": "enableRetry",
+          "type": "boolean",
+          "required": false,
+          "description": "Allow retry after completion."
+        },
+        {
+          "name": "enableSolutionsButton",
+          "type": "boolean",
+          "required": false,
+          "description": "Show solution control."
+        },
+        {
+          "name": "autoCheck",
+          "type": "boolean",
+          "required": false,
+          "description": "Check answers automatically when possible."
+        },
+        {
+          "name": "passingScore",
+          "type": "number",
+          "required": false,
+          "description": "Minimum score to pass."
+        }
+      ],
+      "requiredIds": [
+        "checkId"
+      ],
+      "parentConstraints": [
+        "Lesson",
+        "AssessmentSequence",
+        "TimedCue",
+        "Page",
+        "InteractiveBook",
+        "Slide",
+        "SlideDeck",
+        "InteractiveVideo"
+      ],
+      "a11y": {
+        "element": "section",
+        "ariaLabel": "Essay",
+        "keyboard": "Textarea input.",
+        "notes": "H5P Essay equivalent."
+      },
+      "theming": {
+        "surface": "global-inherit",
+        "dataAttributes": [
+          "data-lk-check-id"
+        ],
+        "stylingNotes": "Uses data-lk-check-id."
+      },
+      "telemetry": {
+        "emits": [
+          "assessment_answered",
+          "assessment_completed"
+        ],
+        "requiresActiveLesson": true
+      }
     },
     {
       "type": "Text",
@@ -856,6 +1302,8 @@
         "InteractiveBook",
         "Slide",
         "SlideDeck",
+        "TimedCue",
+        "InteractiveVideo",
         "AssessmentSequence"
       ],
       "a11y": {
@@ -903,6 +1351,8 @@
         "InteractiveBook",
         "Slide",
         "SlideDeck",
+        "TimedCue",
+        "InteractiveVideo",
         "AssessmentSequence"
       ],
       "a11y": {
@@ -950,6 +1400,8 @@
         "InteractiveBook",
         "Slide",
         "SlideDeck",
+        "TimedCue",
+        "InteractiveVideo",
         "AssessmentSequence"
       ],
       "a11y": {
@@ -967,6 +1419,69 @@
       }
     },
     {
+      "type": "Video",
+      "category": "content",
+      "description": "Self-hosted video with native controls and optional captions.",
+      "props": [
+        {
+          "name": "blockId",
+          "type": "BlockId",
+          "required": true,
+          "description": "Stable block id."
+        },
+        {
+          "name": "src",
+          "type": "string",
+          "required": true,
+          "description": "Video URL."
+        },
+        {
+          "name": "poster",
+          "type": "string",
+          "required": false,
+          "description": "Poster image URL."
+        },
+        {
+          "name": "captions",
+          "type": "string",
+          "required": false,
+          "description": "WebVTT captions URL."
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "required": false,
+          "description": "Accessible title."
+        }
+      ],
+      "requiredIds": [
+        "blockId"
+      ],
+      "parentConstraints": [
+        "Lesson",
+        "Page",
+        "InteractiveBook",
+        "Slide",
+        "SlideDeck",
+        "TimedCue",
+        "InteractiveVideo",
+        "AssessmentSequence"
+      ],
+      "a11y": {
+        "element": "video",
+        "ariaLabel": "Video",
+        "keyboard": "Native video controls.",
+        "notes": "No autoplay with sound."
+      },
+      "theming": {
+        "surface": "global-inherit",
+        "stylingNotes": "Responsive video."
+      },
+      "telemetry": {
+        "emits": []
+      }
+    },
+    {
       "type": "Page",
       "category": "container",
       "compoundContract": true,
@@ -977,6 +1492,7 @@
         "Text",
         "Heading",
         "Image",
+        "Video",
         "Scenario",
         "Reflection",
         "Quiz",
@@ -986,6 +1502,15 @@
         "DragAndDrop",
         "DragTheWords",
         "MarkTheWords",
+        "Summary",
+        "ImagePairing",
+        "ImageSequencing",
+        "MemoryGame",
+        "InformationWall",
+        "ParallaxSlideshow",
+        "Questionnaire",
+        "Essay",
+        "ArithmeticQuiz",
         "Accordion",
         "DialogCards",
         "Flashcards",
@@ -1107,11 +1632,12 @@
       "compoundContract": true,
       "h5pMachineName": "H5P.CoursePresentation",
       "h5pAlias": "Course Presentation slide",
-      "description": "Single slide row in a SlideDeck. Planned allowlist expansion: Video, Summary.",
+      "description": "Single slide row in a SlideDeck. Supports Video, Summary, and 1.4 blocks.",
       "allowedChildTypes": [
         "Text",
         "Heading",
         "Image",
+        "Video",
         "Scenario",
         "Reflection",
         "Quiz",
@@ -1121,6 +1647,15 @@
         "DragAndDrop",
         "DragTheWords",
         "MarkTheWords",
+        "Summary",
+        "ImagePairing",
+        "ImageSequencing",
+        "MemoryGame",
+        "InformationWall",
+        "ParallaxSlideshow",
+        "Questionnaire",
+        "Essay",
+        "ArithmeticQuiz",
         "Accordion",
         "DialogCards",
         "Flashcards",
@@ -1235,6 +1770,355 @@
       }
     },
     {
+      "type": "TimedCue",
+      "category": "container",
+      "compoundContract": true,
+      "h5pMachineName": "H5P.InteractiveVideo",
+      "h5pAlias": "Interactive Video timed cue",
+      "description": "Timed overlay cue within InteractiveVideo.",
+      "allowedChildTypes": [
+        "Text",
+        "Heading",
+        "Image",
+        "Quiz",
+        "TrueFalse",
+        "FillInTheBlanks",
+        "Summary",
+        "ImagePairing",
+        "ImageSequencing",
+        "MemoryGame",
+        "Questionnaire",
+        "Essay",
+        "ArithmeticQuiz"
+      ],
+      "maxNestingDepth": 1,
+      "props": [
+        {
+          "name": "atSeconds",
+          "type": "number",
+          "required": true,
+          "description": "Cue time in seconds."
+        },
+        {
+          "name": "label",
+          "type": "string",
+          "required": false,
+          "description": "Cue label."
+        },
+        {
+          "name": "mustComplete",
+          "type": "boolean",
+          "required": false,
+          "description": "Block seek until completed."
+        },
+        {
+          "name": "children",
+          "type": "ReactNode",
+          "required": true,
+          "description": "Single allowed child block."
+        }
+      ],
+      "requiredIds": [],
+      "parentConstraints": [
+        "InteractiveVideo"
+      ],
+      "a11y": {
+        "element": "dialog",
+        "ariaLabel": "Timed cue",
+        "keyboard": "Focus moves to overlay content.",
+        "notes": "Pauses parent video."
+      },
+      "theming": {
+        "surface": "global-inherit",
+        "stylingNotes": "Overlay panel."
+      },
+      "telemetry": {
+        "emits": []
+      }
+    },
+    {
+      "type": "InteractiveVideo",
+      "category": "container",
+      "compoundContract": true,
+      "h5pMachineName": "H5P.InteractiveVideo",
+      "h5pAlias": "Interactive Video",
+      "description": "Video with timed interaction overlays.",
+      "allowedChildTypes": [
+        "TimedCue"
+      ],
+      "maxNestingDepth": 2,
+      "props": [
+        {
+          "name": "blockId",
+          "type": "BlockId",
+          "required": true,
+          "description": "Stable block id."
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "required": true,
+          "description": "Video title."
+        },
+        {
+          "name": "src",
+          "type": "string",
+          "required": true,
+          "description": "Video URL."
+        },
+        {
+          "name": "poster",
+          "type": "string",
+          "required": false,
+          "description": "Poster image."
+        },
+        {
+          "name": "captions",
+          "type": "string",
+          "required": false,
+          "description": "WebVTT captions."
+        },
+        {
+          "name": "showVideoScore",
+          "type": "boolean",
+          "required": false,
+          "description": "Show aggregate score."
+        },
+        {
+          "name": "children",
+          "type": "TimedCue[]",
+          "required": true,
+          "description": "Timed cues."
+        }
+      ],
+      "requiredIds": [
+        "blockId"
+      ],
+      "parentConstraints": [
+        "Lesson"
+      ],
+      "a11y": {
+        "element": "section",
+        "ariaLabel": "Interactive video",
+        "keyboard": "Native video controls; overlay interactions when paused.",
+        "notes": "H5P Interactive Video equivalent."
+      },
+      "theming": {
+        "surface": "global-inherit",
+        "stylingNotes": "Video + overlay."
+      },
+      "telemetry": {
+        "emits": [
+          "video_cue_reached",
+          "video_segment_completed"
+        ],
+        "requiresActiveLesson": true
+      }
+    },
+    {
+      "type": "Questionnaire",
+      "category": "content",
+      "h5pMachineName": "H5P.Questionnaire",
+      "h5pAlias": "Questionnaire",
+      "description": "Unscored multi-field survey.",
+      "props": [
+        {
+          "name": "blockId",
+          "type": "BlockId",
+          "required": true,
+          "description": "Stable block id."
+        },
+        {
+          "name": "fields",
+          "type": "QuestionnaireField[]",
+          "required": true,
+          "description": "Form fields."
+        }
+      ],
+      "requiredIds": [
+        "blockId"
+      ],
+      "parentConstraints": [
+        "Lesson",
+        "Page",
+        "InteractiveBook",
+        "Slide",
+        "SlideDeck",
+        "TimedCue",
+        "InteractiveVideo",
+        "AssessmentSequence"
+      ],
+      "a11y": {
+        "element": "form",
+        "ariaLabel": "Questionnaire",
+        "keyboard": "Tab through fields.",
+        "notes": "Unscored survey."
+      },
+      "theming": {
+        "surface": "global-inherit",
+        "stylingNotes": "Form layout."
+      },
+      "telemetry": {
+        "emits": [
+          "questionnaire_submitted"
+        ],
+        "requiresActiveLesson": true
+      }
+    },
+    {
+      "type": "MemoryGame",
+      "category": "content",
+      "h5pMachineName": "H5P.MemoryGame",
+      "h5pAlias": "Memory Game",
+      "description": "Card flip memory matching game.",
+      "props": [
+        {
+          "name": "blockId",
+          "type": "BlockId",
+          "required": true,
+          "description": "Stable block id."
+        },
+        {
+          "name": "pairs",
+          "type": "MemoryPair[]",
+          "required": true,
+          "description": "Card pairs."
+        },
+        {
+          "name": "selfScore",
+          "type": "boolean",
+          "required": false,
+          "description": "Optional self-score mode."
+        }
+      ],
+      "requiredIds": [
+        "blockId"
+      ],
+      "parentConstraints": [
+        "Lesson",
+        "Page",
+        "InteractiveBook",
+        "Slide",
+        "SlideDeck",
+        "TimedCue",
+        "InteractiveVideo",
+        "AssessmentSequence"
+      ],
+      "a11y": {
+        "element": "section",
+        "ariaLabel": "Memory game",
+        "keyboard": "Flip cards with buttons.",
+        "notes": "Reduced motion safe."
+      },
+      "theming": {
+        "surface": "global-inherit",
+        "stylingNotes": "Card grid."
+      },
+      "telemetry": {
+        "emits": [
+          "memory_card_flipped"
+        ]
+      }
+    },
+    {
+      "type": "InformationWall",
+      "category": "content",
+      "h5pMachineName": "H5P.InformationWall",
+      "h5pAlias": "Information Wall",
+      "description": "Searchable information panels.",
+      "props": [
+        {
+          "name": "blockId",
+          "type": "BlockId",
+          "required": true,
+          "description": "Stable block id."
+        },
+        {
+          "name": "panels",
+          "type": "InformationPanel[]",
+          "required": true,
+          "description": "Content panels."
+        }
+      ],
+      "requiredIds": [
+        "blockId"
+      ],
+      "parentConstraints": [
+        "Lesson",
+        "Page",
+        "InteractiveBook",
+        "Slide",
+        "SlideDeck",
+        "TimedCue",
+        "InteractiveVideo",
+        "AssessmentSequence"
+      ],
+      "a11y": {
+        "element": "section",
+        "ariaLabel": "Information wall",
+        "keyboard": "Search and browse panels.",
+        "notes": "Filterable grid."
+      },
+      "theming": {
+        "surface": "global-inherit",
+        "stylingNotes": "Panel grid."
+      },
+      "telemetry": {
+        "emits": [
+          "information_wall_search"
+        ]
+      }
+    },
+    {
+      "type": "ParallaxSlideshow",
+      "category": "content",
+      "h5pMachineName": "H5P.ImpressivePresentation",
+      "h5pAlias": "Slideshow (parallax)",
+      "description": "Slideshow with parallax; static fallback when reduced motion.",
+      "props": [
+        {
+          "name": "blockId",
+          "type": "BlockId",
+          "required": true,
+          "description": "Stable block id."
+        },
+        {
+          "name": "slides",
+          "type": "ParallaxSlide[]",
+          "required": true,
+          "description": "Slides."
+        }
+      ],
+      "requiredIds": [
+        "blockId"
+      ],
+      "parentConstraints": [
+        "Lesson",
+        "Page",
+        "InteractiveBook",
+        "Slide",
+        "SlideDeck",
+        "TimedCue",
+        "InteractiveVideo",
+        "AssessmentSequence"
+      ],
+      "a11y": {
+        "element": "section",
+        "ariaLabel": "Slideshow",
+        "keyboard": "Previous/next slide.",
+        "notes": "prefers-reduced-motion fallback."
+      },
+      "theming": {
+        "surface": "global-inherit",
+        "stylingNotes": "Slide deck."
+      },
+      "telemetry": {
+        "emits": [
+          "parallax_slide_viewed"
+        ]
+      }
+    },
+    {
       "type": "Accordion",
       "category": "content",
       "h5pMachineName": "H5P.Accordion",
@@ -1263,6 +2147,8 @@
         "InteractiveBook",
         "Slide",
         "SlideDeck",
+        "TimedCue",
+        "InteractiveVideo",
         "AssessmentSequence"
       ],
       "a11y": {
@@ -1310,6 +2196,8 @@
         "InteractiveBook",
         "Slide",
         "SlideDeck",
+        "TimedCue",
+        "InteractiveVideo",
         "AssessmentSequence"
       ],
       "a11y": {
@@ -1361,6 +2249,8 @@
         "InteractiveBook",
         "Slide",
         "SlideDeck",
+        "TimedCue",
+        "InteractiveVideo",
         "AssessmentSequence"
       ],
       "a11y": {
@@ -1420,6 +2310,8 @@
         "InteractiveBook",
         "Slide",
         "SlideDeck",
+        "TimedCue",
+        "InteractiveVideo",
         "AssessmentSequence"
       ],
       "a11y": {
@@ -1467,6 +2359,8 @@
         "InteractiveBook",
         "Slide",
         "SlideDeck",
+        "TimedCue",
+        "InteractiveVideo",
         "AssessmentSequence"
       ],
       "a11y": {
@@ -1557,6 +2451,8 @@
         "InteractiveBook",
         "Slide",
         "SlideDeck",
+        "TimedCue",
+        "InteractiveVideo",
         "AssessmentSequence"
       ],
       "a11y": {
@@ -1652,6 +2548,8 @@
         "InteractiveBook",
         "Slide",
         "SlideDeck",
+        "TimedCue",
+        "InteractiveVideo",
         "AssessmentSequence"
       ],
       "a11y": {

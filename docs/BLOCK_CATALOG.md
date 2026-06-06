@@ -199,7 +199,26 @@ Adds content primitives (`Text`, `Heading`, `Image`), compound containers (`Page
 
 **SlideDeck props:** `blockId` (required), `title`, `showDeckScore`, `Slide` children. Implements `CompoundHandle` with session resume (`persistCompoundState` default `true`).
 
-**Planned slide children:** `Video`, `Summary` — not in 1.3.0 allowlist yet.
+### Catalog v3 additions (framework 1.4.0)
+
+| Block | H5P display name | Notes |
+| --- | --- | --- |
+| `Video` | — | Self-hosted `<video>` primitive; nestable in `Page` / `Slide` |
+| `TimedCue` | Interactive Video (cue) | Single child at `atSeconds`; used inside `InteractiveVideo` |
+| `InteractiveVideo` | Interactive Video | `TimedCue[]` children; `video_cue_reached` telemetry; session resume |
+| `Summary` | Summary | Statement-bank construct task |
+| `ImagePairing` | Image Pairing | Match image pairs |
+| `ImageSequencing` | Image Sequencing | Order images |
+| `ArithmeticQuiz` | Arithmetic Quiz | Timed math prompts |
+| `Essay` | Essay | Open text; plugin grading via `scoreAssessment` |
+| `Questionnaire` | Questionnaire | Unscored multi-field survey |
+| `MemoryGame` | Memory Game | Card flip pairs |
+| `InformationWall` | Information Wall | Searchable panel grid |
+| `ParallaxSlideshow` | Slideshow (parallax) | Static fallback under `prefers-reduced-motion` |
+
+**InteractiveVideo props:** `blockId` (required), `title`, `src`, `showVideoScore?`, `TimedCue` children. Implements `CompoundHandle` with session resume (video time + cue index + child assessment state).
+
+**Slide / Page allowlist:** includes `Video`, `Summary`, and all 1.4.0 content blocks above.
 
 Import `@lessonkit/react/block-catalog.v3.json` or pin `{ version: 2 }` until generators are updated.
 

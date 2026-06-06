@@ -20,7 +20,13 @@ export type TelemetryEventName =
   | "hotspot_opened"
   | "accordion_section_toggled"
   | "flashcard_flipped"
-  | "image_slider_changed";
+  | "image_slider_changed"
+  | "video_cue_reached"
+  | "video_segment_completed"
+  | "memory_card_flipped"
+  | "information_wall_search"
+  | "parallax_slide_viewed"
+  | "questionnaire_submitted";
 
 export type TelemetryUser = {
   id?: string;
@@ -122,6 +128,42 @@ export type ImageSliderChangedData = {
   slideIndex: number;
 };
 
+export type VideoCueReachedData = {
+  blockId: BlockId;
+  cueIndex: number;
+  atSeconds: number;
+  cueLabel?: string;
+};
+
+export type VideoSegmentCompletedData = {
+  blockId: BlockId;
+  segmentIndex: number;
+  atSeconds: number;
+  segmentLabel?: string;
+};
+
+export type MemoryCardFlippedData = {
+  blockId: BlockId;
+  cardIndex: number;
+  face: "front" | "back";
+};
+
+export type InformationWallSearchData = {
+  blockId: BlockId;
+  query: string;
+  resultCount: number;
+};
+
+export type ParallaxSlideViewedData = {
+  blockId: BlockId;
+  slideIndex: number;
+};
+
+export type QuestionnaireSubmittedData = {
+  blockId: BlockId;
+  fieldCount: number;
+};
+
 export type TelemetryEvent =
   | (TelemetryEventBase & { name: "course_started"; lessonId?: LessonId; data?: undefined })
   | (TelemetryEventBase & { name: "course_completed"; lessonId?: LessonId; data?: undefined })
@@ -159,6 +201,28 @@ export type TelemetryEvent =
       name: "image_slider_changed";
       lessonId?: LessonId;
       data: ImageSliderChangedData;
+    })
+  | (TelemetryEventBase & { name: "video_cue_reached"; lessonId: LessonId; data: VideoCueReachedData })
+  | (TelemetryEventBase & {
+      name: "video_segment_completed";
+      lessonId: LessonId;
+      data: VideoSegmentCompletedData;
+    })
+  | (TelemetryEventBase & { name: "memory_card_flipped"; lessonId?: LessonId; data: MemoryCardFlippedData })
+  | (TelemetryEventBase & {
+      name: "information_wall_search";
+      lessonId?: LessonId;
+      data: InformationWallSearchData;
+    })
+  | (TelemetryEventBase & {
+      name: "parallax_slide_viewed";
+      lessonId?: LessonId;
+      data: ParallaxSlideViewedData;
+    })
+  | (TelemetryEventBase & {
+      name: "questionnaire_submitted";
+      lessonId: LessonId;
+      data: QuestionnaireSubmittedData;
     });
 
 /** Payload shape for a telemetry event name. */
@@ -174,6 +238,8 @@ export type TelemetryBatchSink = (events: TelemetryEvent[]) => void | Promise<vo
 
 export type TrackingClient = {
   track: (event: TelemetryEvent) => void;
+  /** Delivers one event and resolves to true only when the sink accepted it (batch: includes flush). */
+  deliver?: (event: TelemetryEvent) => Promise<boolean>;
   /** Resolves to true when all buffered events were delivered; false when a sink failure re-queued events. */
   flush?: () => void | Promise<boolean>;
   /** Best-effort synchronous flush for pagehide (keepalive batch sink when configured). */

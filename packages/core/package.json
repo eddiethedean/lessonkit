@@ -1,6 +1,6 @@
 {
   "name": "@lessonkit/core",
-  "version": "1.3.1",
+  "version": "1.4.0",
   "private": false,
   "description": "Shared types and telemetry primitives for LessonKit.",
   "license": "Apache-2.0",
@@ -30,6 +30,11 @@
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
+    "./testing": {
+      "types": "./dist/testing.d.ts",
+      "import": "./dist/testing.js",
+      "require": "./dist/testing.cjs"
+    },
     "./telemetry-catalog.v1.json": "./telemetry-catalog.v1.json",
     "./telemetry-catalog.v2.json": "./telemetry-catalog.v2.json",
     "./telemetry-catalog.v3.json": "./telemetry-catalog.v3.json",
@@ -43,8 +48,8 @@
     "identity-contract.v1.json"
   ],
   "scripts": {
-    "build": "tsup src/index.ts --format esm,cjs --dts",
-    "dev": "tsup src/index.ts --format esm,cjs --dts --watch",
+    "build": "tsup src/index.ts src/testing.ts --format esm,cjs --dts",
+    "dev": "tsup src/index.ts src/testing.ts --format esm,cjs --dts --watch",
     "prepublishOnly": "npm run build",
     "typecheck": "tsc -p tsconfig.json",
     "test": "vitest run --passWithNoTests",

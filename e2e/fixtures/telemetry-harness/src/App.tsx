@@ -27,7 +27,11 @@ function E2eBridge() {
         tracking.flush?.();
       },
       flushXapi: async () => {
-        await xapi?.flush();
+        try {
+          await xapi?.flush();
+        } catch {
+          // flush may reject when transport still failing
+        }
       },
       getXapiQueueSize: () => xapi?.queueSize() ?? 0,
     });
@@ -57,6 +61,14 @@ function HarnessControls() {
 export default function App() {
   const config = useMemo(
     () => ({
+      observability: {
+        onTelemetrySinkError: () => undefined,
+        onTelemetryBufferDrop: () => undefined,
+        onXapiQueueDepth: () => undefined,
+        onXapiQueueCap: () => undefined,
+        onLxpackBridgeMiss: () => undefined,
+        onXapiTransportError: () => undefined,
+      },
       tracking: {
         batch: { enabled: true, flushIntervalMs: 60_000, maxBatchSize: 25 },
         batchSink: (events: TelemetryEvent[]) => {

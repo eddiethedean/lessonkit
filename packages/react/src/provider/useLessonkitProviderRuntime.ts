@@ -21,7 +21,8 @@ import type {
 import { createLessonkitRuntime, createTrackingClient, assertValidId } from "@lessonkit/core";
 import type { XAPIClient } from "@lessonkit/xapi";
 
-import { createXapiQueueFromObservability, wrapBatchSink, wrapTrackingSink, warnMissingProductionObservability } from "../runtime/observability";
+import { createXapiQueueFromObservability, wrapBatchSink, wrapTrackingSink } from "../runtime/observability";
+import { assertProductionCourseConfig, shouldEnforceProductionGuard } from "../runtime/productionGuard";
 import { telemetryEventToXAPIStatement } from "@lessonkit/xapi";
 import { tryBuildTelemetryEvent } from "../runtime/emitTelemetry";
 import type { LxpackBridgeMode } from "../runtime/lxpackBridge";
@@ -83,6 +84,10 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
     () => ({ ...config, courseId: normalizedCourseId }),
     [config, normalizedCourseId],
   );
+
+  if (shouldEnforceProductionGuard()) {
+    assertProductionCourseConfig(normalizedConfig);
+  }
 
   const useV2Runtime = normalizedConfig.runtimeVersion !== "v1";
 
@@ -198,7 +203,7 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
   const activeLessonIdRef = useRef<LessonId | undefined>(progress.activeLessonId);
   activeLessonIdRef.current = progress.activeLessonId;
 
-  const xapiQueueRef = useRef(createXapiQueueFromObservability(normalizedConfig.observability));
+  const xapiQueueRef = useRef(createXapiQueueFromObservability(() => observabilityRef.current));
   const xapiRef = useRef<XAPIClient | null>(null);
   const [xapi, setXapi] = useState<XAPIClient | null>(null);
   const prevXapiCourseIdRef = useRef(normalizedCourseId);
@@ -223,14 +228,18 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
         /* v8 ignore stop */
         void xapiRef.current?.flush();
       }
-      xapiQueueRef.current = createXapiQueueFromObservability(observabilityRef.current);
+      xapiQueueRef.current = createXapiQueueFromObservability(() => observabilityRef.current);
       prevXapiCourseIdRef.current = courseId;
       xapiCourseStartedSentOnClientRef.current = false;
       xapiBootstrapSendRef.current = false;
     }
 
     const prev = xapiRef.current;
-    const next = createXapiClientFromConfig(normalizedConfig, xapiQueueRef.current);
+    const next = createXapiClientFromConfig(
+      normalizedConfig,
+      xapiQueueRef.current,
+      observabilityRef.current,
+    );
     xapiRef.current = next;
     setXapi(next);
 
@@ -300,7 +309,13 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
     })();
     return () => {
       cancelled = true;
-      void prev?.flush();
+      void (async () => {
+        try {
+          await prev?.flush();
+        } catch {
+          // Swallow flush errors so a broken previous transport doesn't block cleanup.
+        }
+      })();
     };
   }, [xapiEnabled, xapiClient, xapiTransport, courseId, trackingEnabled]);
 
@@ -382,7 +397,7 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
     } else if (courseStartedFullySettled) {
       courseStartedEmittedToSinkRef.current = true;
     } else if (!courseStartedEmittedToSinkRef.current) {
-      const generation = ++courseStartedEmitGenerationRef.current;
+      const generation = courseStartedEmitGenerationRef.current;
       const shouldCommit = () => generation === courseStartedEmitGenerationRef.current;
       void (async () => {
         /* v8 ignore start -- superseded course_started generation exits before emit */
@@ -390,7 +405,7 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
         /* v8 ignore stop */
         const result = await emitPendingCourseStarted({
           pluginHost: pluginHostRef.current,
-          tracking: next,
+          tracking: () => trackingRef.current,
           xapi: xapiRef.current,
           storage: defaultStorage,
           sessionId,
@@ -400,7 +415,8 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
           lxpackBridge: lxpackBridgeModeRef.current,
           onLxpackBridgeMiss,
           extraSinks: extraSinksRef.current,
-          skipXapi: xapiCourseStartedSentOnClientRef.current,
+          skipXapi:
+            xapiCourseStartedSentOnClientRef.current || xapiBootstrapSendRef.current,
           onXapiStatementSent: () => {
             xapiCourseStartedSentOnClientRef.current = true;
           },
@@ -412,7 +428,6 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
     }
 
     return () => {
-      courseStartedEmitGenerationRef.current += 1;
       /* v8 ignore start -- tracking client unchanged between layout passes */
       if (prev !== trackingRef.current) {
         void disposeTrackingClient(prev);
@@ -511,9 +526,11 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
 
       /* v8 ignore start -- backup emit when tracking effect did not mark course_started */
       if (!courseStartedEmittedToSinkRef.current) {
+        const generation = courseStartedEmitGenerationRef.current;
+        const shouldCommit = () => generation === courseStartedEmitGenerationRef.current;
         const result = await emitPendingCourseStarted({
           pluginHost: pluginHostRef.current,
-          tracking: trackingRef.current,
+          tracking: () => trackingRef.current,
           xapi: xapiRef.current,
           storage: defaultStorage,
           sessionId,
@@ -523,11 +540,14 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
           lxpackBridge: lxpackBridgeModeRef.current,
           onLxpackBridgeMiss,
           extraSinks: extraSinksRef.current,
-          skipXapi: xapiCourseStartedSentOnClientRef.current,
+          skipXapi:
+            xapiCourseStartedSentOnClientRef.current || xapiBootstrapSendRef.current,
           onXapiStatementSent: () => {
             xapiCourseStartedSentOnClientRef.current = true;
           },
+          shouldCommit,
         });
+        if (generation !== courseStartedEmitGenerationRef.current) return;
         courseStartedEmittedToSinkRef.current = isCourseStartedSinkSettled(result);
       }
       /* v8 ignore stop */
@@ -611,23 +631,6 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
       window.removeEventListener("pagehide", flushOnPageExit);
     };
   }, []);
-
-  useEffect(() => {
-    warnMissingProductionObservability(observabilityRef.current, {
-      trackingEnabled: isTrackingActive(normalizedConfig.tracking),
-      xapiEnabled: normalizedConfig.xapi?.enabled !== false && Boolean(
-        normalizedConfig.xapi?.client ||
-          normalizedConfig.xapi?.transport ||
-          normalizedConfig.xapi?.enabled === true,
-      ),
-    });
-  }, [
-    normalizedConfig.tracking,
-    normalizedConfig.xapi?.enabled,
-    normalizedConfig.xapi?.client,
-    normalizedConfig.xapi?.transport,
-    normalizedConfig.observability,
-  ]);
 
   const setActiveLesson = useCallback(
     (lessonId: LessonId) => {

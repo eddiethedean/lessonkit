@@ -13,11 +13,22 @@
 | `MarkTheWords` | Mark the Words |
 | `AssessmentSequence` | Question Set |
 | `SlideDeck` / `Slide` | Course Presentation |
+| `InteractiveVideo` / `TimedCue` | Interactive Video |
 | `InteractiveBook` / `Page` | Interactive Book / Column |
+| `Video` | Self-hosted video (slides/pages) |
+| `Summary` | Summary |
+| `ImagePairing` | Image Pairing |
+| `ImageSequencing` | Image Sequencing |
+| `MemoryGame` | Memory Game |
+| `Questionnaire` | Questionnaire |
+| `Essay` | Essay |
+| `ArithmeticQuiz` | Arithmetic Quiz |
+| `InformationWall` | Information Wall |
+| `ParallaxSlideshow` | Slideshow (parallax) |
 | `Scenario` | Scenario / narrative block |
 | `Reflection` | Open response (manual scoring) |
 
-More types (`InteractiveVideo`, `BranchingScenario`, …) are on the roadmap. See **[Coming from H5P?](../h5p-for-lessonkit-authors.md)** and the **[capability map](../../project/h5p-capability-map.md)**.
+More types (`BranchingScenario`, …) are on the roadmap. See **[Coming from H5P?](../h5p-for-lessonkit-authors.md)** and the **[capability map](../../project/h5p-capability-map.md)**.
 :::
 
 Canonical block list, props, and contracts: [Block catalog reference](../../reference/block-catalog.md).
@@ -38,6 +49,10 @@ Canonical block list, props, and contracts: [Block catalog reference](../../refe
 | `AssessmentSequence` | `checkId`, children with `checkId` | Question-set container; aggregates child handles |
 | `SlideDeck` | `blockId`, `title`, `Slide` children | Course Presentation; keyboard slide nav; `CompoundHandle` |
 | `Slide` | `blockId`, optional `title` | Single slide row inside `SlideDeck` |
+| `InteractiveVideo` | `blockId`, `title`, `src`, `TimedCue` children | Interactive Video; pause on cue; `CompoundHandle` |
+| `TimedCue` | `atSeconds`, optional `label`, `mustComplete?` | Single timed overlay child inside `InteractiveVideo` |
+| `Video` | `blockId`, `src`, optional `poster`, `captions` | Self-hosted video primitive |
+| `Summary` | `checkId`, `statements[]`, `correct[]` | Statement-bank construct task |
 | `InteractiveBook` | `blockId`, `title`, `Page` children | Multi-chapter book; `CompoundHandle` |
 | `Page` | `blockId`, optional `title` | Column/chapter inside `InteractiveBook` |
 | `Reflection` | optional `prompt`, `blockId` | Textarea reflection block |

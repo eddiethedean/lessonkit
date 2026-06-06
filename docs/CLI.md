@@ -68,7 +68,7 @@ Every LessonKit project includes a `lessonkit.json` at the project root. The CLI
 | `paths.lxpackOutDir` | LXPack project directory (default `.lxpack/course`) |
 | `paths.outputBaseDir` | Packaged artifact base under the LXPack project dir (default `.lxpack/out`; artifacts are `{outputBaseDir}/course-<target>.zip` or `{outputBaseDir}/standalone`) |
 
-Keep `course.courseId`, `course.lessons[].id`, and `course.assessments[].checkId` aligned with your React component props. `lessonkit init` updates `lessonkit.json` and patches `src/App.tsx` `courseId` / course title for you. See [Identity reference](reference/identity.md).
+Keep `course.courseId`, `course.lessons[].id`, and `course.assessments[].checkId` aligned with your React component props. `lessonkit init` updates `lessonkit.json` (including `tracking.xapi.activityIri`), `src/courseConfig.ts` `courseId`, and patches `src/App.tsx` `courseId` / course title for you. See [Identity reference](reference/identity.md).
 
 The CLI only recognizes project manifests with `schemaVersion: 1` (not the interchange `lessonkit.json` written under `.lxpack/course`). `per-lesson-spa` layout is not supported by `lessonkit package` (1.0.0) — use `single-spa`. Use `@lessonkit/lxpack` directly if you need `per-lesson-spa`. SPA build output is controlled by `paths.spaDistDir` (not `course.spaDistDir`).
 

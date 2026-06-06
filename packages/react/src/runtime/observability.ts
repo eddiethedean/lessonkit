@@ -14,18 +14,17 @@ export type LessonkitObservabilityConfig = {
   onTelemetryBufferDrop?: () => void;
   /** LMS bridge missing for a completion-related telemetry event (`bridge: auto`). */
   onLxpackBridgeMiss?: (event: TelemetryEvent) => void;
+  /** xAPI transport failure after retries (statement re-queued). */
+  onXapiTransportError?: (err: unknown) => void;
 };
 
 export function createXapiQueueFromObservability(
-  observability?: LessonkitObservabilityConfig,
+  getObservability?: () => LessonkitObservabilityConfig | undefined,
 ): ReturnType<typeof createInMemoryXAPIQueue> {
-  const opts: InMemoryXAPIQueueOptions = {};
-  if (observability?.onXapiQueueDepth) {
-    opts.onDepth = observability.onXapiQueueDepth;
-  }
-  if (observability?.onXapiQueueCap) {
-    opts.onCap = observability.onXapiQueueCap;
-  }
+  const opts: InMemoryXAPIQueueOptions = {
+    onDepth: (size) => getObservability?.()?.onXapiQueueDepth?.(size),
+    onCap: () => getObservability?.()?.onXapiQueueCap?.(),
+  };
   return createInMemoryXAPIQueue(opts);
 }
 
@@ -53,7 +52,9 @@ export function warnMissingProductionObservability(
 ): void {
   let isProduction = false;
   try {
-    isProduction = (import.meta as { env?: { PROD?: boolean } }).env?.PROD === true;
+    const env = (import.meta as { env?: { PROD?: boolean; MODE?: string } }).env;
+    if (env?.MODE === "test") return;
+    isProduction = env?.PROD === true;
   } catch {
     // no import.meta
   }
@@ -64,14 +65,18 @@ export function warnMissingProductionObservability(
   }
   if (!isProduction) return;
   if (!opts.trackingEnabled && !opts.xapiEnabled) return;
-  const hooks = [
-    observability?.onTelemetrySinkError,
-    observability?.onTelemetryBufferDrop,
-    observability?.onXapiQueueDepth,
-    observability?.onXapiQueueCap,
-    observability?.onLxpackBridgeMiss,
-  ];
-  if (hooks.some(Boolean)) return;
+  const required: Array<unknown> = [observability?.onLxpackBridgeMiss];
+  if (opts.trackingEnabled) {
+    required.push(observability?.onTelemetrySinkError, observability?.onTelemetryBufferDrop);
+  }
+  if (opts.xapiEnabled) {
+    required.push(
+      observability?.onXapiQueueDepth,
+      observability?.onXapiQueueCap,
+      observability?.onXapiTransportError,
+    );
+  }
+  if (!required.some((hook) => !hook)) return;
   if (typeof console !== "undefined") {
     console.warn(
       "[lessonkit] Production deployment without observability hooks — telemetry/xAPI failures and buffer drops will be silent. See https://lessonkit.readthedocs.io/en/latest/guides/react-developers/production-checklist.html",
@@ -91,12 +96,13 @@ export function wrapTrackingSink(
       if (result != null && typeof (result as Promise<void>).catch === "function") {
         return (result as Promise<void>).catch((err) => {
           onError(err, { sinkId: "tracking" });
+          throw err;
         });
       }
       return result;
     } catch (err) {
       onError(err, { sinkId: "tracking" });
-      return undefined;
+      throw err;
     }
   }) as TrackingSink;
 }
