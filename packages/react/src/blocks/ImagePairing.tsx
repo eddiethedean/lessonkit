@@ -64,9 +64,11 @@ function ImagePairingInner(
   const [keyboardSelection, setKeyboardSelection] = useState<string | null>(null);
   const [passed, setPassed] = useState(false);
   const completedRef = useRef(false);
+  const telemetryReplayedRef = useRef(false);
 
   const reset = () => {
     completedRef.current = false;
+    telemetryReplayedRef.current = false;
     setCards(buildDeck(props.pairs));
     setMatched(new Set());
     setRevealed(new Set());
@@ -188,6 +190,26 @@ function ImagePairingInner(
           readBooleanStateField(state, "passed", (value) => {
             setPassed(value);
             completedRef.current = value;
+            if (value && !telemetryReplayedRef.current) {
+              telemetryReplayedRef.current = true;
+              const matchedIds = Array.isArray(state.matched)
+                ? (state.matched as string[])
+                : [...matched];
+              const finalScore = matchedIds.length;
+              assessment.answer({
+                checkId,
+                interactionType: INTERACTION,
+                response: { matchedPairIds: matchedIds },
+                correct: true,
+              });
+              assessment.complete({
+                checkId,
+                interactionType: INTERACTION,
+                score: finalScore,
+                maxScore,
+                passingScore: props.passingScore ?? maxScore,
+              });
+            }
           });
         },
       }),

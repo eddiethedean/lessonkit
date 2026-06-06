@@ -1,6 +1,6 @@
 import React, { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { BlockId, CompoundHandle, CourseId } from "@lessonkit/core";
-import { loadCompoundState, saveCompoundState } from "@lessonkit/core";
+import type { BlockId, CompoundHandle, CompoundResumeState, CourseId } from "@lessonkit/core";
+import { loadCompoundState } from "@lessonkit/core";
 import { CompoundProvider } from "../compound/CompoundProvider";
 import { useCompoundInitialIndex, useCompoundShell } from "../compound/useCompoundShell";
 import { mergeVideoMetaIntoState, readInteractiveVideoMeta } from "../compound/useCompoundVideoShell";
@@ -36,6 +36,18 @@ function loadVideoMeta(
   return meta ?? { currentTime: 0, completedCueIndices: [] as number[] };
 }
 
+function getCueChildCheckId(cue: CueElement): string | null {
+  const child = React.Children.only(cue.props.children);
+  if (!React.isValidElement(child)) return null;
+  const props = child.props as { checkId?: string };
+  if (typeof props.checkId !== "string") return null;
+  return normalizeComponentId(props.checkId, "checkId");
+}
+
+function cueRequiresAnswer(cue: CueElement): boolean {
+  return Boolean(cue.props.mustComplete && getCueChildCheckId(cue));
+}
+
 const InteractiveVideoInner = forwardRef<
   CompoundHandle,
   InteractiveVideoProps & {
@@ -53,15 +65,30 @@ const InteractiveVideoInner = forwardRef<
   const { config, track, storage } = useLessonkit();
   const lessonId = useEnclosingLessonId();
   const videoRef = useRef<HTMLVideoElement>(null);
+  const completedCuesRef = useRef(new Set<number>(initialMeta.completedCueIndices));
   const [completedCues, setCompletedCues] = useState<Set<number>>(
     () => new Set(initialMeta.completedCueIndices),
   );
   const [overlayActive, setOverlayActive] = useState(false);
   const firedCuesRef = useRef(new Set<number>(initialMeta.completedCueIndices));
+  const resumeOverlayCheckedRef = useRef(false);
 
   const sortedCues = useMemo(
     () => [...cues].sort((a, b) => (a.props.atSeconds ?? 0) - (b.props.atSeconds ?? 0)),
     [cues],
+  );
+
+  useEffect(() => {
+    completedCuesRef.current = completedCues;
+  }, [completedCues]);
+
+  const transformState = useCallback(
+    (state: CompoundResumeState) =>
+      mergeVideoMetaIntoState(state, {
+        currentTime: videoRef.current?.currentTime ?? initialMeta.currentTime,
+        completedCueIndices: [...completedCuesRef.current],
+      }),
+    [initialMeta.currentTime],
   );
 
   const { ctx } = useCompoundShell({
@@ -73,7 +100,24 @@ const InteractiveVideoInner = forwardRef<
     persistEnabled,
     ref,
     storage,
+    transformState,
   });
+
+  const activeCue = sortedCues[index];
+
+  const cueCanContinue = useCallback(
+    (cue: CueElement | undefined) => {
+      if (!cue || !cueRequiresAnswer(cue)) return true;
+      const checkId = getCueChildCheckId(cue);
+      if (!checkId) return true;
+      const entry = ctx?.getRegisteredHandles().get(checkId);
+      if (!entry) return false;
+      return entry.handle.getAnswerGiven();
+    },
+    [ctx],
+  );
+
+  const canContinueActiveCue = cueCanContinue(activeCue);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -81,29 +125,42 @@ const InteractiveVideoInner = forwardRef<
     video.currentTime = initialMeta.currentTime;
   }, [initialMeta.currentTime]);
 
-  const persistMeta = useCallback(() => {
-    if (!persistEnabled || !config.courseId) return;
-    const saved = loadCompoundState(storage, config.courseId, blockId);
-    const base = saved ?? { schemaVersion: 1 as const, activePageIndex: index, childStates: {} };
-    const childStates = { ...base.childStates };
-    for (const [checkId, entry] of ctx?.getRegisteredHandles() ?? []) {
-      if (entry.handle.getCurrentState) {
-        childStates[checkId] = entry.handle.getCurrentState();
-      }
-    }
-    const merged = mergeVideoMetaIntoState(
-      { ...base, activePageIndex: index, childStates },
-      {
-        currentTime: videoRef.current?.currentTime ?? initialMeta.currentTime,
-        completedCueIndices: [...completedCues],
-      },
-    );
-    saveCompoundState(storage, config.courseId, blockId, merged);
-  }, [persistEnabled, config.courseId, blockId, storage, index, ctx, completedCues, initialMeta.currentTime]);
-
   useEffect(() => {
-    persistMeta();
-  }, [index, completedCues, overlayActive, persistMeta]);
+    if (resumeOverlayCheckedRef.current || sortedCues.length === 0) return;
+    resumeOverlayCheckedRef.current = true;
+
+    const hasSavedProgress =
+      initialMeta.currentTime > 0 ||
+      initialMeta.completedCueIndices.length > 0 ||
+      (persistEnabled &&
+        config.courseId &&
+        loadCompoundState(storage, config.courseId, blockId) !== null);
+
+    if (!hasSavedProgress) return;
+
+    const video = videoRef.current;
+    if (!video) return;
+
+    const cue = sortedCues[index];
+    if (!cue || completedCues.has(index)) return;
+
+    setOverlayActive(true);
+    video.pause();
+    const at = cue.props.atSeconds ?? 0;
+    if (video.currentTime < at) {
+      video.currentTime = at;
+    }
+  }, [
+    blockId,
+    completedCues,
+    config.courseId,
+    index,
+    initialMeta.completedCueIndices.length,
+    initialMeta.currentTime,
+    persistEnabled,
+    sortedCues,
+    storage,
+  ]);
 
   const mandatoryIncompleteBefore = useCallback(
     (time: number) => {
@@ -115,6 +172,25 @@ const InteractiveVideoInner = forwardRef<
       return null;
     },
     [sortedCues, completedCues],
+  );
+
+  const activateCue = useCallback(
+    (i: number) => {
+      const cue = sortedCues[i];
+      if (!cue || firedCuesRef.current.has(i)) return;
+      firedCuesRef.current.add(i);
+      videoRef.current?.pause();
+      setIndex(i);
+      setOverlayActive(true);
+      if (lessonId) {
+        track(
+          "video_cue_reached",
+          { blockId, cueIndex: i, atSeconds: cue.props.atSeconds ?? 0, cueLabel: cue.props.label },
+          { lessonId },
+        );
+      }
+    },
+    [blockId, lessonId, setIndex, sortedCues, track],
   );
 
   const onTimeUpdate = () => {
@@ -130,20 +206,9 @@ const InteractiveVideoInner = forwardRef<
 
     for (let i = 0; i < sortedCues.length; i++) {
       if (firedCuesRef.current.has(i)) continue;
-      const cue = sortedCues[i];
-      const at = cue.props.atSeconds ?? 0;
+      const at = sortedCues[i]?.props.atSeconds ?? 0;
       if (t >= at) {
-        firedCuesRef.current.add(i);
-        video.pause();
-        setIndex(i);
-        setOverlayActive(true);
-        if (lessonId) {
-          track(
-            "video_cue_reached",
-            { blockId, cueIndex: i, atSeconds: at, cueLabel: cue.props.label },
-            { lessonId },
-          );
-        }
+        activateCue(i);
         break;
       }
     }
@@ -151,8 +216,12 @@ const InteractiveVideoInner = forwardRef<
 
   const completeCue = () => {
     const cue = sortedCues[index];
-    if (!cue) return;
-    setCompletedCues((prev) => new Set([...prev, index]));
+    if (!cue || !cueCanContinue(cue)) return;
+    setCompletedCues((prev) => {
+      const next = new Set([...prev, index]);
+      completedCuesRef.current = next;
+      return next;
+    });
     setOverlayActive(false);
     if (lessonId) {
       track(
@@ -168,8 +237,6 @@ const InteractiveVideoInner = forwardRef<
     }
     videoRef.current?.play().catch(() => {});
   };
-
-  const activeCue = sortedCues[index];
 
   return (
     <section aria-label={props.title} data-testid="interactive-video" data-lk-block-id={blockId}>
@@ -197,21 +264,38 @@ const InteractiveVideoInner = forwardRef<
             }
           }}
         >
-          {props.captions ? <track kind="captions" src={props.captions} /> : null}
+          {props.captions ? (
+            <track kind="captions" src={props.captions} srcLang="en" label="Captions" default />
+          ) : null}
         </video>
-        {overlayActive && activeCue
-          ? React.cloneElement(activeCue, {
-              key: activeCue.key ?? index,
-              hidden: false,
-              cueIndex: index,
-              parentType: "InteractiveVideo",
-            })
-          : null}
+      </div>
+      <div data-testid="interactive-video-cues">
+        {sortedCues.map((cue, i) =>
+          React.cloneElement(cue, {
+            key: cue.key ?? i,
+            hidden: !overlayActive || i !== index,
+            cueIndex: i,
+            parentType: "InteractiveVideo",
+          }),
+        )}
       </div>
       {overlayActive ? (
-        <button type="button" data-testid="cue-continue" onClick={completeCue}>
-          Continue video
-        </button>
+        <>
+          {activeCue?.props.mustComplete && !canContinueActiveCue ? (
+            <p role="status" data-testid="cue-must-complete-hint">
+              Complete the interaction to continue.
+            </p>
+          ) : null}
+          <button
+            type="button"
+            data-testid="cue-continue"
+            disabled={!canContinueActiveCue}
+            aria-disabled={!canContinueActiveCue}
+            onClick={completeCue}
+          >
+            Continue video
+          </button>
+        </>
       ) : null}
     </section>
   );

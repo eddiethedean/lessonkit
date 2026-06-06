@@ -1,6 +1,6 @@
 import type React from "react";
 import { useMemo } from "react";
-import type { BlockId, CompoundHandle, CourseId } from "@lessonkit/core";
+import type { BlockId, CompoundHandle, CompoundResumeState, CourseId } from "@lessonkit/core";
 import { clampCompoundPageIndex, type StoragePort } from "@lessonkit/core";
 import { useCompoundHandleRef, useCompoundRegistry } from "./CompoundProvider";
 import { useCompoundNavigation } from "./useCompoundNavigation";
@@ -17,6 +17,7 @@ export function useCompoundShell(opts: {
   ref: React.Ref<CompoundHandle>;
   enableSolutionsButton?: boolean;
   storage?: StoragePort;
+  transformState?: (state: CompoundResumeState) => CompoundResumeState;
 }) {
   const ctx = useCompoundRegistry();
 
@@ -28,6 +29,7 @@ export function useCompoundShell(opts: {
     setIndex: opts.setIndex,
     enabled: opts.persistEnabled,
     storage: opts.storage,
+    transformState: opts.transformState,
   });
 
   const { goNext, goPrev, progress } = useCompoundNavigation(opts.pageCount, opts.index, opts.setIndex);

@@ -25,6 +25,7 @@ function EssayInner(
   const [text, setText] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const completedRef = useRef(false);
+  const telemetryReplayedRef = useRef(false);
   const questionId = React.useId();
 
   const minLength = props.minLength ?? 0;
@@ -32,6 +33,7 @@ function EssayInner(
 
   const reset = () => {
     completedRef.current = false;
+    telemetryReplayedRef.current = false;
     setText("");
     setSubmitted(false);
   };
@@ -64,6 +66,24 @@ function EssayInner(
           readBooleanStateField(state, "submitted", (value) => {
             setSubmitted(value);
             completedRef.current = value;
+            if (value && !telemetryReplayedRef.current) {
+              telemetryReplayedRef.current = true;
+              const response = typeof nextText === "string" ? nextText : text;
+              assessment.answer({
+                checkId,
+                interactionType: INTERACTION,
+                question: props.question,
+                response,
+                correct: false,
+              });
+              assessment.complete({
+                checkId,
+                interactionType: INTERACTION,
+                score: 0,
+                maxScore: 1,
+                passingScore: props.passingScore ?? 1,
+              });
+            }
           });
         },
       }),

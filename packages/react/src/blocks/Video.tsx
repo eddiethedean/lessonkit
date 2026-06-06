@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useMemo } from "react";
 import type { BlockId } from "@lessonkit/core";
 import { setLessonkitBlockType } from "../compound/blockType";
+import { normalizeComponentId } from "../runtime/validateComponentId";
 
 export type VideoProps = {
   blockId: BlockId;
@@ -12,8 +13,13 @@ export type VideoProps = {
 };
 
 export function Video(props: VideoProps) {
+  const blockId = useMemo(
+    () => normalizeComponentId(props.blockId, "blockId") as BlockId,
+    [props.blockId],
+  );
+
   return (
-    <section aria-label={props.title ?? "Video"} data-lk-block-id={props.blockId} data-testid="video">
+    <section aria-label={props.title ?? "Video"} data-lk-block-id={blockId} data-testid="video">
       {props.title ? <h3 data-testid="video-title">{props.title}</h3> : null}
       <video
         controls

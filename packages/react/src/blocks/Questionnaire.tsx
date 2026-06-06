@@ -1,8 +1,9 @@
-import React, { useId, useState } from "react";
+import React, { useEffect, useId, useMemo, useState } from "react";
 import type { BlockId } from "@lessonkit/core";
 import { setLessonkitBlockType } from "../compound/blockType";
 import { useLessonkit } from "../hooks";
 import { useEnclosingLessonId } from "../lessonContext";
+import { normalizeComponentId } from "../runtime/validateComponentId";
 
 export type QuestionnaireField = {
   id: string;
@@ -16,6 +17,11 @@ export type QuestionnaireProps = {
 };
 
 export function Questionnaire(props: QuestionnaireProps) {
+  const blockId = useMemo(
+    () => normalizeComponentId(props.blockId, "blockId") as BlockId,
+    [props.blockId],
+  );
+  const fieldsKey = props.fields.map((f) => `${f.id}:${f.type}:${f.label}`).join("|");
   const [values, setValues] = useState<Record<string, string>>(() =>
     Object.fromEntries(props.fields.map((f) => [f.id, ""])),
   );
@@ -24,20 +30,25 @@ export function Questionnaire(props: QuestionnaireProps) {
   const lessonId = useEnclosingLessonId();
   const baseId = useId();
 
+  useEffect(() => {
+    setValues(Object.fromEntries(props.fields.map((f) => [f.id, ""])));
+    setSubmitted(false);
+  }, [blockId, fieldsKey, props.fields]);
+
   const submit = () => {
     if (submitted) return;
     setSubmitted(true);
     if (lessonId) {
       track(
         "questionnaire_submitted",
-        { blockId: props.blockId, fieldCount: props.fields.length },
+        { blockId, fieldCount: props.fields.length },
         { lessonId },
       );
     }
   };
 
   return (
-    <section aria-label="Questionnaire" data-lk-block-id={props.blockId} data-testid="questionnaire">
+    <section aria-label="Questionnaire" data-lk-block-id={blockId} data-testid="questionnaire">
       <form
         onSubmit={(e) => {
           e.preventDefault();

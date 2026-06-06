@@ -465,7 +465,7 @@ These are H5P's "course builders." Each becomes a **framework container** with a
 |----------|------------------|------------------|-----------|------------|
 | P0 | **Interactive Book** | `InteractiveBook` | **1.2.x** ✅ | Page layout, resume state, sub-block catalog |
 | P0 | **Course Presentation** | `SlideDeck` | **1.3.x** ✅ | Slide schema, per-slide block allowlist, keyboard slide nav |
-| P0 | **Interactive Video** | `InteractiveVideo` | **1.4.0** | Video block, `TimedCue`, timed overlays, question contract; Tier B/C/D blocks in **1.4.1–1.4.2** |
+| P0 | **Interactive Video** | `InteractiveVideo` | **1.4.0** ✅ | Video block, `TimedCue`, timed overlays, Tier B/C/D blocks |
 | P0 | **Branching Scenario** | `BranchingScenario` | **1.5.x** | Branch graph, scoring, xAPI branching verbs |
 | P1 | **Question Set (Quiz)** | `AssessmentSequence` | **1.1.x** ✅ | Question-type contract (below) |
 | P1 | **Column** → **Page** | `Page` | **1.2.x** ✅ | Unified semantics with Interactive Book chapters |
@@ -493,16 +493,16 @@ Extend beyond MCQ via a formal **assessment contract** (H5P's `H5P.Question` pat
 | P0 | **Mark the Words** | `MarkTheWords` ✅ | Click/highlight; keyboard-selectable tokens |
 | P1 | **Single Choice Set** | `SingleChoiceSet` | Sequential single-question slides |
 | P1 | **Multiple Choice** (variants) | Extend `Quiz` | Multi-select, shuffle, feedback modes |
-| P1 | **Summary** | `Summary` | Construct summary from statement bank; ships **1.4.1** |
+| P1 | **Summary** | `Summary` | Construct summary from statement bank; ships **1.4.0** ✅ |
 | P1 | **Sort the Paragraphs** | `SortParagraphs` | Ordering task; drag or keyboard reorder |
 | P1 | **Guess the Answer** | `GuessTheAnswer` | Reveal answer; optional scoring |
 | P1 | **Multimedia Choice** | `MultimediaChoice` | Image/audio options (a11y captions required) |
 | P2 | **Speak the Words** / **Speak the Words Set** | `SpeakTheWords`, `SpeakTheWordsSet` | Web Speech API; graceful degradation |
 | P2 | **Dictation** | `Dictation` | Audio prompt + text compare |
 | P2 | **Complex / Advanced Fill in the Blanks** | `AdvancedBlanks` | Dropdown/markup blanks; higher a11y bar |
-| P3 | **Arithmetic Quiz** | `ArithmeticQuiz` | Timed math; optional (no H5P Question Set contract); ships **1.4.2** |
-| P3 | **Essay** (third-party in H5P) | `Essay` | AI/manual grading hooks via `scoreAssessment` plugin; ships **1.4.2** |
-| P3 | **Questionnaire** | `Questionnaire` | Unscored survey; feedback export; ships **1.4.2** |
+| P3 | **Arithmetic Quiz** | `ArithmeticQuiz` | Timed math; optional (no H5P Question Set contract); ships **1.4.0** ✅ |
+| P3 | **Essay** (third-party in H5P) | `Essay` | AI/manual grading hooks via `scoreAssessment` plugin; ships **1.4.0** ✅ |
+| P3 | **Questionnaire** | `Questionnaire` | Unscored survey; feedback export; ships **1.4.0** ✅ |
 
 **Framework milestone:** **1.1.x — Assessment contract v1** — shared `Assessment` base, catalog entries, Storybook, e2e for Tier B P0 items.
 
@@ -516,8 +516,8 @@ Extend beyond MCQ via a formal **assessment contract** (H5P's `H5P.Question` pat
 | P2 | **Image Juxtaposition** | `ImageJuxtaposition` | Before/after slider |
 | P2 | **Agamotto (Image Blender)** | `ImageSequence` | Progressive image sequence |
 | P2 | **Collage** | `Collage` | Multi-image layout block |
-| P2 | **Image Pairing** / **Image Sequencing** | `ImagePairing`, `ImageSequencing` | Memory/order games; ships **1.4.1** |
-| P2 | **Memory Game** | `MemoryGame` | Card flip; focus management; ships **1.4.1** |
+| P2 | **Image Pairing** / **Image Sequencing** | `ImagePairing`, `ImageSequencing` | Memory/order games; ships **1.4.0** ✅ |
+| P2 | **Memory Game** | `MemoryGame` | Card flip; focus management; ships **1.4.0** ✅ |
 | P3 | **Iframe Embedder** | `Embed` (restricted) | Sandboxed, responsive; opt-in for security |
 | P3 | **Chart** | `Chart` | Bar/pie; accessible data table fallback |
 
@@ -530,11 +530,11 @@ Extend beyond MCQ via a formal **assessment contract** (H5P's `H5P.Question` pat
 | P1 | **Flashcards** | `Flashcards` ✅ | Study mode; optional self-score |
 | P2 | **Timeline** | `Timeline` | Events + media; fragile as sub-content in H5P—test resize |
 | P2 | **Table** | `Table` | Rich text table |
-| P2 | **Information Wall** | `InformationWall` | Searchable panels; ships **1.4.2** |
+| P2 | **Information Wall** | `InformationWall` | Searchable panels; ships **1.4.0** ✅ |
 | P3 | **Exportable Text Area / Cornell** | `CornellNotes`, `ExportableNotes` | Learner export (PDF/text) |
 | P3 | **Personality Quiz** | `PersonalityQuiz` | Outcome buckets; community pattern, lower priority |
 | P1 | **Audio Recorder** | `AudioRecorder` | Learner recording; consent + storage policy |
-| P2 | **Slideshow (parallax)** | `ParallaxSlideshow` | Presentation variant; respect `prefers-reduced-motion`; ships **1.4.2** |
+| P2 | **Slideshow (parallax)** | `ParallaxSlideshow` | Presentation variant; respect `prefers-reduced-motion`; ships **1.4.0** ✅ |
 
 **Primitives (H5P sub-content):** `Text`, `Heading`, `Image`, and media blocks with shared semantics for compounds.
 
@@ -602,9 +602,7 @@ When implementing backlog items, follow H5P's constraints **in React form**:
 Framework 1.1.x   Assessment contract + Tier B P0 + H5P doc checklist per block
 Framework 1.2.x   Page/InteractiveBook foundation + resume state + catalog allowlists + H5P docs
 Framework 1.3.x   SlideDeck (Course Presentation) + H5P docs
-Framework 1.4.0   InteractiveVideo + Video + TimedCue + video telemetry + golden example
-Framework 1.4.1   Summary + ImagePairing + ImageSequencing + MemoryGame
-Framework 1.4.2   InformationWall + ParallaxSlideshow + Questionnaire + Essay + ArithmeticQuiz
+Framework 1.4.0   InteractiveVideo + Video + TimedCue + Tier B/C/D blocks + golden example
 Framework 1.5.x   BranchingScenario + branch telemetry + H5P docs
 Framework 1.6.x   Interchange format + optional H5P import spike + import guide callouts
 Framework 1.7.x+  Tier C–E blocks by demand; plugin marketplace; H5P doc checklist each

@@ -24,17 +24,21 @@ function SummaryInner(
 ) {
   const checkId = useMemo(() => normalizeComponentId(props.checkId, "checkId"), [props.checkId]);
   const assessment = useAssessmentState(props.enclosingLessonId);
-  const [selected, setSelected] = useState<string[]>([]);
+  const [selectedIndices, setSelectedIndices] = useState<number[]>([]);
   const [passed, setPassed] = useState(false);
   const [checked, setChecked] = useState(false);
   const completedRef = useRef(false);
+  const telemetryReplayedRef = useRef(false);
 
   const correctKey = props.correct.join("\0");
   const statementsKey = props.statements.join("\0");
 
+  const selected = selectedIndices.map((i) => props.statements[i] ?? "");
+
   const reset = () => {
     completedRef.current = false;
-    setSelected([]);
+    telemetryReplayedRef.current = false;
+    setSelectedIndices([]);
     setPassed(false);
     setChecked(false);
   };
@@ -49,7 +53,9 @@ function SummaryInner(
   const maxScore = props.correct.length || 1;
   const score = isCorrect ? maxScore : 0;
   const passedThreshold = meetsPassingThreshold(score, maxScore, props.passingScore);
-  const available = props.statements.filter((s) => !selected.includes(s));
+  const availableIndices = props.statements
+    .map((_, i) => i)
+    .filter((i) => !selectedIndices.includes(i));
 
   const handle = useMemo(
     () =>
@@ -57,7 +63,7 @@ function SummaryInner(
         checkId,
         getScore: () => (passed ? score : 0),
         getMaxScore: () => maxScore,
-        getAnswerGiven: () => selected.length > 0,
+        getAnswerGiven: () => selectedIndices.length > 0,
         resetTask: reset,
         showSolutions: () => {},
         getXAPIData: () => ({
@@ -68,35 +74,79 @@ function SummaryInner(
           score: passed ? score : 0,
           maxScore,
         }),
-        getCurrentState: () => ({ selected, passed, checked }),
+        getCurrentState: () => ({ selectedIndices, passed, checked }),
         resume: (state) => {
-          if (Array.isArray(state.selected)) setSelected([...(state.selected as string[])]);
+          let nextIndices: number[] = [];
+          if (Array.isArray(state.selectedIndices)) {
+            nextIndices = [...(state.selectedIndices as number[])];
+          } else if (Array.isArray(state.selected)) {
+            const legacy = state.selected as string[];
+            nextIndices = legacy
+              .map((text) => props.statements.indexOf(text))
+              .filter((i) => i >= 0);
+          }
+          setSelectedIndices(nextIndices);
+          const nextSelected = nextIndices.map((i) => props.statements[i] ?? "");
+          const nextIsCorrect =
+            nextSelected.length === props.correct.length &&
+            nextSelected.every((s, i) => s === props.correct[i]);
+          const nextScore = nextIsCorrect ? maxScore : 0;
           readBooleanStateField(state, "passed", (value) => {
             setPassed(value);
             completedRef.current = value;
+            if (value) {
+              if (!telemetryReplayedRef.current) {
+                telemetryReplayedRef.current = true;
+                assessment.answer({
+                  checkId,
+                  interactionType: INTERACTION,
+                  response: nextSelected,
+                  correct: true,
+                });
+                assessment.complete({
+                  checkId,
+                  interactionType: INTERACTION,
+                  score: nextScore,
+                  maxScore,
+                  passingScore: props.passingScore ?? maxScore,
+                });
+              }
+            }
           });
           readBooleanStateField(state, "checked", setChecked);
         },
       }),
-    [checkId, checked, maxScore, passed, passedThreshold, score, selected],
+    [
+      assessment,
+      checkId,
+      checked,
+      maxScore,
+      passed,
+      passedThreshold,
+      props.passingScore,
+      props.statements,
+      score,
+      selected,
+      selectedIndices.length,
+    ],
   );
 
   useAssessmentHandleRegistration(checkId, handle, ref);
 
-  const addStatement = (statement: string) => {
+  const addStatement = (statementIndex: number) => {
     if (passed && !props.enableRetry) return;
     setChecked(false);
-    setSelected((prev) => [...prev, statement]);
+    setSelectedIndices((prev) => [...prev, statementIndex]);
   };
 
   const removeLast = () => {
     if (passed && !props.enableRetry) return;
     setChecked(false);
-    setSelected((prev) => prev.slice(0, -1));
+    setSelectedIndices((prev) => prev.slice(0, -1));
   };
 
   const check = () => {
-    if (selected.length === 0) return;
+    if (selectedIndices.length === 0) return;
     setChecked(true);
     assessment.answer({
       checkId,
@@ -122,27 +172,27 @@ function SummaryInner(
       <p>Select statements in order to build the summary.</p>
       <ol data-testid="summary-selected">
         {selected.map((s, i) => (
-          <li key={`${i}-${s}`}>{s}</li>
+          <li key={`${i}-${selectedIndices[i]}`}>{s}</li>
         ))}
       </ol>
       <div role="group" aria-label="Available statements">
-        {available.map((s) => (
+        {availableIndices.map((statementIndex) => (
           <button
-            key={s}
+            key={statementIndex}
             type="button"
-            data-testid={`summary-statement-${props.statements.indexOf(s)}`}
+            data-testid={`summary-statement-${statementIndex}`}
             disabled={passed && !props.enableRetry}
-            onClick={() => addStatement(s)}
+            onClick={() => addStatement(statementIndex)}
             style={{ display: "block", margin: "0.25rem 0" }}
           >
-            {s}
+            {props.statements[statementIndex]}
           </button>
         ))}
       </div>
       <button
         type="button"
         data-testid="summary-undo"
-        disabled={(passed && !props.enableRetry) || selected.length === 0}
+        disabled={(passed && !props.enableRetry) || selectedIndices.length === 0}
         onClick={removeLast}
       >
         Remove last
@@ -150,7 +200,7 @@ function SummaryInner(
       <button
         type="button"
         data-testid="summary-check"
-        disabled={selected.length === 0 || (passed && !props.enableRetry)}
+        disabled={selectedIndices.length === 0 || (passed && !props.enableRetry)}
         onClick={check}
       >
         Check

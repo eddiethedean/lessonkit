@@ -23,7 +23,7 @@ LessonKit emits versioned telemetry events from `@lessonkit/react` and maps them
 | `slide_viewed` | `SlideDeck` navigation (1.3+) | `blockId`, `slideIndex`, `slideTitle` |
 | `video_cue_reached` | `InteractiveVideo` cue activation (1.4+) | `blockId`, `cueIndex`, `atSeconds`, `cueLabel?` |
 | `video_segment_completed` | `InteractiveVideo` cue dismissed/completed (1.4+) | `blockId`, `segmentIndex`, `atSeconds`, `segmentLabel?` |
-| `memory_card_flipped` | `MemoryGame` card flip (1.4+) | `blockId`, `cardIndex`, `pairId?` |
+| `memory_card_flipped` | `MemoryGame` card flip (1.4+) | `blockId`, `cardIndex`, `face` |
 | `information_wall_search` | `InformationWall` search (1.4+) | `blockId`, `query` |
 | `parallax_slide_viewed` | `ParallaxSlideshow` slide view (1.4+) | `blockId`, `slideIndex` |
 | `questionnaire_submitted` | `Questionnaire` submit (1.4+) | `blockId`, `fieldCount` |

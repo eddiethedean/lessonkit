@@ -798,4 +798,44 @@ describe("InteractiveVideo", () => {
     fireEvent.click(screen.getByTestId("cue-continue"));
     expect(screen.queryByTestId("cue-continue")).toBeNull();
   });
+
+  it("blocks Continue until mustComplete assessment is answered", () => {
+    render(
+      wrap(
+        <InteractiveVideo blockId="iv-mc" title="Briefing" src="/sample.mp4">
+          <TimedCue atSeconds={0} label="Check" mustComplete>
+            <TrueFalse checkId="iv-mc-tf" question="Ready?" answer={true} />
+          </TimedCue>
+        </InteractiveVideo>,
+      ),
+    );
+    const video = screen.getByTestId("interactive-video-player") as HTMLVideoElement;
+    Object.defineProperty(video, "currentTime", { value: 0.5, writable: true });
+    fireEvent.timeUpdate(video);
+    const continueBtn = screen.getByTestId("cue-continue") as HTMLButtonElement;
+    expect(continueBtn.disabled).toBe(true);
+    fireEvent.click(screen.getByRole("radio", { name: "True" }));
+    expect(continueBtn.disabled).toBe(false);
+  });
+
+  it("aggregates showVideoScore across all cue assessments", () => {
+    render(
+      wrap(
+        <InteractiveVideo blockId="iv-score" title="Briefing" src="/sample.mp4" showVideoScore>
+          <TimedCue atSeconds={0} label="Q1">
+            <TrueFalse checkId="iv-s1" question="One?" answer={true} />
+          </TimedCue>
+          <TimedCue atSeconds={10} label="Q2">
+            <TrueFalse checkId="iv-s2" question="Two?" answer={false} />
+          </TimedCue>
+        </InteractiveVideo>,
+      ),
+    );
+    expect(screen.getByTestId("video-score").textContent).toContain("Score: 0 / 2");
+    const video = screen.getByTestId("interactive-video-player") as HTMLVideoElement;
+    Object.defineProperty(video, "currentTime", { value: 0.5, writable: true });
+    fireEvent.timeUpdate(video);
+    fireEvent.click(screen.getByRole("radio", { name: "True" }));
+    expect(screen.getByTestId("video-score").textContent).toContain("Score: 1 / 2");
+  });
 });

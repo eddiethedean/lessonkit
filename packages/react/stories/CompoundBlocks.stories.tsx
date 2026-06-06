@@ -4,12 +4,17 @@ import {
   Course,
   Heading,
   InteractiveBook,
+  InteractiveVideo,
   Lesson,
+  MemoryGame,
   Page,
   Slide,
   SlideDeck,
+  Summary,
   Text,
+  TimedCue,
   TrueFalse,
+  Video,
 } from "../src";
 import { storyConfig } from "./helpers";
 
@@ -77,6 +82,66 @@ export const AccordionBlock: Story = {
           sections={[
             { id: "one", title: "Section one", content: <Text>First panel content.</Text> },
             { id: "two", title: "Section two", content: <Text>Second panel content.</Text> },
+          ]}
+        />
+      </Lesson>
+    </Course>
+  ),
+};
+
+/** H5P: Interactive Video */
+export const InteractiveVideoBlock: Story = {
+  render: () => (
+    <Course title="Interactive video" courseId="storybook-iv" config={storyConfig}>
+      <Lesson title="Briefing" lessonId="lesson-iv">
+        <InteractiveVideo blockId="briefing-iv" title="Safety briefing" src="/sample.mp4" showVideoScore>
+          <TimedCue atSeconds={5} label="Check" mustComplete>
+            <TrueFalse checkId="iv-tf" question="PPE required?" answer={true} />
+          </TimedCue>
+        </InteractiveVideo>
+      </Lesson>
+    </Course>
+  ),
+};
+
+/** Self-hosted video primitive */
+export const VideoBlock: Story = {
+  render: () => (
+    <Course title="Video" courseId="storybook-video" config={storyConfig}>
+      <Lesson title="Clip" lessonId="lesson-video">
+        <Video blockId="intro-video" src="/sample.mp4" title="Introduction" />
+      </Lesson>
+    </Course>
+  ),
+};
+
+/** H5P: Summary */
+export const SummaryBlock: Story = {
+  render: () => (
+    <Course title="Summary" courseId="storybook-summary" config={storyConfig}>
+      <Lesson title="Construct" lessonId="lesson-summary">
+        <Summary
+          checkId="summary-1"
+          statements={["Wear PPE", "Report hazards", "Stay alert"]}
+          correct={["Wear PPE", "Report hazards"]}
+        />
+      </Lesson>
+    </Course>
+  ),
+};
+
+/** H5P: Memory Game */
+export const MemoryGameBlock: Story = {
+  render: () => (
+    <Course title="Memory" courseId="storybook-memory" config={storyConfig}>
+      <Lesson title="Pairs" lessonId="lesson-memory">
+        <MemoryGame
+          blockId="memory-1"
+          pairs={[
+            { id: "a", label: "Hat" },
+            { id: "b", label: "Hat" },
+            { id: "c", label: "Vest" },
+            { id: "d", label: "Vest" },
           ]}
         />
       </Lesson>

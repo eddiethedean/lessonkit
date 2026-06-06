@@ -40,6 +40,8 @@ export function useCompoundPersistence(opts: {
   setIndex: React.Dispatch<React.SetStateAction<number>>;
   enabled: boolean;
   storage?: StoragePort;
+  /** Merges extra resume fields (e.g. InteractiveVideo timeline meta) before save. */
+  transformState?: (state: CompoundResumeState) => CompoundResumeState;
 }): void {
   const lessonkitCtx = useContext(LessonkitContext);
   const storage = opts.storage ?? lessonkitCtx?.storage ?? createSessionStoragePort();
@@ -95,6 +97,8 @@ export function useCompoundPersistence(opts: {
 
   const buildStateRef = useRef(buildState);
   buildStateRef.current = buildState;
+  const transformStateRef = useRef(opts.transformState);
+  transformStateRef.current = opts.transformState;
   const persistNowRef = useRef<() => void>(() => {});
 
   const finalizeHydration = useCallback(
@@ -163,7 +167,9 @@ export function useCompoundPersistence(opts: {
   const persistNow = useCallback(() => {
     if (!opts.enabled || !opts.courseId) return;
     if (skipSaveUntilHydratedRef.current) return;
-    saveResume(buildStateRef.current());
+    const built = buildStateRef.current();
+    const state = transformStateRef.current ? transformStateRef.current(built) : built;
+    saveResume(state);
   }, [opts.enabled, opts.courseId, saveResume]);
 
   useEffect(() => {

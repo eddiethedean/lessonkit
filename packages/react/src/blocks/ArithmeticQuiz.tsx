@@ -39,11 +39,11 @@ function ArithmeticQuizInner(
     props.timeLimitSeconds ?? null,
   );
   const completedRef = useRef(false);
-  const timerStartedRef = useRef(false);
+  const telemetryReplayedRef = useRef(false);
 
   const reset = () => {
     completedRef.current = false;
-    timerStartedRef.current = false;
+    telemetryReplayedRef.current = false;
     setAnswers(Object.fromEntries(props.problems.map((_, i) => [i, ""])));
     setPassed(false);
     setChecked(false);
@@ -117,10 +117,34 @@ function ArithmeticQuizInner(
         getCurrentState: () => ({ answers, passed, checked, timeLeft }),
         resume: (state) => {
           const raw = state.answers;
-          if (raw && typeof raw === "object") setAnswers({ ...(raw as Record<number, string>) });
+          let nextAnswers = answers;
+          if (raw && typeof raw === "object") {
+            nextAnswers = { ...(raw as Record<number, string>) };
+            setAnswers(nextAnswers);
+          }
           readBooleanStateField(state, "passed", (value) => {
             setPassed(value);
             completedRef.current = value;
+            if (value && !telemetryReplayedRef.current) {
+              telemetryReplayedRef.current = true;
+              let nextScore = 0;
+              props.problems.forEach((p, i) => {
+                if ((nextAnswers[i] ?? "").trim() === p.answer.trim()) nextScore += 1;
+              });
+              assessment.answer({
+                checkId,
+                interactionType: INTERACTION,
+                response: nextAnswers,
+                correct: true,
+              });
+              assessment.complete({
+                checkId,
+                interactionType: INTERACTION,
+                score: nextScore,
+                maxScore,
+                passingScore: props.passingScore ?? maxScore,
+              });
+            }
           });
           readBooleanStateField(state, "checked", setChecked);
           if (typeof state.timeLeft === "number") setTimeLeft(state.timeLeft);
@@ -133,9 +157,6 @@ function ArithmeticQuizInner(
 
   const onInput = (index: number, value: string) => {
     if (passed && !props.enableRetry) return;
-    if (!timerStartedRef.current && props.timeLimitSeconds) {
-      timerStartedRef.current = true;
-    }
     setChecked(false);
     setAnswers((prev) => ({ ...prev, [index]: value }));
   };

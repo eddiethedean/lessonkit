@@ -36,9 +36,11 @@ function ImageSequencingInner(
   const [passed, setPassed] = useState(false);
   const [checked, setChecked] = useState(false);
   const completedRef = useRef(false);
+  const telemetryReplayedRef = useRef(false);
 
   const reset = () => {
     completedRef.current = false;
+    telemetryReplayedRef.current = false;
     setOrder(props.images.map((i) => i.id));
     setPassed(false);
     setChecked(false);
@@ -84,10 +86,32 @@ function ImageSequencingInner(
         }),
         getCurrentState: () => ({ order, passed, checked }),
         resume: (state) => {
-          if (Array.isArray(state.order)) setOrder([...(state.order as string[])]);
+          let nextOrder = order;
+          if (Array.isArray(state.order)) {
+            nextOrder = [...(state.order as string[])];
+            setOrder(nextOrder);
+          }
           readBooleanStateField(state, "passed", (value) => {
             setPassed(value);
             completedRef.current = value;
+            if (value && !telemetryReplayedRef.current) {
+              telemetryReplayedRef.current = true;
+              const nextIsCorrect = nextOrder.every((id, i) => id === props.correctOrder[i]);
+              const nextScore = nextIsCorrect ? maxScore : 0;
+              assessment.answer({
+                checkId,
+                interactionType: INTERACTION,
+                response: nextOrder,
+                correct: nextIsCorrect,
+              });
+              assessment.complete({
+                checkId,
+                interactionType: INTERACTION,
+                score: nextScore,
+                maxScore,
+                passingScore: props.passingScore ?? maxScore,
+              });
+            }
           });
           readBooleanStateField(state, "checked", setChecked);
         },

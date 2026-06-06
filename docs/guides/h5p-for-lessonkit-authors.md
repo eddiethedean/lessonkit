@@ -69,7 +69,7 @@ A few LessonKit ids differ from H5P labels where we already shipped or need clea
 | IDs | Per-content params | Required `courseId`, `lessonId`, `checkId` |
 | Analytics | xAPI from library | Telemetry catalog + `@lessonkit/xapi` |
 | Theming | Per content-type CSS | Global `--lk-*` via `@lessonkit/themes` |
-| Nesting | Curated sub-content lists | Same idea via compound blocks + catalog allowlists (planned) |
+| Nesting | Curated sub-content lists | Same idea via compound blocks + catalog allowlists (shipped in 1.2.x+) |
 
 ## Import from existing H5P content
 

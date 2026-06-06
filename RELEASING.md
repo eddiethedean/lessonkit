@@ -2,6 +2,26 @@
 
 Published packages (`v*.*.*` tag → [Release](.github/workflows/release.yml)): `@lessonkit/core`, `@lessonkit/xapi`, `@lessonkit/accessibility`, `@lessonkit/themes`, `@lessonkit/lxpack`, `@lessonkit/react`, `@lessonkit/cli`
 
+## Publishing 1.4.0
+
+### 1.4.0 checklist
+
+| Item | Status |
+|------|--------|
+| All seven `@lessonkit/*` packages at `1.4.0` | Done |
+| [CHANGELOG.md](CHANGELOG.md) `## [1.4.0]` documents InteractiveVideo + bundled blocks | Done |
+| Sphinx `docs/conf.py` `release` = `1.4.0` | Done |
+| [MIGRATION-1.3-to-1.4.md](docs/MIGRATION-1.3-to-1.4.md) in Sphinx toctree | Done |
+| `lessonkit init` template pins `^1.4.0` | Verify after `copy-template` |
+| No pending `.changeset/*.md` files | Remove before tag |
+| `npm run copy-template -w @lessonkit/cli` (template in sync) | Run before tag |
+| `examples/interactive-video` integration + e2e golden path | Done |
+| `npm run lint` + `typecheck` + `test` + `test:integration` + `test:e2e` | Verify before tag |
+| `npm audit --omit=dev --audit-level=high` | Verify before tag |
+| Git tag `v1.4.0` | **Create when ready** |
+
+> **Do not create or push `v1.4.0`** until you intend to publish to npm.
+
 ## Publishing 1.3.1
 
 ### 1.3.1 checklist

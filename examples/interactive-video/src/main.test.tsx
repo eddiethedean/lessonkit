@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-describe("slide-deck example", () => {
+describe("interactive-video example", () => {
   it("loads", () => {
     expect(true).toBe(true);
   });

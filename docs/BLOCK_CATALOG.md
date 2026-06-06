@@ -199,8 +199,6 @@ Adds content primitives (`Text`, `Heading`, `Image`), compound containers (`Page
 
 **SlideDeck props:** `blockId` (required), `title`, `showDeckScore`, `Slide` children. Implements `CompoundHandle` with session resume (`persistCompoundState` default `true`).
 
-**Planned slide children:** `Video`, `Summary` — not in 1.3.0 allowlist yet.
-
 ### Catalog v3 additions (framework 1.4.0)
 
 | Block | H5P display name | Notes |

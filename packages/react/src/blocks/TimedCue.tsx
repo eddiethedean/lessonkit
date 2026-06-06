@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
+import { trapFocus } from "@lessonkit/accessibility";
 import type { BlockId } from "@lessonkit/core";
 import { setLessonkitBlockType } from "../compound/blockType";
 import { CompoundPageIndexProvider } from "../compound/CompoundPageIndexContext";
@@ -18,14 +19,26 @@ export type TimedCueProps = {
 export function TimedCue(props: TimedCueProps) {
   validateCompoundChildren("TimedCue", props.children, true);
   const child = React.Children.only(props.children);
+  const overlayRef = useRef<HTMLDivElement>(null);
 
-  if (props.hidden) {
-    return null;
-  }
+  useEffect(() => {
+    if (props.hidden || !overlayRef.current) return;
+    const trap = trapFocus(overlayRef.current, { restoreFocus: false });
+    trap.activate();
+    const firstFocusable = overlayRef.current.querySelector<HTMLElement>(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+    );
+    firstFocusable?.focus();
+    return () => trap.deactivate();
+  }, [props.hidden, props.cueIndex]);
 
   return (
     <div
+      ref={overlayRef}
       role="dialog"
+      aria-modal={props.hidden ? undefined : true}
+      aria-hidden={props.hidden ? true : undefined}
+      hidden={props.hidden ? true : undefined}
       aria-label={props.label ?? `Interaction at ${props.atSeconds} seconds`}
       data-testid={`timed-cue-${props.cueIndex ?? 0}`}
       data-lk-cue-at={props.atSeconds}
@@ -39,7 +52,7 @@ export function TimedCue(props: TimedCueProps) {
         marginTop: "0.5rem",
       }}
     >
-      {props.label ? <p data-testid="timed-cue-label">{props.label}</p> : null}
+      {props.hidden ? null : props.label ? <p data-testid="timed-cue-label">{props.label}</p> : null}
       <CompoundPageIndexProvider pageIndex={props.cueIndex ?? 0}>
         {child}
       </CompoundPageIndexProvider>
