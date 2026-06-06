@@ -34,7 +34,7 @@ describe("xAPI packaging preflight", () => {
 
     expect(result.ok).toBe(false);
     if (!result.ok) {
-      expect(result.issues.some((i) => i.path === "course.tracking.xapi.activityIri")).toBe(true);
+      expect(result.issues.some((i) => i.path === "tracking.xapi.activityIri")).toBe(true);
     }
   });
 });
