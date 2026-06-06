@@ -72,6 +72,26 @@ Release notes: [changelog](project/changelog.md) on this site · [GitHub](https:
 
 ```{toctree}
 :maxdepth: 1
+:caption: Getting started
+
+guides/faq
+guides/architecture-overview
+guides/react-developers/getting-started-in-5-minutes
+guides/vibe-coding/getting-started
+guides/h5p-for-lessonkit-authors
+```
+
+```{toctree}
+:maxdepth: 1
+:caption: FAQ and troubleshooting
+
+guides/faq
+guides/react-developers/troubleshooting
+guides/vibe-coding/troubleshooting
+```
+
+```{toctree}
+:maxdepth: 1
 :caption: Examples
 
 examples/index
@@ -111,7 +131,9 @@ guides/react-developers/telemetry-and-xapi
 guides/react-developers/production-checklist
 guides/react-developers/theming-and-accessibility
 guides/react-developers/packaging-and-cli
+guides/react-developers/deployment-guide
 guides/react-developers/export-parity
+guides/react-developers/troubleshooting
 guides/react-developers/plugin-cookbook
 guides/react-developers/contributing-to-the-monorepo
 ```
@@ -125,6 +147,7 @@ reference/api
 reference/cli
 reference/core
 reference/packaging
+reference/lms-compatibility
 reference/identity
 reference/telemetry
 reference/xapi
@@ -138,8 +161,10 @@ reference/lxpack-upgrades
 
 ```{toctree}
 :maxdepth: 1
-:caption: Project
+:caption: Project and releases
 
+guides/upgrading-lessonkit
+guides/enterprise-evaluation
 project/changelog
 project/good-first-contributions
 project/security

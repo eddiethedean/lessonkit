@@ -14,13 +14,7 @@ cd my-course
 npm run dev
 ```
 
-See [Getting started in 5 minutes](getting-started-in-5-minutes.md) for build, SCORM packaging, and output paths.
-
-:::{admonition} Production builds
-:class: warning
-
-**Tracking defaults on** when `config.tracking` is omitted or partially set. `npm run build` followed by preview rejects console-only sinks unless you wire real transports (see `createFetchBatchSink` below) or set `tracking: { enabled: false }`. xAPI behaves similarly—provide `xapi.transport` or `xapi: { enabled: false }`. Details: [production checklist](production-checklist.md).
-:::
+See [Getting started in 5 minutes](getting-started-in-5-minutes.md) for build, SCORM packaging, LMS bridge, and output paths.
 
 ## Add to an existing Vite + React app
 
@@ -31,7 +25,45 @@ npm install -D @lessonkit/cli @lessonkit/xapi
 
 `@lessonkit/react` already depends on `core`, `themes`, `xapi`, and `lxpack`. Add `@lessonkit/core` only for headless APIs; add `@lessonkit/xapi` in devDependencies when you want typed `XAPIStatement` imports in app code.
 
-Wrap your app (or course subtree):
+### Minimal integration
+
+Start with telemetry and xAPI disabled until your course UI works:
+
+```tsx
+import { useMemo } from "react";
+import { Course, Lesson, Quiz, Scenario, ThemeProvider } from "@lessonkit/react";
+
+export default function App() {
+  const config = useMemo(
+    () => ({ tracking: { enabled: false }, xapi: { enabled: false } }),
+    [],
+  );
+
+  return (
+    <ThemeProvider mode="light" preset="default">
+      <Course title="My Course" courseId="my-course" config={config}>
+        <Lesson title="Intro" lessonId="intro">
+          <Scenario>
+            <p>Welcome.</p>
+          </Scenario>
+          <Quiz
+            checkId="intro-check"
+            question="Ready to continue?"
+            choices={["No", "Yes"]}
+            answer="Yes"
+          />
+        </Lesson>
+      </Course>
+    </ThemeProvider>
+  );
+}
+```
+
+Add a matching `lessonkit.json` at the project root (or run `lessonkit init` in a fresh folder and copy the manifest shape). See [project structure](project-structure.md).
+
+### Production wiring
+
+When you are ready for analytics and LRS delivery, wire fetch transports and observability hooks—or use `npx @lessonkit/cli init` and adapt `src/courseConfig.ts`:
 
 ```tsx
 import { useMemo } from "react";
@@ -43,6 +75,7 @@ export default function App() {
     const xapiFetch = createFetchTransport({ url: "/api/xapi/statements", timeoutMs: 30_000 });
     const analytics = createFetchBatchSink({ url: "/api/telemetry/batch", timeoutMs: 30_000 });
     return {
+      lxpack: { bridge: "auto" },
       tracking: {
         batchSink: analytics.batchSink,
         exitBatchSink: analytics.exitBatchSink,
@@ -58,13 +91,13 @@ export default function App() {
         onXapiQueueDepth: (depth) => depth > 100 && console.warn("[xapi] queue", depth),
         onXapiQueueCap: () => console.warn("[xapi] queue cap"),
         onLxpackBridgeMiss: (event) => console.warn("[bridge]", event.name),
+        onXapiTransportError: (err) => console.error("[xapi]", err),
       },
     };
   }, []);
 
   return (
     <ThemeProvider mode="light" preset="default">
-      {/* Course wraps LessonkitProvider; pass config here */}
       <Course title="My Course" courseId="my-course" config={config}>
         <Lesson title="Intro" lessonId="intro">
           <Scenario>
@@ -86,7 +119,13 @@ export default function App() {
 :::{admonition} Local development only
 :class: note
 
-The example above uses `console.*` in observability hooks for visibility while building. In production, send these signals to your monitoring stack—see [production checklist](production-checklist.md).
+The production example uses `console.*` in observability hooks for visibility while building. In production, send these signals to your monitoring stack—see [production checklist](production-checklist.md).
+:::
+
+:::{admonition} Production builds
+:class: warning
+
+**Tracking defaults on** when `config.tracking` is omitted or partially set. Production preview rejects console-only sinks unless you wire real transports or set `tracking: { enabled: false }`. Details: [production checklist](production-checklist.md) · [Troubleshooting](troubleshooting.md).
 :::
 
 (keep-react-ids-in-sync-with-lessonkitjson)=
@@ -117,7 +156,9 @@ Rules of thumb:
 | `courseId` mismatch | Align `Course` and `course.courseId` (package validates React source) |
 | Empty `dist/` | Run `npm run build` before `lessonkit package` |
 | Wrong layout | Use `"layout": "single-spa"` for standard CLI package |
-:::
+| Cannot find SCORM zip | Default: `.lxpack/course/.lxpack/out/course-scorm12.zip` — see [Troubleshooting](troubleshooting.md) |
+
+More fixes: [Troubleshooting](troubleshooting.md) · [FAQ](../faq.md).
 
 ## Monorepo example
 
@@ -135,5 +176,6 @@ npm -w lessonkit-example-react-vite run dev
 - [Production checklist](production-checklist.md)
 - [Project structure](project-structure.md)
 - [Components and hooks](components-and-hooks.md)
+- [Troubleshooting](troubleshooting.md)
 - [Glossary](../../reference/glossary.md)
 - [Packaging and CLI](packaging-and-cli.md)

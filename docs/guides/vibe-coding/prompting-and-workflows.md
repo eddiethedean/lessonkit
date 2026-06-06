@@ -51,7 +51,7 @@ Emit no new lessonIds; keep existing lessonId on the Lesson component.
 ## Workflow E — hand off to LMS admin
 
 1. You run `lessonkit build` and `lessonkit package --target scorm12`
-2. You send the ZIP from `.lxpack/out/` (path may vary—CLI prints it)
+2. You send the ZIP from the path the CLI prints (default: `.lxpack/course/.lxpack/out/course-scorm12.zip`)
 3. Admin uploads to LMS; you do **not** need to explain React
 
 ## Prompts to avoid

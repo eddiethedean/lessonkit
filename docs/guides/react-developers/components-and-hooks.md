@@ -66,6 +66,36 @@ Canonical block list, props, and contracts: [Block catalog reference](../../refe
 
 `Course` accepts `config` for tracking/xAPI and optional `sinks` (same shape as `LessonkitProvider`).
 
+## Common optional props
+
+Full contracts: [Block catalog](../../reference/block-catalog.md) · [Storybook](https://eddiethedean.github.io/lessonkit/storybook/).
+
+| Component | Optional props | Notes |
+| --- | --- | --- |
+| `Course` | `config`, `className` | `config`: tracking, xAPI, `lxpack.bridge`, observability, plugins |
+| `Lesson` | `className` | Completes on unmount when another lesson becomes active |
+| `Quiz` | `autoCheck`, `disabled`, `className` | `autoCheck` default true; exact string match on `answer` |
+| `Scenario` | `blockId` | Enables block-level URNs on manual `interaction` events |
+| `SlideDeck` | `persistCompoundState`, `initialSlideIndex` | Requires unique `blockId`; resume via session storage |
+| `InteractiveBook` | `persistCompoundState` | Same compound resume rules as `SlideDeck` |
+| `BranchingScenario` | `persistCompoundState`, `showPathRecap` | Graph resume; pre-1.5 sessions restart at `startNodeId` |
+| `Embed` | `title`, `allow`, `aspectRatio`, `sandbox` | Restrictive iframe defaults; opt in extra `allow` tokens |
+| `Chart` | `title`, `className` | Accessible data table fallback for screen readers |
+| `ThemeProvider` | `mode`, `preset`, `tokens` | `mode`: `light` \| `dark` \| `system` |
+
+### `LessonkitConfig` (on `Course` / `LessonkitProvider`)
+
+| Field | Purpose |
+| --- | --- |
+| `tracking` | Sink, batch sink, `enabled: false` |
+| `xapi` | Transport, client, `enabled: false` |
+| `lxpack.bridge` | `"auto"` for LMS iframe; `"off"` for standalone |
+| `observability` | Production monitoring hooks (required when delivery enabled) |
+| `session` | `sessionId`, `user`, `persistCompoundState` |
+| `plugins` | Telemetry/lifecycle plugin registry |
+
+Errors: `assertProductionCourseConfig()` throws in production when console sinks, missing delivery, or missing observability hooks. See [production checklist](production-checklist.md).
+
 ## Storybook
 
 Browse published stories: **[Storybook on GitHub Pages](https://eddiethedean.github.io/lessonkit/storybook/)**.

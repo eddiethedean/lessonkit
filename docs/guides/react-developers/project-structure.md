@@ -5,14 +5,33 @@
 ```text
 my-course/
 ├── lessonkit.json      # schemaVersion 1 — packaging + course descriptor
-├── package.json
+├── package.json        # npm scripts: dev, build, package:scorm12, …
+├── .env.example        # VITE_XAPI_PROXY_URL, VITE_ANALYTICS_URL
 ├── vite.config.ts
 ├── src/
 │   ├── main.tsx
-│   ├── App.tsx         # your course UI
+│   ├── App.tsx         # course UI (IDs match lessonkit.json)
+│   ├── courseConfig.ts # tracking, xAPI, observability, lxpack bridge
 │   └── styles.css
-└── dist/               # after lessonkit build
+├── dist/               # after lessonkit build (paths.spaDistDir)
+└── .lxpack/course/     # LXPack staging (paths.lxpackOutDir)
+    └── .lxpack/out/    # packaged zips (paths.outputBaseDir)
 ```
+
+### Key npm scripts
+
+| Script | Command |
+| --- | --- |
+| `npm run dev` | `lessonkit dev` — Vite dev server |
+| `npm run build` | `lessonkit build` — production SPA to `dist/` |
+| `npm run package:scorm12` | `lessonkit package --target scorm12` |
+| `npm run package:standalone` | `lessonkit package --target standalone` |
+
+Default SCORM output: **`.lxpack/course/.lxpack/out/course-scorm12.zip`**.
+
+### `courseConfig.ts`
+
+Central runtime config: telemetry sinks, xAPI transport, observability hooks, and `lxpack.bridge`. Set `bridge: "auto"` before LMS packaging. See [Getting started in 5 minutes](getting-started-in-5-minutes.md#prepare-for-lms).
 
 `lessonkit.json` is the contract between your React app and `@lessonkit/lxpack`:
 
@@ -20,8 +39,9 @@ my-course/
 - `lessons[].id` **must match** when each lesson is a separate SPA or LMS entry; with `layout: "single-spa"`, the manifest lists only the LMS shell lesson(s) while additional in-app step ids may exist only in React (see [lxpack-golden README](https://github.com/eddiethedean/lessonkit/blob/main/examples/lxpack-golden/README.md))
 - `course.layout` should be `single-spa` for `lessonkit package` (1.0.0)
 - `paths.spaDistDir` points at the Vite output (default `dist`)
+- `paths.lxpackOutDir` (default `.lxpack/course`) and `paths.outputBaseDir` (default `.lxpack/out`, resolved inside `lxpackOutDir`)
 
-`lessonkit init` patches `App.tsx` `courseId` and title to match the manifest.
+`lessonkit init` patches `App.tsx` `courseId`, `courseConfig.ts`, and title to match the manifest.
 
 ## Monorepo layout
 

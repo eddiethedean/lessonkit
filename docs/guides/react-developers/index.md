@@ -63,7 +63,10 @@ Use the [Vibe coding guides](../vibe-coding/index.md) with an AI editor and the 
 | Production checklist | [production-checklist.md](production-checklist.md) |
 | Theming & a11y | [theming-and-accessibility.md](theming-and-accessibility.md) |
 | Packaging & CLI | [packaging-and-cli.md](packaging-and-cli.md) |
+| Deployment | [deployment-guide.md](deployment-guide.md) |
 | Export parity | [export-parity.md](export-parity.md) |
+| Troubleshooting | [troubleshooting.md](troubleshooting.md) |
+| FAQ | [../faq.md](../faq.md) |
 | Plugins | [plugin-cookbook.md](plugin-cookbook.md) |
 | Monorepo | [contributing-to-the-monorepo.md](contributing-to-the-monorepo.md) |
 

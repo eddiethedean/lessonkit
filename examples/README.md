@@ -16,6 +16,8 @@ See the [5-minute guide](https://lessonkit.readthedocs.io/en/latest/guides/react
 
 ## Start here (pick one path)
 
+**Full picker (embedded vs local, framework version):** [Examples on Read the Docs](https://lessonkit.readthedocs.io/en/latest/examples/index.html#example-picker)
+
 | Tier | Example | When to use |
 | --- | --- | --- |
 | **Start** | [`npx @lessonkit/cli init`](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/getting-started-in-5-minutes.html) (external) or [`react-vite/`](react-vite/README.md) | First course, full UX patterns, or monorepo smoke test |

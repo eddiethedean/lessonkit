@@ -8,6 +8,11 @@ Packaging turns your preview app into a file your LMS can import.
 - A finished course that passes `lessonkit build`
 - Your LMS admin’s target format (often **SCORM 1.2**)
 
+## Before you package
+
+1. **LMS bridge** — In `src/courseConfig.ts`, set `lxpack: { bridge: "auto" }` so scores and completions reach the LMS. The init template uses `"off"` for local preview.
+2. **Production runtime** — Copy `.env.example` to `.env`, set `VITE_ANALYTICS_URL` and `VITE_XAPI_PROXY_URL`, then rebuild—or temporarily set `tracking: { enabled: false }` and `xapi: { enabled: false }` for a first test export only. See [Getting started — production runtime](../react-developers/getting-started-in-5-minutes.md#production-runtime-for-lms).
+
 ## Steps
 
 ```bash
@@ -16,7 +21,7 @@ lessonkit build
 lessonkit package --target scorm12
 ```
 
-The CLI prints the output path (typically under `.lxpack/out/`).
+The CLI prints the output path (default: **`.lxpack/course/.lxpack/out/course-scorm12.zip`** relative to your project root).
 
 ## Targets
 
@@ -32,7 +37,7 @@ Your admin knows which to request. If unsure, start with **scorm12**.
 
 ## What to send your LMS administrator
 
-1. The generated **ZIP** (SCORM) or folder (standalone)
+1. The generated **ZIP** (SCORM) or folder (standalone)—use the path the CLI prints
 2. Course title and expected duration (your estimate)
 3. Note: “Single-SPA LessonKit export; one SCO; navigation inside the package.”
 
@@ -51,4 +56,4 @@ Compare lessonkit.json assessments checkIds with Quiz checkId props in App.tsx.
 Fix mismatches and validate layout is single-spa.
 ```
 
-More detail: [Packaging reference](../../reference/packaging.md).
+More detail: [Packaging reference](../../reference/packaging.md) · [Troubleshooting](troubleshooting.md)

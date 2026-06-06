@@ -1,6 +1,17 @@
-# Accessibility (0.3.x)
+# Accessibility (framework 1.x)
 
 This document defines accessibility expectations for LessonKit authors and implementers.
+
+## WCAG targets vs verification
+
+| Area | Target | Status |
+| --- | --- | --- |
+| Keyboard operation | WCAG 2.1 AA patterns for shipped blocks | Implemented per component; see [block catalog](reference/block-catalog.md) a11y notes |
+| Focus management | Visible focus, trap/roving helpers in `@lessonkit/accessibility` | Utilities documented below |
+| Reduced motion | Respect `prefers-reduced-motion` | `shouldAnimate()` helper + component fallbacks |
+| Formal VPAT / third-party audit | — | **Not published**; evaluate with your QA process before enterprise rollout |
+
+Shipped components use semantic regions, quiz `aria-live` feedback, and keyboard alternatives for drag/drop where applicable. Custom UI must follow the same patterns—see [Theming and accessibility guide](../guides/react-developers/theming-and-accessibility.md).
 
 ## Keyboard navigation standards
 

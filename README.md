@@ -109,7 +109,7 @@ npm run dev
 
 (`init` runs `npm install` by default.) Use `npx lessonkit dev` or a global CLI (`npm install -g @lessonkit/cli`) if you prefer.
 
-Build and package for an LMS:
+Build and package for an LMS (set `lxpack.bridge: "auto"` in `src/courseConfig.ts` first—see the [5-minute guide](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/getting-started-in-5-minutes.html)):
 
 ```bash
 npm run build
@@ -117,7 +117,7 @@ npm run package:scorm12
 # or: npx lessonkit build && npx lessonkit package --target scorm12
 ```
 
-SCORM zip output path: see [getting started in 5 minutes](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/getting-started-in-5-minutes.html#package-for-your-lms).
+Default SCORM zip: **`.lxpack/course/.lxpack/out/course-scorm12.zip`** (the CLI prints the resolved path). Details: [Package for your LMS](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/getting-started-in-5-minutes.html#package-for-your-lms).
 
 Each project includes [`lessonkit.json`](https://lessonkit.readthedocs.io/en/latest/reference/cli.html) (`schemaVersion: 1`) that ties React props to the LXPack course descriptor.
 
@@ -210,21 +210,7 @@ Component gallery: [Storybook on GitHub Pages](https://eddiethedean.github.io/le
 
 ## Upgrading from an older version
 
-<details>
-<summary>Migration guides (skip if you used <code>npx @lessonkit/cli init</code> recently)</summary>
-
-| From | Guide |
-| --- | --- |
-| 1.4.x | [MIGRATION-1.4-to-1.5.md](https://github.com/eddiethedean/lessonkit/blob/main/docs/MIGRATION-1.4-to-1.5.md) — `BranchingScenario`, `Embed`, `Chart`; branch resume behavior |
-| 1.3.x | [MIGRATION-1.3-to-1.4.md](https://github.com/eddiethedean/lessonkit/blob/main/docs/MIGRATION-1.3-to-1.4.md) — `InteractiveVideo`, `Video`, Tier B/C/D blocks |
-| 1.2.x | [MIGRATION-1.2-to-1.3.md](https://github.com/eddiethedean/lessonkit/blob/main/docs/MIGRATION-1.2-to-1.3.md) — `SlideDeck`, production transport helpers |
-| 1.1.x | [MIGRATION-1.1-to-1.2.md](https://github.com/eddiethedean/lessonkit/blob/main/docs/MIGRATION-1.1-to-1.2.md) — catalog v3 default, compound persistence, `AssessmentSequence` scores |
-| 1.0.x | [MIGRATION-1.0-to-1.1.md](https://github.com/eddiethedean/lessonkit/blob/main/docs/MIGRATION-1.0-to-1.1.md) |
-| 0.9.x | [MIGRATION-0.x-to-1.0.md](https://github.com/eddiethedean/lessonkit/blob/main/docs/MIGRATION-0.x-to-1.0.md) |
-
-**1.1.x → 1.2.x highlights:** `buildBlockCatalog()` defaults to catalog v3; `persistCompoundState` defaults to `true`; set a unique `blockId` on compound containers.
-
-</details>
+See the [Upgrade guide](https://lessonkit.readthedocs.io/en/latest/guides/upgrading-lessonkit.html) for migration guides by version.
 
 ---
 

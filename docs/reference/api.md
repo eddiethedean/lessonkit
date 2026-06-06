@@ -1,6 +1,17 @@
 # API reference
 
-LessonKit publishes **TypeScript declarations** on npm (`dist/*.d.ts`) and documents behavior in the guides below. There is no separate TypeDoc site yet—use these entry points:
+LessonKit publishes **TypeScript declarations** on npm (`dist/*.d.ts`) and documents behavior in the guides below.
+
+:::{admonition} Generated API docs (roadmap)
+:class: note
+
+**TypeDoc on Read the Docs is planned** for a future release. Until then, use:
+
+1. **IDE** — `Go to Definition` on `@lessonkit/react` imports in a scaffolded project
+2. **Storybook** — component states and props visually
+3. **This site** — [Components and hooks](../guides/react-developers/components-and-hooks.md) (required + common optional props) · [Block catalog](block-catalog.md) (per-block contracts)
+4. **npm types** — `node_modules/@lessonkit/react/dist/index.d.ts`
+:::
 
 ## Interactive
 

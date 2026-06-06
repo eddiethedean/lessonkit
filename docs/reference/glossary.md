@@ -28,7 +28,12 @@ Browser bridge (`window.parent.lxpackBridge.v1`) used when a packaged course run
 
 ## .lxpack/
 
-Working directories created during packaging (descriptor staging, output zips). Default output base: **`.lxpack/out/`** (see section **Package for your LMS** in [Getting started in 5 minutes](../guides/react-developers/getting-started-in-5-minutes.md)).
+Working directories created during packaging (descriptor staging, output zips). Default layout:
+
+- **`paths.lxpackOutDir`** — `.lxpack/course` (LXPack project root)
+- **`paths.outputBaseDir`** — `.lxpack/out` (resolved **inside** `lxpackOutDir`, not at the project root)
+
+Default SCORM artifact: **`.lxpack/course/.lxpack/out/course-scorm12.zip`**. The CLI prints the resolved path after `lessonkit package`. See [Getting started in 5 minutes — step 6](../guides/react-developers/getting-started-in-5-minutes.md).
 
 ## single-spa
 
