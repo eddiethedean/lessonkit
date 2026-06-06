@@ -57,7 +57,7 @@ Framework **1.3.0** adds production-oriented defaults and helpers (no breaking A
 | --- | --- | --- |
 | `createFetchTransport` / `createFetchBatchSink` | `@lessonkit/xapi` | Timeout, retry backoff, keepalive pagehide delivery |
 | `flushOnExit` on xAPI / telemetry clients | `@lessonkit/xapi`, `@lessonkit/core` | Wire `exitTransport` / `exitBatchSink` |
-| Observability hooks | `@lessonkit/react` | Wire all five hooks in production — see [production checklist](guides/react-developers/production-checklist.md) |
+| Observability hooks | `@lessonkit/react` | Conditional hook matrix in production — see [production checklist](guides/react-developers/production-checklist.md) (includes required `onXapiTransportError` when xAPI delivery is configured) |
 | Manifest ↔ React ID validation | `@lessonkit/lxpack` / CLI | Fails `lessonkit package` on ID drift |
 | Init template | `@lessonkit/cli` | No `console.log` telemetry sinks; noop + checklist comment |
 

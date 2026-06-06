@@ -17,7 +17,7 @@ import {
 
 ## Provider integration
 
-`@lessonkit/react` forwards completion events automatically when `config.lxpack.bridge` is `"auto"` (default). Set `"off"` to disable.
+`@lessonkit/react` forwards completion events when `config.lxpack.bridge` is `"auto"`. The init template defaults to `"off"`; set `"auto"` for packaged LMS iframe deployments.
 
 Extra pipeline sinks can also call `forwardTelemetryToBridge` directly.
 

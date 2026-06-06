@@ -101,12 +101,12 @@ Built-in `Quiz` / `KnowledgeCheck` must be wrapped in `<Lesson>`. Events without
 
 ## Production observability
 
-Wire all five hooks in production — see [production checklist](../guides/react-developers/production-checklist.md):
+Required hooks depend on what you enable — see the [production checklist](../guides/react-developers/production-checklist.md) for the full matrix. When both tracking and xAPI delivery are configured, wire all six hooks including **`onXapiTransportError`** (required for xAPI, not optional):
 
-- `onTelemetrySinkError`
-- `onTelemetryBufferDrop`
-- `onXapiQueueDepth`
-- `onXapiQueueCap`
-- `onLxpackBridgeMiss`
+| Config | Required hooks |
+| --- | --- |
+| Tracking or xAPI enabled | `onLxpackBridgeMiss` |
+| Tracking delivery (`sink` or `batchSink`) | + `onTelemetrySinkError`, `onTelemetryBufferDrop` |
+| xAPI delivery (`transport` or `client`) | + `onXapiQueueDepth`, `onXapiQueueCap`, `onXapiTransportError` |
 
 Without these hooks, buffer/queue drops and sink failures are silent in production builds.

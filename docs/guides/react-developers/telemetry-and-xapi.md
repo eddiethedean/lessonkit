@@ -47,6 +47,7 @@ const config = {
   xapi: {
     transport: xapiFetch.transport,
     exitTransport: xapiFetch.exitTransport,
+    abortInFlight: xapiFetch.abortInFlight,
   },
 };
 ```
@@ -77,7 +78,7 @@ xapi: { client: myXAPIClient },
 
 ## LXPack bridge (packaged courses)
 
-When embedded in an LXPack export, `@lessonkit/react` can forward completion/scores to `window.parent.lxpackBridge.v1` (`config.lxpack.bridge`, default `auto`). See [LXPack bridge reference](../../reference/lxpack-bridge.md) and [Packaging reference](../../reference/packaging.md).
+When embedded in an LXPack export, `@lessonkit/react` can forward completion/scores to `window.parent.lxpackBridge.v1` when `config.lxpack.bridge` is `"auto"`. The init template defaults to `"off"` — set `"auto"` for SCORM/LMS shells. See [LXPack bridge reference](../../reference/lxpack-bridge.md) and [Packaging reference](../../reference/packaging.md).
 
 `LessonkitProvider` uses `runtimeVersion: "v2"` by default (headless runtime from `@lessonkit/core`). Set `runtimeVersion: "v1"` to opt out; see [Core reference](../../reference/core.md) and [MIGRATION-0.x-to-1.0.md](../../MIGRATION-0.x-to-1.0.md).
 

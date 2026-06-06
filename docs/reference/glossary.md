@@ -24,7 +24,7 @@ External packaging engine used by **`@lessonkit/lxpack`** and the CLI. Produces 
 
 ## lxpackBridge
 
-Browser bridge (`window.parent.lxpackBridge.v1`) used when a packaged course runs inside an LXPack-hosted iframe. **`@lessonkit/react`** can forward completion events automatically when `config.lxpack.bridge` is enabled.
+Browser bridge (`window.parent.lxpackBridge.v1`) used when a packaged course runs inside an LXPack-hosted iframe. Set `config.lxpack.bridge` to `"auto"` for LMS iframe shells; the init template defaults to `"off"`.
 
 ## .lxpack/
 

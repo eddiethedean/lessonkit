@@ -6,8 +6,10 @@ Use this checklist before shipping a LessonKit course to learners in an LMS, sta
 
 | Target | `config.lxpack.bridge` | xAPI transport |
 | --- | --- | --- |
-| SCORM / xAPI / cmi5 (LXPack iframe) | `"auto"` (default) | Required if you report to an LRS |
+| SCORM / xAPI / cmi5 (LXPack iframe) | `"auto"` | Required if you report to an LRS |
 | Standalone web (no LMS parent) | `"off"` | Required if you report to an LRS |
+
+The `lessonkit init` template scaffolds `lxpack.bridge: "off"`. Set `"auto"` before packaging for LMS iframe targets.
 
 Verify the parent exposes `window.parent.lxpackBridge.v1` in SCORM previews before go-live. If the bridge is missing, completions stay in the UI only.
 
@@ -57,7 +59,7 @@ observability: {
 
 `onTelemetryBufferDrop` fires when the telemetry batch buffer (cap 1000) drops new events. `onTelemetrySinkError` covers both per-event sinks and `batchSink` failures. `onLxpackBridgeMiss` alerts when SCORM/LMS parent lacks `lxpackBridge.v1` (set `lxpack.bridge: "auto"` only in LMS shells). `onXapiTransportError` is **required** when xAPI delivery is configured — it fires when the LRS transport fails after retries.
 
-`lessonkit init` scaffolds these hooks in `src/courseConfig.ts`. Production builds call `assertProductionCourseConfig()` (via `shouldEnforceProductionGuard()` in the template) — console sinks, missing delivery config, or missing hooks throw before the app mounts.
+`lessonkit init` scaffolds these hooks in `src/courseConfig.ts`. Production builds call `assertProductionCourseConfig()` (via `shouldEnforceProductionGuard()` in the template) — console sinks, `tracking.enabled` without a sink/batchSink, missing delivery config, or missing hooks throw before the app mounts.
 
 ## CI / build
 

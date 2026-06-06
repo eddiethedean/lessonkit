@@ -37,6 +37,8 @@ Import from `@lessonkit/core` (re-exported by `@lessonkit/react` where relevant)
 | `shouldEnforceProductionGuard()` | `@lessonkit/react` | Returns false in test mode (`import.meta.env.MODE === "test"`) even when `NODE_ENV=production` |
 | `onXapiTransportError` | `config.observability` | Required when xAPI delivery is configured; called when transport fails after retries (statement re-queued) |
 
+See the [production checklist](../guides/react-developers/production-checklist.md) for the full observability hook matrix (1–6 hooks depending on tracking/xAPI configuration).
+
 ## Machine-readable contracts
 
 | Artifact | Package path |

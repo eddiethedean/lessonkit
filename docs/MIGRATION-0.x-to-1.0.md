@@ -81,7 +81,7 @@ import { forwardTelemetryToBridge, dispatchBridgeAction } from "@lessonkit/lxpac
 `setLxpackBridgeMode` (global) was removed in **1.0.0**. Use provider config and per-call bridge mode instead:
 
 ```typescript
-// Provider (default "auto")
+// Provider — set "auto" for LMS iframe shells; init template defaults to "off"
 <Course
   courseId="my-course"
   config={{ lxpack: { bridge: "auto" } }} // or "off"
