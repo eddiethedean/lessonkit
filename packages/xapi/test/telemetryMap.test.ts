@@ -230,30 +230,27 @@ describe("telemetryEventToXAPIStatement", () => {
       ...base,
       data: { kind: "embed_viewed", blockId: "embed-1", src: "https://example.com/video" },
     });
+    const embedExt = embed?.context?.extensions as Record<string, unknown> | undefined;
     expect(embed?.verb).toBe("http://adlnet.gov/expapi/verbs/experienced");
-    expect(embed?.context?.extensions?.["https://lessonkit.dev/xapi/interactionKind"]).toBe(
-      "embed_viewed",
-    );
-    expect(embed?.context?.extensions?.["https://lessonkit.dev/xapi/embedSrc"]).toBe(
-      "https://example.com/video",
-    );
+    expect(embedExt?.["https://lessonkit.dev/xapi/interactionKind"]).toBe("embed_viewed");
+    expect(embedExt?.["https://lessonkit.dev/xapi/embedSrc"]).toBe("https://example.com/video");
 
     const chart = telemetryEventToXAPIStatement({
       name: "interaction",
       ...base,
       data: { kind: "chart_viewed", blockId: "chart-1", chartType: "bar" },
     });
-    expect(chart?.context?.extensions?.["https://lessonkit.dev/xapi/interactionKind"]).toBe(
-      "chart_viewed",
-    );
-    expect(chart?.context?.extensions?.["https://lessonkit.dev/xapi/chartType"]).toBe("bar");
+    const chartExt = chart?.context?.extensions as Record<string, unknown> | undefined;
+    expect(chartExt?.["https://lessonkit.dev/xapi/interactionKind"]).toBe("chart_viewed");
+    expect(chartExt?.["https://lessonkit.dev/xapi/chartType"]).toBe("bar");
 
     const embedNoSrc = telemetryEventToXAPIStatement({
       name: "interaction",
       ...base,
       data: { kind: "embed_viewed", blockId: "embed-2" },
     });
-    expect(embedNoSrc?.context?.extensions?.["https://lessonkit.dev/xapi/embedSrc"]).toBeUndefined();
+    const embedNoSrcExt = embedNoSrc?.context?.extensions as Record<string, unknown> | undefined;
+    expect(embedNoSrcExt?.["https://lessonkit.dev/xapi/embedSrc"]).toBeUndefined();
   });
 
   it("maps assessment_answered and assessment_completed", () => {
