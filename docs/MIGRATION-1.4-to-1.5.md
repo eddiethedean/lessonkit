@@ -64,7 +64,7 @@ See [H5P capability map](project/h5p-capability-map.md).
 
 ## Golden example
 
-[`examples/branching-scenario`](../examples/branching-scenario/) — SCORM-packaged demo with scored branch path.
+[`examples/branching-scenario`](https://github.com/eddiethedean/lessonkit/tree/main/examples/branching-scenario) — SCORM-packaged demo with scored branch path.
 
 ## Breaking changes
 

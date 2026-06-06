@@ -452,7 +452,7 @@ Framework **1.0.0** shipped **2026-05-30**.
   </BranchNode>
 
   <BranchNode nodeId="supervisor" terminal>
-    <Text>Stay on the line until the supervisor joins—no cold transfer.</Text>
+    <Text>Stay on the line until the supervisor joins - no cold transfer.</Text>
   </BranchNode>
 </BranchingScenario>
 ```

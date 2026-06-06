@@ -1,6 +1,6 @@
 import { useCallback, useImperativeHandle } from "react";
 import type React from "react";
-import type { CompoundHandle, CompoundResumeState } from "@lessonkit/core";
+import type { AssessmentResumeState, CompoundHandle, CompoundResumeState } from "@lessonkit/core";
 import { createCompoundResumeState } from "@lessonkit/core";
 import type { RegisteredAssessmentHandle } from "./CompoundProvider";
 import { useCompoundHydrationBridgeRef } from "./CompoundHydrationBridge";
@@ -34,7 +34,9 @@ export function useCompoundBranchHandle(
     (handles: Iterable<RegisteredAssessmentHandle>) => {
       const filtered: RegisteredAssessmentHandle[] = [];
       for (const entry of handles) {
-        if (visitedNodeIndices.has(entry.pageIndex)) filtered.push(entry);
+        const { pageIndex } = entry;
+        if (pageIndex === undefined) continue;
+        if (visitedNodeIndices.has(pageIndex)) filtered.push(entry);
       }
       return filtered;
     },
@@ -68,10 +70,10 @@ export function useCompoundBranchHandle(
         }
       },
       getCurrentState: () => {
-        const childStates: Record<string, NonNullable<ReturnType<NonNullable<CompoundHandle["getCurrentState"]>>>> =
-          {};
+        const childStates: Record<string, AssessmentResumeState> = {};
         for (const [checkId, entry] of getRegisteredHandles()) {
-          if (!visitedNodeIndices.has(entry.pageIndex)) continue;
+          const { pageIndex } = entry;
+          if (pageIndex === undefined || !visitedNodeIndices.has(pageIndex)) continue;
           if (entry.handle.getCurrentState) {
             childStates[checkId] = entry.handle.getCurrentState();
           }

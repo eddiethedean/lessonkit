@@ -24,7 +24,6 @@ import {
   BranchNode,
   BranchChoice,
   Scenario,
-  Reflection,
 } from "../src";
 
 const COURSE_ID = "compound-course";
