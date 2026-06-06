@@ -6,7 +6,7 @@ Maintainers: label suitable issues **`good first issue`** or **`help wanted`** i
 
 ## Documentation
 
-- Fix broken links or version numbers (framework **1.4.0**).
+- Fix broken links or version numbers (framework **1.5.0**).
 - Add a short “how I debugged X” note to [troubleshooting](../guides/vibe-coding/troubleshooting.md).
 - Improve [glossary](../reference/glossary.md) definitions from your onboarding experience.
 

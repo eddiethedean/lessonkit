@@ -6,7 +6,7 @@
 This guide uses **npm only**. You do not need the LessonKit GitHub monorepo unless you are [contributing](contributing-to-the-monorepo.md) or running [examples](../../examples/index.md).
 :::
 
-**Prerequisites:** Node.js **18+**.
+**Prerequisites:** Node.js **18+** minimum; **20.19+** recommended (CLI scaffold uses Vite 8).
 
 ## 1. Create a project
 
@@ -29,6 +29,12 @@ Alternative: `npx lessonkit dev` (same as the `dev` script).
 
 ## 3. Change one quiz
 
+:::{admonition} Edit React and lessonkit.json together
+:class: warning
+
+Packaging validates that `courseId`, `lessonId`, and every `checkId` in React appear in **`lessonkit.json`**. Change both files in the same edit—mismatches are the most common `lessonkit package` failure. See [Keep React IDs in sync](quickstart.md#keep-react-ids-in-sync-with-lessonkitjson).
+:::
+
 Edit `src/App.tsx` and `lessonkit.json` together:
 
 - In React: update a `Quiz` `question`, `choices`, or `answer`.
@@ -37,6 +43,12 @@ Edit `src/App.tsx` and `lessonkit.json` together:
 `lessonkit init` already aligned `courseId` and the first assessment—keep that pattern when you add lessons or checks. See [Keep React IDs in sync with lessonkit.json](quickstart.md#keep-react-ids-in-sync-with-lessonkitjson).
 
 ## 4. Production build
+
+:::{admonition} Production builds and tracking
+:class: warning
+
+Telemetry is **on by default** when you pass a `config` object without `tracking.enabled: false`. Production builds (`npm run build` + preview) require an explicit telemetry **sink** or `tracking: { enabled: false }`—console-only sinks fail the production guard. The CLI template wires this in `src/courseConfig.ts`; see the [production checklist](production-checklist.md).
+:::
 
 ```bash
 npm run build

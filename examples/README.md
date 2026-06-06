@@ -14,7 +14,18 @@ npm run dev
 
 See the [5-minute guide](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/getting-started-in-5-minutes.html).
 
-## Monorepo examples
+## Start here (pick one path)
+
+| Tier | Example | When to use |
+| --- | --- | --- |
+| **Start** | [`npx @lessonkit/cli init`](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/getting-started-in-5-minutes.html) (external) or [`react-vite/`](react-vite/README.md) | First course, full UX patterns, or monorepo smoke test |
+| **Blocks** | [`framework-11-showcase/`](framework-11-showcase/) · [`framework-12-showcase/`](framework-12-showcase/) | Block catalog coverage (1.1 P0 assessments vs 1.2+ compound + Tier C/D) |
+| **Compound** | [`interactive-book/`](interactive-book/README.md) · [`slide-deck/`](slide-deck/) · [`interactive-video/`](interactive-video/) · [`branching-scenario/`](branching-scenario/) | Books, decks, timed video, branching graphs (1.2–1.5) |
+| **Packaging** | [`lxpack-golden/`](lxpack-golden/) | SCORM/xAPI export reference and validation smoke target |
+
+**Not sure?** Use the CLI template or `react-vite`—avoid copying `file:../../packages/*` into your own repo.
+
+## Monorepo examples (full table)
 
 These workspaces use `file:../../packages/*` dependencies—they are for **monorepo development**, not copy-paste templates for external apps.
 

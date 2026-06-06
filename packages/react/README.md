@@ -12,7 +12,7 @@ React components and hooks for authoring LessonKit courses.
 npm install @lessonkit/react react react-dom
 ```
 
-Optional: `@lessonkit/xapi`, `@lessonkit/themes`, `@lessonkit/accessibility`
+Optional: `@lessonkit/xapi`, `@lessonkit/themes`, `@lessonkit/accessibility`, `@lessonkit/cli` (devDependency for packaging)
 
 ## Usage
 
@@ -23,7 +23,10 @@ import { useMemo } from "react";
 import { Course, Lesson, Quiz, ProgressTracker, ThemeProvider } from "@lessonkit/react";
 
 export default function App() {
-  const config = useMemo(() => ({ tracking: { sink: console.log } }), []);
+  const config = useMemo(
+    () => ({ tracking: { enabled: false }, xapi: { enabled: false } }),
+    [],
+  );
 
   return (
     <ThemeProvider mode="light">
@@ -43,28 +46,33 @@ export default function App() {
 }
 ```
 
+For telemetry and xAPI in dev and production, use `npx @lessonkit/cli init` (includes `src/courseConfig.ts`) or follow the [quickstart](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/quickstart.html). Production builds reject console-only sinks unless you wire real transports—see the [production checklist](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/production-checklist.html).
+
 ## API
 
 **Structure:** `Course`, `Lesson`, `Scenario`, `Quiz`, `KnowledgeCheck`, `Reflection`, `ProgressTracker`, `ThemeProvider`, `LessonkitProvider`
 
-**Compound:** `Page`, `InteractiveBook`, `AssessmentSequence` — types: `CompoundHandle`, `CompoundResumeState`, `CompoundBaseProps`
+**Compound:** `Page`, `InteractiveBook`, `Slide`, `SlideDeck`, `InteractiveVideo`, `TimedCue`, `BranchingScenario`, `BranchNode`, `BranchChoice`, `AssessmentSequence` — types: `CompoundHandle`, `CompoundResumeState`, `CompoundBaseProps`
 
-**Content:** `Text`, `Heading`, `Image`
+**Content:** `Text`, `Heading`, `Image`, `Video`
 
-**Assessments:** `TrueFalse`, `MarkTheWords`, `FillInTheBlanks`, `DragTheWords`, `DragAndDrop`, `FindHotspot`, `FindMultipleHotspots`
+**Assessments:** `TrueFalse`, `MarkTheWords`, `FillInTheBlanks`, `DragTheWords`, `DragAndDrop`, `FindHotspot`, `FindMultipleHotspots`, `Summary`, `ImagePairing`, `ImageSequencing`, `ArithmeticQuiz`, `Essay`
 
-**Presentation:** `Accordion`, `DialogCards`, `Flashcards`, `ImageHotspots`, `ImageSlider`
+**Presentation:** `Accordion`, `DialogCards`, `Flashcards`, `ImageHotspots`, `ImageSlider`, `MemoryGame`, `InformationWall`, `ParallaxSlideshow`, `Questionnaire`, `Embed`, `Chart`
 
-**Hooks:** `useProgress`, `useTracking`, `useQuizState`, `useAssessmentState`, `useCompletion`, `useLessonkit`, `useTheme`
+**Tree-shake friendly blocks:** `import { Quiz } from "@lessonkit/react/blocks"`
+
+**Hooks:** `useProgress`, `useTracking`, `useQuizState`, `useAssessmentState`, `useCompletion`, `useLessonkit`, `useTheme`, `useBranchingScenario`
 
 **Runtime (re-exported from `@lessonkit/core`):** `createLessonkitRuntime`, `buildTelemetryEvent`, `createPluginRegistry`, `defineAssessmentPlugin`, `defineLifecyclePlugin`, `defineTelemetryPlugin` — use `@lessonkit/core` directly for headless runtimes.
 
-**Catalog:** `buildBlockCatalog()` defaults to **v3** in 1.2.0 (`{ version: 2 }` for the 1.1.x shape). JSON: `@lessonkit/react/block-catalog.v1.json`, `.v2.json`, `.v3.json` — `getBlockCatalogEntry()`, `BLOCK_CATALOG_V3`, etc.
+**Catalog:** `buildBlockCatalog()` defaults to **v3** in 1.2.0+. JSON: `@lessonkit/react/block-catalog.v3.json` — `getBlockCatalogEntry()`, `BLOCK_CATALOG_V3`, etc.
 
 ## Tips
 
 - Hoist `config` with `useMemo` so tracking/xAPI clients are not recreated every render.
-- xAPI is on by default; provide `xapi.transport` or statements queue in memory.
+- Tracking is enabled by default when `config.tracking` is omitted—provide a sink or set `tracking: { enabled: false }`.
+- xAPI is on by default; provide `xapi.transport` or set `xapi: { enabled: false }`.
 - Lessons complete on unmount or when another lesson becomes active via `setActiveLesson`.
 - Compound resume: use a unique `blockId` when `persistCompoundState` is enabled; see [SECURITY.md](https://github.com/eddiethedean/lessonkit/blob/main/SECURITY.md) for shared-device guidance.
 

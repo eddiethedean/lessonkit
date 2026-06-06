@@ -16,7 +16,7 @@ These guides are for **instructional designers, trainers, and builders who do no
 
 You do not need to understand TypeScript, hooks, or bundlers. You **do** need to:
 
-- Install **Node.js 18+** (required for dev, build, and LMS packaging)
+- Install **Node.js 18+** minimum (**20.19+** recommended — the CLI scaffold uses Vite 8)
 - Follow prompts carefully and paste suggested commands into a terminal
 - Review AI-generated changes before publishing
 

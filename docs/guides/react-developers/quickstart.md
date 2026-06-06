@@ -16,6 +16,12 @@ npm run dev
 
 See [Getting started in 5 minutes](getting-started-in-5-minutes.md) for build, SCORM packaging, and output paths.
 
+:::{admonition} Production builds
+:class: warning
+
+**Tracking defaults on** when `config.tracking` is omitted or partially set. `npm run build` followed by preview rejects console-only sinks unless you wire real transports (see `createFetchBatchSink` below) or set `tracking: { enabled: false }`. xAPI behaves similarly—provide `xapi.transport` or `xapi: { enabled: false }`. Details: [production checklist](production-checklist.md).
+:::
+
 ## Add to an existing Vite + React app
 
 ```bash

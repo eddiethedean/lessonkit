@@ -48,7 +48,8 @@ Skip the full monorepo `npm run build` when your PR touches only documentation o
 
 | Task | Node.js |
 | --- | --- |
-| Day-to-day dev, build, packaging smoke | **18+** |
+| Day-to-day dev, build, packaging smoke | **18+** minimum |
+| CLI scaffold (Vite 8), monorepo CI | **20.19+** recommended |
 | Playwright e2e (`npm run test:e2e`) | **20+** |
 
 After `npm ci`, install Playwright once for e2e:

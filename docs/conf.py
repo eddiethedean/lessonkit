@@ -9,6 +9,11 @@ copyright = f"{datetime.now().year}, LessonKit contributors"
 author = "LessonKit contributors"
 release = "1.5.0"
 
+# Substitutions for MyST pages (e.g. {{ release }}). Keep docs/index.md hero badge in sync with `release`.
+myst_substitutions = {
+    "release": release,
+}
+
 extensions = [
     "myst_parser",
     "sphinx_copybutton",

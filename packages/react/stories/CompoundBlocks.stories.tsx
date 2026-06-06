@@ -25,7 +25,15 @@ import { storyConfig } from "./helpers";
 
 const meta: Meta = {
   title: "Components/Compound & Tier C/D",
-  parameters: { layout: "padded" },
+  parameters: {
+    layout: "padded",
+    docs: {
+      description: {
+        component:
+          "Compound layouts and Tier C/D blocks. Props and H5P mappings: [block catalog](https://lessonkit.readthedocs.io/en/latest/reference/block-catalog.html).",
+      },
+    },
+  },
 };
 
 export default meta;
@@ -34,6 +42,13 @@ type Story = StoryObj;
 
 /** H5P: Interactive Book */
 export const InteractiveBookBlock: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story: "[`InteractiveBook` / `Page`](https://lessonkit.readthedocs.io/en/latest/reference/block-catalog.html#interactivebook) in the block catalog.",
+      },
+    },
+  },
   render: () => (
     <Course title="Handbook" courseId="storybook-book" config={storyConfig}>
       <Lesson title="Safety" lessonId="lesson-book">
@@ -52,6 +67,13 @@ export const InteractiveBookBlock: Story = {
 
 /** H5P: Course Presentation */
 export const SlideDeckBlock: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story: "[`SlideDeck` / `Slide`](https://lessonkit.readthedocs.io/en/latest/reference/block-catalog.html#slidedeck) in the block catalog.",
+      },
+    },
+  },
   render: () => (
     <Course title="Presentation" courseId="storybook-deck" config={storyConfig}>
       <Lesson title="Onboarding" lessonId="lesson-deck">
@@ -96,6 +118,13 @@ export const AccordionBlock: Story = {
 
 /** H5P: Interactive Video */
 export const InteractiveVideoBlock: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story: "[`InteractiveVideo` / `TimedCue`](https://lessonkit.readthedocs.io/en/latest/reference/block-catalog.html#interactivevideo) in the block catalog.",
+      },
+    },
+  },
   render: () => (
     <Course title="Interactive video" courseId="storybook-iv" config={storyConfig}>
       <Lesson title="Briefing" lessonId="lesson-iv">
@@ -156,6 +185,14 @@ export const MemoryGameBlock: Story = {
 
 /** H5P: Branching Scenario */
 export const BranchingScenarioBlock: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "[`BranchingScenario`](https://lessonkit.readthedocs.io/en/latest/reference/block-catalog.html#branchingscenario) · [1.4→1.5 migration](https://lessonkit.readthedocs.io/en/latest/MIGRATION-1.4-to-1.5.html).",
+      },
+    },
+  },
   render: () => (
     <Course title="Branching" courseId="storybook-branch" config={storyConfig}>
       <Lesson title="Paths" lessonId="lesson-branch">
@@ -179,6 +216,13 @@ export const BranchingScenarioBlock: Story = {
 
 /** H5P: Iframe Embedder */
 export const EmbedBlock: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story: "[`Embed`](https://lessonkit.readthedocs.io/en/latest/reference/block-catalog.html#embed) — sandboxed iframe (1.5).",
+      },
+    },
+  },
   render: () => (
     <Course title="Embed" courseId="storybook-embed" config={storyConfig}>
       <Lesson title="External" lessonId="lesson-embed">
@@ -190,6 +234,13 @@ export const EmbedBlock: Story = {
 
 /** H5P: Chart */
 export const ChartBlock: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story: "[`Chart`](https://lessonkit.readthedocs.io/en/latest/reference/block-catalog.html#chart) — bar/pie with table fallback (1.5).",
+      },
+    },
+  },
   render: () => (
     <Course title="Chart" courseId="storybook-chart" config={storyConfig}>
       <Lesson title="Metrics" lessonId="lesson-chart">

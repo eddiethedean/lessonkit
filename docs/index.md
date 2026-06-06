@@ -3,7 +3,7 @@
 ```{raw} html
 <div class="lk-hero">
   <div class="lk-hero-badges">
-    <span class="lk-badge lk-badge--accent">v1.4.0</span>
+    <span class="lk-badge lk-badge--accent">v1.5.0</span>
     <span class="lk-badge">React-first</span>
     <span class="lk-badge">SCORM · xAPI · cmi5</span>
   </div>
@@ -53,7 +53,8 @@ LessonKit courses are React apps. If you want to learn React before the develope
 
 ```{raw} html
 <div class="lk-callout">
-  <strong>Node.js:</strong> 18+ for dev, build, and <code>lessonkit package</code> (LMS export).
+  <strong>Node.js:</strong> <strong>18+</strong> minimum for dev, build, and <code>lessonkit package</code>.
+  Use <strong>20.19+</strong> for the CLI scaffold (Vite 8), monorepo CI, and Playwright e2e.
 </div>
 ```
 
@@ -61,8 +62,8 @@ LessonKit courses are React apps. If you want to learn React before the develope
 
 | Task | Node.js |
 | --- | --- |
-| Create a course, run `lessonkit dev`, build | **18+** |
-| Package for LMS (`lessonkit package`) | **18+** |
+| Create a course, run `lessonkit dev`, build, package | **18+** minimum |
+| CLI scaffold (Vite 8), monorepo CI, Playwright e2e | **20.19+** recommended |
 
 Release notes: [changelog](project/changelog.md) on this site · [GitHub](https://github.com/eddiethedean/lessonkit).
 
