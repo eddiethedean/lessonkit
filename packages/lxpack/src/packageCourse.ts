@@ -23,6 +23,9 @@ import { validateReactManifestParity } from "./validateReactParity";
 
 export type { ExportTarget } from "@lxpack/api";
 
+/** LessonKit-owned alias for LMS export targets (maps to `@lxpack/api` `ExportTarget`). */
+export type LessonkitExportTarget = ExportTarget;
+
 export type ValidateLessonkitProjectOptions = {
   courseDir: string;
   target?: ExportTarget;

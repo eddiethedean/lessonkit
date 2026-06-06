@@ -1,11 +1,11 @@
 import { afterEach } from "vitest";
 import { cleanup } from "@testing-library/react";
-import { resetQuizWarningsForTests } from "../src";
-import { resetLessonMountRegistryForTests } from "../src/runtime/lessonMountRegistry";
 import {
   resetCourseStartedTrackingFlightForTests,
   resetLessonkitProviderStorageForTests,
-} from "../src/provider/useLessonkitProviderRuntime";
+  resetLessonMountRegistryForTests,
+  resetQuizWarningsForTests,
+} from "../src/testing";
 
 export function registerRuntimeTestCleanup(): void {
   afterEach(() => {

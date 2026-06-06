@@ -89,7 +89,7 @@ Migrating from 0.9.x? See [MIGRATION-0.x-to-1.0.md](https://github.com/eddiethed
 | Custom LRS transport or statement helpers | `@lessonkit/xapi` |
 | Custom theme presets | `@lessonkit/themes` |
 | Focus utilities in custom UI | `@lessonkit/accessibility` |
-| Packaging without the CLI | `@lessonkit/lxpack` (+ peer `@lxpack/api`) |
+| Packaging without the CLI | `@lessonkit/lxpack` (bundles `@lxpack/*` as direct dependencies) |
 
 See the [glossary](https://lessonkit.readthedocs.io/en/latest/reference/glossary.html) for terms like LXPack and `LessonkitProvider`.
 

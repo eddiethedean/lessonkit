@@ -57,3 +57,11 @@ export type AssessmentBaseProps = AssessmentBehaviour & {
   checkId: CheckId;
   passingScore?: number;
 };
+
+/** MCQ assessment props shared by React components and LMS packaging descriptors. */
+export type McqAssessmentProps = AssessmentBaseProps & {
+  kind?: "mcq";
+  question: string;
+  choices: string[];
+  answer: string;
+};

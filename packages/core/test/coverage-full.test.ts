@@ -13,9 +13,9 @@ import {
 import { createNoopStorage } from "../src/ports";
 import {
   buildTelemetryEvent,
-  resetTelemetryBuilderWarningsForTests,
   tryBuildTelemetryEvent,
 } from "../src/telemetryBuilder";
+import { resetTelemetryBuilderWarningsForTests } from "../src/testing";
 import {
   hasCourseStartedPipelineDelivered,
   markCourseStartedEmittedToTracking,

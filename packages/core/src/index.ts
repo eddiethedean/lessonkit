@@ -61,7 +61,10 @@ export type {
   AssessmentXAPIData,
   AssessmentBaseProps,
   AssessmentResumeState,
+  McqAssessmentProps,
 } from "./assessment";
+
+export type { LmsBridgeMode } from "./bridgeTypes";
 
 export type {
   CompoundHandle,
@@ -128,6 +131,7 @@ export type { BuildTelemetryEventInput } from "./telemetryBuilder";
 export {
   buildTelemetryEvent,
   tryBuildTelemetryEvent,
+  /** @deprecated Import from `@lessonkit/core/testing`. */
   resetTelemetryBuilderWarningsForTests,
 } from "./telemetryBuilder";
 
@@ -140,6 +144,7 @@ export {
   createGlobalTimer,
   createNoopStorage,
   createSessionStoragePort,
+  /** @deprecated Import from `@lessonkit/core/testing`. */
   resetStoragePortForTests,
 } from "./ports";
 
@@ -157,6 +162,7 @@ export {
   markCourseStartedEmittedToTracking,
   hasCourseStartedPipelineDelivered,
   markCourseStartedPipelineDelivered,
+  /** @deprecated Import from `@lessonkit/core/testing`. */
   resetSharedVolatileSessionIdForTests,
 } from "./session";
 

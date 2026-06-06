@@ -20,6 +20,10 @@ Look for issues labeled **`good first issue`** or **`help wanted`**. Starter ide
 
 Maintainers: create those labels in GitHub (**Settings → Labels**) if they are not present yet.
 
+## Studio packages (not shipped)
+
+The `packages/studio-*` directories (`studio-builder`, `studio-codegen`, `studio-renderer`, `studio-schema`, `studio-ui`) and `apps/studio-web` are **experimental and not published** to npm. They are excluded from workspace `package.json` files and CI. Do not depend on them for course authoring or packaging — use `@lessonkit/react` and `@lessonkit/cli` instead. If you touch studio code, treat it as archival R&D unless a maintainer re-enables it in workspaces.
+
 ## Development setup
 
 ```bash

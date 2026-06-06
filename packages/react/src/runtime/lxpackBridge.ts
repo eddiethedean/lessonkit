@@ -1,14 +1,14 @@
-import type { TelemetryEvent } from "@lessonkit/core";
+import type { LmsBridgeMode, TelemetryEvent } from "@lessonkit/core";
 import {
   dispatchBridgeAction,
   forwardTelemetryToBridge,
   getLxpackBridge,
   mapLessonkitTelemetryToBridgeAction,
   telemetryEventToLessonkit,
-  type LxpackBridgeMode,
 } from "@lessonkit/lxpack/bridge";
 
-export type { LxpackBridgeMode };
+/** @deprecated Use `LmsBridgeMode` from `@lessonkit/core`. */
+export type LxpackBridgeMode = LmsBridgeMode;
 
 const BRIDGE_MISS_EVENT_NAMES = new Set<TelemetryEvent["name"]>([
   "course_completed",
@@ -19,7 +19,7 @@ const BRIDGE_MISS_EVENT_NAMES = new Set<TelemetryEvent["name"]>([
 
 export function forwardTelemetryToLxpack(
   event: TelemetryEvent,
-  mode: LxpackBridgeMode = "auto",
+  mode: LmsBridgeMode = "auto",
   opts?: { onBridgeMiss?: (event: TelemetryEvent) => void },
 ): void {
   if (

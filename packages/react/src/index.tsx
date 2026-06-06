@@ -6,6 +6,7 @@ export {
   Quiz,
   Reflection,
   Scenario,
+  /** @deprecated Import from `@lessonkit/react/testing`. */
   resetQuizWarningsForTests,
 } from "./components";
 
@@ -120,6 +121,7 @@ export {
   useTracking,
 } from "./hooks";
 
+/** @deprecated Import from `@lessonkit/react/testing`. */
 export { resetAssessmentWarningsForTests } from "./assessment/AssessmentLessonGuard";
 
 export type {
@@ -129,6 +131,8 @@ export type {
   LessonkitRuntime,
 } from "./context";
 export { LessonkitProvider } from "./context";
+
+export type { LmsBridgeMode, McqAssessmentProps } from "@lessonkit/core";
 
 export type {
   AssessmentAnsweredData,

@@ -1,7 +1,7 @@
 import React, { forwardRef, useEffect, useId, useMemo, useRef, useState } from "react";
 import { visuallyHiddenStyle } from "@lessonkit/accessibility";
 import type { AssessmentHandle, LessonId } from "@lessonkit/core";
-import type { McqAssessmentDescriptor } from "@lessonkit/lxpack";
+import type { McqAssessmentProps } from "@lessonkit/core";
 import { AssessmentLessonGuard, resetAssessmentWarningsForTests } from "../assessment/AssessmentLessonGuard";
 import { buildAssessmentHandle } from "../assessment/internal/buildAssessmentHandle";
 import {
@@ -14,7 +14,7 @@ import { usePluginScoring } from "../assessment/internal/usePluginScoring";
 import { useQuizState } from "../hooks";
 import { normalizeComponentId } from "../runtime/validateComponentId";
 
-export type QuizProps = McqAssessmentDescriptor;
+export type QuizProps = McqAssessmentProps;
 
 function QuizInner(
   props: QuizProps & { enclosingLessonId: LessonId },

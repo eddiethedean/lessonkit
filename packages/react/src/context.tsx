@@ -11,7 +11,7 @@ import type {
   TrackingClient,
 } from "@lessonkit/core";
 import type { XAPIClient, XAPITransport } from "@lessonkit/xapi";
-import type { LxpackBridgeMode } from "@lessonkit/lxpack/bridge";
+import type { LmsBridgeMode } from "@lessonkit/core";
 import type { ProgressState } from "./runtime/progress";
 import type { LessonkitObservabilityConfig } from "./runtime/observability";
 import { useLessonkitProviderRuntime } from "./provider/useLessonkitProviderRuntime";
@@ -48,7 +48,7 @@ export type LessonkitConfig = {
   };
   lxpack?: {
     /** Forward completion events to `window.parent.lxpackBridge.v1` when embedded (default `auto`). */
-    bridge?: LxpackBridgeMode;
+    bridge?: LmsBridgeMode;
   };
   /** Framework plugins (analytics, LMS, assessment, interaction, AI). */
   plugins?: LessonkitPlugin[];

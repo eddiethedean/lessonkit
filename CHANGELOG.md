@@ -6,7 +6,20 @@ All notable changes to the LessonKit monorepo are documented here.
 
 ## Unreleased
 
-_No changes yet._
+### Added
+
+- **@lessonkit/core**: `McqAssessmentProps`, `LmsBridgeMode`; `./testing` subpath export for test reset helpers.
+- **@lessonkit/react**: `./blocks` and `./testing` subpath exports; optional `@lessonkit/lxpack` peer dependency.
+- **@lessonkit/lxpack**: `LessonkitExportTarget` alias for packaging targets.
+- **CI**: Dependabot for npm and GitHub Actions.
+
+### Changed
+
+- **@lessonkit/react**: `QuizProps` and `KnowledgeCheckProps` now use `McqAssessmentProps` from `@lessonkit/core` (was `McqAssessmentDescriptor` from lxpack).
+- **@lessonkit/lxpack**: `@lxpack/*` dependencies pinned to exact `0.6.2`; LXPack compatibility matrix in [LXPack interoperability](docs/reference/lxpack-upgrades.md).
+- **@lessonkit/cli**: `exports` field now includes TypeScript types.
+- **Docs**: `SECURITY.md` lists 1.4.x; README clarifies lxpack bundles `@lxpack/*`; CONTRIBUTING documents studio packages as not shipped.
+- Test reset helpers on main package entries are **deprecated**; use `@lessonkit/core/testing` and `@lessonkit/react/testing`.
 
 ## [1.4.0] - 2026-06-05
 
@@ -23,6 +36,7 @@ Framework **1.4.x** — `InteractiveVideo` (H5P Interactive Video) and bundled T
 
 - **Block catalog v3**: 38 entries (was 26); `Slide` allowlist includes `Video` and 1.4 blocks.
 - **Docs**: [MIGRATION-1.3-to-1.4.md](docs/MIGRATION-1.3-to-1.4.md); H5P capability map rows marked ✅ at 1.4.0.
+- **Dependencies**: `@lessonkit/react` transitively installs `@lessonkit/lxpack` (and `@lxpack/*`) for LMS bridge telemetry at runtime; use `@lessonkit/cli` as a devDependency for packaging only.
 
 ## [1.3.1] - 2026-06-05
 
