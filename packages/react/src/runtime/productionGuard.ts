@@ -10,10 +10,32 @@ function isProductionEnvironment(): boolean {
   return typeof g.process !== "undefined" && g.process.env?.NODE_ENV === "production";
 }
 
+function shouldEnforceProductionGuard(): boolean {
+  try {
+    if ((import.meta as { env?: { MODE?: string } }).env?.MODE === "test") return false;
+  } catch {
+    // no import.meta
+  }
+  return isProductionEnvironment();
+}
+
 function looksLikeConsoleSink(fn: unknown): boolean {
   if (typeof fn !== "function") return false;
   const src = Function.prototype.toString.call(fn);
   return /console\.(log|debug|info)\s*\(/.test(src);
+}
+
+export function isTrackingDeliveryConfigured(
+  tracking: LessonkitConfig["tracking"] | undefined,
+): boolean {
+  if (!tracking || tracking.enabled === false) return false;
+  return Boolean(tracking.sink || tracking.batchSink);
+}
+
+export function isXapiDeliveryConfigured(xapi: LessonkitConfig["xapi"] | undefined): boolean {
+  if (!xapi || xapi.enabled === false) return false;
+  if (xapi.client) return true;
+  return typeof xapi.transport === "function";
 }
 
 function trackingUsesConsole(config: Pick<LessonkitConfig, "tracking">): boolean {
@@ -35,14 +57,25 @@ function observabilityIncomplete(
   opts: { trackingEnabled: boolean; xapiEnabled: boolean },
 ): boolean {
   if (!opts.trackingEnabled && !opts.xapiEnabled) return false;
-  const hooks = [
-    observability?.onTelemetrySinkError,
-    observability?.onTelemetryBufferDrop,
-    observability?.onXapiQueueDepth,
-    observability?.onXapiQueueCap,
-    observability?.onLxpackBridgeMiss,
-  ];
-  return !hooks.some(Boolean);
+  const required: Array<unknown> = [observability?.onLxpackBridgeMiss];
+  if (opts.trackingEnabled) {
+    required.push(observability?.onTelemetrySinkError, observability?.onTelemetryBufferDrop);
+  }
+  if (opts.xapiEnabled) {
+    required.push(
+      observability?.onXapiQueueDepth,
+      observability?.onXapiQueueCap,
+      observability?.onXapiTransportError,
+    );
+  }
+  return required.some((hook) => !hook);
+}
+
+function requiredObservabilityHookCount(opts: { trackingEnabled: boolean; xapiEnabled: boolean }): number {
+  let count = 1;
+  if (opts.trackingEnabled) count += 2;
+  if (opts.xapiEnabled) count += 3;
+  return count;
 }
 
 /**
@@ -54,10 +87,8 @@ export function assertProductionCourseConfig(
 ): void {
   if (!isProductionEnvironment()) return;
 
-  const trackingEnabled = config.tracking?.enabled !== false && Boolean(config.tracking?.sink || config.tracking?.batchSink);
-  const xapiEnabled =
-    config.xapi?.enabled === true ||
-    (config.xapi?.enabled !== false && typeof config.xapi?.transport === "function");
+  const trackingEnabled = isTrackingDeliveryConfigured(config.tracking);
+  const xapiEnabled = isXapiDeliveryConfigured(config.xapi);
 
   if (trackingUsesConsole(config)) {
     throw new Error(
@@ -70,8 +101,11 @@ export function assertProductionCourseConfig(
     );
   }
   if (observabilityIncomplete(config.observability, { trackingEnabled, xapiEnabled })) {
+    const hookCount = requiredObservabilityHookCount({ trackingEnabled, xapiEnabled });
     throw new Error(
-      "[lessonkit] Production build missing observability hooks. Wire all five config.observability callbacks before go-live.",
+      `[lessonkit] Production build missing observability hooks. Wire all ${hookCount} config.observability callbacks before go-live.`,
     );
   }
 }
+
+export { isProductionEnvironment, shouldEnforceProductionGuard };

@@ -42,6 +42,22 @@ describe("assertProductionCourseConfig", () => {
     ).toThrow(/observability hooks/);
   });
 
+  it("throws when production xAPI omits onXapiTransportError", () => {
+    vi.stubEnv("NODE_ENV", "production");
+    expect(() =>
+      assertProductionCourseConfig({
+        xapi: { enabled: true, transport: async () => undefined },
+        observability: {
+          onTelemetrySinkError: () => undefined,
+          onTelemetryBufferDrop: () => undefined,
+          onXapiQueueDepth: () => undefined,
+          onXapiQueueCap: () => undefined,
+          onLxpackBridgeMiss: () => undefined,
+        },
+      }),
+    ).toThrow(/4 config\.observability/);
+  });
+
   it("passes with real sinks and observability in production", () => {
     vi.stubEnv("NODE_ENV", "production");
     expect(() =>
@@ -54,6 +70,7 @@ describe("assertProductionCourseConfig", () => {
           onXapiQueueDepth: () => undefined,
           onXapiQueueCap: () => undefined,
           onLxpackBridgeMiss: () => undefined,
+          onXapiTransportError: () => undefined,
         },
       }),
     ).not.toThrow();

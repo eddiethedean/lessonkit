@@ -1,5 +1,5 @@
 import type { ExportTarget } from "@lxpack/api";
-import { assessmentDescriptorToLxpack } from "../assessments";
+import { validateInjectableAssessments } from "./validateInjectableAssessments";
 import type { LessonkitCourseDescriptor } from "../types";
 import type { ValidationIssue } from "../validationIssue";
 
@@ -33,14 +33,10 @@ export function validateDescriptorForExportTarget(
   }
 
   if (LMS_SHELL_TARGETS.has(target)) {
-    (descriptor.assessments ?? []).forEach((assessment, index) => {
-      if (assessmentDescriptorToLxpack(assessment) === null) {
-        issues.push({
-          path: `assessments[${index}]`,
-          message: `assessment kind "${assessment.kind ?? "mcq"}" (checkId "${assessment.checkId}") is not injected into LMS shell quizzes for target "${target}"`,
-        });
-      }
-    });
+    issues.push(...validateInjectableAssessments(descriptor).map((issue) => ({
+      ...issue,
+      message: `${issue.message} for target "${target}"`,
+    })));
   }
 
   return issues;

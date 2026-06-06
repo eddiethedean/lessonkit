@@ -44,6 +44,8 @@ export type LessonkitConfig = {
     transport?: XAPITransport;
     /** Keepalive transport for pagehide (e.g. from createFetchTransport). */
     exitTransport?: import("@lessonkit/xapi").XAPIExitTransport;
+    /** Abort in-flight transport by statement id (e.g. from createFetchTransport). */
+    abortInFlight?: (statementId: string) => void;
     client?: XAPIClient;
   };
   lxpack?: {

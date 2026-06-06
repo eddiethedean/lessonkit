@@ -21,6 +21,8 @@ export type FetchTransportBundle = {
   transport: XAPITransport;
   /** Best-effort synchronous delivery for pagehide (keepalive fetch). */
   exitTransport: (statement: XAPIStatement) => void;
+  /** Abort an in-flight transport request by statement id (used on pagehide). */
+  abortInFlight: (statementId: string) => void;
 };
 
 /** HTTP error from fetch transport with status for retry policy. */
@@ -56,18 +58,18 @@ function resolveHeaders(
   return { "Content-Type": "application/json", ...resolved };
 }
 
-function createAbortSignal(timeoutMs: number): AbortSignal | undefined {
-  if (timeoutMs <= 0) return undefined;
-  const timeout = AbortSignal as typeof AbortSignal & {
-    timeout?: (ms: number) => AbortSignal;
-  };
-  if (typeof timeout.timeout === "function") {
-    return timeout.timeout(timeoutMs);
-  }
+function createAbortSignal(timeoutMs: number): { signal: AbortSignal | undefined; abort: () => void } {
+  if (timeoutMs <= 0) return { signal: undefined, abort: () => {} };
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   (timer as unknown as { unref?: () => void }).unref?.();
-  return controller.signal;
+  return {
+    signal: controller.signal,
+    abort: () => {
+      clearTimeout(timer);
+      controller.abort();
+    },
+  };
 }
 
 function sleep(ms: number): Promise<void> {
@@ -80,9 +82,9 @@ function postStatement(
   init: RequestInit,
 ): Promise<void> {
   return fetch(url, {
+    ...init,
     method: "POST",
     body: JSON.stringify(statement),
-    ...init,
   }).then((res) => {
     if (!res.ok) {
       throw new FetchHttpError(res.status, res.statusText, "xapi");
@@ -117,22 +119,30 @@ async function postWithRetry(
  */
 export function createFetchTransport(opts: CreateFetchTransportOptions): FetchTransportBundle {
   const timeoutMs = opts.timeoutMs ?? 30_000;
-  const retries = opts.retries ?? 2;
+  const rawRetries = opts.retries ?? 2;
+  const retries = Number.isFinite(rawRetries) ? Math.max(0, Math.floor(rawRetries)) : 2;
   const initialBackoffMs = opts.backoffMs ?? 250;
   const maxBackoffMs = opts.maxBackoffMs ?? 5_000;
+  const activeControllers = new Map<string, { abort: () => void }>();
 
   const transport: XAPITransport = async (statement) => {
-    await postWithRetry(
-      () =>
-        postStatement(opts.url, statement, {
-          ...opts.init,
-          headers: resolveHeaders(opts.headers),
-          signal: createAbortSignal(timeoutMs),
-        }),
-      retries,
-      initialBackoffMs,
-      maxBackoffMs,
-    );
+    const { signal, abort } = createAbortSignal(timeoutMs);
+    activeControllers.set(statement.id, { abort });
+    try {
+      await postWithRetry(
+        () =>
+          postStatement(opts.url, statement, {
+            ...opts.init,
+            headers: resolveHeaders(opts.headers),
+            signal,
+          }),
+        retries,
+        initialBackoffMs,
+        maxBackoffMs,
+      );
+    } finally {
+      activeControllers.delete(statement.id);
+    }
   };
 
   const exitTransport = (statement: XAPIStatement): void => {
@@ -147,7 +157,12 @@ export function createFetchTransport(opts: CreateFetchTransportOptions): FetchTr
     }
   };
 
-  return { transport, exitTransport };
+  const abortInFlight = (statementId: string): void => {
+    activeControllers.get(statementId)?.abort();
+    activeControllers.delete(statementId);
+  };
+
+  return { transport, exitTransport, abortInFlight };
 }
 
 export type CreateFetchBatchSinkOptions = CreateFetchTransportOptions;
@@ -163,18 +178,20 @@ export type FetchBatchSinkBundle = {
  */
 export function createFetchBatchSink(opts: CreateFetchBatchSinkOptions): FetchBatchSinkBundle {
   const timeoutMs = opts.timeoutMs ?? 30_000;
-  const retries = opts.retries ?? 2;
+  const rawRetries = opts.retries ?? 2;
+  const retries = Number.isFinite(rawRetries) ? Math.max(0, Math.floor(rawRetries)) : 2;
   const initialBackoffMs = opts.backoffMs ?? 250;
   const maxBackoffMs = opts.maxBackoffMs ?? 5_000;
 
   const postBatch = async (events: unknown[], init: RequestInit): Promise<void> => {
+    const { signal } = createAbortSignal(timeoutMs);
     await postWithRetry(async () => {
       const res = await fetch(opts.url, {
+        ...init,
         method: "POST",
         body: JSON.stringify(events),
-        ...init,
         headers: resolveHeaders(opts.headers),
-        signal: createAbortSignal(timeoutMs),
+        signal,
       });
       if (!res.ok) {
         throw new FetchHttpError(res.status, res.statusText, "batch");

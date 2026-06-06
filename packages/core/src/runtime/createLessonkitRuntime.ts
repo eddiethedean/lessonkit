@@ -212,7 +212,7 @@ export function createLessonkitRuntime(
       if (next.courseId !== undefined && next.courseId !== previousCourseId) {
         progress = createProgressController();
       }
-      if (next.plugins !== undefined && next.plugins !== pluginHost) {
+      if (next.plugins !== undefined && next.plugins !== configSnapshot.plugins) {
         pluginHost?.disposeAll();
         configSnapshot.plugins = next.plugins;
         pluginHost = resolvePluginHost(configSnapshot.plugins);
@@ -231,17 +231,18 @@ export function createLessonkitRuntime(
       const wrapped = wrapEmitFn(emitFn);
       const current = progress.getState();
       if (current.activeLessonId === lessonId) return;
-      if (current.completedLessonIds.has(lessonId)) {
-        progress.setActiveLesson(lessonId, clock.nowMs());
-        return;
-      }
 
       const previous = current.activeLessonId;
-      if (previous && previous !== lessonId) {
+      if (previous && previous !== lessonId && !current.completedLessonIds.has(previous)) {
         const completed = progress.completeLesson(previous, clock.nowMs());
         if (completed.didComplete) {
           emitLessonCompletedEvents(previous, completed.durationMs, wrapped);
         }
+      }
+
+      if (current.completedLessonIds.has(lessonId)) {
+        progress.setActiveLesson(lessonId, clock.nowMs());
+        return;
       }
 
       progress.setActiveLesson(lessonId, clock.nowMs());

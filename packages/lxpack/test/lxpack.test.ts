@@ -284,6 +284,19 @@ describe("assessments", () => {
     expect(injected[0]?.id).toBe("email-first-step");
   });
 
+  it("findHotspot is not injected into LMS shell quizzes", () => {
+    expect(
+      assessmentDescriptorToLxpack({
+        kind: "findHotspot",
+        checkId: "hotspot-1",
+        question: "Find it",
+        src: "/img.png",
+        alt: "map",
+        correctTargetId: "zone-a",
+      }),
+    ).toBeNull();
+  });
+
   it("converts trueFalse descriptors to two-choice MCQ", () => {
     const lxTrue = assessmentDescriptorToLxpack({
       kind: "trueFalse",

@@ -86,7 +86,7 @@ function productionXapi(xapiProxyUrl: string | undefined): LessonkitConfig["xapi
       "VITE_XAPI_PROXY_URL is required in production. Point it at your LRS proxy (never the raw LRS with embedded secrets).",
     );
   }
-  const { transport, exitTransport } = createFetchTransport({
+  const { transport, exitTransport, abortInFlight } = createFetchTransport({
     url: xapiProxyUrl,
     headers: lrsAuthHeaders,
   });
@@ -94,6 +94,7 @@ function productionXapi(xapiProxyUrl: string | undefined): LessonkitConfig["xapi
     enabled: true,
     transport,
     exitTransport,
+    abortInFlight,
   };
 }
 

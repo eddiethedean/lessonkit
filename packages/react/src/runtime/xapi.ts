@@ -7,6 +7,7 @@ export type XapiConfig = {
   enabled?: boolean;
   transport?: XAPITransport;
   exitTransport?: import("@lessonkit/xapi").XAPIExitTransport;
+  abortInFlight?: (statementId: string) => void;
   client?: XAPIClient;
 };
 
@@ -24,6 +25,7 @@ export function createXapiClientFromConfig(
     courseId: config.courseId,
     transport: config.xapi?.transport,
     exitTransport: config.xapi?.exitTransport,
+    abortInFlight: config.xapi?.abortInFlight,
     queue,
     onTransportError: observability?.onXapiTransportError,
   });

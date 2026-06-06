@@ -24,6 +24,8 @@ export function createXAPIClient(opts?: {
   transport?: XAPITransport;
   /** Keepalive transport for pagehide flush (e.g. from createFetchTransport). */
   exitTransport?: import("./types").XAPIExitTransport;
+  /** Abort in-flight transport by statement id (e.g. from createFetchTransport). */
+  abortInFlight?: (statementId: string) => void;
   courseId?: CourseId;
   queue?: XAPIQueue;
   /** When creating the default in-memory queue (max size 1000 unless overridden). */
@@ -47,9 +49,11 @@ export function createXAPIClient(opts?: {
   let warnedTransportFailure = false;
   const inflightById = new Map<string, Promise<void>>();
   const inflightStatements = new Map<string, XAPIStatement>();
+  const exitDeliveredIds = new Set<string>();
 
   const sendOrQueue = (statement: XAPIStatement) => {
     const normalized = withStatementId(statement);
+    if (exitDeliveredIds.has(normalized.id)) return;
     if (!transport) {
       queue.enqueue(normalized);
       if (isDevEnvironment() && !warnedNoTransport) {
@@ -78,6 +82,7 @@ export function createXAPIClient(opts?: {
         queue.removeById(normalized.id);
       })
       .catch((err) => {
+        if (exitDeliveredIds.has(normalized.id)) return;
         queue.enqueue(normalized);
         opts?.onTransportError?.(err);
         if (isDevEnvironment() && !warnedTransportFailure) {
@@ -86,7 +91,7 @@ export function createXAPIClient(opts?: {
             "[lessonkit] xAPI transport failed; statement re-queued. Check your LRS endpoint or transport implementation.",
           );
         }
-        throw new Error("xAPI transport failed");
+        throw err instanceof Error ? err : new Error("xAPI transport failed", { cause: err });
       })
       .finally(() => {
         inflightById.delete(normalized.id);
@@ -123,7 +128,10 @@ export function createXAPIClient(opts?: {
       await queue.flush(transport);
       const flights = [...inflightById.values()];
       if (flights.length > 0) {
-        await Promise.allSettled(flights);
+        await Promise.all(flights);
+      }
+      if (queue.size() > 0) {
+        throw new Error("xAPI flush incomplete: statements remain queued after flush");
       }
     },
     flushOnExit: exitTransport
@@ -131,6 +139,8 @@ export function createXAPIClient(opts?: {
           const exitSentIds = new Set<string>();
           for (const statement of inflightStatements.values()) {
             if (exitSentIds.has(statement.id)) continue;
+            opts.abortInFlight?.(statement.id);
+            exitDeliveredIds.add(statement.id);
             try {
               exitTransport(statement);
               exitSentIds.add(statement.id);
@@ -140,6 +150,7 @@ export function createXAPIClient(opts?: {
           }
           queue.flushOnExit((statement) => {
             if (exitSentIds.has(statement.id)) return;
+            exitDeliveredIds.add(statement.id);
             exitTransport(statement);
             exitSentIds.add(statement.id);
           });

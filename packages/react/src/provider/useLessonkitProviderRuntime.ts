@@ -22,6 +22,7 @@ import { createLessonkitRuntime, createTrackingClient, assertValidId } from "@le
 import type { XAPIClient } from "@lessonkit/xapi";
 
 import { createXapiQueueFromObservability, wrapBatchSink, wrapTrackingSink, warnMissingProductionObservability } from "../runtime/observability";
+import { assertProductionCourseConfig, isTrackingDeliveryConfigured, isXapiDeliveryConfigured, shouldEnforceProductionGuard } from "../runtime/productionGuard";
 import { telemetryEventToXAPIStatement } from "@lessonkit/xapi";
 import { tryBuildTelemetryEvent } from "../runtime/emitTelemetry";
 import type { LxpackBridgeMode } from "../runtime/lxpackBridge";
@@ -83,6 +84,10 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
     () => ({ ...config, courseId: normalizedCourseId }),
     [config, normalizedCourseId],
   );
+
+  if (shouldEnforceProductionGuard()) {
+    assertProductionCourseConfig(normalizedConfig);
+  }
 
   const useV2Runtime = normalizedConfig.runtimeVersion !== "v1";
 
@@ -304,7 +309,13 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
     })();
     return () => {
       cancelled = true;
-      void prev?.flush();
+      void (async () => {
+        try {
+          await prev?.flush();
+        } catch {
+          // Swallow flush errors so a broken previous transport doesn't block cleanup.
+        }
+      })();
     };
   }, [xapiEnabled, xapiClient, xapiTransport, courseId, trackingEnabled]);
 
@@ -386,7 +397,7 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
     } else if (courseStartedFullySettled) {
       courseStartedEmittedToSinkRef.current = true;
     } else if (!courseStartedEmittedToSinkRef.current) {
-      const generation = ++courseStartedEmitGenerationRef.current;
+      const generation = courseStartedEmitGenerationRef.current;
       const shouldCommit = () => generation === courseStartedEmitGenerationRef.current;
       void (async () => {
         /* v8 ignore start -- superseded course_started generation exits before emit */
@@ -394,7 +405,7 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
         /* v8 ignore stop */
         const result = await emitPendingCourseStarted({
           pluginHost: pluginHostRef.current,
-          tracking: next,
+          tracking: () => trackingRef.current,
           xapi: xapiRef.current,
           storage: defaultStorage,
           sessionId,
@@ -416,7 +427,6 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
     }
 
     return () => {
-      courseStartedEmitGenerationRef.current += 1;
       /* v8 ignore start -- tracking client unchanged between layout passes */
       if (prev !== trackingRef.current) {
         void disposeTrackingClient(prev);
@@ -515,9 +525,11 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
 
       /* v8 ignore start -- backup emit when tracking effect did not mark course_started */
       if (!courseStartedEmittedToSinkRef.current) {
+        const generation = courseStartedEmitGenerationRef.current;
+        const shouldCommit = () => generation === courseStartedEmitGenerationRef.current;
         const result = await emitPendingCourseStarted({
           pluginHost: pluginHostRef.current,
-          tracking: trackingRef.current,
+          tracking: () => trackingRef.current,
           xapi: xapiRef.current,
           storage: defaultStorage,
           sessionId,
@@ -531,7 +543,9 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
           onXapiStatementSent: () => {
             xapiCourseStartedSentOnClientRef.current = true;
           },
+          shouldCommit,
         });
+        if (generation !== courseStartedEmitGenerationRef.current) return;
         courseStartedEmittedToSinkRef.current = isCourseStartedSinkSettled(result);
       }
       /* v8 ignore stop */
@@ -618,12 +632,8 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
 
   useEffect(() => {
     warnMissingProductionObservability(observabilityRef.current, {
-      trackingEnabled: isTrackingActive(normalizedConfig.tracking),
-      xapiEnabled: normalizedConfig.xapi?.enabled !== false && Boolean(
-        normalizedConfig.xapi?.client ||
-          normalizedConfig.xapi?.transport ||
-          normalizedConfig.xapi?.enabled === true,
-      ),
+      trackingEnabled: isTrackingDeliveryConfigured(normalizedConfig.tracking),
+      xapiEnabled: isXapiDeliveryConfigured(normalizedConfig.xapi),
     });
   }, [
     normalizedConfig.tracking,

@@ -97,6 +97,36 @@ describe("createLessonkitRuntime", () => {
     expect(events.filter((e) => e === "lesson_completed").length).toBe(1);
   });
 
+  it("setActiveLesson completes in-progress lesson when navigating to a completed lesson", () => {
+    const events: string[] = [];
+    const runtime = createLessonkitRuntime({ courseId: "c" });
+    runtime.setActiveLesson("lesson-1", (name) => events.push(name));
+    runtime.completeLesson("lesson-1", (name) => events.push(name));
+    runtime.setActiveLesson("lesson-2", (name) => events.push(name));
+    events.length = 0;
+    runtime.setActiveLesson("lesson-1", (name) => events.push(name));
+    expect(events.filter((e) => e === "lesson_completed").length).toBe(1);
+    expect(runtime.getProgressState().completedLessonIds.has("lesson-2")).toBe(true);
+  });
+
+  it("updateConfig does not re-init plugins when the same plugins array is passed", () => {
+    const setup = vi.fn();
+    const dispose = vi.fn();
+    const plugin = defineLifecyclePlugin({
+      id: "stable-plugins",
+      version: "1",
+      kind: "analytics",
+      setup,
+      dispose,
+    });
+    const plugins = [plugin];
+    const runtime = createLessonkitRuntime({ courseId: "c", plugins });
+    expect(setup).toHaveBeenCalledTimes(1);
+    runtime.updateConfig({ plugins });
+    expect(setup).toHaveBeenCalledTimes(1);
+    expect(dispose).not.toHaveBeenCalled();
+  });
+
   it("track runs telemetry plugins before deliver", () => {
     const plugin = defineTelemetryPlugin({
       id: "filter",

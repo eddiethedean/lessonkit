@@ -55,7 +55,9 @@ export function warnMissingProductionObservability(
 ): void {
   let isProduction = false;
   try {
-    isProduction = (import.meta as { env?: { PROD?: boolean } }).env?.PROD === true;
+    const env = (import.meta as { env?: { PROD?: boolean; MODE?: string } }).env;
+    if (env?.MODE === "test") return;
+    isProduction = env?.PROD === true;
   } catch {
     // no import.meta
   }
@@ -66,14 +68,18 @@ export function warnMissingProductionObservability(
   }
   if (!isProduction) return;
   if (!opts.trackingEnabled && !opts.xapiEnabled) return;
-  const hooks = [
-    observability?.onTelemetrySinkError,
-    observability?.onTelemetryBufferDrop,
-    observability?.onXapiQueueDepth,
-    observability?.onXapiQueueCap,
-    observability?.onLxpackBridgeMiss,
-  ];
-  if (hooks.some(Boolean)) return;
+  const required: Array<unknown> = [observability?.onLxpackBridgeMiss];
+  if (opts.trackingEnabled) {
+    required.push(observability?.onTelemetrySinkError, observability?.onTelemetryBufferDrop);
+  }
+  if (opts.xapiEnabled) {
+    required.push(
+      observability?.onXapiQueueDepth,
+      observability?.onXapiQueueCap,
+      observability?.onXapiTransportError,
+    );
+  }
+  if (!required.some((hook) => !hook)) return;
   if (typeof console !== "undefined") {
     console.warn(
       "[lessonkit] Production deployment without observability hooks — telemetry/xAPI failures and buffer drops will be silent. See https://lessonkit.readthedocs.io/en/latest/guides/react-developers/production-checklist.html",
