@@ -16,7 +16,7 @@ Developer tooling, not a timeline authoring tool: **React + telemetry + packagin
 | **Release** | [1.4.0](https://github.com/eddiethedean/lessonkit/blob/main/CHANGELOG.md#140---2026-06-06) |
 | **npm** | [`@lessonkit/*`](https://www.npmjs.com/org/lessonkit) |
 | **Docs** | [lessonkit.readthedocs.io](https://lessonkit.readthedocs.io/en/latest/) |
-| **Node.js** | 18+ (dev, build, LMS packaging); **20+** for Playwright e2e when [contributing](CONTRIBUTING.md) |
+| **Node.js** | **20+** (dev, build, LMS packaging, and CI); Vite 8 requires Node 20.19+ |
 
 ---
 
