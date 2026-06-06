@@ -216,7 +216,9 @@ export function createLessonkitRuntime(
         pluginHost?.disposeAll();
         configSnapshot.plugins = next.plugins;
         pluginHost = resolvePluginHost(configSnapshot.plugins);
-        pluginHost?.setupAll(getPluginCtx());
+        if (!configSnapshot.deferPluginSetup) {
+          pluginHost?.setupAll(getPluginCtx());
+        }
       } else if (
         next.session !== undefined &&
         sessionKeyBefore !== sessionKeyAfter &&
@@ -267,9 +269,12 @@ export function createLessonkitRuntime(
       });
     },
     track,
-    scoreAssessment(input, _lessonId) {
+    scoreAssessment(input, lessonId) {
       if (!pluginHost) return null;
-      return pluginHost.scoreAssessment(input, getPluginCtx());
+      return pluginHost.scoreAssessment(
+        { ...input, lessonId: input.lessonId ?? lessonId },
+        getPluginCtx(),
+      );
     },
     resetForCourseChange(nextCourseId) {
       configSnapshot.courseId = nextCourseId;

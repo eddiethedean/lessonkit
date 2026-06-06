@@ -62,7 +62,18 @@ export function isTrackingActive(tracking?: { enabled?: boolean }): boolean {
 }
 
 export function isCourseStartedSinkSettled(result: CourseStartedEmitResult): boolean {
-  return result === "emitted";
+  return result === "emitted" || result === "filtered";
+}
+
+async function deliverToTracking(client: TrackingClient, event: TelemetryEvent): Promise<boolean> {
+  if (client.deliver) {
+    return client.deliver(event);
+  }
+  client.track(event);
+  const flushed = await client.flush?.();
+  if (flushed === false) return false;
+  if (flushed === true) return true;
+  return false;
 }
 
 export function buildCourseStartedEvent(opts: CourseStartedEmitOpts): TelemetryEvent | null {
@@ -94,10 +105,10 @@ export async function emitCourseStartedToTracking(
   if (hasCourseStartedEmittedToTracking(storage, sessionId, courseId)) {
     return true;
   }
+
   const existing = courseStartedTrackingFlights.get(flightKey);
   if (existing) {
-    const settled = await existing;
-    if (settled) return true;
+    return existing;
   }
 
   let resolveFlight!: (value: boolean) => void;
@@ -113,13 +124,12 @@ export async function emitCourseStartedToTracking(
         return;
       }
       const client = resolveTrackingClient(tracking);
-      client.track(event);
-      const delivered = await client.flush?.();
+      const delivered = await deliverToTracking(client, event);
       if (shouldCommit && !shouldCommit()) {
         resolveFlight(false);
         return;
       }
-      if (delivered === false) {
+      if (!delivered) {
         resolveFlight(false);
         return;
       }
@@ -131,7 +141,9 @@ export async function emitCourseStartedToTracking(
     } catch {
       resolveFlight(false);
     } finally {
-      courseStartedTrackingFlights.delete(flightKey);
+      if (courseStartedTrackingFlights.get(flightKey) === flight) {
+        courseStartedTrackingFlights.delete(flightKey);
+      }
     }
   })();
 
@@ -339,7 +351,7 @@ async function emitPendingCourseStartedInner(
       onXapiStatementSent: opts.onXapiStatementSent,
     });
   }
-  return "emitted";
+  return "failed";
 }
 
 export function assertTrackingSinkConfig(tracking?: {

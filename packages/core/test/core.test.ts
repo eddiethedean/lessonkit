@@ -29,7 +29,7 @@ describe("@lessonkit/core", () => {
     vi.unstubAllGlobals();
   });
 
-  it("rethrows sync sink errors when batching is disabled", () => {
+  it("does not throw from track when batching is disabled and sync sink fails", async () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
     const prevEnv = process.env.NODE_ENV;
     process.env.NODE_ENV = "development";
@@ -38,8 +38,9 @@ describe("@lessonkit/core", () => {
       throw new Error("sync failed");
     });
     const client = createTrackingClient({ sink, batch: { enabled: false } });
-    expect(() => client.track(interactionEvent("t"))).toThrow("sync failed");
+    expect(() => client.track(interactionEvent("t"))).not.toThrow();
     expect(warn).toHaveBeenCalled();
+    await expect(client.deliver?.(interactionEvent("t"))).resolves.toBe(false);
 
     process.env.NODE_ENV = prevEnv;
     warn.mockRestore();

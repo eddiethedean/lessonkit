@@ -33,6 +33,7 @@ export function createInMemoryXAPIQueue(opts?: InMemoryXAPIQueueOptions): XAPIQu
   const buffer: XAPIStatement[] = [];
   let flushInFlight: Promise<void> | null = null;
   let headInFlight = false;
+  let headInFlightId: string | undefined;
   let headFailureCount = 0;
 
   const notifyDepth = () => {
@@ -51,6 +52,7 @@ export function createInMemoryXAPIQueue(opts?: InMemoryXAPIQueueOptions): XAPIQu
     while (buffer.length) {
       const statement = buffer[0]!;
       headInFlight = true;
+      headInFlightId = statement.id;
       try {
         await transport(statement);
         buffer.shift();
@@ -68,6 +70,7 @@ export function createInMemoryXAPIQueue(opts?: InMemoryXAPIQueueOptions): XAPIQu
         throw err;
       } finally {
         headInFlight = false;
+        headInFlightId = undefined;
       }
     }
   };
@@ -101,21 +104,16 @@ export function createInMemoryXAPIQueue(opts?: InMemoryXAPIQueueOptions): XAPIQu
       return flushInFlight;
     },
     flushOnExit: (exitTransport: XAPIExitTransport) => {
-      const startIdx = headInFlight && buffer.length > 0 ? 1 : 0;
-      for (let i = startIdx; i < buffer.length; i++) {
-        const statement = buffer[i]!;
+      for (const statement of buffer) {
         try {
           exitTransport(statement);
         } catch {
           // page is unloading
         }
       }
-      if (startIdx === 0) {
-        buffer.length = 0;
-      } else if (buffer.length > 1) {
-        buffer.splice(1);
-      }
+      buffer.length = 0;
       notifyDepth();
     },
+    getHeadInFlightId: () => headInFlightId,
   };
 }

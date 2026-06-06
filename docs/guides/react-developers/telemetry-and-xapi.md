@@ -87,7 +87,9 @@ Before go-live, complete the [production checklist](production-checklist.md) (LM
 
 ### Observability hooks
 
-Wire **all five** hooks in production:
+Required hooks depend on what you enable — see the [production checklist](production-checklist.md) for the full matrix. When both tracking and xAPI delivery are configured, wire all six hooks including **`onXapiTransportError`** (required for xAPI, not optional).
+
+If you pass a prebuilt `config.xapi.client`, the provider does not attach its internal queue observability wiring; wire `onXapiQueueDepth` / `onXapiQueueCap` yourself or use `config.xapi.transport` from `createFetchTransport`.
 
 ```tsx
 observability: {
@@ -96,6 +98,7 @@ observability: {
   onXapiQueueDepth: (depth) => { /* gauge */ },
   onXapiQueueCap: () => { /* alert: queue dropped oldest statement */ },
   onLxpackBridgeMiss: (event) => { /* LMS bridge missing for completion */ },
+  onXapiTransportError: (err) => { /* alert: LRS transport failed after retries */ },
 },
 ```
 

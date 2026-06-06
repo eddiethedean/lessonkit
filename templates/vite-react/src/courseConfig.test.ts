@@ -15,7 +15,7 @@ describe("createCourseConfig", () => {
     const config = createCourseConfig();
 
     expect(config.courseId).toBe("my-course");
-    expect(config.lxpack?.bridge).toBe("auto");
+    expect(config.lxpack?.bridge).toBe("off");
     expect(config.observability?.onTelemetrySinkError).toBeTypeOf("function");
     expect(config.observability?.onLxpackBridgeMiss).toBeTypeOf("function");
 
@@ -73,4 +73,19 @@ describe("createCourseConfig", () => {
     expect(fetchMock).toHaveBeenCalled();
   });
 
+  it("skips production guard when MODE is test even with proxy URLs set", () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("MODE", "test");
+    vi.stubEnv("VITE_XAPI_PROXY_URL", "https://lrs.example/statements");
+    vi.stubEnv("VITE_ANALYTICS_URL", "https://analytics.example/events");
+
+    expect(() => createCourseConfig()).not.toThrow();
+  });
+
+  it("throws when production guard is enforced with console sinks", () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("MODE", "production");
+
+    expect(() => createCourseConfig()).toThrow(/console telemetry sinks|observability hooks/);
+  });
 });

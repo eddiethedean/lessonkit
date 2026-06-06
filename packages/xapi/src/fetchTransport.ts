@@ -126,16 +126,21 @@ export function createFetchTransport(opts: CreateFetchTransportOptions): FetchTr
   const activeControllers = new Map<string, { abort: () => void }>();
 
   const transport: XAPITransport = async (statement) => {
-    const { signal, abort } = createAbortSignal(timeoutMs);
-    activeControllers.set(statement.id, { abort });
+    let abortCleanup: (() => void) | undefined;
+    activeControllers.set(statement.id, {
+      abort: () => abortCleanup?.(),
+    });
     try {
       await postWithRetry(
-        () =>
-          postStatement(opts.url, statement, {
+        () => {
+          const { signal, abort } = createAbortSignal(timeoutMs);
+          abortCleanup = abort;
+          return postStatement(opts.url, statement, {
             ...opts.init,
             headers: resolveHeaders(opts.headers),
             signal,
-          }),
+          });
+        },
         retries,
         initialBackoffMs,
         maxBackoffMs,
@@ -184,8 +189,8 @@ export function createFetchBatchSink(opts: CreateFetchBatchSinkOptions): FetchBa
   const maxBackoffMs = opts.maxBackoffMs ?? 5_000;
 
   const postBatch = async (events: unknown[], init: RequestInit): Promise<void> => {
-    const { signal } = createAbortSignal(timeoutMs);
     await postWithRetry(async () => {
+      const { signal } = createAbortSignal(timeoutMs);
       const res = await fetch(opts.url, {
         ...init,
         method: "POST",

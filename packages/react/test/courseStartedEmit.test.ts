@@ -54,6 +54,45 @@ describe("emitCourseStartedToTracking", () => {
     expect(hasCourseStartedEmittedToTracking(storage, "session-1", "course-1")).toBe(false);
   });
 
+  it("does not mark dedupe when deliver returns false for non-batch client", async () => {
+    const storage = createSessionStoragePort();
+    const tracking: TrackingClient = {
+      deliver: async () => false,
+      track: vi.fn(),
+    };
+
+    const ok = await emitCourseStartedToTracking(
+      tracking,
+      storage,
+      "session-1",
+      "course-1",
+      event,
+    );
+
+    expect(ok).toBe(false);
+    expect(hasCourseStartedEmittedToTracking(storage, "session-1", "course-1")).toBe(false);
+  });
+
+  it("dedupes concurrent tracking retries after failed deliver", async () => {
+    const storage = createSessionStoragePort();
+    let deliverCalls = 0;
+    const tracking: TrackingClient = {
+      deliver: async () => {
+        deliverCalls += 1;
+        return deliverCalls >= 2;
+      },
+      track: vi.fn(),
+    };
+
+    const [a, b] = await Promise.all([
+      emitCourseStartedToTracking(tracking, storage, "session-1", "course-1", event),
+      emitCourseStartedToTracking(tracking, storage, "session-1", "course-1", event),
+    ]);
+
+    expect(a).toBe(b);
+    expect(deliverCalls).toBe(1);
+  });
+
   it("marks dedupe after flush succeeds", async () => {
     const storage = createSessionStoragePort();
     const tracking: TrackingClient = {

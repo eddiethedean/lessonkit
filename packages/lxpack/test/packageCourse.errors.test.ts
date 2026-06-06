@@ -236,7 +236,7 @@ describe("packageLessonkitCourse errors", () => {
       expect(
         result.issues.some(
           (i) =>
-            i.path === "course.tracking.xapi.activityIri" &&
+            i.path === "tracking.xapi.activityIri" &&
             i.message.includes("HTTPS"),
         ),
       ).toBe(true);
@@ -260,7 +260,7 @@ describe("packageLessonkitCourse errors", () => {
 
     expect(result.ok).toBe(false);
     if (!result.ok) {
-      expect(result.issues.some((i) => i.path === "course.tracking.xapi.activityIri")).toBe(true);
+      expect(result.issues.some((i) => i.path === "tracking.xapi.activityIri")).toBe(true);
     }
   });
 

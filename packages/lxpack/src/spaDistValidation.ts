@@ -1,6 +1,7 @@
 import { lstat, readdir } from "node:fs/promises";
+import { realpathSync } from "node:fs";
 import { join } from "node:path";
-import { assertRealPathUnderRoot } from "./spaPath";
+import { assertRealPathUnderRoot, assertResolvedPathUnderRoot, resolveComparablePath } from "./spaPath";
 
 /**
  * Reject symlinks and paths escaping dist roots before packaging LMS artifacts.
@@ -10,10 +11,22 @@ export async function assertSpaDistContentsSafe(
   projectRoot?: string,
 ): Promise<void> {
   for (const [label, dir] of Object.entries(spaDirs)) {
+    const dirResolved = resolveComparablePath(dir);
+    const dirStat = await lstat(dirResolved);
+    if (dirStat.isSymbolicLink()) {
+      throw new Error(`spa dist for "${label}" cannot be a symlink: ${dir}`);
+    }
+    let rootReal: string;
+    try {
+      rootReal = realpathSync(dirResolved);
+    } catch {
+      throw new Error(`spa dist for "${label}" is not readable: ${dir}`);
+    }
     if (projectRoot) {
       assertRealPathUnderRoot(projectRoot, dir);
     }
-    await walkDistDir(dir, dir, label);
+    assertResolvedPathUnderRoot(rootReal, rootReal);
+    await walkDistDir(rootReal, rootReal, label);
   }
 }
 
@@ -33,7 +46,13 @@ async function walkDistDir(rootReal: string, current: string, label: string): Pr
     if (stat.isSymbolicLink()) {
       throw new Error(`spa dist for "${label}" contains symlink: ${entryPath}`);
     }
-    assertRealPathUnderRoot(rootReal, entryPath);
+    let entryReal = entryPath;
+    try {
+      entryReal = realpathSync(entryPath);
+    } catch {
+      entryReal = entryPath;
+    }
+    assertResolvedPathUnderRoot(rootReal, entryReal);
     if (stat.isDirectory()) {
       await walkDistDir(rootReal, entryPath, label);
     }

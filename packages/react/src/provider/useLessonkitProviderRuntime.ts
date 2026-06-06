@@ -21,8 +21,8 @@ import type {
 import { createLessonkitRuntime, createTrackingClient, assertValidId } from "@lessonkit/core";
 import type { XAPIClient } from "@lessonkit/xapi";
 
-import { createXapiQueueFromObservability, wrapBatchSink, wrapTrackingSink, warnMissingProductionObservability } from "../runtime/observability";
-import { assertProductionCourseConfig, isTrackingDeliveryConfigured, isXapiDeliveryConfigured, shouldEnforceProductionGuard } from "../runtime/productionGuard";
+import { createXapiQueueFromObservability, wrapBatchSink, wrapTrackingSink } from "../runtime/observability";
+import { assertProductionCourseConfig, shouldEnforceProductionGuard } from "../runtime/productionGuard";
 import { telemetryEventToXAPIStatement } from "@lessonkit/xapi";
 import { tryBuildTelemetryEvent } from "../runtime/emitTelemetry";
 import type { LxpackBridgeMode } from "../runtime/lxpackBridge";
@@ -203,7 +203,7 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
   const activeLessonIdRef = useRef<LessonId | undefined>(progress.activeLessonId);
   activeLessonIdRef.current = progress.activeLessonId;
 
-  const xapiQueueRef = useRef(createXapiQueueFromObservability(normalizedConfig.observability));
+  const xapiQueueRef = useRef(createXapiQueueFromObservability(() => observabilityRef.current));
   const xapiRef = useRef<XAPIClient | null>(null);
   const [xapi, setXapi] = useState<XAPIClient | null>(null);
   const prevXapiCourseIdRef = useRef(normalizedCourseId);
@@ -228,7 +228,7 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
         /* v8 ignore stop */
         void xapiRef.current?.flush();
       }
-      xapiQueueRef.current = createXapiQueueFromObservability(observabilityRef.current);
+      xapiQueueRef.current = createXapiQueueFromObservability(() => observabilityRef.current);
       prevXapiCourseIdRef.current = courseId;
       xapiCourseStartedSentOnClientRef.current = false;
       xapiBootstrapSendRef.current = false;
@@ -415,7 +415,8 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
           lxpackBridge: lxpackBridgeModeRef.current,
           onLxpackBridgeMiss,
           extraSinks: extraSinksRef.current,
-          skipXapi: xapiCourseStartedSentOnClientRef.current,
+          skipXapi:
+            xapiCourseStartedSentOnClientRef.current || xapiBootstrapSendRef.current,
           onXapiStatementSent: () => {
             xapiCourseStartedSentOnClientRef.current = true;
           },
@@ -539,7 +540,8 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
           lxpackBridge: lxpackBridgeModeRef.current,
           onLxpackBridgeMiss,
           extraSinks: extraSinksRef.current,
-          skipXapi: xapiCourseStartedSentOnClientRef.current,
+          skipXapi:
+            xapiCourseStartedSentOnClientRef.current || xapiBootstrapSendRef.current,
           onXapiStatementSent: () => {
             xapiCourseStartedSentOnClientRef.current = true;
           },
@@ -629,19 +631,6 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
       window.removeEventListener("pagehide", flushOnPageExit);
     };
   }, []);
-
-  useEffect(() => {
-    warnMissingProductionObservability(observabilityRef.current, {
-      trackingEnabled: isTrackingDeliveryConfigured(normalizedConfig.tracking),
-      xapiEnabled: isXapiDeliveryConfigured(normalizedConfig.xapi),
-    });
-  }, [
-    normalizedConfig.tracking,
-    normalizedConfig.xapi?.enabled,
-    normalizedConfig.xapi?.client,
-    normalizedConfig.xapi?.transport,
-    normalizedConfig.observability,
-  ]);
 
   const setActiveLesson = useCallback(
     (lessonId: LessonId) => {

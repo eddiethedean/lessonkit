@@ -135,7 +135,7 @@ describe("coverage-full", () => {
     warn.mockRestore();
   });
 
-  it("tracking client omits dev warnings in production for sync sink errors", () => {
+  it("tracking client omits dev warnings in production for sync sink errors", async () => {
     vi.stubEnv("NODE_ENV", "production");
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
     const client = createTrackingClient({
@@ -144,7 +144,8 @@ describe("coverage-full", () => {
       },
       batch: { enabled: false },
     });
-    expect(() => client.track(baseEvent)).toThrow("sync");
+    expect(() => client.track(baseEvent)).not.toThrow();
+    await expect(client.deliver?.(baseEvent)).resolves.toBe(false);
     expect(warn).not.toHaveBeenCalled();
     warn.mockRestore();
   });
@@ -292,7 +293,7 @@ describe("coverage-full", () => {
     expect(() => client.track(baseEvent)).not.toThrow();
   });
 
-  it("tracking client formats non-Error sync failures in development", () => {
+  it("tracking client formats non-Error sync failures in development", async () => {
     vi.stubEnv("NODE_ENV", "development");
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
     const client = createTrackingClient({
@@ -301,7 +302,8 @@ describe("coverage-full", () => {
       },
       batch: { enabled: false },
     });
-    expect(() => client.track(baseEvent)).toThrow();
+    expect(() => client.track(baseEvent)).not.toThrow();
+    await expect(client.deliver?.(baseEvent)).resolves.toBe(false);
     expect(warn).toHaveBeenCalledWith(
       expect.stringContaining("tracking sink failed"),
       "sync-string",

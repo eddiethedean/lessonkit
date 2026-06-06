@@ -6,6 +6,7 @@ import type { LessonkitCourseDescriptor } from "../types";
 import { descriptorToInterchange } from "../interchange";
 import { resolveSpaDirs } from "../spaDirs";
 import { assertSpaDistContentsSafe } from "../spaDistValidation";
+import { validateInjectableAssessments } from "../descriptor/validateInjectableAssessments";
 import type { WriteLxpackProjectOptions } from "../writeProject";
 
 export type BuildStagingPackageOptions = WriteLxpackProjectOptions & {
@@ -52,6 +53,18 @@ export async function buildStagingPackage(
             message: err instanceof Error ? err.message : String(err),
           },
         ],
+      };
+    }
+
+    const injectableIssues = validateInjectableAssessments(descriptor);
+    if (injectableIssues.length > 0) {
+      return {
+        ok: false,
+        stagingDir,
+        issues: injectableIssues.map((i) => ({
+          path: i.path,
+          message: i.message,
+        })),
       };
     }
 

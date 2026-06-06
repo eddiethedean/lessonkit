@@ -238,6 +238,8 @@ export type TelemetryBatchSink = (events: TelemetryEvent[]) => void | Promise<vo
 
 export type TrackingClient = {
   track: (event: TelemetryEvent) => void;
+  /** Delivers one event and resolves to true only when the sink accepted it (batch: includes flush). */
+  deliver?: (event: TelemetryEvent) => Promise<boolean>;
   /** Resolves to true when all buffered events were delivered; false when a sink failure re-queued events. */
   flush?: () => void | Promise<boolean>;
   /** Best-effort synchronous flush for pagehide (keepalive batch sink when configured). */

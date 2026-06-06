@@ -33,7 +33,15 @@ Verify the parent exposes `window.parent.lxpackBridge.v1` in SCORM previews befo
 
 ## Observability (required in production)
 
-Wire **all five** hooks (plus optional `onXapiTransportError`) so silent data loss surfaces in your monitoring stack:
+When telemetry or xAPI delivery is configured, wire observability hooks so silent data loss surfaces in your monitoring stack. Required hooks depend on what you enable:
+
+| Config | Required hooks |
+| --- | --- |
+| Tracking or xAPI enabled | `onLxpackBridgeMiss` |
+| Tracking delivery (`sink` or `batchSink`) | + `onTelemetrySinkError`, `onTelemetryBufferDrop` |
+| xAPI delivery (`transport` or `client`) | + `onXapiQueueDepth`, `onXapiQueueCap`, `onXapiTransportError` |
+
+Example when both tracking and xAPI use fetch transports:
 
 ```tsx
 observability: {
@@ -47,9 +55,9 @@ observability: {
 },
 ```
 
-`onTelemetryBufferDrop` fires when the telemetry batch buffer (cap 1000) drops new events. `onTelemetrySinkError` covers both per-event sinks and `batchSink` failures. `onLxpackBridgeMiss` alerts when SCORM/LMS parent lacks `lxpackBridge.v1`. `onXapiTransportError` fires when the LRS transport fails after retries.
+`onTelemetryBufferDrop` fires when the telemetry batch buffer (cap 1000) drops new events. `onTelemetrySinkError` covers both per-event sinks and `batchSink` failures. `onLxpackBridgeMiss` alerts when SCORM/LMS parent lacks `lxpackBridge.v1` (set `lxpack.bridge: "auto"` only in LMS shells). `onXapiTransportError` is **required** when xAPI delivery is configured — it fires when the LRS transport fails after retries.
 
-`lessonkit init` scaffolds these hooks in `src/courseConfig.ts`. Production builds call `assertProductionCourseConfig()` — console sinks or missing hooks throw at load time.
+`lessonkit init` scaffolds these hooks in `src/courseConfig.ts`. Production builds call `assertProductionCourseConfig()` (via `shouldEnforceProductionGuard()` in the template) — console sinks, missing delivery config, or missing hooks throw before the app mounts.
 
 ## CI / build
 

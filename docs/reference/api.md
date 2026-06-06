@@ -33,8 +33,9 @@ Import from `@lessonkit/core` (re-exported by `@lessonkit/react` where relevant)
 
 | API | Package | Purpose |
 | --- | --- | --- |
-| `assertProductionCourseConfig(config)` | `@lessonkit/react` | Throws in production when console sinks or observability hooks are missing |
-| `onXapiTransportError` | `config.observability` | Called when xAPI transport fails after retries (statement re-queued) |
+| `assertProductionCourseConfig(config)` | `@lessonkit/react` | Throws in production when console telemetry/xAPI sinks, tracking enabled without delivery, or required observability hooks are missing |
+| `shouldEnforceProductionGuard()` | `@lessonkit/react` | Returns false in test mode (`import.meta.env.MODE === "test"`) even when `NODE_ENV=production` |
+| `onXapiTransportError` | `config.observability` | Required when xAPI delivery is configured; called when transport fails after retries (statement re-queued) |
 
 ## Machine-readable contracts
 

@@ -1,6 +1,6 @@
 import type { TelemetryEvent } from "@lessonkit/core";
 import type { LessonkitConfig } from "@lessonkit/react";
-import { assertProductionCourseConfig } from "@lessonkit/react";
+import { assertProductionCourseConfig, shouldEnforceProductionGuard } from "@lessonkit/react";
 import { createFetchBatchSink, createFetchTransport } from "@lessonkit/xapi";
 import type { XAPIStatement } from "@lessonkit/xapi";
 
@@ -104,12 +104,14 @@ export function createCourseConfig(): LessonkitConfig {
 
   const config: LessonkitConfig = {
     courseId: "my-course",
-    lxpack: { bridge: "auto" },
+    lxpack: { bridge: "off" },
     observability: createObservability(),
     tracking: useProductionTransports ? productionTracking(analyticsUrl) : devConsoleTracking(),
     xapi: useProductionTransports ? productionXapi(xapiProxyUrl) : devConsoleXapi(),
   };
 
-  assertProductionCourseConfig(config);
+  if (shouldEnforceProductionGuard()) {
+    assertProductionCourseConfig(config);
+  }
   return config;
 }

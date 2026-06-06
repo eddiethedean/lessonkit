@@ -42,6 +42,15 @@ describe("assertProductionCourseConfig", () => {
     ).toThrow(/observability hooks/);
   });
 
+  it("throws when production has tracking enabled without delivery", () => {
+    vi.stubEnv("NODE_ENV", "production");
+    expect(() =>
+      assertProductionCourseConfig({
+        tracking: { enabled: true },
+      }),
+    ).toThrow(/tracking enabled but no sink/);
+  });
+
   it("throws when production xAPI omits onXapiTransportError", () => {
     vi.stubEnv("NODE_ENV", "production");
     expect(() =>

@@ -19,15 +19,12 @@ export type LessonkitObservabilityConfig = {
 };
 
 export function createXapiQueueFromObservability(
-  observability?: LessonkitObservabilityConfig,
+  getObservability?: () => LessonkitObservabilityConfig | undefined,
 ): ReturnType<typeof createInMemoryXAPIQueue> {
-  const opts: InMemoryXAPIQueueOptions = {};
-  if (observability?.onXapiQueueDepth) {
-    opts.onDepth = observability.onXapiQueueDepth;
-  }
-  if (observability?.onXapiQueueCap) {
-    opts.onCap = observability.onXapiQueueCap;
-  }
+  const opts: InMemoryXAPIQueueOptions = {
+    onDepth: (size) => getObservability?.()?.onXapiQueueDepth?.(size),
+    onCap: () => getObservability?.()?.onXapiQueueCap?.(),
+  };
   return createInMemoryXAPIQueue(opts);
 }
 
@@ -99,12 +96,13 @@ export function wrapTrackingSink(
       if (result != null && typeof (result as Promise<void>).catch === "function") {
         return (result as Promise<void>).catch((err) => {
           onError(err, { sinkId: "tracking" });
+          throw err;
         });
       }
       return result;
     } catch (err) {
       onError(err, { sinkId: "tracking" });
-      return undefined;
+      throw err;
     }
   }) as TrackingSink;
 }

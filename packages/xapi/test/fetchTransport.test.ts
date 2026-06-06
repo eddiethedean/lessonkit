@@ -168,6 +168,47 @@ describe("createFetchTransport", () => {
     }
   });
 
+  it("retries after timeout with a fresh abort signal per attempt", async () => {
+    vi.useFakeTimers();
+    try {
+      let calls = 0;
+      const fetchMock = vi.fn((_url: string, init?: RequestInit) => {
+        calls += 1;
+        if (calls === 1) {
+          return new Promise<Response>((_resolve, reject) => {
+            init?.signal?.addEventListener("abort", () => {
+              reject(new DOMException("Aborted", "AbortError"));
+            });
+          });
+        }
+        return Promise.resolve(new Response(null, { status: 204 }));
+      });
+      globalThis.fetch = fetchMock as typeof fetch;
+
+      const { transport } = createFetchTransport({
+        url: "https://lrs.example/statements",
+        retries: 1,
+        backoffMs: 10,
+        timeoutMs: 50,
+      });
+
+      const promise = transport({
+        id: "s1",
+        timestamp: "2026-01-01T00:00:00Z",
+        verb: "http://adlnet.gov/expapi/verbs/completed",
+        object: { id: "https://example.com/a" },
+      });
+      await vi.advanceTimersByTimeAsync(50);
+      await vi.advanceTimersByTimeAsync(10);
+      await promise;
+
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+    } finally {
+      vi.clearAllTimers();
+      vi.useRealTimers();
+    }
+  });
+
   it("exitTransport uses keepalive fetch", () => {
     const fetchMock = vi.fn(() => Promise.resolve(new Response(null, { status: 204 })));
     globalThis.fetch = fetchMock as typeof fetch;

@@ -201,7 +201,7 @@ describe("@lessonkit/xapi", () => {
     expect(transport).toHaveBeenCalledTimes(2);
   });
 
-  it("flushOnExit skips in-flight queue head to avoid duplicate delivery", async () => {
+  it("flushOnExit delivers all queued statements including in-flight head after abort", async () => {
     const exitCalls: XAPIStatement[] = [];
     const queue = createInMemoryXAPIQueue();
     let release!: () => void;
@@ -227,14 +227,15 @@ describe("@lessonkit/xapi", () => {
 
     const flushPromise = queue.flush(transport);
     await new Promise((r) => setTimeout(r, 0));
+    expect(queue.getHeadInFlightId?.()).toBe("head");
     queue.flushOnExit((s) => {
       exitCalls.push(s);
     });
-    expect(exitCalls.map((s) => s.id)).toEqual(["tail"]);
+    expect(exitCalls.map((s) => s.id)).toEqual(["head", "tail"]);
 
     release();
     await flushPromise;
-    expect(exitCalls.map((s) => s.id)).toEqual(["tail"]);
+    expect(exitCalls.map((s) => s.id)).toEqual(["head", "tail"]);
   });
 
   it("does not send duplicate in-flight statements with the same id", async () => {

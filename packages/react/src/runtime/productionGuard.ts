@@ -87,6 +87,16 @@ export function assertProductionCourseConfig(
 ): void {
   if (!isProductionEnvironment()) return;
 
+  if (
+    config.tracking &&
+    config.tracking.enabled !== false &&
+    !isTrackingDeliveryConfigured(config.tracking)
+  ) {
+    throw new Error(
+      "[lessonkit] Production build has tracking enabled but no sink or batchSink configured.",
+    );
+  }
+
   const trackingEnabled = isTrackingDeliveryConfigured(config.tracking);
   const xapiEnabled = isXapiDeliveryConfigured(config.xapi);
 

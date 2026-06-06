@@ -50,11 +50,19 @@ export function createXAPIClient(opts?: {
   const inflightById = new Map<string, Promise<void>>();
   const inflightStatements = new Map<string, XAPIStatement>();
   const exitDeliveredIds = new Set<string>();
+  const exitNetworkSentIds = new Set<string>();
+
+  const deliveryTransport: XAPITransport | undefined = transport
+    ? async (statement) => {
+        if (exitNetworkSentIds.has(statement.id)) return;
+        await transport(statement);
+      }
+    : undefined;
 
   const sendOrQueue = (statement: XAPIStatement) => {
     const normalized = withStatementId(statement);
     if (exitDeliveredIds.has(normalized.id)) return;
-    if (!transport) {
+    if (!deliveryTransport) {
       queue.enqueue(normalized);
       if (isDevEnvironment() && !warnedNoTransport) {
         warnedNoTransport = true;
@@ -78,7 +86,7 @@ export function createXAPIClient(opts?: {
     inflightStatements.set(normalized.id, normalized);
     const flight = Promise.resolve()
       .then(async () => {
-        await transport(normalized);
+        await deliveryTransport(normalized);
         queue.removeById(normalized.id);
       })
       .catch((err) => {
@@ -124,8 +132,8 @@ export function createXAPIClient(opts?: {
     },
     queueSize: () => queue.size(),
     flush: async () => {
-      if (!transport) return;
-      await queue.flush(transport);
+      if (!deliveryTransport) return;
+      await queue.flush(deliveryTransport);
       const flights = [...inflightById.values()];
       if (flights.length > 0) {
         await Promise.all(flights);
@@ -136,23 +144,26 @@ export function createXAPIClient(opts?: {
     },
     flushOnExit: exitTransport
       ? () => {
-          const exitSentIds = new Set<string>();
+          const headId = queue.getHeadInFlightId?.();
+          if (headId) {
+            exitNetworkSentIds.add(headId);
+            exitDeliveredIds.add(headId);
+            opts.abortInFlight?.(headId);
+          }
           for (const statement of inflightStatements.values()) {
-            if (exitSentIds.has(statement.id)) continue;
+            exitNetworkSentIds.add(statement.id);
+            exitDeliveredIds.add(statement.id);
             opts.abortInFlight?.(statement.id);
+          }
+          queue.flushOnExit((statement) => {
+            if (exitDeliveredIds.has(statement.id)) return;
+            exitNetworkSentIds.add(statement.id);
             exitDeliveredIds.add(statement.id);
             try {
               exitTransport(statement);
-              exitSentIds.add(statement.id);
             } catch {
               // page is unloading
             }
-          }
-          queue.flushOnExit((statement) => {
-            if (exitSentIds.has(statement.id)) return;
-            exitDeliveredIds.add(statement.id);
-            exitTransport(statement);
-            exitSentIds.add(statement.id);
           });
         }
       : undefined,
