@@ -9,17 +9,18 @@ Published packages (`v*.*.*` tag → [Release](.github/workflows/release.yml)): 
 | Item | Status |
 |------|--------|
 | All seven `@lessonkit/*` packages at `1.4.0` | Done |
-| [CHANGELOG.md](CHANGELOG.md) `## [1.4.0]` documents InteractiveVideo, Studio removal, and audit **Fixed** pass | Done |
+| [CHANGELOG.md](CHANGELOG.md) `## [1.4.0]` documents InteractiveVideo, Studio removal, audit **Fixed** pass, and dependency refresh | Done |
 | Sphinx `docs/conf.py` `release` = `1.4.0` | Done |
 | [MIGRATION-1.3-to-1.4.md](docs/MIGRATION-1.3-to-1.4.md) in Sphinx toctree | Done |
-| Docs updated for 1.4 observability, production guard, and init template | Done |
-| `lessonkit init` template pins `^1.4.0` | Done |
+| Docs updated for 1.4 observability, production guard, init template, and Node 20 | Done |
+| `lessonkit init` template pins `^1.4.0` (React 19, Vite 8) | Done |
 | No pending `.changeset/*.md` files | Done |
 | `npm run copy-template -w @lessonkit/cli` (template in sync) | Done |
 | `examples/interactive-video` integration + e2e golden path | Done |
-| `release/1.4.0` CI green | Done (2026-06-06) |
-| `npm run lint` + `typecheck` + `test` + `test:integration` + `test:e2e` | Done locally (2026-06-06) |
+| `main` CI green (includes #25 dependency batch) | Done (2026-06-06) |
+| `npm run lint` + `typecheck` + `test` + `test:integration` + `test:e2e` | Done locally (2026-06-06); CI green on `main` |
 | `npm audit --omit=dev --audit-level=high` | 0 high/critical (2026-06-06) |
+| npm latest `@lessonkit/react` | **1.3.x** — publish with `v1.4.0` |
 | Git tag `v1.4.0` | **Create when ready** |
 
 > **Do not create or push `v1.4.0`** until you intend to publish to npm.
