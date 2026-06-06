@@ -57,10 +57,10 @@
   "dependencies": {
     "@lessonkit/core": "1.4.0",
     "@lessonkit/themes": "1.4.0",
-    "@lxpack/api": "0.6.2",
-    "@lxpack/spa-bridge": "0.6.2",
-    "@lxpack/tracking-schema": "0.6.2",
-    "@lxpack/validators": "0.6.2"
+    "@lxpack/api": "0.6.4",
+    "@lxpack/spa-bridge": "0.6.4",
+    "@lxpack/tracking-schema": "0.6.4",
+    "@lxpack/validators": "0.6.4"
   },
   "devDependencies": {
     "@types/node": "^22.13.10",
