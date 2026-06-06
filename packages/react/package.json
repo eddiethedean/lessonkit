@@ -90,7 +90,7 @@
     "@storybook/addon-essentials": "8.6.18",
     "@storybook/addon-interactions": "8.6.18",
     "@storybook/builder-vite": "8.6.18",
-    "@storybook/react": "8.6.18",
+    "@storybook/react": "10.4.2",
     "@storybook/react-vite": "8.6.18",
     "@storybook/test": "8.6.18",
     "@testing-library/react": "^16.3.0",
