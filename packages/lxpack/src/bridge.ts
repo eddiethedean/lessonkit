@@ -31,7 +31,7 @@ export {
 } from "@lxpack/tracking-schema";
 import { mapLessonkitTelemetryToBridgeAction } from "@lxpack/tracking-schema";
 
-import { telemetryEventToLessonkit } from "./telemetry";
+import { telemetryEventToLessonkit, branchTelemetryToBridgeTrackEvent } from "./telemetry";
 
 type LxpackBridgeHost = {
   lxpackBridge?: { v1?: LxpackBridgeV1 };
@@ -39,7 +39,7 @@ type LxpackBridgeHost = {
   lxpack?: LxpackBridgeV1;
 };
 
-export { telemetryEventToLessonkit };
+export { telemetryEventToLessonkit, branchTelemetryToBridgeTrackEvent, BRANCH_TELEMETRY_EVENTS } from "./telemetry";
 
 /**
  * Scale a raw quiz score to 0–1 for the LXPack parent bridge.
@@ -173,6 +173,11 @@ export function forwardTelemetryToBridge(
   if (!bridge) return;
   if (event.name === "assessment_completed") {
     forwardAssessmentCompletedToBridge(bridge, event);
+    return;
+  }
+  const branchTrack = branchTelemetryToBridgeTrackEvent(event);
+  if (branchTrack) {
+    bridge.track?.(branchTrack);
     return;
   }
   const lessonkitEvent = telemetryEventToLessonkit(event);

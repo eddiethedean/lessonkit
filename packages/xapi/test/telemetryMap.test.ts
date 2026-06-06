@@ -432,6 +432,25 @@ describe("telemetryEventToXAPIStatement", () => {
     expect(branchSelected?.verb).toBe("http://adlnet.gov/expapi/verbs/experienced");
   });
 
+  it("maps branch_selected with NaN scoreWeight as experienced", () => {
+    const branchSelected = telemetryEventToXAPIStatement({
+      name: "branch_selected",
+      courseId: "c1",
+      lessonId: "l1",
+      timestamp: "2026-01-01T00:00:00.000Z",
+      sessionId: "s1",
+      data: {
+        blockId: "branch-1",
+        fromNodeId: "offer",
+        toNodeId: "supervisor",
+        label: "Supervisor",
+        scoreWeight: Number.NaN,
+      },
+    });
+    expect(branchSelected?.verb).toBe("http://adlnet.gov/expapi/verbs/experienced");
+    expect(branchSelected?.result).toBeUndefined();
+  });
+
   it("throws for unknown event names", () => {
     expect(() =>
       telemetryEventToXAPIStatement({

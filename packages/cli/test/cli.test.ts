@@ -449,7 +449,7 @@ describe("runInit", () => {
     expect(appSource).toContain('preset="default"');
     const courseConfigSource = await readFile(join(projectDir, "src/courseConfig.ts"), "utf8");
     expect(courseConfigSource).toContain('courseId: "my-demo"');
-    expect(lessonkit.tracking?.xapi?.activityIri).toBe("https://example.com/courses/my-demo");
+    expect(lessonkit.course.tracking?.xapi?.activityIri).toBe("https://example.com/courses/my-demo");
   });
 
   it("slugifies numeric project names to valid courseId values", async () => {

@@ -17,6 +17,7 @@ import {
 import type { TelemetryEvent } from "@lessonkit/core";
 import type { XAPIStatement } from "@lessonkit/xapi";
 import { CourseTopbar, LessonIntro, SidebarLessons, type LessonMeta } from "../../_shared/course-ui";
+import { allowConsoleTelemetryForDocsDemo } from "../../_shared/docsDemoConfig";
 
 const COURSE_ID = "customer-de-escalation";
 
@@ -33,6 +34,7 @@ export default function App() {
 
   const courseConfig = React.useMemo(
     () => ({
+      ...allowConsoleTelemetryForDocsDemo(),
       tracking: { sink: (event: TelemetryEvent) => console.log("[telemetry]", event) },
       xapi: { transport: (statement: XAPIStatement) => console.log("[xapi]", statement) },
     }),

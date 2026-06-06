@@ -84,4 +84,15 @@ describe("assertProductionCourseConfig", () => {
       }),
     ).not.toThrow();
   });
+
+  it("allows console sinks in production when preview.allowConsoleTelemetry is set", () => {
+    vi.stubEnv("NODE_ENV", "production");
+    expect(() =>
+      assertProductionCourseConfig({
+        preview: { allowConsoleTelemetry: true },
+        tracking: { sink: (event) => console.log(event) },
+        xapi: { enabled: true, transport: (s) => console.log(s) },
+      }),
+    ).not.toThrow();
+  });
 });

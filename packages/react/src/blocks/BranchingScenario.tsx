@@ -1,15 +1,17 @@
 import React, { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { BlockId, CompoundHandle, CompoundResumeState } from "@lessonkit/core";
-import { loadCompoundState } from "@lessonkit/core";
+import { clampCompoundPageIndex, loadCompoundState } from "@lessonkit/core";
 import { CompoundProvider, useCompoundRegistry } from "../compound/CompoundProvider";
 import { useCompoundPersistence } from "../compound/useCompoundPersistence";
 import {
+  applyChoiceScoreUpdate,
+  createInitialBranchMeta,
   mergeBranchMetaIntoState,
   readBranchingScenarioMeta,
+  sanitizeBranchMeta,
   sumChoiceScores,
   type BranchingScenarioMeta,
 } from "../compound/useCompoundBranchShell";
-import { choiceScoreKey } from "../compound/useCompoundBranchShell";
 import { useCompoundBranchHandle } from "../compound/useCompoundBranchHandle";
 import { BranchingScenarioProvider } from "../compound/useBranchingScenario";
 import {
@@ -22,7 +24,7 @@ import { validateCompoundChildren } from "../compound/validateChildren";
 import { getLessonkitBlockType, setLessonkitBlockType } from "../compound/blockType";
 import { useLessonkit } from "../hooks";
 import { useEnclosingLessonId } from "../lessonContext";
-import { normalizeComponentId } from "../runtime/validateComponentId";
+import { isDevEnvironment, normalizeComponentId } from "../runtime/validateComponentId";
 import type { BranchNodeProps } from "./BranchNode";
 
 export type BranchingScenarioProps = {
@@ -40,15 +42,23 @@ function loadBranchMeta(
   blockId: BlockId,
   persistEnabled: boolean,
   startNodeId: string,
+  nodeIndexMap: ReadonlyMap<string, number>,
+  pageCount: number,
 ): BranchingScenarioMeta {
-  if (!persistEnabled || !courseId) {
-    return { activeNodeId: startNodeId, visitedNodeIds: [startNodeId] };
+  const fallback = createInitialBranchMeta(startNodeId);
+  if (!persistEnabled || !courseId || pageCount < 1) {
+    return fallback;
   }
   const saved = loadCompoundState(storage, courseId, blockId);
-  if (!saved) return { activeNodeId: startNodeId, visitedNodeIds: [startNodeId] };
-  const meta = readBranchingScenarioMeta(saved.childStates);
-  if (!meta) return { activeNodeId: startNodeId, visitedNodeIds: [startNodeId] };
-  return meta;
+  if (!saved) return fallback;
+  const fromMeta = readBranchingScenarioMeta(saved.childStates);
+  if (fromMeta) {
+    return sanitizeBranchMeta(fromMeta, nodeIndexMap, startNodeId);
+  }
+  const nodeIds = [...nodeIndexMap.keys()];
+  const clamped = clampCompoundPageIndex(saved.activePageIndex, pageCount);
+  const nodeId = nodeIds[clamped] ?? startNodeId;
+  return sanitizeBranchMeta(createInitialBranchMeta(nodeId), nodeIndexMap, startNodeId);
 }
 
 const BranchingScenarioInner = forwardRef<
@@ -73,15 +83,14 @@ const BranchingScenarioInner = forwardRef<
 
   const [meta, setMeta] = useState<BranchingScenarioMeta>(initialMeta);
   const metaRef = useRef(meta);
-  metaRef.current = meta;
+  const branchViewedRef = useRef(new Set<string>());
+
+  const commitMeta = useCallback((next: BranchingScenarioMeta) => {
+    metaRef.current = next;
+    setMeta(next);
+  }, []);
 
   const activeIndex = nodeIndexMap.get(meta.activeNodeId) ?? 0;
-  const [index, setIndex] = useState(activeIndex);
-
-  useEffect(() => {
-    const nextIndex = nodeIndexMap.get(meta.activeNodeId) ?? 0;
-    setIndex(nextIndex);
-  }, [meta.activeNodeId, nodeIndexMap]);
 
   const visitedNodeIndices = useMemo(() => {
     const indices = new Set<number>();
@@ -92,29 +101,60 @@ const BranchingScenarioInner = forwardRef<
     return indices;
   }, [meta.visitedNodeIds, nodeIndexMap]);
 
+  const applyResumeState = useCallback(
+    (state: CompoundResumeState) => {
+      const fromMeta = readBranchingScenarioMeta(state.childStates);
+      if (fromMeta) {
+        commitMeta(sanitizeBranchMeta(fromMeta, nodeIndexMap, props.startNodeId));
+        return;
+      }
+      const nodeIds = [...nodeIndexMap.keys()];
+      const clamped = clampCompoundPageIndex(state.activePageIndex, nodes.length);
+      const nodeId = nodeIds[clamped] ?? props.startNodeId;
+      commitMeta(sanitizeBranchMeta(createInitialBranchMeta(nodeId), nodeIndexMap, props.startNodeId));
+    },
+    [commitMeta, nodeIndexMap, nodes.length, props.startNodeId],
+  );
+
+  const resetBranchMeta = useCallback(() => {
+    commitMeta(createInitialBranchMeta(props.startNodeId));
+    branchViewedRef.current = new Set();
+  }, [commitMeta, props.startNodeId]);
+
   const transformState = useCallback(
     (state: CompoundResumeState) => mergeBranchMetaIntoState(state, metaRef.current),
     [],
+  );
+
+  const shouldIncludeChildState = useCallback(
+    (_checkId: string, pageIndex: number | undefined) =>
+      pageIndex !== undefined && visitedNodeIndices.has(pageIndex),
+    [visitedNodeIndices],
   );
 
   useCompoundPersistence({
     courseId: config.courseId,
     compoundId: blockId,
     pageCount: nodes.length,
-    index,
-    setIndex,
+    index: activeIndex,
+    setIndex: () => {},
     enabled: persistEnabled,
     storage,
     transformState,
+    onCompoundResume: applyResumeState,
+    shouldIncludeChildState,
   });
 
   useCompoundBranchHandle(ref, {
-    activePageIndex: index,
-    setActivePageIndex: setIndex,
+    activePageIndex: activeIndex,
+    setActivePageIndex: () => {},
     getRegisteredHandles: () => ctx?.getRegisteredHandles() ?? new Map(),
     pageCount: nodes.length,
     visitedNodeIndices,
     choiceScores: meta.choiceScores ?? {},
+    meta,
+    onResetMeta: resetBranchMeta,
+    onApplyResumeState: applyResumeState,
   });
 
   const activeNode = nodes[activeIndex];
@@ -123,12 +163,19 @@ const BranchingScenarioInner = forwardRef<
     (activeNode ? !nodeHasChoices(activeNode) && meta.activeNodeId !== props.startNodeId : false);
 
   const visitedLabels = useMemo(
-    () => meta.visitedNodeIds.map((id) => nodeLabels.get(id) ?? id),
+    () =>
+      meta.visitedNodeIds.map((id) => ({
+        nodeId: id,
+        label: nodeLabels.get(id) ?? id,
+      })),
     [meta.visitedNodeIds, nodeLabels],
   );
 
   useEffect(() => {
     if (!lessonId || !activeNode) return;
+    const dedupeKey = `${blockId}:${meta.activeNodeId}`;
+    if (branchViewedRef.current.has(dedupeKey)) return;
+    branchViewedRef.current.add(dedupeKey);
     track(
       "branch_node_viewed",
       {
@@ -143,13 +190,24 @@ const BranchingScenarioInner = forwardRef<
 
   const navigateToNode = useCallback(
     (opts: { fromNodeId: string; toNodeId: string; label: string; scoreWeight?: number }) => {
+      const toNodeId = normalizeComponentId(opts.toNodeId, "blockId");
+      const fromNodeId = normalizeComponentId(opts.fromNodeId, "blockId");
+      if (!nodeIndexMap.has(toNodeId)) {
+        if (isDevEnvironment()) {
+          console.warn(
+            `[lessonkit] BranchingScenario: unknown targetNodeId "${toNodeId}" from "${fromNodeId}"`,
+          );
+        }
+        return;
+      }
+
       if (lessonId) {
         track(
           "branch_selected",
           {
             blockId,
-            fromNodeId: opts.fromNodeId,
-            toNodeId: opts.toNodeId,
+            fromNodeId,
+            toNodeId,
             label: opts.label,
             scoreWeight: opts.scoreWeight,
           },
@@ -158,21 +216,29 @@ const BranchingScenarioInner = forwardRef<
       }
 
       setMeta((prev) => {
-        const choiceScores =
-          opts.scoreWeight !== undefined
-            ? { ...prev.choiceScores, [choiceScoreKey(opts.fromNodeId, opts.toNodeId)]: opts.scoreWeight }
-            : prev.choiceScores;
-        const visited = prev.visitedNodeIds.includes(opts.toNodeId)
+        const choiceScores = applyChoiceScoreUpdate(
+          prev.choiceScores,
+          fromNodeId,
+          toNodeId,
+          opts.scoreWeight,
+        );
+        const visited = prev.visitedNodeIds.includes(toNodeId)
           ? prev.visitedNodeIds
-          : [...prev.visitedNodeIds, opts.toNodeId];
-        return {
-          activeNodeId: opts.toNodeId,
-          visitedNodeIds: visited,
-          choiceScores,
-        };
+          : [...prev.visitedNodeIds, toNodeId];
+        const next = sanitizeBranchMeta(
+          {
+            activeNodeId: toNodeId,
+            visitedNodeIds: visited,
+            choiceScores,
+          },
+          nodeIndexMap,
+          props.startNodeId,
+        );
+        metaRef.current = next;
+        return next;
       });
     },
-    [blockId, lessonId, track],
+    [blockId, lessonId, nodeIndexMap, props.startNodeId, track],
   );
 
   const contextValue = useMemo(
@@ -180,7 +246,7 @@ const BranchingScenarioInner = forwardRef<
       compoundBlockId: blockId,
       activeNodeId: meta.activeNodeId,
       visitedNodeIds: meta.visitedNodeIds,
-      visitedLabels,
+      visitedLabels: visitedLabels.map((entry) => entry.label),
       navigateToNode,
       isTerminal,
       choicesLocked: false,
@@ -212,8 +278,8 @@ const BranchingScenarioInner = forwardRef<
           <aside data-testid="branch-path-recap" aria-label="Your path">
             <h4>Your path</h4>
             <ol>
-              {visitedLabels.map((label) => (
-                <li key={label}>{label}</li>
+              {visitedLabels.map((entry) => (
+                <li key={entry.nodeId}>{entry.label}</li>
               ))}
             </ol>
           </aside>
@@ -256,26 +322,28 @@ export const BranchingScenario = forwardRef<CompoundHandle, BranchingScenarioPro
     const { config, storage } = useLessonkit();
     const persistEnabled = config.session?.persistCompoundState !== false;
 
+    const nodeIndexMap = useMemo(() => buildNodeIndexMap(nodes), [nodes]);
+    const hydrationKey = `${config.courseId ?? "no-course"}:${blockId}`;
+
     const initialMeta = useMemo(
-      () => loadBranchMeta(storage, config.courseId, blockId, persistEnabled, startNodeId),
-      [blockId, config.courseId, persistEnabled, startNodeId, storage],
+      () => loadBranchMeta(storage, config.courseId, blockId, persistEnabled, startNodeId, nodeIndexMap, nodes.length),
+      [blockId, config.courseId, nodeIndexMap, nodes.length, persistEnabled, startNodeId, storage],
     );
 
-    const [metaSeed] = useState(initialMeta);
-    const activeIndex = nodes.findIndex((n) => n.props.nodeId === metaSeed.activeNodeId);
-    const [index, setIndex] = useState(activeIndex >= 0 ? activeIndex : 0);
-    const setIndexStable = useCallback((i: number) => setIndex(i), []);
+    const activeIndex = nodeIndexMap.get(initialMeta.activeNodeId) ?? 0;
+    const setIndexStable = useCallback(() => {}, []);
 
     return (
-      <CompoundProvider activePageIndex={index} onActivePageIndexChange={setIndexStable}>
+      <CompoundProvider activePageIndex={activeIndex} onActivePageIndexChange={setIndexStable}>
         <BranchingScenarioInner
+          key={hydrationKey}
           {...props}
           startNodeId={startNodeId}
           ref={ref}
           blockId={blockId}
           nodes={nodes}
           persistEnabled={persistEnabled}
-          initialMeta={metaSeed}
+          initialMeta={initialMeta}
         />
       </CompoundProvider>
     );

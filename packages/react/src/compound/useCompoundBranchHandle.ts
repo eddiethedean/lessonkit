@@ -5,7 +5,7 @@ import { createCompoundResumeState } from "@lessonkit/core";
 import type { RegisteredAssessmentHandle } from "./CompoundProvider";
 import { useCompoundHydrationBridgeRef } from "./CompoundHydrationBridge";
 import { aggregateAssessmentScores } from "./aggregateScores";
-import { sumChoiceScores } from "./useCompoundBranchShell";
+import { mergeBranchMetaIntoState, sumChoiceScores, type BranchingScenarioMeta } from "./useCompoundBranchShell";
 
 export function useCompoundBranchHandle(
   ref: React.Ref<CompoundHandle>,
@@ -16,17 +16,22 @@ export function useCompoundBranchHandle(
     pageCount?: number;
     visitedNodeIndices: ReadonlySet<number>;
     choiceScores: Record<string, number>;
+    meta: BranchingScenarioMeta;
+    onResetMeta: () => void;
+    onApplyResumeState?: (state: CompoundResumeState) => void;
     enableSolutionsButton?: boolean;
   },
 ) {
   const bridgeRef = useCompoundHydrationBridgeRef();
   const {
     activePageIndex,
-    setActivePageIndex,
     getRegisteredHandles,
     pageCount,
     visitedNodeIndices,
     choiceScores,
+    meta,
+    onResetMeta,
+    onApplyResumeState,
     enableSolutionsButton,
   } = opts;
 
@@ -55,10 +60,9 @@ export function useCompoundBranchHandle(
         return assessment.maxScore + sumChoiceScores(choiceScores);
       },
       getAnswerGiven: () =>
-        aggregateAssessmentScores(filterVisited(getRegisteredHandles().values()), {
-          answerPageIndex: activePageIndex,
-        }).allAnswered,
+        aggregateAssessmentScores(filterVisited(getRegisteredHandles().values())).allAnswered,
       resetTask: () => {
+        onResetMeta();
         for (const entry of filterVisited(getRegisteredHandles().values())) {
           entry.handle.resetTask();
         }
@@ -78,9 +82,13 @@ export function useCompoundBranchHandle(
             childStates[checkId] = entry.handle.getCurrentState();
           }
         }
-        return createCompoundResumeState({ activePageIndex, childStates });
+        return mergeBranchMetaIntoState(
+          createCompoundResumeState({ activePageIndex, childStates }),
+          meta,
+        );
       },
       resume: (state: CompoundResumeState) => {
+        onApplyResumeState?.(state);
         bridgeRef?.current?.notifyImperativeResume(state);
       },
     }),
@@ -91,8 +99,10 @@ export function useCompoundBranchHandle(
       enableSolutionsButton,
       filterVisited,
       getRegisteredHandles,
+      meta,
+      onResetMeta,
+      onApplyResumeState,
       pageCount,
-      setActivePageIndex,
       visitedNodeIndices,
     ],
   );

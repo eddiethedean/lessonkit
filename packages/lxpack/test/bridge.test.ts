@@ -153,4 +153,38 @@ describe("@lessonkit/lxpack/bridge", () => {
     process.env.NODE_ENV = prevEnv;
     warn.mockRestore();
   });
+
+  it("forwards branch telemetry via bridge.track", () => {
+    const track = vi.fn();
+    vi.stubGlobal("window", {
+      parent: { lxpackBridge: { v1: { track } } },
+    });
+
+    forwardTelemetryToBridge(
+      {
+        name: "branch_selected",
+        courseId: "c",
+        lessonId: "l1",
+        sessionId: "s",
+        timestamp: "2026-01-01T00:00:00.000Z",
+        data: {
+          blockId: "bs-1",
+          fromNodeId: "offer",
+          toNodeId: "credit",
+          label: "Credit",
+        },
+      } as TelemetryEvent,
+      "auto",
+    );
+
+    expect(track).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: "interaction",
+        id: "branch_selected",
+        data: expect.objectContaining({ toNodeId: "credit" }),
+      }),
+    );
+
+    vi.unstubAllGlobals();
+  });
 });

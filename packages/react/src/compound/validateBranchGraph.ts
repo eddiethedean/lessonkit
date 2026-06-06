@@ -1,6 +1,6 @@
 import React from "react";
 import { validateBranchGraph } from "@lessonkit/core";
-import { isDevEnvironment } from "../runtime/validateComponentId";
+import { isDevEnvironment, normalizeComponentId } from "../runtime/validateComponentId";
 import { getLessonkitBlockType } from "./blockType";
 import type { BranchNodeProps } from "../blocks/BranchNode";
 
@@ -11,9 +11,11 @@ export function extractBranchGraph(nodes: React.ReactElement<BranchNodeProps>[])
       if (!React.isValidElement(child)) return;
       if (getLessonkitBlockType(child.type) !== "BranchChoice") return;
       const targetNodeId = (child.props as { targetNodeId?: string }).targetNodeId;
-      if (typeof targetNodeId === "string") choices.push({ targetNodeId });
+      if (typeof targetNodeId === "string") {
+        choices.push({ targetNodeId: normalizeComponentId(targetNodeId, "blockId") });
+      }
     });
-    return { nodeId: node.props.nodeId, choices };
+    return { nodeId: normalizeComponentId(node.props.nodeId, "blockId"), choices };
   });
 }
 
@@ -35,7 +37,7 @@ export function validateBranchGraphAtMount(
 export function buildNodeIndexMap(nodes: React.ReactElement<BranchNodeProps>[]): Map<string, number> {
   const map = new Map<string, number>();
   nodes.forEach((node, index) => {
-    map.set(node.props.nodeId, index);
+    map.set(normalizeComponentId(node.props.nodeId, "blockId"), index);
   });
   return map;
 }
@@ -43,7 +45,8 @@ export function buildNodeIndexMap(nodes: React.ReactElement<BranchNodeProps>[]):
 export function buildNodeLabels(nodes: React.ReactElement<BranchNodeProps>[]): Map<string, string> {
   const map = new Map<string, string>();
   for (const node of nodes) {
-    map.set(node.props.nodeId, node.props.title ?? node.props.nodeId);
+    const nodeId = normalizeComponentId(node.props.nodeId, "blockId");
+    map.set(nodeId, node.props.title ?? nodeId);
   }
   return map;
 }

@@ -20,6 +20,7 @@ import {
   SidebarLessons,
   type LessonMeta,
 } from "../../_shared/course-ui";
+import { allowConsoleTelemetryForDocsDemo } from "../../_shared/docsDemoConfig";
 
 const COURSE_ID = "cybersecurity-awareness";
 
@@ -38,6 +39,7 @@ export default function App() {
 
   const courseConfig = React.useMemo(
     () => ({
+      ...allowConsoleTelemetryForDocsDemo(),
       tracking: {
         sink: (event: TelemetryEvent) => {
           console.log("[telemetry]", event);

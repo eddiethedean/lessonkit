@@ -211,12 +211,12 @@ const TELEMETRY_XAPI_MAPPERS = {
     const blockId = event.data.blockId;
     const toNodeId = event.data.toNodeId;
     if (!lessonId || !blockId || !toNodeId) return null;
-    const verb =
-      typeof event.data.scoreWeight === "number" ? XAPIVerbs.answered : XAPIVerbs.experienced;
-    const result =
-      typeof event.data.scoreWeight === "number"
-        ? { score: buildXapiScoreResult({ score: event.data.scoreWeight, maxScore: event.data.scoreWeight }) }
-        : undefined;
+    const scored =
+      typeof event.data.scoreWeight === "number" && Number.isFinite(event.data.scoreWeight);
+    const verb = scored ? XAPIVerbs.answered : XAPIVerbs.experienced;
+    const result = scored
+      ? { score: buildXapiScoreResult({ score: event.data.scoreWeight!, maxScore: event.data.scoreWeight! }) }
+      : undefined;
     return statementFor(
       buildLessonkitUrn({ courseId: ctx.courseId, lessonId, blockId, nodeId: toNodeId }),
       verb,

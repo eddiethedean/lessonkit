@@ -1,15 +1,19 @@
 import type { AssessmentHandle, AssessmentResumeState, CheckId } from "@lessonkit/core";
+import { BS_META_KEY } from "./useCompoundBranchShell";
 
 export type ChildHandleRegistry = Map<CheckId, AssessmentHandle>;
+
+const DEFAULT_PRESERVED_CHILD_STATE_KEYS = new Set<string>([BS_META_KEY]);
 
 /** Keep only child state entries that have a registered handle (orphan keys are dropped). */
 export function filterRegisteredChildStates(
   handles: ChildHandleRegistry,
   childStates: Record<string, AssessmentResumeState>,
+  preserveKeys: ReadonlySet<string> = DEFAULT_PRESERVED_CHILD_STATE_KEYS,
 ): Record<string, AssessmentResumeState> {
   const filtered: Record<string, AssessmentResumeState> = {};
   for (const [key, value] of Object.entries(childStates)) {
-    if (handles.has(key as CheckId)) {
+    if (preserveKeys.has(key) || handles.has(key as CheckId)) {
       filtered[key] = value;
     }
   }

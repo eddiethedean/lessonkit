@@ -4,6 +4,7 @@ import { setLessonkitBlockType } from "../compound/blockType";
 import { useLessonkit } from "../hooks";
 import { useEnclosingLessonId } from "../lessonContext";
 import { normalizeComponentId } from "../runtime/validateComponentId";
+import { chartMaxValue, normalizeChartData, normalizeChartType } from "./chartUtils";
 
 export type ChartDatum = {
   label: string;
@@ -21,23 +22,27 @@ export function Chart(props: ChartProps) {
   const blockId = normalizeComponentId(props.blockId, "blockId") as BlockId;
   const { track } = useLessonkit();
   const lessonId = useEnclosingLessonId();
-  const max = useMemo(() => Math.max(...props.data.map((d) => d.value), 1), [props.data]);
+  const chartType = normalizeChartType(props.type);
+  const rows = useMemo(() => normalizeChartData(props.data), [props.data]);
+  const max = useMemo(() => chartMaxValue(rows), [rows]);
 
   useEffect(() => {
     track(
       "interaction",
-      { kind: "chart_viewed", blockId, chartType: props.type },
+      { kind: "chart_viewed", blockId, chartType },
       lessonId ? { lessonId } : undefined,
     );
-  }, [blockId, lessonId, props.type, track]);
+  }, [blockId, chartType, lessonId, track]);
 
   return (
     <figure data-lk-block-id={blockId} data-testid={`chart-${blockId}`}>
       {props.title ? <figcaption>{props.title}</figcaption> : null}
-      {props.type === "bar" ? (
-        <div role="img" aria-label={props.title ?? "Bar chart"}>
-          {props.data.map((datum) => (
-            <div key={datum.label} style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+      {rows.length === 0 ? (
+        <p data-testid="chart-empty">No chart data.</p>
+      ) : chartType === "bar" ? (
+        <div role="img" aria-label={props.title ?? "Bar chart"} aria-describedby={`${blockId}-table`}>
+          {rows.map((datum) => (
+            <div key={datum.key} style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
               <span style={{ minWidth: "6rem" }}>{datum.label}</span>
               <div
                 style={{
@@ -53,14 +58,14 @@ export function Chart(props: ChartProps) {
         </div>
       ) : (
         <ul role="list" aria-label={props.title ?? "Pie chart segments"}>
-          {props.data.map((datum) => (
-            <li key={datum.label}>
+          {rows.map((datum) => (
+            <li key={datum.key}>
               {datum.label}: {datum.value}
             </li>
           ))}
         </ul>
       )}
-      <table>
+      <table id={`${blockId}-table`}>
         <caption>{props.title ?? "Chart data"}</caption>
         <thead>
           <tr>
@@ -69,8 +74,8 @@ export function Chart(props: ChartProps) {
           </tr>
         </thead>
         <tbody>
-          {props.data.map((datum) => (
-            <tr key={datum.label}>
+          {rows.map((datum) => (
+            <tr key={datum.key}>
               <th scope="row">{datum.label}</th>
               <td>{datum.value}</td>
             </tr>

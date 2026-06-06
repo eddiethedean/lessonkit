@@ -9,6 +9,10 @@ export type BranchingScenarioMeta = {
   choiceScores?: Record<string, number>;
 };
 
+export function createInitialBranchMeta(startNodeId: string): BranchingScenarioMeta {
+  return { activeNodeId: startNodeId, visitedNodeIds: [startNodeId] };
+}
+
 export function readBranchingScenarioMeta(
   childStates: Record<string, AssessmentResumeState>,
 ): BranchingScenarioMeta | null {
@@ -26,6 +30,36 @@ export function readBranchingScenarioMeta(
   return { activeNodeId, visitedNodeIds, choiceScores };
 }
 
+/** Clamp branch meta to known node ids; reset to start when active node is invalid. */
+export function sanitizeBranchMeta(
+  meta: BranchingScenarioMeta,
+  nodeIndexMap: ReadonlyMap<string, number>,
+  startNodeId: string,
+): BranchingScenarioMeta {
+  const knownIds = new Set(nodeIndexMap.keys());
+  const activeNodeId = knownIds.has(meta.activeNodeId) ? meta.activeNodeId : startNodeId;
+  const visitedNodeIds = meta.visitedNodeIds.filter((id) => knownIds.has(id));
+  if (!visitedNodeIds.includes(activeNodeId)) {
+    visitedNodeIds.push(activeNodeId);
+  }
+  if (visitedNodeIds.length === 0) {
+    visitedNodeIds.push(startNodeId);
+  }
+  const choiceScores = meta.choiceScores
+    ? Object.fromEntries(
+        Object.entries(meta.choiceScores).filter(([key]) => {
+          const fromId = key.split(":")[0];
+          return fromId !== undefined && knownIds.has(fromId);
+        }),
+      )
+    : undefined;
+  return {
+    activeNodeId,
+    visitedNodeIds,
+    ...(Object.keys(choiceScores ?? {}).length > 0 ? { choiceScores } : {}),
+  };
+}
+
 export function mergeBranchMetaIntoState(
   state: ReturnType<typeof createCompoundResumeState>,
   meta: BranchingScenarioMeta,
@@ -41,6 +75,24 @@ export function mergeBranchMetaIntoState(
 
 export function choiceScoreKey(fromNodeId: string, toNodeId: string): string {
   return `${fromNodeId}:${toNodeId}`;
+}
+
+/** Replace prior choice from the same node (cycle-safe). */
+export function applyChoiceScoreUpdate(
+  prev: Record<string, number> | undefined,
+  fromNodeId: string,
+  toNodeId: string,
+  scoreWeight?: number,
+): Record<string, number> | undefined {
+  if (scoreWeight === undefined) return prev;
+  const next = { ...(prev ?? {}) };
+  for (const key of Object.keys(next)) {
+    if (key.startsWith(`${fromNodeId}:`)) {
+      delete next[key];
+    }
+  }
+  next[choiceScoreKey(fromNodeId, toNodeId)] = scoreWeight;
+  return next;
 }
 
 export function sumChoiceScores(choiceScores: Record<string, number> | undefined): number {

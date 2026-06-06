@@ -83,7 +83,10 @@ function requiredObservabilityHookCount(opts: { trackingEnabled: boolean; xapiEn
  * omits observability hooks while telemetry/xAPI are enabled.
  */
 export function assertProductionCourseConfig(
-  config: Pick<LessonkitConfig, "tracking" | "xapi" | "observability" | "lxpack">,
+  config: Pick<
+    LessonkitConfig,
+    "tracking" | "xapi" | "observability" | "lxpack" | "preview"
+  >,
 ): void {
   if (!isProductionEnvironment()) return;
 
@@ -96,6 +99,8 @@ export function assertProductionCourseConfig(
       "[lessonkit] Production build has tracking enabled but no sink or batchSink configured.",
     );
   }
+
+  if (config.preview?.allowConsoleTelemetry === true) return;
 
   const trackingEnabled = isTrackingDeliveryConfigured(config.tracking);
   const xapiEnabled = isXapiDeliveryConfigured(config.xapi);

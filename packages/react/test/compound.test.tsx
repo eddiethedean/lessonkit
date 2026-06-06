@@ -927,4 +927,62 @@ describe("BranchingScenario", () => {
       expect(sessionStorage.getItem(key)).toBeTruthy();
     });
   });
+
+  it("round-trips branch meta via getCurrentState and resume", async () => {
+    const ref = createRef<CompoundHandle>();
+    render(
+      wrap(
+        <BranchingScenario ref={ref} blockId="branch-handle" title="Handle" startNodeId="offer">
+          <BranchNode nodeId="offer">
+            <BranchChoice label="Credit" targetNodeId="credit" />
+          </BranchNode>
+          <BranchNode nodeId="credit" terminal>
+            <Text>Done</Text>
+          </BranchNode>
+        </BranchingScenario>,
+      ),
+    );
+    fireEvent.click(screen.getByTestId("branch-choice-credit"));
+    expect(screen.getByText("Done")).toBeTruthy();
+    const saved = ref.current?.getCurrentState();
+    expect(saved?.childStates.__lk_bs__).toMatchObject({ activeNodeId: "credit" });
+
+    ref.current?.resume(
+      createCompoundResumeState({
+        activePageIndex: 0,
+        childStates: {
+          __lk_bs__: { activeNodeId: "offer", visitedNodeIds: ["offer"] },
+        },
+      }),
+    );
+    await waitFor(() => {
+      expect(screen.getByTestId("branch-node-offer").hasAttribute("hidden")).toBe(false);
+      expect(screen.getByTestId("branch-node-credit").hasAttribute("hidden")).toBe(true);
+    });
+
+    ref.current?.resume(saved!);
+    await waitFor(() => {
+      expect(screen.getByTestId("branch-node-credit").hasAttribute("hidden")).toBe(false);
+    });
+  });
+
+  it("ignores navigation to unknown targetNodeId", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    render(
+      wrap(
+        <BranchingScenario blockId="branch-invalid" title="Invalid" startNodeId="offer">
+          <BranchNode nodeId="offer">
+            <BranchChoice label="Bad" targetNodeId="creditt" />
+          </BranchNode>
+          <BranchNode nodeId="credit" terminal>
+            <Text>Done</Text>
+          </BranchNode>
+        </BranchingScenario>,
+      ),
+    );
+    fireEvent.click(screen.getByTestId("branch-choice-creditt"));
+    expect(screen.getByTestId("branch-node-offer").hasAttribute("hidden")).toBe(false);
+    expect(warn).toHaveBeenCalled();
+    warn.mockRestore();
+  });
 });

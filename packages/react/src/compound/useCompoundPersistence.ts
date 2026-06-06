@@ -1,5 +1,5 @@
 import React, { useCallback, useContext, useEffect, useRef } from "react";
-import type { AssessmentResumeState, BlockId, CompoundResumeState, CourseId, StoragePort } from "@lessonkit/core";
+import type { AssessmentResumeState, BlockId, CheckId, CompoundResumeState, CourseId, StoragePort } from "@lessonkit/core";
 import {
   clampCompoundPageIndex,
   createCompoundResumeState,
@@ -42,6 +42,10 @@ export function useCompoundPersistence(opts: {
   storage?: StoragePort;
   /** Merges extra resume fields (e.g. InteractiveVideo timeline meta) before save. */
   transformState?: (state: CompoundResumeState) => CompoundResumeState;
+  /** Called when compound state is restored from storage or imperative resume. */
+  onCompoundResume?: (state: CompoundResumeState) => void;
+  /** When set, only registered handles passing this filter are written to childStates on save. */
+  shouldIncludeChildState?: (checkId: CheckId, pageIndex: number | undefined) => boolean;
 }): void {
   const lessonkitCtx = useContext(LessonkitContext);
   const storage = opts.storage ?? lessonkitCtx?.storage ?? createSessionStoragePort();
@@ -82,6 +86,9 @@ export function useCompoundPersistence(opts: {
     };
     if (ctx) {
       for (const [checkId, entry] of ctx.getRegisteredHandles()) {
+        if (opts.shouldIncludeChildState && !opts.shouldIncludeChildState(checkId, entry.pageIndex)) {
+          continue;
+        }
         const handle = entry.handle;
         if (handle.getCurrentState) {
           childStates[checkId] = handle.getCurrentState();
@@ -93,12 +100,14 @@ export function useCompoundPersistence(opts: {
       activePageIndex: clampCompoundPageIndex(opts.index, opts.pageCount),
       childStates,
     });
-  }, [ctx, opts.index, opts.pageCount]);
+  }, [ctx, opts.index, opts.pageCount, opts.shouldIncludeChildState]);
 
   const buildStateRef = useRef(buildState);
   buildStateRef.current = buildState;
   const transformStateRef = useRef(opts.transformState);
   transformStateRef.current = opts.transformState;
+  const onCompoundResumeRef = useRef(opts.onCompoundResume);
+  onCompoundResumeRef.current = opts.onCompoundResume;
   const persistNowRef = useRef<() => void>(() => {});
 
   const finalizeHydration = useCallback(
@@ -157,6 +166,7 @@ export function useCompoundPersistence(opts: {
       const clamped = clampCompoundPageIndex(state.activePageIndex, opts.pageCount);
       loadedChildStatesRef.current = { ...state.childStates };
       skipSaveUntilHydratedRef.current = Object.keys(state.childStates).length > 0;
+      onCompoundResumeRef.current?.({ ...state, activePageIndex: clamped });
       opts.setIndex(clamped);
       resumedChildKeysRef.current = new Set();
       pendingChildResumeRef.current = { ...state, activePageIndex: clamped, childStates: state.childStates };
@@ -181,6 +191,7 @@ export function useCompoundPersistence(opts: {
       const clamped = clampCompoundPageIndex(state.activePageIndex, opts.pageCount);
       loadedChildStatesRef.current = { ...state.childStates };
       skipSaveUntilHydratedRef.current = Object.keys(state.childStates).length > 0;
+      onCompoundResumeRef.current?.({ ...state, activePageIndex: clamped });
       opts.setIndex(clamped);
       resumedChildKeysRef.current = new Set();
       pendingChildResumeRef.current = { ...state, activePageIndex: clamped, childStates: state.childStates };

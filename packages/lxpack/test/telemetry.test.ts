@@ -57,4 +57,32 @@ describe("telemetryEventToLessonkit", () => {
 
     expect(telemetryEventToLessonkit(event)).toBeNull();
   });
+
+  it("maps branch telemetry events with data payloads", () => {
+    const viewed = telemetryEventToLessonkit({
+      name: "branch_node_viewed",
+      courseId: "c",
+      lessonId: "l",
+      sessionId: "s",
+      timestamp: new Date().toISOString(),
+      data: { blockId: "bs-1", nodeId: "offer", nodeIndex: 0 },
+    } as TelemetryEvent);
+    expect(viewed?.data).toMatchObject({ blockId: "bs-1", nodeId: "offer" });
+
+    const selected = telemetryEventToLessonkit({
+      name: "branch_selected",
+      courseId: "c",
+      lessonId: "l",
+      sessionId: "s",
+      timestamp: new Date().toISOString(),
+      data: {
+        blockId: "bs-1",
+        fromNodeId: "offer",
+        toNodeId: "credit",
+        label: "Credit",
+        scoreWeight: 1,
+      },
+    } as TelemetryEvent);
+    expect(selected?.data).toMatchObject({ toNodeId: "credit" });
+  });
 });

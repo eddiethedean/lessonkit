@@ -15,6 +15,7 @@ describe("Embed", () => {
     const iframe = screen.getByTitle("External doc") as HTMLIFrameElement;
     expect(iframe.tagName).toBe("IFRAME");
     expect(iframe.getAttribute("sandbox")).toContain("allow-scripts");
+    expect(iframe.getAttribute("sandbox")).not.toContain("allow-same-origin");
     expect(iframe.getAttribute("referrerpolicy")).toBe("no-referrer");
   });
 });
