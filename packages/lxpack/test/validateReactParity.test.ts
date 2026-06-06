@@ -5,6 +5,17 @@ import { describe, expect, it } from "vitest";
 import { validateReactManifestParity } from "../src/validateReactParity";
 import type { LessonkitCourseDescriptor } from "../src/types";
 
+function testDescriptor(
+  overrides: Partial<LessonkitCourseDescriptor> & Pick<LessonkitCourseDescriptor, "courseId">,
+): LessonkitCourseDescriptor {
+  return {
+    title: "T",
+    layout: "single-spa",
+    lessons: [{ id: "l1", title: "L" }],
+    ...overrides,
+  };
+}
+
 describe("validateReactManifestParity", () => {
   it("passes when courseId and checkIds appear in src", () => {
     const root = mkdtempSync(join(tmpdir(), "lk-parity-"));
@@ -16,11 +27,10 @@ describe("validateReactManifestParity", () => {
 
     const issues = validateReactManifestParity({
       projectRoot: root,
-      descriptor: {
+      descriptor: testDescriptor({
         courseId: "my-course",
-        title: "T",
         assessments: [{ checkId: "quiz-1", question: "Q", choices: ["a"], answer: "a" }],
-      } as LessonkitCourseDescriptor,
+      }),
     });
 
     expect(issues.filter((i) => i.severity === "error")).toEqual([]);
@@ -33,11 +43,10 @@ describe("validateReactManifestParity", () => {
 
     const issues = validateReactManifestParity({
       projectRoot: root,
-      descriptor: {
+      descriptor: testDescriptor({
         courseId: "my-course",
-        title: "T",
         assessments: [{ checkId: "q", question: "Q", choices: ["a"], answer: "a" }],
-      } as LessonkitCourseDescriptor,
+      }),
     });
 
     expect(issues.some((i) => i.path === "course.courseId" && i.severity === "error")).toBe(true);
@@ -53,11 +62,10 @@ describe("validateReactManifestParity", () => {
 
     const issues = validateReactManifestParity({
       projectRoot: root,
-      descriptor: {
+      descriptor: testDescriptor({
         courseId: "course",
-        title: "T",
         assessments: [{ checkId: "q", question: "Q", choices: ["a"], answer: "a" }],
-      } as LessonkitCourseDescriptor,
+      }),
     });
 
     expect(issues.some((i) => i.path === "course.courseId" && i.severity === "error")).toBe(true);
@@ -73,11 +81,10 @@ describe("validateReactManifestParity", () => {
 
     const issues = validateReactManifestParity({
       projectRoot: root,
-      descriptor: {
+      descriptor: testDescriptor({
         courseId: "my-course",
-        title: "T",
         assessments: [{ checkId: "quiz-a", question: "Q", choices: ["a"], answer: "a" }],
-      } as LessonkitCourseDescriptor,
+      }),
     });
 
     expect(issues.some((i) => i.path === "assessments.checkId:quiz-a" && i.severity === "error")).toBe(
@@ -95,11 +102,10 @@ describe("validateReactManifestParity", () => {
 
     const issues = validateReactManifestParity({
       projectRoot: root,
-      descriptor: {
+      descriptor: testDescriptor({
         courseId: "my-course",
-        title: "T",
         assessments: [],
-      } as LessonkitCourseDescriptor,
+      }),
     });
 
     expect(issues.filter((i) => i.severity === "error")).toEqual([]);
@@ -115,11 +121,10 @@ describe("validateReactManifestParity", () => {
 
     const issues = validateReactManifestParity({
       projectRoot: root,
-      descriptor: {
+      descriptor: testDescriptor({
         courseId: "my-course",
-        title: "T",
         assessments: [{ checkId: "quiz-1", question: "Q", choices: ["a"], answer: "a" }],
-      } as LessonkitCourseDescriptor,
+      }),
     });
 
     expect(issues.filter((i) => i.severity === "error")).toEqual([]);
@@ -135,11 +140,10 @@ describe("validateReactManifestParity", () => {
 
     const issues = validateReactManifestParity({
       projectRoot: root,
-      descriptor: {
+      descriptor: testDescriptor({
         courseId: "my-course",
-        title: "T",
         assessments: [],
-      } as LessonkitCourseDescriptor,
+      }),
     });
 
     expect(issues.filter((i) => i.severity === "error")).toEqual([]);
@@ -155,11 +159,10 @@ describe("validateReactManifestParity", () => {
 
     const issues = validateReactManifestParity({
       projectRoot: root,
-      descriptor: {
+      descriptor: testDescriptor({
         courseId: "my-course",
-        title: "T",
         assessments: [{ checkId: "quiz-1", question: "Q", choices: ["a"], answer: "a" }],
-      } as LessonkitCourseDescriptor,
+      }),
     });
 
     expect(issues.filter((i) => i.severity === "error")).toEqual([]);
@@ -173,11 +176,10 @@ describe("validateReactManifestParity", () => {
 
     const issues = validateReactManifestParity({
       projectRoot: root,
-      descriptor: {
+      descriptor: testDescriptor({
         courseId: "my-course",
-        title: "T",
         assessments: [{ checkId: "nested-check", question: "Q", choices: ["a"], answer: "a" }],
-      } as LessonkitCourseDescriptor,
+      }),
     });
 
     expect(issues.filter((i) => i.severity === "error")).toEqual([]);
@@ -188,11 +190,10 @@ describe("validateReactManifestParity", () => {
 
     const issues = validateReactManifestParity({
       projectRoot: root,
-      descriptor: {
+      descriptor: testDescriptor({
         courseId: "my-course",
-        title: "T",
         assessments: [{ checkId: "q", question: "Q", choices: ["a"], answer: "a" }],
-      } as LessonkitCourseDescriptor,
+      }),
     });
 
     expect(issues.some((i) => i.severity === "error")).toBe(true);

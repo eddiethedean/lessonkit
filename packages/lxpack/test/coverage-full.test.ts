@@ -830,7 +830,7 @@ describe("coverage-full lxpack", () => {
       const dist = join(root, "dist");
       await mkdir(dist, { recursive: true });
       await writeFile(join(dist, "index.html"), "<!DOCTYPE html><html></html>", "utf8");
-      const packDescriptor = { ...baseDescriptor, assessments: [] as typeof baseDescriptor.assessments };
+      const packDescriptor = { ...baseDescriptor, assessments: [] };
       await writeMinimalParitySource(root, packDescriptor);
       const result = await packageLessonkitCourse({
         descriptor: packDescriptor,
