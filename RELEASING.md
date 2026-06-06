@@ -17,9 +17,9 @@ Published packages (`v*.*.*` tag → [Release](.github/workflows/release.yml)): 
 | No pending `.changeset/*.md` files | Done |
 | `npm run copy-template -w @lessonkit/cli` (template in sync) | Done |
 | `examples/interactive-video` integration + e2e golden path | Done |
-| `release/1.4.0` CI green | Done |
-| `npm run lint` + `typecheck` + `test` + `test:integration` + `test:e2e` | Verify before tag |
-| `npm audit --omit=dev --audit-level=high` | Verify before tag |
+| `release/1.4.0` CI green | Done (2026-06-06) |
+| `npm run lint` + `typecheck` + `test` + `test:integration` + `test:e2e` | Done locally (2026-06-06) |
+| `npm audit --omit=dev --audit-level=high` | 0 high/critical (2026-06-06) |
 | Git tag `v1.4.0` | **Create when ready** |
 
 > **Do not create or push `v1.4.0`** until you intend to publish to npm.
