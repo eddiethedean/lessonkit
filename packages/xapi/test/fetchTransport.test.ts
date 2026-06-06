@@ -35,6 +35,53 @@ describe("createFetchTransport", () => {
     );
   });
 
+  it("throws when response is not ok", async () => {
+    globalThis.fetch = vi.fn(() =>
+      Promise.resolve(new Response("bad", { status: 500, statusText: "Server Error" })),
+    ) as typeof fetch;
+
+    const { transport } = createFetchTransport({
+      url: "https://lrs.example/statements",
+      retries: 0,
+      timeoutMs: 0,
+    });
+
+    await expect(
+      transport({
+        id: "s1",
+        timestamp: "2026-01-01T00:00:00Z",
+        verb: "http://adlnet.gov/expapi/verbs/completed",
+        object: { id: "https://example.com/a" },
+      }),
+    ).rejects.toThrow(/xAPI fetch failed: 500/);
+  });
+
+  it("resolves dynamic headers", async () => {
+    const fetchMock = vi.fn(() => Promise.resolve(new Response(null, { status: 204 })));
+    globalThis.fetch = fetchMock as typeof fetch;
+
+    const { transport } = createFetchTransport({
+      url: "https://lrs.example/statements",
+      headers: () => ({ Authorization: "Bearer token" }),
+      retries: 0,
+      timeoutMs: 0,
+    });
+
+    await transport({
+      id: "s1",
+      timestamp: "2026-01-01T00:00:00Z",
+      verb: "http://adlnet.gov/expapi/verbs/completed",
+      object: { id: "https://example.com/a" },
+    });
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://lrs.example/statements",
+      expect.objectContaining({
+        headers: expect.objectContaining({ Authorization: "Bearer token" }),
+      }),
+    );
+  });
+
   it("retries with backoff then throws", async () => {
     vi.useFakeTimers();
     try {
@@ -109,6 +156,31 @@ describe("createFetchBatchSink", () => {
         method: "POST",
         body: JSON.stringify([{ name: "course_started" }]),
       }),
+    );
+  });
+
+  it("throws when batch response is not ok", async () => {
+    globalThis.fetch = vi.fn(() =>
+      Promise.resolve(new Response("bad", { status: 502, statusText: "Bad Gateway" })),
+    ) as typeof fetch;
+
+    const { batchSink } = createFetchBatchSink({ url: "/api/batch", retries: 0, timeoutMs: 0 });
+
+    await expect(batchSink([{ name: "course_started" }])).rejects.toThrow(
+      /telemetry batch fetch failed: 502/,
+    );
+  });
+
+  it("exitBatchSink uses keepalive fetch", () => {
+    const fetchMock = vi.fn(() => Promise.resolve(new Response(null, { status: 204 })));
+    globalThis.fetch = fetchMock as typeof fetch;
+
+    const { exitBatchSink } = createFetchBatchSink({ url: "/api/batch" });
+    exitBatchSink([{ name: "course_started" }]);
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/batch",
+      expect.objectContaining({ keepalive: true }),
     );
   });
 });
