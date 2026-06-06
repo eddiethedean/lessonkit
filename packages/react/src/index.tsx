@@ -131,6 +131,7 @@ export type {
   LessonkitRuntime,
 } from "./context";
 export { LessonkitProvider } from "./context";
+export { assertProductionCourseConfig } from "./runtime/productionGuard";
 
 export type { LmsBridgeMode, McqAssessmentProps } from "@lessonkit/core";
 

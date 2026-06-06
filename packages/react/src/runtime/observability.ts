@@ -14,6 +14,8 @@ export type LessonkitObservabilityConfig = {
   onTelemetryBufferDrop?: () => void;
   /** LMS bridge missing for a completion-related telemetry event (`bridge: auto`). */
   onLxpackBridgeMiss?: (event: TelemetryEvent) => void;
+  /** xAPI transport failure after retries (statement re-queued). */
+  onXapiTransportError?: (err: unknown) => void;
 };
 
 export function createXapiQueueFromObservability(

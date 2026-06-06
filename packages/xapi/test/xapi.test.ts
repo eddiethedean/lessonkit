@@ -24,6 +24,17 @@ describe("@lessonkit/xapi", () => {
     });
   });
 
+  it("calls onTransportError when transport fails", async () => {
+    const onTransportError = vi.fn();
+    const transport = vi.fn(async () => {
+      throw new Error("network");
+    });
+    const client = createXAPIClient({ transport, courseId, onTransportError });
+    client.startedLesson({ lessonId: "lesson-1" });
+    await new Promise((r) => setTimeout(r, 0));
+    expect(onTransportError).toHaveBeenCalled();
+  });
+
   it("queues when transport fails and flushes later", async () => {
     const queue = createInMemoryXAPIQueue();
     const transport = vi.fn<(statement: unknown) => Promise<void>>(async (_statement: unknown) => {

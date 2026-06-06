@@ -24,6 +24,11 @@ export function validateDescriptorForExportTarget(
         path: "course.tracking.xapi.activityIri",
         message: "tracking.xapi.activityIri is required for xapi and cmi5 export targets",
       });
+    } else if (!/^https:\/\/.+/i.test(activityIri)) {
+      issues.push({
+        path: "course.tracking.xapi.activityIri",
+        message: "tracking.xapi.activityIri must be an HTTPS URL for xapi and cmi5 export targets",
+      });
     }
   }
 

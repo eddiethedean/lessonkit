@@ -29,6 +29,13 @@ Import from `@lessonkit/core` (re-exported by `@lessonkit/react` where relevant)
 | `McqAssessmentProps` | Props shape for `Quiz`, `KnowledgeCheck`, and MCQ-style assessments (replaces deprecated `McqAssessmentDescriptor` from lxpack) |
 | `LmsBridgeMode` | `"auto"` \| `"off"` — controls forwarding telemetry to the LXPack parent iframe bridge |
 
+### Production guardrails
+
+| API | Package | Purpose |
+| --- | --- | --- |
+| `assertProductionCourseConfig(config)` | `@lessonkit/react` | Throws in production when console sinks or observability hooks are missing |
+| `onXapiTransportError` | `config.observability` | Called when xAPI transport fails after retries (statement re-queued) |
+
 ## Machine-readable contracts
 
 | Artifact | Package path |

@@ -30,6 +30,8 @@ export function createXAPIClient(opts?: {
   maxQueueSize?: number;
   onQueueDepth?: (size: number) => void;
   onQueueCap?: () => void;
+  /** Called when transport fails after retries (statement is re-queued). */
+  onTransportError?: (err: unknown) => void;
 }): XAPIClient {
   const transport = opts?.transport;
   const exitTransport = opts?.exitTransport;
@@ -75,8 +77,9 @@ export function createXAPIClient(opts?: {
         await transport(normalized);
         queue.removeById(normalized.id);
       })
-      .catch(() => {
+      .catch((err) => {
         queue.enqueue(normalized);
+        opts?.onTransportError?.(err);
         if (isDevEnvironment() && !warnedTransportFailure) {
           warnedTransportFailure = true;
           console.warn(

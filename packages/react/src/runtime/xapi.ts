@@ -1,6 +1,7 @@
 import type { CourseId } from "@lessonkit/core";
 import type { XAPIClient, XAPIQueue, XAPITransport } from "@lessonkit/xapi";
 import { createXAPIClient } from "@lessonkit/xapi";
+import type { LessonkitObservabilityConfig } from "./observability";
 
 export type XapiConfig = {
   enabled?: boolean;
@@ -9,7 +10,11 @@ export type XapiConfig = {
   client?: XAPIClient;
 };
 
-export function createXapiClientFromConfig(config: { courseId?: CourseId; xapi?: XapiConfig }, queue: XAPIQueue): XAPIClient | null {
+export function createXapiClientFromConfig(
+  config: { courseId?: CourseId; xapi?: XapiConfig },
+  queue: XAPIQueue,
+  observability?: LessonkitObservabilityConfig,
+): XAPIClient | null {
   if (config.xapi?.enabled === false) return null;
   if (config.xapi?.client) return config.xapi.client;
   if (!config.courseId) return null;
@@ -20,6 +25,7 @@ export function createXapiClientFromConfig(config: { courseId?: CourseId; xapi?:
     transport: config.xapi?.transport,
     exitTransport: config.xapi?.exitTransport,
     queue,
+    onTransportError: observability?.onXapiTransportError,
   });
 }
 

@@ -14,7 +14,13 @@ npm run package:scorm12
 ## Files
 
 - `src/App.tsx` — course UI (IDs match `lessonkit.json`)
+- `src/courseConfig.ts` — production transports, observability hooks, and LMS bridge config
+- `.env.example` — `VITE_XAPI_PROXY_URL` and `VITE_ANALYTICS_URL` for production builds
 - `lessonkit.json` — manifest for CLI and LXPack packaging
+
+## Production
+
+Copy `.env.example` to `.env.production` and set your LRS/analytics proxy URLs before `npm run build`. See the [production checklist](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/production-checklist.html).
 
 ## Docs
 

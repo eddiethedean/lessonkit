@@ -212,6 +212,37 @@ describe("packageLessonkitCourse errors", () => {
     if (!result.ok) expect(result.issues[0]?.message).toContain("bad course");
   });
 
+  it("returns ok false when activityIri is not HTTPS for xapi target", async () => {
+    const root = await makeTempDir();
+    const dist = join(root, "dist");
+    await mkdir(dist, { recursive: true });
+    await writeFile(join(dist, "index.html"), "<html></html>", "utf-8");
+    const httpDescriptor = {
+      ...descriptor,
+      tracking: { xapi: { activityIri: "http://example.com/activity/1" } },
+    };
+    await writeMinimalParitySource(root, httpDescriptor);
+
+    const result = await packageLessonkitCourse({
+      descriptor: httpDescriptor,
+      outDir: join(root, "course"),
+      spaDistDir: dist,
+      projectRoot: root,
+      target: "xapi",
+    });
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(
+        result.issues.some(
+          (i) =>
+            i.path === "course.tracking.xapi.activityIri" &&
+            i.message.includes("HTTPS"),
+        ),
+      ).toBe(true);
+    }
+  });
+
   it("returns ok false when activityIri is missing for xapi target", async () => {
     const root = await makeTempDir();
     const dist = join(root, "dist");

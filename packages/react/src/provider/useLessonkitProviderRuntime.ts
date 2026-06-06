@@ -230,7 +230,11 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
     }
 
     const prev = xapiRef.current;
-    const next = createXapiClientFromConfig(normalizedConfig, xapiQueueRef.current);
+    const next = createXapiClientFromConfig(
+      normalizedConfig,
+      xapiQueueRef.current,
+      observabilityRef.current,
+    );
     xapiRef.current = next;
     setXapi(next);
 

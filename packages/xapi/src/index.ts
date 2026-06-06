@@ -14,6 +14,9 @@ export { createXAPIClient } from "./client";
 export {
   createFetchTransport,
   createFetchBatchSink,
+  FetchHttpError,
+  isRetryableFetchError,
+  isRetryableFetchHttpStatus,
   type CreateFetchTransportOptions,
   type FetchTransportBundle,
   type CreateFetchBatchSinkOptions,
