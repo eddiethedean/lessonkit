@@ -192,9 +192,16 @@ function idUsedViaConstant(
   return false;
 }
 
+function lessonIdInDataLiteral(source: string, lessonId: string): boolean {
+  const stripped = stripComments(source);
+  const escaped = escapeRegExp(lessonId);
+  return new RegExp(`\\bid\\s*:\\s*["'\`]${escaped}["'\`]`).test(stripped);
+}
+
 function lessonIdPresent(source: string, lessonId: string): boolean {
   if (idPropPresent(source, "lessonId", lessonId)) return true;
-  return idUsedViaConstant(source, "lessonId", lessonId, extractStringConstants(source));
+  if (idUsedViaConstant(source, "lessonId", lessonId, extractStringConstants(source))) return true;
+  return lessonIdInDataLiteral(source, lessonId);
 }
 
 function courseConfigCourseIdPresent(source: string, courseId: string): boolean {

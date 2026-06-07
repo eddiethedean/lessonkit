@@ -22,12 +22,17 @@ const validCourse = {
   theme: { preset: "default" as const },
 };
 
-async function writeParitySource(projectRoot: string, courseId: string, checkId: string): Promise<void> {
+async function writeParitySource(
+  projectRoot: string,
+  courseId: string,
+  checkId: string,
+  lessonId: string,
+): Promise<void> {
   const srcDir = join(projectRoot, "src");
   await mkdir(srcDir, { recursive: true });
   await writeFile(
     join(srcDir, "App.tsx"),
-    `<Course courseId="${courseId}">\n<Quiz checkId="${checkId}" />\n</Course>`,
+    `<Course courseId="${courseId}"><Lesson lessonId="${lessonId}"><Quiz checkId="${checkId}" /></Lesson></Course>`,
     "utf8",
   );
 }
@@ -56,7 +61,8 @@ async function writeValidProject(
   await mkdir(join(dir, "dist"), { recursive: true });
   await writeFile(join(dir, "dist", "index.html"), "<!DOCTYPE html><html><body>ok</body></html>", "utf8");
   const checkId = course.assessments[0]?.checkId ?? "ready-to-build";
-  await writeParitySource(dir, course.courseId, checkId);
+  const lessonId = course.lessons[0]?.id ?? "lesson-1";
+  await writeParitySource(dir, course.courseId, checkId, lessonId);
 }
 
 describe("runPackage integration (real lxpack validation)", () => {

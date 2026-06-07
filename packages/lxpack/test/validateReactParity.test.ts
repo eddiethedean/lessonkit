@@ -173,6 +173,29 @@ describe("validateReactManifestParity", () => {
     expect(issues.filter((i) => i.severity === "error")).toEqual([]);
   });
 
+  it("accepts lesson id declared in a data literal (e.g. STEPS[].id)", () => {
+    const root = mkdtempSync(join(tmpdir(), "lk-parity-"));
+    mkdirSync(join(root, "src"), { recursive: true });
+    writeFileSync(
+      join(root, "src/App.tsx"),
+      `const STEPS = [{ id: "welcome", title: "Hi" }];
+export default function App() {
+  return <Course courseId="my-course"><Lesson lessonId={STEPS[0].id} /></Course>;
+}`,
+    );
+
+    const issues = validateReactManifestParity({
+      projectRoot: root,
+      descriptor: testDescriptor({
+        courseId: "my-course",
+        lessons: [{ id: "welcome", title: "Welcome" }],
+        assessments: [],
+      }),
+    });
+
+    expect(issues.filter((i) => i.severity === "error")).toEqual([]);
+  });
+
   it("errors when lessonId missing from React source", () => {
     const root = mkdtempSync(join(tmpdir(), "lk-parity-"));
     mkdirSync(join(root, "src"), { recursive: true });

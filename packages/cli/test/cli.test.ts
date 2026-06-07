@@ -447,7 +447,7 @@ describe("runInit", () => {
     expect(appSource).toContain("@lessonkit/react");
     expect(appSource).toContain('courseId="my-demo"');
     expect(appSource).toContain('title="my-demo"');
-    expect(appSource).toContain('preset="default"');
+    expect(appSource).toContain('preset={COURSE_THEME_PRESET}');
     const courseConfigSource = await readFile(join(projectDir, "src/courseConfig.ts"), "utf8");
     expect(courseConfigSource).toContain('courseId: "my-demo"');
     expect(lessonkit.course.tracking?.xapi?.activityIri).toBe("https://example.com/courses/my-demo");
