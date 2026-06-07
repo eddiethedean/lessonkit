@@ -81,6 +81,13 @@ jobs:
       - name: Build example bundles for docs
         run: bash docs/scripts/build-docs-demos.sh
 
+      - name: Install Playwright browsers
+        run: npx playwright install chromium
+        working-directory: e2e
+
+      - name: Verify doc demo bundles render
+        run: bash docs/scripts/verify-doc-demos.sh
+
       - name: Generate API docs (TypeDoc)
         run: npm run docs:api
 

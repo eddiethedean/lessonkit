@@ -24,6 +24,7 @@ pip install -r docs/requirements.txt
 bash docs/scripts/build-docs-demos.sh   # optional: embed example course bundles
 sphinx-build -W -b html docs docs/_build/html
 npm run docs:verify   # after sphinx-build: includes + substitution tokens in HTML
+bash docs/scripts/verify-doc-demos.sh   # after build-docs-demos.sh: Playwright smoke test
 sphinx-build -b linkcheck docs docs/_build/linkcheck   # optional: external link audit
 ```
 
