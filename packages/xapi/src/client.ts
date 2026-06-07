@@ -7,7 +7,7 @@ import {
   removeDeadLetterStatement,
 } from "./deadLetter";
 import type { XAPIClient, XAPIQueue, XAPIStatement, XAPITransport } from "./types";
-import { cryptoRandomId, stableTelemetryEventId } from "./id";
+import { cryptoRandomId } from "./id";
 import { createInMemoryXAPIQueue } from "./queue";
 import { telemetryEventToXAPIStatement } from "./telemetryMap";
 
@@ -43,7 +43,7 @@ function defaultHeadSkippedHandler(_statement: XAPIStatement, err: unknown): voi
 
 /**
  * Imperative xAPI client with in-memory queue, retry flush, and optional pagehide delivery.
- * Prefer wiring transport via {@link LessonkitProvider} config in React apps.
+ * Prefer wiring transport via `LessonkitProvider` config from `@lessonkit/react` in React apps.
  */
 export function createXAPIClient(opts?: {
   transport?: XAPITransport;
@@ -219,9 +219,7 @@ export function createXAPIClient(opts?: {
 
   const emit = (event: Parameters<typeof telemetryEventToXAPIStatement>[0]) => {
     try {
-      const enriched =
-        event.id?.trim() ? event : { ...event, id: stableTelemetryEventId(event) };
-      const statement = telemetryEventToXAPIStatement(enriched);
+      const statement = telemetryEventToXAPIStatement(event);
       /* v8 ignore start -- public emit paths always map to a statement */
       if (!statement) return;
       /* v8 ignore stop */

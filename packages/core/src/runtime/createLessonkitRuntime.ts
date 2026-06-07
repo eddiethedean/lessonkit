@@ -85,7 +85,7 @@ function warnRuntimeV1Deprecated(): void {
 
 /**
  * Create a headless LessonKit runtime for non-React tooling and tests.
- * Powers {@link LessonkitProvider} when `runtimeVersion` is `"v2"` (default).
+ * Powers `LessonkitProvider` from `@lessonkit/react` when `runtimeVersion` is `"v2"` (default).
  */
 export function createLessonkitRuntime(
   config: HeadlessLessonkitConfig,
@@ -169,6 +169,7 @@ export function createLessonkitRuntime(
     emit: (event: TelemetryEvent) => void,
     lessonId?: LessonId,
   ) => {
+    if (disposed) return;
     const event = buildAndApply(name, data, lessonId);
     if (!event) return;
     emit(event);
@@ -200,6 +201,7 @@ export function createLessonkitRuntime(
     getProgressState: () => progress.getState(),
     getSession,
     updateConfig(next) {
+      if (disposed) return;
       const previousCourseId = courseId;
       const sessionKeyBefore = JSON.stringify({ sessionId, attemptId, user });
       if (next.courseId !== undefined) configSnapshot.courseId = next.courseId;
@@ -236,6 +238,7 @@ export function createLessonkitRuntime(
       }
     },
     setActiveLesson(lessonId, emitFn) {
+      if (disposed) return;
       const current = progress.getState();
       if (current.activeLessonId === lessonId) return;
 
@@ -261,6 +264,7 @@ export function createLessonkitRuntime(
       emitLifecycleEvent(emitFn, "lesson_started", { lessonId }, lessonId);
     },
     completeLesson(lessonId, emitFn) {
+      if (disposed) return;
       completeLessonWithTelemetry({
         progress,
         lessonId,
@@ -269,6 +273,7 @@ export function createLessonkitRuntime(
       });
     },
     completeCourse(emitFn) {
+      if (disposed) return;
       completeCourseWithTelemetry({
         progress,
         nowMs: clock.nowMs(),
@@ -278,13 +283,14 @@ export function createLessonkitRuntime(
     },
     track,
     scoreAssessment(input, lessonId) {
-      if (!pluginHost) return null;
+      if (disposed || !pluginHost) return null;
       return pluginHost.scoreAssessment(
         { ...input, lessonId: input.lessonId ?? lessonId },
         getPluginCtx(),
       );
     },
     resetForCourseChange(nextCourseId) {
+      if (disposed) return;
       configSnapshot.courseId = nextCourseId;
       courseId = nextCourseId;
       progress = createProgressController();

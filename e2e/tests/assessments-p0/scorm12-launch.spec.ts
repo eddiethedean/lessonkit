@@ -61,8 +61,7 @@ test.describe("assessments-p0 scorm12 LMS", () => {
         (e) =>
           e.element.includes("lesson_status") &&
           (e.value === "completed" || e.value === "passed"),
-      ) ||
-      state.log.some((e) => e.element.includes("score"));
+      );
 
     expect(completed).toBe(true);
   });

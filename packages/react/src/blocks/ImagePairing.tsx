@@ -93,6 +93,7 @@ function ImagePairingInner(
   const [revealed, setRevealed] = useState<Set<string>>(() => new Set());
   const [keyboardSelection, setKeyboardSelection] = useState<string | null>(null);
   const [passed, setPassed] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
   const completedRef = useRef(false);
   const telemetryReplayedRef = useRef(false);
   const mismatchTimeoutRef = useRef<number | null>(null);
@@ -109,6 +110,7 @@ function ImagePairingInner(
     setRevealed(new Set());
     setKeyboardSelection(null);
     setPassed(false);
+    setSubmitted(false);
   };
 
   useEffect(() => {
@@ -136,7 +138,13 @@ function ImagePairingInner(
     const finalScore = nextMatched.size;
     const finalPassed = meetsPassingThreshold(finalScore, maxScore, props.passingScore);
     if (!finalPassed && nextMatched.size < totalPairs) return;
+    completeWithScore(nextMatched, finalScore, finalPassed);
+  };
+
+  const completeWithScore = (nextMatched: Set<string>, finalScore: number, finalPassed: boolean) => {
+    if (completedRef.current) return;
     completedRef.current = true;
+    setSubmitted(true);
     setPassed(finalPassed);
     assessment.answer({
       checkId,
@@ -151,6 +159,11 @@ function ImagePairingInner(
       maxScore,
       passingScore: props.passingScore ?? maxScore,
     });
+  };
+
+  const finishAttempt = () => {
+    if (completedRef.current || matchedCount === 0) return;
+    completeWithScore(matched, matchedCount, passedThreshold);
   };
 
   const tryMatch = (firstKey: string, secondKey: string) => {
@@ -275,7 +288,7 @@ function ImagePairingInner(
           });
         },
       }),
-    [allMatched, checkId, config, keyboardSelection, matched, matchedCount, maxScore, passed, passedThreshold, props.pairs, props.passingScore, revealed, score],
+    [allMatched, assessment, cards, checkId, config, keyboardSelection, matched, matchedCount, maxScore, passed, passedThreshold, props.pairs, props.passingScore, revealed, score],
   );
 
   useAssessmentHandleRegistration(checkId, handle, ref);
@@ -328,6 +341,11 @@ function ImagePairingInner(
       <p role="status" aria-live="polite" data-testid="image-pairing-progress">
         {matchedCount} / {totalPairs} pairs matched
       </p>
+      {props.enableRetry === false && matchedCount > 0 && !submitted ? (
+        <button type="button" data-testid="image-pairing-finish" onClick={finishAttempt}>
+          Submit
+        </button>
+      ) : null}
       {props.enableRetry && passed ? (
         <button type="button" data-testid="image-pairing-retry" onClick={reset}>
           Try again

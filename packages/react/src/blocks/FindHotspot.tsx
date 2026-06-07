@@ -79,7 +79,7 @@ function FindHotspotInner(
         checkId,
         getScore: () => (checked && correct ? 1 : 0),
         getMaxScore: () => 1,
-        getAnswerGiven: () => selected !== null,
+        getAnswerGiven: () => checked,
         resetTask: () => {
           setSelected(null);
           setChecked(false);

@@ -81,7 +81,7 @@ function FindMultipleHotspotsInner(
         checkId,
         getScore: () => score,
         getMaxScore: () => maxScore,
-        getAnswerGiven: () => selected.size > 0,
+        getAnswerGiven: () => checked,
         resetTask: () => {
           setSelected(new Set());
           setChecked(false);

@@ -803,6 +803,32 @@ describe("AssessmentSequence compound handle", () => {
     expect(screen.getByText("Question 2 of 2")).toBeTruthy();
   });
 
+  it("disables Next for FindHotspot until Check is clicked", () => {
+    render(
+      wrap(
+        <AssessmentSequence sequential>
+          <FindHotspot
+            checkId="hs-seq"
+            src="/img.png"
+            alt="Map"
+            targets={[
+              { id: "t1", label: "Target A", x: 10, y: 10 },
+              { id: "t2", label: "Target B", x: 50, y: 50 },
+            ]}
+            correctTargetId="t1"
+          />
+          <TrueFalse checkId="tf-after-hotspot" question="Done?" answer={true} />
+        </AssessmentSequence>,
+      ),
+    );
+    const next = screen.getByTestId("sequence-next") as HTMLButtonElement;
+    expect(next.disabled).toBe(true);
+    fireEvent.click(screen.getByTestId("target-t1"));
+    expect(next.disabled).toBe(true);
+    fireEvent.click(screen.getByTestId("check-hotspot"));
+    expect(next.disabled).toBe(false);
+  });
+
   it("requires blockId when persistCompoundState is enabled", () => {
     expect(() =>
       render(

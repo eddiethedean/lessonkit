@@ -10,6 +10,12 @@ export async function completeAssessmentsP0ViteTrueFalse(page: Page): Promise<vo
 
 /** LXPack SCORM shell: trueFalse is injected as a native shell quiz. */
 export async function completeAssessmentsP0ScormShell(page: Page): Promise<void> {
+  await expect(page.getByRole("button", { name: /p0 interactions/i })).toBeVisible({
+    timeout: 30_000,
+  });
+  await page.getByRole("button", { name: /p0 interactions/i }).click();
+  await page.getByRole("button", { name: /mark complete/i }).click();
+
   await expect(page.getByRole("button", { name: /phishing-tf/i })).toBeVisible({
     timeout: 30_000,
   });

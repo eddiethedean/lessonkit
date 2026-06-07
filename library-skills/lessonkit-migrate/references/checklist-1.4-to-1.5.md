@@ -2,7 +2,7 @@
 
 - [ ] Pin aligned `@lessonkit/*` at `^1.5.0` (react, core, cli, xapi, lxpack, themes, accessibility)
 - [ ] Run `npm install` and `lessonkit build` — fix TypeScript errors
-- [ ] Optional: adopt `BranchingScenario`, `Embed`, `Chart` blocks (additive; no breaking changes required)
+- [ ] Compound blocks with `persistCompoundState` (default) require an explicit `blockId` on `InteractiveBook`, `SlideDeck`, `InteractiveVideo`, `BranchingScenario`, and `AssessmentSequence` — missing `blockId` throws at runtime
 - [ ] If using branching: set unique `blockId` on `BranchingScenario`; test graph resume in LMS
 - [ ] Branch resume: pre-1.5 session state without `__lk_bs__` metadata restarts at `startNodeId` (expected)
 - [ ] Telemetry catalog v3 adds `branch_node_viewed`, `branch_selected` (additive)

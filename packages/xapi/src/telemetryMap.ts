@@ -1,7 +1,7 @@
 import type { TelemetryEvent } from "@lessonkit/core";
 import { buildLessonkitUrn } from "@lessonkit/core";
 import type { XAPIResult, XAPIStatement, XAPIVerbIri } from "./types";
-import { deriveStatementId } from "./id";
+import { deriveStatementId, enrichTelemetryEventForXapi } from "./id";
 import { formatDurationMs } from "./duration";
 
 const XAPIVerbs = {
@@ -275,12 +275,13 @@ const TELEMETRY_XAPI_MAPPERS = {
  * `lesson_time_on_task` returns null (companion metric; lesson_completed carries duration).
  */
 export function telemetryEventToXAPIStatement(event: TelemetryEvent): XAPIStatement | null {
-  const mapper = TELEMETRY_XAPI_MAPPERS[event.name];
+  const enriched = enrichTelemetryEventForXapi(event);
+  const mapper = TELEMETRY_XAPI_MAPPERS[enriched.name];
   if (!mapper) {
-    throw new Error(`Unhandled telemetry event: ${(event as { name: string }).name}`);
+    throw new Error(`Unhandled telemetry event: ${(enriched as { name: string }).name}`);
   }
-  return mapper(event, {
-    courseId: event.courseId,
-    timestamp: event.timestamp,
+  return mapper(enriched, {
+    courseId: enriched.courseId,
+    timestamp: enriched.timestamp,
   });
 }

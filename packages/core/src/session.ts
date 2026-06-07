@@ -6,8 +6,6 @@ import { validateId } from "./validateId";
 export const SESSION_STORAGE_KEY = "lessonkit:sessionId";
 
 const volatileSessionIds = new WeakMap<StoragePort, string>();
-/** Shared volatile session id when durable sessionStorage writes fail (one id per tab). */
-let sharedVolatileSessionId: string | null = null;
 
 function isDevEnvironment(): boolean {
   const g = globalThis as typeof globalThis & { process?: { env?: { NODE_ENV?: string } } };
@@ -49,16 +47,13 @@ export function resolveSessionId(storage: StoragePort, provided?: string): strin
   const id = createSessionId();
   const persisted = storage.setItem(SESSION_STORAGE_KEY, id);
   if (!persisted) {
-    if (!sharedVolatileSessionId) {
-      sharedVolatileSessionId = id;
-    }
-    volatileSessionIds.set(storage, sharedVolatileSessionId);
+    volatileSessionIds.set(storage, id);
     if (isDevEnvironment()) {
       console.warn(
-        "[lessonkit] session id could not be persisted; reusing in-memory id for this tab.",
+        "[lessonkit] session id could not be persisted; using in-memory id for this storage.",
       );
     }
-    return sharedVolatileSessionId;
+    return id;
   }
   return id;
 }
@@ -155,9 +150,9 @@ export function markCourseStartedXapiSent(
   return storage.setItem(courseStartedXapiStorageKey(sessionId, courseId), "1");
 }
 
-/** @internal Reset shared volatile session id between tests. */
+/** @internal Reset volatile session ids between tests. */
 export function resetSharedVolatileSessionIdForTests(): void {
-  sharedVolatileSessionId = null;
+  // WeakMap entries are scoped per StoragePort; no global state to reset.
 }
 
 function migrateStorageMark(

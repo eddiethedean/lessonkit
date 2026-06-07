@@ -44,7 +44,7 @@ describe("session", () => {
       const id2 = resolveSessionId(storage, undefined);
       expect(id1).toBe(id2);
       expect(warn).toHaveBeenCalledWith(
-        "[lessonkit] session id could not be persisted; reusing in-memory id for this tab.",
+        "[lessonkit] session id could not be persisted; using in-memory id for this storage.",
       );
     } finally {
       vi.unstubAllEnvs();

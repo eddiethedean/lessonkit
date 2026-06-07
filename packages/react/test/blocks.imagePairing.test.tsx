@@ -47,4 +47,27 @@ describe("ImagePairing component resume", () => {
     });
     expect(ref.current?.getAnswerGiven()).toBe(true);
   });
+
+  it("persists restored cardKeys via getCurrentState after resume", async () => {
+    vi.spyOn(Math, "random").mockReturnValue(0.5);
+    const ref = createRef<AssessmentHandle>();
+    render(
+      wrap(
+        <ImagePairing ref={ref} checkId="pair-persist" pairs={pairs} />,
+      ),
+    );
+
+    ref.current?.resume?.({
+      cardKeys: ["p2-0", "p1-0", "p2-1", "p1-1"],
+      matched: [],
+      revealed: [],
+      keyboardSelection: null,
+      passed: false,
+    });
+
+    await waitFor(() => {
+      const state = ref.current?.getCurrentState?.() as { cardKeys?: string[] } | undefined;
+      expect(state?.cardKeys).toEqual(["p2-0", "p1-0", "p2-1", "p1-1"]);
+    });
+  });
 });

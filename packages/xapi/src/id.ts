@@ -56,23 +56,38 @@ export function cryptoRandomId(): string {
   return randomIdFallback();
 }
 
+const LIFECYCLE_EVENTS_FOR_STABLE_ID = new Set([
+  "course_started",
+  "course_completed",
+  "lesson_started",
+  "lesson_completed",
+]);
+
 /** Stable telemetry event id for lifecycle emits (excludes timestamp so retries dedupe). */
 export function stableTelemetryEventId(event: {
   name: string;
   courseId: string;
   lessonId?: string;
   sessionId?: string;
-  data?: unknown;
+  attemptId?: string;
 }): string {
-  const data = event.data as { checkId?: string } | undefined;
   const seed = [
     event.name,
     event.courseId,
     event.lessonId ?? "",
     event.sessionId ?? "",
-    data?.checkId ?? "",
+    event.attemptId ?? "",
   ].join("|");
   return hashSeedToUuid(seed);
+}
+
+/** Assign stable event.id for lifecycle telemetry before xAPI mapping (idempotent retries). */
+export function enrichTelemetryEventForXapi<T extends { id?: string; name: string; courseId: string; lessonId?: string; sessionId?: string; attemptId?: string }>(
+  event: T,
+): T {
+  if (event.id?.trim()) return event;
+  if (!LIFECYCLE_EVENTS_FOR_STABLE_ID.has(event.name)) return event;
+  return { ...event, id: stableTelemetryEventId(event) };
 }
 
 /** Stable xAPI statement id from telemetry event identity (idempotent across retries). */

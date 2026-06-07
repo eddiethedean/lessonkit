@@ -43,6 +43,35 @@ describe("emitTelemetry", () => {
     );
   });
 
+  it("maps repeated lifecycle emits through pipeline to identical statement ids", async () => {
+    const tracking = createTrackingClient();
+    const ids: string[] = [];
+    const xapi = {
+      send: (statement: { id: string }) => {
+        ids.push(statement.id);
+      },
+      flush: async () => {},
+      queueSize: () => 0,
+      startedLesson: () => {},
+      completeLesson: () => {},
+      completeCourse: () => {},
+    };
+
+    const event = buildTelemetryEvent({
+      name: "course_started",
+      courseId: "course-1",
+      sessionId: "s1",
+    });
+    await emitTelemetry(tracking, xapi, event);
+    await emitTelemetry(tracking, xapi, {
+      ...event,
+      timestamp: "2026-06-07T12:00:00.000Z",
+    });
+
+    expect(ids.length).toBe(2);
+    expect(ids[0]).toBe(ids[1]);
+  });
+
   it("buildTelemetryEvent throws when lesson lifecycle events lack lessonId", () => {
     expect(() =>
       buildTelemetryEvent({ name: "lesson_started", courseId: "c" }),

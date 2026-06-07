@@ -102,4 +102,66 @@ describe("useLessonkitProviderRuntime edge cases", () => {
       expect(batches.some((b) => b.some((e) => e.name === "course_started"))).toBe(true),
     );
   });
+
+  it("does not recreate tracking client when plugins array reference changes with same fingerprint", async () => {
+    const events: TelemetryEvent[] = [];
+    const plugin = defineTelemetryPlugin({
+      id: "stable-plugin",
+      version: "1",
+      kind: "analytics",
+    });
+
+    function Wrapper() {
+      return (
+        <LessonkitProvider
+          config={{
+            courseId: "course-1",
+            plugins: [plugin],
+            tracking: { sink: (e) => void events.push(e) },
+            xapi: { enabled: false },
+          }}
+        >
+          <div>child</div>
+        </LessonkitProvider>
+      );
+    }
+
+    const { rerender } = render(<Wrapper />);
+    await waitFor(() => expect(events.some((e) => e.name === "course_started")).toBe(true));
+    const countAfterMount = events.filter((e) => e.name === "course_started").length;
+
+    rerender(<Wrapper />);
+    await waitFor(() => expect(events.length).toBeGreaterThanOrEqual(countAfterMount));
+    expect(events.filter((e) => e.name === "course_started").length).toBe(countAfterMount);
+  });
+
+  it("v1 and v2 runtimes both dedupe course_started on remount with same session", async () => {
+    for (const runtimeVersion of ["v1", "v2"] as const) {
+      const events: TelemetryEvent[] = [];
+      const config = {
+        courseId: "course-1",
+        runtimeVersion,
+        session: { sessionId: `session-${runtimeVersion}` },
+        tracking: { sink: (e: TelemetryEvent) => void events.push(e) },
+        xapi: { enabled: false },
+      };
+
+      const { unmount } = render(
+        <LessonkitProvider config={config}>
+          <div>child</div>
+        </LessonkitProvider>,
+      );
+      await waitFor(() => expect(events.some((e) => e.name === "course_started")).toBe(true));
+      unmount();
+
+      render(
+        <LessonkitProvider config={config}>
+          <div>child</div>
+        </LessonkitProvider>,
+      );
+      await waitFor(() => expect(events.some((e) => e.name === "course_started")).toBe(true));
+      expect(events.filter((e) => e.name === "course_started").length).toBe(1);
+      events.length = 0;
+    }
+  });
 });

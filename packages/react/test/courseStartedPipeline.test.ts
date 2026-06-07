@@ -203,4 +203,24 @@ describe("emitCourseStartedNonTrackingPipeline", () => {
     });
     expect(order).toEqual(["flush", "xapi-delivered", "extra"]);
   });
+
+  it("uses stable xAPI statement ids when course_started is retried with a new timestamp", async () => {
+    const ids: string[] = [];
+    const send = vi.fn((statement: { id: string }) => {
+      ids.push(statement.id);
+    });
+    const xapi = { ...mockXapiClient(send), flush: vi.fn(async () => {}) };
+    await emitCourseStartedNonTrackingPipeline({
+      event: courseStartedEvent,
+      xapi,
+      lxpackBridge: "off",
+    });
+    await emitCourseStartedNonTrackingPipeline({
+      event: { ...courseStartedEvent, timestamp: "2026-06-07T12:00:00.000Z" },
+      xapi,
+      lxpackBridge: "off",
+    });
+    expect(ids.length).toBe(2);
+    expect(ids[0]).toBe(ids[1]);
+  });
 });

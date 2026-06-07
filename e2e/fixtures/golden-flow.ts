@@ -43,10 +43,27 @@ export async function expectPackagedAssessmentPassed(
 }
 
 /**
+ * Mark the packaged LXPack SPA lesson complete (required for SCORM lesson_status when
+ * completion threshold counts lessons + assessments).
+ */
+export async function completePackagedWelcomeLesson(page: Page): Promise<void> {
+  const lessonButton = page.getByRole("button", {
+    name: /site orientation|p0 interactions|welcome/i,
+  });
+  await expect(lessonButton).toBeVisible({ timeout: 30_000 });
+  await lessonButton.click();
+  const markComplete = page.getByRole("button", { name: /mark complete/i });
+  await expect(markComplete).toBeVisible();
+  await markComplete.click();
+}
+
+/**
  * LXPack standalone / SCORM shell: assessments are native quizzes in the shell nav
  * (safety-check, ppe-acknowledgment), not the multi-step React sign-off route.
  */
 export async function completePackagedAssessments(page: Page): Promise<void> {
+  await completePackagedWelcomeLesson(page);
+
   await page.getByRole("button", { name: /safety-check/i }).click();
   await page.getByText(QUIZ_CORRECT, { exact: true }).click();
   await page.getByRole("button", { name: /Submit assessment/i }).click();

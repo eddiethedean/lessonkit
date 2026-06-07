@@ -216,6 +216,20 @@ describe("createLessonkitRuntime", () => {
     expect(dispose).toHaveBeenCalledTimes(1);
   });
 
+  it("track and lifecycle methods no-op after dispose()", () => {
+    const events: string[] = [];
+    const emit = () => {
+      events.push("emit");
+    };
+    const runtime = createLessonkitRuntime({ courseId: "c" });
+    runtime.dispose();
+    runtime.track("interaction", { kind: "noop" }, emit, "lesson-1");
+    runtime.setActiveLesson("lesson-1", emit);
+    runtime.completeLesson("lesson-1", emit);
+    runtime.completeCourse(emit);
+    expect(events).toEqual([]);
+  });
+
   it("does not call setupAll on plugin swap when deferPluginSetup is true", () => {
     const setup = vi.fn();
     const pluginA = defineLifecyclePlugin({

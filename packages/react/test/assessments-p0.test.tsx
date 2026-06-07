@@ -9,6 +9,7 @@ import {
   DragTheWords,
   FillInTheBlanks,
   FindHotspot,
+  ImagePairing,
   Lesson,
   MarkTheWords,
   TrueFalse,
@@ -101,6 +102,82 @@ describe("1.1.x P0 assessment blocks", () => {
     expect(ref.current?.getScore()).toBe(1);
     expect(ref.current?.getMaxScore()).toBe(2);
     expect(ref.current?.getXAPIData()?.correct).toBe(false);
+  });
+
+  it("MarkTheWords with enableRetry=false completes on submit when below passingScore", async () => {
+    const events: TelemetryEvent[] = [];
+    render(
+      <Course
+        title="Assessments"
+        courseId="assessments-p0"
+        config={{
+          tracking: { sink: (e) => void events.push(e) },
+          xapi: { enabled: false },
+        }}
+      >
+        <Lesson title="L1" lessonId="lesson-1">
+          <MarkTheWords
+            checkId="mtw-no-retry"
+            text="Paris is in France"
+            correctWords={["Paris", "France"]}
+            passingScore={2}
+            enableRetry={false}
+          />
+        </Lesson>
+      </Course>,
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Paris" }));
+    fireEvent.click(screen.getByTestId("mark-the-words-submit"));
+    await waitFor(() =>
+      expect(
+        events.some(
+          (e) =>
+            e.name === "assessment_completed" &&
+            e.data?.checkId === "mtw-no-retry" &&
+            e.data?.score === 1,
+        ),
+      ).toBe(true),
+    );
+  });
+
+  it("ImagePairing with enableRetry=false completes on submit when below passingScore", async () => {
+    const events: TelemetryEvent[] = [];
+    render(
+      <Course
+        title="Assessments"
+        courseId="assessments-p0"
+        config={{
+          tracking: { sink: (e) => void events.push(e) },
+          xapi: { enabled: false },
+        }}
+      >
+        <Lesson title="L1" lessonId="lesson-1">
+          <ImagePairing
+            checkId="ip-no-retry"
+            enableRetry={false}
+            passingScore={2}
+            pairs={[
+              { id: "a", label: "A", imageSrc: "/a.png" },
+              { id: "b", label: "B", imageSrc: "/b.png" },
+            ]}
+          />
+        </Lesson>
+      </Course>,
+    );
+    fireEvent.click(screen.getByTestId("pairing-card-a-0"));
+    fireEvent.click(screen.getByTestId("pairing-card-a-1"));
+    fireEvent.click(screen.getByTestId("image-pairing-finish"));
+    await waitFor(() =>
+      expect(
+        events.some(
+          (e) =>
+            e.name === "assessment_completed" &&
+            e.data?.checkId === "ip-no-retry" &&
+            e.data?.score === 1 &&
+            e.data?.maxScore === 2,
+        ),
+      ).toBe(true),
+    );
   });
 
   it("FillInTheBlanks checks blanks", () => {

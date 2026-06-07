@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { deriveStatementId, stableTelemetryEventId } from "../src/id";
+import { deriveStatementId, enrichTelemetryEventForXapi, stableTelemetryEventId } from "../src/id";
 
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -65,12 +65,45 @@ describe("stableTelemetryEventId", () => {
     expect(stableTelemetryEventId(event)).toMatch(UUID_RE);
   });
 
-  it("differs when sessionId or lessonId differs", () => {
+  it("differs when sessionId, lessonId, or attemptId differs", () => {
     const base = { name: "lesson_started" as const, courseId: "c1", sessionId: "s1" };
     const a = stableTelemetryEventId({ ...base, lessonId: "l1" });
     const b = stableTelemetryEventId({ ...base, lessonId: "l2" });
     const c = stableTelemetryEventId({ ...base, lessonId: "l1", sessionId: "s2" });
+    const d = stableTelemetryEventId({ ...base, lessonId: "l1", attemptId: "a1" });
+    const e = stableTelemetryEventId({ ...base, lessonId: "l1", attemptId: "a2" });
     expect(a).not.toBe(b);
     expect(a).not.toBe(c);
+    expect(d).not.toBe(e);
+  });
+});
+
+describe("enrichTelemetryEventForXapi", () => {
+  it("assigns stable id to lifecycle events without id", () => {
+    const event = {
+      name: "course_started" as const,
+      courseId: "c1",
+      sessionId: "s1",
+      timestamp: "2026-01-01T00:00:00.000Z",
+    };
+    const enriched = enrichTelemetryEventForXapi(event) as typeof event & { id?: string };
+    expect(enriched.id).toMatch(UUID_RE);
+    expect(
+      (enrichTelemetryEventForXapi({ ...event, timestamp: "2026-01-02T00:00:00.000Z" }) as typeof event & {
+        id?: string;
+      }).id,
+    ).toBe(enriched.id);
+  });
+
+  it("does not assign id to assessment events", () => {
+    const event = {
+      name: "assessment_answered" as const,
+      courseId: "c1",
+      lessonId: "l1",
+      sessionId: "s1",
+      timestamp: "2026-01-01T00:00:00.000Z",
+      data: { checkId: "q1" },
+    };
+    expect((enrichTelemetryEventForXapi(event) as { id?: string }).id).toBeUndefined();
   });
 });

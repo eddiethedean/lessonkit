@@ -471,7 +471,7 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
     batchEnabled,
     batchFlushIntervalMs,
     batchMaxBatchSize,
-    normalizedConfig.plugins,
+    pluginsFingerprint,
     normalizedCourseId,
     buildCurrentPluginCtx,
     emitCourseStartedOnce,
@@ -763,6 +763,13 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
       setSessionId(sessionIdRef.current);
     }
   }, [sessionConfiguredId, sessionId]);
+
+  useEffect(() => {
+    return () => {
+      headlessRef.current?.dispose();
+      headlessRef.current = null;
+    };
+  }, []);
 
   const runtime = useMemo<LessonkitRuntime>(
     () => ({
