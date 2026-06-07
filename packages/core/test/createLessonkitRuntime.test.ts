@@ -52,12 +52,12 @@ describe("createLessonkitRuntime", () => {
     expect(runtime.getProgressState().activeLessonId).toBeUndefined();
   });
 
-  it("completeLesson emits via callback", () => {
+  it("completeLesson emits exactly one lesson_completed via callback", () => {
     const events: string[] = [];
     const runtime = createLessonkitRuntime({ courseId: "c" });
     runtime.setActiveLesson("lesson-1", (event) => events.push(event.name));
     runtime.completeLesson("lesson-1", (event) => events.push(event.name));
-    expect(events.filter((e) => e === "lesson_completed").length).toBeGreaterThan(0);
+    expect(events.filter((e) => e === "lesson_completed")).toEqual(["lesson_completed"]);
   });
 
   it("track emits built events", () => {
@@ -185,17 +185,35 @@ describe("createLessonkitRuntime", () => {
 
   it("disposes plugins when updateConfig clears plugins without calling setup again", () => {
     const setup = vi.fn();
+    const dispose = vi.fn();
     const plugin = defineLifecyclePlugin({
       id: "setup-test",
       version: "1",
       kind: "analytics",
       setup,
+      dispose,
     });
     const runtime = createLessonkitRuntime({ courseId: "c", plugins: [plugin] });
     expect(setup).toHaveBeenCalledTimes(1);
 
     runtime.updateConfig({ plugins: [] });
+    expect(dispose).toHaveBeenCalledTimes(1);
     expect(setup).toHaveBeenCalledTimes(1);
+  });
+
+  it("dispose() tears down plugins and is idempotent", () => {
+    const dispose = vi.fn();
+    const plugin = defineLifecyclePlugin({
+      id: "dispose-test",
+      version: "1",
+      kind: "analytics",
+      dispose,
+    });
+    const runtime = createLessonkitRuntime({ courseId: "c", plugins: [plugin] });
+
+    runtime.dispose();
+    runtime.dispose();
+    expect(dispose).toHaveBeenCalledTimes(1);
   });
 
   it("does not call setupAll on plugin swap when deferPluginSetup is true", () => {
@@ -222,8 +240,9 @@ describe("createLessonkitRuntime", () => {
     expect(setup).not.toHaveBeenCalled();
   });
 
-  it("scoreAssessment merges lessonId from the second argument", () => {
-    const score = vi.fn(() => ({ score: 1, maxScore: 1, passed: true }));
+  it("scoreAssessment merges lessonId from the second argument and returns the plugin result", () => {
+    const scoreResult = { score: 1, maxScore: 1, passed: true };
+    const score = vi.fn(() => scoreResult);
     const plugin = defineAssessmentPlugin({
       id: "score",
       version: "1",
@@ -231,11 +250,12 @@ describe("createLessonkitRuntime", () => {
       scoreAssessment: score,
     });
     const runtime = createLessonkitRuntime({ courseId: "c", plugins: [plugin] });
-    runtime.scoreAssessment({ checkId: "q1", response: "a" }, "lesson-2");
+    const result = runtime.scoreAssessment({ checkId: "q1", response: "a" }, "lesson-2");
     expect(score).toHaveBeenCalledWith(
       expect.objectContaining({ checkId: "q1", lessonId: "lesson-2" }),
       expect.any(Object),
     );
+    expect(result).toEqual(scoreResult);
   });
 
   it("updateConfig re-runs plugin setup when session.user changes", () => {

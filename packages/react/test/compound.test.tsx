@@ -967,9 +967,12 @@ describe("InteractiveVideo", () => {
     fireEvent.timeUpdate(video);
     fireEvent.click(screen.getByRole("radio", { name: "True" }));
     expect(screen.getByTestId("video-score").textContent).toContain("Score: 1 / 2");
+    fireEvent.click(screen.getByTestId("cue-continue"));
     Object.defineProperty(video, "currentTime", { value: 10.5, writable: true, configurable: true });
     fireEvent.timeUpdate(video);
-    expect(screen.getAllByRole("radio", { name: "False" }).length).toBeGreaterThan(0);
+    expect(screen.getByTestId("timed-cue-1")).toBeTruthy();
+    fireEvent.click(screen.getByRole("radio", { name: "False" }));
+    expect(screen.getByTestId("video-score").textContent).toContain("Score: 2 / 2");
   });
 
   it("restores firedCueIndices from saved meta without re-firing completed cues", async () => {

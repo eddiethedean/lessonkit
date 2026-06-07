@@ -105,6 +105,7 @@ export function createLessonkitRuntime(
 
   let progress = createProgressController();
   let pluginHost = resolvePluginHost(configSnapshot.plugins);
+  let disposed = false;
 
   const getPluginCtx = () =>
     buildPluginContext({
@@ -293,6 +294,8 @@ export function createLessonkitRuntime(
       }
     },
     dispose() {
+      if (disposed) return;
+      disposed = true;
       pluginHost?.disposeAll();
     },
   };

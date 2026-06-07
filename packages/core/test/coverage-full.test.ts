@@ -271,23 +271,6 @@ describe("coverage-full", () => {
     expect(events).toEqual(["course"]);
   });
 
-  it("headless runtime covers config updates and duplicate lifecycle calls", () => {
-    const events: string[] = [];
-    const emit = (event: { name: string }) => events.push(event.name);
-    const runtime = createLessonkitRuntime({ courseId: "c" });
-
-    runtime.updateConfig({ plugins: createPluginRegistry([]) });
-    runtime.setActiveLesson("l1", emit);
-    runtime.setActiveLesson("l1", emit);
-    runtime.completeLesson("l1", emit);
-    runtime.completeLesson("l1", emit);
-    runtime.completeCourse(emit);
-    runtime.completeCourse(emit);
-
-    expect(events.filter((e) => e === "lesson_started")).toHaveLength(1);
-    expect(events.filter((e) => e === "course_completed")).toHaveLength(1);
-  });
-
   it("tracking client no-ops without sink when batching is disabled", () => {
     const client = createTrackingClient({ batch: { enabled: false } });
     expect(() => client.track(baseEvent)).not.toThrow();

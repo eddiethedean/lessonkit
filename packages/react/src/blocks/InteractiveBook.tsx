@@ -3,6 +3,7 @@ import type { BlockId, CompoundHandle } from "@lessonkit/core";
 import { CompoundProvider } from "../compound/CompoundProvider";
 import { useCompoundInitialIndex, useCompoundShell } from "../compound/useCompoundShell";
 import { validateCompoundChildren } from "../compound/validateChildren";
+import { requireCompoundBlockIdWhenPersisting } from "../compound/requireCompoundBlockId";
 import { setLessonkitBlockType } from "../compound/blockType";
 import { useLessonkit } from "../hooks";
 import { useEnclosingLessonId } from "../lessonContext";
@@ -109,15 +110,22 @@ export const InteractiveBook = forwardRef<CompoundHandle, InteractiveBookProps>(
   props,
   ref,
 ) {
-  const blockId = useMemo(
-    () => normalizeComponentId(props.blockId, "blockId") as BlockId,
-    [props.blockId],
-  );
   const pages = React.Children.toArray(props.children).filter(
     React.isValidElement,
   ) as React.ReactElement<PageProps>[];
   const { config, storage } = useLessonkit();
   const persistEnabled = config.session?.persistCompoundState !== false;
+
+  requireCompoundBlockIdWhenPersisting({
+    persistEnabled,
+    blockId: props.blockId,
+    componentName: "InteractiveBook",
+  });
+
+  const blockId = useMemo(
+    () => normalizeComponentId(props.blockId, "blockId") as BlockId,
+    [props.blockId],
+  );
 
   const initialIndex = useCompoundInitialIndex({
     courseId: config.courseId,

@@ -8,6 +8,11 @@ import type { XAPIStatement, XAPITransport } from "@lessonkit/xapi";
 import * as courseStartedPipelineModule from "../src/runtime/courseStartedPipeline";
 import { createSessionStoragePort } from "../src/runtime/ports";
 import { markCourseStarted, markCourseStartedEmittedToTracking, markCourseStartedPipelineDelivered } from "../src/runtime/session";
+import {
+  buildCourseStartedEvent,
+  isCourseStartedSinkSettled,
+  isTrackingActive,
+} from "../src/provider/courseStarted";
 
 
 describe("@lessonkit/react runtime — course_started", () => {
@@ -853,6 +858,52 @@ it("emits course_started after courseId change when flush fails once", async () 
       expect(events.some((e) => e.name === "course_started" && e.courseId === "course-b")).toBe(true),
     );
     vi.unmock("@lessonkit/core");
+  });
+});
+
+describe("courseStarted helpers", () => {
+  it("isTrackingActive defaults to true", () => {
+    expect(isTrackingActive(undefined)).toBe(true);
+    expect(isTrackingActive({ enabled: false })).toBe(false);
+  });
+
+  it("isCourseStartedSinkSettled is true only for emitted", () => {
+    expect(isCourseStartedSinkSettled("emitted")).toBe(true);
+    expect(isCourseStartedSinkSettled("filtered")).toBe(false);
+    expect(isCourseStartedSinkSettled("failed")).toBe(false);
+  });
+
+  it("buildCourseStartedEvent returns course_started payload", () => {
+    const event = buildCourseStartedEvent({
+      pluginHost: null,
+      courseId: "course-1",
+      sessionId: "session-1",
+      lxpackBridge: "auto",
+    });
+    expect(event?.name).toBe("course_started");
+    expect(event?.courseId).toBe("course-1");
+  });
+
+  it("buildCourseStartedEvent includes session metadata when provided", () => {
+    const event = buildCourseStartedEvent({
+      pluginHost: null,
+      courseId: "course-1",
+      sessionId: "session-42",
+      lxpackBridge: "auto",
+    });
+    expect(event?.sessionId).toBe("session-42");
+    expect(event?.name).toBe("course_started");
+    expect(event?.courseId).toBe("course-1");
+  });
+
+  it("buildCourseStartedEvent assigns a stable dedupe id", () => {
+    const event = buildCourseStartedEvent({
+      pluginHost: null,
+      courseId: "course-1",
+      sessionId: "session-42",
+      lxpackBridge: "auto",
+    });
+    expect(event?.id).toBe("session-42:course-1:course_started");
   });
 });
 

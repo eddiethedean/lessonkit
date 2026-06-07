@@ -5,6 +5,7 @@ import { CompoundProvider } from "../compound/CompoundProvider";
 import { useCompoundInitialIndex, useCompoundShell } from "../compound/useCompoundShell";
 import { mergeVideoMetaIntoState, readInteractiveVideoMeta } from "../compound/useCompoundVideoShell";
 import { validateCompoundChildren } from "../compound/validateChildren";
+import { requireCompoundBlockIdWhenPersisting } from "../compound/requireCompoundBlockId";
 import { setLessonkitBlockType } from "../compound/blockType";
 import { useLessonkit } from "../hooks";
 import { useEnclosingLessonId } from "../lessonContext";
@@ -362,15 +363,22 @@ const InteractiveVideoInner = forwardRef<
 
 export const InteractiveVideo = forwardRef<CompoundHandle, InteractiveVideoProps>(
   function InteractiveVideo(props, ref) {
-    const blockId = useMemo(
-      () => normalizeComponentId(props.blockId, "blockId") as BlockId,
-      [props.blockId],
-    );
     const cues = React.Children.toArray(props.children).filter(
       React.isValidElement,
     ) as CueElement[];
     const { config, storage } = useLessonkit();
     const persistEnabled = config.session?.persistCompoundState !== false;
+
+    requireCompoundBlockIdWhenPersisting({
+      persistEnabled,
+      blockId: props.blockId,
+      componentName: "InteractiveVideo",
+    });
+
+    const blockId = useMemo(
+      () => normalizeComponentId(props.blockId, "blockId") as BlockId,
+      [props.blockId],
+    );
 
     const initialMeta = useMemo(
       () => loadVideoMeta(storage, config.courseId, blockId, persistEnabled),

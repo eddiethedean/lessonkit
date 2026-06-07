@@ -14,6 +14,7 @@ import {
   type BranchingScenarioMeta,
 } from "../compound/useCompoundBranchShell";
 import { useCompoundBranchHandle } from "../compound/useCompoundBranchHandle";
+import { requireCompoundBlockIdWhenPersisting } from "../compound/requireCompoundBlockId";
 import { BranchingScenarioProvider } from "../compound/useBranchingScenario";
 import {
   buildNodeIndexMap,
@@ -375,6 +376,18 @@ const BranchingScenarioInner = forwardRef<
 
 export const BranchingScenario = forwardRef<CompoundHandle, BranchingScenarioProps>(
   function BranchingScenario(props, ref) {
+    const nodes = React.Children.toArray(props.children).filter(
+      React.isValidElement,
+    ) as React.ReactElement<BranchNodeProps>[];
+    const { config } = useLessonkit();
+    const persistEnabled = config.session?.persistCompoundState !== false;
+
+    requireCompoundBlockIdWhenPersisting({
+      persistEnabled,
+      blockId: props.blockId,
+      componentName: "BranchingScenario",
+    });
+
     const blockId = useMemo(
       () => normalizeComponentId(props.blockId, "blockId") as BlockId,
       [props.blockId],
@@ -383,11 +396,6 @@ export const BranchingScenario = forwardRef<CompoundHandle, BranchingScenarioPro
       () => normalizeComponentId(props.startNodeId, "blockId"),
       [props.startNodeId],
     );
-    const nodes = React.Children.toArray(props.children).filter(
-      React.isValidElement,
-    ) as React.ReactElement<BranchNodeProps>[];
-    const { config } = useLessonkit();
-    const persistEnabled = config.session?.persistCompoundState !== false;
 
     const nodeIndexMap = useMemo(() => buildNodeIndexMap(nodes), [nodes]);
     const initialIndex = nodeIndexMap.get(startNodeId) ?? 0;

@@ -143,7 +143,10 @@ describe("session", () => {
     expect(hasCourseStarted(storage, "new", "c1")).toBe(true);
     expect(hasCourseStarted(storage, "old", "c1")).toBe(false);
     migrateCourseStartedMark(storage, "new", "new", "c1");
+    expect(hasCourseStarted(storage, "new", "c1")).toBe(true);
+    const keysBefore = Object.keys(store).length;
     migrateCourseStartedMark(storage, "a", "b", undefined);
+    expect(Object.keys(store).length).toBe(keysBefore);
   });
 
   it("migrateCourseStartedMark retains source when destination write fails", () => {

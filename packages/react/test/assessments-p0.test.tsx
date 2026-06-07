@@ -1,10 +1,9 @@
-import React from "react";
+import React, { createRef } from "react";
 import { afterEach, describe, expect, it } from "vitest";
 import { cleanup, render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { defineAssessmentPlugin } from "@lessonkit/core";
-import type { TelemetryEvent } from "@lessonkit/core";
+import type { AssessmentHandle, TelemetryEvent } from "@lessonkit/core";
 import {
-  AssessmentSequence,
   Course,
   DragAndDrop,
   DragTheWords,
@@ -85,6 +84,25 @@ describe("1.1.x P0 assessment blocks", () => {
     expect(screen.getByRole("status").textContent).toContain("Correct");
   });
 
+  it("MarkTheWords partial selection does not meet passingScore", () => {
+    const ref = createRef<AssessmentHandle>();
+    render(
+      wrap(
+        <MarkTheWords
+          ref={ref}
+          checkId="mtw-wrong"
+          text="Paris is in France"
+          correctWords={["Paris", "France"]}
+          passingScore={2}
+        />,
+      ),
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Paris" }));
+    expect(ref.current?.getScore()).toBe(1);
+    expect(ref.current?.getMaxScore()).toBe(2);
+    expect(ref.current?.getXAPIData()?.correct).toBe(false);
+  });
+
   it("FillInTheBlanks checks blanks", () => {
     render(
       wrap(
@@ -94,6 +112,17 @@ describe("1.1.x P0 assessment blocks", () => {
     fireEvent.change(screen.getByTestId("blank-blank-0"), { target: { value: "capital" } });
     fireEvent.click(screen.getByTestId("check-blanks"));
     expect(screen.getByRole("status").textContent).toContain("Correct");
+  });
+
+  it("FillInTheBlanks reports wrong blank value", () => {
+    render(
+      wrap(
+        <FillInTheBlanks checkId="fib-wrong" template="The *capital* is France." />,
+      ),
+    );
+    fireEvent.change(screen.getByTestId("blank-blank-0"), { target: { value: "wrong" } });
+    fireEvent.click(screen.getByTestId("check-blanks"));
+    expect(screen.getByRole("status").textContent).toContain("Try again");
   });
 
   it("DragTheWords places words in zones", () => {
@@ -110,6 +139,22 @@ describe("1.1.x P0 assessment blocks", () => {
     fireEvent.click(screen.getByTestId("zone-0"));
     fireEvent.click(screen.getByTestId("check-drag-words"));
     expect(screen.getByRole("status").textContent).toContain("Correct");
+  });
+
+  it("DragTheWords reports wrong zone placement", () => {
+    render(
+      wrap(
+        <DragTheWords
+          checkId="dtw-wrong"
+          template="I like *cats*"
+          words={["cats", "dogs"]}
+        />,
+      ),
+    );
+    fireEvent.click(screen.getByTestId("word-dogs"));
+    fireEvent.click(screen.getByTestId("zone-0"));
+    fireEvent.click(screen.getByTestId("check-drag-words"));
+    expect(screen.getByRole("status").textContent).toContain("Try again");
   });
 
   it("DragAndDrop with empty targets is not answerable", () => {
@@ -152,6 +197,30 @@ describe("1.1.x P0 assessment blocks", () => {
     expect(screen.getByRole("status").textContent).toContain("Correct");
   });
 
+  it("DragAndDrop reports incorrect assignment when all targets are filled", () => {
+    render(
+      wrap(
+        <DragAndDrop
+          checkId="dad-wrong"
+          items={[
+            { id: "a", label: "Apple" },
+            { id: "b", label: "Banana" },
+          ]}
+          targets={[
+            { id: "t1", label: "Fruit A", accepts: "a" },
+            { id: "t2", label: "Fruit B", accepts: "b" },
+          ]}
+        />,
+      ),
+    );
+    fireEvent.click(screen.getByTestId("drag-item-b"));
+    fireEvent.click(screen.getByTestId("drop-t1"));
+    fireEvent.click(screen.getByTestId("drag-item-a"));
+    fireEvent.click(screen.getByTestId("drop-t2"));
+    fireEvent.click(screen.getByTestId("check-drag-drop"));
+    expect(screen.getByRole("status").textContent).toContain("Try again");
+  });
+
   it("FindHotspot defaults passingScore to 1 when prop is omitted", async () => {
     const events: TelemetryEvent[] = [];
     render(
@@ -189,20 +258,24 @@ describe("1.1.x P0 assessment blocks", () => {
     );
   });
 
-  it("AssessmentSequence shows sequential steps", () => {
+  it("FindHotspot reports incorrect target click", () => {
     render(
       wrap(
-        <AssessmentSequence blockId="assessment-seq-p0">
-          <TrueFalse checkId="tf-seq" question="2+2=4?" answer={true} />
-          <TrueFalse checkId="tf-seq-2" question="Earth is flat?" answer={false} />
-        </AssessmentSequence>,
+        <FindHotspot
+          checkId="hs-wrong"
+          src="/img.png"
+          alt="Map"
+          targets={[
+            { id: "t1", label: "Target A", x: 10, y: 10 },
+            { id: "t2", label: "Target B", x: 50, y: 50 },
+          ]}
+          correctTargetId="t1"
+        />,
       ),
     );
-    expect(screen.getByText(/Question 1 of 2/)).toBeTruthy();
-    fireEvent.click(screen.getAllByLabelText("True")[0]!);
-    fireEvent.click(screen.getByTestId("sequence-next"));
-    expect(screen.getByText(/Question 2 of 2/)).toBeTruthy();
-    fireEvent.click(screen.getByTestId("sequence-prev"));
-    expect(screen.getByText(/Question 1 of 2/)).toBeTruthy();
+    fireEvent.click(screen.getByTestId("target-t2"));
+    fireEvent.click(screen.getByTestId("check-hotspot"));
+    expect(screen.getByRole("status").textContent).toContain("Try again");
   });
+
 });

@@ -4,6 +4,7 @@ import { CompoundProvider } from "../compound/CompoundProvider";
 import { useCompoundInitialIndex, useCompoundShell } from "../compound/useCompoundShell";
 import { useCompoundKeyboardNav } from "../compound/useCompoundKeyboardNav";
 import { validateCompoundChildren } from "../compound/validateChildren";
+import { requireCompoundBlockIdWhenPersisting } from "../compound/requireCompoundBlockId";
 import { setLessonkitBlockType } from "../compound/blockType";
 import { useLessonkit } from "../hooks";
 import { useEnclosingLessonId } from "../lessonContext";
@@ -126,15 +127,22 @@ const SlideDeckInner = forwardRef<CompoundHandle, SlideDeckInnerProps>(function 
 });
 
 export const SlideDeck = forwardRef<CompoundHandle, SlideDeckProps>(function SlideDeck(props, ref) {
-  const blockId = useMemo(
-    () => normalizeComponentId(props.blockId, "blockId") as BlockId,
-    [props.blockId],
-  );
   const slides = React.Children.toArray(props.children).filter(
     React.isValidElement,
   ) as React.ReactElement<SlideProps>[];
   const { config, storage } = useLessonkit();
   const persistEnabled = config.session?.persistCompoundState !== false;
+
+  requireCompoundBlockIdWhenPersisting({
+    persistEnabled,
+    blockId: props.blockId,
+    componentName: "SlideDeck",
+  });
+
+  const blockId = useMemo(
+    () => normalizeComponentId(props.blockId, "blockId") as BlockId,
+    [props.blockId],
+  );
 
   const initialIndex = useCompoundInitialIndex({
     courseId: config.courseId,

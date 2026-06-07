@@ -4,6 +4,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import {
   ArithmeticQuiz,
+  Accordion,
+  Chart,
   Course,
   DialogCards,
   Essay,
@@ -541,5 +543,61 @@ describe("Tier B/C/D block components", () => {
     fireEvent.change(screen.getByLabelText("Your name"), { target: { value: "Alex" } });
     fireEvent.click(screen.getByTestId("questionnaire-submit"));
     expect(screen.getByTestId("questionnaire-submitted").textContent).toContain("Thank you");
+  });
+
+  it("Accordion expands and collapses sections via click", () => {
+    render(
+      wrap(
+        <Accordion
+          blockId="acc-1"
+          sections={[
+            { id: "s1", title: "Section one", content: <p>Content one</p> },
+            { id: "s2", title: "Section two", content: <p>Content two</p> },
+          ]}
+        />,
+      ),
+    );
+    const trigger = screen.getByTestId("accordion-trigger-s1");
+    expect(trigger.getAttribute("aria-expanded")).toBe("false");
+    fireEvent.click(trigger);
+    expect(trigger.getAttribute("aria-expanded")).toBe("true");
+    expect(screen.getByText("Content one")).toBeTruthy();
+    fireEvent.click(trigger);
+    expect(trigger.getAttribute("aria-expanded")).toBe("false");
+  });
+
+  it("Accordion trigger is keyboard focusable", () => {
+    render(
+      wrap(
+        <Accordion
+          blockId="acc-kb"
+          sections={[{ id: "s1", title: "Section one", content: <p>Content one</p> }]}
+        />,
+      ),
+    );
+    const trigger = screen.getByTestId("accordion-trigger-s1") as HTMLButtonElement;
+    trigger.focus();
+    expect(document.activeElement).toBe(trigger);
+    fireEvent.click(trigger);
+    expect(trigger.getAttribute("aria-expanded")).toBe("true");
+  });
+
+  it("Chart renders accessible data table", () => {
+    render(
+      wrap(
+        <Chart
+          blockId="incidents"
+          type="bar"
+          title="Incidents by type"
+          data={[
+            { label: "Phishing", value: 12 },
+            { label: "Malware", value: 4 },
+          ]}
+        />,
+      ),
+    );
+    expect(screen.getByRole("table")).toBeTruthy();
+    expect(screen.getByRole("rowheader", { name: "Phishing" })).toBeTruthy();
+    expect(screen.getByRole("cell", { name: "12" })).toBeTruthy();
   });
 });

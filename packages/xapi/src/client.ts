@@ -7,7 +7,7 @@ import {
   removeDeadLetterStatement,
 } from "./deadLetter";
 import type { XAPIClient, XAPIQueue, XAPIStatement, XAPITransport } from "./types";
-import { cryptoRandomId } from "./id";
+import { cryptoRandomId, stableTelemetryEventId } from "./id";
 import { createInMemoryXAPIQueue } from "./queue";
 import { telemetryEventToXAPIStatement } from "./telemetryMap";
 
@@ -219,7 +219,9 @@ export function createXAPIClient(opts?: {
 
   const emit = (event: Parameters<typeof telemetryEventToXAPIStatement>[0]) => {
     try {
-      const statement = telemetryEventToXAPIStatement(event);
+      const enriched =
+        event.id?.trim() ? event : { ...event, id: stableTelemetryEventId(event) };
+      const statement = telemetryEventToXAPIStatement(enriched);
       /* v8 ignore start -- public emit paths always map to a statement */
       if (!statement) return;
       /* v8 ignore stop */

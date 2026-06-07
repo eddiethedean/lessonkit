@@ -56,6 +56,25 @@ export function cryptoRandomId(): string {
   return randomIdFallback();
 }
 
+/** Stable telemetry event id for lifecycle emits (excludes timestamp so retries dedupe). */
+export function stableTelemetryEventId(event: {
+  name: string;
+  courseId: string;
+  lessonId?: string;
+  sessionId?: string;
+  data?: unknown;
+}): string {
+  const data = event.data as { checkId?: string } | undefined;
+  const seed = [
+    event.name,
+    event.courseId,
+    event.lessonId ?? "",
+    event.sessionId ?? "",
+    data?.checkId ?? "",
+  ].join("|");
+  return hashSeedToUuid(seed);
+}
+
 /** Stable xAPI statement id from telemetry event identity (idempotent across retries). */
 export function deriveStatementId(
   event: { id?: string; name: string; courseId: string; lessonId?: string; sessionId?: string; timestamp: string },
