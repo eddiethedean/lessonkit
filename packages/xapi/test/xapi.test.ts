@@ -371,6 +371,106 @@ describe("@lessonkit/xapi", () => {
     expect(transport).toHaveBeenCalledTimes(2);
   });
 
+  it("replaces a queued statement when enqueue repeats the same id", async () => {
+    const verb = "http://adlnet.gov/expapi/verbs/experienced";
+    const queue = createInMemoryXAPIQueue();
+    queue.enqueue({ id: "dup", timestamp: "t1", verb, object: { id: "o1" } });
+    queue.enqueue({ id: "dup", timestamp: "t2", verb, object: { id: "o2" } });
+    expect(queue.size()).toBe(1);
+
+    const delivered: XAPIStatement[] = [];
+    await queue.flush(async (statement) => {
+      delivered.push(statement);
+    });
+    expect(delivered).toHaveLength(1);
+    expect(delivered[0]?.timestamp).toBe("t2");
+  });
+
+  it("evicts the head when maxSize is 1 and head is in flight", async () => {
+    const verb = "http://adlnet.gov/expapi/verbs/experienced";
+    const onCap = vi.fn();
+    const queue = createInMemoryXAPIQueue({ maxSize: 1, onCap });
+    let release!: () => void;
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+
+    queue.enqueue({ id: "head", timestamp: "t", verb, object: { id: "o1" } });
+    const flushPromise = queue.flush(async () => {
+      await gate;
+    });
+    await new Promise((r) => setTimeout(r, 0));
+
+    queue.enqueue({ id: "overflow", timestamp: "t", verb, object: { id: "o2" } });
+    expect(onCap).toHaveBeenCalledTimes(1);
+
+    release();
+    await flushPromise;
+  });
+
+  it("concurrent client flush drains re-queued statements after the first flush finishes", async () => {
+    let attempts = 0;
+    const transport = vi.fn(async () => {
+      attempts += 1;
+      if (attempts === 1) throw new Error("transient");
+    });
+    const client = createXAPIClient({ courseId, transport });
+    client.startedLesson({ lessonId: "lesson-1" });
+    await new Promise((r) => setTimeout(r, 50));
+
+    const first = client.flush().catch(() => undefined);
+    const second = client.flush();
+    await Promise.all([first, second]);
+
+    expect(client.queueSize()).toBe(0);
+    expect(attempts).toBeGreaterThanOrEqual(2);
+  });
+
+  it("default onQueueCap warns in development", () => {
+    vi.stubEnv("NODE_ENV", "development");
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    try {
+      const client = createXAPIClient({ courseId, maxQueueSize: 2 });
+      client.startedLesson({ lessonId: "a" });
+      client.startedLesson({ lessonId: "b" });
+      client.startedLesson({ lessonId: "c" });
+      expect(warn).toHaveBeenCalledWith(
+        "[lessonkit] xAPI queue reached capacity; oldest statement(s) dropped.",
+      );
+    } finally {
+      warn.mockRestore();
+      vi.unstubAllEnvs();
+    }
+  });
+
+  it("flushOnExit hands off in-flight head to exit transport", async () => {
+    let release!: () => void;
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const exitCalls: XAPIStatement[] = [];
+    const abortIds: string[] = [];
+    const client = createXAPIClient({
+      courseId,
+      transport: async () => {
+        await gate;
+      },
+      exitTransport: (statement) => {
+        exitCalls.push(statement);
+      },
+      abortInFlight: (id) => {
+        abortIds.push(id);
+      },
+    });
+
+    client.startedLesson({ lessonId: "lesson-1" });
+    await Promise.resolve();
+    client.flushOnExit?.();
+    expect(abortIds.length).toBeGreaterThan(0);
+    expect(exitCalls.length).toBeGreaterThan(0);
+    release();
+  });
+
   it("queue flush rejects on first transport error and keeps remainder queued", async () => {
     const queue = createInMemoryXAPIQueue();
     queue.enqueue({ id: "1", timestamp: "t", verb: "http://adlnet.gov/expapi/verbs/experienced", object: { id: "o" } });
