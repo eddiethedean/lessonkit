@@ -11,6 +11,8 @@ export type CourseStartedPipelineEmitOpts = {
   extraSinks?: TelemetryPipelineSink[];
   /** When xAPI already sent course_started for this client (layout bootstrap or prior pipeline). */
   skipXapi?: boolean;
+  /** Called immediately after xAPI flush succeeds, before extra sinks. */
+  onXapiDelivered?: () => void;
 };
 
 export type CourseStartedPipelineEmitResult = {
@@ -72,6 +74,7 @@ export async function emitCourseStartedNonTrackingPipeline(
       opts.xapi.send(statement);
       await opts.xapi.flush();
       xapiStatementSent = true;
+      opts.onXapiDelivered?.();
     }
   }
 

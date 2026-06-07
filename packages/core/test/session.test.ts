@@ -146,6 +146,27 @@ describe("session", () => {
     migrateCourseStartedMark(storage, "a", "b", undefined);
   });
 
+  it("migrateCourseStartedMark retains source when destination write fails", () => {
+    const store: Record<string, string> = {
+      "lessonkit:course_started:old:c1": "1",
+    };
+    const storage = {
+      getItem: (k: string) => store[k] ?? null,
+      setItem: (k: string, v: string) => {
+        if (k.includes(":new:")) return false;
+        store[k] = v;
+        return true;
+      },
+      removeItem: (k: string) => {
+        delete store[k];
+      },
+    };
+
+    migrateCourseStartedMark(storage, "old", "new", "c1");
+    expect(hasCourseStarted(storage, "old", "c1")).toBe(true);
+    expect(hasCourseStarted(storage, "new", "c1")).toBe(false);
+  });
+
   it("tracking emitted marks are scoped to courseId", () => {
     const store: Record<string, string> = {};
     const storage = {

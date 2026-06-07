@@ -222,7 +222,7 @@ describe("coverage-full", () => {
     expect(second).not.toHaveBeenCalled();
   });
 
-  it("course lifecycle handles failed emit and duplicate completions", () => {
+  it("course lifecycle handles failed emit and duplicate completions", async () => {
     const storage = createNoopStorage();
     const ctx = {
       courseId: "c" as const,
@@ -231,7 +231,7 @@ describe("coverage-full", () => {
       pluginHost: null,
       lxpackBridge: "auto" as const,
     };
-    const failed = tryEmitCourseStarted(ctx, { emitCourseStartedEvent: () => false }, false);
+    const failed = await tryEmitCourseStarted(ctx, { emitCourseStartedEvent: () => false }, false);
     expect(failed).toEqual({ emitted: false, marked: false });
 
     const progress = createProgressController();

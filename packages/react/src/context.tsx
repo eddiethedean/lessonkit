@@ -31,6 +31,8 @@ export type LessonkitConfig = {
     enabled?: boolean;
     sink?: (event: Parameters<TrackingClient["track"]>[0]) => void | Promise<void>;
     batchSink?: (events: Parameters<TrackingClient["track"]>[0][]) => void | Promise<void>;
+    /** Factory for a custom tracking client (alternative to sink/batchSink). */
+    createClient?: () => TrackingClient;
     /** Explicit opt-in for console sinks in production builds. */
     consoleSink?: boolean;
     /** Re-emit assessment telemetry when restoring session state (default false). */

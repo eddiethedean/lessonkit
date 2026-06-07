@@ -20,10 +20,10 @@ describe("ports", () => {
     expect(typeof clock.nowIso()).toBe("string");
   });
 
-  it("createNoopStorage never persists", () => {
+  it("createNoopStorage persists in memory", () => {
     const storage = createNoopStorage();
     storage.setItem("k", "v");
-    expect(storage.getItem("k")).toBeNull();
+    expect(storage.getItem("k")).toBe("v");
   });
 
   it("createSessionStoragePort reads and writes when available", () => {

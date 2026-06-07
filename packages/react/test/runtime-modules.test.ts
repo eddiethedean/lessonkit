@@ -66,10 +66,10 @@ describe("@lessonkit/react runtime modules", () => {
     }
   });
 
-  it("ports: createNoopStorage never persists", () => {
+  it("ports: createNoopStorage persists in memory", () => {
     const storage = createNoopStorage();
     storage.setItem("k", "v");
-    expect(storage.getItem("k")).toBeNull();
+    expect(storage.getItem("k")).toBe("v");
   });
 
   it("ports: createGlobalTimer can schedule and clear", () => {

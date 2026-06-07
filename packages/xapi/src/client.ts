@@ -226,28 +226,31 @@ export function createXAPIClient(opts?: {
     queueSize: () => queue.size(),
     flush: async () => {
       if (!deliveryTransport) return;
-      if (activeFlush) {
-        await activeFlush;
-        return;
-      }
-      flushInProgress = true;
-      activeFlush = (async () => {
-        try {
-          await runFlushLoop();
-          while (pendingDuringFlush.length > 0) {
-            const batch = pendingDuringFlush.splice(0, pendingDuringFlush.length);
-            for (const pending of batch) {
-              sendOrQueueInternal(pending);
+      for (;;) {
+        if (activeFlush) {
+          await activeFlush;
+        } else {
+          flushInProgress = true;
+          activeFlush = (async () => {
+            try {
+              await runFlushLoop();
+              while (pendingDuringFlush.length > 0) {
+                const batch = pendingDuringFlush.splice(0, pendingDuringFlush.length);
+                for (const pending of batch) {
+                  sendOrQueueInternal(pending);
+                }
+                await runFlushLoop();
+              }
+            } finally {
+              flushInProgress = false;
             }
-            await runFlushLoop();
-          }
-        } finally {
-          flushInProgress = false;
+          })().finally(() => {
+            activeFlush = null;
+          });
+          await activeFlush;
         }
-      })().finally(() => {
-        activeFlush = null;
-      });
-      await activeFlush;
+        if (queue.size() === 0 && inflightById.size === 0) break;
+      }
     },
     flushOnExit: exitTransport
       ? () => {

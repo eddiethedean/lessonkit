@@ -140,6 +140,14 @@ function FindHotspotInner(
         maxScore: 1,
         passingScore: props.passingScore ?? 1,
       });
+    } else if (props.enableRetry === false) {
+      assessment.complete({
+        checkId,
+        interactionType: INTERACTION,
+        score: 0,
+        maxScore: 1,
+        passingScore: props.passingScore ?? 1,
+      });
     }
   };
 

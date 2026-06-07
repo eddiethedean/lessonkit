@@ -1,4 +1,5 @@
 import type { LessonkitConfig } from "../context";
+import { assertTrackingSinkConfig } from "../provider/courseStarted/emit";
 import { isDevEnvironment } from "./validateComponentId";
 
 function isProductionEnvironment(): boolean {
@@ -30,7 +31,7 @@ export function isTrackingDeliveryConfigured(
   tracking: LessonkitConfig["tracking"] | undefined,
 ): boolean {
   if (!tracking || tracking.enabled === false) return false;
-  return Boolean(tracking.sink || tracking.batchSink);
+  return Boolean(tracking.sink || tracking.batchSink || tracking.createClient);
 }
 
 export function isXapiDeliveryConfigured(xapi: LessonkitConfig["xapi"] | undefined): boolean {
@@ -111,6 +112,8 @@ export function assertProductionCourseConfig(
     warnConsoleSinkHeuristic(config);
     return;
   }
+
+  assertTrackingSinkConfig(config.tracking);
 
   const trackingImplicitlyEnabled = config.tracking === undefined || config.tracking.enabled !== false;
   if (trackingImplicitlyEnabled && !isTrackingDeliveryConfigured(config.tracking)) {

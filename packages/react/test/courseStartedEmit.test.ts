@@ -112,6 +112,25 @@ describe("emitCourseStartedToTracking", () => {
     expect(hasCourseStartedEmittedToTracking(storage, "session-1", "course-1")).toBe(true);
   });
 
+  it("marks dedupe after flush resolves void", async () => {
+    const storage = createSessionStoragePort();
+    const tracking: TrackingClient = {
+      track: vi.fn(),
+      flush: vi.fn(() => {}),
+    };
+
+    const ok = await emitCourseStartedToTracking(
+      tracking,
+      storage,
+      "session-1",
+      "course-1",
+      event,
+    );
+
+    expect(ok).toBe(true);
+    expect(hasCourseStartedEmittedToTracking(storage, "session-1", "course-1")).toBe(true);
+  });
+
   it("marks dedupe after flush succeeds", async () => {
     const storage = createSessionStoragePort();
     const tracking: TrackingClient = {

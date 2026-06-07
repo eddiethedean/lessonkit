@@ -148,11 +148,24 @@ export function useCompoundPersistence(opts: {
           `[lessonkit] Compound hydration: ${missing.length} child state(s) not restored (missing handles: ${missing.join(", ")})`,
         );
       }
+      lessonkitCtx?.config?.observability?.onCompoundHydrationPartial?.({
+        compoundId: opts.compoundId,
+        missingCheckIds: missing,
+      });
+      for (const key of missing) {
+        const state = pending.childStates[key];
+        if (state) {
+          loadedChildStatesRef.current[key] = state;
+        }
+      }
       const registeredOnly = stripOrphanChildStates(handles, pending.childStates);
       resumeChildHandles(handles, registeredOnly, {
         alreadyResumed: resumedChildKeysRef.current,
       });
-      finalizeHydration(registeredOnly);
+      finalizeHydration({
+        ...loadedChildStatesRef.current,
+        ...registeredOnly,
+      });
       return;
     }
     const registeredOnly = stripOrphanChildStates(handles, pending.childStates);

@@ -78,11 +78,20 @@ export function createInMemoryXAPIQueue(opts?: InMemoryXAPIQueueOptions): XAPIQu
   return {
     enqueue: (statement) => {
       const normalized = withStatementId(statement);
-      if (buffer.some((s) => s.id === normalized.id)) return;
+      const existingIdx = buffer.findIndex((s) => s.id === normalized.id);
+      if (existingIdx >= 0) {
+        buffer[existingIdx] = normalized;
+        notifyDepth();
+        return;
+      }
       if (buffer.length >= maxSize) {
         if (headInFlight) {
-          if (buffer.length > 1) {
-            buffer.splice(1, 1);
+          if (buffer.length >= maxSize) {
+            if (buffer.length > 1) {
+              buffer.splice(1, 1);
+            } else {
+              buffer.shift();
+            }
           }
         } else {
           buffer.shift();

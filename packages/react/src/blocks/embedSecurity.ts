@@ -49,6 +49,8 @@ export function resolveEmbedSrc(src: string): string | null {
       if (!isAbsolute && url.origin !== pageOrigin) return null;
       if (trimmed.startsWith("//") && url.origin !== pageOrigin) return null;
     }
+    url.username = "";
+    url.password = "";
     return url.href;
   } catch {
     return null;

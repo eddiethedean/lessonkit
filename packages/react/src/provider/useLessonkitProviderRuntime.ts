@@ -42,6 +42,7 @@ import {
 import {
   assertTrackingSinkConfig,
   buildCourseStartedEvent,
+  createCourseStartedFlightScope,
   emitPendingCourseStarted,
   isCourseStartedSinkSettled,
   isTrackingActive,
@@ -150,13 +151,15 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
   const progressRef = useRef(createProgressController());
   const courseStartedEmittedToSinkRef = useRef(false);
   const courseStartedEmitGenerationRef = useRef(0);
+  const courseStartedFlightScopeRef = useRef(createCourseStartedFlightScope());
+  const pendingSessionReEmitRef = useRef(false);
 
   const prevPluginsFingerprintRef = useRef(pluginsFingerprint);
   if (prevPluginsFingerprintRef.current !== pluginsFingerprint) {
     prevPluginsFingerprintRef.current = pluginsFingerprint;
     courseStartedEmitGenerationRef.current += 1;
     courseStartedEmittedToSinkRef.current = false;
-    resetCourseStartedTrackingFlights();
+    resetCourseStartedTrackingFlights(courseStartedFlightScopeRef.current);
   }
   const prevCourseIdForProgressRef = useRef(normalizedCourseId);
   const pendingCourseIdResetRef = useRef(false);
@@ -384,6 +387,7 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
           xapiCourseStartedSentOnClientRef.current = true;
         },
         shouldCommit,
+        flightScope: courseStartedFlightScopeRef.current,
       });
 
       if (generation !== courseStartedEmitGenerationRef.current) return;
@@ -729,16 +733,16 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
     const cid = courseIdRef.current;
 
     if (nextConfigured) {
-      const fromIds = new Set<string>();
-      if (prevConfigured) fromIds.add(prevConfigured);
       const tabId = getTabSessionId(defaultStorage);
-      if (tabId) fromIds.add(tabId);
-      for (const fromId of fromIds) {
-        /* v8 ignore start -- session migration skips when ids already match */
-        if (fromId !== nextConfigured) {
-          migrateCourseStartedMark(defaultStorage, fromId, nextConfigured, cid);
-        }
-        /* v8 ignore stop */
+      const isExplicitLearnerSwap =
+        prevConfigured !== undefined && prevConfigured !== nextConfigured;
+
+      if (isExplicitLearnerSwap) {
+        courseStartedEmittedToSinkRef.current = false;
+        courseStartedEmitGenerationRef.current += 1;
+        pendingSessionReEmitRef.current = true;
+      } else if (tabId && tabId !== nextConfigured) {
+        migrateCourseStartedMark(defaultStorage, tabId, nextConfigured, cid);
       }
       sessionIdRef.current = nextConfigured;
       setSessionId(nextConfigured);
@@ -751,6 +755,13 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
     }
     /* v8 ignore stop */
   }, [sessionConfiguredId, normalizedCourseId]);
+
+  useEffect(() => {
+    if (!pendingSessionReEmitRef.current) return;
+    pendingSessionReEmitRef.current = false;
+    if (!isTrackingActive(normalizedConfig.tracking)) return;
+    void emitCourseStartedOnce(sessionIdRef.current, courseIdRef.current);
+  }, [sessionConfiguredId, emitCourseStartedOnce, normalizedConfig.tracking]);
 
   useLayoutEffect(() => {
     if (sessionIdRef.current !== sessionId) {

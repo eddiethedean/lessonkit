@@ -3,6 +3,7 @@ import {
   createInMemoryXAPIQueue,
   createXAPIClient,
 } from "../src";
+import { cryptoRandomId } from "../src/id";
 import type { XAPIStatement } from "../src";
 
 const courseId = "test";
@@ -122,13 +123,27 @@ describe("@lessonkit/xapi", () => {
     }
   });
 
-  it("uses Math.random fallback when crypto.randomUUID is unavailable", async () => {
-    vi.stubGlobal("crypto", {});
+  it("uses getRandomValues fallback when crypto.randomUUID is unavailable", async () => {
+    vi.stubGlobal("crypto", {
+      getRandomValues: (arr: Uint8Array) => {
+        arr.fill(7);
+        return arr;
+      },
+    });
     const queue = createInMemoryXAPIQueue();
     const client = createXAPIClient({ courseId, queue });
     client.startedLesson({ lessonId: "lesson-1" });
     expect(client.queueSize()).toBe(1);
     vi.unstubAllGlobals();
+  });
+
+  it("throws when secure RNG is unavailable", () => {
+    vi.stubGlobal("crypto", {});
+    try {
+      expect(() => cryptoRandomId()).toThrow(/cryptoRandomId requires/);
+    } finally {
+      vi.unstubAllGlobals();
+    }
   });
 
   it("send() forwards statements to transport", async () => {

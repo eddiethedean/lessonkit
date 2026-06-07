@@ -191,6 +191,17 @@ function TrueFalseInner(
         maxScore: scored.maxScore,
         passingScore: props.passingScore ?? scored.maxScore,
       });
+    } else if (!scored.passed && props.enableRetry === false && !completedRef.current) {
+      completedRef.current = true;
+      setCompletedScore(scored.score);
+      setCompletedMaxScore(scored.maxScore);
+      assessment.complete({
+        checkId,
+        interactionType: INTERACTION,
+        score: scored.score,
+        maxScore: scored.maxScore,
+        passingScore: props.passingScore ?? scored.maxScore,
+      });
     }
   };
 

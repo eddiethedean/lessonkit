@@ -290,7 +290,7 @@ const InteractiveVideoInner = forwardRef<
         {sortedCues.map((cue, i) =>
           React.cloneElement(cue, {
             key: cue.key ?? i,
-            hidden: !overlayActive || i !== index,
+            hidden: !overlayActive || i !== visibleIndex,
             cueIndex: i,
             parentType: "InteractiveVideo",
           }),

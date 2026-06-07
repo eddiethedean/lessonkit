@@ -38,6 +38,11 @@ export function ParallaxSlideshow(props: ParallaxSlideshowProps) {
   const slide = props.slides[index];
 
   useEffect(() => {
+    if (props.slides.length < 1) return;
+    setIndex((current) => Math.min(current, props.slides.length - 1));
+  }, [props.slides.length]);
+
+  useEffect(() => {
     track(
       "parallax_slide_viewed",
       { blockId: props.blockId, slideIndex: index },

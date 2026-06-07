@@ -21,6 +21,7 @@ export function getTabSessionId(storage: StoragePort): string | null {
 const COURSE_STARTED_PREFIX = "lessonkit:course_started:";
 const COURSE_STARTED_TRACKING_PREFIX = "lessonkit:course_started_tracking:";
 const COURSE_STARTED_PIPELINE_PREFIX = "lessonkit:course_started_pipeline:";
+const COURSE_STARTED_XAPI_PREFIX = "lessonkit:course_started_xapi:";
 
 /** Safe segment for composite storage keys (avoids colon ambiguity in sessionId). */
 function sessionKeySegment(sessionId: string): string {
@@ -34,6 +35,11 @@ export function resolveSessionId(storage: StoragePort, provided?: string): strin
     if (trimmed.length > 0) {
       const validated = validateId(trimmed);
       if (validated.ok) return validated.id;
+      if (isDevEnvironment()) {
+        console.warn(
+          `[lessonkit] Invalid sessionId "${trimmed}"; falling back to tab or generated id.`,
+        );
+      }
     }
   }
   const existing = storage.getItem(SESSION_STORAGE_KEY);
@@ -72,6 +78,12 @@ function courseStartedTrackingStorageKey(sessionId: string, courseId?: CourseId)
 function courseStartedPipelineStorageKey(sessionId: string, courseId?: CourseId): string {
   /* v8 ignore start -- callers guard undefined courseId before building keys */
   return `${COURSE_STARTED_PIPELINE_PREFIX}${sessionKeySegment(sessionId)}:${courseId ?? ""}`;
+  /* v8 ignore stop */
+}
+
+function courseStartedXapiStorageKey(sessionId: string, courseId?: CourseId): string {
+  /* v8 ignore start -- callers guard undefined courseId before building keys */
+  return `${COURSE_STARTED_XAPI_PREFIX}${sessionKeySegment(sessionId)}:${courseId ?? ""}`;
   /* v8 ignore stop */
 }
 
@@ -125,9 +137,39 @@ export function markCourseStartedPipelineDelivered(
   return storage.setItem(courseStartedPipelineStorageKey(sessionId, courseId), "1");
 }
 
+export function hasCourseStartedXapiSent(
+  storage: StoragePort,
+  sessionId: string,
+  courseId?: CourseId,
+): boolean {
+  if (!courseId) return false;
+  return storage.getItem(courseStartedXapiStorageKey(sessionId, courseId)) === "1";
+}
+
+export function markCourseStartedXapiSent(
+  storage: StoragePort,
+  sessionId: string,
+  courseId?: CourseId,
+): boolean {
+  if (!courseId) return false;
+  return storage.setItem(courseStartedXapiStorageKey(sessionId, courseId), "1");
+}
+
 /** @internal Reset shared volatile session id between tests. */
 export function resetSharedVolatileSessionIdForTests(): void {
   sharedVolatileSessionId = null;
+}
+
+function migrateStorageMark(
+  storage: StoragePort,
+  fromKey: string,
+  toKey: string,
+  hasMark: boolean,
+): void {
+  if (!hasMark) return;
+  if (storage.setItem(toKey, "1")) {
+    storage.removeItem?.(fromKey);
+  }
 }
 
 export function migrateCourseStartedMark(
@@ -137,16 +179,28 @@ export function migrateCourseStartedMark(
   courseId?: CourseId,
 ): void {
   if (!courseId || fromSessionId === toSessionId) return;
-  if (hasCourseStarted(storage, fromSessionId, courseId)) {
-    markCourseStarted(storage, toSessionId, courseId);
-    storage.removeItem?.(courseStartedStorageKey(fromSessionId, courseId));
-  }
-  if (hasCourseStartedEmittedToTracking(storage, fromSessionId, courseId)) {
-    markCourseStartedEmittedToTracking(storage, toSessionId, courseId);
-    storage.removeItem?.(courseStartedTrackingStorageKey(fromSessionId, courseId));
-  }
-  if (hasCourseStartedPipelineDelivered(storage, fromSessionId, courseId)) {
-    markCourseStartedPipelineDelivered(storage, toSessionId, courseId);
-    storage.removeItem?.(courseStartedPipelineStorageKey(fromSessionId, courseId));
-  }
+  migrateStorageMark(
+    storage,
+    courseStartedStorageKey(fromSessionId, courseId),
+    courseStartedStorageKey(toSessionId, courseId),
+    hasCourseStarted(storage, fromSessionId, courseId),
+  );
+  migrateStorageMark(
+    storage,
+    courseStartedTrackingStorageKey(fromSessionId, courseId),
+    courseStartedTrackingStorageKey(toSessionId, courseId),
+    hasCourseStartedEmittedToTracking(storage, fromSessionId, courseId),
+  );
+  migrateStorageMark(
+    storage,
+    courseStartedPipelineStorageKey(fromSessionId, courseId),
+    courseStartedPipelineStorageKey(toSessionId, courseId),
+    hasCourseStartedPipelineDelivered(storage, fromSessionId, courseId),
+  );
+  migrateStorageMark(
+    storage,
+    courseStartedXapiStorageKey(fromSessionId, courseId),
+    courseStartedXapiStorageKey(toSessionId, courseId),
+    hasCourseStartedXapiSent(storage, fromSessionId, courseId),
+  );
 }

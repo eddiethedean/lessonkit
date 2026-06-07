@@ -242,7 +242,7 @@ function FillInTheBlanksInner(
           if (!blank) return <React.Fragment key={i}>{part}</React.Fragment>;
           return (
             <label key={blank.id} style={{ margin: "0 0.25em" }}>
-              <span className="lk-visually-hidden">{blank.answer}</span>
+              <span className="lk-visually-hidden">Blank {blank.id}</span>
               <input
                 type="text"
                 data-testid={`blank-${blank.id}`}

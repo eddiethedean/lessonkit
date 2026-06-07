@@ -173,6 +173,8 @@ export {
   markCourseStartedEmittedToTracking,
   hasCourseStartedPipelineDelivered,
   markCourseStartedPipelineDelivered,
+  hasCourseStartedXapiSent,
+  markCourseStartedXapiSent,
   /** @deprecated Import from `@lessonkit/core/testing`. */
   resetSharedVolatileSessionIdForTests,
 } from "./session";

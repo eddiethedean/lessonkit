@@ -1,6 +1,7 @@
 export {
   assertTrackingSinkConfig,
   buildCourseStartedEvent,
+  createCourseStartedFlightScope,
   emitCourseStarted,
   emitCourseStartedPipelineOnly,
   emitCourseStartedToTracking,
@@ -12,4 +13,5 @@ export {
   resetCourseStartedTrackingFlights,
   type CourseStartedEmitOpts,
   type CourseStartedEmitResult,
+  type CourseStartedFlightScope,
 } from "./emit";

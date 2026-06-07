@@ -23,7 +23,7 @@ describe("courseLifecycle", () => {
     expect(event.courseId).toBe("c");
   });
 
-  it("tryEmitCourseStarted marks storage when emit succeeds", () => {
+  it("tryEmitCourseStarted marks storage when emit succeeds", async () => {
     const store: Record<string, string> = {};
     const storage = {
       getItem: (k: string) => store[k] ?? null,
@@ -39,12 +39,12 @@ describe("courseLifecycle", () => {
       pluginHost: null,
       lxpackBridge: "auto" as const,
     };
-    const result = tryEmitCourseStarted(ctx, { emitCourseStartedEvent: () => true }, false);
+    const result = await tryEmitCourseStarted(ctx, { emitCourseStartedEvent: () => true }, false);
     expect(result.emitted).toBe(true);
     expect(result.marked).toBe(true);
   });
 
-  it("tryEmitCourseStarted skips when already marked", () => {
+  it("tryEmitCourseStarted skips when already marked", async () => {
     const store: Record<string, string> = {};
     const storage = {
       getItem: (k: string) => store[k] ?? null,
@@ -61,13 +61,13 @@ describe("courseLifecycle", () => {
       lxpackBridge: "auto" as const,
     };
     const emit = vi.fn(() => true);
-    const first = tryEmitCourseStarted(ctx, { emitCourseStartedEvent: emit }, false);
-    const second = tryEmitCourseStarted(ctx, { emitCourseStartedEvent: emit }, first.emitted);
+    const first = await tryEmitCourseStarted(ctx, { emitCourseStartedEvent: emit }, false);
+    const second = await tryEmitCourseStarted(ctx, { emitCourseStartedEvent: emit }, first.emitted);
     expect(second.emitted).toBe(true);
     expect(emit).toHaveBeenCalledTimes(1);
   });
 
-  it("tryEmitCourseStarted reports unmarked storage when alreadyEmittedToSink is true", () => {
+  it("tryEmitCourseStarted reports unmarked storage when alreadyEmittedToSink is true", async () => {
     const storage = createNoopStorage();
     const ctx = {
       courseId: "c" as const,
@@ -76,12 +76,12 @@ describe("courseLifecycle", () => {
       pluginHost: null,
       lxpackBridge: "auto" as const,
     };
-    const result = tryEmitCourseStarted(ctx, { emitCourseStartedEvent: () => true }, true);
+    const result = await tryEmitCourseStarted(ctx, { emitCourseStartedEvent: () => true }, true);
     expect(result.emitted).toBe(true);
     expect(result.marked).toBe(false);
   });
 
-  it("tryEmitCourseStarted reports marked when in-memory dedupe succeeds despite failed durable write", () => {
+  it("tryEmitCourseStarted reports marked when in-memory dedupe succeeds despite failed durable write", async () => {
     const memory = new Map<string, string>();
     const storage = {
       getItem: (k: string) => memory.get(k) ?? null,
@@ -98,15 +98,15 @@ describe("courseLifecycle", () => {
       lxpackBridge: "auto" as const,
     };
     const emit = vi.fn(() => true);
-    const first = tryEmitCourseStarted(ctx, { emitCourseStartedEvent: emit }, false);
+    const first = await tryEmitCourseStarted(ctx, { emitCourseStartedEvent: emit }, false);
     expect(first.emitted).toBe(true);
     expect(first.marked).toBe(true);
-    const second = tryEmitCourseStarted(ctx, { emitCourseStartedEvent: emit }, first.emitted);
+    const second = await tryEmitCourseStarted(ctx, { emitCourseStartedEvent: emit }, first.emitted);
     expect(second.emitted).toBe(true);
     expect(emit).toHaveBeenCalledTimes(1);
   });
 
-  it("tryEmitCourseStarted retries emit when storage is marked but sink has not received event", () => {
+  it("tryEmitCourseStarted retries emit when storage is marked but sink has not received event", async () => {
     const store: Record<string, string> = {};
     const storage = {
       getItem: (k: string) => store[k] ?? null,
@@ -124,10 +124,39 @@ describe("courseLifecycle", () => {
       lxpackBridge: "auto" as const,
     };
     const emit = vi.fn(() => true);
-    const result = tryEmitCourseStarted(ctx, { emitCourseStartedEvent: emit }, false);
+    const result = await tryEmitCourseStarted(ctx, { emitCourseStartedEvent: emit }, false);
     expect(result.emitted).toBe(true);
     expect(result.marked).toBe(true);
     expect(emit).toHaveBeenCalledTimes(1);
+  });
+
+  it("tryEmitCourseStarted dedupes concurrent calls", async () => {
+    const store: Record<string, string> = {};
+    const storage = {
+      getItem: (k: string) => store[k] ?? null,
+      setItem: (k: string, v: string) => {
+        store[k] = v;
+        return true;
+      },
+    };
+    const ctx = {
+      courseId: "c" as const,
+      sessionId: "s",
+      storage,
+      pluginHost: null,
+      lxpackBridge: "auto" as const,
+    };
+    let emitCalls = 0;
+    const emit = () => {
+      emitCalls += 1;
+      return true;
+    };
+    const [a, b] = await Promise.all([
+      tryEmitCourseStarted(ctx, { emitCourseStartedEvent: emit }, false),
+      tryEmitCourseStarted(ctx, { emitCourseStartedEvent: emit }, false),
+    ]);
+    expect(a).toEqual(b);
+    expect(emitCalls).toBe(1);
   });
 
   it("completeLessonWithTelemetry emits when progress completes", () => {

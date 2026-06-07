@@ -1,6 +1,6 @@
-import { readFileSync, existsSync, readdirSync, statSync } from "node:fs";
+import { readFileSync, existsSync, readdirSync, lstatSync } from "node:fs";
 import { join, relative } from "node:path";
-import { isSafeRelativeSpaPath } from "./spaPath";
+import { assertRealPathUnderRoot, isSafeRelativeSpaPath } from "./spaPath";
 import type { LessonkitCourseDescriptor } from "./types";
 
 export type ReactParityIssue = {
@@ -18,7 +18,10 @@ export type ValidateReactManifestParityOptions = {
 
 const SCANNABLE_EXTENSIONS = [".tsx", ".ts", ".jsx", ".js"];
 
-function collectSourceUnderSrc(projectRoot: string): string[] {
+function collectSourceUnderSrc(
+  projectRoot: string,
+  issues: ReactParityIssue[],
+): string[] {
   const srcDir = join(projectRoot, "src");
   if (!existsSync(srcDir)) return [];
 
@@ -26,9 +29,43 @@ function collectSourceUnderSrc(projectRoot: string): string[] {
   const walk = (dir: string) => {
     for (const entry of readdirSync(dir)) {
       const abs = join(dir, entry);
-      if (statSync(abs).isDirectory()) {
+      let stat;
+      try {
+        stat = lstatSync(abs);
+      } catch {
+        continue;
+      }
+      if (stat.isSymbolicLink()) {
+        issues.push({
+          path: relative(projectRoot, abs),
+          message: `Source tree contains symlink (rejected for parity scan): ${relative(projectRoot, abs)}`,
+          severity: "error",
+        });
+        continue;
+      }
+      if (stat.isDirectory()) {
+        try {
+          assertRealPathUnderRoot(projectRoot, abs);
+        } catch {
+          issues.push({
+            path: relative(projectRoot, abs),
+            message: `Source directory escapes project root: ${relative(projectRoot, abs)}`,
+            severity: "error",
+          });
+          continue;
+        }
         walk(abs);
       } else if (SCANNABLE_EXTENSIONS.some((ext) => entry.endsWith(ext))) {
+        try {
+          assertRealPathUnderRoot(projectRoot, abs);
+        } catch {
+          issues.push({
+            path: relative(projectRoot, abs),
+            message: `Source file escapes project root: ${relative(projectRoot, abs)}`,
+            severity: "error",
+          });
+          continue;
+        }
         results.push(relative(projectRoot, abs));
       }
     }
@@ -37,12 +74,47 @@ function collectSourceUnderSrc(projectRoot: string): string[] {
   return results;
 }
 
-function readAppSources(projectRoot: string, appSources: string[]): string {
+function readAppSources(
+  projectRoot: string,
+  appSources: string[],
+  issues: ReactParityIssue[],
+  customSourcesProvided: boolean,
+): string {
   return appSources
-    .filter((rel) => isSafeRelativeSpaPath(rel))
-    .map((rel) => join(projectRoot, rel))
-    .filter((abs) => existsSync(abs))
-    .map((abs) => readFileSync(abs, "utf8"))
+    .map((rel) => {
+      if (!isSafeRelativeSpaPath(rel)) {
+        if (customSourcesProvided) {
+          issues.push({
+            path: rel,
+            message: `Unsafe appSources path skipped: ${rel}`,
+            severity: "warning",
+          });
+        }
+        return null;
+      }
+      const abs = join(projectRoot, rel);
+      try {
+        assertRealPathUnderRoot(projectRoot, abs);
+        if (existsSync(abs) && lstatSync(abs).isSymbolicLink()) {
+          issues.push({
+            path: rel,
+            message: `appSources path is a symlink: ${rel}`,
+            severity: "error",
+          });
+          return null;
+        }
+      } catch {
+        issues.push({
+          path: rel,
+          message: `appSources path escapes project root: ${rel}`,
+          severity: "error",
+        });
+        return null;
+      }
+      if (!existsSync(abs)) return null;
+      return readFileSync(abs, "utf8");
+    })
+    .filter((content): content is string => content != null)
     .join("\n");
 }
 
@@ -162,24 +234,30 @@ function parityHint(message: string): string {
 export function validateReactManifestParity(
   opts: ValidateReactManifestParityOptions,
 ): ReactParityIssue[] {
-  const appSources = opts.appSources ?? collectSourceUnderSrc(opts.projectRoot);
-  const source = readAppSources(opts.projectRoot, appSources);
+  const issues: ReactParityIssue[] = [];
+  const customSourcesProvided = opts.appSources !== undefined;
+  const appSources =
+    opts.appSources ?? collectSourceUnderSrc(opts.projectRoot, issues);
+  const source = readAppSources(
+    opts.projectRoot,
+    appSources,
+    issues,
+    customSourcesProvided,
+  );
   const hasDescriptorIds =
     Boolean(opts.descriptor.courseId) || (opts.descriptor.assessments?.length ?? 0) > 0;
 
   if (!source.trim()) {
-    return [
-      {
-        path: appSources.length > 0 ? appSources.join(", ") : "src/",
-        message: hasDescriptorIds
-          ? "React app source not found for ID parity check"
-          : "React app source not found for ID parity check",
-        severity: hasDescriptorIds ? "error" : "warning",
-      },
-    ];
+    issues.push({
+      path: appSources.length > 0 ? appSources.join(", ") : "src/",
+      message: hasDescriptorIds
+        ? "React app source not found for ID parity check"
+        : "React app source not found for ID parity check",
+      severity: hasDescriptorIds ? "error" : "warning",
+    });
+    return issues;
   }
 
-  const issues: ReactParityIssue[] = [];
   const courseId = opts.descriptor.courseId;
 
   if (!courseIdPresent(source, courseId)) {

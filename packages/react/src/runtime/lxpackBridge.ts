@@ -11,6 +11,7 @@ import {
 export type LxpackBridgeMode = LmsBridgeMode;
 
 const BRIDGE_MISS_EVENT_NAMES = new Set<TelemetryEvent["name"]>([
+  "course_started",
   "course_completed",
   "lesson_completed",
   "assessment_completed",

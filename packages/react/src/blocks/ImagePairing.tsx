@@ -68,8 +68,13 @@ function ImagePairingInner(
   const [passed, setPassed] = useState(false);
   const completedRef = useRef(false);
   const telemetryReplayedRef = useRef(false);
+  const mismatchTimeoutRef = useRef<number | null>(null);
 
   const reset = () => {
+    if (mismatchTimeoutRef.current !== null) {
+      window.clearTimeout(mismatchTimeoutRef.current);
+      mismatchTimeoutRef.current = null;
+    }
     completedRef.current = false;
     telemetryReplayedRef.current = false;
     setCards(buildDeck(props.pairs));
@@ -82,6 +87,15 @@ function ImagePairingInner(
   useEffect(() => {
     reset();
   }, [checkId, pairsKey]);
+
+  useEffect(
+    () => () => {
+      if (mismatchTimeoutRef.current !== null) {
+        window.clearTimeout(mismatchTimeoutRef.current);
+      }
+    },
+    [],
+  );
 
   const totalPairs = props.pairs.length;
   const matchedCount = matched.size;
@@ -129,7 +143,11 @@ function ImagePairingInner(
       setRevealed(new Set());
       setKeyboardSelection(null);
     } else {
-      window.setTimeout(() => {
+      if (mismatchTimeoutRef.current !== null) {
+        window.clearTimeout(mismatchTimeoutRef.current);
+      }
+      mismatchTimeoutRef.current = window.setTimeout(() => {
+        mismatchTimeoutRef.current = null;
         setRevealed((prev) => {
           const next = new Set(prev);
           next.delete(firstKey);

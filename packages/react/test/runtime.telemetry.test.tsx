@@ -693,7 +693,10 @@ it("updates runtime.session.sessionId when session.sessionId changes", async () 
     );
 
     expect(getByTestId("session-id").textContent).toBe("session-b");
-    expect(events.filter((e) => e.name === "course_started")).toHaveLength(1);
+    await waitFor(() =>
+      expect(events.filter((e) => e.name === "course_started")).toHaveLength(2),
+    );
+    expect(events.filter((e) => e.name === "course_started").at(-1)?.sessionId).toBe("session-b");
   });
 
 it("emits quiz_completed again when checkId changes on a mounted Quiz", async () => {

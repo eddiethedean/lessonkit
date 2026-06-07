@@ -18,6 +18,11 @@ export type LessonkitObservabilityConfig = {
   onXapiTransportError?: (err: unknown) => void;
   /** Telemetry → xAPI mapping failure (statement skipped). */
   onXapiMappingError?: (err: unknown) => void;
+  /** Compound child resume incomplete after hydration retries. */
+  onCompoundHydrationPartial?: (ctx: {
+    compoundId: string;
+    missingCheckIds: string[];
+  }) => void;
 };
 
 export function createXapiQueueFromObservability(

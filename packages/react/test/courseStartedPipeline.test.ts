@@ -135,4 +135,26 @@ describe("emitCourseStartedNonTrackingPipeline", () => {
     });
     expect(settled).toBe(true);
   });
+
+  it("calls onXapiDelivered after flush before extra sinks", async () => {
+    const order: string[] = [];
+    const flush = vi.fn(async () => {
+      order.push("flush");
+    });
+    await emitCourseStartedNonTrackingPipeline({
+      event: courseStartedEvent,
+      xapi: { ...mockXapiClient(vi.fn()), flush },
+      lxpackBridge: "off",
+      onXapiDelivered: () => order.push("xapi-delivered"),
+      extraSinks: [
+        {
+          id: "extra",
+          emit: () => {
+            order.push("extra");
+          },
+        },
+      ],
+    });
+    expect(order).toEqual(["flush", "xapi-delivered", "extra"]);
+  });
 });

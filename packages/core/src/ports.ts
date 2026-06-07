@@ -25,9 +25,19 @@ export function createDefaultClock(): ClockPort {
 }
 
 export function createNoopStorage(): StoragePort {
+  const memory = new Map<string, string>();
   return {
-    getItem: () => null,
-    setItem: () => true,
+    getItem: (key) => memory.get(key) ?? null,
+    setItem: (key, value) => {
+      memory.set(key, value);
+      return true;
+    },
+    removeItem: (key) => {
+      memory.delete(key);
+    },
+    resetForTests: () => {
+      memory.clear();
+    },
   };
 }
 
@@ -35,6 +45,7 @@ function createMemoryBackedSessionStorage(
   session: Pick<Storage, "getItem" | "setItem" | "removeItem">,
 ): StoragePort {
   const memory = new Map<string, string>();
+  const tombstones = new Set<string>();
   let warnedPersistFailure = false;
 
   const warnPersistFailure = () => {
@@ -50,6 +61,7 @@ function createMemoryBackedSessionStorage(
 
   return {
     getItem: (key) => {
+      if (tombstones.has(key)) return null;
       if (memory.has(key)) return memory.get(key)!;
       try {
         const value = session.getItem(key);
@@ -60,6 +72,7 @@ function createMemoryBackedSessionStorage(
       }
     },
     setItem: (key, value) => {
+      tombstones.delete(key);
       memory.set(key, value);
       try {
         session.setItem(key, value);
@@ -73,12 +86,15 @@ function createMemoryBackedSessionStorage(
       memory.delete(key);
       try {
         session.removeItem(key);
+        tombstones.delete(key);
       } catch {
         warnPersistFailure();
+        tombstones.add(key);
       }
     },
     resetForTests: () => {
       memory.clear();
+      tombstones.clear();
     },
   };
 }

@@ -402,7 +402,7 @@ describe("@lessonkit/react provider dispose regression", () => {
     expect(events.filter((e) => e.name === "course_started")).toHaveLength(0);
   });
 
-  it("migrates course_started dedup when session.sessionId changes", async () => {
+  it("re-emits course_started when session.sessionId changes between explicit ids", async () => {
     const events: TelemetryEvent[] = [];
     const sink = (e: TelemetryEvent) => void events.push(e);
 
@@ -435,7 +435,7 @@ describe("@lessonkit/react provider dispose regression", () => {
       </LessonkitProvider>,
     );
 
-    await waitFor(() => expect(events.filter((e) => e.name === "course_started")).toHaveLength(1));
+    await waitFor(() => expect(events.filter((e) => e.name === "course_started")).toHaveLength(2));
   });
 
   it("Lesson under StrictMode does not complete until removed from the tree", async () => {

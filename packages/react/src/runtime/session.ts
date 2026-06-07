@@ -8,5 +8,7 @@ export {
   markCourseStartedEmittedToTracking,
   hasCourseStartedPipelineDelivered,
   markCourseStartedPipelineDelivered,
+  hasCourseStartedXapiSent,
+  markCourseStartedXapiSent,
   migrateCourseStartedMark,
 } from "@lessonkit/core";
