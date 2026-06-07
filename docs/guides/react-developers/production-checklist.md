@@ -4,12 +4,21 @@ Use this checklist before shipping a LessonKit course to learners in an LMS, sta
 
 ## Packaging target
 
-| Target | `config.lxpack.bridge` | xAPI transport |
-| --- | --- | --- |
-| SCORM / xAPI / cmi5 (LXPack iframe) | `"auto"` | Required if you report to an LRS |
-| Standalone web (no LMS parent) | `"off"` | Required if you report to an LRS |
+| Target | `config.lxpack.bridge` | `allowedParentOrigins` | xAPI transport |
+| --- | --- | --- | --- |
+| SCORM / xAPI / cmi5 (LXPack iframe) | `"auto"` | **Required in production** — LMS parent origin(s) | Required if you report to an LRS |
+| Standalone web (no LMS parent) | `"off"` | Omit | Required if you report to an LRS |
 
-The `lessonkit init` template scaffolds `lxpack.bridge: "off"`. Set `"auto"` before packaging for LMS iframe targets.
+The `lessonkit init` template scaffolds `lxpack.bridge: "off"`. Set `"auto"` and configure `allowedParentOrigins` before packaging for LMS iframe targets:
+
+```ts
+lxpack: {
+  bridge: "auto",
+  allowedParentOrigins: ["https://your-lms.example"],
+},
+```
+
+Development builds allow bridge forwarding without an allowlist; production builds deny it when the list is empty. See [LXPack bridge reference](../../reference/lxpack-bridge.md).
 
 Do **not** ship `config.preview.allowConsoleTelemetry` in learner-facing production builds — it is for Read the Docs demo bundles only. Wire real sinks and all `config.observability` hooks instead.
 

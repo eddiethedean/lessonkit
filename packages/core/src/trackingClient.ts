@@ -171,7 +171,7 @@ export function createTrackingClient(opts?: {
   const track = (event: TelemetryEvent): boolean => {
     if (disposed || disposing) return false;
     const key = eventDedupKey(event);
-    if (key && buffer.some((buffered) => eventDedupKey(buffered) === key)) {
+    if (key && (pendingDeliverIds.has(key) || isEventBuffered(event))) {
       return true;
     }
     if (buffer.length >= maxBufferSize) {
@@ -209,9 +209,13 @@ export function createTrackingClient(opts?: {
           try {
             const result = opts.exitBatchSink!(events);
             if (result != null && typeof (result as Promise<void>).catch === "function") {
-              void (result as Promise<void>).catch(() => {
-                buffer.unshift(...events);
-              });
+              void (result as Promise<void>)
+                .then(() => {
+                  clearPendingDeliverIds(events);
+                })
+                .catch(() => {
+                  buffer.unshift(...events);
+                });
             } else {
               clearPendingDeliverIds(events);
             }

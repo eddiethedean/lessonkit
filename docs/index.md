@@ -9,6 +9,7 @@
   </div>
   <p class="lk-hero-title">Build learning experiences that ship to your LMS</p>
   <p class="lk-lead">LessonKit is a framework for accessible, trackable courses—authored in React, packaged for SCORM and modern learning platforms, with built-in telemetry and xAPI.</p>
+  <p><a class="lk-hero-cta" href="guides/start-here.html">Start here →</a></p>
 </div>
 ```
 
@@ -74,12 +75,18 @@ Release notes: [changelog](project/changelog.md) on this site · [GitHub](https:
 :maxdepth: 1
 :caption: Getting started
 
-guides/faq
-guides/architecture-overview
+guides/start-here
 guides/react-developers/getting-started-in-5-minutes
+guides/react-developers/first-lms-export
 guides/vibe-coding/getting-started
 guides/h5p-for-lessonkit-authors
 ```
+
+:::{admonition} Questions?
+:class: tip
+
+See the [FAQ](guides/faq.md) or [troubleshooting](guides/react-developers/troubleshooting.md).
+:::
 
 ```{toctree}
 :maxdepth: 1
@@ -124,7 +131,9 @@ H5P_CATALOG_CROSSWALK
 
 guides/react-developers/index
 guides/react-developers/getting-started-in-5-minutes
+guides/react-developers/first-lms-export
 guides/react-developers/quickstart
+guides/react-developers/block-cookbook
 guides/react-developers/project-structure
 guides/react-developers/components-and-hooks
 guides/react-developers/telemetry-and-xapi
@@ -164,16 +173,13 @@ reference/lxpack-upgrades
 :caption: Project and releases
 
 guides/upgrading-lessonkit
+MIGRATION-1.4-to-1.5
 guides/enterprise-evaluation
+guides/architecture-overview
 project/changelog
 project/good-first-contributions
 project/security
+project/accessibility-conformance
 project/roadmap
 project/h5p-capability-map
-MIGRATION-0.x-to-1.0
-MIGRATION-1.0-to-1.1
-MIGRATION-1.1-to-1.2
-MIGRATION-1.2-to-1.3
-MIGRATION-1.3-to-1.4
-MIGRATION-1.4-to-1.5
 ```

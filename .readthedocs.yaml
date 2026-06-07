@@ -9,6 +9,8 @@ build:
   commands:
     - npm ci
     - bash docs/scripts/build-docs-demos.sh
+    - npm run docs:api
+    - bash docs/scripts/verify-doc-includes.sh
     - pip install -r docs/requirements.txt
     - sphinx-build -b html docs $READTHEDOCS_OUTPUT/html -W
 

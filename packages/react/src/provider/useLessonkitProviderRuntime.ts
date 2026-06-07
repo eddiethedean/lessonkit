@@ -163,6 +163,7 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
   const prevUseV2RuntimeRef = useRef(useV2Runtime);
   const xapiCourseStartedSentOnClientRef = useRef(false);
   const xapiBootstrapSendRef = useRef(false);
+  const xapiBootstrapQueuedRef = useRef(false);
 
   if (prevUseV2RuntimeRef.current !== useV2Runtime) {
     prevUseV2RuntimeRef.current = useV2Runtime;
@@ -247,6 +248,7 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
       prevXapiCourseIdRef.current = courseId;
       xapiCourseStartedSentOnClientRef.current = false;
       xapiBootstrapSendRef.current = false;
+      xapiBootstrapQueuedRef.current = false;
     }
 
     const prev = xapiRef.current;
@@ -272,7 +274,7 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
       const needsBootstrap =
         !skipBootstrap &&
         !xapiCourseStartedSentOnClientRef.current &&
-        !xapiBootstrapSendRef.current &&
+        !xapiBootstrapQueuedRef.current &&
         (!bootstrapAlreadyStarted || clientChanged);
       if (needsBootstrap) {
         try {
@@ -289,7 +291,7 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
             const statement = telemetryEventToXAPIStatement(event);
             if (statement) {
               next.send(statement);
-              xapiBootstrapSendRef.current = true;
+              xapiBootstrapQueuedRef.current = true;
               bootstrapSent = true;
             }
           }
@@ -314,13 +316,17 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
       try {
         await next?.flush();
         if (bootstrapSent && !cancelled) {
+          xapiBootstrapSendRef.current = true;
           if (!bootstrapAlreadyStarted) {
             markCourseStarted(defaultStorage, sessionIdRef.current, courseIdRef.current);
           }
           xapiCourseStartedSentOnClientRef.current = true;
         }
       } catch {
-        // ignore — do not mark session until xAPI flush succeeds
+        if (bootstrapSent && !cancelled) {
+          xapiBootstrapQueuedRef.current = false;
+        }
+        // ignore — do not mark session or bootstrap skip until xAPI flush succeeds
       }
     })();
     return () => {

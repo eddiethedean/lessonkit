@@ -19,6 +19,7 @@ See [Export parity](../guides/react-developers/export-parity.md) for the full te
 | Requirement | SCORM / xAPI / cmi5 | Standalone |
 | --- | --- | --- |
 | `config.lxpack.bridge: "auto"` | **Required** for score/completion forwarding | Use `"off"` |
+| `config.lxpack.allowedParentOrigins` | **Required in production** when bridge is `"auto"` | Omit |
 | Parent `lxpackBridge.v1` | Provided by LXPack LMS shell | N/A |
 | Modern browser | ES202+ (Vite build) | Same |
 | Node.js for packaging | **18+** (authoring machine only) | Same |

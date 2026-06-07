@@ -39,4 +39,14 @@ describe("courseStarted helpers", () => {
     expect(event?.name).toBe("course_started");
     expect(event?.courseId).toBe("course-1");
   });
+
+  it("buildCourseStartedEvent assigns a stable dedupe id", () => {
+    const event = buildCourseStartedEvent({
+      pluginHost: null,
+      courseId: "course-1",
+      sessionId: "session-42",
+      lxpackBridge: "auto",
+    });
+    expect(event?.id).toBe("session-42:course-1:course_started");
+  });
 });

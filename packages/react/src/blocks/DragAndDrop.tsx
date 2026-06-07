@@ -159,9 +159,9 @@ function DragAndDropInner(
       response: assignments,
       correct: passedThreshold,
     });
-    if (passedThreshold && !completedRef.current) {
+    if ((passedThreshold || props.enableRetry === false) && !completedRef.current) {
       completedRef.current = true;
-      setPassed(true);
+      if (passedThreshold) setPassed(true);
       assessment.complete({
         checkId,
         interactionType: INTERACTION,
@@ -231,7 +231,12 @@ function DragAndDropInner(
           );
         })}
       </ul>
-      <button type="button" data-testid="check-drag-drop" disabled={!hasTargets || !allFilled || passed} onClick={check}>
+      <button
+        type="button"
+        data-testid="check-drag-drop"
+        disabled={!hasTargets || !allFilled || (passed && !props.enableRetry)}
+        onClick={check}
+      >
         Check
       </button>
       {checked ? (

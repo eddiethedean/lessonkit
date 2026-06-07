@@ -25,6 +25,7 @@ Diagram and package boundaries: [Architecture overview](architecture-overview.md
 | Vulnerability reporting | GitHub private advisories (no public issues) |
 | CI | `npm audit` (high/critical), CodeQL on `main` |
 | Client secrets | **Do not** embed LRS passwords; use backend token proxies |
+| LMS bridge allowlist | Production `bridge: "auto"` requires `allowedParentOrigins` — blocks arbitrary parent-frame hijack |
 | Learner data in browser | Compound state / resume in `sessionStorage` by default—disable on shared devices |
 | Packaging | Path containment validation when `projectRoot` is set |
 
@@ -48,7 +49,7 @@ Details: [LMS compatibility](../reference/lms-compatibility.md) · [Export parit
 ## Accessibility
 
 - **Target:** WCAG 2.1 AA patterns for shipped components.
-- **Status:** Component-level implementation; **no published VPAT**. See [Accessibility reference](../reference/accessibility.md).
+- **Status:** Component-level implementation; **no published VPAT**. See [Accessibility reference](../reference/accessibility.md) and [Accessibility conformance (interim)](../project/accessibility-conformance.md).
 
 ## Support model
 
@@ -59,7 +60,7 @@ Details: [LMS compatibility](../reference/lms-compatibility.md) · [Export parit
 ## Evaluation checklist
 
 - [ ] Run `npx @lessonkit/cli init` and complete [5-minute guide](react-developers/getting-started-in-5-minutes.md)
-- [ ] Import SCORM zip into staging LMS; verify completion/score with `lxpack.bridge: "auto"`
+- [ ] Import SCORM zip into staging LMS; verify completion/score with `lxpack.bridge: "auto"` and `allowedParentOrigins` set to staging LMS origin(s)
 - [ ] Review telemetry/xAPI flow with your security team ([deployment guide](react-developers/deployment-guide.md))
 - [ ] Run accessibility QA on representative blocks your course will use
 - [ ] Pin `@lessonkit/*` versions; run `npm audit` in your course repo

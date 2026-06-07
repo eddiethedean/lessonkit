@@ -44,7 +44,14 @@ function normalizeHostname(hostname: string): string {
   return hostname.replace(/^\[/, "").replace(/\]$/, "").toLowerCase();
 }
 
+function isIpv4MappedAddress(hostname: string): string | null {
+  const match = hostname.match(/^::ffff:(\d+\.\d+\.\d+\.\d+)$/i);
+  return match?.[1] ?? null;
+}
+
 function isLoopbackHost(hostname: string): boolean {
+  const ipv4Mapped = isIpv4MappedAddress(hostname);
+  if (ipv4Mapped) return isLoopbackHost(ipv4Mapped);
   return (
     hostname === "localhost" ||
     hostname.endsWith(".localhost") ||
@@ -62,6 +69,8 @@ function isLinkLocalOrMetadataHost(hostname: string): boolean {
 }
 
 function isRfc1918Host(hostname: string): boolean {
+  const ipv4Mapped = isIpv4MappedAddress(hostname);
+  if (ipv4Mapped) return isRfc1918Host(ipv4Mapped);
   if (/^10\./.test(hostname)) return true;
   if (/^192\.168\./.test(hostname)) return true;
   const parts = hostname.split(".").map(Number);

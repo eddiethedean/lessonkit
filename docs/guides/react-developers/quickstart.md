@@ -75,7 +75,10 @@ export default function App() {
     const xapiFetch = createFetchTransport({ url: "/api/xapi/statements", timeoutMs: 30_000 });
     const analytics = createFetchBatchSink({ url: "/api/telemetry/batch", timeoutMs: 30_000 });
     return {
-      lxpack: { bridge: "auto" },
+      lxpack: {
+        bridge: "auto",
+        allowedParentOrigins: ["https://your-lms.example"],
+      },
       tracking: {
         batchSink: analytics.batchSink,
         exitBatchSink: analytics.exitBatchSink,

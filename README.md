@@ -24,7 +24,9 @@ Developer tooling, not a timeline authoring tool: **React + telemetry + packagin
 
 | Path | Start here |
 | --- | --- |
-| **New course (CLI)** | `npx @lessonkit/cli init` → [5-minute guide](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/getting-started-in-5-minutes.html) · [Quickstart](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/quickstart.html#cli-scaffold) |
+| **Not sure?** | [Start here](https://lessonkit.readthedocs.io/en/latest/guides/start-here.html) on Read the Docs |
+| **New course (CLI)** | `npx @lessonkit/cli init` → [5-minute guide](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/getting-started-in-5-minutes.html) · [First LMS export](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/first-lms-export.html) |
+| **AI-assisted authoring** | [Vibe coding](https://lessonkit.readthedocs.io/en/latest/guides/vibe-coding/index.html) · [Library Skills](https://lessonkit.readthedocs.io/en/latest/guides/library-skills.html) |
 | **Existing React app** | `npm install @lessonkit/react` (+ CLI as devDep) → [Quickstart — add to Vite](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/quickstart.html#add-to-an-existing-vite-react-app) |
 | **Contribute** | Clone this repo → [Contributing](CONTRIBUTING.md) |
 
@@ -109,7 +111,7 @@ npm run dev
 
 (`init` runs `npm install` by default.) Use `npx lessonkit dev` or a global CLI (`npm install -g @lessonkit/cli`) if you prefer.
 
-Build and package for an LMS (set `lxpack.bridge: "auto"` in `src/courseConfig.ts` first—see the [5-minute guide](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/getting-started-in-5-minutes.html)):
+Build and package for an LMS (set `lxpack.bridge: "auto"` and `allowedParentOrigins` in `src/courseConfig.ts` first—see the [5-minute guide](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/getting-started-in-5-minutes.html) and [LXPack bridge](https://lessonkit.readthedocs.io/en/latest/reference/lxpack-bridge.html)):
 
 ```bash
 npm run build
@@ -117,7 +119,7 @@ npm run package:scorm12
 # or: npx lessonkit build && npx lessonkit package --target scorm12
 ```
 
-Default SCORM zip: **`.lxpack/course/.lxpack/out/course-scorm12.zip`** (the CLI prints the resolved path). Details: [Package for your LMS](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/getting-started-in-5-minutes.html#package-for-your-lms).
+Default SCORM zip: **`.lxpack/course/.lxpack/out/course-scorm12.zip`** (the CLI prints the resolved path). Details: [First LMS export](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/first-lms-export.html).
 
 Each project includes [`lessonkit.json`](https://lessonkit.readthedocs.io/en/latest/reference/cli.html) (`schemaVersion: 1`) that ties React props to the LXPack course descriptor.
 

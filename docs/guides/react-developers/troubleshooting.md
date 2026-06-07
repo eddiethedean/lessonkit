@@ -44,9 +44,16 @@ Details: [production checklist](production-checklist.md) · [Production runtime 
 
 **Fix:**
 
-1. Set `lxpack: { bridge: "auto" }` in `courseConfig.ts` **before** packaging (init template defaults to `"off"`).
+1. Set `lxpack: { bridge: "auto", allowedParentOrigins: ["https://your-lms.example"] }` in `courseConfig.ts` **before** packaging (init template defaults to `"off"`). Production builds deny bridge forwarding when `allowedParentOrigins` is empty.
 2. Verify the LMS parent exposes `window.parent.lxpackBridge.v1` in SCORM preview.
-3. Wire `onLxpackBridgeMiss` in production—see [LXPack bridge reference](../../reference/lxpack-bridge.md).
+3. Discover the parent origin: inspect `document.referrer`, the LMS launch URL, or the parent frame in browser devtools. Use the exact scheme, host, and port in the allowlist.
+4. Wire `onLxpackBridgeMiss` in production—see [LXPack bridge reference](../../reference/lxpack-bridge.md).
+
+## Bridge works in dev but not after LMS upload
+
+**Symptom:** `npm run dev` shows completions; packaged SCORM in the LMS does not.
+
+**Fix:** Production requires `allowedParentOrigins` with `bridge: "auto"`. Development skips the allowlist check. Rebuild after updating `courseConfig.ts`, then re-package.
 
 ## Quiz does not mark complete
 

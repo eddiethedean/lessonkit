@@ -111,7 +111,11 @@ export function buildCourseStartedEvent(opts: CourseStartedEmitOpts): TelemetryE
     attemptId: opts.attemptId,
     user: opts.user,
   });
-  return opts.pluginHost ? opts.pluginHost.runTelemetry(built, pluginCtx) : built;
+  const withId: TelemetryEvent = {
+    ...built,
+    id: `${opts.sessionId}:${opts.courseId}:course_started`,
+  };
+  return opts.pluginHost ? opts.pluginHost.runTelemetry(withId, pluginCtx) : withId;
 }
 
 export async function emitCourseStartedToTracking(

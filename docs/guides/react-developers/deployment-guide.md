@@ -19,11 +19,35 @@ npm run build
 npm run package:scorm12   # or scorm2004, xapi, cmi5, standalone
 ```
 
-Default SCORM path: **`.lxpack/course/.lxpack/out/course-scorm12.zip`**. See [Getting started in 5 minutes — step 6](getting-started-in-5-minutes.md).
+Default SCORM path: **`.lxpack/course/.lxpack/out/course-scorm12.zip`**. See [First LMS export](first-lms-export.md).
+
+## Runtime configuration matrix
+
+| Target | `lxpack.bridge` | `allowedParentOrigins` | Proxy env vars | Observability hooks |
+| --- | --- | --- | --- | --- |
+| SCORM / xAPI / cmi5 (iframe) | `"auto"` | **Required in production** | `VITE_ANALYTICS_URL`, `VITE_XAPI_PROXY_URL` (or disable tracking/xAPI for smoke test) | All required when delivery enabled — see [production checklist](production-checklist.md) |
+| Standalone static host | `"off"` | Omit | Same if reporting to LRS/analytics | Same when delivery enabled |
+| Local `npm run dev` | `"off"` (default) | Not required | Optional | Console sinks OK |
+
+### CORS and proxy requirements
+
+Browser requests from the packaged SPA must reach **your** backend proxies, not the raw LRS with embedded credentials:
+
+- `VITE_ANALYTICS_URL` — POST batch telemetry; proxy should allow course origin and validate auth server-side
+- `VITE_XAPI_PROXY_URL` — POST xAPI statements; issue short-lived tokens from your backend
+
+Configure CORS on proxies for the static host origin (standalone CDN) or rely on same-origin LMS iframe paths (SCORM).
+
+### Discovering `allowedParentOrigins`
+
+1. Launch the course in LMS SCORM preview
+2. Open browser devtools → inspect parent frame URL or `document.referrer`
+3. Add the origin (scheme + host + port) to `allowedParentOrigins`
+4. Rebuild and re-package
 
 ## Pre-flight checklist
 
-1. **`lxpack.bridge: "auto"`** in `courseConfig.ts` for LMS iframe targets (SCORM/xAPI/cmi5).
+1. **`lxpack.bridge: "auto"`** and **`allowedParentOrigins`** in `courseConfig.ts` for LMS iframe targets.
 2. **Proxy URLs** — set `VITE_ANALYTICS_URL` and `VITE_XAPI_PROXY_URL` in `.env` before production build; never embed LRS secrets in the client bundle.
 3. **Observability hooks** — wire all required `config.observability` callbacks. See [production checklist](production-checklist.md).
 4. **ID parity** — React `courseId` / `checkId` values match `lessonkit.json`.

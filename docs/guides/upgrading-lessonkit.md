@@ -10,6 +10,10 @@ Bump all `@lessonkit/*` packages to the same semver (for example **1.5.0**). Mis
 
 ## Migration guides
 
+**Latest:** [MIGRATION-1.4-to-1.5](../MIGRATION-1.4-to-1.5.md) (current npm line **1.5.x**).
+
+Older jumps (linked here; not duplicated in the sidebar):
+
 | From | To | Guide |
 | --- | --- | --- |
 | 1.4.x | 1.5.x | [MIGRATION-1.4-to-1.5](../MIGRATION-1.4-to-1.5.md) — `BranchingScenario`, `Embed`, `Chart`, branch resume |
@@ -18,6 +22,8 @@ Bump all `@lessonkit/*` packages to the same semver (for example **1.5.0**). Mis
 | 1.1.x | 1.2.x | [MIGRATION-1.1-to-1.2](../MIGRATION-1.1-to-1.2.md) — catalog v3 default, compound persistence |
 | 1.0.x | 1.1.x | [MIGRATION-1.0-to-1.1](../MIGRATION-1.0-to-1.1.md) |
 | 0.9.x | 1.0.x | [MIGRATION-0.x-to-1.0](../MIGRATION-0.x-to-1.0.md) |
+
+Historical release checklists: [Release history](../project/release-history.md).
 
 ## Quick checklist (any upgrade)
 

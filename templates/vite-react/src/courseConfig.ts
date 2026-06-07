@@ -107,7 +107,11 @@ export function createCourseConfig(): LessonkitConfig {
 
   const config: LessonkitConfig = {
     courseId: "my-course",
-    lxpack: { bridge: "off" },
+    lxpack: {
+      bridge: "off",
+      // Uncomment for LMS packaging (SCORM/xAPI/cmi5). Production requires allowedParentOrigins.
+      // allowedParentOrigins: ["https://your-lms.example"],
+    },
     observability: createObservability(),
     tracking: useProductionTransports ? productionTracking(analyticsUrl) : devConsoleTracking(),
     xapi: useProductionTransports ? productionXapi(xapiProxyUrl) : devConsoleXapi(),

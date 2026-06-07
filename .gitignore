@@ -11,6 +11,7 @@ docs/_build/
 docs/.venv/
 docs/_static/demos/*
 !docs/_static/demos/.gitkeep
+docs/_static/typedoc/
 .lxpack/
 e2e/.artifacts/
 e2e/test-results/

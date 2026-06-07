@@ -81,6 +81,12 @@ jobs:
       - name: Build example bundles for docs
         run: bash docs/scripts/build-docs-demos.sh
 
+      - name: Generate API docs (TypeDoc)
+        run: npm run docs:api
+
+      - name: Verify doc include wrappers
+        run: bash docs/scripts/verify-doc-includes.sh
+
       - name: Setup Python
         uses: actions/setup-python@v6
         with:

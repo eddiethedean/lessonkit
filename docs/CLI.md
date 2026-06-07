@@ -90,9 +90,9 @@ Scaffold a Vite + React project from the bundled template.
 
 ```bash
 lessonkit init my-course
-lessonkit init --here          # init in current directory
+lessonkit init --here
+lessonkit init --here --force  # empty dir or dotfiles only; requires --here
 lessonkit init my-course --skip-install
-lessonkit init my-course --force
 ```
 
 | Flag | Description |
@@ -113,7 +113,7 @@ lessonkit dev --cwd ./apps/training
 
 ### `lessonkit build`
 
-Production Vite build to `dist/` (or `paths.spaDistDir` from `lessonkit.json`; the CLI passes `--outDir` when it differs from `dist`).
+Production Vite build to `dist/` (or `paths.spaDistDir` from `lessonkit.json`). The CLI always strips passthrough `--outDir` from Vite args and appends the configured `paths.spaDistDir`.
 
 ```bash
 lessonkit build

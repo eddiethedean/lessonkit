@@ -35,6 +35,7 @@
     "conformance:golden": "npm run conformance:golden -w @lessonkit/e2e",
     "storybook": "npm run storybook -w @lessonkit/react",
     "build-storybook": "npm run build-storybook -w @lessonkit/react",
+    "docs:api": "bash docs/scripts/build-api-docs.sh",
     "changeset": "changeset",
     "version-packages": "changeset version",
     "release": "changeset publish"
@@ -46,6 +47,7 @@
     "eslint": "^10.4.1",
     "eslint-plugin-react-hooks": "^7.0.1",
     "prettier": "^3.6.2",
+    "typedoc": "^0.28.5",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.60.1"
   }

@@ -129,6 +129,29 @@ describe("Tier B/C/D block components", () => {
     expect(screen.getByRole("status").textContent).toContain("Correct");
   });
 
+  it("FindMultipleHotspots rejects decoy selections even when score meets passingScore", () => {
+    render(
+      wrap(
+        <FindMultipleHotspots
+          checkId="fmh-decoy"
+          src="/scene.png"
+          alt="Scene"
+          targets={[
+            { id: "a", label: "Hazard A", x: 10, y: 10 },
+            { id: "b", label: "Hazard B", x: 50, y: 50 },
+            { id: "c", label: "Decoy", x: 80, y: 80 },
+          ]}
+          correctTargetIds={["a", "b"]}
+        />,
+      ),
+    );
+    fireEvent.click(screen.getByTestId("target-a"));
+    fireEvent.click(screen.getByTestId("target-b"));
+    fireEvent.click(screen.getByTestId("target-c"));
+    fireEvent.click(screen.getByTestId("check-hotspots"));
+    expect(screen.getByRole("status").textContent).toContain("Try again");
+  });
+
   it("FindMultipleHotspots scores per correct hotspot", () => {
     const ref = createRef<import("@lessonkit/core").AssessmentHandle>();
     render(

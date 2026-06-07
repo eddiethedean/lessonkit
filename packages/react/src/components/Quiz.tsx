@@ -175,10 +175,10 @@ function QuizInner(
               name={questionId}
               value={c}
               checked={selected === c}
-              disabled={passed}
+              disabled={passed && !props.enableRetry}
               aria-invalid={selected === c && selectionCorrect === false ? true : undefined}
               onChange={() => {
-                if (passed) return;
+                if (passed && !props.enableRetry) return;
                 setSelected(c);
                 const defaultCorrect = c === props.answer;
                 const scored = scoreResponse(c, defaultCorrect, 1, props.passingScore);
@@ -221,6 +221,23 @@ function QuizInner(
         <p role="status" aria-live="polite">
           {selectionCorrect ? "Correct" : "Try again"}
         </p>
+      ) : null}
+      {props.enableRetry && passed ? (
+        <button
+          type="button"
+          data-testid="quiz-retry"
+          onClick={() => {
+            completedRef.current = false;
+            telemetryReplayedRef.current = false;
+            setQuizPassed(false);
+            setSelected(null);
+            setSelectionCorrect(null);
+            setCompletedScore(null);
+            setCompletedMaxScore(null);
+          }}
+        >
+          Try again
+        </button>
       ) : null}
     </section>
   );

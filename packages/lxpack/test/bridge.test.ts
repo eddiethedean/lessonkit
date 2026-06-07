@@ -251,6 +251,18 @@ describe("@lessonkit/lxpack/bridge", () => {
     }
   });
 
+  it("denies auto bridge in production without allowedParentOrigins", () => {
+    vi.stubEnv("NODE_ENV", "production");
+    try {
+      expect(isParentOriginAllowed(undefined, undefined, "auto")).toBe(false);
+      expect(
+        getLxpackBridge(undefined, { allowedParentOrigins: ["https://lms.example"], mode: "auto" }),
+      ).toBeNull();
+    } finally {
+      vi.unstubAllEnvs();
+    }
+  });
+
   it("getLxpackBridge returns null when origin is not allowlisted", () => {
     vi.stubGlobal("window", {
       parent: {

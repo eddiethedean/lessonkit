@@ -45,10 +45,10 @@ Canonical block list, props, and contracts: [Block catalog reference](../../refe
 | `Scenario` | — | Semantic scenario region |
 | `Quiz` / `KnowledgeCheck` | `checkId`, `question`, `choices`, `answer` | MCQ assessment (`quiz_*` telemetry) |
 | `TrueFalse` | `checkId`, `question`, `answer` (boolean) | Two-option assessment (`assessment_*` telemetry) |
-| `FillInTheBlanks` | `checkId`, `question`, `blanks[]` | Inline inputs; `interactionType: fillInBlanks` |
-| `DragTheWords` | `checkId`, `question`, `zones[]`, `pool[]` | Inline drag targets |
-| `DragAndDrop` | `checkId`, `question`, `items[]`, `targets[]` | Drag items to targets; keyboard alternative |
-| `MarkTheWords` | `checkId`, `question`, `tokens[]` | Select correct word tokens |
+| `FillInTheBlanks` | `checkId`, `template` (`*blank*` syntax); optional `blanks[]` | Inline inputs; `interactionType: fillInBlanks` |
+| `DragTheWords` | `checkId`, `template`, `words` | Inline drag targets; `interactionType: dragTheWords` |
+| `DragAndDrop` | `checkId`, `items[]`, `targets[]` | Drag items to targets; keyboard alternative |
+| `MarkTheWords` | `checkId`, `text`, `correctWords` | Select correct word tokens in running text |
 | `AssessmentSequence` | `checkId`, children with `checkId` | Question-set container; aggregates child handles |
 | `SlideDeck` | `blockId`, `title`, `Slide` children | Course Presentation; keyboard slide nav; `CompoundHandle` |
 | `Slide` | `blockId`, optional `title` | Single slide row inside `SlideDeck` |
@@ -72,7 +72,7 @@ Full contracts: [Block catalog](../../reference/block-catalog.md) · [Storybook]
 
 | Component | Optional props | Notes |
 | --- | --- | --- |
-| `Course` | `config` | `config`: tracking, xAPI, `lxpack.bridge`, observability, plugins |
+| `Course` | `config` | `config`: tracking, xAPI, `lxpack.bridge`, `lxpack.allowedParentOrigins`, observability, plugins |
 | `Lesson` | `autoCompleteOnUnmount` | Completes on unmount when another lesson becomes active |
 | `Quiz` / `KnowledgeCheck` | `passingScore`, `enableRetry`, `enableSolutionsButton`, `autoCheck` | `KnowledgeCheck` is an alias of `Quiz`; exact string match on `answer` |
 | `Scenario` | `blockId` | Enables block-level URNs on manual `interaction` events |

@@ -453,6 +453,63 @@ describe("@lessonkit/core", () => {
     await expect(client.deliver?.(interactionEvent("overflow"))).resolves.toBe(false);
   });
 
+  it("deliver dedupes course_started using production id without caller override", async () => {
+    const batchSink = vi
+      .fn<TelemetryBatchSink>()
+      .mockRejectedValueOnce(new Error("nope"))
+      .mockResolvedValueOnce(undefined);
+
+    const client = createTrackingClient({
+      batchSink,
+      batch: { enabled: true, flushIntervalMs: 0, maxBatchSize: 100 },
+    });
+
+    const event = {
+      ...interactionEvent("course-started"),
+      name: "course_started",
+      sessionId: "session-1",
+      courseId: "course-1",
+      id: "session-1:course-1:course_started",
+    } as TelemetryEvent;
+
+    await expect(client.deliver?.(event)).resolves.toBe(false);
+    await expect(client.deliver?.(event)).resolves.toBe(true);
+
+    const lastBatch = batchSink.mock.calls.at(-1)?.[0] as TelemetryEvent[] | undefined;
+    expect(lastBatch).toHaveLength(1);
+    expect(lastBatch?.[0]?.id).toBe("session-1:course-1:course_started");
+  });
+
+  it("track dedupes by id while deliver flush is in-flight", async () => {
+    let resolveFlush!: () => void;
+    const batchSink = vi.fn<TelemetryBatchSink>(
+      () =>
+        new Promise<void>((resolve) => {
+          resolveFlush = resolve;
+        }),
+    );
+    const client = createTrackingClient({
+      batchSink,
+      batch: { enabled: true, flushIntervalMs: 0, maxBatchSize: 100 },
+    });
+
+    const event = {
+      ...interactionEvent("inflight-cs"),
+      name: "course_started",
+      sessionId: "session-1",
+      courseId: "course-1",
+      id: "session-1:course-1:course_started",
+    } as TelemetryEvent;
+
+    void client.deliver?.(event);
+    await new Promise((r) => setTimeout(r, 0));
+    expect(client.track(event)).toBe(true);
+
+    resolveFlush();
+    await client.flush?.();
+    expect(batchSink).toHaveBeenCalledTimes(1);
+  });
+
   it("deliver does not double-enqueue when flush fails and deliver is retried", async () => {
     const batchSink = vi
       .fn<TelemetryBatchSink>()

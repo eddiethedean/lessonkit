@@ -26,6 +26,10 @@ Open the browser developer console (F12) and paste errors into the chat.
 - Confirm `checkId` on `<Quiz />` matches `lessonkit.json` → `course.assessments[].checkId`
 - Confirm the learner selected the **exact** answer string from `choices`
 
+## LMS does not record completion after SCORM upload
+
+Set `lxpack: { bridge: "auto", allowedParentOrigins: ["https://your-lms.example"] }` in `src/courseConfig.ts` before `npm run build` and packaging. Production requires the allowlist. Details: [React troubleshooting — SCORM completion](../react-developers/troubleshooting.md#scorm-runs-but-lms-shows-no-completion-or-score).
+
 ## Packaging says layout not supported
 
 Use `"layout": "single-spa"` in `lessonkit.json`. `per-lesson-spa` is not supported by `lessonkit package` (1.0.0).

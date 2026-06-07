@@ -2,16 +2,25 @@
 
 LessonKit publishes **TypeScript declarations** on npm (`dist/*.d.ts`) and documents behavior in the guides below.
 
-:::{admonition} Generated API docs (roadmap)
-:class: note
+## Generated API (TypeDoc)
 
-**TypeDoc on Read the Docs is planned** for a future release. Until then, use:
+Browse generated TypeScript API docs (built with the docs site on Read the Docs):
+
+| Package | Generated reference |
+| --- | --- |
+| `@lessonkit/react` | [TypeDoc — react](../_static/typedoc/modules/react_dist.html) |
+| `@lessonkit/core` | [TypeDoc — core](../_static/typedoc/modules/core_dist.html) |
+| `@lessonkit/cli` | [TypeDoc — cli](../_static/typedoc/modules/cli_dist.html) |
+
+Full index: [TypeDoc home](../_static/typedoc/index.html).
+
+Monorepo maintainers regenerate locally: `npm run docs:api` (requires `npm run build:packages` first).
+
+Also use:
 
 1. **IDE** — `Go to Definition` on `@lessonkit/react` imports in a scaffolded project
 2. **Storybook** — component states and props visually
-3. **This site** — [Components and hooks](../guides/react-developers/components-and-hooks.md) (required + common optional props) · [Block catalog](block-catalog.md) (per-block contracts)
-4. **npm types** — `node_modules/@lessonkit/react/dist/index.d.ts`
-:::
+3. **Narrative guides** — [Components and hooks](../guides/react-developers/components-and-hooks.md) · [Block catalog](block-catalog.md)
 
 ## Interactive
 

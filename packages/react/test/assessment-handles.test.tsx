@@ -297,6 +297,82 @@ describe("AssessmentHandle (imperative API)", () => {
     expect(ref.current?.getScore()).toBe(2);
   });
 
+  it("Quiz allows retry after a correct answer when enableRetry is true", () => {
+    render(
+      wrap(
+        <Quiz
+          checkId="quiz-retry"
+          question="Pick one"
+          choices={["A", "B"]}
+          answer="B"
+          enableRetry
+        />,
+      ),
+    );
+    fireEvent.click(screen.getByLabelText("B"));
+    expect(screen.getByRole("status").textContent).toContain("Correct");
+    fireEvent.click(screen.getByTestId("quiz-retry"));
+    fireEvent.click(screen.getByLabelText("A"));
+    expect(screen.getByRole("status").textContent).toContain("Try again");
+    expect((screen.getByLabelText("B") as HTMLInputElement).disabled).toBe(false);
+  });
+
+  it("FillInTheBlanks completes on failure when enableRetry is false", async () => {
+    const events: { name: string }[] = [];
+    render(
+      <Course
+        title="Handles"
+        courseId="handle-course"
+        config={{
+          xapi: { enabled: false },
+          tracking: { sink: (e) => { events.push(e); } },
+        }}
+      >
+        <Lesson title="L1" lessonId="lesson-1">
+          <FillInTheBlanks
+            checkId="fib-no-retry"
+            template="The *right* answer"
+            enableRetry={false}
+          />
+        </Lesson>
+      </Course>,
+    );
+    fireEvent.change(screen.getByTestId("blank-blank-0"), { target: { value: "wrong" } });
+    fireEvent.click(screen.getByTestId("check-blanks"));
+    await waitFor(() => {
+      expect(events.some((e) => e.name === "assessment_completed")).toBe(true);
+    });
+  });
+
+  it("DragTheWords completes on failure when enableRetry is false", async () => {
+    const events: { name: string }[] = [];
+    render(
+      <Course
+        title="Handles"
+        courseId="handle-course"
+        config={{
+          xapi: { enabled: false },
+          tracking: { sink: (e) => { events.push(e); } },
+        }}
+      >
+        <Lesson title="L1" lessonId="lesson-1">
+          <DragTheWords
+            checkId="dtw-no-retry"
+            template="Pick *right*"
+            words={["right", "wrong"]}
+            enableRetry={false}
+          />
+        </Lesson>
+      </Course>,
+    );
+    fireEvent.click(screen.getByTestId("word-wrong"));
+    fireEvent.click(screen.getByTestId("zone-0"));
+    fireEvent.click(screen.getByTestId("check-drag-words"));
+    await waitFor(() => {
+      expect(events.some((e) => e.name === "assessment_completed")).toBe(true);
+    });
+  });
+
   it("Quiz completes on wrong answer when enableRetry is false", async () => {
     const events: { name: string }[] = [];
     render(

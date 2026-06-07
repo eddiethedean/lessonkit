@@ -72,6 +72,27 @@ If you add or change a workspace in the root `package.json`, run `npm install` a
 | `packages/cli`, `packages/lxpack`, templates | `npm run test:integration` |
 | `docs/` (Sphinx) | `cd docs && pip install -r requirements.txt && sphinx-build -W -b html . _build/html` (or rely on CI `docs` job) |
 
+## Full CI-equivalent checks
+
+Before a wide refactor or release, run from the repo root:
+
+| Check | Command |
+| --- | --- |
+| Template sync | `npm run copy-template -w @lessonkit/cli && git diff --exit-code packages/cli/template/vite-react` |
+| Template parity | `diff -rq templates/vite-react/src packages/cli/template/vite-react/src` |
+| Build | `npm run build` |
+| Typecheck | `npm run typecheck` |
+| Lint | `npm run lint` |
+| Test | `npm test` |
+| Coverage | `npm run coverage` |
+| Storybook | `STORYBOOK_DISABLE_TELEMETRY=1 CI=true npm run build-storybook` |
+| Integration | `npm run test:integration` |
+| E2E | `npm exec -w @lessonkit/e2e -- playwright install chromium && npm run test:e2e` |
+| Conformance | `npm run conformance:lxpack && npm run conformance:golden` |
+| Audit | `npm run audit:ci` |
+| API docs | `npm run docs:api` |
+| Sphinx docs | `cd docs && pip install -r requirements.txt && sphinx-build -W -b html . _build/html` |
+
 ## Pull request expectations
 
 - Tests and lint/typecheck pass locally when feasible (`npm test`, `npm run lint`, `npm run typecheck`).

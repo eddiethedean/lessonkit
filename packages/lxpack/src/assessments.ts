@@ -21,8 +21,20 @@ export function escapeShellText(text: string): string {
     .replace(/'/g, "&#39;");
 }
 
+function decodeShellEntities(text: string): string {
+  return text
+    .replace(/&amp;/gi, "&")
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">")
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/gi, "'")
+    .replace(/&#x([0-9a-f]+);/gi, (_, hex) => String.fromCharCode(parseInt(hex, 16)))
+    .replace(/&#(\d+);/g, (_, num) => String.fromCharCode(Number(num)));
+}
+
 function containsUnsafeShellMarkup(text: string): boolean {
-  return /<\/script/i.test(text) || /<!--/.test(text) || /</.test(text);
+  const decoded = decodeShellEntities(text);
+  return /<\/script/i.test(decoded) || /<!--/.test(decoded) || /</.test(decoded);
 }
 
 function sanitizeShellField(text: string): string | null {

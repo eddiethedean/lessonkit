@@ -28,7 +28,7 @@ export function forwardTelemetryToLxpack(
   mode: LmsBridgeMode = "auto",
   opts?: ForwardTelemetryToLxpackOptions,
 ): void {
-  const bridgeOpts = { allowedParentOrigins: opts?.allowedParentOrigins };
+  const bridgeOpts = { allowedParentOrigins: opts?.allowedParentOrigins, mode };
   if (
     mode === "auto" &&
     opts?.onBridgeMiss &&

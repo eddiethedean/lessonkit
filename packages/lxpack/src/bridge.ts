@@ -71,6 +71,8 @@ export function normalizeAssessmentPassingScore(opts?: {
 export type BridgeAccessOptions = {
   /** Allowed parent-frame origins (scheme + host + port). When set, bridge calls require a matching origin. */
   allowedParentOrigins?: string[];
+  /** LMS bridge mode; `"auto"` in production requires `allowedParentOrigins`. */
+  mode?: LxpackBridgeMode;
 };
 
 /** Resolve the parent frame origin when embedded (same-origin parent or document.referrer fallback). */
@@ -91,11 +93,27 @@ export function resolveParentOrigin(parentWindow?: Window): string | null {
   }
 }
 
+function isProductionRuntime(): boolean {
+  try {
+    if ((import.meta as { env?: { PROD?: boolean } }).env?.PROD === true) return true;
+  } catch {
+    // no import.meta
+  }
+  const g = globalThis as typeof globalThis & { process?: { env?: { NODE_ENV?: string } } };
+  return typeof g.process !== "undefined" && g.process.env?.NODE_ENV === "production";
+}
+
+function requiresProductionAllowlist(mode?: LxpackBridgeMode): boolean {
+  return mode === "auto" && isProductionRuntime();
+}
+
 /** Returns true when no allowlist is configured or the resolved parent origin is listed. */
 export function isParentOriginAllowed(
   allowedParentOrigins: string[] | undefined,
   parentWindow?: Window,
+  mode?: LxpackBridgeMode,
 ): boolean {
+  if (requiresProductionAllowlist(mode) && !allowedParentOrigins?.length) return false;
   if (!allowedParentOrigins?.length) return true;
   const origin = resolveParentOrigin(parentWindow);
   if (!origin) return false;
@@ -103,7 +121,7 @@ export function isParentOriginAllowed(
 }
 
 function getBridge(parentWindow?: Window, opts?: BridgeAccessOptions): LxpackBridgeV1 | null {
-  if (!isParentOriginAllowed(opts?.allowedParentOrigins, parentWindow)) return null;
+  if (!isParentOriginAllowed(opts?.allowedParentOrigins, parentWindow, opts?.mode)) return null;
   const fromSdk = getLxpackBridgeFromParent(parentWindow);
   if (fromSdk) return fromSdk;
   if (typeof window === "undefined") return null;
@@ -231,6 +249,7 @@ export function forwardTelemetryToBridge(
   if (mode === "off") return;
   const bridge = getBridge(parentWindow, {
     allowedParentOrigins: opts?.allowedParentOrigins,
+    mode,
   });
   if (!bridge) return;
   try {

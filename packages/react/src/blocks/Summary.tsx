@@ -173,9 +173,9 @@ function SummaryInner(
       response: selected,
       correct: passedThreshold,
     });
-    if (passedThreshold && !completedRef.current) {
+    if ((passedThreshold || props.enableRetry === false) && !completedRef.current) {
       completedRef.current = true;
-      setPassed(true);
+      if (passedThreshold) setPassed(true);
       assessment.complete({
         checkId,
         interactionType: INTERACTION,

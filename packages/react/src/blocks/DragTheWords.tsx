@@ -199,9 +199,9 @@ function DragTheWordsInner(
         response: zones,
         correct: passedThreshold,
       });
-    if (passedThreshold && !completedRef.current) {
+    if ((passedThreshold || props.enableRetry === false) && !completedRef.current) {
       completedRef.current = true;
-      setPassed(true);
+      if (passedThreshold) setPassed(true);
       assessment.complete({
         checkId,
         interactionType: INTERACTION,
@@ -271,7 +271,12 @@ function DragTheWordsInner(
           );
         })}
       </p>
-      <button type="button" data-testid="check-drag-words" disabled={!allFilled || passed} onClick={check}>
+      <button
+        type="button"
+        data-testid="check-drag-words"
+        disabled={!allFilled || (passed && !props.enableRetry)}
+        onClick={check}
+      >
         Check
       </button>
       {!hasZones ? (

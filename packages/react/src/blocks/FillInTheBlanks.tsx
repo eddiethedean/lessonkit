@@ -203,7 +203,7 @@ function FillInTheBlanksInner(
       return;
     }
     if (!allFilled) return;
-    if (passed) return;
+    if (passed && !props.enableRetry) return;
     const snapshot = JSON.stringify(values);
     if (checkSnapshotRef.current === snapshot) return;
     checkSnapshotRef.current = snapshot;
@@ -216,9 +216,9 @@ function FillInTheBlanksInner(
       response: values,
       correct: passedThreshold,
     });
-    if (passedThreshold && !completedRef.current) {
+    if ((passedThreshold || props.enableRetry === false) && !completedRef.current) {
       completedRef.current = true;
-      setPassed(true);
+      if (passedThreshold) setPassed(true);
       assessment.complete({
         checkId,
         interactionType: INTERACTION,
@@ -236,6 +236,7 @@ function FillInTheBlanksInner(
     maxScore,
     passed,
     passedThreshold,
+    props.enableRetry,
     props.passingScore,
     props.template,
     score,
@@ -285,7 +286,12 @@ function FillInTheBlanksInner(
         })}
       </p>
       {!props.autoCheck ? (
-        <button type="button" data-testid="check-blanks" disabled={!allFilled || passed} onClick={check}>
+        <button
+          type="button"
+          data-testid="check-blanks"
+          disabled={!allFilled || (passed && !props.enableRetry)}
+          onClick={check}
+        >
           Check
         </button>
       ) : null}

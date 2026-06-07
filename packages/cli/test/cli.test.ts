@@ -587,6 +587,19 @@ describe("resolveViteBuildArgv", () => {
       "build/spa",
     ]);
   });
+
+  it("always canonicalizes default dist outDir over passthrough", () => {
+    const defaultDistProject = {
+      ...baseProject,
+      paths: { ...baseProject.paths, spaDistDir: "dist" },
+    };
+    expect(resolveViteBuildArgv(defaultDistProject, ["--outDir", "other", "--minify"])).toEqual([
+      "build",
+      "--minify",
+      "--outDir",
+      "dist",
+    ]);
+  });
 });
 
 describe("runBuild", () => {

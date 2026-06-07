@@ -69,11 +69,7 @@ export function resolveViteBuildArgv(
   viteArgs: readonly string[] = [],
 ): string[] {
   const passthrough = stripOutDirFromViteArgs(viteArgs);
-  const argv = ["build", ...passthrough];
-  if (project.paths.spaDistDir !== DEFAULT_SPA_DIST_DIR) {
-    argv.push("--outDir", project.paths.spaDistDir);
-  }
-  return argv;
+  return ["build", ...passthrough, "--outDir", project.paths.spaDistDir];
 }
 
 export function parsePackageTarget(value: string | undefined): PackageTarget {

@@ -43,7 +43,11 @@ The CLI prints the resolved path. `lessonkit.json` → `paths.outputBaseDir` is 
 
 ## Why does my LMS not record completion?
 
-Set `lxpack: { bridge: "auto" }` in `courseConfig.ts` before packaging. The init template defaults to `"off"`. See [LXPack bridge](../reference/lxpack-bridge.md).
+Set `lxpack: { bridge: "auto", allowedParentOrigins: ["https://your-lms.example"] }` in `courseConfig.ts` before packaging. Production builds require the allowlist when the bridge is enabled. The init template defaults to `"off"`. See [LXPack bridge](../reference/lxpack-bridge.md).
+
+## Why does `bridge: "auto"` work locally but not in the LMS?
+
+Development builds allow bridge forwarding without an allowlist. **Production builds require `config.lxpack.allowedParentOrigins`** when `bridge` is `"auto"`. Add your LMS parent frame origin (scheme + host + port). Discover it from the SCORM preview URL, `document.referrer`, or browser devtools. Wire `onLxpackBridgeMiss` in observability. See [React troubleshooting](react-developers/troubleshooting.md#scorm-runs-but-lms-shows-no-completion-or-score).
 
 ## Why does my packaged course show a blank page?
 

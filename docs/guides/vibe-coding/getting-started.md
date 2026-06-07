@@ -24,6 +24,17 @@ cd my-phishing-course
 
 `lessonkit init` copies a starter template, writes `lessonkit.json`, and installs dependencies.
 
+## 2.5. Install Library Skills (recommended)
+
+If you use **Cursor**, install LessonKit authoring skills so the AI follows `lessonkit.json` and block contracts:
+
+```bash
+git clone https://github.com/eddiethedean/lessonkit.git
+cd lessonkit && ./library-skills/install.sh --project -C "$(pwd)/my-phishing-course"
+```
+
+See [Library Skills](../library-skills.md) for other editors and options.
+
 ## 3. Open the project in your AI editor
 
 - **Cursor / VS Code:** File → Open Folder → select `my-phishing-course`

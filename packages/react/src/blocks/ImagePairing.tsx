@@ -193,7 +193,7 @@ function ImagePairingInner(
           checkId,
           interactionType: INTERACTION,
           response: { matchedPairIds: [...matched] },
-          correct: allMatched && passedThreshold,
+          correct: passedThreshold,
           score,
           maxScore,
         }),

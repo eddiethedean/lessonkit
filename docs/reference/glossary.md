@@ -26,6 +26,10 @@ External packaging engine used by **`@lessonkit/lxpack`** and the CLI. Produces 
 
 Browser bridge (`window.parent.lxpackBridge.v1`) used when a packaged course runs inside an LXPack-hosted iframe. Set `config.lxpack.bridge` to `"auto"` for LMS iframe shells; the init template defaults to `"off"`.
 
+## allowedParentOrigins
+
+List of parent-frame origins (scheme + host + port) permitted to receive bridge telemetry when `config.lxpack.bridge` is `"auto"`. **Required in production builds** when the bridge is enabled. Example: `["https://lms.example"]`. See [LXPack bridge](lxpack-bridge.md).
+
 ## .lxpack/
 
 Working directories created during packaging (descriptor staging, output zips). Default layout:

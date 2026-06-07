@@ -36,6 +36,7 @@ describe("assertSafeLrsUrl", () => {
 
   it("rejects path traversal in relative URLs", () => {
     expect(() => assertSafeLrsUrl("/api/../secret")).toThrow(/path traversal/);
+    expect(() => assertSafeLrsUrl("/api/%2e%2e/admin")).toThrow(/path traversal/);
   });
 
   it("rejects invalid URLs", () => {

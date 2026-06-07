@@ -280,6 +280,17 @@ describe("assessments", () => {
     expect(escapeShellText("<not-allowed>")).toBe("&lt;not-allowed&gt;");
   });
 
+  it("rejects entity-encoded unsafe SCORM markup in assessment fields", () => {
+    expect(
+      assessmentDescriptorToLxpack({
+        checkId: "entity-xss",
+        question: "Pick one",
+        choices: ["&lt;script&gt;alert(1)&lt;/script&gt;"],
+        answer: "&lt;script&gt;alert(1)&lt;/script&gt;",
+      }),
+    ).toBeNull();
+  });
+
   it("rejects unsafe SCORM markup in assessment fields", () => {
     expect(
       assessmentDescriptorToLxpack({
