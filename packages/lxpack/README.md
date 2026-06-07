@@ -6,7 +6,7 @@
 
 Package Vite SPAs for LMS delivery — SCORM 1.2/2004, standalone, xAPI, and cmi5. `@lessonkit/lxpack` bundles [`@lxpack/*`](https://www.npmjs.com/org/lxpack) as direct dependencies (no separate `@lxpack/api` install).
 
-Requires Node.js **18+**.
+Requires Node.js **18+** minimum; **20.19+** recommended for CLI scaffold workflows (Vite 8).
 
 ## Install
 

@@ -33,11 +33,11 @@ Default SCORM output: **`.lxpack/course/.lxpack/out/course-scorm12.zip`**.
 
 Central runtime config: telemetry sinks, xAPI transport, observability hooks, and `lxpack.bridge`. Set `bridge: "auto"` and `allowedParentOrigins` before LMS packaging. See [First LMS export](first-lms-export.md).
 
-`lessonkit.json` is the contract between your React app and `@lessonkit/lxpack`:
+`lessonkit.json` is the contract between your React app and `@lessonkit/lxpack`. See the [manifest reference](../../reference/manifest.md) for every field:
 
 - `course.courseId` and every `assessments[].checkId` **must match** React props
 - `lessons[].id` **must match** when each lesson is a separate SPA or LMS entry; with `layout: "single-spa"`, the manifest lists only the LMS shell lesson(s) while additional in-app step ids may exist only in React (see [lxpack-golden README](https://github.com/eddiethedean/lessonkit/blob/main/examples/lxpack-golden/README.md))
-- `course.layout` should be `single-spa` for `lessonkit package` (1.0.0)
+- `course.layout` should be `single-spa` for `lessonkit package` (1.x)
 - `paths.spaDistDir` points at the Vite output (default `dist`)
 - `paths.lxpackOutDir` (default `.lxpack/course`) and `paths.outputBaseDir` (default `.lxpack/out`, resolved inside `lxpackOutDir`)
 

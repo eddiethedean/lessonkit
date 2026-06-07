@@ -14,7 +14,7 @@ cd my-course
 npm run dev
 ```
 
-See [Getting started in 5 minutes](getting-started-in-5-minutes.md) for build, SCORM packaging, LMS bridge, and output paths.
+See [Getting started in 5 minutes](getting-started-in-5-minutes.md) for local preview in about five minutes. For SCORM packaging, LMS bridge, and output paths, continue with [First LMS export](first-lms-export.md).
 
 ## Add to an existing Vite + React app
 

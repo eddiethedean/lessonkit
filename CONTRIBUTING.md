@@ -14,7 +14,7 @@ We follow the [Contributor Covenant](CODE_OF_CONDUCT.md). Be respectful and cons
 2. Keep each PR focused on one logical change (feature, fix, or docs update).
 3. Search [existing issues](https://github.com/eddiethedean/lessonkit/issues) to avoid duplicate work.
 
-**Branch policy:** Open pull requests against **`main`**. Release branches (for example `release/1.4.0`) are maintainer-only for version stabilization—do not target them unless a maintainer asks you to.
+**Branch policy:** Open pull requests against **`main`**. Release branches (for example `release/1.5.x`) are maintainer-only for version stabilization—do not target them unless a maintainer asks you to.
 
 ## Good first contributions
 
@@ -24,15 +24,17 @@ Maintainers: create those labels in GitHub (**Settings → Labels**) if they are
 
 ## Development setup
 
+Canonical first-time setup (from repo root):
+
 ```bash
 git clone https://github.com/eddiethedean/lessonkit.git
 cd lessonkit
 npm ci
-npm run build
+npm run build:packages
 npm test
 ```
 
-`npm test` runs `pretest` → `build:packages` first so workspace `@lessonkit/*` dist matches source.
+`npm test` runs `pretest` → `build:packages` automatically, but run `build:packages` explicitly before `npm -w lessonkit-example-react-vite run dev` or other example workspaces. Skip the full monorepo `npm run build` unless you are validating examples or release surfaces.
 
 ### Faster loops
 

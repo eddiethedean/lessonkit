@@ -1,18 +1,18 @@
 ---
 name: lessonkit-author
 description: >-
-  Author and fix LessonKit 1.0 React courses — App.tsx, lessonkit.json, Course/Lesson/Quiz
+  Author and fix LessonKit 1.5.x React courses — App.tsx, lessonkit.json, Course/Lesson/Quiz
   blocks, ThemeProvider, stable courseId/lessonId/checkId. Run lessonkit dev and build.
   Use when the workspace has lessonkit.json or mentions LessonKit, React training, or LMS courses.
 license: Apache-2.0
 metadata:
-  lessonkit-version: "1.2.0"
+  lessonkit-version: "1.5.0"
   docs: https://lessonkit.readthedocs.io/en/latest/
 ---
 
 # LessonKit course authoring
 
-You help edit **LessonKit 1.0** projects: Vite + React apps with a root `lessonkit.json` manifest.
+You help edit **LessonKit 1.5.x** projects: Vite + React apps with a root `lessonkit.json` manifest.
 
 ## Before you edit
 
@@ -31,6 +31,7 @@ my-course/
   src/
     main.tsx
     App.tsx            # Course / Lesson / Quiz UI
+    courseConfig.ts    # tracking, xAPI, lxpack bridge (production)
     styles.css
   dist/                # after lessonkit build
   .lxpack/             # package output — do not hand-edit
@@ -49,20 +50,24 @@ Details: `references/identity.md`
 
 ## React blocks (use only these)
 
-From `@lessonkit/react`:
+Import from `@lessonkit/react`. Block contract: `@lessonkit/react/block-catalog.v3.json` — do not invent block types.
 
-- `Course`, `Lesson`, `Scenario`, `Quiz`, `KnowledgeCheck`, `Reflection`, `ProgressTracker`
-- `ThemeProvider` with preset from `lessonkit.json` (`default`, `brand`, etc.)
+**Shell:** `Course`, `Lesson`, `Scenario`, `Quiz`, `KnowledgeCheck`, `Reflection`, `ProgressTracker`, `ThemeProvider`
+
+**Assessments:** `TrueFalse`, `MarkTheWords`, `FillInTheBlanks`, `DragTheWords`, `DragAndDrop`, `Summary`, `ImagePairing`, `ImageSequencing`, `ArithmeticQuiz`, `Essay`, `AssessmentSequence`, and more — see catalog v3.
+
+**Compound:** `Page`, `InteractiveBook`, `Slide`, `SlideDeck`, `TimedCue`, `InteractiveVideo`, `BranchingScenario`, `BranchNode`, `BranchChoice`
+
+**Content (1.5+):** `Embed`, `Chart`, `Text`, `Heading`, `Image`, `Video`, `Accordion`, `DialogCards`, `Flashcards`, `MemoryGame`, and others in catalog v3.
+
 - `LessonkitProvider` is inside `<Course>` — pass `config` for tracking/xAPI/plugins
-
-Block contract: `@lessonkit/react/block-catalog.v1.json` — do not invent block types.
 
 Details: `references/blocks.md`
 
 ## lessonkit.json essentials
 
 - `schemaVersion`: `1`
-- `course.layout`: `single-spa` for `lessonkit package` (1.0.0)
+- `course.layout`: `single-spa` for `lessonkit package` (1.x)
 - `paths.spaDistDir`: `dist` (Vite output)
 - `course.assessments[]`: mirror Quiz props (`checkId`, `question`, `choices`, `answer`, optional `passingScore`)
 

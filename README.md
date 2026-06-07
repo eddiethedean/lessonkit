@@ -257,10 +257,11 @@ Source markdown: [`docs/`](https://github.com/eddiethedean/lessonkit/tree/main/d
 git clone https://github.com/eddiethedean/lessonkit.git
 cd lessonkit
 npm ci
+npm run build:packages
 npm test
 ```
 
-Most PRs do **not** need the full monorepo build. Use scoped loops from [CONTRIBUTING.md](CONTRIBUTING.md):
+Full contributor setup (Playwright, scoped loops, CI checklist): [CONTRIBUTING.md](CONTRIBUTING.md). Most PRs do **not** need the full monorepo build. Use scoped loops from CONTRIBUTING:
 
 | Change type | Usually enough |
 | --- | --- |

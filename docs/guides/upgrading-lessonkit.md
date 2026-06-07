@@ -12,7 +12,7 @@ Bump all `@lessonkit/*` packages to the same semver (for example **1.5.0**). Mis
 
 **Latest:** [MIGRATION-1.4-to-1.5](../MIGRATION-1.4-to-1.5.md) (current npm line **1.5.x**).
 
-Older jumps (linked here; not duplicated in the sidebar):
+Older jumps (also listed in the [documentation map](../index.md#documentation-map) sidebar):
 
 | From | To | Guide |
 | --- | --- | --- |

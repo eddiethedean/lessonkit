@@ -4,7 +4,7 @@
 [![Documentation](https://readthedocs.org/projects/lessonkit/badge/?version=latest)](https://lessonkit.readthedocs.io/en/latest/reference/cli.html)
 [![License](https://img.shields.io/github/license/eddiethedean/lessonkit)](https://github.com/eddiethedean/lessonkit/blob/main/LICENSE)
 
-Scaffold, develop, build, and package LessonKit courses. Node.js **18+**.
+Scaffold, develop, build, and package LessonKit courses. Node.js **18+** minimum; **20.19+** recommended (CLI scaffold uses Vite 8).
 
 ## Install
 
@@ -36,7 +36,7 @@ Subprocess timeout defaults to **30 minutes** (`LESSONKIT_CMD_TIMEOUT_MS`). To d
 
 ## Docs
 
-[CLI reference](https://lessonkit.readthedocs.io/en/latest/reference/cli.html) · [Packaging guide](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/packaging-and-cli.html) · [Template source](https://github.com/eddiethedean/lessonkit/tree/main/templates/vite-react)
+[CLI reference](https://lessonkit.readthedocs.io/en/latest/reference/cli.html) · [Packaging guide](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/packaging-and-cli.html) · [Published template](https://github.com/eddiethedean/lessonkit/tree/main/packages/cli/template/vite-react) (monorepo dev mirror: [`templates/vite-react`](https://github.com/eddiethedean/lessonkit/tree/main/templates/vite-react))
 
 ## License
 

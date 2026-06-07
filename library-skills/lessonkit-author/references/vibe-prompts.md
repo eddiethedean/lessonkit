@@ -3,13 +3,14 @@
 Paste once per chat session:
 
 ```text
-Project: LessonKit 1.0 (Vite + React).
+Project: LessonKit 1.5.x (Vite 8 + React 19).
 Manifest: lessonkit.json (schemaVersion 1).
-Main UI: src/App.tsx.
-Blocks: Course, Lesson, Scenario, Quiz, KnowledgeCheck, Reflection, ProgressTracker only.
+Main UI: src/App.tsx; production config: src/courseConfig.ts.
+Block catalog: @lessonkit/react/block-catalog.v3.json (only use listed block types).
 Rules:
 - Keep courseId, lessonId, checkId stable; sync lessonkit.json when adding lessons/quizzes.
 - Use ThemeProvider preset from lessonkit.json.
+- course.layout must be "single-spa" for lessonkit package (1.x).
 - After edits, list files changed and what to verify in the browser (lessonkit dev).
 ```
 

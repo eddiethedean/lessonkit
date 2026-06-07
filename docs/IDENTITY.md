@@ -1,6 +1,6 @@
 # Identity model (v1)
 
-LessonKit **1.0.0** requires explicit, stable identifiers for courses, lessons, and knowledge checks.
+LessonKit **1.x** requires explicit, stable identifiers for courses, lessons, and knowledge checks.
 Generators and authors must supply IDs in source — the runtime does not invent lesson or check IDs.
 
 ## Required props

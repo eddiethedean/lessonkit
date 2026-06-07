@@ -56,7 +56,7 @@ Full guide: [Packaging reference](../../reference/packaging.md) · [LMS compatib
 
 ## Layout
 
-Use `single-spa` for CLI packaging (1.0.0). Multi-lesson UX stays inside your React app.
+Use `single-spa` for CLI packaging (1.x). Multi-lesson UX stays inside your React app.
 
 `per-lesson-spa` is supported by `@lessonkit/lxpack` APIs but not `lessonkit package` yet.
 

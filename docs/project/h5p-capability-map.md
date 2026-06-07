@@ -9,7 +9,7 @@ Use this page as a **lookup table**: H5P display name and machine name → Lesso
 Traceability matrix for adopting [H5P](https://h5p.org/content-types-and-applications) interaction patterns as native LessonKit blocks—not as embedded H5P runtimes.
 
 **Roadmap:** [ROADMAP.md — H5P-aligned backlog](roadmap.md#h5p-aligned-capability-backlog)  
-**Runtime catalog (today):** [Block catalog](../reference/block-catalog.md) (`blockCatalogVersion = 1`)  
+**Runtime catalog (today):** [Block catalog](../reference/block-catalog.md) (`blockCatalogVersion = 3` — default since framework 1.2; 1.5 adds `BranchingScenario`, `Embed`, `Chart`)  
 **Catalog expansion (shipped 1.1.0):** framework **1.1.x** (`blockCatalogVersion = 2`)
 
 ## Status legend

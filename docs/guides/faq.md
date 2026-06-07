@@ -39,7 +39,7 @@ Default path (relative to project root):
 
 **`.lxpack/course/.lxpack/out/course-scorm12.zip`**
 
-The CLI prints the resolved path. `lessonkit.json` → `paths.outputBaseDir` is **inside** `paths.lxpackOutDir`, not at the project root. See [Getting started in 5 minutes — step 6](react-developers/getting-started-in-5-minutes.md).
+The CLI prints the resolved path. `lessonkit.json` → `paths.outputBaseDir` is **inside** `paths.lxpackOutDir`, not at the project root. See [First LMS export — where the SCORM zip lands](react-developers/first-lms-export.md#where-the-scorm-zip-lands).
 
 ## Why does my LMS not record completion?
 
@@ -51,7 +51,7 @@ Development builds allow bridge forwarding without an allowlist. **Production bu
 
 ## Why does my packaged course show a blank page?
 
-Production mode requires proxy URLs (`VITE_ANALYTICS_URL`, `VITE_XAPI_PROXY_URL`) or explicitly disabled tracking/xAPI. See [Production runtime for LMS](react-developers/getting-started-in-5-minutes.md#production-runtime-for-lms).
+Production mode requires proxy URLs (`VITE_ANALYTICS_URL`, `VITE_XAPI_PROXY_URL`) or explicitly disabled tracking/xAPI. See [Production runtime for LMS](react-developers/first-lms-export.md#production-runtime-for-lms).
 
 ## How do I keep React and `lessonkit.json` in sync?
 
@@ -63,7 +63,7 @@ Yes, when you pass a `config` object without `tracking.enabled: false`. Provide 
 
 ## Where is the API reference?
 
-TypeScript types ship on npm (`dist/*.d.ts`). Narrative docs: [API reference](../reference/api.md) · [Components and hooks](react-developers/components-and-hooks.md) · [Storybook](https://eddiethedean.github.io/lessonkit/storybook/). Generated TypeDoc is planned; use IDE “Go to Definition” until then.
+TypeScript types ship on npm (`dist/*.d.ts`). Browse generated API docs on [API reference](../reference/api.md) (TypeDoc for `@lessonkit/react`, `@lessonkit/core`, `@lessonkit/cli`). For component behavior and props, use [Components and hooks](react-developers/components-and-hooks.md) and [Storybook](https://eddiethedean.github.io/lessonkit/storybook/). In your project, IDE “Go to Definition” on `@lessonkit/react` imports is the fastest path.
 
 ## How do I upgrade LessonKit?
 

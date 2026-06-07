@@ -33,7 +33,7 @@
 
 ## Rules
 
-- `layout`: use `single-spa` for CLI `lessonkit package` (1.0.0).
+- `layout`: use `single-spa` for CLI `lessonkit package` (1.x).
 - `spaLessonId`: lesson id that hosts the built SPA in the package.
 - Assessments in JSON are used by LXPack packaging; React `Quiz` must use the same `checkId`.
 

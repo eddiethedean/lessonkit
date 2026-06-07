@@ -2,13 +2,17 @@
 
 ## Setup
 
+Canonical first-time setup (same as [CONTRIBUTING.md](https://github.com/eddiethedean/lessonkit/blob/main/CONTRIBUTING.md)):
+
 ```bash
 git clone https://github.com/eddiethedean/lessonkit.git
 cd lessonkit
-npm install
-npm run build
+npm ci
+npm run build:packages
 npm test
 ```
+
+Use `npm install` only when you change workspace dependencies (commit the updated `package-lock.json`). Run `npm run build` (packages + all examples) before wide refactors or release validation—not for every PR.
 
 ## Common scripts
 

@@ -32,7 +32,7 @@ Set `lxpack: { bridge: "auto", allowedParentOrigins: ["https://your-lms.example"
 
 ## Packaging says layout not supported
 
-Use `"layout": "single-spa"` in `lessonkit.json`. `per-lesson-spa` is not supported by `lessonkit package` (1.0.0).
+Use `"layout": "single-spa"` in `lessonkit.json`. `per-lesson-spa` is not supported by `lessonkit package` (1.x).
 
 ## “Could not find lessonkit.json”
 

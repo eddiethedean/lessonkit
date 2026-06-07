@@ -12,7 +12,7 @@ Common fixes for packaging, production builds, and LMS delivery. Vibe-coding use
 .lxpack/course/.lxpack/out/course-scorm12.zip
 ```
 
-Trust the path **`lessonkit package` prints** on stdout. See [Getting started in 5 minutes — step 6](getting-started-in-5-minutes.md).
+Trust the path **`lessonkit package` prints** on stdout. See [First LMS export — where the SCORM zip lands](first-lms-export.md#where-the-scorm-zip-lands).
 
 ## `lessonkit package` fails on ID parity
 
@@ -36,7 +36,7 @@ See [Keep React IDs in sync](quickstart.md#keep-react-ids-in-sync-with-lessonkit
 - **First test export only:** Temporarily set `tracking: { enabled: false }` and `xapi: { enabled: false }` in `courseConfig.ts`.
 - **Dev vs prod:** `npm run dev` uses console sinks; production mode enforces real delivery or explicit disable.
 
-Details: [production checklist](production-checklist.md) · [Production runtime for LMS](getting-started-in-5-minutes.md#production-runtime-for-lms).
+Details: [production checklist](production-checklist.md) · [Production runtime for LMS](first-lms-export.md#production-runtime-for-lms).
 
 ## SCORM runs but LMS shows no completion or score
 

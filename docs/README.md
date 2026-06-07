@@ -4,7 +4,7 @@ Sphinx site published at **[lessonkit.readthedocs.io](https://lessonkit.readthed
 
 | Audience | Entry |
 | --- | --- |
-| New users | [FAQ](https://lessonkit.readthedocs.io/en/latest/guides/faq.html) · [5-minute guide](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/getting-started-in-5-minutes.html) |
+| New users | [Start here](https://lessonkit.readthedocs.io/en/latest/guides/start-here.html) · [FAQ](https://lessonkit.readthedocs.io/en/latest/guides/faq.html) |
 | AI-assisted / non-React | [Vibe coding](https://lessonkit.readthedocs.io/en/latest/guides/vibe-coding/index.html) |
 | React developers | [React guides](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/index.html) |
 | Evaluators | [Architecture](https://lessonkit.readthedocs.io/en/latest/guides/architecture-overview.html) · [Enterprise evaluation](https://lessonkit.readthedocs.io/en/latest/guides/enterprise-evaluation.html) |
@@ -43,6 +43,7 @@ Edit the **canonical markdown at `docs/` root**, not the thin wrapper pages unde
 | `docs/CORE.md` | `reference/core.md` |
 | `docs/PLUGINS.md` | `reference/plugins.md` |
 | `docs/LXPACK_BRIDGE.md` | `reference/lxpack-bridge.md` |
+| `docs/MANIFEST.md` | `reference/manifest.md` |
 | `../../CHANGELOG.md` | `project/changelog.md` |
 | `../../SECURITY.md` | `project/security.md` |
 

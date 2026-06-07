@@ -2,10 +2,12 @@
 
 These pages embed **production builds** of the monorepo examples, compiled when the documentation site is built (CI and Read the Docs). Each course uses the same modern LMS layout (sidebar curriculum, progress ring, lesson cards) with a different color theme and scenario content.
 
-:::{admonition} Demo telemetry
+:::{admonition} Demo telemetry — not for production
 :class: warning
 
-Embedded demos and some examples still log telemetry/xAPI to the browser console for illustration. **Do not copy that pattern for production**—use the [production checklist](../guides/react-developers/production-checklist.md) and `createFetchTransport` instead.
+Embedded demos and monorepo examples log telemetry/xAPI to the **browser console** for illustration (`examples/_shared/docsDemoConfig.ts`). **Do not copy that pattern for production.**
+
+For LMS go-live, use the CLI template **`src/courseConfig.ts`** from `npx @lessonkit/cli init` and complete the [production checklist](../guides/react-developers/production-checklist.md) (proxy URLs, observability hooks, `lxpack.bridge` allowlist).
 :::
 
 :::{admonition} Local preview

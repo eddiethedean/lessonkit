@@ -33,7 +33,7 @@ import {
 | Runtime | `createLessonkitRuntime`, progress and session helpers |
 | Plugins | `createPluginRegistry`, `defineTelemetryPlugin`, `defineAssessmentPlugin` |
 
-Machine-readable: `@lessonkit/core/telemetry-catalog.v1.json`, `identity-contract.v1.json`
+Machine-readable: `@lessonkit/core/telemetry-catalog.v3.json` (current; v1–v3 retained), `identity-contract.v1.json`
 
 ## Docs
 

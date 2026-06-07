@@ -6,7 +6,7 @@
 
 xAPI statement generation, in-memory queueing, and telemetry-to-xAPI mapping.
 
-Requires Node.js **18+**.
+Requires Node.js **18+** minimum; **20.19+** recommended for CLI scaffold workflows (Vite 8).
 
 ## Install
 

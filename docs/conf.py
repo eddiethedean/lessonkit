@@ -32,6 +32,7 @@ exclude_patterns = [
     "README.md",
     "READTHEDOCS.md",
     "CLI.md",
+    "MANIFEST.md",
     "PACKAGING.md",
     "IDENTITY.md",
     "TELEMETRY.md",

@@ -2,6 +2,8 @@
 
 Runnable Vite + React courses demonstrating `@lessonkit/react` patterns and LMS packaging.
 
+> **Production config:** Monorepo examples use **console telemetry sinks** for demos (`examples/_shared/docsDemoConfig.ts`). For LMS go-live, copy patterns from the CLI template **`src/courseConfig.ts`** (`npx @lessonkit/cli init`) and complete the [production checklist](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/production-checklist.html)—do not copy example telemetry wiring into production.
+
 **Live demos:** [lessonkit.readthedocs.io/examples](https://lessonkit.readthedocs.io/en/latest/examples/index.html)
 
 ## Quick try (no clone)

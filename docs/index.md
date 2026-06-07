@@ -9,7 +9,11 @@
   </div>
   <p class="lk-hero-title">Build learning experiences that ship to your LMS</p>
   <p class="lk-lead">LessonKit is a framework for accessible, trackable courses—authored in React, packaged for SCORM and modern learning platforms, with built-in telemetry and xAPI.</p>
-  <p><a class="lk-hero-cta" href="guides/start-here.html">Start here →</a></p>
+  <p>
+    <a class="lk-hero-cta" href="guides/react-developers/getting-started-in-5-minutes.html">Build with React →</a>
+    <a class="lk-hero-cta" href="guides/vibe-coding/index.html" style="margin-left:0.75rem">Build with AI →</a>
+  </p>
+  <p style="margin-top:0.75rem"><a href="guides/start-here.html">Not sure? Start here</a></p>
 </div>
 ```
 
@@ -76,10 +80,6 @@ Release notes: [changelog](project/changelog.md) on this site · [GitHub](https:
 :caption: Getting started
 
 guides/start-here
-guides/react-developers/getting-started-in-5-minutes
-guides/react-developers/first-lms-export
-guides/vibe-coding/getting-started
-guides/h5p-for-lessonkit-authors
 ```
 
 :::{admonition} Questions?
@@ -113,7 +113,6 @@ guides/vibe-coding/getting-started
 guides/vibe-coding/your-first-course
 guides/vibe-coding/prompting-and-workflows
 guides/vibe-coding/shipping-to-lms
-guides/vibe-coding/troubleshooting
 guides/library-skills
 ```
 
@@ -142,7 +141,6 @@ guides/react-developers/theming-and-accessibility
 guides/react-developers/packaging-and-cli
 guides/react-developers/deployment-guide
 guides/react-developers/export-parity
-guides/react-developers/troubleshooting
 guides/react-developers/plugin-cookbook
 guides/react-developers/contributing-to-the-monorepo
 ```
@@ -152,6 +150,7 @@ guides/react-developers/contributing-to-the-monorepo
 :caption: Reference
 
 reference/glossary
+reference/manifest
 reference/api
 reference/cli
 reference/core
@@ -174,6 +173,12 @@ reference/lxpack-upgrades
 
 guides/upgrading-lessonkit
 MIGRATION-1.4-to-1.5
+MIGRATION-1.3-to-1.4
+MIGRATION-1.2-to-1.3
+MIGRATION-1.1-to-1.2
+MIGRATION-1.0-to-1.1
+MIGRATION-0.x-to-1.0
+project/release-history
 guides/enterprise-evaluation
 guides/architecture-overview
 project/changelog

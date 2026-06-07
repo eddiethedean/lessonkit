@@ -1,12 +1,12 @@
 ---
 name: lessonkit-packaging
 description: >-
-  Package LessonKit 1.0 Vite apps for LMS — lessonkit build, lessonkit package with
+  Package LessonKit 1.5.x Vite apps for LMS — lessonkit build, lessonkit package with
   scorm12/scorm2004/standalone/xapi/cmi5. Node 18+ required. Use when shipping ZIPs
   to an LMS or configuring lessonkit.json paths for export.
 license: Apache-2.0
 metadata:
-  lessonkit-version: "1.2.0"
+  lessonkit-version: "1.5.0"
 ---
 
 # LessonKit packaging / LMS export
@@ -60,5 +60,5 @@ Packaged SCORM/xAPI shells expose `window.parent.lxpackBridge.v1`. React apps us
 ## Do not
 
 - Run `lessonkit package` on Node versions below 18 (engine check fails)
-- Use `per-lesson-spa` layout with CLI package in 1.0.0
+- Use `per-lesson-spa` layout with CLI package in 1.x
 - Edit generated ZIP contents manually — fix source and rebuild

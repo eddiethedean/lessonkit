@@ -2,21 +2,21 @@
 
 Pick the path that matches how you work. Each link is a single next step—not the full documentation map.
 
-## I want to build a new course
+## Build with React
 
-**Fastest path:** [Getting started in 5 minutes](react-developers/getting-started-in-5-minutes.md) — `npx @lessonkit/cli init`, preview locally, edit one quiz.
+[Getting started in 5 minutes](react-developers/getting-started-in-5-minutes.md) — `npx @lessonkit/cli init`, preview locally, edit one quiz.
 
 **Then ship to an LMS:** [First LMS export](react-developers/first-lms-export.md) — bridge, env vars, SCORM zip.
 
-## I have an existing React / Vite app
-
-[Quickstart — add to an existing Vite app](react-developers/quickstart.md)
-
-## I use AI tools (Cursor, Copilot, ChatGPT)
+## Build with AI (no React required)
 
 [Vibe coding guides](vibe-coding/index.md) — prompts, library skills, ship to LMS without studying React first.
 
 Install optional [Library Skills](library-skills.md) for Cursor-compatible authoring helpers.
+
+## I have an existing React / Vite app
+
+[Quickstart — add to an existing Vite app](react-developers/quickstart.md)
 
 ## I am coming from H5P
 
