@@ -3,6 +3,10 @@
 from __future__ import annotations
 
 from datetime import datetime
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from sphinx.application import Sphinx
 
 project = "LessonKit"
 copyright = f"{datetime.now().year}, LessonKit contributors"
@@ -140,3 +144,16 @@ myst_url_schemes = ("http", "https", "mailto")
 
 copybutton_prompt_text = r">>> |\.\.\. |\$ |bash# "
 copybutton_prompt_is_regexp = True
+
+
+def _substitute_release_in_source(
+    _app: Sphinx, _docname: str, source: list[str]
+) -> None:
+    """MyST substitutions do not run inside ``{raw} html`` blocks."""
+    if "{{ release }}" in source[0]:
+        source[0] = source[0].replace("{{ release }}", release)
+
+
+def setup(app: Sphinx) -> dict[str, bool]:
+    app.connect("source-read", _substitute_release_in_source)
+    return {"version": "1.0", "parallel_read_safe": True}
