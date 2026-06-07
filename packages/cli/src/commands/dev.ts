@@ -1,4 +1,7 @@
+import { existsSync } from "node:fs";
+import { join } from "node:path";
 import type { CliJsonResult } from "../lib/errors.js";
+import { CliError, EXIT_INVALID_PROJECT } from "../lib/errors.js";
 import { runCommand } from "../lib/exec.js";
 import {
   assertViteProject,
@@ -6,7 +9,7 @@ import {
   readPackageJson,
   resolveViteJs,
 } from "../lib/project.js";
-import { resolveViteBuildArgs } from "../lib/paths.js";
+import { resolveDistDir, resolveViteBuildArgv } from "../lib/paths.js";
 
 export type DevBuildOptions = {
   cwd?: string;
@@ -34,10 +37,19 @@ export async function runBuild(opts: DevBuildOptions): Promise<CliJsonResult> {
   assertViteProject(pkg, project.root);
   const viteJs = resolveViteJs(project.root);
 
-  const buildArgs = resolveViteBuildArgs(project);
-  await runCommand(process.execPath, [viteJs, ...buildArgs, ...(opts.viteArgs ?? [])], {
+  const buildArgs = resolveViteBuildArgv(project, opts.viteArgs);
+  await runCommand(process.execPath, [viteJs, ...buildArgs], {
     cwd: project.root,
   });
+
+  const distDir = resolveDistDir(project);
+  const indexHtml = join(distDir, "index.html");
+  if (!existsSync(indexHtml)) {
+    throw new CliError(
+      `Build did not produce index.html at ${indexHtml}. Check paths.spaDistDir in lessonkit.json.`,
+      { code: "INVALID_PROJECT", exitCode: EXIT_INVALID_PROJECT },
+    );
+  }
 
   return { ok: true, command: "build", projectRoot: project.root };
 }

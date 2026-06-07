@@ -80,6 +80,9 @@ export function createXAPIClient(opts?: {
   let warnedTransportFailure = false;
   const inflightById = new Map<string, Promise<void>>();
   const inflightStatements = new Map<string, XAPIStatement>();
+  const pendingReplacement = new Map<string, XAPIStatement>();
+  const inflightPayload = new Map<string, XAPIStatement>();
+  const replacementWatcher = new Set<string>();
   const exitDeliveredIds = new Set<string>();
   const exitNetworkSentIds = new Set<string>();
   /** Statement ids handed to exit transport — suppresses abort re-queue race. */
@@ -146,16 +149,34 @@ export function createXAPIClient(opts?: {
       }
       const existing = inflightById.get(normalized.id);
       if (existing) {
-        void existing.then(
-          () => undefined,
-          () => {
-            sendOrQueueInternal(normalized);
-          },
-        );
+        pendingReplacement.set(normalized.id, normalized);
+        inflightStatements.set(normalized.id, normalized);
+        if (!replacementWatcher.has(normalized.id)) {
+          replacementWatcher.add(normalized.id);
+          void existing.then(
+            () => {
+              replacementWatcher.delete(normalized.id);
+              const replacement = pendingReplacement.get(normalized.id);
+              const transported = inflightPayload.get(normalized.id);
+              pendingReplacement.delete(normalized.id);
+              inflightPayload.delete(normalized.id);
+              if (replacement && replacement !== transported) {
+                sendOrQueueInternal(replacement);
+              }
+            },
+            () => {
+              replacementWatcher.delete(normalized.id);
+              const replacement = pendingReplacement.get(normalized.id) ?? normalized;
+              pendingReplacement.delete(normalized.id);
+              sendOrQueueInternal(replacement);
+            },
+          );
+        }
         return;
       }
 
       inflightStatements.set(normalized.id, normalized);
+      inflightPayload.set(normalized.id, normalized);
       const flight = Promise.resolve()
         .then(async () => {
           await deliveryTransport(normalized);
@@ -176,6 +197,9 @@ export function createXAPIClient(opts?: {
         .finally(() => {
           inflightById.delete(normalized.id);
           inflightStatements.delete(normalized.id);
+          if (!replacementWatcher.has(normalized.id)) {
+            inflightPayload.delete(normalized.id);
+          }
         });
       inflightById.set(normalized.id, flight);
       void flight.catch(() => {});

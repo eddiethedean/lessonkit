@@ -86,12 +86,11 @@ export function createInMemoryXAPIQueue(opts?: InMemoryXAPIQueueOptions): XAPIQu
       }
       if (buffer.length >= maxSize) {
         if (headInFlight) {
-          if (buffer.length >= maxSize) {
-            if (buffer.length > 1) {
-              buffer.splice(1, 1);
-            } else {
-              buffer.shift();
-            }
+          if (buffer.length > 1) {
+            buffer.splice(1, 1);
+          } else {
+            opts?.onCap?.();
+            return;
           }
         } else {
           buffer.shift();

@@ -207,7 +207,34 @@ describe("@lessonkit/react runtime modules", () => {
     expect(client).toBeNull();
   });
 
-  it("telemetryPipeline: emitThroughPipeline invokes extra sinks", () => {
+  it("telemetryPipeline: awaits xapi flush for lifecycle events", async () => {
+    const flush = vi.fn(async () => {});
+    const send = vi.fn();
+    const tracking = { track: vi.fn() } as TrackingClient;
+    const xapi = {
+      send,
+      flush,
+      queueSize: () => 0,
+      startedLesson: () => {},
+      completeLesson: () => {},
+      completeCourse: () => {},
+    };
+    await emitThroughPipeline(
+      {
+        name: "lesson_completed",
+        timestamp: "t",
+        courseId: "c",
+        sessionId: "s",
+        lessonId: "lesson-1",
+        data: { lessonId: "lesson-1" },
+      },
+      { tracking, xapi, lxpackBridge: "off" },
+    );
+    expect(send).toHaveBeenCalledTimes(1);
+    expect(flush).toHaveBeenCalledTimes(1);
+  });
+
+  it("telemetryPipeline: emitThroughPipeline invokes extra sinks", async () => {
     const tracked: string[] = [];
     const tracking = {
       track: (e: TelemetryEvent) => {
@@ -215,7 +242,7 @@ describe("@lessonkit/react runtime modules", () => {
         return true;
       },
     } satisfies TrackingClient;
-    emitThroughPipeline(
+    await emitThroughPipeline(
       {
         name: "course_started",
         timestamp: "t",
@@ -235,7 +262,7 @@ describe("@lessonkit/react runtime modules", () => {
     expect(pipeline.sinks.length).toBeGreaterThan(0);
   });
 
-  it("telemetryPipeline: warns in dev when xAPI mapping throws", () => {
+  it("telemetryPipeline: warns in dev when xAPI mapping throws", async () => {
     vi.stubEnv("NODE_ENV", "development");
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
     vi.spyOn(xapiMapModule, "telemetryEventToXAPIStatement").mockImplementation(() => {
@@ -251,7 +278,7 @@ describe("@lessonkit/react runtime modules", () => {
         completeLesson: () => {},
         completeCourse: () => {},
       };
-      emitThroughPipeline(
+      await emitThroughPipeline(
         { name: "interaction", timestamp: "t", courseId: "c" },
         { tracking, xapi, lxpackBridge: "off" },
       );
@@ -265,7 +292,7 @@ describe("@lessonkit/react runtime modules", () => {
     }
   });
 
-  it("telemetryPipeline: swallows mapping errors in production without warning", () => {
+  it("telemetryPipeline: swallows mapping errors in production without warning", async () => {
     vi.stubEnv("NODE_ENV", "production");
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
     vi.spyOn(xapiMapModule, "telemetryEventToXAPIStatement").mockImplementation(() => {
@@ -281,7 +308,7 @@ describe("@lessonkit/react runtime modules", () => {
         completeLesson: () => {},
         completeCourse: () => {},
       };
-      emitThroughPipeline(
+      await emitThroughPipeline(
         { name: "interaction", timestamp: "t", courseId: "c" },
         { tracking, xapi, lxpackBridge: "off" },
       );
@@ -293,7 +320,7 @@ describe("@lessonkit/react runtime modules", () => {
     }
   });
 
-  it("telemetryPipeline: swallows mapping errors when process is unavailable", () => {
+  it("telemetryPipeline: swallows mapping errors when process is unavailable", async () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
     vi.spyOn(xapiMapModule, "telemetryEventToXAPIStatement").mockImplementation(() => {
       throw new Error("bad mapping");
@@ -303,7 +330,7 @@ describe("@lessonkit/react runtime modules", () => {
     try {
       Reflect.deleteProperty(globalThis as object, "process");
       const tracking = { track: vi.fn() } as TrackingClient;
-      emitThroughPipeline(
+      await emitThroughPipeline(
         { name: "interaction", timestamp: "t", courseId: "c" },
         {
           tracking,

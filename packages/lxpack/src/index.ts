@@ -32,7 +32,7 @@ export type { SpaLessonEntry } from "./interchange";
 export { descriptorToInterchange, resolveSpaLessons } from "./interchange";
 
 export type { LxpackInjectedAssessment } from "./assessments";
-export { assessmentDescriptorToLxpack, extractAssessments } from "./assessments";
+export { assessmentDescriptorToLxpack, escapeShellText, extractAssessments } from "./assessments";
 
 export type { WriteLxpackProjectOptions, WriteLxpackProjectResult } from "./writeProject";
 export { writeLxpackProject } from "./writeProject";

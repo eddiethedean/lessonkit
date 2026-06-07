@@ -30,7 +30,7 @@ describe("emitTelemetry", () => {
       courseId: "course-1",
       sessionId: "s1",
     });
-    emitTelemetry(tracking, xapi, event);
+    await emitTelemetry(tracking, xapi, event);
 
     expect(sink).toHaveBeenCalledWith(
       expect.objectContaining({ name: "course_started", courseId: "course-1", sessionId: "s1" }),
@@ -81,7 +81,7 @@ describe("emitTelemetry", () => {
     ).toThrow(/Unexpected value/);
   });
 
-  it("forwards lesson_completed to lxpackBridge when embedded", () => {
+  it("forwards lesson_completed to lxpackBridge when embedded", async () => {
     const completeLesson = vi.fn();
     const parent = {
       lxpackBridge: { v1: { completeLesson } },
@@ -96,7 +96,7 @@ describe("emitTelemetry", () => {
       sessionId: "s1",
       data: { lessonId: "lesson-1" },
     });
-    emitTelemetry(tracking, null, event);
+    await emitTelemetry(tracking, null, event);
 
     expect(completeLesson).toHaveBeenCalledWith("lesson-1");
     vi.unstubAllGlobals();

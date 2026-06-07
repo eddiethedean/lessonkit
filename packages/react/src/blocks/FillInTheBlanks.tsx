@@ -30,6 +30,42 @@ function parseTemplate(template: string): { parts: string[]; blanks: FillInBlank
   };
 }
 
+function normalizeBlanks(blanks: FillInBlankSpec[]): FillInBlankSpec[] {
+  return blanks
+    .map((b) => ({ id: b.id.trim(), answer: b.answer.trim() }))
+    .filter((b) => b.id.length > 0 && b.answer.length > 0);
+}
+
+function resolveBlanks(
+  template: string,
+  explicitBlanks: FillInBlankSpec[] | undefined,
+): { parts: string[]; blanks: FillInBlankSpec[] } {
+  const parsed = parseTemplate(template);
+  if (!explicitBlanks) {
+    return { parts: parsed.parts, blanks: parsed.blanks };
+  }
+  const normalized = normalizeBlanks(explicitBlanks);
+  if (normalized.length !== parsed.blanks.length) {
+    if (isDevEnvironment()) {
+      console.warn(
+        "[lessonkit] FillInTheBlanks: blanks length does not match template; using parsed blanks",
+        { templateBlanks: parsed.blanks.length, explicitBlanks: normalized.length },
+      );
+    }
+    return { parts: parsed.parts, blanks: parsed.blanks };
+  }
+  let blankIdx = 0;
+  const interleavedParts = parsed.parts.map((part) => {
+    if (part.startsWith("blank-")) {
+      const id = normalized[blankIdx]?.id;
+      blankIdx += 1;
+      return id ?? part;
+    }
+    return part;
+  });
+  return { parts: interleavedParts, blanks: normalized };
+}
+
 function FillInTheBlanksInner(
   props: FillInTheBlanksProps & { enclosingLessonId: LessonId },
   ref: React.Ref<AssessmentHandle>,
@@ -37,22 +73,10 @@ function FillInTheBlanksInner(
   const checkId = useMemo(() => normalizeComponentId(props.checkId, "checkId"), [props.checkId]);
   const assessment = useAssessmentState(props.enclosingLessonId);
   const { config } = useLessonkit();
-  const { parts, blanks } = useMemo(() => {
-    const parsed = parseTemplate(props.template);
-    if (!props.blanks) {
-      return { parts: parsed.parts, blanks: parsed.blanks };
-    }
-    let blankIdx = 0;
-    const interleavedParts = parsed.parts.map((part) => {
-      if (part.startsWith("blank-")) {
-        const id = props.blanks![blankIdx]?.id;
-        blankIdx += 1;
-        return id ?? part;
-      }
-      return part;
-    });
-    return { parts: interleavedParts, blanks: props.blanks };
-  }, [props.template, props.blanks]);
+  const { parts, blanks } = useMemo(
+    () => resolveBlanks(props.template, props.blanks),
+    [props.template, props.blanks],
+  );
   const [values, setValues] = useState<Record<string, string>>(() =>
     Object.fromEntries(blanks.map((b) => [b.id, ""])),
   );

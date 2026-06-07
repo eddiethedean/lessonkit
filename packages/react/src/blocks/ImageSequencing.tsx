@@ -6,8 +6,10 @@ import { buildAssessmentHandle } from "../assessment/internal/buildAssessmentHan
 import { readBooleanStateField } from "../assessment/internal/resumeState";
 import { useAssessmentHandleRegistration } from "../assessment/internal/useAssessmentHandleRegistration";
 import { meetsPassingThreshold } from "../assessment/scoring";
+import { shouldReplayResumeTelemetry } from "../assessment/shouldReplayResumeTelemetry";
 import { useAssessmentState } from "../assessment/useAssessmentState";
 import { setLessonkitBlockType } from "../compound/blockType";
+import { useLessonkit } from "../hooks";
 import { normalizeComponentId } from "../runtime/validateComponentId";
 
 export type SequencingImage = {
@@ -28,6 +30,7 @@ function ImageSequencingInner(
   ref: React.Ref<AssessmentHandle>,
 ) {
   const checkId = useMemo(() => normalizeComponentId(props.checkId, "checkId"), [props.checkId]);
+  const { config } = useLessonkit();
   const assessment = useAssessmentState(props.enclosingLessonId);
   const imagesKey = props.images.map((i) => i.id).join("\0");
   const orderKey = props.correctOrder.join("\0");
@@ -94,7 +97,7 @@ function ImageSequencingInner(
           readBooleanStateField(state, "passed", (value) => {
             setPassed(value);
             completedRef.current = value;
-            if (value && !telemetryReplayedRef.current) {
+            if (value && !telemetryReplayedRef.current && shouldReplayResumeTelemetry(config)) {
               telemetryReplayedRef.current = true;
               const nextIsCorrect = nextOrder.every((id, i) => id === props.correctOrder[i]);
               const nextScore = nextIsCorrect ? maxScore : 0;
@@ -116,7 +119,7 @@ function ImageSequencingInner(
           readBooleanStateField(state, "checked", setChecked);
         },
       }),
-    [checkId, checked, maxScore, order, passed, passedThreshold, score],
+    [assessment, checkId, checked, config, maxScore, order, passed, passedThreshold, props.correctOrder, props.passingScore, score],
   );
 
   useAssessmentHandleRegistration(checkId, handle, ref);

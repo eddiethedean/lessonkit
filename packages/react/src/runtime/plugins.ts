@@ -33,6 +33,7 @@ export function emitTelemetryWithPlugins(opts: {
   event: TelemetryEvent;
   pluginCtx: LessonkitPluginContext;
   lxpackBridge?: LxpackBridgeMode;
+  allowedParentOrigins?: string[];
   extraSinks?: import("@lessonkit/core").TelemetryPipelineSink[];
   onLxpackBridgeMiss?: (event: TelemetryEvent) => void;
 }): void {
@@ -42,6 +43,7 @@ export function emitTelemetryWithPlugins(opts: {
   if (next === null) return;
   emitTelemetry(opts.tracking, opts.xapi, next, {
     lxpackBridge: opts.lxpackBridge ?? "auto",
+    allowedParentOrigins: opts.allowedParentOrigins,
     extraSinks: opts.extraSinks,
     onLxpackBridgeMiss: opts.onLxpackBridgeMiss,
   });

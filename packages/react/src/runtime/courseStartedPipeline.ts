@@ -7,12 +7,15 @@ export type CourseStartedPipelineEmitOpts = {
   event: TelemetryEvent;
   xapi: XAPIClient | null;
   lxpackBridge: LxpackBridgeMode;
+  allowedParentOrigins?: string[];
   onLxpackBridgeMiss?: (event: TelemetryEvent) => void;
   extraSinks?: TelemetryPipelineSink[];
   /** When xAPI already sent course_started for this client (layout bootstrap or prior pipeline). */
   skipXapi?: boolean;
   /** Called immediately after xAPI flush succeeds, before extra sinks. */
   onXapiDelivered?: () => void;
+  /** Called after xAPI and lxpack bridge, before extra sinks (for independent mark commits). */
+  onBeforeExtraSinks?: () => void | Promise<void>;
 };
 
 export type CourseStartedPipelineEmitResult = {
@@ -80,7 +83,12 @@ export async function emitCourseStartedNonTrackingPipeline(
 
   forwardTelemetryToLxpack(opts.event, opts.lxpackBridge, {
     onBridgeMiss: opts.onLxpackBridgeMiss,
+    allowedParentOrigins: opts.allowedParentOrigins,
   });
+
+  if (opts.onBeforeExtraSinks) {
+    await opts.onBeforeExtraSinks();
+  }
 
   const emitCtx = {
     courseId: opts.event.courseId as CourseId,

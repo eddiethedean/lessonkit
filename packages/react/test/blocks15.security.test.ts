@@ -1,8 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
 import {
   buildEmbedSandbox,
+  isBlockedHost,
   resolveEmbedAspectRatio,
   resolveEmbedSrc,
+  resolveMediaSrc,
   telemetryEmbedSrc,
 } from "../src/blocks/embedSecurity";
 import { chartMaxValue, normalizeChartData, normalizeChartType } from "../src/blocks/chartUtils";
@@ -15,6 +17,23 @@ describe("embedSecurity", () => {
   it("rejects javascript and data URLs", () => {
     expect(resolveEmbedSrc("javascript:alert(1)")).toBeNull();
     expect(resolveEmbedSrc("data:text/html,hello")).toBeNull();
+    expect(resolveMediaSrc("javascript:alert(1)")).toBeNull();
+  });
+
+  it("blocks private-network hosts in production", () => {
+    vi.stubEnv("NODE_ENV", "production");
+    expect(isBlockedHost("10.0.0.1")).toBe(true);
+    expect(resolveEmbedSrc("https://10.0.0.1/doc")).toBeNull();
+    expect(resolveMediaSrc("https://10.0.0.1/video.mp4")).toBeNull();
+    vi.unstubAllEnvs();
+  });
+
+  it("allows explicitly allowlisted private hosts in production", () => {
+    vi.stubEnv("NODE_ENV", "production");
+    expect(
+      resolveMediaSrc("https://10.0.0.1/video.mp4", { allowedHosts: ["10.0.0.1"] }),
+    ).toBe("https://10.0.0.1/video.mp4");
+    vi.unstubAllEnvs();
   });
 
   it("blocks high-risk sandbox tokens", () => {

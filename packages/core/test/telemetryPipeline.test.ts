@@ -1,9 +1,13 @@
 import { describe, expect, it, vi } from "vitest";
 import type { TelemetryEvent } from "@lessonkit/core";
-import { createTelemetryPipeline, createTrackingPipelineSink } from "../src/telemetryPipeline";
+import {
+  createTelemetryPipeline,
+  createTrackingPipelineSink,
+  isLifecycleTelemetryEvent,
+} from "../src/telemetryPipeline";
 
 describe("createTelemetryPipeline", () => {
-  it("invokes all sinks in registration order", () => {
+  it("invokes all sinks in registration order", async () => {
     const order: string[] = [];
     const pipeline = createTelemetryPipeline([
       createTrackingPipelineSink("a", () => void order.push("a")),
@@ -16,7 +20,7 @@ describe("createTelemetryPipeline", () => {
       courseId: "c",
       sessionId: "s",
     };
-    pipeline.emit(event);
+    await pipeline.emit(event);
 
     expect(order).toEqual(["a", "b"]);
   });
@@ -57,7 +61,7 @@ describe("createTelemetryPipeline", () => {
     expect(tracked).toEqual(["course_completed"]);
   });
 
-  it("swallows sync sink throws and still invokes later sinks", () => {
+  it("swallows sync sink throws and still invokes later sinks", async () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
     const prevEnv = process.env.NODE_ENV;
     process.env.NODE_ENV = "development";
@@ -73,14 +77,14 @@ describe("createTelemetryPipeline", () => {
       { id: "after", emit: () => void order.push("after") },
     ]);
 
-    expect(() =>
+    await expect(
       pipeline.emit({
         name: "course_started",
         timestamp: "t",
         courseId: "c",
         sessionId: "s",
       }),
-    ).not.toThrow();
+    ).resolves.toBeUndefined();
 
     expect(order).toEqual(["after"]);
     expect(warn).toHaveBeenCalledWith(
@@ -106,16 +110,15 @@ describe("createTelemetryPipeline", () => {
       },
     ]);
 
-    expect(() =>
+    await expect(
       pipeline.emit({
         name: "course_started",
         timestamp: "t",
         courseId: "c",
         sessionId: "s",
       }),
-    ).not.toThrow();
+    ).resolves.toBeUndefined();
 
-    await new Promise((resolve) => setTimeout(resolve, 0));
     expect(warn).toHaveBeenCalledWith(
       expect.stringContaining('telemetry sink "async-fail" failed'),
       "sink failed",
@@ -123,5 +126,38 @@ describe("createTelemetryPipeline", () => {
 
     process.env.NODE_ENV = prevEnv;
     warn.mockRestore();
+  });
+
+  it("isLifecycleTelemetryEvent identifies course and lesson lifecycle names", () => {
+    expect(isLifecycleTelemetryEvent("lesson_started")).toBe(true);
+    expect(isLifecycleTelemetryEvent("interaction")).toBe(false);
+  });
+
+  it("awaits async sinks in registration order", async () => {
+    const order: string[] = [];
+    const pipeline = createTelemetryPipeline([
+      {
+        id: "async-a",
+        emit: async () => {
+          await new Promise((resolve) => setTimeout(resolve, 5));
+          order.push("a");
+        },
+      },
+      {
+        id: "async-b",
+        emit: async () => {
+          order.push("b");
+        },
+      },
+    ]);
+
+    await pipeline.emit({
+      name: "course_started",
+      timestamp: "t",
+      courseId: "c",
+      sessionId: "s",
+    });
+
+    expect(order).toEqual(["a", "b"]);
   });
 });

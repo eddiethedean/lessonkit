@@ -1,6 +1,7 @@
 import { slugifyId } from "@lessonkit/core";
-import { cp, mkdir, readdir, readFile, writeFile } from "node:fs/promises";
+import { cp, mkdir, readdir, readFile, rename, rm, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
+import { randomUUID } from "node:crypto";
 import { basename, dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { CliLogger } from "../lib/logger.js";
@@ -107,6 +108,22 @@ async function applyTemplateSubstitutions(projectDir: string, projectName: strin
   await writeFile(appPath, appSource, "utf8");
 }
 
+async function promoteStagingToProjectDir(stagingDir: string, projectDir: string): Promise<void> {
+  await mkdir(projectDir, { recursive: true });
+  const entries = await readdir(stagingDir, { withFileTypes: true });
+  for (const entry of entries) {
+    const srcPath = join(stagingDir, entry.name);
+    const destPath = join(projectDir, entry.name);
+    if (entry.isDirectory()) {
+      await cp(srcPath, destPath, { recursive: true });
+    } else if (entry.isFile()) {
+      await cp(srcPath, destPath);
+    } else {
+      /* v8 ignore next -- template tree entries are files or directories */
+    }
+  }
+}
+
 /** @internal Exported for coverage of edge-case helpers only. */
 export const __testInitHelpers = {
   getTemplateDir,
@@ -114,6 +131,7 @@ export const __testInitHelpers = {
   isDirEmptyOrDotfilesOnly,
   escapeJsxString,
   copyTemplate,
+  promoteStagingToProjectDir,
 };
 
 export async function runInit(opts: InitOptions, logger: CliLogger): Promise<CliJsonResult> {
@@ -175,12 +193,28 @@ export async function runInit(opts: InitOptions, logger: CliLogger): Promise<Cli
     });
   }
 
-  await copyTemplate(templateDir, projectDir);
-  await applyTemplateSubstitutions(projectDir, projectName, slug);
+  const stagingDir = opts.here
+    ? join(cwd, `.lessonkit-init-${randomUUID()}`)
+    : join(cwd, `.${slug}-init-${randomUUID()}`);
 
-  if (!opts.skipInstall) {
-    if (!opts.json) logger.log(`Installing dependencies in ${projectDir}…`);
-    await runNpmInstall(projectDir);
+  try {
+    await copyTemplate(templateDir, stagingDir);
+    await applyTemplateSubstitutions(stagingDir, projectName, slug);
+
+    if (!opts.skipInstall) {
+      if (!opts.json) logger.log(`Installing dependencies in ${stagingDir}…`);
+      await runNpmInstall(stagingDir);
+    }
+
+    if (opts.here) {
+      await promoteStagingToProjectDir(stagingDir, projectDir);
+      await rm(stagingDir, { recursive: true, force: true });
+    } else {
+      await rename(stagingDir, projectDir);
+    }
+  } catch (err) {
+    await rm(stagingDir, { recursive: true, force: true }).catch(/* v8 ignore next */ () => undefined);
+    throw err;
   }
 
   if (!opts.json) {

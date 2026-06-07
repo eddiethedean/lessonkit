@@ -59,6 +59,8 @@ export type LessonkitConfig = {
   lxpack?: {
     /** Forward completion events to `window.parent.lxpackBridge.v1` when embedded (default `auto`). */
     bridge?: LmsBridgeMode;
+    /** Parent-frame origins allowed to receive bridge calls when `bridge` is `auto`. */
+    allowedParentOrigins?: string[];
   };
   /** Framework plugins (analytics, LMS, assessment, interaction, AI). */
   plugins?: LessonkitPlugin[];
@@ -72,6 +74,8 @@ export type LessonkitConfig = {
   embed?: {
     /** Strip `allow-popups` from iframe sandbox in production builds (default true). */
     restrictPopupsInProduction?: boolean;
+    /** Hostnames allowed to bypass the production private-network media/embed blocklist. */
+    allowedHosts?: string[];
   };
   /**
    * Non-production preview options. `allowConsoleTelemetry` skips production guard

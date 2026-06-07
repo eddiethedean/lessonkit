@@ -136,6 +136,52 @@ describe("emitCourseStartedNonTrackingPipeline", () => {
     expect(settled).toBe(true);
   });
 
+  it("calls onBeforeExtraSinks after xAPI and lxpack before extra sinks", async () => {
+    const order: string[] = [];
+    const flush = vi.fn(async () => {
+      order.push("flush");
+    });
+    await emitCourseStartedNonTrackingPipeline({
+      event: courseStartedEvent,
+      xapi: { ...mockXapiClient(vi.fn()), flush },
+      lxpackBridge: "off",
+      onBeforeExtraSinks: () => {
+        order.push("before-extra");
+      },
+      extraSinks: [
+        {
+          id: "extra",
+          emit: () => {
+            order.push("extra");
+          },
+        },
+      ],
+    });
+    expect(order).toEqual(["flush", "before-extra", "extra"]);
+  });
+
+  it("commits onBeforeExtraSinks before extra sinks even when a sink fails", async () => {
+    const marks: string[] = [];
+    await emitCourseStartedNonTrackingPipeline({
+      event: courseStartedEvent,
+      xapi: null,
+      lxpackBridge: "off",
+      onBeforeExtraSinks: () => {
+        marks.push("before-extra");
+      },
+      extraSinks: [
+        {
+          id: "failing",
+          emit: async () => {
+            throw new Error("sink failed");
+          },
+        },
+      ],
+    }).catch(() => undefined);
+
+    expect(marks).toEqual(["before-extra"]);
+  });
+
   it("calls onXapiDelivered after flush before extra sinks", async () => {
     const order: string[] = [];
     const flush = vi.fn(async () => {

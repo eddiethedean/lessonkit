@@ -1,4 +1,4 @@
-import { mkdir, mkdtemp, writeFile, rm } from "node:fs/promises";
+import { mkdir, mkdtemp, writeFile, rm, access } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -77,5 +77,6 @@ describe("buildStagingPackage errors", () => {
     expect(result.ok).toBe(false);
     if (result.ok) return;
     expect(result.issues.some((i) => i.path === "assessments[0]")).toBe(true);
+    await expect(access(result.stagingDir)).rejects.toThrow();
   });
 });

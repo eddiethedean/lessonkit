@@ -150,6 +150,32 @@ describe("emitCourseStartedToTracking", () => {
     expect(hasCourseStartedEmittedToTracking(storage, "session-1", "course-1")).toBe(true);
   });
 
+  it("treats delivery as success when durable mark fails but in-memory dedupe is set", async () => {
+    const memory = new Map<string, string>();
+    const storage = {
+      getItem: (k: string) => memory.get(k) ?? null,
+      setItem: (k: string, v: string) => {
+        memory.set(k, v);
+        return false;
+      },
+    };
+    const tracking: TrackingClient = {
+      deliver: async () => true,
+      track: vi.fn(),
+    };
+
+    const ok = await emitCourseStartedToTracking(
+      tracking,
+      storage,
+      "session-1",
+      "course-1",
+      event,
+    );
+
+    expect(ok).toBe(true);
+    expect(hasCourseStartedEmittedToTracking(storage, "session-1", "course-1")).toBe(true);
+  });
+
   it("does not mark dedupe when shouldCommit fails after flush", async () => {
     const storage = createSessionStoragePort();
     let commit = true;

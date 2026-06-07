@@ -1,7 +1,9 @@
 import React, { useMemo } from "react";
 import type { BlockId } from "@lessonkit/core";
 import { setLessonkitBlockType } from "../compound/blockType";
+import { useLessonkit } from "../hooks";
 import { normalizeComponentId } from "../runtime/validateComponentId";
+import { resolveMediaSrc } from "./embedSecurity";
 
 export type VideoProps = {
   blockId: BlockId;
@@ -13,10 +15,26 @@ export type VideoProps = {
 };
 
 export function Video(props: VideoProps) {
+  const { config } = useLessonkit();
   const blockId = useMemo(
     () => normalizeComponentId(props.blockId, "blockId") as BlockId,
     [props.blockId],
   );
+  const mediaOptions = { allowedHosts: config.embed?.allowedHosts };
+  const resolvedSrc = resolveMediaSrc(props.src, mediaOptions);
+  const resolvedPoster = resolveMediaSrc(props.poster, mediaOptions);
+  const resolvedCaptions = resolveMediaSrc(props.captions, mediaOptions);
+
+  if (!resolvedSrc) {
+    return (
+      <section aria-label={props.title ?? "Video"} data-lk-block-id={blockId} data-testid="video">
+        {props.title ? <h3 data-testid="video-title">{props.title}</h3> : null}
+        <p role="alert" data-testid="video-blocked">
+          This video URL is not allowed.
+        </p>
+      </section>
+    );
+  }
 
   return (
     <section aria-label={props.title ?? "Video"} data-lk-block-id={blockId} data-testid="video">
@@ -24,13 +42,19 @@ export function Video(props: VideoProps) {
       <video
         controls
         preload="metadata"
-        poster={props.poster}
-        src={props.src}
+        poster={resolvedPoster ?? undefined}
+        src={resolvedSrc}
         data-testid="video-player"
         style={{ maxWidth: "100%" }}
       >
-        {props.captions ? (
-          <track kind="captions" src={props.captions} srcLang="en" label="Captions" default />
+        {resolvedCaptions ? (
+          <track
+            kind="captions"
+            src={resolvedCaptions}
+            srcLang="en"
+            label="Captions"
+            default
+          />
         ) : null}
       </video>
     </section>

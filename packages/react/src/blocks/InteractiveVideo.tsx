@@ -9,6 +9,7 @@ import { setLessonkitBlockType } from "../compound/blockType";
 import { useLessonkit } from "../hooks";
 import { useEnclosingLessonId } from "../lessonContext";
 import { normalizeComponentId } from "../runtime/validateComponentId";
+import { resolveMediaSrc } from "./embedSecurity";
 import type { TimedCueProps } from "./TimedCue";
 
 export type InteractiveVideoProps = {
@@ -65,6 +66,10 @@ const InteractiveVideoInner = forwardRef<
 
   const { config, track, storage } = useLessonkit();
   const lessonId = useEnclosingLessonId();
+  const mediaOptions = { allowedHosts: config.embed?.allowedHosts };
+  const resolvedSrc = resolveMediaSrc(props.src, mediaOptions);
+  const resolvedPoster = resolveMediaSrc(props.poster, mediaOptions);
+  const resolvedCaptions = resolveMediaSrc(props.captions, mediaOptions);
   const videoRef = useRef<HTMLVideoElement>(null);
   const lastKnownTimeRef = useRef(initialMeta.currentTime);
   const completedCuesRef = useRef(new Set<number>(initialMeta.completedCueIndices));
@@ -80,6 +85,8 @@ const InteractiveVideoInner = forwardRef<
     ),
   );
   const resumeOverlayCheckedRef = useRef(false);
+  const [persistTrigger, setPersistTrigger] = useState(0);
+  const lastPersistTimeRef = useRef(0);
 
   const sortedCues = useMemo(
     () => [...cues].sort((a, b) => (a.props.atSeconds ?? 0) - (b.props.atSeconds ?? 0)),
@@ -116,6 +123,7 @@ const InteractiveVideoInner = forwardRef<
     ref,
     storage,
     transformState,
+    persistTrigger,
   });
 
   const activeCue = sortedCues[visibleIndex];
@@ -215,6 +223,12 @@ const InteractiveVideoInner = forwardRef<
     const t = video.currentTime;
     lastKnownTimeRef.current = Math.max(lastKnownTimeRef.current, t);
 
+    const now = Date.now();
+    if (now - lastPersistTimeRef.current >= 5000) {
+      lastPersistTimeRef.current = now;
+      setPersistTrigger((n) => n + 1);
+    }
+
     const blockSeek = mandatoryIncompleteBefore(t);
     if (blockSeek !== null && t > blockSeek + 0.5) {
       video.currentTime = blockSeek;
@@ -264,28 +278,40 @@ const InteractiveVideoInner = forwardRef<
           {Array.from(ctx.getHandles().values()).reduce((s, h) => s + h.getMaxScore(), 0)}
         </p>
       ) : null}
-      <div style={{ position: "relative" }}>
-        <video
-          ref={videoRef}
-          src={props.src}
-          poster={props.poster}
-          controls
-          data-testid="interactive-video-player"
-          onTimeUpdate={onTimeUpdate}
-          onSeeking={() => {
-            const video = videoRef.current;
-            if (!video) return;
-            const blockSeek = mandatoryIncompleteBefore(video.currentTime);
-            if (blockSeek !== null && video.currentTime > blockSeek + 0.5) {
-              video.currentTime = blockSeek;
-            }
-          }}
-        >
-          {props.captions ? (
-            <track kind="captions" src={props.captions} srcLang="en" label="Captions" default />
-          ) : null}
-        </video>
-      </div>
+      {!resolvedSrc ? (
+        <p role="alert" data-testid="interactive-video-blocked">
+          This video URL is not allowed.
+        </p>
+      ) : (
+        <div style={{ position: "relative" }}>
+          <video
+            ref={videoRef}
+            src={resolvedSrc}
+            poster={resolvedPoster ?? undefined}
+            controls
+            data-testid="interactive-video-player"
+            onTimeUpdate={onTimeUpdate}
+            onSeeking={() => {
+              const video = videoRef.current;
+              if (!video) return;
+              const blockSeek = mandatoryIncompleteBefore(video.currentTime);
+              if (blockSeek !== null && video.currentTime > blockSeek + 0.5) {
+                video.currentTime = blockSeek;
+              }
+            }}
+          >
+            {resolvedCaptions ? (
+              <track
+                kind="captions"
+                src={resolvedCaptions}
+                srcLang="en"
+                label="Captions"
+                default
+              />
+            ) : null}
+          </video>
+        </div>
+      )}
       <div data-testid="interactive-video-cues">
         {sortedCues.map((cue, i) =>
           React.cloneElement(cue, {

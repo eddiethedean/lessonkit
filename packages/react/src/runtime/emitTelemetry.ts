@@ -19,10 +19,11 @@ export function emitTelemetry(
   event: TelemetryEvent,
   opts?: {
     lxpackBridge?: LxpackBridgeMode;
+    allowedParentOrigins?: string[];
     extraSinks?: import("@lessonkit/core").TelemetryPipelineSink[];
     onLxpackBridgeMiss?: (event: TelemetryEvent) => void;
   },
-): void {
+): void | Promise<void> {
   if (!event.courseId) {
     if (isDevEnvironment() && !warnedMissingCourseId) {
       warnedMissingCourseId = true;
@@ -35,7 +36,8 @@ export function emitTelemetry(
     tracking,
     xapi,
     lxpackBridge: opts?.lxpackBridge ?? "auto",
+    allowedParentOrigins: opts?.allowedParentOrigins,
     onLxpackBridgeMiss: opts?.onLxpackBridgeMiss,
   };
-  emitThroughPipeline(event, legacy, opts?.extraSinks);
+  return emitThroughPipeline(event, legacy, opts?.extraSinks);
 }

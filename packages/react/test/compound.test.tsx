@@ -803,6 +803,36 @@ describe("AssessmentSequence compound handle", () => {
     expect(screen.getByText("Question 2 of 2")).toBeTruthy();
   });
 
+  it("auto-generates a unique blockId when blockId is omitted", () => {
+    render(
+      wrap(
+        <>
+          <AssessmentSequence sequential>
+            <TrueFalse checkId="tf-auto-a" question="A?" answer={true} />
+            <TrueFalse checkId="tf-auto-b" question="B?" answer={false} />
+          </AssessmentSequence>
+          <AssessmentSequence sequential>
+            <TrueFalse checkId="tf-auto-c" question="C?" answer={true} />
+            <TrueFalse checkId="tf-auto-d" question="D?" answer={false} />
+          </AssessmentSequence>
+        </>,
+        true,
+      ),
+    );
+    const nextButtons = screen.getAllByTestId("sequence-next");
+    fireEvent.click(screen.getAllByRole("radio", { name: "True" })[0]!);
+    fireEvent.click(nextButtons[0]!);
+    fireEvent.click(screen.getAllByRole("radio", { name: "True" })[1]!);
+    fireEvent.click(nextButtons[1]!);
+    const keys = Object.keys(sessionStorage).filter((k) =>
+      k.startsWith(`lessonkit:compound:${COURSE_ID}:`),
+    );
+    expect(keys).toHaveLength(2);
+    expect(keys[0]).not.toBe(compoundStateStorageKey(COURSE_ID, "assessment-sequence"));
+    expect(keys[1]).not.toBe(compoundStateStorageKey(COURSE_ID, "assessment-sequence"));
+    expect(new Set(keys).size).toBe(2);
+  });
+
   it("allows Next without an answer when requireAnswerBeforeNext is false", () => {
     render(
       wrap(
@@ -1058,8 +1088,8 @@ describe("BranchingScenario", () => {
     fireEvent.click(screen.getByTestId("branch-choice-credit"));
     fireEvent.click(screen.getByRole("radio", { name: "True" }));
     expect(ref.current?.getScore()).toBe(4);
-    expect(ref.current?.getMaxScore()).toBe(11);
-    expect(screen.getByTestId("branch-score").textContent).toContain("Score: 4 / 11");
+    expect(ref.current?.getMaxScore()).toBe(4);
+    expect(screen.getByTestId("branch-score").textContent).toContain("Score: 4 / 4");
   });
 
   it("persists graph position in session storage", async () => {

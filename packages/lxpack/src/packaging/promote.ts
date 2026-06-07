@@ -28,14 +28,28 @@ function promoteLockPath(outDir: string): string {
   return join(parent, `.lk-promote-lock-${hash}`);
 }
 
-const STALE_LOCK_TTL_MS = 5 * 60 * 1000;
+const STALE_ARTIFACT_TTL_MS = 5 * 60 * 1000;
+const MAX_LOCK_AGE_MS = 30 * 60 * 1000;
 
-const LOCK_TOKEN_RE = /^(\d+)\n([0-9a-f-]{36})\n?$/i;
+const LOCK_TOKEN_RE = /^(\d+)\n([0-9a-f-]{36})(?:\n(\d+))?\n?$/i;
 
 async function isStalePromoteLock(lockPath: string): Promise<boolean> {
   try {
+    const stat = await fsp.stat(lockPath);
     const content = await fsp.readFile(lockPath, "utf8");
     const match = content.match(LOCK_TOKEN_RE);
+
+    let lockAgeMs = Date.now() - stat.mtimeMs;
+    if (match?.[3]) {
+      const startedAt = Number.parseInt(match[3], 10);
+      if (Number.isFinite(startedAt) && startedAt > 0) {
+        lockAgeMs = Date.now() - startedAt;
+      }
+    }
+    if (lockAgeMs > MAX_LOCK_AGE_MS) {
+      return true;
+    }
+
     if (match) {
       const pid = Number.parseInt(match[1]!, 10);
       if (Number.isFinite(pid) && pid > 0) {
@@ -47,8 +61,8 @@ async function isStalePromoteLock(lockPath: string): Promise<boolean> {
         }
       }
     }
-    const stat = await fsp.stat(lockPath);
-    return Date.now() - stat.mtimeMs > STALE_LOCK_TTL_MS;
+
+    return lockAgeMs > STALE_ARTIFACT_TTL_MS;
   } catch {
     return true;
   }
@@ -62,7 +76,7 @@ async function withPromoteLock<T>(outDir: string, fn: () => Promise<T>): Promise
   for (let attempt = 0; attempt < 200; attempt++) {
     try {
       lockHandle = await fsp.open(lockPath, "wx");
-      await lockHandle.writeFile(`${process.pid}\n${randomUUID()}\n`, "utf8");
+      await lockHandle.writeFile(`${process.pid}\n${randomUUID()}\n${Date.now()}\n`, "utf8");
       break;
     } catch (err) {
       const code =
@@ -87,32 +101,112 @@ async function withPromoteLock<T>(outDir: string, fn: () => Promise<T>): Promise
   }
 }
 
-async function assertNoLegacyPromoteArtifacts(outDir: string): Promise<void> {
+async function removeStaleLegacyPromoteArtifacts(outDir: string): Promise<void> {
   const legacyTmp = `${outDir}.tmp-promote`;
   const legacyBak = `${outDir}.bak`;
-  const stale: string[] = [];
-  if (await pathExists(legacyTmp)) stale.push(legacyTmp);
-  if (await pathExists(legacyBak)) stale.push(legacyBak);
-  if (stale.length) {
+  const blocked: string[] = [];
+
+  for (const legacyPath of [legacyTmp, legacyBak]) {
+    if (!(await pathExists(legacyPath))) continue;
+    try {
+      const stat = await fsp.stat(legacyPath);
+      if (Date.now() - stat.mtimeMs > STALE_ARTIFACT_TTL_MS) {
+        await fsp.rm(legacyPath, { recursive: true, force: true }).catch(/* v8 ignore next */ () => undefined);
+        continue;
+      }
+    } catch {
+      /* v8 ignore next -- stat races are handled on next promote attempt */
+    }
+    blocked.push(legacyPath);
+  }
+
+  if (blocked.length) {
+    const rmHint = blocked.map((p) => `rm -rf ${JSON.stringify(p)}`).join("; ");
     throw new Error(
-      `[lessonkit/lxpack] cannot promote: remove stale packaging artifacts from a previous failed run: ${stale.join(", ")}`,
+      `[lessonkit/lxpack] cannot promote: remove stale packaging artifacts from a previous failed run: ${blocked.join(", ")}. ` +
+        `Try: ${rmHint}`,
     );
   }
 }
 
+async function listRelativePaths(root: string, dir = root): Promise<string[]> {
+  const entries = await fsp.readdir(dir, { withFileTypes: true });
+  const paths: string[] = [];
+  for (const entry of entries) {
+    const full = join(dir, entry.name);
+    if (entry.isDirectory()) {
+      paths.push(...(await listRelativePaths(root, full)));
+    } else if (entry.isFile()) {
+      paths.push(full.slice(root.length + 1));
+    } else {
+      /* v8 ignore next -- promote trees contain files and directories only */
+    }
+  }
+  return paths;
+}
+
+async function mergePreservedOutArtifacts(
+  priorArtifactsDir: string,
+  destArtifactsDir: string,
+  newArtifactPaths: ReadonlySet<string>,
+): Promise<void> {
+  if (!(await pathExists(priorArtifactsDir))) return;
+
+  for (const rel of await listRelativePaths(priorArtifactsDir)) {
+    if (newArtifactPaths.has(rel)) continue;
+    const src = join(priorArtifactsDir, rel);
+    const dest = join(destArtifactsDir, rel);
+    await fsp.mkdir(dirname(dest), { recursive: true });
+    await fsp.cp(src, dest, { force: true });
+  }
+}
+
+export type PromoteStagingOptions = {
+  /** Relative path under `outDir` where LMS artifacts live (default `.lxpack/out`). */
+  outputBaseDir?: string;
+};
+
 /**
  * Atomically replace `outDir` with the packaged tree at `stagingDir`.
+ * Preserves prior `.lxpack/out` artifacts from earlier target builds.
  * Restores the previous `outDir` when promote fails after a backup rename.
  */
 /** @internal For coverage of filesystem helpers. */
-export const __testPromoteFs = { pathExists, renameOrCopy };
+export const __testPromoteFs = {
+  pathExists,
+  renameOrCopy,
+  listRelativePaths,
+  mergePreservedOutArtifacts,
+  promoteLockPath,
+};
 export { pathExists, renameOrCopy };
 
-export async function promoteStagingToOutDir(stagingDir: string, outDir: string): Promise<void> {
+export async function promoteStagingToOutDir(
+  stagingDir: string,
+  outDir: string,
+  options?: PromoteStagingOptions,
+): Promise<void> {
+  const outputBaseDir = options?.outputBaseDir ?? ".lxpack/out";
+
   return withPromoteLock(outDir, async () => {
-    await assertNoLegacyPromoteArtifacts(outDir);
+    await removeStaleLegacyPromoteArtifacts(outDir);
+
+    const stagingArtifactsDir = join(stagingDir, outputBaseDir);
+    const newArtifactPaths = new Set<string>();
+    if (await pathExists(stagingArtifactsDir)) {
+      for (const rel of await listRelativePaths(stagingArtifactsDir)) {
+        newArtifactPaths.add(rel);
+      }
+    }
 
     const parent = dirname(outDir);
+    let priorArtifactsBackup: string | undefined;
+    const existingArtifactsDir = join(outDir, outputBaseDir);
+    if ((await pathExists(outDir)) && (await pathExists(existingArtifactsDir))) {
+      priorArtifactsBackup = await fsp.mkdtemp(join(parent, ".lk-prior-out-"));
+      await fsp.cp(existingArtifactsDir, join(priorArtifactsBackup, outputBaseDir), { recursive: true });
+    }
+
     const tmpPromote = await fsp.mkdtemp(join(parent, ".lk-promote-"));
 
     await renameOrCopy(stagingDir, tmpPromote);
@@ -166,6 +260,20 @@ export async function promoteStagingToOutDir(stagingDir: string, outDir: string)
         await fsp.rm(tmpPromote, { recursive: true, force: true }).catch(/* v8 ignore next */ () => undefined);
       }
       throw promoteError;
+    }
+
+    if (priorArtifactsBackup) {
+      try {
+        await mergePreservedOutArtifacts(
+          join(priorArtifactsBackup, outputBaseDir),
+          join(outDir, outputBaseDir),
+          newArtifactPaths,
+        );
+      } finally {
+        await fsp
+          .rm(priorArtifactsBackup, { recursive: true, force: true })
+          .catch(/* v8 ignore next */ () => undefined);
+      }
     }
 
     if (backup) {

@@ -63,8 +63,33 @@ export const ASSESSMENT_VALIDATORS: Record<AssessmentKind, AssessmentValidator> 
     }
   },
   fillInBlanks: (assessment, path, issues) => {
-    if (assessment.kind === "fillInBlanks" && !assessment.template?.trim()) {
+    if (assessment.kind !== "fillInBlanks") return;
+    if (!assessment.template?.trim()) {
       issues.push({ path: `${path}.template`, message: "template is required for fillInBlanks" });
+      return;
+    }
+    const templateBlankCount = countStarDelimitedBlanks(assessment.template);
+    if (templateBlankCount === 0) {
+      issues.push({
+        path: `${path}.template`,
+        message: "template must include at least one blank wrapped in asterisks for fillInBlanks",
+      });
+    }
+    const explicitBlanks =
+      assessment.blanks
+        ?.map((b) => ({ id: b.id?.trim() ?? "", answer: b.answer?.trim() ?? "" }))
+        .filter((b) => b.id.length > 0 && b.answer.length > 0) ?? [];
+    if (assessment.blanks !== undefined && explicitBlanks.length === 0) {
+      issues.push({
+        path: `${path}.blanks`,
+        message: "blanks must include at least one entry with non-empty id and answer",
+      });
+    }
+    if (explicitBlanks.length > 0 && explicitBlanks.length !== templateBlankCount) {
+      issues.push({
+        path: `${path}.blanks`,
+        message: `blanks length (${explicitBlanks.length}) must match template blank count (${templateBlankCount})`,
+      });
     }
   },
   findHotspot: (assessment, path, issues) => {

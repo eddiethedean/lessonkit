@@ -24,7 +24,9 @@ export function Embed(props: EmbedProps) {
   const blockId = normalizeComponentId(props.blockId, "blockId") as BlockId;
   const { config, track } = useLessonkit();
   const lessonId = useEnclosingLessonId();
-  const resolvedSrc = resolveEmbedSrc(props.src);
+  const resolvedSrc = resolveEmbedSrc(props.src, {
+    allowedHosts: config.embed?.allowedHosts,
+  });
   const sandbox = buildEmbedSandbox(props.allow, {
     restrictPopupsInProduction: config.embed?.restrictPopupsInProduction ?? true,
   });

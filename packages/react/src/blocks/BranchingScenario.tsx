@@ -60,25 +60,6 @@ const BranchingScenarioInner = forwardRef<
   const nodeIndexMap = useMemo(() => buildNodeIndexMap(nodes), [nodes]);
   const nodeLabels = useMemo(() => buildNodeLabels(nodes), [nodes]);
 
-  const maxChoiceWeightByNode = useMemo(() => {
-    const map = new Map<string, number>();
-    for (const node of nodes) {
-      let maxWeight = 0;
-      let hasScoredChoice = false;
-      React.Children.forEach(node.props.children, (child) => {
-        if (!React.isValidElement(child)) return;
-        if (getLessonkitBlockType(child.type) !== "BranchChoice") return;
-        const weight = (child.props as { scoreWeight?: number }).scoreWeight;
-        if (weight !== undefined && Number.isFinite(weight)) {
-          hasScoredChoice = true;
-          maxWeight = Math.max(maxWeight, weight);
-        }
-      });
-      if (hasScoredChoice) map.set(node.props.nodeId, maxWeight);
-    }
-    return map;
-  }, [nodes]);
-
   const [meta, setMeta] = useState<BranchingScenarioMeta>(() => createInitialBranchMeta(startNodeId));
   const metaRef = useRef(meta);
   const branchViewedRef = useRef(new Set<string>());
@@ -194,13 +175,7 @@ const BranchingScenarioInner = forwardRef<
     shouldIncludeChildState,
   });
 
-  const maxChoiceScoreOnPath = useMemo(() => {
-    let sum = 0;
-    for (const nodeId of meta.visitedNodeIds) {
-      sum += maxChoiceWeightByNode.get(nodeId) ?? 0;
-    }
-    return sum;
-  }, [maxChoiceWeightByNode, meta.visitedNodeIds]);
+  const choiceScoreOnPath = sumChoiceScores(meta.choiceScores);
 
   useCompoundBranchHandle(ref, {
     activePageIndex: activeIndex,
@@ -208,7 +183,7 @@ const BranchingScenarioInner = forwardRef<
     visitedNodeIndices,
     choiceScores: meta.choiceScores ?? {},
     meta,
-    maxChoiceScore: maxChoiceScoreOnPath,
+    maxChoiceScore: choiceScoreOnPath,
     onResetMeta: resetBranchMeta,
     enableSolutionsButton: props.enableSolutionsButton,
   });
@@ -330,7 +305,7 @@ const BranchingScenarioInner = forwardRef<
   const pathMaxScore = ctx
     ? Array.from(ctx.getRegisteredHandles().values())
         .filter((h) => h.pageIndex !== undefined && visitedNodeIndices.has(h.pageIndex))
-        .reduce((s, h) => s + h.handle.getMaxScore(), 0) + maxChoiceScoreOnPath
+        .reduce((s, h) => s + h.handle.getMaxScore(), 0) + choiceScoreOnPath
     : 0;
 
   return (

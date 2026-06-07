@@ -482,7 +482,9 @@ it("forwards course_started to extraSinks when tracking enables after xAPI boots
 
     await waitFor(() => expect(trackingEvents.some((e) => e.name === "course_started")).toBe(true));
     expect(trackingEvents.filter((e) => e.name === "course_started")).toHaveLength(1);
-    expect(pipelineEvents.filter((e) => e.name === "course_started")).toHaveLength(1);
+    await waitFor(() =>
+      expect(pipelineEvents.filter((e) => e.name === "course_started")).toHaveLength(1),
+    );
   });
 
 it("emitCourseStarted returns early when plugin filters course_started", () => {

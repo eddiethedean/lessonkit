@@ -55,6 +55,8 @@ describe("@lessonkit/core identity", () => {
   it("slugifyId produces valid ids", () => {
     expect(slugifyId("Phishing Awareness 101")).toBe("phishing-awareness-101");
     expect(validateId(slugifyId("")).ok).toBe(true);
+    expect(validateId(slugifyId("   ")).ok).toBe(true);
+    expect(slugifyId("123abc")).toBe("id-123abc");
   });
 
   it("deriveId handles collisions", () => {
@@ -97,6 +99,59 @@ describe("@lessonkit/core identity", () => {
     const id = deriveId(longBase, used);
     expect(validateId(id).ok).toBe(true);
     expect(id.length).toBeLessThanOrEqual(64);
+  });
+
+  it("deriveId uses crypto randomUUID when hash and random suffixes are exhausted", () => {
+    vi.spyOn(Date, "now").mockReturnValue(42);
+    vi.spyOn(Math, "random").mockReturnValue(0.5);
+    vi.stubGlobal("crypto", { randomUUID: () => "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee" });
+
+    const title = "Intro";
+    const base = slugifyId(title);
+    const used = new Set<string>([base]);
+    for (let n = 2; n < 1000; n++) used.add(`${base}-${n}`);
+
+    const fallbackKey = `${title}-42`;
+    let h = 0;
+    for (let i = 0; i < fallbackKey.length; i++) {
+      h = (Math.imul(31, h) + fallbackKey.charCodeAt(i)) >>> 0;
+    }
+    const hash = h.toString(36);
+    for (let n = 0; n < 100; n++) {
+      used.add((n === 0 ? `id-${hash}` : `id-${hash}-${n}`).slice(0, 64));
+    }
+    const randomSuffix = (0.5).toString(36).slice(2, 8);
+    used.add(`id-${hash}-${randomSuffix}`.slice(0, 64));
+    used.add(`id-${hash}-${(42).toString(36)}`.slice(0, 64));
+
+    const id = deriveId(title, used);
+    expect(used.has(id)).toBe(false);
+    expect(validateId(id).ok).toBe(true);
+
+    vi.unstubAllGlobals();
+    vi.spyOn(Date, "now").mockRestore();
+    vi.spyOn(Math, "random").mockRestore();
+  });
+
+  it("deriveId never returns an id already in usedIds", () => {
+    const title = "Collision Test";
+    const base = slugifyId(title);
+    const used = new Set<string>([base]);
+    for (let n = 2; n < 1000; n++) used.add(`${base}-${n}`);
+    const hash = (() => {
+      let h = 0;
+      const input = `${title}-${Date.now()}`;
+      for (let i = 0; i < input.length; i++) {
+        h = (Math.imul(31, h) + input.charCodeAt(i)) >>> 0;
+      }
+      return h.toString(36);
+    })();
+    for (let n = 0; n < 100; n++) {
+      used.add((n === 0 ? `id-${hash}` : `id-${hash}-${n}`).slice(0, 64));
+    }
+    const id = deriveId(title, used);
+    expect(used.has(id)).toBe(false);
+    expect(validateId(id).ok).toBe(true);
   });
 
   it("deriveId uses random suffix fallback when numeric suffixes are exhausted", () => {

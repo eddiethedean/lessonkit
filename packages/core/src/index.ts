@@ -147,7 +147,11 @@ export {
 } from "./telemetryBuilder";
 
 export type { EmitContext, TelemetryPipeline, TelemetryPipelineSink } from "./telemetryPipeline";
-export { createTelemetryPipeline, createTrackingPipelineSink } from "./telemetryPipeline";
+export {
+  createTelemetryPipeline,
+  createTrackingPipelineSink,
+  isLifecycleTelemetryEvent,
+} from "./telemetryPipeline";
 
 export type { StoragePort, ClockPort, TimerPort } from "./ports";
 export {

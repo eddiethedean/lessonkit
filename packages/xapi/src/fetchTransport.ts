@@ -1,8 +1,14 @@
 import type { XAPIStatement, XAPITransport } from "./types";
+import { assertSafeLrsUrl, type AssertSafeLrsUrlOptions } from "./safeLrsUrl";
+
+export type { AssertSafeLrsUrlOptions };
+export { assertSafeLrsUrl } from "./safeLrsUrl";
 
 export type CreateFetchTransportOptions = {
   /** LRS or proxy endpoint (POST). */
   url: string;
+  /** Allow loopback and private-network hosts (default false). */
+  allowPrivateHosts?: boolean;
   /** Per-request timeout (default 30_000 ms). Uses AbortSignal.timeout when available. */
   timeoutMs?: number;
   /** Static headers merged into each request (e.g. Authorization from a short-lived token). */
@@ -118,6 +124,7 @@ async function postWithRetry(
  * keepalive exit transport for pagehide delivery.
  */
 export function createFetchTransport(opts: CreateFetchTransportOptions): FetchTransportBundle {
+  assertSafeLrsUrl(opts.url, { allowPrivateHosts: opts.allowPrivateHosts });
   const timeoutMs = opts.timeoutMs ?? 30_000;
   const rawRetries = opts.retries ?? 2;
   const retries = Number.isFinite(rawRetries) ? Math.max(0, Math.floor(rawRetries)) : 2;
@@ -180,6 +187,7 @@ export type FetchBatchSinkBundle = {
  * Batch analytics sink with timeout, retry backoff, and keepalive exit delivery.
  */
 export function createFetchBatchSink(opts: CreateFetchBatchSinkOptions): FetchBatchSinkBundle {
+  assertSafeLrsUrl(opts.url, { allowPrivateHosts: opts.allowPrivateHosts });
   const timeoutMs = opts.timeoutMs ?? 30_000;
   const rawRetries = opts.retries ?? 2;
   const retries = Number.isFinite(rawRetries) ? Math.max(0, Math.floor(rawRetries)) : 2;

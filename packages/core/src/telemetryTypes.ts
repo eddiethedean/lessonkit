@@ -40,6 +40,8 @@ export type TelemetryUser = {
 export type TelemetryEventBase = {
   timestamp: string;
   courseId: CourseId;
+  /** Optional stable id for sink deduplication (e.g. deliver retry). */
+  id?: string;
   sessionId?: string;
   attemptId?: string;
   user?: TelemetryUser;

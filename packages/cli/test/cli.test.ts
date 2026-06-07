@@ -1,6 +1,6 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 import { existsSync } from "node:fs";
-import { mkdtemp, rm, writeFile, mkdir, readFile } from "node:fs/promises";
+import { mkdtemp, rm, writeFile, mkdir, readFile, readdir } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { tmpdir } from "node:os";
 import { fileURLToPath } from "node:url";
@@ -8,7 +8,7 @@ import { createProgram, run } from "../src/index.js";
 import { runInit } from "../src/commands/init.js";
 import { formatCliError, CliError, EXIT_INVALID_PROJECT } from "../src/lib/errors.js";
 import { findProjectRoot, loadLessonkitJson } from "../src/lib/project.js";
-import { parsePackageTarget, resolvePackageOutput, resolveViteBuildArgs } from "../src/lib/paths.js";
+import { parsePackageTarget, resolvePackageOutput, resolveViteBuildArgs, resolveViteBuildArgv, stripOutDirFromViteArgs } from "../src/lib/paths.js";
 import * as exec from "../src/lib/exec.js";
 
 describe("@lessonkit/cli program", () => {
@@ -503,6 +503,22 @@ describe("runInit", () => {
       message: expect.stringContaining("dotfiles only"),
     });
   });
+
+  it("rolls back staging when dependency install fails", async () => {
+    process.chdir(parentDir);
+    const runNpmInstallSpy = vi
+      .spyOn(await import("../src/lib/exec.js"), "runNpmInstall")
+      .mockRejectedValueOnce(new Error("simulated install failure"));
+
+    await expect(
+      runInit({ name: "rollback-demo" }, { log: () => {}, error: () => {} }),
+    ).rejects.toThrow("simulated install failure");
+
+    expect(existsSync(join(parentDir, "rollback-demo"))).toBe(false);
+    const entries = await readdir(parentDir);
+    expect(entries.some((name) => name.startsWith(".rollback-demo-init-"))).toBe(false);
+    runNpmInstallSpy.mockRestore();
+  });
 });
 
 describe("resolveViteBuildArgs", () => {
@@ -534,6 +550,42 @@ describe("resolveViteBuildArgs", () => {
         paths: { ...baseProject.paths, spaDistDir: "build/spa" },
       }),
     ).toEqual(["build", "--outDir", "build/spa"]);
+  });
+});
+
+describe("stripOutDirFromViteArgs", () => {
+  it("removes --outDir and its value from passthrough args", () => {
+    expect(stripOutDirFromViteArgs(["--outDir", "other", "--minify"])).toEqual(["--minify"]);
+    expect(stripOutDirFromViteArgs(["--outDir=other", "--minify"])).toEqual(["--minify"]);
+    expect(stripOutDirFromViteArgs(["-o", "other"])).toEqual([]);
+  });
+});
+
+describe("resolveViteBuildArgv", () => {
+  const baseProject = {
+    root: "/proj",
+    schemaVersion: 1 as const,
+    name: "demo",
+    course: {
+      courseId: "demo",
+      title: "Demo",
+      layout: "single-spa" as const,
+      lessons: [{ id: "l1", title: "L1" }],
+    },
+    paths: {
+      spaDistDir: "build/spa",
+      lxpackOutDir: ".lxpack/course",
+      outputBaseDir: ".lxpack/out",
+    },
+  };
+
+  it("appends configured --outDir after passthrough args", () => {
+    expect(resolveViteBuildArgv(baseProject, ["--outDir", "ignored", "--minify"])).toEqual([
+      "build",
+      "--minify",
+      "--outDir",
+      "build/spa",
+    ]);
   });
 });
 
@@ -585,5 +637,22 @@ describe("runBuild", () => {
       ]),
       expect.objectContaining({ cwd: expect.stringMatching(/lk-cli-build/) }),
     );
+  });
+
+  it("fails when build does not produce index.html", async () => {
+    vi.spyOn(exec, "runCommand").mockResolvedValue(undefined);
+    const { runBuild } = await import("../src/commands/dev.js");
+    await expect(runBuild({ cwd: dir, json: true })).rejects.toMatchObject({
+      message: expect.stringContaining("index.html"),
+    });
+  });
+
+  it("verifies index.html after a successful build", async () => {
+    vi.spyOn(exec, "runCommand").mockResolvedValue(undefined);
+    await mkdir(join(dir, "dist"), { recursive: true });
+    await writeFile(join(dir, "dist", "index.html"), "<html></html>", "utf8");
+    const { runBuild } = await import("../src/commands/dev.js");
+    const result = await runBuild({ cwd: dir, json: true });
+    expect(result.ok).toBe(true);
   });
 });

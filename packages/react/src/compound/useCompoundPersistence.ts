@@ -20,6 +20,11 @@ import { isDevEnvironment } from "../runtime/validateComponentId";
 
 const MAX_HYDRATION_RETRIES = 10;
 
+function isEmptyResumeState(state: AssessmentResumeState): boolean {
+  if (!state || typeof state !== "object") return true;
+  return Object.keys(state).length === 0;
+}
+
 export function readCompoundInitialIndex(
   courseId: CourseId | undefined,
   compoundId: BlockId,
@@ -54,6 +59,8 @@ export function useCompoundPersistence(opts: {
   onCompoundResume?: (state: CompoundResumeState) => void;
   /** When set, only registered handles passing this filter are written to childStates on save. */
   shouldIncludeChildState?: (checkId: CheckId, pageIndex: number | undefined) => boolean;
+  /** Bumped externally (e.g. InteractiveVideo timeupdate) to trigger a persist without index change. */
+  persistTrigger?: number;
 }): void {
   const lessonkitCtx = useContext(LessonkitContext);
   const storage = opts.storage ?? lessonkitCtx?.storage ?? createSessionStoragePort();
@@ -65,6 +72,7 @@ export function useCompoundPersistence(opts: {
   /** Loaded child states merged into saves until live handles overwrite them. */
   const loadedChildStatesRef = useRef<Record<string, AssessmentResumeState>>({});
   const skipSaveUntilHydratedRef = useRef(false);
+  const postResumePersistPendingRef = useRef(false);
   const hydrationKeyRef = useRef("");
   const hydrationRetryRef = useRef(0);
 
@@ -76,6 +84,7 @@ export function useCompoundPersistence(opts: {
     hydrationKeyRef.current = hydrationKey;
     loadedChildStatesRef.current = {};
     skipSaveUntilHydratedRef.current = false;
+    postResumePersistPendingRef.current = false;
     pendingChildResumeRef.current = null;
     resumedChildKeysRef.current = new Set();
     hydrationRetryRef.current = 0;
@@ -92,8 +101,16 @@ export function useCompoundPersistence(opts: {
         }
         const handle = entry.handle;
         if (handle.getCurrentState) {
-          childStates[checkId] = handle.getCurrentState();
-          delete loadedChildStatesRef.current[checkId];
+          const live = handle.getCurrentState();
+          const loaded = loadedChildStatesRef.current[checkId];
+          if (loaded !== undefined && isEmptyResumeState(live)) {
+            childStates[checkId] = loaded;
+          } else {
+            childStates[checkId] = live;
+            if (!isEmptyResumeState(live)) {
+              delete loadedChildStatesRef.current[checkId];
+            }
+          }
         }
       }
     }
@@ -120,7 +137,13 @@ export function useCompoundPersistence(opts: {
       skipSaveUntilHydratedRef.current = false;
       pendingChildResumeRef.current = null;
       hydrationRetryRef.current = 0;
-      queueMicrotask(() => persistNowRef.current());
+      postResumePersistPendingRef.current = true;
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          postResumePersistPendingRef.current = false;
+          persistNowRef.current();
+        });
+      });
     },
     [],
   );
@@ -208,13 +231,46 @@ export function useCompoundPersistence(opts: {
     },
   });
 
-  const persistNow = useCallback(() => {
-    if (!opts.enabled || !opts.courseId) return;
-    if (skipSaveUntilHydratedRef.current) return;
-    const built = buildStateRef.current();
-    const state = transformStateRef.current ? transformStateRef.current(built) : built;
-    saveResume(state);
-  }, [opts.enabled, opts.courseId, saveResume]);
+  const buildBestEffortState = useCallback((): CompoundResumeState => {
+    const childStates: Record<string, AssessmentResumeState> = {
+      ...loadedChildStatesRef.current,
+    };
+    if (ctx) {
+      for (const [checkId, entry] of ctx.getRegisteredHandles()) {
+        if (opts.shouldIncludeChildState && !opts.shouldIncludeChildState(checkId, entry.pageIndex)) {
+          continue;
+        }
+        const handle = entry.handle;
+        if (handle.getCurrentState) {
+          const live = handle.getCurrentState();
+          if (!isEmptyResumeState(live)) {
+            childStates[checkId] = live;
+          }
+        }
+      }
+    }
+    const built = createCompoundResumeState({
+      activePageIndex: clampCompoundPageIndex(opts.index, opts.pageCount),
+      childStates,
+    });
+    return transformStateRef.current ? transformStateRef.current(built) : built;
+  }, [ctx, opts.index, opts.pageCount, opts.shouldIncludeChildState]);
+
+  const persistNow = useCallback(
+    (options?: { forceDuringHydration?: boolean }) => {
+      if (!opts.enabled || !opts.courseId) return;
+      if (options?.forceDuringHydration) {
+        saveResume(buildBestEffortState());
+        return;
+      }
+      if (skipSaveUntilHydratedRef.current) return;
+      if (postResumePersistPendingRef.current) return;
+      const built = buildStateRef.current();
+      const state = transformStateRef.current ? transformStateRef.current(built) : built;
+      saveResume(state);
+    },
+    [opts.enabled, opts.courseId, saveResume, buildBestEffortState],
+  );
 
   useEffect(() => {
     persistNowRef.current = persistNow;
@@ -251,18 +307,23 @@ export function useCompoundPersistence(opts: {
 
   useEffect(() => {
     persistNow();
-  }, [persistNow, opts.index, opts.pageCount, handlesVersion]);
+  }, [persistNow, opts.index, opts.pageCount, handlesVersion, opts.persistTrigger]);
 
   useEffect(() => {
     if (!opts.enabled || !opts.courseId || typeof document === "undefined") return;
     const flushOnExit = () => {
-      if (document.visibilityState === "hidden") persistNow();
+      if (document.visibilityState === "hidden") {
+        persistNow({ forceDuringHydration: skipSaveUntilHydratedRef.current });
+      }
     };
     document.addEventListener("visibilitychange", flushOnExit);
-    window.addEventListener("pagehide", flushOnExit);
+    const flushOnPageHide = () => {
+      persistNow({ forceDuringHydration: skipSaveUntilHydratedRef.current });
+    };
+    window.addEventListener("pagehide", flushOnPageHide);
     return () => {
       document.removeEventListener("visibilitychange", flushOnExit);
-      window.removeEventListener("pagehide", flushOnExit);
+      window.removeEventListener("pagehide", flushOnPageHide);
     };
   }, [opts.enabled, opts.courseId, persistNow]);
 }

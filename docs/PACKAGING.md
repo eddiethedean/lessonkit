@@ -177,6 +177,10 @@ const validation = validatePackageInputs({
 if (!validation.ok) throw new Error("invalid package inputs");
 
 const staged = await buildStagingPackage({ /* descriptor, spaDistDir, target, … */ });
+if (!staged.ok) {
+  console.error(staged.issues);
+  process.exit(1);
+}
 await promoteStagingToOutDir(staged.stagingDir, validation.outDir);
 ```
 

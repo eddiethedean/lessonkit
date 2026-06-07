@@ -229,13 +229,13 @@ describe("coverage-full", () => {
     warn.mockRestore();
   });
 
-  it("telemetry pipeline formats non-Error xAPI mapping failures in development", () => {
+  it("telemetry pipeline formats non-Error xAPI mapping failures in development", async () => {
     vi.stubEnv("NODE_ENV", "development");
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
     vi.spyOn(xapiMapModule, "telemetryEventToXAPIStatement").mockImplementation(() => {
       throw "mapping-string";
     });
-    emitThroughPipeline(
+    await emitThroughPipeline(
       { name: "interaction", timestamp: "t", courseId: "c" },
       {
         tracking: { track: vi.fn() } as never,

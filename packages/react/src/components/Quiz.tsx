@@ -24,7 +24,7 @@ function QuizInner(
   const checkId = useMemo(() => normalizeComponentId(props.checkId, "checkId"), [props.checkId]);
   const quiz = useQuizState(enclosingLessonId);
   const { config } = useLessonkit();
-  const { getPluginScore, isChoiceCorrect } = usePluginScoring(checkId, enclosingLessonId);
+  const { scoreResponse } = usePluginScoring(checkId, enclosingLessonId);
   const [selected, setSelected] = useState<string | null>(null);
   const [selectionCorrect, setSelectionCorrect] = useState<boolean | null>(null);
   const [quizPassed, setQuizPassed] = useState(false);
@@ -180,39 +180,35 @@ function QuizInner(
               onChange={() => {
                 if (passed) return;
                 setSelected(c);
-                const custom = getPluginScore(c);
-                const correct = isChoiceCorrect(c, props.answer, custom, props.passingScore);
-                setSelectionCorrect(correct);
+                const defaultCorrect = c === props.answer;
+                const scored = scoreResponse(c, defaultCorrect, 1, props.passingScore);
+                setSelectionCorrect(scored.passed);
                 quiz.answer({
                   checkId,
                   question: props.question,
                   choice: c,
-                  correct,
+                  correct: scored.passed,
                 });
-                if (correct && !completedRef.current) {
+                if (scored.passed && !completedRef.current) {
                   completedRef.current = true;
                   setQuizPassed(true);
-                  const maxScore = custom?.maxScore ?? 1;
-                  const score = custom?.score ?? maxScore;
-                  setCompletedScore(score);
-                  setCompletedMaxScore(maxScore);
+                  setCompletedScore(scored.score);
+                  setCompletedMaxScore(scored.maxScore);
                   quiz.complete({
                     checkId,
-                    score,
-                    maxScore,
-                    passingScore: props.passingScore ?? maxScore,
+                    score: scored.score,
+                    maxScore: scored.maxScore,
+                    passingScore: props.passingScore ?? scored.maxScore,
                   });
-                } else if (!correct && props.enableRetry === false && !completedRef.current) {
+                } else if (!scored.passed && props.enableRetry === false && !completedRef.current) {
                   completedRef.current = true;
-                  const maxScore = custom?.maxScore ?? 1;
-                  const score = custom?.score ?? 0;
-                  setCompletedScore(score);
-                  setCompletedMaxScore(maxScore);
+                  setCompletedScore(scored.score);
+                  setCompletedMaxScore(scored.maxScore);
                   quiz.complete({
                     checkId,
-                    score,
-                    maxScore,
-                    passingScore: props.passingScore ?? maxScore,
+                    score: scored.score,
+                    maxScore: scored.maxScore,
+                    passingScore: props.passingScore ?? scored.maxScore,
                   });
                 }
               }}

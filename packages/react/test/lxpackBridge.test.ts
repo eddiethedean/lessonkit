@@ -162,7 +162,7 @@ describe("lxpackBridge", () => {
     vi.unstubAllGlobals();
   });
 
-  it("emitTelemetry respects per-call lxpack bridge mode", () => {
+  it("emitTelemetry respects per-call lxpack bridge mode", async () => {
     const completeCourse = vi.fn();
     vi.stubGlobal("window", {
       parent: { lxpackBridge: { v1: { completeCourse } } },
@@ -171,10 +171,10 @@ describe("lxpackBridge", () => {
     const tracking = createTrackingClient();
     const event = buildTelemetryEvent({ name: "course_completed", courseId: "c", sessionId: "s" });
 
-    emitTelemetry(tracking, null, event, { lxpackBridge: "off" });
+    await emitTelemetry(tracking, null, event, { lxpackBridge: "off" });
     expect(completeCourse).not.toHaveBeenCalled();
 
-    emitTelemetry(tracking, null, event, { lxpackBridge: "auto" });
+    await emitTelemetry(tracking, null, event, { lxpackBridge: "auto" });
     expect(completeCourse).toHaveBeenCalledTimes(1);
     vi.unstubAllGlobals();
   });
@@ -185,6 +185,25 @@ describe("lxpackBridge", () => {
     const event = buildTelemetryEvent({ name: "course_completed", courseId: "c", sessionId: "s" });
     forwardTelemetryToLxpack(event, "auto", { onBridgeMiss });
     expect(onBridgeMiss).toHaveBeenCalledWith(event);
+    vi.unstubAllGlobals();
+  });
+
+  it("blocks bridge when parent origin is not allowlisted", () => {
+    const completeCourse = vi.fn();
+    vi.stubGlobal("window", {
+      parent: {
+        location: { origin: "https://evil.example" },
+        lxpackBridge: { v1: { completeCourse } },
+      },
+    });
+
+    forwardTelemetryToLxpack(
+      buildTelemetryEvent({ name: "course_completed", courseId: "c", sessionId: "s" }),
+      "auto",
+      { allowedParentOrigins: ["https://lms.example"] },
+    );
+
+    expect(completeCourse).not.toHaveBeenCalled();
     vi.unstubAllGlobals();
   });
 });

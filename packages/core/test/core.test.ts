@@ -343,6 +343,42 @@ describe("@lessonkit/core", () => {
     expect(totalDelivered).toBe(7);
   });
 
+  it("flushOnExit re-queues events when exitBatchSink promise rejects", async () => {
+    const batchSink = vi.fn<TelemetryBatchSink>();
+    const exitBatchSink = vi.fn(() => Promise.reject(new Error("exit fail")));
+    const client = createTrackingClient({
+      batchSink,
+      exitBatchSink,
+      batch: { enabled: true, flushIntervalMs: 0, maxBatchSize: 100 },
+    });
+
+    client.track(interactionEvent("exit-retry"));
+    client.flushOnExit?.();
+    await new Promise((r) => setTimeout(r, 0));
+
+    await client.flush?.();
+    expect(exitBatchSink).toHaveBeenCalledTimes(1);
+    expect(batchSink).toHaveBeenCalledTimes(1);
+  });
+
+  it("flushOnExit re-queues events when exitBatchSink throws synchronously", async () => {
+    const batchSink = vi.fn<TelemetryBatchSink>();
+    const exitBatchSink = vi.fn(() => {
+      throw new Error("sync exit fail");
+    });
+    const client = createTrackingClient({
+      batchSink,
+      exitBatchSink,
+      batch: { enabled: true, flushIntervalMs: 0, maxBatchSize: 100 },
+    });
+
+    client.track(interactionEvent("exit-sync"));
+    client.flushOnExit?.();
+    await client.flush?.();
+    expect(exitBatchSink).toHaveBeenCalledTimes(1);
+    expect(batchSink).toHaveBeenCalledTimes(1);
+  });
+
   it("flushOnExit delivers buffered events via exitBatchSink", () => {
     const exitEvents: TelemetryEvent[][] = [];
     const batchSink = vi.fn(async () => {
@@ -415,6 +451,54 @@ describe("@lessonkit/core", () => {
       client.track(interactionEvent(`t${i}`));
     }
     await expect(client.deliver?.(interactionEvent("overflow"))).resolves.toBe(false);
+  });
+
+  it("deliver does not double-enqueue when flush fails and deliver is retried", async () => {
+    const batchSink = vi
+      .fn<TelemetryBatchSink>()
+      .mockRejectedValueOnce(new Error("nope"))
+      .mockResolvedValueOnce(undefined);
+
+    const client = createTrackingClient({
+      batchSink,
+      batch: { enabled: true, flushIntervalMs: 0, maxBatchSize: 100 },
+    });
+
+    const event = {
+      ...interactionEvent("course-started"),
+      id: "evt-course-started",
+      name: "course_started",
+    } as TelemetryEvent;
+
+    await expect(client.deliver?.(event)).resolves.toBe(false);
+    await expect(client.deliver?.(event)).resolves.toBe(true);
+
+    const lastBatch = batchSink.mock.calls.at(-1)?.[0] as TelemetryEvent[] | undefined;
+    expect(lastBatch).toHaveLength(1);
+    expect(lastBatch?.[0]?.id).toBe("evt-course-started");
+  });
+
+  it("dedupes buffered events by id", async () => {
+    const batchSink = vi.fn<TelemetryBatchSink>();
+    const client = createTrackingClient({
+      batchSink,
+      batch: { enabled: true, flushIntervalMs: 0, maxBatchSize: 100 },
+    });
+
+    const event = {
+      ...interactionEvent("dup"),
+      id: "evt-dup",
+      name: "interaction",
+    } as TelemetryEvent;
+
+    client.track(event);
+    client.track({ ...event, timestamp: "dup-2" });
+    await client.flush?.();
+
+    expect(batchSink).toHaveBeenCalledTimes(1);
+    const firstBatch = batchSink.mock.calls[0]?.[0];
+    expect(firstBatch).toHaveLength(1);
+    expect(firstBatch?.[0]?.id).toBe("evt-dup");
   });
 
   it("dispose calls onBufferDrop for each event dropped after flush cap", async () => {

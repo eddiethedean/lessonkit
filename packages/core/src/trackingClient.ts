@@ -2,6 +2,11 @@ import type { TelemetryBatchSink, TelemetryEvent, TelemetrySink, TrackingClient 
 import { invokeTrackingSink, invokeTrackingSinkWithResult } from "./internal/sinkInvoke";
 import { isDevEnvironment } from "./internal/env";
 
+function eventDedupKey(event: TelemetryEvent): string | undefined {
+  const id = event.id?.trim();
+  return id || undefined;
+}
+
 /**
  * Creates a client that buffers telemetry and flushes in batches.
  *
@@ -66,10 +71,24 @@ export function createTrackingClient(opts?: {
   }
 
   const buffer: TelemetryEvent[] = [];
+  const pendingDeliverIds = new Set<string>();
   let flushInFlight: Promise<boolean> | null = null;
   let disposed = false;
   let disposing = false;
   let intervalId: ReturnType<typeof globalThis.setInterval> | undefined;
+
+  const clearPendingDeliverIds = (events: TelemetryEvent[]): void => {
+    for (const event of events) {
+      const key = eventDedupKey(event);
+      if (key) pendingDeliverIds.delete(key);
+    }
+  };
+
+  const isEventBuffered = (event: TelemetryEvent): boolean => {
+    const key = eventDedupKey(event);
+    if (!key) return false;
+    return buffer.some((buffered) => eventDedupKey(buffered) === key);
+  };
 
   const runFlush = (): Promise<boolean> => {
     /* v8 ignore start -- flush() never invokes runFlush with an empty buffer */
@@ -101,6 +120,9 @@ export function createTrackingClient(opts?: {
         }
       })
       .then(async () => {
+        if (succeeded) {
+          clearPendingDeliverIds(events);
+        }
         if (succeeded && buffer.length > 0 && !disposed) {
           return runFlush();
         }
@@ -139,6 +161,7 @@ export function createTrackingClient(opts?: {
         opts?.onBufferDrop?.();
       }
       buffer.length = 0;
+      pendingDeliverIds.clear();
     }
   };
 
@@ -147,6 +170,10 @@ export function createTrackingClient(opts?: {
 
   const track = (event: TelemetryEvent): boolean => {
     if (disposed || disposing) return false;
+    const key = eventDedupKey(event);
+    if (key && buffer.some((buffered) => eventDedupKey(buffered) === key)) {
+      return true;
+    }
     if (buffer.length >= maxBufferSize) {
       opts?.onBufferDrop?.();
       if (!warnedBufferCap && isDevEnvironment()) {
@@ -165,7 +192,12 @@ export function createTrackingClient(opts?: {
   return {
     track,
     deliver: async (event) => {
+      const key = eventDedupKey(event);
+      if (key && (pendingDeliverIds.has(key) || isEventBuffered(event))) {
+        return flush();
+      }
       if (!track(event)) return false;
+      if (key) pendingDeliverIds.add(key);
       return flush();
     },
     flush,
@@ -180,6 +212,8 @@ export function createTrackingClient(opts?: {
               void (result as Promise<void>).catch(() => {
                 buffer.unshift(...events);
               });
+            } else {
+              clearPendingDeliverIds(events);
             }
           } catch {
             buffer.unshift(...events);

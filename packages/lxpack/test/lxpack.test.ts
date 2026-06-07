@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import {
   assessmentDescriptorToLxpack,
   descriptorToInterchange,
+  escapeShellText,
   extractAssessments,
   mapLessonkitIds,
   packageLessonkitCourse,
@@ -264,6 +265,38 @@ describe("assessments", () => {
     expect(lx!.id).toBe("email-first-step");
     expect(lx!.questions[0]?.choices.some((c) => c.correct)).toBe(true);
     expect(extractAssessments(baseDescriptor)).toHaveLength(1);
+  });
+
+  it("escapes safe assessment text for SCORM interchange", () => {
+    const lx = assessmentDescriptorToLxpack({
+      checkId: "safe-check",
+      question: 'Say "hello" & go',
+      choices: ["A&B", "Plain"],
+      answer: "A&B",
+    });
+    expect(lx).not.toBeNull();
+    expect(lx!.questions[0]?.prompt).toBe("Say &quot;hello&quot; &amp; go");
+    expect(lx!.questions[0]?.choices[0]?.text).toBe("A&amp;B");
+    expect(escapeShellText("<not-allowed>")).toBe("&lt;not-allowed&gt;");
+  });
+
+  it("rejects unsafe SCORM markup in assessment fields", () => {
+    expect(
+      assessmentDescriptorToLxpack({
+        checkId: "xss-check",
+        question: "</script><script>alert(1)</script>",
+        choices: ["A"],
+        answer: "A",
+      }),
+    ).toBeNull();
+    expect(
+      assessmentDescriptorToLxpack({
+        checkId: "safe-check",
+        question: "Pick one",
+        choices: ["<!-- leak"],
+        answer: "<!-- leak",
+      }),
+    ).toBeNull();
   });
 
   it("extractAssessments skips kinds that do not package to shell quizzes", () => {
@@ -586,6 +619,20 @@ describe("validateDescriptor edge cases", () => {
     expect(result.ok).toBe(false);
     if (!result.ok) {
       expect(result.issues.some((i) => i.path.includes("passingScore"))).toBe(true);
+    }
+  });
+
+  it("validateDescriptorForTarget rejects invalid activityIri for scorm12 when tracking.xapi is set", () => {
+    const invalid = validateDescriptorForTarget(
+      {
+        ...baseDescriptor,
+        tracking: { xapi: { activityIri: "http://example.com/activity/1" } },
+      },
+      "scorm12",
+    );
+    expect(invalid.ok).toBe(false);
+    if (!invalid.ok) {
+      expect(invalid.issues.some((i) => i.path === "tracking.xapi.activityIri")).toBe(true);
     }
   });
 

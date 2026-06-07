@@ -105,25 +105,25 @@ function ImagePairingInner(
   const passedThreshold = meetsPassingThreshold(score, maxScore, props.passingScore);
 
   const completeIfReady = (nextMatched: Set<string>) => {
-    if (nextMatched.size === totalPairs && totalPairs > 0 && !completedRef.current) {
-      const finalScore = nextMatched.size;
-      const finalPassed = meetsPassingThreshold(finalScore, maxScore, props.passingScore);
-      completedRef.current = true;
-      setPassed(true);
-      assessment.answer({
-        checkId,
-        interactionType: INTERACTION,
-        response: { matchedPairIds: [...nextMatched] },
-        correct: finalPassed,
-      });
-      assessment.complete({
-        checkId,
-        interactionType: INTERACTION,
-        score: finalScore,
-        maxScore,
-        passingScore: props.passingScore ?? maxScore,
-      });
-    }
+    if (totalPairs === 0 || completedRef.current) return;
+    const finalScore = nextMatched.size;
+    const finalPassed = meetsPassingThreshold(finalScore, maxScore, props.passingScore);
+    if (!finalPassed && nextMatched.size < totalPairs) return;
+    completedRef.current = true;
+    setPassed(finalPassed);
+    assessment.answer({
+      checkId,
+      interactionType: INTERACTION,
+      response: { matchedPairIds: [...nextMatched] },
+      correct: finalPassed,
+    });
+    assessment.complete({
+      checkId,
+      interactionType: INTERACTION,
+      score: finalScore,
+      maxScore,
+      passingScore: props.passingScore ?? maxScore,
+    });
   };
 
   const tryMatch = (firstKey: string, secondKey: string) => {

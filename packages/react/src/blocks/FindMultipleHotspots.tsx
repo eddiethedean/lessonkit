@@ -5,6 +5,7 @@ import { AssessmentLessonGuard } from "../assessment/AssessmentLessonGuard";
 import { buildAssessmentHandle } from "../assessment/internal/buildAssessmentHandle";
 import { readBooleanStateField } from "../assessment/internal/resumeState";
 import { useAssessmentHandleRegistration } from "../assessment/internal/useAssessmentHandleRegistration";
+import { meetsPassingThreshold } from "../assessment/scoring";
 import { useAssessmentState } from "../assessment/useAssessmentState";
 import { setLessonkitBlockType } from "../compound/blockType";
 import { normalizeComponentId } from "../runtime/validateComponentId";
@@ -38,16 +39,20 @@ function FindMultipleHotspotsInner(
     setChecked(false);
   };
 
-  const correct =
-    selected.size === props.correctTargetIds.length &&
-    props.correctTargetIds.every((id) => selected.has(id));
+  const maxScore = props.correctTargetIds.length || 1;
+  const score = props.correctTargetIds.filter((id) => selected.has(id)).length;
+  const passedThreshold = meetsPassingThreshold(score, maxScore, props.passingScore);
+  const validTargetIds = useMemo(
+    () => new Set(props.targets.map((t) => t.id)),
+    [props.targets],
+  );
 
   const handle = useMemo(
     () =>
       buildAssessmentHandle({
         checkId,
-        getScore: () => (checked && correct ? 1 : 0),
-        getMaxScore: () => 1,
+        getScore: () => score,
+        getMaxScore: () => maxScore,
         getAnswerGiven: () => selected.size > 0,
         resetTask: () => {
           setSelected(new Set());
@@ -58,18 +63,27 @@ function FindMultipleHotspotsInner(
           checkId,
           interactionType: INTERACTION,
           response: [...selected],
-          correct: checked ? correct : undefined,
-          score: checked && correct ? 1 : 0,
-          maxScore: 1,
+          correct: checked ? passedThreshold : undefined,
+          score,
+          maxScore,
         }),
         getCurrentState: () => ({ selected: [...selected], checked }),
         resume: (state) => {
           const raw = state.selected;
-          if (Array.isArray(raw)) setSelected(new Set(raw.filter((id): id is string => typeof id === "string")));
+          if (Array.isArray(raw)) {
+            setSelected(
+              new Set(
+                raw.filter(
+                  (id): id is string =>
+                    typeof id === "string" && validTargetIds.has(id),
+                ),
+              ),
+            );
+          }
           readBooleanStateField(state, "checked", setChecked);
         },
       }),
-    [checkId, selected, checked, correct, props.correctTargetIds],
+    [checkId, checked, maxScore, passedThreshold, props.correctTargetIds, score, selected, validTargetIds],
   );
 
   useAssessmentHandleRegistration(checkId, handle, ref);
@@ -81,15 +95,23 @@ function FindMultipleHotspotsInner(
       checkId,
       interactionType: INTERACTION,
       response: [...selected],
-      correct,
+      correct: passedThreshold,
     });
-    if (correct) {
+    if (passedThreshold) {
       assessment.complete({
         checkId,
         interactionType: INTERACTION,
-        score: 1,
-        maxScore: 1,
-        passingScore: props.passingScore ?? 1,
+        score,
+        maxScore,
+        passingScore: props.passingScore ?? maxScore,
+      });
+    } else if (props.enableRetry === false) {
+      assessment.complete({
+        checkId,
+        interactionType: INTERACTION,
+        score,
+        maxScore,
+        passingScore: props.passingScore ?? maxScore,
       });
     }
   };
@@ -121,7 +143,7 @@ function FindMultipleHotspotsInner(
         Check
       </button>
       {checked ? (
-        <p role="status">{correct ? "Correct" : "Try again"}</p>
+        <p role="status">{passedThreshold ? "Correct" : "Try again"}</p>
       ) : null}
     </section>
   );

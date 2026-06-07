@@ -54,6 +54,8 @@ describe("CLI init → build → package", () => {
       standalone.json.outputDir ??
       join(projectDir, ".lxpack/course/.lxpack/out/standalone");
     assertStandaloneDir(standaloneDir);
+
+    assertScormZip(scormZip);
   }
 
   it("builds and packages a minimal fixture project", async () => {

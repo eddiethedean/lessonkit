@@ -14,9 +14,11 @@ export { createXAPIClient, resetXAPIDeadLetterForTests } from "./client";
 export {
   createFetchTransport,
   createFetchBatchSink,
+  assertSafeLrsUrl,
   FetchHttpError,
   isRetryableFetchError,
   isRetryableFetchHttpStatus,
+  type AssertSafeLrsUrlOptions,
   type CreateFetchTransportOptions,
   type FetchTransportBundle,
   type CreateFetchBatchSinkOptions,

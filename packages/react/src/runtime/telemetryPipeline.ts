@@ -2,6 +2,7 @@ import type { TelemetryEvent, TrackingClient } from "@lessonkit/core";
 import {
   createTelemetryPipeline,
   createTrackingPipelineSink,
+  isLifecycleTelemetryEvent,
   type TelemetryPipeline,
 } from "@lessonkit/core";
 import type { XAPIClient } from "@lessonkit/xapi";
@@ -12,6 +13,7 @@ export type LegacyEmitOptions = {
   tracking: TrackingClient;
   xapi: XAPIClient | null;
   lxpackBridge: LxpackBridgeMode;
+  allowedParentOrigins?: string[];
   onLxpackBridgeMiss?: (event: TelemetryEvent) => void;
 };
 
@@ -28,10 +30,14 @@ function createLegacyPipeline(
     createTrackingPipelineSink("tracking", (event) => opts.tracking.track(event)),
     {
       id: "xapi",
-      emit(event) {
+      async emit(event) {
         try {
           const statement = telemetryEventToXAPIStatement(event);
-          if (statement) opts.xapi?.send(statement);
+          if (!statement || !opts.xapi) return;
+          opts.xapi.send(statement);
+          if (isLifecycleTelemetryEvent(event.name)) {
+            await opts.xapi.flush();
+          }
         } catch (err) {
           if (isDevEnvironment()) {
             console.warn(
@@ -47,6 +53,7 @@ function createLegacyPipeline(
       emit(event) {
         forwardTelemetryToLxpack(event, opts.lxpackBridge, {
           onBridgeMiss: opts.onLxpackBridgeMiss,
+          allowedParentOrigins: opts.allowedParentOrigins,
         });
       },
     },
@@ -58,8 +65,8 @@ export function emitThroughPipeline(
   event: TelemetryEvent,
   opts: LegacyEmitOptions,
   extraSinks?: import("@lessonkit/core").TelemetryPipelineSink[],
-): void {
-  createLegacyPipeline(opts, extraSinks).emit(event);
+): void | Promise<void> {
+  return createLegacyPipeline(opts, extraSinks).emit(event);
 }
 
 export function createPipelineFromLegacyConfig(opts: LegacyEmitOptions): TelemetryPipeline {

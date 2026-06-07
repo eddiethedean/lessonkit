@@ -1,6 +1,7 @@
 import React, { createRef } from "react";
+import type { TelemetryEvent } from "@lessonkit/core";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import {
   ArithmeticQuiz,
   Course,
@@ -59,7 +60,7 @@ describe("Tier B/C/D block components", () => {
       ),
     );
     expect(screen.getByTestId("video-title").textContent).toContain("Safety clip");
-    expect(screen.getByTestId("video-player").getAttribute("src")).toBe("/clip.mp4");
+    expect(screen.getByTestId("video-player").getAttribute("src")).toMatch(/clip\.mp4$/);
   });
 
   it("Essay submits when minimum length is met", () => {
@@ -126,6 +127,88 @@ describe("Tier B/C/D block components", () => {
     fireEvent.click(screen.getByTestId("target-b"));
     fireEvent.click(screen.getByTestId("check-hotspots"));
     expect(screen.getByRole("status").textContent).toContain("Correct");
+  });
+
+  it("FindMultipleHotspots scores per correct hotspot", () => {
+    const ref = createRef<import("@lessonkit/core").AssessmentHandle>();
+    render(
+      wrap(
+        <FindMultipleHotspots
+          ref={ref}
+          checkId="fmh-score"
+          src="/scene.png"
+          alt="Scene"
+          targets={[
+            { id: "a", label: "Hazard A", x: 10, y: 10 },
+            { id: "b", label: "Hazard B", x: 50, y: 50 },
+            { id: "c", label: "Decoy", x: 80, y: 80 },
+          ]}
+          correctTargetIds={["a", "b"]}
+          passingScore={1}
+        />,
+      ),
+    );
+    fireEvent.click(screen.getByTestId("target-a"));
+    expect(ref.current?.getScore()).toBe(1);
+    expect(ref.current?.getMaxScore()).toBe(2);
+    fireEvent.click(screen.getByTestId("check-hotspots"));
+    expect(screen.getByRole("status").textContent).toContain("Correct");
+  });
+
+  it("FindMultipleHotspots completes on failure when enableRetry is false", async () => {
+    const events: { name: string }[] = [];
+    render(
+      <Course
+        title="Blocks"
+        courseId="blocks-tier-bcd"
+        config={{
+          xapi: { enabled: false },
+          tracking: { sink: (e) => { events.push(e); } },
+        }}
+      >
+        <Lesson title="L1" lessonId="lesson-1">
+          <FindMultipleHotspots
+            checkId="fmh-no-retry"
+            src="/scene.png"
+            alt="Scene"
+            targets={[
+              { id: "a", label: "Hazard A", x: 10, y: 10 },
+              { id: "b", label: "Hazard B", x: 50, y: 50 },
+            ]}
+            correctTargetIds={["a", "b"]}
+            enableRetry={false}
+          />
+        </Lesson>
+      </Course>,
+    );
+    fireEvent.click(screen.getByTestId("target-a"));
+    fireEvent.click(screen.getByTestId("check-hotspots"));
+    await waitFor(() => {
+      expect(events.some((e) => e.name === "assessment_completed")).toBe(true);
+    });
+  });
+
+  it("FindMultipleHotspots resume filters invalid target ids", () => {
+    const ref = createRef<import("@lessonkit/core").AssessmentHandle>();
+    render(
+      wrap(
+        <FindMultipleHotspots
+          ref={ref}
+          checkId="fmh-resume"
+          src="/scene.png"
+          alt="Scene"
+          targets={[
+            { id: "a", label: "Hazard A", x: 10, y: 10 },
+            { id: "b", label: "Hazard B", x: 50, y: 50 },
+          ]}
+          correctTargetIds={["a", "b"]}
+        />,
+      ),
+    );
+    act(() => {
+      ref.current?.resume?.({ selected: ["a", "ghost", "b"], checked: true });
+    });
+    expect(ref.current?.getCurrentState?.().selected).toEqual(["a", "b"]);
   });
 
   it("Summary accepts correct statement order", () => {
@@ -198,6 +281,39 @@ describe("Tier B/C/D block components", () => {
     expect(ref.current?.getScore()).toBe(2);
   });
 
+  it("ImageSequencing does not replay telemetry on resume unless configured", async () => {
+    const events: { name: string }[] = [];
+    const ref = createRef<import("@lessonkit/core").AssessmentHandle>();
+    render(
+      <Course
+        title="Blocks"
+        courseId="blocks-tier-bcd"
+        config={{
+          xapi: { enabled: false },
+          tracking: { sink: (e) => { events.push(e); } },
+        }}
+      >
+        <Lesson title="L1" lessonId="lesson-1">
+          <ImageSequencing
+            ref={ref}
+            checkId="seq-no-replay"
+            images={[
+              { id: "step-1", src: "/1.png", alt: "Step 1" },
+              { id: "step-2", src: "/2.png", alt: "Step 2" },
+            ]}
+            correctOrder={["step-1", "step-2"]}
+          />
+        </Lesson>
+      </Course>,
+    );
+    act(() => {
+      ref.current?.resume?.({ order: ["step-1", "step-2"], passed: true, checked: true });
+    });
+    await waitFor(() => {
+      expect(events.some((e) => e.name === "assessment_completed")).toBe(false);
+    });
+  });
+
   it("ImageSequencing validates correct order", () => {
     render(
       wrap(
@@ -230,6 +346,38 @@ describe("Tier B/C/D block components", () => {
     );
     expect(screen.getByTestId("image-pairing-grid")).toBeDefined();
     expect(screen.getAllByRole("listitem").length).toBeGreaterThan(0);
+  });
+
+  it("ImagePairing completes on partial passingScore threshold", async () => {
+    vi.spyOn(Math, "random").mockReturnValue(0.5);
+    const events: TelemetryEvent[] = [];
+    render(
+      <Course
+        title="Blocks"
+        courseId="blocks-tier-bcd"
+        config={{
+          xapi: { enabled: false },
+          tracking: { sink: (e) => { events.push(e); } },
+        }}
+      >
+        <Lesson title="L1" lessonId="lesson-1">
+          <ImagePairing
+            checkId="pair-partial"
+            passingScore={1}
+            pairs={[
+              { id: "p1", label: "Helmet", imageSrc: "/helmet.png" },
+              { id: "p2", label: "Gloves", imageSrc: "/gloves.png" },
+            ]}
+          />
+        </Lesson>
+      </Course>,
+    );
+    fireEvent.click(screen.getByTestId("pairing-card-p1-0"));
+    fireEvent.click(screen.getByTestId("pairing-card-p1-1"));
+    await waitFor(() => {
+      const completed = events.find((e) => e.name === "assessment_completed");
+      expect(completed?.data?.score).toBe(1);
+    });
   });
 
   it("Flashcards flips to show the back", () => {

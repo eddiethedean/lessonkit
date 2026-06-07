@@ -28,6 +28,7 @@ export type CourseStartedEmitOpts = {
   attemptId?: string;
   user?: TelemetryUser;
   lxpackBridge: LxpackBridgeMode;
+  allowedParentOrigins?: string[];
   onLxpackBridgeMiss?: (event: TelemetryEvent) => void;
   extraSinks?: import("@lessonkit/core").TelemetryPipelineSink[];
   skipXapi?: boolean;
@@ -156,6 +157,10 @@ export async function emitCourseStartedToTracking(
         return;
       }
       if (markCourseStartedEmittedToTracking(storage, sessionId, courseId) === false) {
+        if (hasCourseStartedEmittedToTracking(storage, sessionId, courseId)) {
+          resolveFlight(true);
+          return;
+        }
         resolveFlight(false);
         return;
       }
@@ -197,6 +202,7 @@ export async function emitCourseStartedPipelineOnly(
       event: opts.event,
       xapi: opts.xapi,
       lxpackBridge: opts.lxpackBridge,
+      allowedParentOrigins: opts.allowedParentOrigins,
       onLxpackBridgeMiss: opts.onLxpackBridgeMiss,
       extraSinks: opts.extraSinks,
       skipXapi,
@@ -204,10 +210,27 @@ export async function emitCourseStartedPipelineOnly(
         markCourseStartedXapiSent(opts.storage, opts.sessionId, opts.courseId);
         opts.onXapiStatementSent?.();
       },
+      onBeforeExtraSinks: async () => {
+        if (opts.shouldCommit && !opts.shouldCommit()) throw new Error("course_started commit aborted");
+        if (
+          markCourseStarted(opts.storage, opts.sessionId, opts.courseId) === false &&
+          !hasCourseStarted(opts.storage, opts.sessionId, opts.courseId)
+        ) {
+          throw new Error("course_started mark failed");
+        }
+      },
     });
     if (opts.shouldCommit && !opts.shouldCommit()) return "failed";
-    if (markCourseStarted(opts.storage, opts.sessionId, opts.courseId) === false) return "failed";
-    if (markCourseStartedPipelineDelivered(opts.storage, opts.sessionId, opts.courseId) === false) {
+    if (
+      markCourseStarted(opts.storage, opts.sessionId, opts.courseId) === false &&
+      !hasCourseStarted(opts.storage, opts.sessionId, opts.courseId)
+    ) {
+      return "failed";
+    }
+    if (
+      markCourseStartedPipelineDelivered(opts.storage, opts.sessionId, opts.courseId) === false &&
+      !hasCourseStartedPipelineDelivered(opts.storage, opts.sessionId, opts.courseId)
+    ) {
       return "failed";
     }
     if (xapiStatementSent && !hasCourseStartedXapiSent(opts.storage, opts.sessionId, opts.courseId)) {
@@ -276,6 +299,7 @@ export async function emitCourseStartedToTrackingOnly(
       event,
       xapi: null,
       lxpackBridge: opts.lxpackBridge,
+      allowedParentOrigins: opts.allowedParentOrigins,
       onLxpackBridgeMiss: opts.onLxpackBridgeMiss,
       extraSinks: opts.extraSinks,
       skipXapi: true,

@@ -11,7 +11,6 @@ export type { LxpackBridgeSubmitAssessmentPayload, LxpackBridgeV1 } from "@lxpac
 export {
   createLxpackBridgeHost,
   DEFAULT_BRIDGE_PASSING_SCORE,
-  getLxpackBridge,
   LXPACK_BRIDGE_VERSIONS,
   normalizePassingThreshold,
   normalizeScore,
@@ -69,13 +68,56 @@ export function normalizeAssessmentPassingScore(opts?: {
   });
 }
 
-function getBridge(parentWindow?: Window): LxpackBridgeV1 | null {
+export type BridgeAccessOptions = {
+  /** Allowed parent-frame origins (scheme + host + port). When set, bridge calls require a matching origin. */
+  allowedParentOrigins?: string[];
+};
+
+/** Resolve the parent frame origin when embedded (same-origin parent or document.referrer fallback). */
+export function resolveParentOrigin(parentWindow?: Window): string | null {
+  if (typeof window === "undefined") return null;
+  const parent = parentWindow ?? window.parent;
+  if (!parent || parent === window) return null;
+  try {
+    return parent.location.origin;
+  } catch {
+    const referrer = typeof document !== "undefined" ? document.referrer : "";
+    if (!referrer) return null;
+    try {
+      return new URL(referrer).origin;
+    } catch {
+      return null;
+    }
+  }
+}
+
+/** Returns true when no allowlist is configured or the resolved parent origin is listed. */
+export function isParentOriginAllowed(
+  allowedParentOrigins: string[] | undefined,
+  parentWindow?: Window,
+): boolean {
+  if (!allowedParentOrigins?.length) return true;
+  const origin = resolveParentOrigin(parentWindow);
+  if (!origin) return false;
+  return allowedParentOrigins.includes(origin);
+}
+
+function getBridge(parentWindow?: Window, opts?: BridgeAccessOptions): LxpackBridgeV1 | null {
+  if (!isParentOriginAllowed(opts?.allowedParentOrigins, parentWindow)) return null;
   const fromSdk = getLxpackBridgeFromParent(parentWindow);
   if (fromSdk) return fromSdk;
   if (typeof window === "undefined") return null;
   const parent = (parentWindow ?? window.parent) as (Window & LxpackBridgeHost) | null;
   if (!parent || parent === window) return null;
   return parent.lxpackBridge?.v1 ?? parent.lxpack ?? null;
+}
+
+/** Resolve the LXPack parent bridge when the parent origin passes validation. */
+export function getLxpackBridge(
+  parentWindow?: Window,
+  opts?: BridgeAccessOptions,
+): LxpackBridgeV1 | null {
+  return getBridge(parentWindow, opts);
 }
 
 /** @deprecated Use `LmsBridgeMode` from `@lessonkit/core`. */
@@ -177,6 +219,7 @@ function forwardAssessmentCompletedToBridge(
 
 export type ForwardTelemetryToBridgeOptions = {
   onBridgeError?: (err: unknown) => void;
+  allowedParentOrigins?: string[];
 };
 
 export function forwardTelemetryToBridge(
@@ -186,7 +229,9 @@ export function forwardTelemetryToBridge(
   opts?: ForwardTelemetryToBridgeOptions,
 ): void {
   if (mode === "off") return;
-  const bridge = getBridge(parentWindow);
+  const bridge = getBridge(parentWindow, {
+    allowedParentOrigins: opts?.allowedParentOrigins,
+  });
   if (!bridge) return;
   try {
     if (event.name === "assessment_completed") {
@@ -207,19 +252,22 @@ export function forwardTelemetryToBridge(
   }
 }
 
-export function createLxpackBridge(): LxpackBridgeV1 | null {
-  return getBridge();
+export function createLxpackBridge(opts?: BridgeAccessOptions): LxpackBridgeV1 | null {
+  return getBridge(undefined, opts);
 }
 
-export function notifyLxpackLessonComplete(lessonId: LessonId): boolean {
-  const bridge = getBridge();
+export function notifyLxpackLessonComplete(
+  lessonId: LessonId,
+  opts?: BridgeAccessOptions,
+): boolean {
+  const bridge = getBridge(undefined, opts);
   if (!bridge?.completeLesson) return false;
   bridge.completeLesson(lessonId);
   return true;
 }
 
-export function notifyLxpackCourseComplete(): boolean {
-  const bridge = getBridge();
+export function notifyLxpackCourseComplete(opts?: BridgeAccessOptions): boolean {
+  const bridge = getBridge(undefined, opts);
   if (!bridge?.completeCourse) return false;
   bridge.completeCourse();
   return true;
@@ -231,8 +279,9 @@ export function notifyLxpackCourseComplete(): boolean {
  */
 export function notifyLxpackAssessment(
   payload: LxpackBridgeSubmitAssessmentPayload & { id: CheckId },
+  opts?: BridgeAccessOptions,
 ): boolean {
-  const bridge = getBridge();
+  const bridge = getBridge(undefined, opts);
   if (!bridge?.submitAssessment) return false;
   bridge.submitAssessment(payload);
   return true;

@@ -1,5 +1,5 @@
 import React, { createRef } from "react";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { defineAssessmentPlugin, type AssessmentHandle } from "@lessonkit/core";
 import {
@@ -194,6 +194,21 @@ describe("AssessmentHandle (imperative API)", () => {
     );
   });
 
+  it("MarkTheWords shows status when passingScore threshold is met", () => {
+    render(
+      wrap(
+        <MarkTheWords
+          checkId="mtw-partial"
+          text="one two three"
+          correctWords={["two", "three"]}
+          passingScore={1}
+        />,
+      ),
+    );
+    fireEvent.click(screen.getByRole("button", { name: "two" }));
+    expect(screen.getByRole("status").textContent).toContain("Correct");
+  });
+
   it("MarkTheWords handle reflects selection state", () => {
     const ref = createRef<AssessmentHandle>();
     render(
@@ -224,6 +239,23 @@ describe("AssessmentHandle (imperative API)", () => {
     expect(ref.current?.getScore()).toBe(1);
     ref.current?.showSolutions();
     expect(screen.getByTestId("check-blanks")).toBeTruthy();
+  });
+
+  it("FillInTheBlanks falls back when blanks length mismatches template", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    render(
+      wrap(
+        <FillInTheBlanks
+          checkId="fib-mismatch"
+          template="The *capital* of France is *Paris*."
+          blanks={[{ id: "only-one", answer: "capital" }]}
+        />,
+      ),
+    );
+    expect(screen.getByTestId("blank-blank-0")).toBeTruthy();
+    expect(screen.getByTestId("blank-blank-1")).toBeTruthy();
+    expect(warn).toHaveBeenCalled();
+    warn.mockRestore();
   });
 
   it("FillInTheBlanks renders custom blank ids from blanks prop", () => {

@@ -115,11 +115,6 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
   const sessionIdRef = useRef<string>(resolveSessionId(defaultStorage, normalizedConfig.session?.sessionId));
   const [sessionId, setSessionId] = useState(() => sessionIdRef.current);
   const prevConfiguredSessionIdRef = useRef<string | undefined>(normalizedConfig.session?.sessionId);
-  if (normalizedConfig.session?.sessionId) {
-    sessionIdRef.current = normalizedConfig.session.sessionId;
-  } else if (prevConfiguredSessionIdRef.current) {
-    sessionIdRef.current = resolveSessionId(defaultStorage, undefined);
-  }
 
   const attemptIdRef = useRef<string | undefined>(normalizedConfig.session?.attemptId);
   const userRef = useRef<TelemetryUser | undefined>(normalizedConfig.session?.user);
@@ -131,6 +126,8 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
 
   const lxpackBridgeModeRef = useRef<LxpackBridgeMode>(normalizedConfig.lxpack?.bridge ?? "auto");
   lxpackBridgeModeRef.current = normalizedConfig.lxpack?.bridge ?? "auto";
+  const allowedParentOriginsRef = useRef(normalizedConfig.lxpack?.allowedParentOrigins);
+  allowedParentOriginsRef.current = normalizedConfig.lxpack?.allowedParentOrigins;
 
   const observabilityRef = useRef(normalizedConfig.observability);
   observabilityRef.current = normalizedConfig.observability;
@@ -286,6 +283,7 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
             attemptId: attemptIdRef.current,
             user: userRef.current,
             lxpackBridge: lxpackBridgeModeRef.current,
+            allowedParentOrigins: allowedParentOriginsRef.current,
           });
           if (event !== null) {
             const statement = telemetryEventToXAPIStatement(event);
@@ -379,6 +377,7 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
         attemptId: attemptIdRef.current,
         user: userRef.current,
         lxpackBridge: lxpackBridgeModeRef.current,
+        allowedParentOrigins: allowedParentOriginsRef.current,
         onLxpackBridgeMiss,
         extraSinks: extraSinksRef.current,
         skipXapi:
@@ -485,6 +484,7 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
         user: userRef.current,
       }),
       lxpackBridge: lxpackBridgeModeRef.current,
+      allowedParentOrigins: allowedParentOriginsRef.current,
       onLxpackBridgeMiss,
       extraSinks: extraSinksRef.current,
     });
@@ -724,7 +724,7 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
     };
   }, [pluginHost, useV2Runtime, normalizedCourseId, sessionAttemptId, sessionConfiguredId, sessionUserKey]);
 
-  useEffect(() => {
+  useIsoLayoutEffect(() => {
     const nextConfigured = normalizedConfig.session?.sessionId;
     const prevConfigured = prevConfiguredSessionIdRef.current;
     if (nextConfigured === prevConfigured) return;
@@ -732,7 +732,8 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
 
     const cid = courseIdRef.current;
 
-    if (nextConfigured) {
+    if (nextConfigured !== undefined) {
+      const resolved = resolveSessionId(defaultStorage, nextConfigured);
       const tabId = getTabSessionId(defaultStorage);
       const isExplicitLearnerSwap =
         prevConfigured !== undefined && prevConfigured !== nextConfigured;
@@ -741,11 +742,11 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
         courseStartedEmittedToSinkRef.current = false;
         courseStartedEmitGenerationRef.current += 1;
         pendingSessionReEmitRef.current = true;
-      } else if (tabId && tabId !== nextConfigured) {
-        migrateCourseStartedMark(defaultStorage, tabId, nextConfigured, cid);
+      } else if (tabId && tabId !== resolved) {
+        migrateCourseStartedMark(defaultStorage, tabId, resolved, cid);
       }
-      sessionIdRef.current = nextConfigured;
-      setSessionId(nextConfigured);
+      sessionIdRef.current = resolved;
+      setSessionId(resolved);
     /* v8 ignore start -- initial mount has no configured session id to migrate from */
     } else if (prevConfigured) {
       const nextAuto = resolveSessionId(defaultStorage, undefined);

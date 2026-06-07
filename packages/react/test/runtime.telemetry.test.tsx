@@ -1073,13 +1073,45 @@ it("Quiz defaults passingScore to plugin maxScore when prop is omitted", async (
     );
   });
 
-it("Quiz does not complete on score-only plugin without explicit passed", async () => {
+it("Quiz uses scoreResponse for plugin numeric score pass threshold", async () => {
     const events: TelemetryEvent[] = [];
     const plugin = defineAssessmentPlugin({
       id: "scorer-score",
       version: "1",
       kind: "assessment",
       scoreAssessment: () => ({ score: 1, maxScore: 0 }),
+    });
+
+    const { getByLabelText } = render(
+      <Course
+        title="Course"
+        courseId="course-1"
+        config={{
+          plugins: [plugin],
+          tracking: { sink: (e) => void events.push(e) },
+          xapi: { enabled: false },
+        }}
+      >
+        <Lesson title="Lesson" lessonId="lesson-1">
+          <Quiz checkId="check-1" question="Q?" choices={["x", "y"]} answer="right" />
+        </Lesson>
+      </Course>,
+    );
+
+    await act(async () => {
+      fireEvent.click(getByLabelText("x"));
+    });
+    expect(await screen.findByText("Correct")).toBeTruthy();
+    expect(events.some((e) => e.name === "quiz_completed")).toBe(true);
+  });
+
+it("Quiz does not complete when plugin score is below passing threshold", async () => {
+    const events: TelemetryEvent[] = [];
+    const plugin = defineAssessmentPlugin({
+      id: "scorer-below",
+      version: "1",
+      kind: "assessment",
+      scoreAssessment: () => ({ score: 1, maxScore: 4 }),
     });
 
     const { getByLabelText } = render(

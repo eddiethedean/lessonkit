@@ -21,6 +21,11 @@ const ALLOWED_SANDBOX_TOKENS = new Set([
 
 const DEFAULT_SANDBOX = "allow-scripts";
 
+export type MediaSrcOptions = {
+  /** Hostnames allowed to bypass the production private-network blocklist. */
+  allowedHosts?: readonly string[];
+};
+
 function isProductionEmbedBuild(): boolean {
   try {
     if ((import.meta as { env?: { PROD?: boolean } }).env?.PROD === true) return true;
@@ -35,7 +40,53 @@ function allowedEmbedSchemes(): Set<string> {
   return isProductionEmbedBuild() ? new Set(["https:"]) : new Set(["https:", "http:"]);
 }
 
-export function resolveEmbedSrc(src: string): string | null {
+function normalizeHostname(hostname: string): string {
+  return hostname.replace(/^\[/, "").replace(/\]$/, "").toLowerCase();
+}
+
+function isLoopbackHost(hostname: string): boolean {
+  return (
+    hostname === "localhost" ||
+    hostname.endsWith(".localhost") ||
+    hostname === "127.0.0.1" ||
+    hostname === "::1" ||
+    hostname === "0.0.0.0"
+  );
+}
+
+function isLinkLocalOrMetadataHost(hostname: string): boolean {
+  if (hostname === "169.254.169.254") return true;
+  if (/^169\.254\./.test(hostname)) return true;
+  if (/^fe80:/i.test(hostname)) return true;
+  return false;
+}
+
+function isRfc1918Host(hostname: string): boolean {
+  if (/^10\./.test(hostname)) return true;
+  if (/^192\.168\./.test(hostname)) return true;
+  const parts = hostname.split(".").map(Number);
+  if (parts.length === 4 && parts[0] === 172 && parts[1]! >= 16 && parts[1]! <= 31) return true;
+  return false;
+}
+
+/** Returns true for loopback, RFC1918, link-local, and cloud metadata hostnames. */
+export function isBlockedHost(hostname: string, allowedHosts?: readonly string[]): boolean {
+  const normalized = normalizeHostname(hostname);
+  if (allowedHosts?.some((host) => normalizeHostname(host) === normalized)) {
+    return false;
+  }
+  if (!isProductionEmbedBuild()) return false;
+  return (
+    isLoopbackHost(normalized) ||
+    isLinkLocalOrMetadataHost(normalized) ||
+    isRfc1918Host(normalized)
+  );
+}
+
+function resolveAllowedUrl(
+  src: string,
+  options?: MediaSrcOptions,
+): string | null {
   const trimmed = src.trim();
   if (!trimmed) return null;
   try {
@@ -43,6 +94,7 @@ export function resolveEmbedSrc(src: string): string | null {
       typeof window !== "undefined" ? window.location.href : "https://example.com/";
     const url = new URL(trimmed, base);
     if (!allowedEmbedSchemes().has(url.protocol)) return null;
+    if (isBlockedHost(url.hostname, options?.allowedHosts)) return null;
     if (typeof window !== "undefined") {
       const pageOrigin = window.location.origin;
       const isAbsolute = /^[a-zA-Z][a-zA-Z\d+\-.]*:/.test(trimmed) || trimmed.startsWith("//");
@@ -55,6 +107,16 @@ export function resolveEmbedSrc(src: string): string | null {
   } catch {
     return null;
   }
+}
+
+export function resolveEmbedSrc(src: string, options?: MediaSrcOptions): string | null {
+  return resolveAllowedUrl(src, options);
+}
+
+/** Sanitize image, video, poster, and caption URLs with the same scheme/host policy as embeds. */
+export function resolveMediaSrc(src: string | undefined, options?: MediaSrcOptions): string | null {
+  if (src === undefined) return null;
+  return resolveAllowedUrl(src, options);
 }
 
 export type EmbedSandboxOptions = {

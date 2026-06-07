@@ -181,7 +181,7 @@ function MarkTheWordsInner(
           );
         })}
       </p>
-      {allMarked ? (
+      {passedThreshold ? (
         <p role="status" aria-live="polite">
           Correct
         </p>

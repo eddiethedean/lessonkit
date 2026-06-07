@@ -256,6 +256,40 @@ describe("@lessonkit/xapi", () => {
     expect(exitCalls.map((s) => s.id)).toEqual(["head", "tail"]);
   });
 
+  it("delivers a replacement payload after an in-flight statement with the same id succeeds", async () => {
+    const statements: XAPIStatement[] = [];
+    let release!: () => void;
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const transport = vi.fn(async (statement: XAPIStatement) => {
+      await gate;
+      statements.push(statement);
+    });
+    const client = createXAPIClient({ transport, courseId });
+    const original: XAPIStatement = {
+      id: "replace-1",
+      timestamp: "t1",
+      verb: "http://adlnet.gov/expapi/verbs/experienced",
+      object: { id: "o-old" },
+    };
+    const replacement: XAPIStatement = {
+      id: "replace-1",
+      timestamp: "t2",
+      verb: "http://adlnet.gov/expapi/verbs/experienced",
+      object: { id: "o-new" },
+    };
+
+    client.send(original);
+    client.send(replacement);
+    release();
+    await new Promise((r) => setTimeout(r, 0));
+    await client.flush();
+
+    expect(transport).toHaveBeenCalledTimes(2);
+    expect(statements.map((s) => s.object.id)).toEqual(["o-old", "o-new"]);
+  });
+
   it("does not send duplicate in-flight statements with the same id", async () => {
     const statements: XAPIStatement[] = [];
     let release!: () => void;
@@ -403,9 +437,11 @@ describe("@lessonkit/xapi", () => {
 
     queue.enqueue({ id: "overflow", timestamp: "t", verb, object: { id: "o2" } });
     expect(onCap).toHaveBeenCalledTimes(1);
+    expect(queue.size()).toBe(1);
 
     release();
     await flushPromise;
+    expect(queue.size()).toBe(0);
   });
 
   it("concurrent client flush drains re-queued statements after the first flush finishes", async () => {
