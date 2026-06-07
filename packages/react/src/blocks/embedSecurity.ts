@@ -44,6 +44,28 @@ function normalizeHostname(hostname: string): string {
   return hostname.replace(/^\[/, "").replace(/\]$/, "").toLowerCase();
 }
 
+function expandIpv4Literal(hostname: string): string | null {
+  if (/^\d+$/.test(hostname)) {
+    const value = Number(hostname);
+    if (!Number.isInteger(value) || value < 0 || value > 0xffffffff) return null;
+    return `${(value >>> 24) & 255}.${(value >>> 16) & 255}.${(value >>> 8) & 255}.${value & 255}`;
+  }
+  if (!/^\d+(?:\.\d+){1,3}$/.test(hostname)) return null;
+  const parts = hostname.split(".").map((part) => Number(part));
+  if (parts.some((part) => !Number.isInteger(part) || part < 0 || part > 255)) return null;
+  let value = 0;
+  for (const part of parts) {
+    value = (value << 8) | part;
+  }
+  value <<= (4 - parts.length) * 8;
+  return `${(value >>> 24) & 255}.${(value >>> 16) & 255}.${(value >>> 8) & 255}.${value & 255}`;
+}
+
+function canonicalHostnameForBlocklist(hostname: string): string {
+  const normalized = normalizeHostname(hostname);
+  return expandIpv4Literal(normalized) ?? normalized;
+}
+
 function isIpv4MappedAddress(hostname: string): string | null {
   const match = hostname.match(/^::ffff:(\d+\.\d+\.\d+\.\d+)$/i);
   return match?.[1] ?? null;
@@ -56,9 +78,14 @@ function isLoopbackHost(hostname: string): boolean {
     hostname === "localhost" ||
     hostname.endsWith(".localhost") ||
     hostname === "127.0.0.1" ||
+    /^127\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(hostname) ||
     hostname === "::1" ||
     hostname === "0.0.0.0"
   );
+}
+
+function isIpv6UniqueLocalHost(hostname: string): boolean {
+  return /^f[cd][0-9a-f]{0,2}:/i.test(hostname);
 }
 
 function isLinkLocalOrMetadataHost(hostname: string): boolean {
@@ -81,14 +108,23 @@ function isRfc1918Host(hostname: string): boolean {
 /** Returns true for loopback, RFC1918, link-local, and cloud metadata hostnames. */
 export function isBlockedHost(hostname: string, allowedHosts?: readonly string[]): boolean {
   const normalized = normalizeHostname(hostname);
-  if (allowedHosts?.some((host) => normalizeHostname(host) === normalized)) {
+  const canonical = canonicalHostnameForBlocklist(hostname);
+  if (
+    allowedHosts?.some((host) => {
+      const allowedNormalized = normalizeHostname(host);
+      return (
+        canonicalHostnameForBlocklist(host) === canonical || allowedNormalized === normalized
+      );
+    })
+  ) {
     return false;
   }
   if (!isProductionEmbedBuild()) return false;
   return (
-    isLoopbackHost(normalized) ||
-    isLinkLocalOrMetadataHost(normalized) ||
-    isRfc1918Host(normalized)
+    isLoopbackHost(canonical) ||
+    isLinkLocalOrMetadataHost(canonical) ||
+    isRfc1918Host(canonical) ||
+    isIpv6UniqueLocalHost(normalized)
   );
 }
 

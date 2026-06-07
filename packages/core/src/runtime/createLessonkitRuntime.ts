@@ -44,13 +44,8 @@ export type HeadlessRuntimePorts = {
   clock?: ClockPort;
 };
 
-export type TelemetryEmitFn = {
-  <N extends TelemetryEventName>(
-    name: N,
-    data?: TelemetryDataFor<N>,
-    lessonId?: LessonId,
-  ): void;
-};
+/** Delivers a fully-built lifecycle telemetry event (plugins already applied). */
+export type TelemetryEmitFn = (event: TelemetryEvent) => void;
 
 export type HeadlessLessonkitRuntime = {
   readonly config: HeadlessLessonkitConfig;
@@ -155,14 +150,14 @@ export function createLessonkitRuntime(
     return applyPluginsToEvent(event);
   };
 
-  const wrapEmitFn = (emitFn: TelemetryEmitFn): TelemetryEmitFn => {
-    return (name, data, lessonId) => {
-      const event = buildAndApply(name, data, lessonId);
-      if (event === null) return;
-      const eventLessonId = "lessonId" in event ? event.lessonId : lessonId;
-      const eventData = "data" in event ? event.data : data;
-      emitFn(event.name as typeof name, eventData as TelemetryDataFor<typeof name>, eventLessonId);
-    };
+  const emitLifecycleEvent = <N extends TelemetryEventName>(
+    emitFn: TelemetryEmitFn,
+    name: N,
+    data?: TelemetryDataFor<N>,
+    lessonId?: LessonId,
+  ): void => {
+    const event = buildAndApply(name, data, lessonId);
+    if (event) emitFn(event);
   };
 
   syncSessionFromConfig(configSnapshot);
@@ -183,10 +178,9 @@ export function createLessonkitRuntime(
     durationMs: number | undefined,
     emitFn: TelemetryEmitFn,
   ) => {
-    const wrapped = wrapEmitFn(emitFn);
-    wrapped("lesson_completed", { lessonId, durationMs }, lessonId);
+    emitLifecycleEvent(emitFn, "lesson_completed", { lessonId, durationMs }, lessonId);
     if (durationMs !== undefined) {
-      wrapped("lesson_time_on_task", { lessonId, durationMs }, lessonId);
+      emitLifecycleEvent(emitFn, "lesson_time_on_task", { lessonId, durationMs }, lessonId);
     }
   };
 
@@ -241,7 +235,6 @@ export function createLessonkitRuntime(
       }
     },
     setActiveLesson(lessonId, emitFn) {
-      const wrapped = wrapEmitFn(emitFn);
       const current = progress.getState();
       if (current.activeLessonId === lessonId) return;
 
@@ -254,7 +247,7 @@ export function createLessonkitRuntime(
       ) {
         const completed = progress.completeLesson(previous, clock.nowMs());
         if (completed.didComplete) {
-          emitLessonCompletedEvents(previous, completed.durationMs, wrapped);
+          emitLessonCompletedEvents(previous, completed.durationMs, emitFn);
         }
       }
 
@@ -264,24 +257,22 @@ export function createLessonkitRuntime(
       }
 
       progress.setActiveLesson(lessonId, clock.nowMs());
-      wrapped("lesson_started", { lessonId }, lessonId);
+      emitLifecycleEvent(emitFn, "lesson_started", { lessonId }, lessonId);
     },
     completeLesson(lessonId, emitFn) {
       completeLessonWithTelemetry({
         progress,
         lessonId,
         nowMs: clock.nowMs(),
-        emitLessonCompleted: (id, durationMs) =>
-          emitLessonCompletedEvents(id, durationMs, wrapEmitFn(emitFn)),
+        emitLessonCompleted: (id, durationMs) => emitLessonCompletedEvents(id, durationMs, emitFn),
       });
     },
     completeCourse(emitFn) {
       completeCourseWithTelemetry({
         progress,
         nowMs: clock.nowMs(),
-        emitLessonCompleted: (id, durationMs) =>
-          emitLessonCompletedEvents(id, durationMs, wrapEmitFn(emitFn)),
-        emitCourseCompleted: () => wrapEmitFn(emitFn)("course_completed"),
+        emitLessonCompleted: (id, durationMs) => emitLessonCompletedEvents(id, durationMs, emitFn),
+        emitCourseCompleted: () => emitLifecycleEvent(emitFn, "course_completed"),
       });
     },
     track,

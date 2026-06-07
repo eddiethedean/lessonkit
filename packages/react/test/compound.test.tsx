@@ -803,15 +803,28 @@ describe("AssessmentSequence compound handle", () => {
     expect(screen.getByText("Question 2 of 2")).toBeTruthy();
   });
 
-  it("auto-generates a unique blockId when blockId is omitted", () => {
+  it("requires blockId when persistCompoundState is enabled", () => {
+    expect(() =>
+      render(
+        wrap(
+          <AssessmentSequence sequential>
+            <TrueFalse checkId="tf-persist-a" question="A?" answer={true} />
+          </AssessmentSequence>,
+          true,
+        ),
+      ),
+    ).toThrow(/requires a unique blockId/);
+  });
+
+  it("uses distinct storage keys for AssessmentSequence instances with unique blockIds", () => {
     render(
       wrap(
         <>
-          <AssessmentSequence sequential>
+          <AssessmentSequence blockId="seq-auto-a" sequential>
             <TrueFalse checkId="tf-auto-a" question="A?" answer={true} />
             <TrueFalse checkId="tf-auto-b" question="B?" answer={false} />
           </AssessmentSequence>
-          <AssessmentSequence sequential>
+          <AssessmentSequence blockId="seq-auto-b" sequential>
             <TrueFalse checkId="tf-auto-c" question="C?" answer={true} />
             <TrueFalse checkId="tf-auto-d" question="D?" answer={false} />
           </AssessmentSequence>
@@ -1088,8 +1101,8 @@ describe("BranchingScenario", () => {
     fireEvent.click(screen.getByTestId("branch-choice-credit"));
     fireEvent.click(screen.getByRole("radio", { name: "True" }));
     expect(ref.current?.getScore()).toBe(4);
-    expect(ref.current?.getMaxScore()).toBe(4);
-    expect(screen.getByTestId("branch-score").textContent).toContain("Score: 4 / 4");
+    expect(ref.current?.getMaxScore()).toBe(11);
+    expect(screen.getByTestId("branch-score").textContent).toContain("Score: 4 / 11");
   });
 
   it("persists graph position in session storage", async () => {

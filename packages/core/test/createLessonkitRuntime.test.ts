@@ -7,10 +7,10 @@ describe("createLessonkitRuntime", () => {
     const events: string[] = [];
     const runtime = createLessonkitRuntime({ courseId: "c" });
 
-    const emit = (name: string) => events.push(name);
+    const emit = (event: { name: string }) => events.push(event.name);
 
-    runtime.setActiveLesson("lesson-1", (name) => emit(name));
-    runtime.completeCourse((name) => emit(name));
+    runtime.setActiveLesson("lesson-1", emit);
+    runtime.completeCourse(emit);
 
     expect(events).toContain("lesson_started");
     expect(events).toContain("lesson_completed");
@@ -55,8 +55,8 @@ describe("createLessonkitRuntime", () => {
   it("completeLesson emits via callback", () => {
     const events: string[] = [];
     const runtime = createLessonkitRuntime({ courseId: "c" });
-    runtime.setActiveLesson("lesson-1", (name) => events.push(name));
-    runtime.completeLesson("lesson-1", (name) => events.push(name));
+    runtime.setActiveLesson("lesson-1", (event) => events.push(event.name));
+    runtime.completeLesson("lesson-1", (event) => events.push(event.name));
     expect(events.filter((e) => e === "lesson_completed").length).toBeGreaterThan(0);
   });
 
@@ -81,18 +81,18 @@ describe("createLessonkitRuntime", () => {
   it("setActiveLesson does not re-emit lesson_started for a completed lesson", () => {
     const events: string[] = [];
     const runtime = createLessonkitRuntime({ courseId: "c" });
-    runtime.setActiveLesson("lesson-1", (name) => events.push(name));
-    runtime.completeLesson("lesson-1", (name) => events.push(name));
+    runtime.setActiveLesson("lesson-1", (event) => events.push(event.name));
+    runtime.completeLesson("lesson-1", (event) => events.push(event.name));
     const startedBefore = events.filter((e) => e === "lesson_started").length;
-    runtime.setActiveLesson("lesson-1", (name) => events.push(name));
+    runtime.setActiveLesson("lesson-1", (event) => events.push(event.name));
     expect(events.filter((e) => e === "lesson_started").length).toBe(startedBefore);
   });
 
   it("setActiveLesson completes previous lesson when switching", () => {
     const events: string[] = [];
     const runtime = createLessonkitRuntime({ courseId: "c" });
-    runtime.setActiveLesson("lesson-1", (name) => events.push(name));
-    runtime.setActiveLesson("lesson-2", (name) => events.push(name));
+    runtime.setActiveLesson("lesson-1", (event) => events.push(event.name));
+    runtime.setActiveLesson("lesson-2", (event) => events.push(event.name));
     expect(events).toContain("lesson_started");
     expect(events.filter((e) => e === "lesson_completed").length).toBe(1);
   });
@@ -100,8 +100,8 @@ describe("createLessonkitRuntime", () => {
   it("setActiveLesson skips auto-complete when autoCompleteOnLessonSwitch is false", () => {
     const events: string[] = [];
     const runtime = createLessonkitRuntime({ courseId: "c", autoCompleteOnLessonSwitch: false });
-    runtime.setActiveLesson("lesson-1", (name) => events.push(name));
-    runtime.setActiveLesson("lesson-2", (name) => events.push(name));
+    runtime.setActiveLesson("lesson-1", (event) => events.push(event.name));
+    runtime.setActiveLesson("lesson-2", (event) => events.push(event.name));
     expect(events.filter((e) => e === "lesson_completed").length).toBe(0);
     expect(events.filter((e) => e === "lesson_started").length).toBe(2);
   });
@@ -129,11 +129,11 @@ describe("createLessonkitRuntime", () => {
   it("setActiveLesson completes in-progress lesson when navigating to a completed lesson", () => {
     const events: string[] = [];
     const runtime = createLessonkitRuntime({ courseId: "c" });
-    runtime.setActiveLesson("lesson-1", (name) => events.push(name));
-    runtime.completeLesson("lesson-1", (name) => events.push(name));
-    runtime.setActiveLesson("lesson-2", (name) => events.push(name));
+    runtime.setActiveLesson("lesson-1", (event) => events.push(event.name));
+    runtime.completeLesson("lesson-1", (event) => events.push(event.name));
+    runtime.setActiveLesson("lesson-2", (event) => events.push(event.name));
     events.length = 0;
-    runtime.setActiveLesson("lesson-1", (name) => events.push(name));
+    runtime.setActiveLesson("lesson-1", (event) => events.push(event.name));
     expect(events.filter((e) => e === "lesson_completed").length).toBe(1);
     expect(runtime.getProgressState().completedLessonIds.has("lesson-2")).toBe(true);
   });
@@ -259,6 +259,22 @@ describe("createLessonkitRuntime", () => {
     expect(log).toEqual(["setup"]);
     runtime.updateConfig({ session: { user: { id: "user-b" } } });
     expect(log).toEqual(["setup", "dispose", "setup"]);
+  });
+
+  it("lifecycle emit runs telemetry plugins exactly once per event", () => {
+    let pluginRuns = 0;
+    const plugin = defineTelemetryPlugin({
+      id: "count",
+      version: "1",
+      kind: "analytics",
+      onTelemetry: (event) => {
+        pluginRuns += 1;
+        return event;
+      },
+    });
+    const runtime = createLessonkitRuntime({ courseId: "c", plugins: [plugin] });
+    runtime.setActiveLesson("lesson-1", () => {});
+    expect(pluginRuns).toBe(1);
   });
 
   it("warns when runtimeVersion is v1 in development", () => {

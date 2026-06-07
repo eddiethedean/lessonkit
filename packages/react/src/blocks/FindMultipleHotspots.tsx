@@ -7,8 +7,10 @@ import { readBooleanStateField } from "../assessment/internal/resumeState";
 import { useAssessmentHandleRegistration } from "../assessment/internal/useAssessmentHandleRegistration";
 import { meetsPassingThreshold } from "../assessment/scoring";
 import { useAssessmentState } from "../assessment/useAssessmentState";
+import { useLessonkit } from "../hooks";
 import { setLessonkitBlockType } from "../compound/blockType";
 import { normalizeComponentId } from "../runtime/validateComponentId";
+import { resolveMediaSrc } from "./embedSecurity";
 import type { HotspotTarget } from "./FindHotspot";
 
 export type FindMultipleHotspotsProps = AssessmentBaseProps & {
@@ -25,6 +27,8 @@ function FindMultipleHotspotsInner(
   ref: React.Ref<AssessmentHandle>,
 ) {
   const checkId = useMemo(() => normalizeComponentId(props.checkId, "checkId"), [props.checkId]);
+  const { config } = useLessonkit();
+  const resolvedSrc = resolveMediaSrc(props.src, { allowedHosts: config.embed?.allowedHosts });
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [checked, setChecked] = useState(false);
   const assessment = useAssessmentState(props.enclosingLessonId);
@@ -153,7 +157,11 @@ function FindMultipleHotspotsInner(
   return (
     <section aria-label="Find multiple hotspots" data-lk-check-id={checkId} data-testid="find-multiple-hotspots">
       <div style={{ position: "relative", display: "inline-block" }}>
-        <img src={props.src} alt={props.alt} style={{ maxWidth: "100%" }} />
+        {resolvedSrc ? (
+          <img src={resolvedSrc} alt={props.alt} style={{ maxWidth: "100%" }} />
+        ) : (
+          <p role="alert">This image URL is not allowed.</p>
+        )}
         {props.targets.map((t) => (
           <button
             key={t.id}

@@ -3,6 +3,7 @@ import type { BlockId } from "@lessonkit/core";
 import { setLessonkitBlockType } from "../compound/blockType";
 import { useLessonkit } from "../hooks";
 import { useEnclosingLessonId } from "../lessonContext";
+import { resolveMediaSrc } from "./embedSecurity";
 
 export type ParallaxSlide = {
   title: string;
@@ -32,10 +33,14 @@ function usePrefersReducedMotion(): boolean {
 export function ParallaxSlideshow(props: ParallaxSlideshowProps) {
   const [index, setIndex] = useState(0);
   const reducedMotion = usePrefersReducedMotion();
-  const { track } = useLessonkit();
+  const { track, config } = useLessonkit();
   const lessonId = useEnclosingLessonId();
   const trackOpts = lessonId ? { lessonId } : undefined;
   const slide = props.slides[index];
+  const mediaOptions = { allowedHosts: config.embed?.allowedHosts };
+  const resolvedImageSrc = slide?.imageSrc
+    ? resolveMediaSrc(slide.imageSrc, mediaOptions)
+    : null;
 
   useEffect(() => {
     if (props.slides.length < 1) return;
@@ -71,7 +76,7 @@ export function ParallaxSlideshow(props: ParallaxSlideshowProps) {
             ? undefined
             : {
                 backgroundAttachment: "fixed",
-                backgroundImage: slide.imageSrc ? `url(${slide.imageSrc})` : undefined,
+                backgroundImage: resolvedImageSrc ? `url("${resolvedImageSrc}")` : undefined,
                 backgroundPosition: "center",
                 backgroundSize: "cover",
                 minHeight: "12rem",
@@ -79,13 +84,16 @@ export function ParallaxSlideshow(props: ParallaxSlideshowProps) {
               }
         }
       >
-        {reducedMotion && slide.imageSrc ? (
+        {reducedMotion && resolvedImageSrc ? (
           <img
-            src={slide.imageSrc}
+            src={resolvedImageSrc}
             alt=""
             data-testid="parallax-slide-image"
             style={{ maxWidth: "100%" }}
           />
+        ) : null}
+        {!reducedMotion && slide.imageSrc && !resolvedImageSrc ? (
+          <p role="alert">This image URL is not allowed.</p>
         ) : null}
         <h3 data-testid="parallax-slide-title">{slide.title}</h3>
         <p data-testid="parallax-slide-body">{slide.body}</p>

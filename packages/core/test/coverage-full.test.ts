@@ -273,7 +273,7 @@ describe("coverage-full", () => {
 
   it("headless runtime covers config updates and duplicate lifecycle calls", () => {
     const events: string[] = [];
-    const emit = (name: string) => events.push(name);
+    const emit = (event: { name: string }) => events.push(event.name);
     const runtime = createLessonkitRuntime({ courseId: "c" });
 
     runtime.updateConfig({ plugins: createPluginRegistry([]) });
@@ -370,7 +370,7 @@ describe("coverage-full", () => {
 
   it("headless runtime skips completion emits when prior lesson already completed", () => {
     const events: string[] = [];
-    const emit = (name: string) => events.push(name);
+    const emit = (event: { name: string }) => events.push(event.name);
     const runtime = createLessonkitRuntime({ courseId: "c" });
     runtime.setActiveLesson("l1", emit);
     runtime.completeLesson("l1", emit);
@@ -381,7 +381,7 @@ describe("coverage-full", () => {
 
   it("headless runtime completeCourse skips active lesson emit when already completed", () => {
     const events: string[] = [];
-    const emit = (name: string) => events.push(name);
+    const emit = (event: { name: string }) => events.push(event.name);
     const runtime = createLessonkitRuntime({ courseId: "c" });
     runtime.setActiveLesson("l1", emit);
     runtime.completeLesson("l1", emit);
@@ -394,7 +394,7 @@ describe("coverage-full", () => {
 
   it("headless runtime skips lesson_time_on_task when duration is unknown", () => {
     const events: string[] = [];
-    const emit = (name: string) => events.push(name);
+    const emit = (event: { name: string }) => events.push(event.name);
     const runtime = createLessonkitRuntime({ courseId: "c" });
     runtime.completeLesson("orphan", emit);
     expect(events).toEqual(["lesson_completed"]);

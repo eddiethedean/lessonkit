@@ -3,6 +3,7 @@ import type { BlockId } from "@lessonkit/core";
 import { setLessonkitBlockType } from "../compound/blockType";
 import { useLessonkit } from "../hooks";
 import { useEnclosingLessonId } from "../lessonContext";
+import { resolveMediaSrc } from "./embedSecurity";
 
 export type HotspotSpec = {
   id: string;
@@ -21,8 +22,9 @@ export type ImageHotspotsProps = {
 
 export function ImageHotspots(props: ImageHotspotsProps) {
   const [active, setActive] = useState<string | null>(null);
-  const { track } = useLessonkit();
+  const { track, config } = useLessonkit();
   const lessonId = useEnclosingLessonId();
+  const resolvedSrc = resolveMediaSrc(props.src, { allowedHosts: config.embed?.allowedHosts });
 
   const open = (hotspotId: string) => {
     setActive(hotspotId);
@@ -36,7 +38,11 @@ export function ImageHotspots(props: ImageHotspotsProps) {
   return (
     <section aria-label="Image hotspots" data-lk-block-id={props.blockId} data-testid="image-hotspots">
       <div style={{ position: "relative", display: "inline-block" }}>
-        <img src={props.src} alt={props.alt} style={{ maxWidth: "100%" }} />
+        {resolvedSrc ? (
+          <img src={resolvedSrc} alt={props.alt} style={{ maxWidth: "100%" }} />
+        ) : (
+          <p role="alert">This image URL is not allowed.</p>
+        )}
         {props.hotspots.map((h) => (
           <button
             key={h.id}

@@ -497,19 +497,7 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
   }, [onLxpackBridgeMiss]);
 
   const emitLifecycleEvent: TelemetryEmitFn = useCallback(
-    (name, data, lessonId) => {
-      const event = tryBuildTelemetryEvent({
-        name,
-        courseId: courseIdRef.current,
-        lessonId: lessonId ?? activeLessonIdRef.current,
-        sessionId: sessionIdRef.current,
-        attemptId: attemptIdRef.current,
-        user: userRef.current,
-        data,
-      } as Parameters<typeof tryBuildTelemetryEvent>[0]);
-      /* v8 ignore start -- invalid lifecycle payloads are dropped before emit */
-      if (!event) return;
-      /* v8 ignore stop */
+    (event) => {
       emitWithBridge(trackingRef.current, event);
     },
     [emitWithBridge],

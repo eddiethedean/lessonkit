@@ -175,7 +175,31 @@ const BranchingScenarioInner = forwardRef<
     shouldIncludeChildState,
   });
 
-  const choiceScoreOnPath = sumChoiceScores(meta.choiceScores);
+  const maxChoiceScoreOnPath = useMemo(() => {
+    if (!meta.choiceScores) return 0;
+    const branchFromIds = new Set<string>();
+    for (const key of Object.keys(meta.choiceScores)) {
+      const fromId = key.split(":")[0];
+      if (fromId) branchFromIds.add(fromId);
+    }
+    let total = 0;
+    for (const node of nodes) {
+      const nodeId = node.props.nodeId;
+      if (!branchFromIds.has(nodeId)) continue;
+      let maxWeight = 0;
+      let found = false;
+      for (const child of React.Children.toArray(node.props.children)) {
+        if (!React.isValidElement(child)) continue;
+        const weight = (child.props as { scoreWeight?: number }).scoreWeight;
+        if (typeof weight === "number" && Number.isFinite(weight)) {
+          found = true;
+          maxWeight = Math.max(maxWeight, weight);
+        }
+      }
+      if (found) total += maxWeight;
+    }
+    return total;
+  }, [meta.choiceScores, nodes]);
 
   useCompoundBranchHandle(ref, {
     activePageIndex: activeIndex,
@@ -183,7 +207,7 @@ const BranchingScenarioInner = forwardRef<
     visitedNodeIndices,
     choiceScores: meta.choiceScores ?? {},
     meta,
-    maxChoiceScore: choiceScoreOnPath,
+    maxChoiceScore: maxChoiceScoreOnPath,
     onResetMeta: resetBranchMeta,
     enableSolutionsButton: props.enableSolutionsButton,
   });
@@ -305,7 +329,7 @@ const BranchingScenarioInner = forwardRef<
   const pathMaxScore = ctx
     ? Array.from(ctx.getRegisteredHandles().values())
         .filter((h) => h.pageIndex !== undefined && visitedNodeIndices.has(h.pageIndex))
-        .reduce((s, h) => s + h.handle.getMaxScore(), 0) + choiceScoreOnPath
+        .reduce((s, h) => s + h.handle.getMaxScore(), 0) + maxChoiceScoreOnPath
     : 0;
 
   return (

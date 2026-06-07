@@ -9,6 +9,7 @@ import { useAssessmentState } from "../assessment/useAssessmentState";
 import { useLessonkit } from "../hooks";
 import { setLessonkitBlockType } from "../compound/blockType";
 import { normalizeComponentId } from "../runtime/validateComponentId";
+import { resolveMediaSrc } from "./embedSecurity";
 
 export type HotspotTarget = {
   id: string;
@@ -32,6 +33,7 @@ function FindHotspotInner(
 ) {
   const checkId = useMemo(() => normalizeComponentId(props.checkId, "checkId"), [props.checkId]);
   const { config } = useLessonkit();
+  const resolvedSrc = resolveMediaSrc(props.src, { allowedHosts: config.embed?.allowedHosts });
   const [selected, setSelected] = useState<string | null>(null);
   const [checked, setChecked] = useState(false);
   const telemetryReplayedRef = useRef(false);
@@ -154,7 +156,11 @@ function FindHotspotInner(
   return (
     <section aria-label="Find the hotspot" data-lk-check-id={checkId} data-testid="find-hotspot">
       <div style={{ position: "relative", display: "inline-block" }}>
-        <img src={props.src} alt={props.alt} style={{ maxWidth: "100%" }} />
+        {resolvedSrc ? (
+          <img src={resolvedSrc} alt={props.alt} style={{ maxWidth: "100%" }} />
+        ) : (
+          <p role="alert">This image URL is not allowed.</p>
+        )}
         {props.targets.map((t) => (
           <button
             key={t.id}

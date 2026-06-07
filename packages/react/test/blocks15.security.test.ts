@@ -36,6 +36,15 @@ describe("embedSecurity", () => {
     vi.unstubAllEnvs();
   });
 
+  it("blocks decimal and shorthand loopback hosts in production", () => {
+    vi.stubEnv("NODE_ENV", "production");
+    expect(resolveEmbedSrc("https://2130706433/")).toBeNull();
+    expect(resolveEmbedSrc("https://127.1/")).toBeNull();
+    expect(isBlockedHost("2130706433")).toBe(true);
+    expect(isBlockedHost("127.1")).toBe(true);
+    vi.unstubAllEnvs();
+  });
+
   it("blocks high-risk sandbox tokens", () => {
     expect(buildEmbedSandbox("allow-top-navigation allow-forms")).toBe("allow-scripts allow-forms");
   });

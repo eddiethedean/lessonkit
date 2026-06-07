@@ -8,10 +8,7 @@ import { validateCompoundChildren } from "../compound/validateChildren";
 import { setLessonkitBlockType } from "../compound/blockType";
 import { useLessonkit } from "../hooks";
 import { normalizeComponentId } from "../runtime/validateComponentId";
-import {
-  DEFAULT_ASSESSMENT_SEQUENCE_COMPOUND_ID,
-  warnSharedCompoundStorageKey,
-} from "../compound/warnPersistence";
+import { requireCompoundBlockIdWhenPersisting } from "../compound/requireCompoundBlockId";
 
 export type AssessmentSequenceProps = AssessmentBehaviour & {
   children: React.ReactNode;
@@ -54,12 +51,19 @@ const AssessmentSequenceInner = forwardRef<CompoundHandle, AssessmentSequenceInn
 
     const activeStepAnswered = useMemo(() => {
       if (!requireAnswerBeforeNext || !registry) return true;
+      let handlesForStep = 0;
       for (const entry of registry.getRegisteredHandles().values()) {
         if (entry.pageIndex !== visibleIndex) continue;
+        handlesForStep += 1;
         if (!entry.handle.getAnswerGiven()) return false;
       }
+      if (handlesForStep === 0) {
+        const child = childArray[visibleIndex];
+        const childProps = child?.props as { checkId?: string } | undefined;
+        if (child && typeof childProps?.checkId === "string") return false;
+      }
       return true;
-    }, [handlesVersion, registry, requireAnswerBeforeNext, visibleIndex]);
+    }, [childArray, handlesVersion, registry, requireAnswerBeforeNext, visibleIndex]);
 
     if (!sequential) {
       return (
@@ -115,26 +119,23 @@ export const AssessmentSequence = forwardRef<CompoundHandle, AssessmentSequenceP
     if (!props.blockId && !autoCompoundIdRef.current) {
       autoCompoundIdRef.current = deriveId(`assessment-sequence-${reactInstanceId}`) as BlockId;
     }
-    const compoundId = useMemo(
-      () =>
-        props.blockId
-          ? (normalizeComponentId(props.blockId, "blockId") as BlockId)
-          : (autoCompoundIdRef.current ?? (DEFAULT_ASSESSMENT_SEQUENCE_COMPOUND_ID as BlockId)),
-      [props.blockId],
-    );
+    const compoundId = useMemo(() => {
+      if (props.blockId) {
+        return normalizeComponentId(props.blockId, "blockId") as BlockId;
+      }
+      return (autoCompoundIdRef.current ?? deriveId(`assessment-sequence-${reactInstanceId}`)) as BlockId;
+    }, [props.blockId, reactInstanceId]);
     const childArray = React.Children.toArray(props.children).filter(
       React.isValidElement,
     ) as React.ReactElement[];
     const { config, storage } = useLessonkit();
     const persistEnabled = config.session?.persistCompoundState !== false;
 
-    useEffect(() => {
-      warnSharedCompoundStorageKey({
-        persistEnabled,
-        hasExplicitBlockId: Boolean(props.blockId),
-        componentName: "AssessmentSequence",
-      });
-    }, [persistEnabled, props.blockId]);
+    requireCompoundBlockIdWhenPersisting({
+      persistEnabled,
+      blockId: props.blockId,
+      componentName: "AssessmentSequence",
+    });
 
     const initialIndex = useCompoundInitialIndex({
       courseId: config.courseId,

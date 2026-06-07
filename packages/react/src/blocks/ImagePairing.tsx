@@ -11,6 +11,7 @@ import { shouldReplayResumeTelemetry } from "../assessment/shouldReplayResumeTel
 import { setLessonkitBlockType } from "../compound/blockType";
 import { useLessonkit } from "../hooks";
 import { normalizeComponentId } from "../runtime/validateComponentId";
+import { resolveMediaSrc } from "./embedSecurity";
 
 export type ImagePair = {
   id: string;
@@ -52,12 +53,38 @@ function buildDeck(pairs: ImagePair[]): Card[] {
   return shuffleCards(cards);
 }
 
+export function rebuildCardsFromKeys(pairs: ImagePair[], cardKeys: string[]): Card[] | null {
+  const pairMap = new Map(pairs.map((pair) => [pair.id, pair]));
+  if (cardKeys.length !== pairs.length * 2) return null;
+  const seen = new Set<string>();
+  const cards: Card[] = [];
+  for (const cardKey of cardKeys) {
+    if (seen.has(cardKey)) return null;
+    seen.add(cardKey);
+    const match = /^(.+)-([01])$/.exec(cardKey);
+    if (!match) return null;
+    const pairId = match[1]!;
+    const copy = Number(match[2]);
+    if (copy !== 0 && copy !== 1) return null;
+    const pair = pairMap.get(pairId);
+    if (!pair) return null;
+    cards.push({
+      cardKey,
+      pairId: pair.id,
+      label: pair.label,
+      imageSrc: pair.imageSrc,
+    });
+  }
+  return cards;
+}
+
 function ImagePairingInner(
   props: ImagePairingProps & { enclosingLessonId: LessonId },
   ref: React.Ref<AssessmentHandle>,
 ) {
   const checkId = useMemo(() => normalizeComponentId(props.checkId, "checkId"), [props.checkId]);
   const { config } = useLessonkit();
+  const mediaOptions = { allowedHosts: config.embed?.allowedHosts };
   const assessment = useAssessmentState(props.enclosingLessonId);
   const pairsKey = props.pairs.map((p) => p.id).join("\0");
 
@@ -198,12 +225,17 @@ function ImagePairingInner(
           maxScore,
         }),
         getCurrentState: () => ({
+          cardKeys: cards.map((card) => card.cardKey),
           matched: [...matched],
           revealed: [...revealed],
           keyboardSelection,
           passed,
         }),
         resume: (state) => {
+          if (Array.isArray(state.cardKeys)) {
+            const restored = rebuildCardsFromKeys(props.pairs, state.cardKeys as string[]);
+            if (restored) setCards(restored);
+          }
           if (Array.isArray(state.matched)) setMatched(new Set(state.matched as string[]));
           if (Array.isArray(state.revealed)) setRevealed(new Set(state.revealed as string[]));
           const sel = state.keyboardSelection;
@@ -243,7 +275,7 @@ function ImagePairingInner(
           });
         },
       }),
-    [allMatched, checkId, config, keyboardSelection, matched, matchedCount, maxScore, passed, passedThreshold, props.passingScore, revealed, score],
+    [allMatched, checkId, config, keyboardSelection, matched, matchedCount, maxScore, passed, passedThreshold, props.pairs, props.passingScore, revealed, score],
   );
 
   useAssessmentHandleRegistration(checkId, handle, ref);
@@ -256,6 +288,7 @@ function ImagePairingInner(
           const isMatched = matched.has(card.pairId);
           const isRevealed = isMatched || revealed.has(card.cardKey);
           const isSelected = keyboardSelection === card.cardKey;
+          const resolvedCardSrc = resolveMediaSrc(card.imageSrc, mediaOptions);
           return (
             <button
               key={card.cardKey}
@@ -274,7 +307,15 @@ function ImagePairingInner(
             >
               {isRevealed ? (
                 <>
-                  <img src={card.imageSrc} alt={card.label} style={{ maxWidth: "5rem", maxHeight: "5rem" }} />
+                  {resolvedCardSrc ? (
+                    <img
+                      src={resolvedCardSrc}
+                      alt={card.label}
+                      style={{ maxWidth: "5rem", maxHeight: "5rem" }}
+                    />
+                  ) : (
+                    <span aria-hidden="true">!</span>
+                  )}
                   <span className="lk-visually-hidden">{card.label}</span>
                 </>
               ) : (

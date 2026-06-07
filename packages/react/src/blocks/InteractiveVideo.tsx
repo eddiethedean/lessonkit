@@ -113,6 +113,21 @@ const InteractiveVideoInner = forwardRef<
     [],
   );
 
+  const applyVideoMetaFromState = useCallback((state: CompoundResumeState) => {
+    const meta = readInteractiveVideoMeta(state.childStates);
+    if (!meta) return;
+    lastKnownTimeRef.current = meta.currentTime;
+    completedCuesRef.current = new Set(meta.completedCueIndices);
+    firedCuesRef.current = new Set(
+      meta.firedCueIndices.length > 0 ? meta.firedCueIndices : meta.completedCueIndices,
+    );
+    setCompletedCues(new Set(meta.completedCueIndices));
+    const video = videoRef.current;
+    if (video && meta.currentTime > 0) {
+      video.currentTime = meta.currentTime;
+    }
+  }, []);
+
   const { visibleIndex, ctx } = useCompoundShell({
     courseId: config.courseId,
     compoundId: blockId,
@@ -124,6 +139,7 @@ const InteractiveVideoInner = forwardRef<
     storage,
     transformState,
     persistTrigger,
+    onCompoundResume: applyVideoMetaFromState,
   });
 
   const activeCue = sortedCues[visibleIndex];

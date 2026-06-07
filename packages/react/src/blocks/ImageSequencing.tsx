@@ -11,6 +11,7 @@ import { useAssessmentState } from "../assessment/useAssessmentState";
 import { setLessonkitBlockType } from "../compound/blockType";
 import { useLessonkit } from "../hooks";
 import { normalizeComponentId } from "../runtime/validateComponentId";
+import { resolveMediaSrc } from "./embedSecurity";
 
 export type SequencingImage = {
   id: string;
@@ -31,6 +32,7 @@ function ImageSequencingInner(
 ) {
   const checkId = useMemo(() => normalizeComponentId(props.checkId, "checkId"), [props.checkId]);
   const { config } = useLessonkit();
+  const mediaOptions = { allowedHosts: config.embed?.allowedHosts };
   const assessment = useAssessmentState(props.enclosingLessonId);
   const imagesKey = props.images.map((i) => i.id).join("\0");
   const orderKey = props.correctOrder.join("\0");
@@ -76,7 +78,7 @@ function ImageSequencingInner(
         checkId,
         getScore: () => score,
         getMaxScore: () => maxScore,
-        getAnswerGiven: () => order.length > 0,
+        getAnswerGiven: () => checked,
         resetTask: reset,
         showSolutions: () => {},
         getXAPIData: () => ({
@@ -152,9 +154,18 @@ function ImageSequencingInner(
         {order.map((id, index) => {
           const image = props.images.find((i) => i.id === id);
           if (!image) return null;
+          const resolvedSrc = resolveMediaSrc(image.src, mediaOptions);
           return (
             <li key={id} data-testid={`sequencing-item-${id}`}>
-              <img src={image.src} alt={image.alt} style={{ maxWidth: "8rem", verticalAlign: "middle" }} />
+              {resolvedSrc ? (
+                <img
+                  src={resolvedSrc}
+                  alt={image.alt}
+                  style={{ maxWidth: "8rem", verticalAlign: "middle" }}
+                />
+              ) : (
+                <span aria-hidden="true">!</span>
+              )}
               <button
                 type="button"
                 data-testid={`sequencing-up-${id}`}

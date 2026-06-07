@@ -1,7 +1,7 @@
 import type { TelemetryEvent } from "@lessonkit/core";
 import { buildLessonkitUrn } from "@lessonkit/core";
 import type { XAPIResult, XAPIStatement, XAPIVerbIri } from "./types";
-import { cryptoRandomId } from "./id";
+import { deriveStatementId } from "./id";
 import { formatDurationMs } from "./duration";
 
 const XAPIVerbs = {
@@ -45,13 +45,14 @@ type MapperContext = { courseId: TelemetryEvent["courseId"]; timestamp: string }
 type EventMapper = (event: TelemetryEvent, ctx: MapperContext) => XAPIStatement | null;
 
 function statementFor(
+  event: TelemetryEvent,
   objectId: string,
   verb: XAPIVerbIri,
   timestamp: string,
   extra?: Pick<XAPIStatement, "result" | "context">,
 ): XAPIStatement {
   return {
-    id: cryptoRandomId(),
+    id: deriveStatementId(event, objectId, verb),
     timestamp,
     verb,
     object: { id: objectId },
@@ -75,12 +76,14 @@ function sanitizeTelemetryEmbedSrc(src: string): string {
 }
 
 function experiencedBlockStatement(
+  event: TelemetryEvent,
   courseId: TelemetryEvent["courseId"],
   lessonId: string,
   blockId: string,
   timestamp: string,
 ): XAPIStatement {
   return statementFor(
+    event,
     buildLessonkitUrn({ courseId, lessonId, blockId }),
     XAPIVerbs.experienced,
     timestamp,
@@ -105,6 +108,7 @@ const experiencedBlockMapper: EventMapper = (event, ctx) => {
       }
     }
     return statementFor(
+      event,
       buildLessonkitUrn({ courseId: ctx.courseId, lessonId, blockId }),
       XAPIVerbs.experienced,
       ctx.timestamp,
@@ -116,18 +120,19 @@ const experiencedBlockMapper: EventMapper = (event, ctx) => {
   const lessonId = event.lessonId;
   const blockId = "data" in event && event.data && "blockId" in event.data ? event.data.blockId : undefined;
   if (!lessonId || !blockId || typeof blockId !== "string") return null;
-  return experiencedBlockStatement(ctx.courseId, lessonId, blockId, ctx.timestamp);
+  return experiencedBlockStatement(event, ctx.courseId, lessonId, blockId, ctx.timestamp);
 };
 
 const TELEMETRY_XAPI_MAPPERS = {
-  course_started: (_event, ctx) =>
-    statementFor(buildLessonkitUrn({ courseId: ctx.courseId }), XAPIVerbs.initialized, ctx.timestamp),
-  course_completed: (_event, ctx) =>
-    statementFor(buildLessonkitUrn({ courseId: ctx.courseId }), XAPIVerbs.completed, ctx.timestamp),
+  course_started: (event, ctx) =>
+    statementFor(event, buildLessonkitUrn({ courseId: ctx.courseId }), XAPIVerbs.initialized, ctx.timestamp),
+  course_completed: (event, ctx) =>
+    statementFor(event, buildLessonkitUrn({ courseId: ctx.courseId }), XAPIVerbs.completed, ctx.timestamp),
   lesson_started: (event, ctx) => {
     const lessonId = event.name === "lesson_started" ? event.lessonId : undefined;
     if (!lessonId) return null;
     return statementFor(
+      event,
       buildLessonkitUrn({ courseId: ctx.courseId, lessonId }),
       XAPIVerbs.initialized,
       ctx.timestamp,
@@ -145,7 +150,12 @@ const TELEMETRY_XAPI_MAPPERS = {
     if (typeof data?.success === "boolean") result.success = data.success;
     const score = buildXapiScoreResult({ score: data?.score, maxScore: data?.maxScore });
     if (score) result.score = score;
-    return statementFor(buildLessonkitUrn({ courseId: ctx.courseId, lessonId }), XAPIVerbs.completed, ctx.timestamp, {
+    return statementFor(
+      event,
+      buildLessonkitUrn({ courseId: ctx.courseId, lessonId }),
+      XAPIVerbs.completed,
+      ctx.timestamp,
+      {
       result: Object.keys(result).length ? result : undefined,
     });
   },
@@ -155,6 +165,7 @@ const TELEMETRY_XAPI_MAPPERS = {
     const result: XAPIResult = {};
     if (typeof event.data.correct === "boolean") result.success = event.data.correct;
     return statementFor(
+      event,
       buildLessonkitUrn({ courseId: ctx.courseId, lessonId: event.lessonId, checkId: event.data.checkId }),
       XAPIVerbs.answered,
       ctx.timestamp,
@@ -165,6 +176,7 @@ const TELEMETRY_XAPI_MAPPERS = {
     if (event.name !== "quiz_completed") return null;
     const score = buildXapiScoreResult({ score: event.data.score, maxScore: event.data.maxScore });
     return statementFor(
+      event,
       buildLessonkitUrn({ courseId: ctx.courseId, lessonId: event.lessonId, checkId: event.data.checkId }),
       XAPIVerbs.completed,
       ctx.timestamp,
@@ -176,6 +188,7 @@ const TELEMETRY_XAPI_MAPPERS = {
     const result: XAPIResult = {};
     if (typeof event.data.correct === "boolean") result.success = event.data.correct;
     return statementFor(
+      event,
       buildLessonkitUrn({ courseId: ctx.courseId, lessonId: event.lessonId, checkId: event.data.checkId }),
       XAPIVerbs.answered,
       ctx.timestamp,
@@ -186,6 +199,7 @@ const TELEMETRY_XAPI_MAPPERS = {
     if (event.name !== "assessment_completed") return null;
     const score = buildXapiScoreResult({ score: event.data.score, maxScore: event.data.maxScore });
     return statementFor(
+      event,
       buildLessonkitUrn({ courseId: ctx.courseId, lessonId: event.lessonId, checkId: event.data.checkId }),
       XAPIVerbs.completed,
       ctx.timestamp,
@@ -207,6 +221,7 @@ const TELEMETRY_XAPI_MAPPERS = {
     const blockId = event.data.blockId;
     if (!lessonId || !blockId) return null;
     return statementFor(
+      event,
       buildLessonkitUrn({ courseId: ctx.courseId, lessonId, blockId }),
       XAPIVerbs.completed,
       ctx.timestamp,
@@ -221,6 +236,7 @@ const TELEMETRY_XAPI_MAPPERS = {
     const blockId = event.data.blockId;
     if (!lessonId || !blockId) return null;
     return statementFor(
+      event,
       buildLessonkitUrn({ courseId: ctx.courseId, lessonId, blockId }),
       XAPIVerbs.completed,
       ctx.timestamp,
@@ -233,6 +249,7 @@ const TELEMETRY_XAPI_MAPPERS = {
     const nodeId = event.data.nodeId;
     if (!lessonId || !blockId || !nodeId) return null;
     return statementFor(
+      event,
       buildLessonkitUrn({ courseId: ctx.courseId, lessonId, blockId, nodeId }),
       XAPIVerbs.experienced,
       ctx.timestamp,
@@ -245,6 +262,7 @@ const TELEMETRY_XAPI_MAPPERS = {
     const toNodeId = event.data.toNodeId;
     if (!lessonId || !blockId || !toNodeId) return null;
     return statementFor(
+      event,
       buildLessonkitUrn({ courseId: ctx.courseId, lessonId, blockId, nodeId: toNodeId }),
       XAPIVerbs.experienced,
       ctx.timestamp,

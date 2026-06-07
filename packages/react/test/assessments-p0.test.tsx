@@ -192,7 +192,7 @@ describe("1.1.x P0 assessment blocks", () => {
   it("AssessmentSequence shows sequential steps", () => {
     render(
       wrap(
-        <AssessmentSequence>
+        <AssessmentSequence blockId="assessment-seq-p0">
           <TrueFalse checkId="tf-seq" question="2+2=4?" answer={true} />
           <TrueFalse checkId="tf-seq-2" question="Earth is flat?" answer={false} />
         </AssessmentSequence>,
