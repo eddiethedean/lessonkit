@@ -513,6 +513,48 @@ it("emitCourseStarted returns early when plugin filters course_started", () => {
     ).toBe(false);
   });
 
+it("retries course_started to tracking when plugin filter is removed while tracking stays enabled", async () => {
+    const filterPlugin = defineTelemetryPlugin({
+      id: "filter-start",
+      version: "1",
+      kind: "analytics",
+      onTelemetry: (event) => (event.name === "course_started" ? null : event),
+    });
+
+    const trackingEvents: TelemetryEvent[] = [];
+
+    const { rerender } = render(
+      <LessonkitProvider
+        config={{
+          courseId: "course-1",
+          plugins: [filterPlugin],
+          tracking: { sink: (e) => void trackingEvents.push(e) },
+          xapi: { enabled: false },
+        }}
+      >
+        <div>child</div>
+      </LessonkitProvider>,
+    );
+
+    expect(trackingEvents.filter((e) => e.name === "course_started")).toHaveLength(0);
+
+    rerender(
+      <LessonkitProvider
+        config={{
+          courseId: "course-1",
+          plugins: [],
+          tracking: { sink: (e) => void trackingEvents.push(e) },
+          xapi: { enabled: false },
+        }}
+      >
+        <div>child</div>
+      </LessonkitProvider>,
+    );
+
+    await waitFor(() => expect(trackingEvents.some((e) => e.name === "course_started")).toBe(true));
+    expect(trackingEvents.filter((e) => e.name === "course_started")).toHaveLength(1);
+  });
+
 it("retries course_started to tracking when plugin filter is removed after xAPI bootstrap", async () => {
     const filterPlugin = defineTelemetryPlugin({
       id: "filter-start",

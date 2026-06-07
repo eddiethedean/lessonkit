@@ -138,11 +138,12 @@ function ArithmeticQuizInner(
               props.problems.forEach((p, i) => {
                 if ((nextAnswers[i] ?? "").trim() === p.answer.trim()) nextScore += 1;
               });
+              const replayCorrect = nextScore >= (props.passingScore ?? maxScore);
               assessment.answer({
                 checkId,
                 interactionType: INTERACTION,
                 response: nextAnswers,
-                correct: true,
+                correct: replayCorrect,
               });
               assessment.complete({
                 checkId,

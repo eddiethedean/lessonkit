@@ -62,7 +62,7 @@ Canonical block list, props, and contracts: [Block catalog reference](../../refe
 | `Chart` | `blockId`, `type` (`bar` \| `pie`), `data[]`, optional `title` | Bar chart or list-style pie + data table |
 | `Page` | `blockId`, optional `title` | Column/chapter inside `InteractiveBook` |
 | `Reflection` | optional `prompt`, `blockId` | Textarea reflection block |
-| `ProgressTracker` | — | Shows completed lesson count |
+| `ProgressTracker` | optional `totalLessons` | Shows completed lesson count |
 
 `Course` accepts `config` for tracking/xAPI and optional `sinks` (same shape as `LessonkitProvider`).
 
@@ -72,15 +72,15 @@ Full contracts: [Block catalog](../../reference/block-catalog.md) · [Storybook]
 
 | Component | Optional props | Notes |
 | --- | --- | --- |
-| `Course` | `config`, `className` | `config`: tracking, xAPI, `lxpack.bridge`, observability, plugins |
-| `Lesson` | `className` | Completes on unmount when another lesson becomes active |
-| `Quiz` | `autoCheck`, `disabled`, `className` | `autoCheck` default true; exact string match on `answer` |
+| `Course` | `config` | `config`: tracking, xAPI, `lxpack.bridge`, observability, plugins |
+| `Lesson` | `autoCompleteOnUnmount` | Completes on unmount when another lesson becomes active |
+| `Quiz` / `KnowledgeCheck` | `passingScore`, `enableRetry`, `enableSolutionsButton`, `autoCheck` | `KnowledgeCheck` is an alias of `Quiz`; exact string match on `answer` |
 | `Scenario` | `blockId` | Enables block-level URNs on manual `interaction` events |
-| `SlideDeck` | `persistCompoundState`, `initialSlideIndex` | Requires unique `blockId`; resume via session storage |
-| `InteractiveBook` | `persistCompoundState` | Same compound resume rules as `SlideDeck` |
-| `BranchingScenario` | `persistCompoundState`, `showPathRecap` | Graph resume; pre-1.5 sessions restart at `startNodeId` |
-| `Embed` | `title`, `allow`, `aspectRatio`, `sandbox` | Restrictive iframe defaults; opt in extra `allow` tokens |
-| `Chart` | `title`, `className` | Accessible data table fallback for screen readers |
+| `SlideDeck` | `blockId`, `title`, optional `enableSolutionsButton`, `showPathRecap` | Compound resume via `config.session.persistCompoundState` (default true) |
+| `InteractiveBook` | `blockId`, `title` | Same compound resume rules as `SlideDeck` |
+| `BranchingScenario` | `blockId`, `title`, `startNodeId`, optional `showPathRecap`, `enableSolutionsButton` | Graph resume; pre-1.5 sessions restart at `startNodeId` |
+| `Embed` | `title`, `allow`, `aspectRatio` | Restrictive iframe defaults; opt in extra `allow` tokens |
+| `Chart` | `title` | Accessible data table fallback for screen readers |
 | `ThemeProvider` | `mode`, `preset`, `tokens` | `mode`: `light` \| `dark` \| `system` |
 
 ### `LessonkitConfig` (on `Course` / `LessonkitProvider`)

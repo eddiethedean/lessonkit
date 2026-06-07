@@ -241,15 +241,7 @@ export const Quiz = forwardRef<AssessmentHandle, QuizProps>(function Quiz(props,
 });
 
 export function KnowledgeCheck(props: QuizProps) {
-  return (
-    <Quiz
-      checkId={props.checkId}
-      question={props.question}
-      choices={props.choices}
-      answer={props.answer}
-      passingScore={props.passingScore}
-    />
-  );
+  return <Quiz {...props} />;
 }
 
 /** @internal Reset module warnings between tests. */

@@ -46,6 +46,7 @@ import {
   isCourseStartedSinkSettled,
   isTrackingActive,
   resetCourseStartedTrackingFlightForTests,
+  resetCourseStartedTrackingFlights,
 } from "./courseStarted";
 import {
   buildPluginContext,
@@ -149,6 +150,14 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
   const progressRef = useRef(createProgressController());
   const courseStartedEmittedToSinkRef = useRef(false);
   const courseStartedEmitGenerationRef = useRef(0);
+
+  const prevPluginsFingerprintRef = useRef(pluginsFingerprint);
+  if (prevPluginsFingerprintRef.current !== pluginsFingerprint) {
+    prevPluginsFingerprintRef.current = pluginsFingerprint;
+    courseStartedEmitGenerationRef.current += 1;
+    courseStartedEmittedToSinkRef.current = false;
+    resetCourseStartedTrackingFlights();
+  }
   const prevCourseIdForProgressRef = useRef(normalizedCourseId);
   const pendingCourseIdResetRef = useRef(false);
   const prevUseV2RuntimeRef = useRef(useV2Runtime);
@@ -439,7 +448,7 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
       courseStartedEmittedToSinkRef.current = false;
     } else if (courseStartedFullySettled) {
       courseStartedEmittedToSinkRef.current = true;
-    } else if (!courseStartedEmittedToSinkRef.current) {
+    } else {
       void emitCourseStartedOnce(sessionId, cid);
     }
 
@@ -600,23 +609,13 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
   }, []);
 
   useEffect(() => {
-    if (typeof document === "undefined") return;
+    if (typeof window === "undefined") return;
     const flushOnPageExit = () => {
-      try {
-        xapiRef.current?.flushOnExit?.();
-        trackingRef.current?.flushOnExit?.();
-      } finally {
-        void xapiRef.current?.flush();
-        void trackingRef.current?.flush?.();
-      }
+      xapiRef.current?.flushOnExit?.();
+      trackingRef.current?.flushOnExit?.();
     };
-    const onVisibilityChange = () => {
-      if (document.visibilityState === "hidden") flushOnPageExit();
-    };
-    document.addEventListener("visibilitychange", onVisibilityChange);
     window.addEventListener("pagehide", flushOnPageExit);
     return () => {
-      document.removeEventListener("visibilitychange", onVisibilityChange);
       window.removeEventListener("pagehide", flushOnPageExit);
     };
   }, []);

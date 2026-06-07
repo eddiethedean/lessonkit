@@ -13,6 +13,7 @@ describe("courseStarted helpers", () => {
 
   it("isCourseStartedSinkSettled is true only for emitted", () => {
     expect(isCourseStartedSinkSettled("emitted")).toBe(true);
+    expect(isCourseStartedSinkSettled("filtered")).toBe(false);
     expect(isCourseStartedSinkSettled("failed")).toBe(false);
   });
 

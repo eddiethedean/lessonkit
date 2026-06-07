@@ -205,17 +205,17 @@ export function createFetchBatchSink(opts: CreateFetchBatchSinkOptions): FetchBa
   return {
     batchSink: (events) => postBatch(events, opts.init ?? {}),
     exitBatchSink: (events) => {
-      try {
-        void fetch(opts.url, {
-          method: "POST",
-          body: JSON.stringify(events),
-          ...opts.init,
-          headers: resolveHeaders(opts.headers),
-          keepalive: true,
-        }).catch(() => undefined);
-      } catch {
-        // ignore
-      }
+      return fetch(opts.url, {
+        method: "POST",
+        body: JSON.stringify(events),
+        ...opts.init,
+        headers: resolveHeaders(opts.headers),
+        keepalive: true,
+      }).then((res) => {
+        if (!res.ok) {
+          throw new FetchHttpError(res.status, res.statusText, "batch");
+        }
+      });
     },
   };
 }

@@ -57,14 +57,14 @@ function stripComments(source: string): string {
 function maskUnrelatedStringLiterals(source: string): string {
   return source.replace(/(["'`])(?:\\.|(?!\1).)*\1/g, (match, _quote, offset, full) => {
     const before = full.slice(Math.max(0, offset - 24), offset);
-    if (/\b(?:courseId|checkId)\s*=\s*$/.test(before)) {
+    if (/\b(?:courseId|checkId|lessonId)\s*=\s*$/.test(before)) {
       return match;
     }
     return '""';
   });
 }
 
-function idPropPresent(source: string, prop: "courseId" | "checkId", id: string): boolean {
+function idPropPresent(source: string, prop: "courseId" | "checkId" | "lessonId", id: string): boolean {
   const stripped = stripComments(source);
   const masked = maskUnrelatedStringLiterals(stripped);
   return jsxPropRegex(prop, id).test(masked);
@@ -74,7 +74,7 @@ function escapeRegExp(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-function jsxPropRegex(prop: "courseId" | "checkId", id: string): RegExp {
+function jsxPropRegex(prop: "courseId" | "checkId" | "lessonId", id: string): RegExp {
   const escapedId = escapeRegExp(id);
   return new RegExp(
     `(?<![A-Za-z0-9_$])${prop}\\s*=\\s*(?:` +
@@ -101,7 +101,7 @@ function extractStringConstants(source: string): Map<string, string> {
 
 function idUsedViaConstant(
   source: string,
-  prop: "courseId" | "checkId",
+  prop: "courseId" | "checkId" | "lessonId",
   id: string,
   constants: Map<string, string>,
 ): boolean {
@@ -116,16 +116,31 @@ function idUsedViaConstant(
       `${prop}={ ${name}}`,
     ];
     if (jsxPatterns.some((p) => masked.includes(p))) return true;
-
-    const objPatterns = [`${prop}: ${name}`, `${prop}:${name}`];
-    if (objPatterns.some((p) => masked.includes(p))) return true;
   }
   return false;
 }
 
+function lessonIdPresent(source: string, lessonId: string): boolean {
+  if (idPropPresent(source, "lessonId", lessonId)) return true;
+  return idUsedViaConstant(source, "lessonId", lessonId, extractStringConstants(source));
+}
+
+function courseConfigCourseIdPresent(source: string, courseId: string): boolean {
+  const stripped = stripComments(source);
+  const escaped = escapeRegExp(courseId);
+  const literalPattern = new RegExp(
+    `(?<![A-Za-z0-9_$])courseId\\s*:\\s*(?:` +
+      `"${escaped}"|'${escaped}'` +
+      `)`,
+  );
+  if (literalPattern.test(stripped)) return true;
+  return idUsedViaConstant(source, "courseId", courseId, extractStringConstants(source));
+}
+
 function courseIdPresent(source: string, courseId: string): boolean {
   if (idPropPresent(source, "courseId", courseId)) return true;
-  return idUsedViaConstant(source, "courseId", courseId, extractStringConstants(source));
+  if (idUsedViaConstant(source, "courseId", courseId, extractStringConstants(source))) return true;
+  return courseConfigCourseIdPresent(source, courseId);
 }
 
 function checkIdPresent(source: string, checkId: string): boolean {
@@ -175,6 +190,20 @@ export function validateReactManifestParity(
       ),
       severity: "error",
     });
+  }
+
+  for (const lesson of opts.descriptor.lessons ?? []) {
+    const lessonId = lesson.id;
+    if (!lessonId) continue;
+    if (!lessonIdPresent(source, lessonId)) {
+      issues.push({
+        path: `lessons.id:${lessonId}`,
+        message: parityHint(
+          `React app source missing lessonId="${lessonId}" declared in lessonkit.json.`,
+        ),
+        severity: "error",
+      });
+    }
   }
 
   for (const assessment of opts.descriptor.assessments ?? []) {

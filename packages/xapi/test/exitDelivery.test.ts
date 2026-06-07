@@ -60,6 +60,15 @@ describe("xAPI exit delivery (C-1)", () => {
     expect(client.queueSize()).toBe(1);
   });
 
+  it("auto-flushes dead-letter statements when transport is configured", async () => {
+    sessionStorage.setItem("lk-xapi-dead-letter", JSON.stringify([stmt]));
+    const transport = vi.fn(async () => {});
+    const client = createXAPIClient({ courseId: "course-1", transport });
+    await new Promise((r) => setTimeout(r, 0));
+    expect(transport).toHaveBeenCalledTimes(1);
+    expect(client.queueSize()).toBe(0);
+  });
+
   it("does not mark statement delivered until async exit succeeds", async () => {
     let resolveExit!: () => void;
     const exitGate = new Promise<void>((resolve) => {
@@ -92,13 +101,13 @@ describe("xAPI flush serialization (H-10)", () => {
     expect(transport).toHaveBeenCalledTimes(2);
   });
 
-  it("flushOnExit dispatches in-flight statements through exit transport", async () => {
+  it("flushOnExit dispatches in-flight statements through exit transport without re-queue on abort", async () => {
     const abortInFlight = vi.fn();
-    let resolveTransport!: () => void;
+    let rejectTransport!: (err: Error) => void;
     const transport = vi.fn(
       () =>
-        new Promise<void>((resolve) => {
-          resolveTransport = resolve;
+        new Promise<void>((_, reject) => {
+          rejectTransport = reject;
         }),
     );
     const exitTransport = vi.fn(async () => {});
@@ -112,8 +121,12 @@ describe("xAPI flush serialization (H-10)", () => {
     await Promise.resolve();
     client.flushOnExit?.();
     expect(abortInFlight).toHaveBeenCalledWith("inflight-exit");
-    expect(exitTransport).toHaveBeenCalled();
-    resolveTransport();
+    expect(exitTransport).toHaveBeenCalledTimes(1);
+    rejectTransport(new Error("aborted"));
+    await Promise.resolve();
+    expect(client.queueSize()).toBe(0);
     await client.flush();
+    expect(transport).toHaveBeenCalledTimes(1);
+    expect(exitTransport).toHaveBeenCalledTimes(1);
   });
 });

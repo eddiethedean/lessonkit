@@ -847,6 +847,27 @@ describe("InteractiveVideo", () => {
     expect(screen.getByTestId("cue-continue")).toBeTruthy();
   });
 
+  it("renders timed cue when saved compound index exceeds cue count", () => {
+    sessionStorage.setItem(
+      "lessonkit:compound:compound-course:iv-clamp",
+      JSON.stringify({ activePageIndex: 99, childStates: {} }),
+    );
+    render(
+      wrap(
+        <InteractiveVideo blockId="iv-clamp" title="Briefing" src="/sample.mp4">
+          <TimedCue atSeconds={0} label="Only cue">
+            <Text>Single cue</Text>
+          </TimedCue>
+        </InteractiveVideo>,
+        true,
+      ),
+    );
+    const video = screen.getByTestId("interactive-video-player") as HTMLVideoElement;
+    Object.defineProperty(video, "currentTime", { value: 0.5, writable: true });
+    fireEvent.timeUpdate(video);
+    expect(screen.getByTestId("timed-cue-0")).toBeTruthy();
+  });
+
   it("continues after cue dismisses overlay", () => {
     render(
       wrap(

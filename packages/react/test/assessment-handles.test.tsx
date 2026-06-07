@@ -8,6 +8,7 @@ import {
   DragTheWords,
   Essay,
   FillInTheBlanks,
+  KnowledgeCheck,
   Lesson,
   MarkTheWords,
   Quiz,
@@ -278,6 +279,34 @@ describe("AssessmentHandle (imperative API)", () => {
         <Lesson title="L1" lessonId="lesson-1">
           <Quiz
             checkId="quiz-no-retry"
+            question="Pick one"
+            choices={["A", "B"]}
+            answer="B"
+            enableRetry={false}
+          />
+        </Lesson>
+      </Course>,
+    );
+    fireEvent.click(screen.getByLabelText("A"));
+    await waitFor(() => {
+      expect(events.some((e) => e.name === "quiz_completed")).toBe(true);
+    });
+  });
+
+  it("KnowledgeCheck forwards enableRetry like Quiz", async () => {
+    const events: { name: string }[] = [];
+    render(
+      <Course
+        title="Handles"
+        courseId="handle-course"
+        config={{
+          xapi: { enabled: false },
+          tracking: { sink: (e) => { events.push(e); } },
+        }}
+      >
+        <Lesson title="L1" lessonId="lesson-1">
+          <KnowledgeCheck
+            checkId="kc-no-retry"
             question="Pick one"
             choices={["A", "B"]}
             answer="B"

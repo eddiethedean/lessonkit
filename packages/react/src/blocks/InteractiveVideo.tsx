@@ -106,7 +106,7 @@ const InteractiveVideoInner = forwardRef<
     [],
   );
 
-  const { ctx } = useCompoundShell({
+  const { visibleIndex, ctx } = useCompoundShell({
     courseId: config.courseId,
     compoundId: blockId,
     pageCount: sortedCues.length,
@@ -118,7 +118,7 @@ const InteractiveVideoInner = forwardRef<
     transformState,
   });
 
-  const activeCue = sortedCues[index];
+  const activeCue = sortedCues[visibleIndex];
 
   const cueCanContinue = useCallback(
     (cue: CueElement | undefined) => {
@@ -156,8 +156,8 @@ const InteractiveVideoInner = forwardRef<
     const video = videoRef.current;
     if (!video) return;
 
-    const cue = sortedCues[index];
-    if (!cue || completedCues.has(index)) return;
+    const cue = sortedCues[visibleIndex];
+    if (!cue || completedCues.has(visibleIndex)) return;
 
     setOverlayActive(true);
     video.pause();
@@ -170,6 +170,7 @@ const InteractiveVideoInner = forwardRef<
     completedCues,
     config.courseId,
     index,
+    visibleIndex,
     initialMeta.completedCueIndices.length,
     initialMeta.currentTime,
     persistEnabled,
@@ -231,10 +232,10 @@ const InteractiveVideoInner = forwardRef<
   };
 
   const completeCue = () => {
-    const cue = sortedCues[index];
+    const cue = sortedCues[visibleIndex];
     if (!cue || !cueCanContinue(cue)) return;
     setCompletedCues((prev) => {
-      const next = new Set([...prev, index]);
+      const next = new Set([...prev, visibleIndex]);
       completedCuesRef.current = next;
       return next;
     });
@@ -244,7 +245,7 @@ const InteractiveVideoInner = forwardRef<
         "video_segment_completed",
         {
           blockId,
-          segmentIndex: index,
+          segmentIndex: visibleIndex,
           atSeconds: cue.props.atSeconds ?? 0,
           segmentLabel: cue.props.label,
         },
@@ -347,7 +348,7 @@ export const InteractiveVideo = forwardRef<CompoundHandle, InteractiveVideoProps
 
     useEffect(() => {
       setIndex(initialIndex);
-    }, [config.courseId, blockId]);
+    }, [config.courseId, blockId, initialIndex, cues.length]);
 
     return (
       <CompoundProvider activePageIndex={index} onActivePageIndexChange={setIndexStable}>

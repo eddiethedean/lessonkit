@@ -1,5 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
-import { createInMemoryXAPIQueue, createXAPIClient } from "../src";
+import {
+  createInMemoryXAPIQueue,
+  createXAPIClient,
+} from "../src";
 import type { XAPIStatement } from "../src";
 
 const courseId = "test";
@@ -399,6 +402,45 @@ describe("@lessonkit/xapi", () => {
     expect(onHeadSkipped).toHaveBeenCalledTimes(1);
     expect(queue.size()).toBe(0);
     expect(transport).toHaveBeenCalledTimes(3);
+  });
+
+  it("queue onHeadSkipped hook persists skipped statements to dead-letter storage", async () => {
+    vi.stubGlobal(
+      "sessionStorage",
+      (() => {
+        const store = new Map<string, string>();
+        return {
+          get length() {
+            return store.size;
+          },
+          clear: () => store.clear(),
+          getItem: (key: string) => store.get(key) ?? null,
+          key: (index: number) => [...store.keys()][index] ?? null,
+          removeItem: (key: string) => store.delete(key),
+          setItem: (key: string, value: string) => store.set(key, value),
+        } as Storage;
+      })(),
+    );
+    const { loadDeadLetterStatements, persistDeadLetterStatement, resetXAPIDeadLetterForTests } =
+      await import("../src");
+    resetXAPIDeadLetterForTests();
+
+    const queue = createInMemoryXAPIQueue({
+      maxHeadFailures: 1,
+      onHeadSkipped: (statement) => persistDeadLetterStatement(statement),
+    });
+    queue.enqueue({
+      id: "bad",
+      timestamp: "t",
+      verb: "http://adlnet.gov/expapi/verbs/experienced",
+      object: { id: "o1" },
+    });
+    await queue.flush(async () => {
+      throw new Error("permanent");
+    });
+
+    expect(loadDeadLetterStatements().map((s) => s.id)).toContain("bad");
+    vi.unstubAllGlobals();
   });
 
   it("adds duration and score to completion result", async () => {

@@ -22,9 +22,9 @@ The block catalog describes every **framework-owned** learning primitive in `@le
 
 | Artifact | Path |
 | --- | --- |
-| **Version** | `blockCatalogVersion = 1` (exported from `@lessonkit/react`) |
-| **JSON** | `@lessonkit/react/block-catalog.v1.json` (must match `buildBlockCatalog()` in tests) |
-| **JSON Schema** | `@lessonkit/react/block-contract.v1.json` |
+| **Version** | `blockCatalogVersion = 3` (default for `buildBlockCatalog()`) |
+| **JSON** | `@lessonkit/react/block-catalog.v3.json` (must match `buildBlockCatalog()` in tests) |
+| **JSON Schema** | `@lessonkit/react/block-contract.v3.json` |
 | **Programmatic API** | `buildBlockCatalog()`, `getBlockCatalogEntry(type)`, `BLOCK_CATALOG` |
 
 Import in Node or bundlers:

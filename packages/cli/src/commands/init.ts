@@ -80,7 +80,7 @@ async function applyTemplateSubstitutions(projectDir: string, projectName: strin
   const lessonkitPath = join(projectDir, "lessonkit.json");
 
   const pkg = JSON.parse(await readFile(pkgPath, "utf8")) as Record<string, unknown>;
-  pkg.name = projectName;
+  pkg.name = slug;
   await writeFile(pkgPath, `${JSON.stringify(pkg, null, 2)}\n`, "utf8");
 
   const lessonkit = JSON.parse(await readFile(lessonkitPath, "utf8")) as Record<string, unknown>;

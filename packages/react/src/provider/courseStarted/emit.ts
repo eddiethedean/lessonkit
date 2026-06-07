@@ -62,7 +62,9 @@ export function isTrackingActive(tracking?: { enabled?: boolean }): boolean {
 }
 
 export function isCourseStartedSinkSettled(result: CourseStartedEmitResult): boolean {
-  return result === "emitted" || result === "filtered";
+  // "filtered" means a plugin dropped course_started before tracking delivery — allow retry
+  // when the plugin is removed or stops filtering (see emitCourseStartedOnce guard).
+  return result === "emitted";
 }
 
 async function deliverToTracking(client: TrackingClient, event: TelemetryEvent): Promise<boolean> {

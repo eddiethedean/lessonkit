@@ -60,7 +60,7 @@ function TrueFalseInner(
     if (passed) {
       return { score: completedScore ?? maxScore, maxScore };
     }
-    if (selectionCorrect) {
+    if (selected !== null && selectionCorrect) {
       return { score: completedMaxScore ?? maxScore, maxScore };
     }
     return { score: 0, maxScore };

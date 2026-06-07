@@ -21,11 +21,20 @@ describe("@lessonkit/core", () => {
     vi.unstubAllGlobals();
   });
 
-  it("createSessionId falls back when crypto.randomUUID is missing", () => {
+  it("createSessionId falls back to getRandomValues when randomUUID is missing", () => {
+    vi.stubGlobal("crypto", {
+      getRandomValues: (arr: Uint8Array) => {
+        arr.fill(0xab);
+        return arr;
+      },
+    });
+    expect(createSessionId()).toBe("ab".repeat(16));
+    vi.unstubAllGlobals();
+  });
+
+  it("createSessionId throws when Web Crypto is unavailable", () => {
     vi.stubGlobal("crypto", {});
-    const id = createSessionId();
-    expect(typeof id).toBe("string");
-    expect(id.length).toBeGreaterThan(0);
+    expect(() => createSessionId()).toThrow(/crypto\.randomUUID or crypto\.getRandomValues/);
     vi.unstubAllGlobals();
   });
 

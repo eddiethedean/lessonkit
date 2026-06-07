@@ -98,6 +98,9 @@ function productionXapi(xapiProxyUrl: string | undefined): LessonkitConfig["xapi
   };
 }
 
+/** Theme preset — keep in sync with lessonkit.json `course.theme.preset`. */
+export const COURSE_THEME_PRESET = "default" as const;
+
 export function createCourseConfig(): LessonkitConfig {
   const { xapiProxyUrl, analyticsUrl } = readProxyUrls();
   const useProductionTransports = import.meta.env.PROD || (xapiProxyUrl && analyticsUrl);

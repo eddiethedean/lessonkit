@@ -51,6 +51,8 @@ export function createXAPIClient(opts?: {
   queue?: XAPIQueue;
   /** When creating the default in-memory queue (max size 1000 unless overridden). */
   maxQueueSize?: number;
+  /** Consecutive head failures before skip (default queue only). */
+  maxHeadFailures?: number;
   onQueueDepth?: (size: number) => void;
   onQueueCap?: () => void;
   onHeadSkipped?: (statement: XAPIStatement, err: unknown) => void;
@@ -66,9 +68,13 @@ export function createXAPIClient(opts?: {
     opts?.queue ??
     createInMemoryXAPIQueue({
       maxSize: opts?.maxQueueSize,
+      maxHeadFailures: opts?.maxHeadFailures,
       onDepth: opts?.onQueueDepth,
       onCap: opts?.onQueueCap ?? defaultQueueCapHandler,
-      onHeadSkipped: opts?.onHeadSkipped ?? defaultHeadSkippedHandler,
+      onHeadSkipped: (statement, err) => {
+        persistDeadLetterStatement(statement);
+        (opts?.onHeadSkipped ?? defaultHeadSkippedHandler)(statement, err);
+      },
     });
   let warnedNoTransport = false;
   let warnedTransportFailure = false;
@@ -76,11 +82,14 @@ export function createXAPIClient(opts?: {
   const inflightStatements = new Map<string, XAPIStatement>();
   const exitDeliveredIds = new Set<string>();
   const exitNetworkSentIds = new Set<string>();
+  /** Statement ids handed to exit transport — suppresses abort re-queue race. */
+  const exitHandoffIds = new Set<string>();
   let activeFlush: Promise<void> | null = null;
 
   for (const statement of loadDeadLetterStatements()) {
     queue.enqueue(statement);
   }
+  const hadDeadLetters = queue.size() > 0;
 
   const deliveryTransport: XAPITransport | undefined = transport
     ? async (statement) => {
@@ -91,6 +100,7 @@ export function createXAPIClient(opts?: {
     : undefined;
 
   const markExitDelivered = (statement: XAPIStatement) => {
+    exitHandoffIds.delete(statement.id);
     exitDeliveredIds.add(statement.id);
     exitNetworkSentIds.add(statement.id);
     removeDeadLetterStatement(statement.id);
@@ -98,17 +108,22 @@ export function createXAPIClient(opts?: {
 
   const dispatchExitStatement = (statement: XAPIStatement) => {
     if (exitDeliveredIds.has(statement.id)) return;
+    exitHandoffIds.add(statement.id);
     try {
       const result = exitTransport!(statement);
       if (result != null && typeof (result as Promise<void>).then === "function") {
         void (result as Promise<void>).then(
           () => markExitDelivered(statement),
-          () => persistDeadLetterStatement(statement),
+          () => {
+            exitHandoffIds.delete(statement.id);
+            persistDeadLetterStatement(statement);
+          },
         );
       } else {
         markExitDelivered(statement);
       }
     } catch {
+      exitHandoffIds.delete(statement.id);
       persistDeadLetterStatement(statement);
     }
   };
@@ -147,7 +162,7 @@ export function createXAPIClient(opts?: {
           queue.removeById(normalized.id);
         })
         .catch((err) => {
-          if (exitDeliveredIds.has(normalized.id)) return;
+          if (exitDeliveredIds.has(normalized.id) || exitHandoffIds.has(normalized.id)) return;
           queue.enqueue(normalized);
           opts?.onTransportError?.(err);
           if (isDevEnvironment() && !warnedTransportFailure) {
@@ -204,7 +219,7 @@ export function createXAPIClient(opts?: {
     }
   };
 
-  return {
+  const client: XAPIClient = {
     send: (statement) => {
       sendOrQueue(statement);
     },
@@ -295,6 +310,14 @@ export function createXAPIClient(opts?: {
       });
     },
   };
+
+  if (hadDeadLetters && deliveryTransport) {
+    queueMicrotask(() => {
+      void client.flush().catch(() => undefined);
+    });
+  }
+
+  return client;
 }
 
 /** @internal Reset dead-letter storage between tests. */
