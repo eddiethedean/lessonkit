@@ -47,3 +47,62 @@ body {
   color: var(--lk-color-primary);
   margin-bottom: 0.25rem;
 }
+
+.muted {
+  color: var(--lk-color-muted);
+  font-size: 0.875rem;
+}
+
+.section-title {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--lk-color-foreground);
+}
+
+.subject {
+  font-weight: 600;
+  color: var(--lk-color-foreground);
+}
+
+.meta {
+  font-size: 0.8125rem;
+  color: var(--lk-color-muted);
+}
+
+.body {
+  margin: 0.5rem 0 0;
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  color: var(--lk-color-foreground);
+}
+
+.card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 0.35rem;
+}
+
+.checkbox-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+  margin: 0.75rem 0;
+  font-size: 0.875rem;
+  color: var(--lk-color-foreground);
+}
+
+.score-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.sms-thread {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
