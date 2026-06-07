@@ -1,4 +1,4 @@
-# LessonKit CLI (1.0+)
+# LessonKit CLI (1.5.x)
 
 The `@lessonkit/cli` package provides the developer workflow for LessonKit projects: scaffold, dev, build, and dual export packaging.
 
@@ -78,7 +78,9 @@ my-course/
         └── course-scorm12.zip         ← upload to LMS
 ```
 
-`lessonkit package` prints the resolved path on stdout. Trust that path if your manifest overrides `paths.*`., `course.lessons[].id`, and `course.assessments[].checkId` aligned with your React component props. `lessonkit init` updates `lessonkit.json` (including `tracking.xapi.activityIri`), `src/courseConfig.ts` `courseId`, and patches `src/App.tsx` `courseId` / course title for you. See [Identity reference](reference/identity.md).
+`lessonkit package` prints the resolved zip path on stdout. Trust that path even when your manifest overrides `paths.*`.
+
+Before packaging, keep `courseId`, `course.lessons[].id`, and `course.assessments[].checkId` aligned with your React component props. `lessonkit init` updates `lessonkit.json` (including `tracking.xapi.activityIri`), `src/courseConfig.ts` `courseId`, and patches `src/App.tsx` `courseId` / course title for you. See [Identity reference](reference/identity.md).
 
 The CLI only recognizes project manifests with `schemaVersion: 1` (not the interchange `lessonkit.json` written under `.lxpack/course`). `per-lesson-spa` layout is not supported by `lessonkit package` (1.x) — use `single-spa`. Use `@lessonkit/lxpack` directly if you need `per-lesson-spa`. SPA build output is controlled by `paths.spaDistDir` (not `course.spaDistDir`).
 
@@ -147,6 +149,7 @@ lessonkit package --target scorm12 --out .lxpack/out/custom.zip
 | `--cwd` | Project root (default: current directory) |
 | `--no-build` | Skip the implicit Vite build; requires an existing `dist/` (fails fast if `dist/` is missing) |
 | `--out` | Override output artifact path (must resolve inside the project root) |
+| `--strict-parity` | Treat React ↔ `lessonkit.json` ID parity **warnings** as packaging errors (exit code 3). Use in CI when you want zero tolerance for drift. |
 | `--json` | Structured JSON result on stdout (CI/codegen) |
 
 Lxpack targets run `packageLessonkitCourse()` from `@lessonkit/lxpack`. Output layout matches [Packaging reference](reference/packaging.md).
@@ -194,6 +197,23 @@ Failure:
   "exitCode": 2
 }
 ```
+
+## Programmatic API
+
+Embed the CLI in Node scripts or tests:
+
+```ts
+import { createProgram, run } from "@lessonkit/cli";
+
+// Build a Commander program (same commands as the `lessonkit` binary)
+const program = createProgram(console);
+await program.parseAsync(["node", "lessonkit", "build", "--cwd", "./my-course"]);
+
+// Or parse process.argv directly
+await run(process.argv);
+```
+
+Set `LESSONKIT_CMD_TIMEOUT_MS` to override subprocess timeouts for `dev`/`build` (see package README).
 
 ## Related
 

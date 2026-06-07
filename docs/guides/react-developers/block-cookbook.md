@@ -166,3 +166,55 @@ How `passingScore` and partial credit behave per block. Source: block implementa
 | `BranchingScenario` | Visited-path aggregation | Terminal nodes contribute |
 
 Use `enableRetry={false}` when the LMS should record a terminal failed attempt—see [Production checklist](production-checklist.md).
+
+---
+
+## InteractiveBook + Page
+
+```tsx
+<InteractiveBook blockId="onboarding-book" title="Employee handbook">
+  <Page blockId="welcome" title="Welcome">
+    <Text>Read the policy summary below.</Text>
+  </Page>
+  <Page blockId="quiz-page" title="Check">
+    <Quiz checkId="book-quiz" question="Acknowledged?" choices={["No", "Yes"]} answer="Yes" />
+  </Page>
+</InteractiveBook>
+```
+
+`lessonkit.json`: list `book-quiz` under `course.assessments[]`. Compound blocks use `blockId` (not `checkId` on the container). Resume state persists when `config.session.persistCompoundState` is true.
+
+## SlideDeck
+
+```tsx
+<SlideDeck blockId="onboarding-deck" title="Day one">
+  <Slide blockId="slide-1" title="Intro">
+    <Heading level={3}>Welcome</Heading>
+  </Slide>
+  <Slide blockId="slide-2">
+    <TrueFalse checkId="deck-tf" question="PPE required?" answer={true} />
+  </Slide>
+</SlideDeck>
+```
+
+Add `deck-tf` to `course.assessments[]` with `"kind": "trueFalse"`.
+
+## BranchingScenario
+
+```tsx
+<BranchingScenario blockId="escalation" title="Handle the complaint" startNodeId="start">
+  <BranchNode id="start" title="First response">
+    <Text>How do you open the conversation?</Text>
+    <BranchChoice targetId="empathy" label="Acknowledge feelings" />
+    <BranchChoice targetId="deflect" label="Deflect blame" />
+  </BranchNode>
+  <BranchNode id="empathy" terminal>
+    <Text>Good path - customer calms down.</Text>
+  </BranchNode>
+  <BranchNode id="deflect" terminal>
+    <Text>Escalation risk increases.</Text>
+  </BranchNode>
+</BranchingScenario>
+```
+
+Branching scenarios do not require `assessments[]` entries unless you embed scored blocks inside nodes. Graph validation: `validateBranchGraph()` from `@lessonkit/core`. See [Core — branching](../../reference/core.md#branching-scenario-meta).

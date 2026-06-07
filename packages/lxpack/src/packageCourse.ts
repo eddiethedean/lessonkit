@@ -96,6 +96,10 @@ export async function buildLessonkitProject(
 export { promoteStagingToOutDir } from "./packaging/promote";
 export { buildStagingPackage, ensureOutDirParent } from "./packaging/staging";
 
+/**
+ * Package a built SPA into SCORM, xAPI, cmi5, or standalone LMS artifacts.
+ * Prefer `lessonkit package --target …` in course projects; call directly for custom pipelines.
+ */
 export async function packageLessonkitCourse(
   options: PackageLessonkitCourseOptions,
 ): Promise<PackageLessonkitCourseResult> {

@@ -31,7 +31,7 @@ Pair with `ThemeProvider` from `@lessonkit/react` for runtime theming.
 
 ## Docs
 
-[Theming reference](https://lessonkit.readthedocs.io/en/latest/reference/theming.html)
+[Theming reference](https://lessonkit.readthedocs.io/en/latest/reference/theming.html) · [TypeDoc API index](https://lessonkit.readthedocs.io/en/latest/reference/api.html)
 
 ## License
 

@@ -58,7 +58,7 @@ npm install && npm run build:packages
 npm -w lessonkit-example-react-vite run dev
 ```
 
-Swap the workspace name from the table above. Packaging requires Node **18+**.
+Swap the workspace name from the table above. Node **20.19+** recommended; **18+** minimum for package commands. See [Prerequisites](../docs/guides/prerequisites.md).
 
 ## Docs embeds
 

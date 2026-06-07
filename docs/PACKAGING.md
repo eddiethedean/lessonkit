@@ -1,4 +1,4 @@
-# Packaging with LXPack (1.0+)
+# Packaging with LXPack (1.5.x)
 
 LessonKit authors courses in React (`@lessonkit/react`). **LXPack** validates and packages them for LMS delivery. **`@lessonkit/lxpack`** is the adapter between the two.
 
@@ -76,6 +76,12 @@ Failed promotes may leave recovery dirs next to `outDir`: `.lk-backup-*`, `.lk-f
 | `{outDir}/dist/` | SPA assets (`single-spa`) |
 | `{outDir}/.lxpack/out/course-{target}.zip` | Packaged SCORM/xAPI/cmi5 ZIP (default) |
 | `{outDir}/.lxpack/out/standalone/` | Unpacked standalone (`dir: true`) |
+
+:::{admonition} Full project path vs staging-relative
+:class: note
+
+API examples often use staging-relative paths such as `output: ".lxpack/out/course-scorm12.zip"` inside `outDir` (`.lxpack/course`). From the **project root**, the default SCORM 1.2 artifact is **`{{ scorm_zip_path }}`**. See [FAQ — SCORM zip location](../guides/faq.md#where-is-my-scorm-zip-after-packaging).
+:::
 
 ## Targets
 

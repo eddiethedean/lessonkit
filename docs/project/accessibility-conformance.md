@@ -28,6 +28,8 @@ See [Accessibility reference](../reference/accessibility.md) and [Theming and ac
 - Caption tracks on `Video` when audio is essential
 - Testing representative courses in your LMS shell (iframe focus traps vary by host)
 
+Use the [pre-ship accessibility checklist](../guides/react-developers/theming-and-accessibility.md#pre-ship-accessibility-checklist-course-authors) before LMS upload.
+
 ## Roadmap (informal)
 
 1. Expand Storybook a11y checks for all P0 assessment blocks

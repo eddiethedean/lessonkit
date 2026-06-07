@@ -12,7 +12,7 @@ Bump all `@lessonkit/*` packages to the same semver (for example **1.5.0**). Mis
 
 **Latest:** [MIGRATION-1.4-to-1.5](../MIGRATION-1.4-to-1.5.md) (current npm line **1.5.x**).
 
-Older jumps (also listed in the [documentation map](../index.md#documentation-map) sidebar):
+Older jumps (linked from the table below and the [detailed migration pages](#detailed-migration-pages) section):
 
 | From | To | Guide |
 | --- | --- | --- |
@@ -41,3 +41,17 @@ Install the **lessonkit-migrate** [Library Skill](library-skills.md) for Cursor 
 ## New projects
 
 If you used `npx @lessonkit/cli init` recently on the latest CLI, you likely do not need a migration—skip unless you are bumping an existing course repo.
+
+## Detailed migration pages
+
+```{toctree}
+:hidden:
+:maxdepth: 1
+
+../MIGRATION-1.4-to-1.5
+../MIGRATION-1.3-to-1.4
+../MIGRATION-1.2-to-1.3
+../MIGRATION-1.1-to-1.2
+../MIGRATION-1.0-to-1.1
+../MIGRATION-0.x-to-1.0
+```

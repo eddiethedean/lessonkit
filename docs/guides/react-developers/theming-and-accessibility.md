@@ -35,3 +35,35 @@ Use when building custom modals or nav:
 - `visuallyHiddenStyle` — inline SR-only styles
 
 Standards and targets: [Accessibility reference](../../reference/accessibility.md).
+
+## Pre-ship accessibility checklist (course authors)
+
+Complete before LMS upload for every block type used in your course:
+
+### Keyboard
+
+- [ ] Tab through the full course without keyboard traps (except intentional modals using `trapFocus`)
+- [ ] Quiz and assessment blocks: arrow keys or Tab reach all choices; Enter/Space activates
+- [ ] Compound blocks (`SlideDeck`, `InteractiveBook`, `BranchingScenario`): documented keyboard nav works (arrows, Home/End where applicable)
+- [ ] Focus visible on all interactive elements
+
+### Screen reader
+
+- [ ] Course title announced (`Course` h1 / `aria-label`)
+- [ ] Quiz feedback uses live region (built into `Quiz` — verify in your theme CSS)
+- [ ] Images have alt text; decorative images use empty alt
+- [ ] Custom content outside LessonKit blocks uses headings in logical order (h1 → h2 → h3)
+
+### LMS iframe
+
+- [ ] Test packaged SCORM in **staging LMS**, not only `npm run dev`
+- [ ] Bridge completion fires with `allowedParentOrigins` set (see [First LMS export](first-lms-export.md))
+- [ ] No horizontal scroll at 320px width unless intentional
+
+### Reduced motion
+
+- [ ] Enable **Reduce motion** in OS settings; verify animations respect `prefers-reduced-motion` (e.g. `ParallaxSlideshow` fallback)
+
+### Sign-off
+
+Document results in your release checklist. Framework conformance statement: [Accessibility conformance (interim)](../../project/accessibility-conformance.md).

@@ -51,6 +51,16 @@ export type ProgressTrackerProps = {
   totalLessons?: number;
 };
 
+/**
+ * Top-level course shell. Wraps {@link LessonkitProvider} and renders a semantic section with title.
+ *
+ * @example
+ * ```tsx
+ * <Course title="Security 101" courseId="sec-101" config={courseConfig}>
+ *   <Lesson title="Phishing" lessonId="phishing-101">…</Lesson>
+ * </Course>
+ * ```
+ */
 export function Course(props: CourseProps) {
   const courseId = useMemo(() => normalizeComponentId(props.courseId, "courseId"), [props.courseId]);
 
@@ -69,6 +79,16 @@ export function Course(props: CourseProps) {
   );
 }
 
+/**
+ * Lesson container. Sets the active lesson on mount and emits lesson lifecycle telemetry.
+ *
+ * @example
+ * ```tsx
+ * <Lesson title="Phishing" lessonId="phishing-101">
+ *   <Scenario>…</Scenario>
+ * </Lesson>
+ * ```
+ */
 export function Lesson(props: LessonProps) {
   const lessonId = useMemo(() => normalizeComponentId(props.lessonId, "lessonId"), [props.lessonId]);
   const autoComplete = props.autoCompleteOnUnmount !== false;

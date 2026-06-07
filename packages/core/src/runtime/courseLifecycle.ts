@@ -27,6 +27,10 @@ export type CourseLifecycleDeps = {
   emitCourseStartedEvent: (ctx: CourseLifecycleContext) => boolean;
 };
 
+/**
+ * Emit `course_started` once per tab session when tracking/xAPI are active.
+ * Coalesces concurrent calls via an in-flight guard.
+ */
 export function tryEmitCourseStarted(
   ctx: CourseLifecycleContext,
   deps: CourseLifecycleDeps,

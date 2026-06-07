@@ -34,6 +34,10 @@ async function handleCommand<T extends CliJsonResult>(
   }
 }
 
+/**
+ * Build the Commander program used by the `lessonkit` CLI binary.
+ * Useful for embedding init/build/package in Node scripts and tests.
+ */
 export function createProgram(baseLogger: CliLogger = console): Command {
   const program = new Command();
 
@@ -144,6 +148,9 @@ export function createProgram(baseLogger: CliLogger = console): Command {
   return program;
 }
 
+/**
+ * Parse argv and run the LessonKit CLI (same as the `lessonkit` binary entrypoint).
+ */
 export async function run(argv: string[] = process.argv, logger: CliLogger = console): Promise<void> {
   const program = createProgram(logger);
   await program.parseAsync(argv);

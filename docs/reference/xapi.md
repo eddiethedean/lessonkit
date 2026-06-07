@@ -74,7 +74,21 @@ Direct `createXAPIClient` usage is optional for non-React tooling; prefer the ma
 
 If `transport` throws or rejects, statements are retained in the in-memory queue. Call `await client.flush()` to retry. The React provider calls `flushOnExit()` then `flush()` when the tab is hidden (`visibilitychange` / `pagehide`).
 
-When the queue exceeds `maxSize` (default **1000**), the oldest statement is dropped and `onCap` runs (wire via `config.observability.onXapiQueueCap` in React). Under prolonged LRS outage, statements are lost silently unless you monitor queue depth via `onXapiQueueDepth` or handle `onXapiQueueCap`. See [production checklist](../guides/react-developers/production-checklist.md).
+When the queue exceeds `maxSize` (default **1000**), the oldest statement is dropped and `onCap` runs (wire via `config.observability.onXapiQueueCap` in React). Under prolonged LRS outage, statements are lost silently unless you monitor queue depth via `onXapiQueueDepth` or handle `onXapiQueueCap`. See [production checklist](../guides/react-developers/production-checklist.md) and [LRS operations](../guides/react-developers/lrs-operations.md).
+
+## Dead-letter and URL safety (advanced)
+
+| Export | Purpose |
+| --- | --- |
+| `persistDeadLetterStatement(storage, statement)` | Persist a statement that exceeded retry/cap to `sessionStorage` for manual replay |
+| `loadDeadLetterStatements(storage)` | Read persisted dead-letter statements |
+| `resetXAPIDeadLetterForTests()` | Clear dead-letter storage in tests (`@lessonkit/xapi/testing` pattern via main export in test files) |
+| `assertSafeLrsUrl(url, opts?)` | Reject unsafe LRS URLs (credentials in URL, private hosts in production) |
+| `isRetryableFetchError(err)` | Whether a transport error should retry |
+| `isRetryableFetchHttpStatus(status)` | HTTP statuses eligible for retry (429, 5xx) |
+| `FetchHttpError` | Typed error from fetch transport with `status` |
+
+**Ops pattern:** Wire `onXapiTransportError` and `onXapiQueueCap` in `config.observability`. On cap, export dead letters with `loadDeadLetterStatements` and replay through your backend proxy when the LRS recovers. Never point production courses at a public LRS with embedded credentials — use `assertSafeLrsUrl` in custom transports.
 
 ## Related
 

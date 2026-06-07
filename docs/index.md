@@ -67,8 +67,11 @@ LessonKit courses are React apps. If you want to learn React before the develope
 
 | Task | Node.js |
 | --- | --- |
-| Create a course, run `lessonkit dev`, build, package | **18+** minimum |
-| CLI scaffold (Vite 8), monorepo CI, Playwright e2e | **20.19+** recommended |
+| **`npx @lessonkit/cli init`** (Vite 8 scaffold) | **20.19+** recommended |
+| Dev, build, package in an existing course | **18+** minimum |
+| Monorepo CI and Playwright e2e | **20.19+** (CI runs Node 20 only) |
+
+See [Prerequisites](guides/prerequisites.md) for details.
 
 Release notes: [changelog](project/changelog.md) on this site · [GitHub](https://github.com/eddiethedean/lessonkit).
 
@@ -80,6 +83,8 @@ Release notes: [changelog](project/changelog.md) on this site · [GitHub](https:
 :caption: Getting started
 
 guides/start-here
+guides/prerequisites
+guides/design-philosophy
 ```
 
 :::{admonition} Questions?
@@ -94,7 +99,6 @@ See the [FAQ](guides/faq.md) or [troubleshooting](guides/react-developers/troubl
 
 guides/faq
 guides/react-developers/troubleshooting
-guides/vibe-coding/troubleshooting
 ```
 
 ```{toctree}
@@ -113,6 +117,7 @@ guides/vibe-coding/getting-started
 guides/vibe-coding/your-first-course
 guides/vibe-coding/prompting-and-workflows
 guides/vibe-coding/shipping-to-lms
+guides/vibe-coding/troubleshooting
 guides/library-skills
 ```
 
@@ -121,7 +126,6 @@ guides/library-skills
 :caption: Guides — H5P authors
 
 guides/h5p-for-lessonkit-authors
-H5P_CATALOG_CROSSWALK
 ```
 
 ```{toctree}
@@ -140,9 +144,13 @@ guides/react-developers/production-checklist
 guides/react-developers/theming-and-accessibility
 guides/react-developers/packaging-and-cli
 guides/react-developers/deployment-guide
+guides/react-developers/lrs-operations
+guides/react-developers/multi-course-patterns
+guides/react-developers/performance
 guides/react-developers/export-parity
 guides/react-developers/plugin-cookbook
 guides/react-developers/contributing-to-the-monorepo
+guides/react-developers/adding-a-framework-block
 ```
 
 ```{toctree}
@@ -169,22 +177,23 @@ reference/lxpack-upgrades
 
 ```{toctree}
 :maxdepth: 1
+:caption: Evaluators
+
+guides/enterprise-evaluation
+guides/architecture-overview
+reference/lms-compatibility
+project/security
+project/accessibility-conformance
+```
+
+```{toctree}
+:maxdepth: 1
 :caption: Project and releases
 
 guides/upgrading-lessonkit
-MIGRATION-1.4-to-1.5
-MIGRATION-1.3-to-1.4
-MIGRATION-1.2-to-1.3
-MIGRATION-1.1-to-1.2
-MIGRATION-1.0-to-1.1
-MIGRATION-0.x-to-1.0
 project/release-history
-guides/enterprise-evaluation
-guides/architecture-overview
 project/changelog
 project/good-first-contributions
-project/security
-project/accessibility-conformance
 project/roadmap
 project/h5p-capability-map
 ```

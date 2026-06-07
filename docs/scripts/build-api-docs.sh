@@ -17,14 +17,22 @@ mkdir -p "$OUT"
 npx typedoc \
   --entryPoints \
     packages/core/dist/index.d.ts \
+    packages/core/dist/testing.d.ts \
     packages/react/dist/index.d.ts \
+    packages/react/dist/testing.d.ts \
     packages/cli/dist/index.d.ts \
+    packages/xapi/dist/index.d.ts \
+    packages/lxpack/dist/index.d.ts \
+    packages/lxpack/dist/bridge.d.ts \
+    packages/themes/dist/index.d.ts \
+    packages/accessibility/dist/index.d.ts \
   --entryPointStrategy expand \
   --out "$OUT" \
   --name "LessonKit API" \
   --excludePrivate \
   --excludeInternal \
   --readme none \
-  --logLevel Warn
+  --logLevel Warn \
+  --skipErrorChecking
 
 echo "==> API docs written to docs/_static/typedoc/"

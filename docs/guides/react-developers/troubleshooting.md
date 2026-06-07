@@ -2,17 +2,22 @@
 
 Common fixes for packaging, production builds, and LMS delivery. Vibe-coding users: see [vibe coding troubleshooting](../vibe-coding/troubleshooting.md). General questions: [FAQ](../faq.md).
 
+## Decision tree
+
+| If you see… | Go to |
+| --- | --- |
+| SCORM zip not where expected | [Cannot find the SCORM zip](#cannot-find-the-scorm-zip) · [FAQ SCORM path](../faq.md#where-is-my-scorm-zip-after-packaging) |
+| `lessonkit package` ID / manifest errors | [`lessonkit package` fails on ID parity](#lessonkit-package-fails-on-id-parity) |
+| Blank page or throw after LMS upload | [Production build throws](#production-build-or-packaged-course-throws-on-load) |
+| LMS shows no completion/score | [SCORM runs but no completion](#scorm-runs-but-lms-shows-no-completion-or-score) |
+| `lessonkit: command not found` | [`lessonkit: command not found`](#lessonkit-command-not-found) |
+| Node engine / version errors | [Node version errors](#node-version-errors) |
+
 ## Cannot find the SCORM zip
 
 **Symptom:** You look for `.lxpack/out/course-scorm12.zip` at the project root and the file is missing.
 
-**Fix:** `paths.outputBaseDir` (`.lxpack/out`) is resolved **inside** `paths.lxpackOutDir` (`.lxpack/course`). Default full path:
-
-```text
-.lxpack/course/.lxpack/out/course-scorm12.zip
-```
-
-Trust the path **`lessonkit package` prints** on stdout. See [First LMS export — where the SCORM zip lands](first-lms-export.md#where-the-scorm-zip-lands).
+**Fix:** See the canonical path in the [FAQ — SCORM zip location](../faq.md#where-is-my-scorm-zip-after-packaging). Trust the path **`lessonkit package` prints** on stdout. Details: [First LMS export — where the SCORM zip lands](first-lms-export.md#where-the-scorm-zip-lands).
 
 ## `lessonkit package` fails on ID parity
 

@@ -1,5 +1,7 @@
 # Start here
 
+**Before you start:** Node.js **20.19+** recommended for `npx @lessonkit/cli init` (**18+** minimum for some packaging workflows). See [Prerequisites](prerequisites.md). Basic React and TypeScript help on the developer path; [vibe coding](vibe-coding/index.md) does not require studying React first.
+
 Pick the path that matches how you work. Each link is a single next step—not the full documentation map.
 
 ## Build with React
@@ -28,7 +30,7 @@ Install optional [Library Skills](library-skills.md) for Cursor-compatible autho
 
 ## I want to contribute to LessonKit
 
-[Contributing on GitHub](https://github.com/eddiethedean/lessonkit/blob/main/CONTRIBUTING.md) · [Monorepo guide](react-developers/contributing-to-the-monorepo.md)
+[Contributing on GitHub](https://github.com/eddiethedean/lessonkit/blob/main/CONTRIBUTING.md) · [Monorepo guide](react-developers/contributing-to-the-monorepo.md) · [Adding a framework block](react-developers/adding-a-framework-block.md)
 
 ## I am upgrading an existing course
 
@@ -36,7 +38,7 @@ Install optional [Library Skills](library-skills.md) for Cursor-compatible autho
 
 ## Common questions
 
-[FAQ](faq.md) · [React troubleshooting](react-developers/troubleshooting.md)
+[FAQ](faq.md) · [React troubleshooting](react-developers/troubleshooting.md) · [Vibe coding troubleshooting](vibe-coding/troubleshooting.md)
 
 ## Full documentation map
 

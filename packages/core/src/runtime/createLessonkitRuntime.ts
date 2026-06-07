@@ -88,6 +88,10 @@ function warnRuntimeV1Deprecated(): void {
   );
 }
 
+/**
+ * Create a headless LessonKit runtime for non-React tooling and tests.
+ * Powers {@link LessonkitProvider} when `runtimeVersion` is `"v2"` (default).
+ */
 export function createLessonkitRuntime(
   config: HeadlessLessonkitConfig,
   ports: HeadlessRuntimePorts = {},

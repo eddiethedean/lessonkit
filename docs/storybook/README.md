@@ -7,20 +7,30 @@ Interactive component gallery for `@lessonkit/react`.
 From repo root:
 
 ```bash
-npm run storybook           # dev server
+npm run storybook           # dev server at http://localhost:6006
 npm run build-storybook     # static export → packages/react/storybook-static/
 ```
 
-CI runs `build-storybook` on every PR.
+CI runs `build-storybook` on every PR. Published gallery: [GitHub Pages](https://eddiethedean.github.io/lessonkit/storybook/).
 
-## Stories
+## Story files
 
-| Group | Covers |
+| File | Storybook group | Blocks / scenarios |
+| --- | --- | --- |
+| `CourseLesson.stories.tsx` | Components/CourseLesson | `Course`, `Lesson`, multi-lesson navigation |
+| `Quiz.stories.tsx` | Components/Quiz | `Quiz` — unanswered, incorrect, correct |
+| `TrueFalse.stories.tsx` | Components/TrueFalse | `TrueFalse` |
+| `Blocks.stories.tsx` | Components/Blocks | `Scenario`, `Reflection`, `KnowledgeCheck` |
+| `CompoundBlocks.stories.tsx` | Components/Compound & Tier C/D | `InteractiveBook`, `SlideDeck`, `InteractiveVideo`, `BranchingScenario`, `Embed`, `Chart`, `Accordion`, `Summary`, `MemoryGame`, `Video`, `Text`, `Heading`, `TrueFalse` in compound context |
+
+Config: `packages/react/.storybook/`. Stories disable telemetry via `storyConfig` helpers in `stories/helpers.tsx`.
+
+## When to use Storybook vs docs
+
+| Need | Use |
 | --- | --- |
-| Layouts | Course/Lesson shells, progress tracker |
-| Quiz | Unanswered, correct, incorrect states |
-| Blocks | Scenario, Reflection, KnowledgeCheck |
-
-Config: `packages/react/.storybook/`. Stories disable telemetry via `storyConfig` helpers.
+| Visual states and keyboard behavior | Storybook |
+| Props contract and manifest mapping | [Block catalog](https://lessonkit.readthedocs.io/en/latest/reference/block-catalog.html) |
+| Copy-paste React + JSON pairs | [Block cookbook](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/block-cookbook.html) |
 
 Linked from [components & hooks guide](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/components-and-hooks.html).

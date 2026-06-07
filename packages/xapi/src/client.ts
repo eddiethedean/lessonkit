@@ -41,6 +41,10 @@ function defaultHeadSkippedHandler(_statement: XAPIStatement, err: unknown): voi
   }
 }
 
+/**
+ * Imperative xAPI client with in-memory queue, retry flush, and optional pagehide delivery.
+ * Prefer wiring transport via {@link LessonkitProvider} config in React apps.
+ */
 export function createXAPIClient(opts?: {
   transport?: XAPITransport;
   /** Keepalive transport for pagehide flush (e.g. from createFetchTransport). */

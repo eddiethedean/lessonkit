@@ -55,7 +55,7 @@ const { batchSink, exitBatchSink } = createFetchBatchSink({ url: "/api/telemetry
 
 ## Docs
 
-[xAPI reference](https://lessonkit.readthedocs.io/en/latest/reference/xapi.html) · [Telemetry & xAPI guide](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/telemetry-and-xapi.html)
+[xAPI reference](https://lessonkit.readthedocs.io/en/latest/reference/xapi.html) · [Telemetry & xAPI guide](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/telemetry-and-xapi.html) · [LRS operations](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/lrs-operations.html) · [TypeDoc API index](https://lessonkit.readthedocs.io/en/latest/reference/api.html)
 
 ## License
 

@@ -109,19 +109,13 @@ cd my-course
 npm run dev
 ```
 
+Open the URL Vite prints. Follow the [5-minute getting started guide](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/getting-started-in-5-minutes.html) to edit your first quiz.
+
+When you are ready to export to an LMS, continue with [First LMS export](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/first-lms-export.html).
+
 (`init` runs `npm install` by default.) Use `npx lessonkit dev` or a global CLI (`npm install -g @lessonkit/cli`) if you prefer.
 
-Build and package for an LMS (set `lxpack.bridge: "auto"` and `allowedParentOrigins` in `src/courseConfig.ts` first—see the [5-minute guide](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/getting-started-in-5-minutes.html) and [LXPack bridge](https://lessonkit.readthedocs.io/en/latest/reference/lxpack-bridge.html)):
-
-```bash
-npm run build
-npm run package:scorm12
-# or: npx lessonkit build && npx lessonkit package --target scorm12
-```
-
-Default SCORM zip: **`.lxpack/course/.lxpack/out/course-scorm12.zip`** (the CLI prints the resolved path). Details: [First LMS export](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/first-lms-export.html).
-
-Each project includes [`lessonkit.json`](https://lessonkit.readthedocs.io/en/latest/reference/cli.html) (`schemaVersion: 1`) that ties React props to the LXPack course descriptor.
+Each project includes [`lessonkit.json`](https://lessonkit.readthedocs.io/en/latest/reference/manifest.html) (`schemaVersion: 1`) that ties React props to the LXPack course descriptor.
 
 ### Existing React app
 

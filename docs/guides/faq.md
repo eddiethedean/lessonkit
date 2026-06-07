@@ -12,10 +12,12 @@ A **React-first framework** for building trackable learning experiences and expo
 
 ## Which Node.js version do I need?
 
+**Node.js 20.19+ recommended** for `npx @lessonkit/cli init` (Vite 8). Node 18 may work for packaging-only workflows but is not tested in CI. See [Prerequisites](prerequisites.md).
+
 | Task | Node.js |
 | --- | --- |
-| Create a course, dev, build, package | **18+** minimum |
 | CLI scaffold (Vite 8), monorepo CI, Playwright e2e | **20.19+** recommended |
+| Dev, build, package in an existing course | **18+** minimum |
 
 ## LessonKit vs H5P vs Storyline
 
@@ -33,11 +35,12 @@ LessonKit ships **native React blocks** inspired by H5P patterns—it does **not
 - Your team cannot maintain a **Vite + React** app.
 - You only need a single H5P activity inside an existing LMS content bank (use H5P directly).
 
+(scorm-zip-path)=
 ## Where is my SCORM zip after packaging?
 
 Default path (relative to project root):
 
-**`.lxpack/course/.lxpack/out/course-scorm12.zip`**
+**`{{ scorm_zip_path }}`**
 
 The CLI prints the resolved path. `lessonkit.json` → `paths.outputBaseDir` is **inside** `paths.lxpackOutDir`, not at the project root. See [First LMS export — where the SCORM zip lands](react-developers/first-lms-export.md#where-the-scorm-zip-lands).
 
@@ -63,7 +66,7 @@ Yes, when you pass a `config` object without `tracking.enabled: false`. Provide 
 
 ## Where is the API reference?
 
-TypeScript types ship on npm (`dist/*.d.ts`). Browse generated API docs on [API reference](../reference/api.md) (TypeDoc for `@lessonkit/react`, `@lessonkit/core`, `@lessonkit/cli`). For component behavior and props, use [Components and hooks](react-developers/components-and-hooks.md) and [Storybook](https://eddiethedean.github.io/lessonkit/storybook/). In your project, IDE “Go to Definition” on `@lessonkit/react` imports is the fastest path.
+TypeScript types ship on npm (`dist/*.d.ts`). Browse generated API docs on [API reference](../reference/api.md) (TypeDoc for `@lessonkit/react`, `@lessonkit/core`, `@lessonkit/cli`, `@lessonkit/xapi`, `@lessonkit/lxpack`, `@lessonkit/themes`, `@lessonkit/accessibility`). For component behavior and props, use [Components and hooks](react-developers/components-and-hooks.md) and [Storybook](https://eddiethedean.github.io/lessonkit/storybook/). In your project, IDE “Go to Definition” on `@lessonkit/react` imports is the fastest path.
 
 ## How do I upgrade LessonKit?
 

@@ -48,10 +48,12 @@ Skip the full monorepo `npm run build` when your PR touches only documentation o
 
 ## Node.js versions
 
+**Node.js 20.19+ recommended** for `npx @lessonkit/cli init` (Vite 8). Node 18 may work for packaging-only workflows but is not tested in CI.
+
 | Task | Node.js |
 | --- | --- |
-| Day-to-day dev, build, packaging smoke | **18+** minimum |
 | CLI scaffold (Vite 8), monorepo CI | **20.19+** recommended |
+| Day-to-day dev, build, packaging smoke | **18+** minimum |
 | Playwright e2e (`npm run test:e2e`) | **20+** |
 
 After `npm ci`, install Playwright once for e2e:
@@ -72,7 +74,8 @@ If you add or change a workspace in the root `package.json`, run `npm install` a
 | --- | --- |
 | `packages/react`, `packages/core`, examples | `npm test`, often `npm run test:e2e` |
 | `packages/cli`, `packages/lxpack`, templates | `npm run test:integration` |
-| `docs/` (Sphinx) | `cd docs && pip install -r requirements.txt && sphinx-build -W -b html . _build/html` (or rely on CI `docs` job) |
+| New `@lessonkit/react` block | [Adding a framework block](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/adding-a-framework-block.html) checklist + `npm test -w @lessonkit/react` |
+| `docs/` (Sphinx) | `npm run build:packages && npm run docs:api && bash docs/scripts/verify-doc-includes.sh && node docs/scripts/generate-block-props-doc.mjs && cd docs && pip install -r requirements.txt && sphinx-build -W -b html . _build/html` |
 
 ## Full CI-equivalent checks
 
@@ -101,6 +104,22 @@ Before a wide refactor or release, run from the repo root:
 - Update user-facing docs if behavior or public API changes (README, `docs/`, or package READMEs).
 - **CHANGELOG:** add an entry under **Unreleased** when the change is user-facing (npm API, CLI flags, packaging behavior, or docs that correct wrong guidance). Skip changelog lines for typos, internal refactors, or test-only changes. Maintainers may fold entries at release time; you do not need Changesets unless asked.
 - Do not commit secrets (`.env`, API keys, credentials).
+
+## CI failure map
+
+When a GitHub Actions job fails, reproduce locally:
+
+| CI job | Common failure | Local repro |
+| --- | --- | --- |
+| **checks** | Lint, typecheck, unit tests | `npm run lint && npm run typecheck && npm test` |
+| **docs** | Broken link, missing include, Sphinx `-W` | `npm run build:packages && npm run docs:api && bash docs/scripts/verify-doc-includes.sh && node docs/scripts/generate-block-props-doc.mjs && cd docs && pip install -r requirements.txt && sphinx-build -W -b html . _build/html` |
+| **packaging** | CLI template drift | `npm run copy-template -w @lessonkit/cli && git diff --exit-code packages/cli/template/vite-react` |
+| **integration** | init → build → package | `npm run test:integration` |
+| **security-audit** | npm audit high/critical | `npm run audit:ci` |
+| **codeql** | Static analysis | Fix reported path in Security tab |
+| **e2e** (if run) | SCORM parity, Playwright | `npm exec -w @lessonkit/e2e -- playwright install chromium && npm run test:e2e` |
+
+See [contributing to the monorepo — full CI-equivalent checks](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/contributing-to-the-monorepo.html#full-ci-equivalent-checks).
 
 ## Releases
 

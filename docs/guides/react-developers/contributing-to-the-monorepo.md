@@ -14,6 +14,10 @@ npm test
 
 Use `npm install` only when you change workspace dependencies (commit the updated `package-lock.json`). Run `npm run build` (packages + all examples) before wide refactors or release validation—not for every PR.
 
+**Node.js 20.19+ recommended** for CLI scaffold workflows and CI parity. See [Prerequisites](../prerequisites.md).
+
+Shipping a new React block? Start with [Adding a framework block](adding-a-framework-block.md).
+
 ## Common scripts
 
 | Command | Purpose |
@@ -63,12 +67,17 @@ Before opening a PR that touches multiple packages or release surfaces, run from
 
 ## Docs site (this site)
 
+Match CI:
+
 ```bash
-cd docs
-pip install -r requirements.txt
-sphinx-build -b html . _build/html
+npm run build:packages
+npm run docs:api
+bash docs/scripts/verify-doc-includes.sh
+cd docs && pip install -r requirements.txt && sphinx-build -W -b html . _build/html
 open _build/html/index.html
 ```
+
+Optional: `bash docs/scripts/build-docs-demos.sh` embeds example course bundles (RTD runs this).
 
 Read the Docs uses [`.readthedocs.yaml`](https://github.com/eddiethedean/lessonkit/blob/main/.readthedocs.yaml) at the repo root. CI validates docs via the `docs` job in [`.github/workflows/checks.yml`](https://github.com/eddiethedean/lessonkit/blob/main/.github/workflows/checks.yml). Setup: [READTHEDOCS.md](https://github.com/eddiethedean/lessonkit/blob/main/docs/READTHEDOCS.md).
 

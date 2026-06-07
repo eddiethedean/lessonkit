@@ -59,7 +59,36 @@ export default function App() {
 }
 ```
 
-Add a matching `lessonkit.json` at the project root (or run `lessonkit init` in a fresh folder and copy the manifest shape). See [project structure](project-structure.md).
+Add a matching `lessonkit.json` at the project root:
+
+```json
+{
+  "schemaVersion": 1,
+  "name": "my-course",
+  "course": {
+    "courseId": "my-course",
+    "title": "My Course",
+    "layout": "single-spa",
+    "lessons": [{ "id": "intro", "title": "Intro" }],
+    "assessments": [
+      {
+        "checkId": "intro-check",
+        "question": "Ready to continue?",
+        "choices": ["No", "Yes"],
+        "answer": "Yes",
+        "passingScore": 1
+      }
+    ]
+  },
+  "paths": {
+    "spaDistDir": "dist",
+    "lxpackOutDir": ".lxpack/course",
+    "outputBaseDir": ".lxpack/out"
+  }
+}
+```
+
+Or run `lessonkit init` in a fresh folder and copy the manifest shape. See [project structure](project-structure.md).
 
 ### Production wiring
 

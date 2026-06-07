@@ -36,7 +36,7 @@ Subprocess timeout defaults to **30 minutes** (`LESSONKIT_CMD_TIMEOUT_MS`). To d
 
 ## Docs
 
-[CLI reference](https://lessonkit.readthedocs.io/en/latest/reference/cli.html) · [Packaging guide](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/packaging-and-cli.html) · [Published template](https://github.com/eddiethedean/lessonkit/tree/main/packages/cli/template/vite-react) (monorepo dev mirror: [`templates/vite-react`](https://github.com/eddiethedean/lessonkit/tree/main/templates/vite-react))
+[CLI reference](https://lessonkit.readthedocs.io/en/latest/reference/cli.html) · [Packaging guide](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/packaging-and-cli.html) · [Published template](https://github.com/eddiethedean/lessonkit/tree/main/packages/cli/template/vite-react) (monorepo dev mirror: [`templates/vite-react`](https://github.com/eddiethedean/lessonkit/tree/main/templates/vite-react)) · [TypeDoc API index](https://lessonkit.readthedocs.io/en/latest/reference/api.html)
 
 ## License
 

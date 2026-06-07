@@ -12,7 +12,7 @@ This guide uses **npm only**. You do not need the LessonKit GitHub monorepo unle
 This page covers **local preview** in about five minutes. SCORM packaging, bridge configuration, and env setup are in [First LMS export](first-lms-export.md). For production go-live, also complete the [production checklist](production-checklist.md).
 :::
 
-**Prerequisites:** Node.js **18+** minimum; **20.19+** recommended (CLI scaffold uses Vite 8).
+**Prerequisites:** See [Prerequisites](../prerequisites.md). Node.js **20.19+** recommended for `npx @lessonkit/cli init` (Vite 8).
 
 ## 1. Create a project
 
@@ -31,6 +31,8 @@ npm run dev
 
 Open the URL Vite prints (usually `http://localhost:5173`). The starter template uses console telemetry sinks in development.
 
+**Success check:** You should see a scenario paragraph and a quiz with two choices. Open the browser console — when you answer the quiz, you should see telemetry events such as `quiz_answered`.
+
 Alternative: `npx lessonkit dev` (same as the `dev` script).
 
 ## 3. Change one quiz
@@ -41,12 +43,43 @@ Alternative: `npx lessonkit dev` (same as the `dev` script).
 Packaging validates that `courseId`, `lessonId`, and every `checkId` in React appear in **`lessonkit.json`**. Change both files in the same edit—mismatches are the most common `lessonkit package` failure. See [Keep React IDs in sync](quickstart.md#keep-react-ids-in-sync-with-lessonkitjson).
 :::
 
-Edit `src/App.tsx` and `lessonkit.json` together:
+After saving both files and refreshing the browser, you should see your new question text and be able to submit the quiz.
 
-- In React: update a `Quiz` `question`, `choices`, or `answer`.
-- In `lessonkit.json`: update the matching `assessments[]` entry (`checkId`, `question`, `choices`, `answer`).
+**Before — `src/App.tsx` (excerpt):**
 
-`lessonkit init` already aligned `courseId` and the first assessment—keep that pattern when you add lessons or checks. See [Keep React IDs in sync with lessonkit.json](quickstart.md#keep-react-ids-in-sync-with-lessonkitjson).
+```tsx
+<Quiz
+  checkId="ready-to-build"
+  question="Ready to build?"
+  choices={["Not yet", "Yes"]}
+  answer="Yes"
+/>
+```
+
+**After:**
+
+```tsx
+<Quiz
+  checkId="ready-to-build"
+  question="What is the first step when you receive a suspicious email?"
+  choices={["Open the attachment", "Verify the sender"]}
+  answer="Verify the sender"
+/>
+```
+
+**Matching `lessonkit.json` entry** under `course.assessments[]`:
+
+```json
+{
+  "checkId": "ready-to-build",
+  "question": "What is the first step when you receive a suspicious email?",
+  "choices": ["Open the attachment", "Verify the sender"],
+  "answer": "Verify the sender",
+  "passingScore": 1
+}
+```
+
+Keep `checkId` unchanged when you edit question text only. When you add lessons or checks, update both React and the manifest in the same commit.
 
 ## 4. Production build (optional smoke test)
 
@@ -54,7 +87,13 @@ Edit `src/App.tsx` and `lessonkit.json` together:
 npm run build
 ```
 
-Output goes to `dist/` (Vite SPA). A production build may require env vars or disabled tracking—see [First LMS export](first-lms-export.md) before uploading to an LMS.
+Output goes to `dist/` (Vite SPA).
+
+:::{admonition} Do not preview the production bundle yet
+:class: warning
+
+`npm run build` succeeds without env vars, but **`vite preview` or opening `dist/` directly will throw** in production mode unless you add `.env` proxy URLs or disable tracking/xAPI. Keep iterating with `npm run dev`. See [First LMS export](first-lms-export.md) before uploading to an LMS.
+:::
 
 ## Next steps
 

@@ -76,9 +76,9 @@ Full contracts: [Block catalog](../../reference/block-catalog.md) · [Storybook]
 | `Lesson` | `autoCompleteOnUnmount` | Completes on unmount when another lesson becomes active |
 | `Quiz` / `KnowledgeCheck` | `passingScore`, `enableRetry`, `enableSolutionsButton`, `autoCheck` | `KnowledgeCheck` is an alias of `Quiz`; exact string match on `answer` |
 | `Scenario` | `blockId` | Enables block-level URNs on manual `interaction` events |
-| `SlideDeck` | `blockId`, `title`, optional `enableSolutionsButton`, `showPathRecap` | Compound resume via `config.session.persistCompoundState` (default true) |
-| `InteractiveBook` | `blockId`, `title` | Same compound resume rules as `SlideDeck` |
-| `BranchingScenario` | `blockId`, `title`, `startNodeId`, optional `showPathRecap`, `enableSolutionsButton` | Graph resume; pre-1.5 sessions restart at `startNodeId` |
+| `SlideDeck` | `blockId`, `title`, optional `enableSolutionsButton`, `showPathRecap` | Compound resume via `config.session.persistCompoundState` (default true). Headless APIs: [Core reference — compound state](../../reference/core.md#compound-state-and-resume) |
+| `InteractiveBook` | `blockId`, `title` | Same compound resume rules as `SlideDeck`. See [Core — compound state](../../reference/core.md#compound-state-and-resume) |
+| `BranchingScenario` | `blockId`, `title`, `startNodeId`, optional `showPathRecap`, `enableSolutionsButton` | Graph resume; pre-1.5 sessions restart at `startNodeId`. Branch meta: [Core — branching](../../reference/core.md#branching-scenario-meta) |
 | `Embed` | `title`, `allow`, `aspectRatio` | Restrictive iframe defaults; opt in extra `allow` tokens |
 | `Chart` | `title` | Accessible data table fallback for screen readers |
 | `ThemeProvider` | `mode`, `preset`, `tokens` | `mode`: `light` \| `dark` \| `system` |

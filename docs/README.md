@@ -4,7 +4,7 @@ Sphinx site published at **[lessonkit.readthedocs.io](https://lessonkit.readthed
 
 | Audience | Entry |
 | --- | --- |
-| New users | [Start here](https://lessonkit.readthedocs.io/en/latest/guides/start-here.html) · [FAQ](https://lessonkit.readthedocs.io/en/latest/guides/faq.html) |
+| New users | [Start here](https://lessonkit.readthedocs.io/en/latest/guides/start-here.html) · [Prerequisites](https://lessonkit.readthedocs.io/en/latest/guides/prerequisites.html) · [FAQ](https://lessonkit.readthedocs.io/en/latest/guides/faq.html) |
 | AI-assisted / non-React | [Vibe coding](https://lessonkit.readthedocs.io/en/latest/guides/vibe-coding/index.html) |
 | React developers | [React guides](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/index.html) |
 | Evaluators | [Architecture](https://lessonkit.readthedocs.io/en/latest/guides/architecture-overview.html) · [Enterprise evaluation](https://lessonkit.readthedocs.io/en/latest/guides/enterprise-evaluation.html) |
@@ -12,11 +12,21 @@ Sphinx site published at **[lessonkit.readthedocs.io](https://lessonkit.readthed
 
 ## Build locally
 
+Match CI as closely as possible:
+
 ```bash
+npm ci
+npm run build:packages
+npm run docs:api
+node docs/scripts/generate-block-props-doc.mjs   # after block-catalog JSON changes
+bash docs/scripts/verify-doc-includes.sh
 pip install -r docs/requirements.txt
-bash docs/scripts/build-docs-demos.sh   # embed example course bundles
-sphinx-build -b html docs docs/_build/html
+bash docs/scripts/build-docs-demos.sh   # optional: embed example course bundles
+sphinx-build -W -b html docs docs/_build/html
+sphinx-build -b linkcheck docs docs/_build/linkcheck   # optional: external link audit
 ```
+
+Without `npm run docs:api`, [API reference](reference/api.md) TypeDoc links will be broken in the built site.
 
 ## Source layout
 
@@ -47,6 +57,6 @@ Edit the **canonical markdown at `docs/` root**, not the thin wrapper pages unde
 | `../../CHANGELOG.md` | `project/changelog.md` |
 | `../../SECURITY.md` | `project/security.md` |
 
-Standalone pages (edit directly): `guides/*`, `examples/index.md`, `reference/api.md`, `reference/lms-compatibility.md`, `reference/glossary.md`.
+Standalone pages (edit directly): `guides/*`, `examples/index.md`, `reference/api.md`, `reference/lms-compatibility.md`, `reference/glossary.md`, `reference/xapi.md`.
 
-After editing included files, run `sphinx-build -W -b html docs docs/_build/html` to catch broken links.
+After editing included files, run the full build command above to catch broken links and missing includes.

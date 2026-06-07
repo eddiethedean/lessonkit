@@ -37,7 +37,7 @@ Machine-readable: `@lessonkit/core/telemetry-catalog.v3.json` (current; v1–v3 
 
 ## Docs
 
-[Core reference](https://lessonkit.readthedocs.io/en/latest/reference/core.html) · [Identity](https://lessonkit.readthedocs.io/en/latest/reference/identity.html) · [Telemetry](https://lessonkit.readthedocs.io/en/latest/reference/telemetry.html) · [Plugins](https://lessonkit.readthedocs.io/en/latest/reference/plugins.html)
+[Core reference](https://lessonkit.readthedocs.io/en/latest/reference/core.html) · [Identity](https://lessonkit.readthedocs.io/en/latest/reference/identity.html) · [Telemetry](https://lessonkit.readthedocs.io/en/latest/reference/telemetry.html) · [Plugins](https://lessonkit.readthedocs.io/en/latest/reference/plugins.html) · [TypeDoc API index](https://lessonkit.readthedocs.io/en/latest/reference/api.html)
 
 ## License
 

@@ -1,5 +1,17 @@
 # Troubleshooting (vibe coding)
 
+## Quick decision tree
+
+| Symptom | Try this first | AI prompt |
+| --- | --- | --- |
+| Blank dev page | Browser console errors | “Fix runtime errors in App.tsx without removing Course/Lesson structure” |
+| Quiz won't complete | ID + exact answer string | “Align checkId in App.tsx with lessonkit.json assessments[]” |
+| LMS no completion | Bridge + allowlist | “Set lxpack bridge auto and allowedParentOrigins for staging LMS” |
+| Package failed | IDs + layout | “Fix lessonkit.json ID parity; use single-spa layout” |
+| Node errors | Version check | “Use Node 20.19+; rerun lessonkit package” |
+
+Full runbooks: [React troubleshooting](../react-developers/troubleshooting.md) (decision tree + sections).
+
 ## `lessonkit: command not found`
 
 Use:
@@ -46,12 +58,14 @@ Run commands from the project root (where `lessonkit.json` lives), not a parent 
 
 ## Node version errors during package
 
-Install Node 18+, then:
+Install Node **20.19+** recommended (**18+** minimum), then:
 
 ```bash
-node -v   # should be v18.x, v20.x, or v22.x
+node -v   # should be v20.19+ for init; v18+ may work for package on existing projects
 lessonkit package --target scorm12
 ```
+
+See [Prerequisites](../prerequisites.md).
 
 ## Still stuck?
 

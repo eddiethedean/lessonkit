@@ -87,6 +87,9 @@ jobs:
       - name: Verify doc include wrappers
         run: bash docs/scripts/verify-doc-includes.sh
 
+      - name: Generate block prop reference
+        run: node docs/scripts/generate-block-props-doc.mjs
+
       - name: Setup Python
         uses: actions/setup-python@v6
         with:

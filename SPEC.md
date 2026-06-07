@@ -1,20 +1,18 @@
 # LessonKit Technical Specification
 
+> **Maintainer note (framework 1.5.x):** This file is a **historical design spec**. For current shipped API, use [Read the Docs](https://lessonkit.readthedocs.io/en/latest/reference/) — especially [block catalog](https://lessonkit.readthedocs.io/en/latest/reference/block-catalog.html), [CLI](https://lessonkit.readthedocs.io/en/latest/reference/cli.html), and [architecture overview](https://lessonkit.readthedocs.io/en/latest/guides/architecture-overview.html). Execution status: [ROADMAP.md](ROADMAP.md) · [CHANGELOG.md](CHANGELOG.md).
+
 ## Monorepo Structure
 
 ```text
 lessonkit/
-├── packages/
-│   ├── core/
-│   ├── react/
-│   ├── xapi/
-│   ├── accessibility/
-│   ├── themes/
-│   ├── cli/
-│   └── lxpack/          (@lessonkit/lxpack — LXPack export adapter)
-├── examples/
-├── docs/
-└── templates/
+├── packages/          # @lessonkit/* (core, react, xapi, accessibility, themes, cli, lxpack)
+├── examples/          # Runnable demo courses (11 workspaces)
+├── templates/         # vite-react mirror for monorepo dev
+├── e2e/               # Playwright export parity + LXPack conformance
+├── integration/       # CLI init → build → package smoke tests
+├── docs/              # Sphinx site (lessonkit.readthedocs.io)
+└── library-skills/    # Agent skills for AI-assisted authoring
 ```
 
 ---
@@ -86,17 +84,19 @@ Identity rules (`courseId`, `lessonId`, `checkId`, URNs): [`docs/IDENTITY.md`](d
 
 ---
 
-# Assessment contract (framework 1.1.x)
+# Assessment contract (framework 1.1.x — **shipped**)
 
-Planned expansion of the runtime block catalog ([`ROADMAP.md`](ROADMAP.md#11x--assessment-contract--tier-b-p0-blocks), [H5P capability map](docs/project/h5p-capability-map.md)). Aligns with H5P’s [question type contract](https://h5p.org/documentation/developers/contracts) but is implemented in React, not `H5P.Question`.
+**Status:** Shipped in framework **1.1.0+** and expanded through **1.5.x**. See [block catalog](docs/reference/block-catalog.md) and [H5P capability map](docs/project/h5p-capability-map.md) for current coverage.
+
+Aligns with H5P's [question type contract](https://h5p.org/documentation/developers/contracts) but is implemented in React, not `H5P.Question`.
 
 ## Scored blocks
 
 All assessment components require `checkId` and sync with `lessonkit.json` `assessments[]` (same as `Quiz` today).
 
-## Runtime interface (target)
+## Runtime interface (shipped)
 
-Parent containers (`AssessmentSequence`, `SlideDeck`, `InteractiveVideo`, `TimedCue`) may call:
+Parent containers (`AssessmentSequence`, `SlideDeck`, `InteractiveVideo`, `BranchingScenario`, `TimedCue`) expose `CompoundHandle`:
 
 | Method | Purpose |
 | --- | --- |
@@ -119,7 +119,7 @@ Behaviour props (aligned with H5P): `enableRetry`, `enableSolutionsButton`, opti
 | `MarkTheWords` | Mark the Words |
 | `AssessmentSequence` | Question Set |
 
-`Quiz` / `KnowledgeCheck` remain the reference implementation of the contract; v1 catalog stays valid until `blockCatalogVersion = 2` ships.
+`Quiz` / `KnowledgeCheck` remain the reference MCQ implementation. Default catalog: `blockCatalogVersion = 3` (`block-catalog.v3.json`).
 
 ## Requirements
 
@@ -197,10 +197,13 @@ Canonical mapping: `telemetryEventToXAPIStatement()` from `@lessonkit/xapi` (see
 
 # SCORM Support
 
-## Planned Versions
+## Shipped formats (via `@lessonkit/lxpack`)
 
 - SCORM 1.2
 - SCORM 2004
+- xAPI, cmi5, standalone
+
+Default SCORM 1.2 artifact (project root): **`.lxpack/course/.lxpack/out/course-scorm12.zip`**. See [packaging reference](docs/reference/packaging.md).
 
 ## Features
 
@@ -224,7 +227,9 @@ Canonical mapping: `telemetryEventToXAPIStatement()` from `@lessonkit/xapi` (see
 
 # Plugin Architecture
 
-## Future Plugin Areas
+**Shipped:** telemetry, assessment, lifecycle, and analytics plugins via `defineTelemetryPlugin` and related helpers. See [plugins reference](docs/reference/plugins.md).
+
+## Extension areas (ongoing)
 
 - AI integrations
 - LMS connectors

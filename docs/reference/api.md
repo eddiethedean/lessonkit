@@ -2,6 +2,8 @@
 
 LessonKit publishes **TypeScript declarations** on npm (`dist/*.d.ts`) and documents behavior in the guides below.
 
+TypeDoc pages list **TypeScript signatures only** — parameter descriptions and usage examples are expanding release over release. For behavior and examples, use the narrative guides in the tables below.
+
 ## Generated API (TypeDoc)
 
 Browse generated TypeScript API docs (built with the docs site on Read the Docs):
@@ -9,12 +11,19 @@ Browse generated TypeScript API docs (built with the docs site on Read the Docs)
 | Package | Generated reference |
 | --- | --- |
 | `@lessonkit/react` | [TypeDoc — react](../_static/typedoc/modules/react_dist.html) |
+| `@lessonkit/react/testing` | [TypeDoc — react/testing](../_static/typedoc/modules/react_dist_testing.html) |
 | `@lessonkit/core` | [TypeDoc — core](../_static/typedoc/modules/core_dist.html) |
+| `@lessonkit/core/testing` | [TypeDoc — core/testing](../_static/typedoc/modules/core_dist_testing.html) |
 | `@lessonkit/cli` | [TypeDoc — cli](../_static/typedoc/modules/cli_dist.html) |
+| `@lessonkit/xapi` | [TypeDoc — xapi](../_static/typedoc/modules/xapi_dist.html) |
+| `@lessonkit/lxpack` | [TypeDoc — lxpack](../_static/typedoc/modules/lxpack_dist.html) |
+| `@lessonkit/lxpack/bridge` | [TypeDoc — lxpack/bridge](../_static/typedoc/modules/lxpack_dist_bridge.html) |
+| `@lessonkit/themes` | [TypeDoc — themes](../_static/typedoc/modules/themes_dist.html) |
+| `@lessonkit/accessibility` | [TypeDoc — accessibility](../_static/typedoc/modules/accessibility_dist.html) |
 
 Full index: [TypeDoc home](../_static/typedoc/index.html).
 
-Monorepo maintainers regenerate locally: `npm run docs:api` (requires `npm run build:packages` first).
+Monorepo maintainers regenerate locally: `npm run build:packages && npm run docs:api`.
 
 Also use:
 
@@ -35,10 +44,35 @@ Also use:
 | --- | --- | --- |
 | `@lessonkit/react` | `import type { … } from "@lessonkit/react"` | [Components and hooks](../guides/react-developers/components-and-hooks.md) |
 | `@lessonkit/react/blocks` | Block components only (tree-shake friendly) | [Block catalog](block-catalog.md) |
-| `@lessonkit/react/testing` | Test reset helpers (`resetQuizWarningsForTests`, …) | [Contributing](../guides/react-developers/contributing-to-the-monorepo.md) |
+| `@lessonkit/react/testing` | Test reset helpers (see table below) | [Contributing](../guides/react-developers/contributing-to-the-monorepo.md) |
 | `@lessonkit/core` | `import type { … } from "@lessonkit/core"` | [Core reference](core.md) |
-| `@lessonkit/core/testing` | Headless test reset helpers | [Contributing](../guides/react-developers/contributing-to-the-monorepo.md) |
+| `@lessonkit/core/testing` | Headless test reset helpers (see table below) | [Contributing](../guides/react-developers/contributing-to-the-monorepo.md) |
 | `@lessonkit/xapi` | `import type { … } from "@lessonkit/xapi"` | [xAPI reference](xapi.md) |
+| `@lessonkit/lxpack` | Packaging API | [Packaging reference](packaging.md) |
+| `@lessonkit/themes` | Theme presets and tokens | [Theming reference](theming.md) |
+| `@lessonkit/accessibility` | Focus and motion utilities | [Accessibility reference](accessibility.md) |
+
+### `@lessonkit/react/testing` exports
+
+| Export | Purpose |
+| --- | --- |
+| `resetQuizWarningsForTests` | Clear Quiz dev warnings between tests |
+| `resetAssessmentWarningsForTests` | Clear assessment guard warnings |
+| `resetLessonMountRegistryForTests` | Reset lesson mount registry |
+| `resetCompoundValidationWarningsForTests` | Clear compound child validation warnings |
+| `resetLessonkitProviderStorageForTests` | Clear session storage used by provider |
+| `resetCourseStartedTrackingFlightForTests` | Reset course_started delivery flight state |
+
+### `@lessonkit/core/testing` exports
+
+| Export | Purpose |
+| --- | --- |
+| `resetTelemetryBuilderWarningsForTests` | Clear telemetry builder dev warnings |
+| `resetStoragePortForTests` | Reset default storage port |
+| `resetSharedVolatileSessionIdForTests` | Reset tab session id helper state |
+| `resetCourseStartedEmitFlightForTests` | Reset headless course_started emit flight |
+
+Prefer these subpaths over deprecated main-entry reset helpers.
 
 ### Shared assessment and bridge types
 

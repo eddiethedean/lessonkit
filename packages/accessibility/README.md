@@ -27,7 +27,7 @@ Used internally by `@lessonkit/react` (e.g. `Quiz` labels).
 
 ## Docs
 
-[Accessibility reference](https://lessonkit.readthedocs.io/en/latest/reference/accessibility.html) · [Theming & accessibility guide](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/theming-and-accessibility.html)
+[Accessibility reference](https://lessonkit.readthedocs.io/en/latest/reference/accessibility.html) · [Theming & accessibility guide](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/theming-and-accessibility.html) · [TypeDoc API index](https://lessonkit.readthedocs.io/en/latest/reference/api.html)
 
 ## License
 

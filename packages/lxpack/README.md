@@ -42,7 +42,7 @@ import { forwardTelemetryToBridge } from "@lessonkit/lxpack/bridge";
 
 ## Docs
 
-[Packaging reference](https://lessonkit.readthedocs.io/en/latest/reference/packaging.html) · [LXPack bridge](https://lessonkit.readthedocs.io/en/latest/reference/lxpack-bridge.html) · [Golden example](https://github.com/eddiethedean/lessonkit/tree/main/examples/lxpack-golden)
+[Packaging reference](https://lessonkit.readthedocs.io/en/latest/reference/packaging.html) · [LXPack bridge](https://lessonkit.readthedocs.io/en/latest/reference/lxpack-bridge.html) · [Golden example](https://github.com/eddiethedean/lessonkit/tree/main/examples/lxpack-golden) · [TypeDoc API index](https://lessonkit.readthedocs.io/en/latest/reference/api.html)
 
 ## License
 

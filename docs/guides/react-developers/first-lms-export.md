@@ -2,7 +2,7 @@
 
 Export your course to SCORM (or other LMS targets) after you have a working local preview. For the fastest local start, complete [Getting started in 5 minutes](getting-started-in-5-minutes.md) first.
 
-**Prerequisites:** Node.js **18+**; a project from `lessonkit init` with `npm run dev` working.
+**Prerequisites:** Node.js **20.19+** recommended (**18+** minimum); a project from `lessonkit init` with `npm run dev` working. See [Prerequisites](../prerequisites.md).
 
 ## Checklist
 
@@ -60,11 +60,7 @@ The CLI prints the resolved path, for example: `Packaged scorm12 → …/course-
 :::{admonition} Your SCORM zip is here
 :class: tip
 
-After a successful `package:scorm12` run, upload the ZIP path the CLI prints. Default (relative to your project root):
-
-**`.lxpack/course/.lxpack/out/course-scorm12.zip`**
-
-Other targets use the same folder (for example `course-xapi.zip`, `course-cmi5.zip`). Standalone export writes **`.lxpack/course/.lxpack/out/standalone/`**.
+After a successful `package:scorm12` run, upload the ZIP path the CLI prints. Default path: see [FAQ — SCORM zip location](../faq.md#where-is-my-scorm-zip-after-packaging) (canonical reference for all targets).
 :::
 
 ### Where the SCORM zip lands

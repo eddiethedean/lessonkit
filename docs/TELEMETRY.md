@@ -1,4 +1,4 @@
-# Telemetry & xAPI (v1)
+# Telemetry & xAPI (1.5.x)
 
 LessonKit emits versioned telemetry events from `@lessonkit/react` and maps them to xAPI via `@lessonkit/xapi`.
 

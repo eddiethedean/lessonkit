@@ -27,6 +27,10 @@ const DEFAULT_PATHS: LessonkitManifestPaths = {
   outputBaseDir: ".lxpack/out",
 };
 
+/**
+ * Parse and validate a project-root `lessonkit.json` manifest (`schemaVersion: 1`).
+ * Pass `projectRoot` for path containment checks equivalent to the CLI.
+ */
 export function parseLessonkitManifest(
   raw: unknown,
   label = "lessonkit.json",

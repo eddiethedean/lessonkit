@@ -18,6 +18,10 @@ import { useLessonkitProviderRuntime } from "./provider/useLessonkitProviderRunt
 
 export type { LessonkitObservabilityConfig };
 
+/**
+ * Runtime configuration for {@link LessonkitProvider} and {@link Course}.
+ * Pass tracking, xAPI, LMS bridge, observability hooks, and plugins here.
+ */
 export type LessonkitConfig = {
   courseId: CourseId;
   session?: {
@@ -117,6 +121,10 @@ export type LessonkitRuntime = {
 
 export const LessonkitContext = createContext<LessonkitRuntime | null>(null);
 
+/**
+ * Root runtime provider for telemetry, xAPI, progress, and LMS bridge forwarding.
+ * Prefer wrapping with {@link Course} unless you need a custom layout.
+ */
 export function LessonkitProvider(props: LessonkitProviderProps) {
   const runtime = useLessonkitProviderRuntime(props.config);
   return <LessonkitContext.Provider value={runtime}>{props.children}</LessonkitContext.Provider>;

@@ -19,10 +19,33 @@ check_include() {
   echo "OK $wrapper -> $source"
 }
 
+check_no_wrapper_h1() {
+  local wrapper="$1"
+  if head -n 3 "$wrapper" | grep -q '^# '; then
+    echo "WRAPPER H1: $wrapper should not have its own H1 (canonical file provides title)"
+    return 1
+  fi
+  echo "OK $wrapper (no duplicate H1)"
+}
+
 failed=0
-check_include reference/cli.md CLI.md || failed=1
-check_include reference/packaging.md PACKAGING.md || failed=1
-check_include reference/lxpack-bridge.md LXPACK_BRIDGE.md || failed=1
+for pair in \
+  "reference/cli.md:CLI.md" \
+  "reference/packaging.md:PACKAGING.md" \
+  "reference/lxpack-bridge.md:LXPACK_BRIDGE.md" \
+  "reference/core.md:CORE.md" \
+  "reference/identity.md:IDENTITY.md" \
+  "reference/telemetry.md:TELEMETRY.md" \
+  "reference/theming.md:THEMING.md" \
+  "reference/accessibility.md:ACCESSIBILITY.md" \
+  "reference/block-catalog.md:BLOCK_CATALOG.md" \
+  "reference/plugins.md:PLUGINS.md" \
+  "reference/manifest.md:MANIFEST.md"; do
+  wrapper="${pair%%:*}"
+  source="${pair##*:}"
+  check_include "$wrapper" "$source" || failed=1
+  check_no_wrapper_h1 "$wrapper" || failed=1
+done
 
 if [[ "$failed" -ne 0 ]]; then
   exit 1
