@@ -61,8 +61,8 @@
   "scripts": {
     "build": "tsup src/index.tsx src/testing.ts src/blocks-entry.ts --format esm,cjs --dts --external react --external react-dom --external @lessonkit/accessibility --external @lessonkit/lxpack --external @lessonkit/themes",
     "dev": "tsup src/index.tsx src/testing.ts src/blocks-entry.ts --format esm,cjs --dts --watch --external react --external react-dom --external @lessonkit/accessibility --external @lessonkit/lxpack --external @lessonkit/themes",
-    "storybook": "NODE_PATH=./node_modules:../../node_modules node ../../node_modules/storybook/bin/index.cjs dev -c .storybook -p 6006 --disable-telemetry",
-    "build-storybook": "NODE_PATH=./node_modules:../../node_modules node ../../node_modules/storybook/bin/index.cjs build -c .storybook --disable-telemetry",
+    "storybook": "storybook dev -c .storybook -p 6006 --disable-telemetry",
+    "build-storybook": "storybook build -c .storybook --disable-telemetry",
     "prepublishOnly": "npm run build",
     "typecheck": "tsc -p tsconfig.json",
     "test": "vitest run --passWithNoTests",
@@ -87,12 +87,9 @@
     "@lessonkit/xapi": "1.4.0"
   },
   "devDependencies": {
-    "@storybook/addon-essentials": "8.6.18",
-    "@storybook/addon-interactions": "8.6.18",
-    "@storybook/builder-vite": "8.6.18",
-    "@storybook/react": "8.6.18",
-    "@storybook/react-vite": "8.6.18",
-    "@storybook/test": "8.6.18",
+    "@storybook/builder-vite": "10.4.2",
+    "@storybook/react": "10.4.2",
+    "@storybook/react-vite": "10.4.2",
     "@testing-library/react": "^16.3.0",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
@@ -100,9 +97,9 @@
     "jsdom": "^29.1.1",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
-    "storybook": "8.6.18",
+    "storybook": "10.4.2",
     "tsup": "^8.5.0",
-    "typescript": "^5.8.3",
+    "typescript": "^6.0.3",
     "vite": "^8.0.11",
     "vitest": "^4.1.8",
     "@testing-library/dom": "^10.4.1"
