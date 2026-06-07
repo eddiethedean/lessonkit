@@ -7,6 +7,8 @@
 
 **LessonKit** is a React-first framework for building accessible, trackable learning experiences—and shipping them to the LMS. Author courses as components, wire telemetry and xAPI, theme with design tokens, and export **SCORM**, **standalone**, **xAPI**, or **cmi5** packages from the same codebase.
 
+LessonKit solves: *"We want custom React learning UX with LMS completion and xAPI—not another WYSIWYG authoring tool."*
+
 Developer tooling, not a timeline authoring tool: **React + telemetry + packaging**, not Storyline-in-a-box.
 
 > **Building a course?** You do not need to clone this repo. Run `npx @lessonkit/cli init my-course` and follow the [5-minute getting started guide](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/getting-started-in-5-minutes.html). Clone only if you are [contributing](CONTRIBUTING.md) or running [examples](examples/README.md).

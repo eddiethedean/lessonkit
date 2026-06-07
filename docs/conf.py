@@ -132,6 +132,7 @@ pygments_dark_style = "monokai"
 myst_enable_extensions = [
     "colon_fence",
     "deflist",
+    "substitution",
     "tasklist",
 ]
 myst_heading_anchors = 4

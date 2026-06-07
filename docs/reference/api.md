@@ -2,7 +2,17 @@
 
 LessonKit publishes **TypeScript declarations** on npm (`dist/*.d.ts`) and documents behavior in the guides below.
 
-TypeDoc pages list **TypeScript signatures only** — parameter descriptions and usage examples are expanding release over release. For behavior and examples, use the narrative guides in the tables below.
+:::{admonition} Guides vs reference
+:class: note
+
+| Read this when… | Start here |
+| --- | --- |
+| Learning workflows (first course, LMS export, theming) | [React developer guides](../guides/react-developers/index.md) |
+| Validating props, IDs, manifest fields, CLI flags | Reference pages on this site (below) + [Block catalog](block-catalog.md) |
+| TypeScript signatures only | [TypeDoc](#generated-api-typedoc) (built on Read the Docs; regenerate locally with `npm run docs:api`) |
+
+TypeDoc lists **signatures** — parameter descriptions and examples expand release over release. For behavior, prefer narrative guides first, then reference contracts.
+:::
 
 ## Generated API (TypeDoc)
 
@@ -11,6 +21,7 @@ Browse generated TypeScript API docs (built with the docs site on Read the Docs)
 | Package | Generated reference |
 | --- | --- |
 | `@lessonkit/react` | [TypeDoc — react](../_static/typedoc/modules/react_dist.html) |
+| `@lessonkit/react/blocks` | [TypeDoc — react/blocks](../_static/typedoc/modules/react_dist_blocks-entry.html) |
 | `@lessonkit/react/testing` | [TypeDoc — react/testing](../_static/typedoc/modules/react_dist_testing.html) |
 | `@lessonkit/core` | [TypeDoc — core](../_static/typedoc/modules/core_dist.html) |
 | `@lessonkit/core/testing` | [TypeDoc — core/testing](../_static/typedoc/modules/core_dist_testing.html) |
@@ -23,7 +34,7 @@ Browse generated TypeScript API docs (built with the docs site on Read the Docs)
 
 Full index: [TypeDoc home](../_static/typedoc/index.html).
 
-Monorepo maintainers regenerate locally: `npm run build:packages && npm run docs:api`.
+Monorepo maintainers regenerate locally: `npm run build:packages && npm run docs:api`. TypeDoc output lives under `docs/_static/typedoc/` and is **generated on Read the Docs** — local Sphinx builds show broken TypeDoc links until you run `docs:api`. See [Contributing — TypeDoc generation](../guides/react-developers/contributing-to-the-monorepo.md#typedoc-api-docs).
 
 Also use:
 

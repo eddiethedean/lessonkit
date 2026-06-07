@@ -1,6 +1,6 @@
 # First LMS export
 
-Export your course to SCORM (or other LMS targets) after you have a working local preview. For the fastest local start, complete [Getting started in 5 minutes](getting-started-in-5-minutes.md) first.
+Export your course to SCORM (or other LMS targets) after you have a working local preview. For the fastest local start, complete [Getting started in 5 minutes](getting-started-in-5-minutes.md) first. Prefer a one-page checklist? See [Ship to LMS](ship-to-lms.md).
 
 **Prerequisites:** Node.js **20.19+** recommended (**18+** minimum); a project from `lessonkit init` with `npm run dev` working. See [Prerequisites](../prerequisites.md).
 

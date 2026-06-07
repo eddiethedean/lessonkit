@@ -62,8 +62,26 @@ Before opening a PR that touches multiple packages or release surfaces, run from
 | Conformance | `npm run conformance:lxpack && npm run conformance:golden` |
 | Audit | `npm run audit:ci` |
 | API docs | `npm run docs:api` |
+| Block props doc | `node docs/scripts/generate-block-props-doc.mjs` |
 | Doc includes | `bash docs/scripts/verify-doc-includes.sh` |
 | Sphinx docs | `cd docs && pip install -r requirements.txt && sphinx-build -W -b html . _build/html` |
+
+(typedoc-api-docs)=
+## TypeDoc API docs
+
+TypeDoc HTML is **generated**, not hand-edited. Output path: `docs/_static/typedoc/`.
+
+```bash
+npm run build:packages
+npm run docs:api
+```
+
+- Read the Docs and CI run `docs:api` before Sphinx — published TypeDoc links work on [lessonkit.readthedocs.io](https://lessonkit.readthedocs.io/en/latest/reference/api.html).
+- **Local Sphinx without `docs:api`** — TypeDoc links in `reference/api.md` 404 until you regenerate.
+- Entry points include `@lessonkit/react/blocks` (`packages/react/dist/blocks-entry.d.ts`). See [`docs/scripts/build-api-docs.sh`](https://github.com/eddiethedean/lessonkit/blob/main/docs/scripts/build-api-docs.sh).
+- After changing block props in catalog sources, also run `node docs/scripts/generate-block-props-doc.mjs` (included in docs CI).
+
+**Docs-only PRs** need Python 3.12+ (`pip install -r docs/requirements.txt`) in addition to Node.
 
 ## Docs site (this site)
 
@@ -73,6 +91,7 @@ Match CI:
 npm run build:packages
 npm run docs:api
 bash docs/scripts/verify-doc-includes.sh
+node docs/scripts/generate-block-props-doc.mjs
 cd docs && pip install -r requirements.txt && sphinx-build -W -b html . _build/html
 open _build/html/index.html
 ```

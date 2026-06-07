@@ -40,7 +40,7 @@ npm test
 
 | Change type | Usually enough |
 | --- | --- |
-| `docs/` only (Markdown, Sphinx) | `cd docs && pip install -r requirements.txt && sphinx-build -W -b html . _build/html` |
+| `docs/` only (Markdown, Sphinx) | `npm run build:packages && npm run docs:api && bash docs/scripts/verify-doc-includes.sh && node docs/scripts/generate-block-props-doc.mjs && cd docs && pip install -r requirements.txt && sphinx-build -W -b html . _build/html` (requires **Python 3.12+** and Node) |
 | Single package you edited | `npm run build -w @lessonkit/react` then `npm test -w @lessonkit/react` |
 | Examples after package API change | `npm run build:packages` then the example workspace `dev` / `test` |
 

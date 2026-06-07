@@ -19,6 +19,7 @@ npx typedoc \
     packages/core/dist/index.d.ts \
     packages/core/dist/testing.d.ts \
     packages/react/dist/index.d.ts \
+    packages/react/dist/blocks-entry.d.ts \
     packages/react/dist/testing.d.ts \
     packages/cli/dist/index.d.ts \
     packages/xapi/dist/index.d.ts \

@@ -15,7 +15,7 @@ One-page summary for security, compliance, and platform teams evaluating LessonK
 - Runtime: browser SPA with optional telemetry, xAPI, and LMS bridge.
 - Packaging: **Node.js 18+** on build agents; **LXPack** produces LMS artifacts.
 
-Diagram and package boundaries: [Architecture overview](architecture-overview.md).
+Diagram and package boundaries: [Architecture overview](architecture-overview.md). Export formats and LMS staging requirements: [LMS compatibility](../reference/lms-compatibility.md).
 
 ## Security
 

@@ -8,7 +8,7 @@ Pick the path that matches how you work. Each link is a single next step—not t
 
 [Getting started in 5 minutes](react-developers/getting-started-in-5-minutes.md) — `npx @lessonkit/cli init`, preview locally, edit one quiz.
 
-**Then ship to an LMS:** [First LMS export](react-developers/first-lms-export.md) — bridge, env vars, SCORM zip.
+**Then ship to an LMS:** [First LMS export](react-developers/first-lms-export.md) — bridge, env vars, SCORM zip. One-page checklist: [Ship to LMS](react-developers/ship-to-lms.md).
 
 ## Build with AI (no React required)
 
@@ -26,7 +26,7 @@ Install optional [Library Skills](library-skills.md) for Cursor-compatible autho
 
 ## I need to evaluate LessonKit for my organization
 
-[Enterprise evaluation](enterprise-evaluation.md) · [Security policy](../project/security.md) · [LMS compatibility](../reference/lms-compatibility.md)
+[Design philosophy](design-philosophy.md) · [Enterprise evaluation](enterprise-evaluation.md) · [Architecture overview](architecture-overview.md) · [Security policy](../project/security.md) · [LMS compatibility](../reference/lms-compatibility.md)
 
 ## I want to contribute to LessonKit
 

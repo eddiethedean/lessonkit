@@ -1,5 +1,11 @@
 # Components and hooks
 
+:::{admonition} Guides vs reference
+:class: note
+
+**Guides** (this page) explain how to use components in a course. **Reference** docs hold contracts and machine-readable schemas: [Block catalog](../../reference/block-catalog.md) (includes [generated prop tables](../../reference/block-catalog.md#generated-prop-reference-catalog-v3)), and [TypeDoc signatures](../../reference/api.md). Start here for workflows; open reference when implementing or validating props.
+:::
+
 :::{admonition} H5P equivalents
 :class: tip
 
@@ -63,6 +69,33 @@ Canonical block list, props, and contracts: [Block catalog reference](../../refe
 | `Page` | `blockId`, optional `title` | Column/chapter inside `InteractiveBook` |
 | `Reflection` | optional `prompt`, `blockId` | Textarea reflection block |
 | `ProgressTracker` | optional `totalLessons` | Shows completed lesson count |
+
+### Content and presentation blocks
+
+These blocks ship in `@lessonkit/react` and appear in the [block catalog](../../reference/block-catalog.md). Props below are summaries — see [generated prop tables](../../reference/block-catalog.md#generated-prop-reference-catalog-v3) for full contracts.
+
+| Component | Required props | Role |
+| --- | --- | --- |
+| `Text` | `blockId`, children or `content` | Rich text paragraph |
+| `Heading` | `blockId`, `level`, children | Semantic heading (`h1`–`h6`) |
+| `Image` | `blockId`, `src`, `alt` | Accessible image |
+| `ImagePairing` | `checkId`, `pairs[]` | Match image pairs assessment |
+| `ImageSequencing` | `checkId`, `images[]` | Order images correctly |
+| `ArithmeticQuiz` | `checkId`, `problems[]` | Numeric drill assessment |
+| `Essay` | `checkId`, `prompt` | Long-form text (manual scoring) |
+| `Questionnaire` | `checkId`, `fields[]` | Multi-field form |
+| `MemoryGame` | `checkId`, `pairs[]` | Card-matching game |
+| `InformationWall` | `blockId`, `panels[]` | Searchable panel grid |
+| `ParallaxSlideshow` | `blockId`, `slides[]` | Parallax image slideshow |
+| `Accordion` | `blockId`, `sections[]` | Expandable sections |
+| `DialogCards` | `blockId`, `cards[]` | Flip/dialog cards |
+| `Flashcards` | `blockId`, `cards[]` | Study deck |
+| `ImageHotspots` | `blockId`, `src`, `hotspots[]` | Clickable image regions |
+| `ImageSlider` | `blockId`, `slides[]` | Before/after or image carousel |
+| `FindHotspot` | `checkId`, `src`, `targets[]` | Single hotspot find task |
+| `FindMultipleHotspots` | `checkId`, `src`, `targets[]` | Multiple hotspot find task |
+
+Import tree-shake friendly: `import { Quiz } from "@lessonkit/react/blocks"`.
 
 `Course` accepts `config` for tracking/xAPI and optional `sinks` (same shape as `LessonkitProvider`).
 

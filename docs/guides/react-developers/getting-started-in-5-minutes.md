@@ -23,6 +23,16 @@ cd my-course
 
 `init` runs `npm install` by default and writes `lessonkit.json`, `src/courseConfig.ts`, and a starter `src/App.tsx`.
 
+### Advanced init flags
+
+| Flag | When to use |
+| --- | --- |
+| `lessonkit init --here` | Scaffold in the current directory (must be empty or use `--force`) |
+| `lessonkit init my-course --skip-install` | Create files only; run `npm install` yourself after fixing Node/proxy issues |
+| `lessonkit init my-course --force` | Overwrite an existing scaffold in the target directory |
+
+See [CLI reference](../../reference/cli.md) for all options.
+
 ## 2. Preview locally
 
 ```bash
@@ -98,6 +108,7 @@ Output goes to `dist/` (Vite SPA).
 ## Next steps
 
 - [First LMS export](first-lms-export.md) — bridge, env, SCORM zip
+- [Ship to LMS checklist](ship-to-lms.md) — one-page go-live checklist
 - [Quickstart](quickstart.md) — add LessonKit to an existing Vite app
 - [Block cookbook](block-cookbook.md) — per-block React + manifest examples
 - [FAQ](../faq.md) — common questions

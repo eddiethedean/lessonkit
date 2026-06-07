@@ -1,4 +1,4 @@
-# Runtime block catalog (v1)
+# Runtime block catalog (v3 default)
 
 :::{admonition} H5P equivalents
 :class: tip

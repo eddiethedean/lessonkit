@@ -20,7 +20,8 @@ LessonKit courses are **React apps** (usually **Vite + TypeScript**). You do not
 2. **React** — [react.dev Learn](https://react.dev/learn) (official tutorial)
 3. **TypeScript** (basics) — [TypeScript Handbook](https://www.typescriptlang.org/docs/handbook/intro.html)
 4. **Vite** (how `lessonkit dev` works) — [Vite Getting Started](https://vite.dev/guide/)
-5. **LessonKit** — [Quickstart](quickstart.md) on this site
+5. **LessonKit (new project)** — [Getting started in 5 minutes](getting-started-in-5-minutes.md) → [First LMS export](first-lms-export.md) → [Ship to LMS checklist](ship-to-lms.md) → [Production checklist](production-checklist.md)
+6. **LessonKit (existing Vite app only)** — [Quickstart — add to an existing Vite app](quickstart.md)
 :::
 
 ### Curated resources
@@ -57,8 +58,9 @@ Use the [Vibe coding guides](../vibe-coding/index.md) with an AI editor and the 
 | Coming from H5P | [../h5p-for-lessonkit-authors.md](../h5p-for-lessonkit-authors.md) |
 | Getting started (5 min) | [getting-started-in-5-minutes.md](getting-started-in-5-minutes.md) |
 | First LMS export | [first-lms-export.md](first-lms-export.md) |
+| Ship to LMS (checklist) | [ship-to-lms.md](ship-to-lms.md) |
+| Quickstart (existing Vite app) | [quickstart.md](quickstart.md) |
 | Block cookbook | [block-cookbook.md](block-cookbook.md) |
-| Quickstart | [quickstart.md](quickstart.md) |
 | Project structure | [project-structure.md](project-structure.md) |
 | Components & hooks | [components-and-hooks.md](components-and-hooks.md) |
 | Telemetry & xAPI | [telemetry-and-xapi.md](telemetry-and-xapi.md) |
@@ -66,11 +68,15 @@ Use the [Vibe coding guides](../vibe-coding/index.md) with an AI editor and the 
 | Theming & a11y | [theming-and-accessibility.md](theming-and-accessibility.md) |
 | Packaging & CLI | [packaging-and-cli.md](packaging-and-cli.md) |
 | Deployment | [deployment-guide.md](deployment-guide.md) |
+| LRS operations | [lrs-operations.md](lrs-operations.md) |
+| Multi-course patterns | [multi-course-patterns.md](multi-course-patterns.md) |
+| Performance | [performance.md](performance.md) |
 | Export parity | [export-parity.md](export-parity.md) |
 | Troubleshooting | [troubleshooting.md](troubleshooting.md) |
 | FAQ | [../faq.md](../faq.md) |
 | Plugins | [plugin-cookbook.md](plugin-cookbook.md) |
 | Monorepo | [contributing-to-the-monorepo.md](contributing-to-the-monorepo.md) |
+| Adding a framework block | [adding-a-framework-block.md](adding-a-framework-block.md) |
 
 ## Identity requirements (0.5+)
 

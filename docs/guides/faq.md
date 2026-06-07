@@ -56,6 +56,10 @@ Development builds allow bridge forwarding without an allowlist. **Production bu
 
 Production mode requires proxy URLs (`VITE_ANALYTICS_URL`, `VITE_XAPI_PROXY_URL`) or explicitly disabled tracking/xAPI. See [Production runtime for LMS](react-developers/first-lms-export.md#production-runtime-for-lms).
 
+## Why did `npm run build` succeed but my packaged course is blank or throws?
+
+`npm run build` only compiles the Vite bundle — it does not validate production runtime config. When the LMS launches the course, production mode enforces real analytics/xAPI transports (or explicit `enabled: false`), observability hooks, and bridge allowlists. Dev console sinks are rejected. See [Production checklist](react-developers/production-checklist.md) · [Troubleshooting — production build throws](react-developers/troubleshooting.md#production-build-or-packaged-course-throws-on-load) · [Ship to LMS checklist](react-developers/ship-to-lms.md).
+
 ## How do I keep React and `lessonkit.json` in sync?
 
 Align `courseId`, `lessonId`, and every `checkId` between React props and the manifest. Packaging fails on mismatch. See [Keep React IDs in sync](react-developers/quickstart.md#keep-react-ids-in-sync-with-lessonkitjson).

@@ -3,7 +3,7 @@
 ```{raw} html
 <div class="lk-hero">
   <div class="lk-hero-badges">
-    <span class="lk-badge lk-badge--accent">v1.5.0</span>
+    <span class="lk-badge lk-badge--accent">v{{ release }}</span>
     <span class="lk-badge">React-first</span>
     <span class="lk-badge">SCORM · xAPI · cmi5</span>
   </div>
@@ -135,6 +135,7 @@ guides/h5p-for-lessonkit-authors
 guides/react-developers/index
 guides/react-developers/getting-started-in-5-minutes
 guides/react-developers/first-lms-export
+guides/react-developers/ship-to-lms
 guides/react-developers/quickstart
 guides/react-developers/block-cookbook
 guides/react-developers/project-structure
@@ -151,6 +152,7 @@ guides/react-developers/export-parity
 guides/react-developers/plugin-cookbook
 guides/react-developers/contributing-to-the-monorepo
 guides/react-developers/adding-a-framework-block
+guides/react-developers/troubleshooting
 ```
 
 ```{toctree}
@@ -181,7 +183,6 @@ reference/lxpack-upgrades
 
 guides/enterprise-evaluation
 guides/architecture-overview
-reference/lms-compatibility
 project/security
 project/accessibility-conformance
 ```
