@@ -33,7 +33,7 @@ Installs to `~/.cursor/skills/`, `~/.claude/skills/`, or `<project>/.cursor/skil
 
 ## Requirements
 
-Node.js **18+** for `lessonkit dev`, `build`, and `package`.
+Node.js **20.19+ recommended** for `npx @lessonkit/cli init` (Vite 8). Node **18+** minimum for `lessonkit dev`, `build`, and `package` in an existing course.
 
 ## License
 

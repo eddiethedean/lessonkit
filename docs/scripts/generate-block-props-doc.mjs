@@ -86,7 +86,7 @@ for (const entry of catalog.entries) {
   }
 
   if (COMPOUND_TYPES.has(entry.type)) {
-    lines.push("**Compound:** Implements session resume when `config.session.persistCompoundState` is true. See [Core reference — compound state](core.md#compound-state-and-resume).");
+    lines.push("**Compound:** Implements session resume when `config.session.persistCompoundState` is true. See [Core reference — compound state](reference/core.md#compound-state-and-resume).");
     lines.push("");
   }
 }

@@ -1,6 +1,6 @@
 # Export parity (React / Vite vs LMS)
 
-LessonKit **1.0.0** extends the **0.9.x conformance harness** with Vitest CLI integration tests and Playwright launch coverage for SCORM 2004, xAPI, and cmi5.
+LessonKit **1.5.x** extends the **0.9.x conformance harness** with Vitest CLI integration tests and Playwright launch coverage for SCORM 2004, xAPI, and cmi5. Last verified against release **1.5.0**.
 
 ## Surfaces
 
@@ -33,7 +33,7 @@ LessonKit **1.0.0** extends the **0.9.x conformance harness** with Vitest CLI in
 | All LMS packages | `npm run conformance:lxpack` | `@lxpack/conformance` validate + build (standalone, scorm12, scorm2004, xapi, cmi5) |
 | Golden artifacts | `npm run conformance:golden` | `examples/lxpack-golden` produces standalone dir + scorm12 zip |
 
-## What is guaranteed (1.0.0)
+## What is guaranteed (1.5.x)
 
 For the reference course (`examples/lxpack-golden`):
 

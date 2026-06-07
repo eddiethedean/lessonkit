@@ -108,7 +108,7 @@ Ordered sequence of contract-compliant assessments.
 | `enableSolutionsButton` | boolean | no | Show solution control. |
 | `autoCheck` | boolean | no | Check answers automatically when possible. |
 
-**Compound:** Implements session resume when `config.session.persistCompoundState` is true. See [Core reference — compound state](core.md#compound-state-and-resume).
+**Compound:** Implements session resume when `config.session.persistCompoundState` is true. See [Core reference — compound state](reference/core.md#compound-state-and-resume).
 
 ## Summary
 
@@ -254,7 +254,7 @@ Column layout container (H5P Column / Page).
 
 **Telemetry:** `compound_page_viewed`
 
-**Compound:** Implements session resume when `config.session.persistCompoundState` is true. See [Core reference — compound state](core.md#compound-state-and-resume).
+**Compound:** Implements session resume when `config.session.persistCompoundState` is true. See [Core reference — compound state](reference/core.md#compound-state-and-resume).
 
 ## InteractiveBook
 
@@ -273,7 +273,7 @@ Multi-page book with chapter navigation.
 
 **Telemetry:** `book_page_viewed`
 
-**Compound:** Implements session resume when `config.session.persistCompoundState` is true. See [Core reference — compound state](core.md#compound-state-and-resume).
+**Compound:** Implements session resume when `config.session.persistCompoundState` is true. See [Core reference — compound state](reference/core.md#compound-state-and-resume).
 
 ## Slide
 
@@ -287,7 +287,7 @@ Single slide row in a SlideDeck. Supports Video, Summary, and 1.4 blocks.
 
 **Telemetry:** `compound_page_viewed`
 
-**Compound:** Implements session resume when `config.session.persistCompoundState` is true. See [Core reference — compound state](core.md#compound-state-and-resume).
+**Compound:** Implements session resume when `config.session.persistCompoundState` is true. See [Core reference — compound state](reference/core.md#compound-state-and-resume).
 
 ## SlideDeck
 
@@ -306,7 +306,7 @@ Multi-slide presentation with keyboard navigation.
 
 **Telemetry:** `slide_viewed`
 
-**Compound:** Implements session resume when `config.session.persistCompoundState` is true. See [Core reference — compound state](core.md#compound-state-and-resume).
+**Compound:** Implements session resume when `config.session.persistCompoundState` is true. See [Core reference — compound state](reference/core.md#compound-state-and-resume).
 
 ## TimedCue
 
@@ -319,7 +319,7 @@ Timed overlay cue within InteractiveVideo.
 | `mustComplete` | boolean | no | Block seek until completed. |
 | `children` | ReactNode | yes | Single allowed child block. |
 
-**Compound:** Implements session resume when `config.session.persistCompoundState` is true. See [Core reference — compound state](core.md#compound-state-and-resume).
+**Compound:** Implements session resume when `config.session.persistCompoundState` is true. See [Core reference — compound state](reference/core.md#compound-state-and-resume).
 
 ## InteractiveVideo
 
@@ -341,7 +341,7 @@ Video with timed interaction overlays.
 
 **Telemetry:** `video_cue_reached`, `video_segment_completed`
 
-**Compound:** Implements session resume when `config.session.persistCompoundState` is true. See [Core reference — compound state](core.md#compound-state-and-resume).
+**Compound:** Implements session resume when `config.session.persistCompoundState` is true. See [Core reference — compound state](reference/core.md#compound-state-and-resume).
 
 ## BranchNode
 
@@ -356,7 +356,7 @@ Graph node in a BranchingScenario with content and choices.
 
 **Telemetry:** `branch_node_viewed`
 
-**Compound:** Implements session resume when `config.session.persistCompoundState` is true. See [Core reference — compound state](core.md#compound-state-and-resume).
+**Compound:** Implements session resume when `config.session.persistCompoundState` is true. See [Core reference — compound state](reference/core.md#compound-state-and-resume).
 
 ## BranchChoice
 
@@ -371,7 +371,7 @@ Transition control linking to a target BranchNode.
 
 **Telemetry:** `branch_selected`
 
-**Compound:** Implements session resume when `config.session.persistCompoundState` is true. See [Core reference — compound state](core.md#compound-state-and-resume).
+**Compound:** Implements session resume when `config.session.persistCompoundState` is true. See [Core reference — compound state](reference/core.md#compound-state-and-resume).
 
 ## BranchingScenario
 
@@ -392,7 +392,7 @@ Graph-based branching narrative with scored paths.
 
 **Telemetry:** `branch_node_viewed`, `branch_selected`
 
-**Compound:** Implements session resume when `config.session.persistCompoundState` is true. See [Core reference — compound state](core.md#compound-state-and-resume).
+**Compound:** Implements session resume when `config.session.persistCompoundState` is true. See [Core reference — compound state](reference/core.md#compound-state-and-resume).
 
 ## Embed
 

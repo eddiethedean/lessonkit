@@ -42,7 +42,7 @@ Verify the parent exposes `window.parent.lxpackBridge.v1` in SCORM previews befo
 
 1. **Every assessment inside `<Lesson>`** — otherwise production shows an alert and skips telemetry/xAPI.
 2. **Align IDs** — `courseId`, `lessonId`, and `checkId` must match `lessonkit.json` for packaging. `lessonkit package` fails when React source and manifest IDs diverge.
-3. **Run export parity** — `npm run test:e2e` in the monorepo or package smoke in CI after changing assessments or `lessonkit.json`.
+3. **Run packaging smoke** — after changing assessments or `lessonkit.json`, run `npm run build && npx lessonkit package --target scorm12` in your course repo and import the zip into a staging LMS. Optionally add that command to your CI pipeline.
 
 ## Observability (required in production)
 

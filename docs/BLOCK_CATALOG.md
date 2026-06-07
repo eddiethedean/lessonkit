@@ -164,9 +164,7 @@ These LessonKit blocks are React implementations of common H5P **question** cont
 | `AssessmentSequence` | container | per child | P0 |
 | `Quiz` / `KnowledgeCheck` | assessment | required | existing (contract alignment) |
 
-**P0 acceptance (each block):** Storybook story, unit tests, catalog JSON entry, telemetry + xAPI mapping, `lessonkit.json` assessment mapping, export parity e2e.
-
-**Not in v2:** compound types (`InteractiveBook`, `SlideDeck`, …) — see [roadmap](../project/roadmap.md#h5p-aligned-capability-backlog).
+**Shipped block criteria:** catalog JSON entry, unit tests, telemetry mapping, export parity where applicable. Storybook coverage is expanding—see the [Component gallery](https://eddiethedean.github.io/lessonkit/storybook/).
 
 Import `@lessonkit/react/block-catalog.v2.json` or `buildBlockCatalog({ version: 2 })`. Use `{ version: 1 }` for legacy generators.
 

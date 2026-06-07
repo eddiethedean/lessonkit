@@ -203,15 +203,15 @@ Add `deck-tf` to `course.assessments[]` with `"kind": "trueFalse"`.
 
 ```tsx
 <BranchingScenario blockId="escalation" title="Handle the complaint" startNodeId="start">
-  <BranchNode id="start" title="First response">
+  <BranchNode nodeId="start" title="First response">
     <Text>How do you open the conversation?</Text>
-    <BranchChoice targetId="empathy" label="Acknowledge feelings" />
-    <BranchChoice targetId="deflect" label="Deflect blame" />
+    <BranchChoice targetNodeId="empathy" label="Acknowledge feelings" />
+    <BranchChoice targetNodeId="deflect" label="Deflect blame" />
   </BranchNode>
-  <BranchNode id="empathy" terminal>
+  <BranchNode nodeId="empathy" terminal>
     <Text>Good path - customer calms down.</Text>
   </BranchNode>
-  <BranchNode id="deflect" terminal>
+  <BranchNode nodeId="deflect" terminal>
     <Text>Escalation risk increases.</Text>
   </BranchNode>
 </BranchingScenario>

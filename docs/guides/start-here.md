@@ -38,7 +38,7 @@ Install optional [Library Skills](library-skills.md) for Cursor-compatible autho
 
 ## Common questions
 
-[FAQ](faq.md) · [React troubleshooting](react-developers/troubleshooting.md) · [Vibe coding troubleshooting](vibe-coding/troubleshooting.md)
+[FAQ](faq.md) · [Troubleshooting hub](troubleshooting.md)
 
 ## Full documentation map
 

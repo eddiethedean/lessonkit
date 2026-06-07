@@ -1,5 +1,7 @@
 # Troubleshooting (vibe coding)
 
+See the [troubleshooting hub](../troubleshooting.md) for a combined decision tree across React and vibe-coding paths.
+
 ## Quick decision tree
 
 | Symptom | Try this first | AI prompt |

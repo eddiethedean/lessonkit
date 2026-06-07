@@ -1,6 +1,6 @@
 # Troubleshooting (React developers)
 
-Common fixes for packaging, production builds, and LMS delivery. Vibe-coding users: see [vibe coding troubleshooting](../vibe-coding/troubleshooting.md). General questions: [FAQ](../faq.md).
+Common fixes for packaging, production builds, and LMS delivery. **Start at the [troubleshooting hub](../troubleshooting.md)** for a combined decision tree. Vibe-coding users: see [vibe coding troubleshooting](../vibe-coding/troubleshooting.md). General questions: [FAQ](../faq.md).
 
 ## Decision tree
 

@@ -38,9 +38,21 @@ npm test
 
 ### Faster loops
 
+**Docs-only changes:** run the canonical docs build (matches CI):
+
+```bash
+npm run build:packages
+npm run docs:api
+bash docs/scripts/verify-doc-includes.sh
+node docs/scripts/generate-block-props-doc.mjs
+cd docs && pip install -r requirements.txt && sphinx-build -W -b html . _build/html
+```
+
+Requires **Python 3.12+** and Node. Skip `build-docs-demos.sh` unless you changed example embeds.
+
 | Change type | Usually enough |
 | --- | --- |
-| `docs/` only (Markdown, Sphinx) | `npm run build:packages && npm run docs:api && bash docs/scripts/verify-doc-includes.sh && node docs/scripts/generate-block-props-doc.mjs && cd docs && pip install -r requirements.txt && sphinx-build -W -b html . _build/html` (requires **Python 3.12+** and Node) |
+| `docs/` only (Markdown, Sphinx) | Canonical docs build above |
 | Single package you edited | `npm run build -w @lessonkit/react` then `npm test -w @lessonkit/react` |
 | Examples after package API change | `npm run build:packages` then the example workspace `dev` / `test` |
 
@@ -75,7 +87,7 @@ If you add or change a workspace in the root `package.json`, run `npm install` a
 | `packages/react`, `packages/core`, examples | `npm test`, often `npm run test:e2e` |
 | `packages/cli`, `packages/lxpack`, templates | `npm run test:integration` |
 | New `@lessonkit/react` block | [Adding a framework block](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/adding-a-framework-block.html) checklist + `npm test -w @lessonkit/react` |
-| `docs/` (Sphinx) | `npm run build:packages && npm run docs:api && bash docs/scripts/verify-doc-includes.sh && node docs/scripts/generate-block-props-doc.mjs && cd docs && pip install -r requirements.txt && sphinx-build -W -b html . _build/html` |
+| `docs/` (Sphinx) | Canonical docs build (see [Faster loops](#faster-loops) above) |
 
 ## Full CI-equivalent checks
 
@@ -92,11 +104,11 @@ Before a wide refactor or release, run from the repo root:
 | Coverage | `npm run coverage` |
 | Storybook | `STORYBOOK_DISABLE_TELEMETRY=1 CI=true npm run build-storybook` |
 | Integration | `npm run test:integration` |
-| E2E | `npm exec -w @lessonkit/e2e -- playwright install chromium && npm run test:e2e` |
+| E2E | `npm exec -w @lessonkit/e2e -- playwright install --with-deps chromium && npm run test:e2e` |
 | Conformance | `npm run conformance:lxpack && npm run conformance:golden` |
 | Audit | `npm run audit:ci` |
 | API docs | `npm run docs:api` |
-| Sphinx docs | `cd docs && pip install -r requirements.txt && sphinx-build -W -b html . _build/html` |
+| Sphinx docs | Canonical docs build (see [Faster loops](#faster-loops) above) |
 
 ## Pull request expectations
 
@@ -112,12 +124,12 @@ When a GitHub Actions job fails, reproduce locally:
 | CI job | Common failure | Local repro |
 | --- | --- | --- |
 | **checks** | Lint, typecheck, unit tests | `npm run lint && npm run typecheck && npm test` |
-| **docs** | Broken link, missing include, Sphinx `-W` | `npm run build:packages && npm run docs:api && bash docs/scripts/verify-doc-includes.sh && node docs/scripts/generate-block-props-doc.mjs && cd docs && pip install -r requirements.txt && sphinx-build -W -b html . _build/html` |
-| **packaging** | CLI template drift | `npm run copy-template -w @lessonkit/cli && git diff --exit-code packages/cli/template/vite-react` |
+| **docs** | Broken link, missing include, Sphinx `-W` | Canonical docs build (see [Faster loops](#faster-loops) above) |
+| **packaging** | CLI template drift, SCORM smoke, library-skills validation | `npm run copy-template -w @lessonkit/cli && git diff --exit-code packages/cli/template/vite-react` · `npm run test:integration` · `npm run conformance:lxpack && npm run conformance:golden` |
 | **integration** | init → build → package | `npm run test:integration` |
 | **security-audit** | npm audit high/critical | `npm run audit:ci` |
 | **codeql** | Static analysis | Fix reported path in Security tab |
-| **e2e** (if run) | SCORM parity, Playwright | `npm exec -w @lessonkit/e2e -- playwright install chromium && npm run test:e2e` |
+| **e2e** | SCORM parity, Playwright | `npm exec -w @lessonkit/e2e -- playwright install --with-deps chromium && npm run test:e2e` |
 
 See [contributing to the monorepo — full CI-equivalent checks](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/contributing-to-the-monorepo.html#full-ci-equivalent-checks).
 

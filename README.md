@@ -123,9 +123,12 @@ Each project includes [`lessonkit.json`](https://lessonkit.readthedocs.io/en/lat
 
 ```bash
 npm install @lessonkit/react react react-dom
+npm install -D @lessonkit/cli @lessonkit/xapi
 ```
 
-Optional: `@lessonkit/xapi` (typed helpers), `@lessonkit/themes`, `@lessonkit/accessibility`, `@lessonkit/core` (headless APIs).
+You need `@lessonkit/cli` to run `lessonkit build` and `lessonkit package`. See the [quickstart for existing Vite apps](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/quickstart.html#add-to-an-existing-vite-react-app).
+
+Optional: `@lessonkit/themes`, `@lessonkit/accessibility`, `@lessonkit/core` (headless APIs).
 
 ### Guides
 
@@ -261,7 +264,7 @@ Full contributor setup (Playwright, scoped loops, CI checklist): [CONTRIBUTING.m
 
 | Change type | Usually enough |
 | --- | --- |
-| `docs/` only | `cd docs && pip install -r requirements.txt && sphinx-build -W -b html . _build/html` |
+| `docs/` only | See [CONTRIBUTING.md](CONTRIBUTING.md) — docs build requires `docs:api`, include verification, and block-props generation before Sphinx |
 | Single package | `npm run build -w @lessonkit/react` then `npm test -w @lessonkit/react` |
 | Examples after API change | `npm run build:packages` then `npm -w lessonkit-example-react-vite run dev` |
 | Release / wide refactor | `npm run build` (all packages + examples) |

@@ -58,9 +58,26 @@ Canonical mapper: `telemetryEventToXAPIStatement(event)` in `@lessonkit/xapi`.
 | `lesson_started` | initialized | `…:lesson:{lessonId}` |
 | `lesson_completed` | completed | `…:lesson:{lessonId}` (+ `result.duration` when `durationMs` set) |
 | `lesson_time_on_task` | *(none)* | Returns `null` — use `lesson_completed` for xAPI duration |
-| `quiz_answered` | answered | `…:check:{checkId}` |
+| `quiz_answered` | answered | `…:check:{checkId}` (+ `result.success` when `correct` set) |
 | `quiz_completed` | completed | `…:check:{checkId}` (+ score when provided) |
-| `interaction` | experienced | `…:block:{blockId}` only when `lessonId` and `data.blockId` are set |
+| `assessment_answered` | answered | `…:check:{checkId}` (+ `result.success` when `correct` set) |
+| `assessment_completed` | completed | `…:check:{checkId}` (+ score when provided) |
+| `interaction` | experienced | `…:block:{blockId}` when `lessonId` and `data.blockId` are set |
+| `book_page_viewed` | experienced | `…:block:{blockId}` |
+| `slide_viewed` | experienced | `…:block:{blockId}` |
+| `compound_page_viewed` | experienced | `…:block:{blockId}` |
+| `hotspot_opened` | experienced | `…:block:{blockId}` |
+| `accordion_section_toggled` | experienced | `…:block:{blockId}` |
+| `flashcard_flipped` | experienced | `…:block:{blockId}` |
+| `image_slider_changed` | experienced | `…:block:{blockId}` |
+| `video_cue_reached` | experienced | `…:block:{blockId}` |
+| `video_segment_completed` | completed | `…:block:{blockId}` |
+| `memory_card_flipped` | experienced | `…:block:{blockId}` |
+| `information_wall_search` | experienced | `…:block:{blockId}` |
+| `parallax_slide_viewed` | experienced | `…:block:{blockId}` |
+| `questionnaire_submitted` | completed | `…:block:{blockId}` |
+| `branch_node_viewed` | experienced | `…:block:{blockId}:node:{nodeId}` |
+| `branch_selected` | experienced | `…:block:{blockId}:node:{toNodeId}` |
 
 For block-level `interaction` events, set `blockId` on `Scenario` / `Reflection` and ensure an active `lessonId`. See [telemetry reference](telemetry.md) for the full event catalog.
 

@@ -1,6 +1,6 @@
 # Frequently asked questions
 
-Quick answers across onboarding, packaging, and adoption. Detailed runbooks: [React troubleshooting](react-developers/troubleshooting.md) · [Vibe coding troubleshooting](vibe-coding/troubleshooting.md).
+Quick answers across onboarding, packaging, and adoption. Detailed runbooks: [Troubleshooting hub](troubleshooting.md).
 
 ## What is LessonKit?
 

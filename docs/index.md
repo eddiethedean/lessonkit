@@ -47,7 +47,7 @@ Pick the path that matches how you work:
 :::{admonition} Coming from H5P?
 :class: tip
 
-You can map familiar H5P content types to LessonKit components. **`Quiz`** is H5P Multiple Choice; more types are on the roadmap with the same names where possible. Start with **[Coming from H5P?](guides/h5p-for-lessonkit-authors.md)** and the **[H5P capability map](project/h5p-capability-map.md)**.
+You can map familiar H5P content types to LessonKit components. LessonKit ships **40+ native React blocks** with H5P capability mappings. Start with **[Coming from H5P?](guides/h5p-for-lessonkit-authors.md)** and the **[H5P capability map](project/h5p-capability-map.md)**.
 :::
 
 :::{admonition} New to React?
@@ -90,7 +90,7 @@ guides/design-philosophy
 :::{admonition} Questions?
 :class: tip
 
-See the [FAQ](guides/faq.md) or [troubleshooting](guides/react-developers/troubleshooting.md).
+See the [FAQ](guides/faq.md) or [troubleshooting hub](guides/troubleshooting.md).
 :::
 
 ```{toctree}
@@ -98,7 +98,7 @@ See the [FAQ](guides/faq.md) or [troubleshooting](guides/react-developers/troubl
 :caption: FAQ and troubleshooting
 
 guides/faq
-guides/react-developers/troubleshooting
+guides/troubleshooting
 ```
 
 ```{toctree}
@@ -141,18 +141,15 @@ guides/react-developers/block-cookbook
 guides/react-developers/project-structure
 guides/react-developers/components-and-hooks
 guides/react-developers/telemetry-and-xapi
-guides/react-developers/production-checklist
 guides/react-developers/theming-and-accessibility
 guides/react-developers/packaging-and-cli
 guides/react-developers/deployment-guide
 guides/react-developers/lrs-operations
 guides/react-developers/multi-course-patterns
 guides/react-developers/performance
-guides/react-developers/export-parity
 guides/react-developers/plugin-cookbook
 guides/react-developers/contributing-to-the-monorepo
 guides/react-developers/adding-a-framework-block
-guides/react-developers/troubleshooting
 ```
 
 ```{toctree}
@@ -172,6 +169,7 @@ reference/xapi
 reference/theming
 reference/accessibility
 reference/block-catalog
+reference/storybook-gallery
 reference/plugins
 reference/lxpack-bridge
 reference/lxpack-upgrades
@@ -183,6 +181,8 @@ reference/lxpack-upgrades
 
 guides/enterprise-evaluation
 guides/architecture-overview
+guides/react-developers/production-checklist
+guides/react-developers/export-parity
 project/security
 project/accessibility-conformance
 ```

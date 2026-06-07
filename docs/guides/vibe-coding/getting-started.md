@@ -2,7 +2,7 @@
 
 ## 1. Install Node.js
 
-Download **Node.js 18 LTS or newer** from [nodejs.org](https://nodejs.org/) for dev, build, and SCORM export.
+Download **Node.js 20.19 or newer** from [nodejs.org](https://nodejs.org/) (required for `npx @lessonkit/cli init` with Vite 8).
 
 Check in a terminal:
 
@@ -11,7 +11,7 @@ node -v
 npm -v
 ```
 
-You should see `v18.x` or `v20.x`.
+`node -v` should show **v20.19+** (v22.x is fine). Node 18 may fail during scaffold—see [Prerequisites](../prerequisites.md).
 
 ## 2. Create a course project
 
