@@ -374,6 +374,7 @@ describe("writeLxpackProject", () => {
       descriptor: baseDescriptor,
       outDir,
       spaDistDir: dist,
+      projectRoot: root,
     });
 
     const yaml = await readFile(result.courseYamlPath, "utf-8");
@@ -397,6 +398,7 @@ describe("writeLxpackProject", () => {
         },
         outDir: join(root, "out"),
         lessonSpaDirs: {},
+        projectRoot: root,
       }),
     ).rejects.toThrow(/missing build output/);
   });
@@ -424,6 +426,7 @@ describe("writeLxpackProject", () => {
       },
       outDir,
       lessonSpaDirs: { a: lessonA, b: lessonB },
+      projectRoot: root,
     });
 
     expect(await readFile(join(outDir, "dist/lessons/a/index.html"), "utf-8")).toBe("a");
@@ -455,6 +458,7 @@ describe("writeLxpackProject errors", () => {
         descriptor: { ...baseDescriptor, courseId: "" } as typeof baseDescriptor,
         outDir: join(root, "out"),
         spaDistDir: join(root, "dist"),
+        projectRoot: root,
       }),
     ).rejects.toThrow(/courseId/);
   });
@@ -466,6 +470,7 @@ describe("writeLxpackProject errors", () => {
         descriptor: baseDescriptor,
         outDir: join(root, "out"),
         spaDistDir: join(root, "missing-dist"),
+        projectRoot: root,
       }),
     ).rejects.toThrow(/spaDistDir not found/);
   });
@@ -618,6 +623,7 @@ describe("writeLxpackProject with assessments", () => {
       descriptor: baseDescriptor,
       outDir,
       spaDistDir: dist,
+      projectRoot: root,
     });
 
     const courseYaml = await readFile(join(outDir, "course.yaml"), "utf-8");

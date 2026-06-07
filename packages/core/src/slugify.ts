@@ -15,9 +15,15 @@ function uniqueFallbackId(input: string, usedIds: ReadonlySet<string>): string {
     const validated = validateId(candidate);
     if (validated.ok && !usedIds.has(validated.id)) return validated.id;
   }
+  for (let attempt = 0; attempt < 100; attempt++) {
+    const randomSuffix = Math.random().toString(36).slice(2, 8);
+    const candidate = `id-${hash}-${randomSuffix}`.slice(0, 64);
+    const validated = validateId(candidate);
+    if (validated.ok && !usedIds.has(validated.id)) return validated.id;
+  }
   const timed = `id-${hash}-${Date.now().toString(36)}`.slice(0, 64);
   const validated = validateId(timed);
-  return validated.ok ? validated.id : `id-${hash}`;
+  return validated.ok && !usedIds.has(validated.id) ? validated.id : `id-${hash}`;
 }
 
 /** Convert human-readable text to a candidate LessonKit id (may still need collision handling via deriveId). */

@@ -134,7 +134,12 @@ describe("@lessonkit/react runtime modules", () => {
 
   it("telemetry: createTrackingClientFromConfig uses injected createClient", () => {
     const events: TelemetryEvent[] = [];
-    const injected: TrackingClient = { track: (e) => void events.push(e) };
+    const injected: TrackingClient = {
+      track: (e) => {
+        events.push(e);
+        return true;
+      },
+    };
     const client = createTrackingClientFromConfig({ tracking: { createClient: () => injected } });
     client.track({ name: "interaction", timestamp: "t", courseId: "c" });
     expect(events).toHaveLength(1);
@@ -154,7 +159,7 @@ describe("@lessonkit/react runtime modules", () => {
   it("telemetry: disposeTrackingClient calls flush+dispose when present", async () => {
     const flush = vi.fn();
     const dispose = vi.fn();
-    await disposeTrackingClient({ track: () => {}, flush, dispose });
+    await disposeTrackingClient({ track: () => true, flush, dispose });
     expect(flush).toHaveBeenCalledTimes(1);
     expect(dispose).toHaveBeenCalledTimes(1);
   });
@@ -204,7 +209,12 @@ describe("@lessonkit/react runtime modules", () => {
 
   it("telemetryPipeline: emitThroughPipeline invokes extra sinks", () => {
     const tracked: string[] = [];
-    const tracking = { track: (e: TelemetryEvent) => tracked.push(e.name) } as TrackingClient;
+    const tracking = {
+      track: (e: TelemetryEvent) => {
+        tracked.push(e.name);
+        return true;
+      },
+    } satisfies TrackingClient;
     emitThroughPipeline(
       {
         name: "course_started",

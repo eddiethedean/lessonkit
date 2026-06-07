@@ -71,7 +71,7 @@ function ImageSequencingInner(
     () =>
       buildAssessmentHandle({
         checkId,
-        getScore: () => (passed ? score : 0),
+        getScore: () => score,
         getMaxScore: () => maxScore,
         getAnswerGiven: () => order.length > 0,
         resetTask: reset,
@@ -81,7 +81,7 @@ function ImageSequencingInner(
           interactionType: INTERACTION,
           response: order,
           correct: passedThreshold,
-          score: passed ? score : 0,
+          score,
           maxScore,
         }),
         getCurrentState: () => ({ order, passed, checked }),

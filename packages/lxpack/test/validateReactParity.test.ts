@@ -198,4 +198,43 @@ describe("validateReactManifestParity", () => {
 
     expect(issues.some((i) => i.severity === "error")).toBe(true);
   });
+
+  it("rejects courseId only inside string literals", () => {
+    const root = mkdtempSync(join(tmpdir(), "lk-parity-"));
+    mkdirSync(join(root, "src"), { recursive: true });
+    writeFileSync(
+      join(root, "src/App.tsx"),
+      `const hint = 'courseId="my-course" checkId="quiz-1"'; export default () => <Course courseId="other" />;`,
+    );
+
+    const issues = validateReactManifestParity({
+      projectRoot: root,
+      descriptor: testDescriptor({
+        courseId: "my-course",
+        assessments: [{ checkId: "quiz-1", question: "Q", choices: ["a"], answer: "a" }],
+      }),
+    });
+
+    expect(issues.some((i) => i.path === "course.courseId" && i.severity === "error")).toBe(true);
+    expect(issues.some((i) => i.path === "assessments.checkId:quiz-1" && i.severity === "error")).toBe(
+      true,
+    );
+  });
+
+  it("ignores unsafe appSources paths", () => {
+    const root = mkdtempSync(join(tmpdir(), "lk-parity-"));
+    mkdirSync(join(root, "src"), { recursive: true });
+    writeFileSync(join(root, "src/App.tsx"), `<Course courseId="my-course" />`);
+
+    const issues = validateReactManifestParity({
+      projectRoot: root,
+      appSources: ["../escape/App.tsx", "src/App.tsx"],
+      descriptor: testDescriptor({
+        courseId: "my-course",
+        assessments: [],
+      }),
+    });
+
+    expect(issues.filter((i) => i.severity === "error")).toEqual([]);
+  });
 });

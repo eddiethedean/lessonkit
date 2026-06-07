@@ -19,6 +19,48 @@ export type DragAndDropProps = AssessmentBaseProps & {
 
 const INTERACTION: AssessmentInteractionType = "dragAndDrop";
 
+function normalizeDragAndDropState(
+  rawAssignments: unknown,
+  rawPool: unknown,
+  items: DragItem[],
+  targets: DropTarget[],
+): { assignments: Record<string, string>; pool: string[] } {
+  const itemIds = new Set(items.map((i) => i.id));
+  const targetIds = targets.map((t) => t.id);
+  const assignments = Object.fromEntries(targetIds.map((id) => [id, ""]));
+
+  if (rawAssignments && typeof rawAssignments === "object") {
+    for (const targetId of targetIds) {
+      const value = (rawAssignments as Record<string, unknown>)[targetId];
+      if (typeof value === "string" && (value === "" || itemIds.has(value))) {
+        assignments[targetId] = value;
+      }
+    }
+  }
+
+  const assigned = new Set(Object.values(assignments).filter(Boolean));
+  const pool: string[] = [];
+  const seen = new Set<string>();
+
+  if (Array.isArray(rawPool)) {
+    for (const id of rawPool) {
+      if (typeof id === "string" && itemIds.has(id) && !assigned.has(id) && !seen.has(id)) {
+        pool.push(id);
+        seen.add(id);
+      }
+    }
+  }
+
+  for (const item of items) {
+    if (!assigned.has(item.id) && !seen.has(item.id)) {
+      pool.push(item.id);
+      seen.add(item.id);
+    }
+  }
+
+  return { assignments, pool };
+}
+
 function DragAndDropInner(
   props: DragAndDropProps & { enclosingLessonId: LessonId },
   ref: React.Ref<AssessmentHandle>,
@@ -74,11 +116,14 @@ function DragAndDropInner(
       }),
       getCurrentState: () => ({ assignments, pool, passed, checked, keyboardItem }),
       resume: (state) => {
-        const rawAssignments = state.assignments;
-        if (rawAssignments && typeof rawAssignments === "object") {
-          setAssignments({ ...(rawAssignments as Record<string, string>) });
-        }
-        if (Array.isArray(state.pool)) setPool([...(state.pool as string[])]);
+        const normalized = normalizeDragAndDropState(
+          state.assignments,
+          state.pool,
+          props.items,
+          props.targets,
+        );
+        setAssignments(normalized.assignments);
+        setPool(normalized.pool);
         readBooleanStateField(state, "passed", (value) => {
           setPassed(value);
           completedRef.current = value;

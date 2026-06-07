@@ -243,4 +243,14 @@ describe("tryBuildTelemetryEvent", () => {
     });
     expect(event?.name).toBe("quiz_completed");
   });
+
+  it("returns null for any requiresLessonId event when lessonId is missing", () => {
+    expect(
+      tryBuildTelemetryEvent({
+        name: "lesson_started",
+        courseId: "c",
+        data: { lessonId: "l1" },
+      }),
+    ).toBeNull();
+  });
 });

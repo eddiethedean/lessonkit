@@ -1,4 +1,4 @@
-import React from "react";
+import React, { createRef } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import {
@@ -142,6 +142,60 @@ describe("Tier B/C/D block components", () => {
     fireEvent.click(screen.getByTestId("summary-statement-1"));
     fireEvent.click(screen.getByTestId("summary-check"));
     expect(screen.getByTestId("summary-feedback").textContent).toContain("Correct");
+  });
+
+  it("Summary getScore reflects live selection before check", () => {
+    const ref = createRef<import("@lessonkit/core").AssessmentHandle>();
+    render(
+      wrap(
+        <Summary
+          ref={ref}
+          checkId="summary-live-score"
+          statements={["First", "Second", "Noise"]}
+          correct={["First", "Second"]}
+        />,
+      ),
+    );
+    fireEvent.click(screen.getByTestId("summary-statement-0"));
+    fireEvent.click(screen.getByTestId("summary-statement-1"));
+    expect(ref.current?.getScore()).toBe(2);
+  });
+
+  it("ImageSequencing getScore reflects live order before check", () => {
+    const ref = createRef<import("@lessonkit/core").AssessmentHandle>();
+    render(
+      wrap(
+        <ImageSequencing
+          ref={ref}
+          checkId="seq-live"
+          images={[
+            { id: "step-1", src: "/1.png", alt: "Step 1" },
+            { id: "step-2", src: "/2.png", alt: "Step 2" },
+          ]}
+          correctOrder={["step-1", "step-2"]}
+        />,
+      ),
+    );
+    expect(ref.current?.getScore()).toBe(2);
+  });
+
+  it("ArithmeticQuiz getScore reflects live answers before check", () => {
+    const ref = createRef<import("@lessonkit/core").AssessmentHandle>();
+    render(
+      wrap(
+        <ArithmeticQuiz
+          ref={ref}
+          checkId="arith-live"
+          problems={[
+            { question: "1 + 1", answer: "2" },
+            { question: "2 + 2", answer: "4" },
+          ]}
+        />,
+      ),
+    );
+    fireEvent.change(screen.getByTestId("arithmetic-answer-0"), { target: { value: "2" } });
+    fireEvent.change(screen.getByTestId("arithmetic-answer-1"), { target: { value: "4" } });
+    expect(ref.current?.getScore()).toBe(2);
   });
 
   it("ImageSequencing validates correct order", () => {

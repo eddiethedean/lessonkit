@@ -150,10 +150,10 @@ describe("tryBuildTelemetryEvent", () => {
     vi.unstubAllEnvs();
   });
 
-  it("rethrows when buildTelemetryEvent throws for non-quiz events", () => {
-    expect(() =>
+  it("returns null when lesson-scoped events lack lessonId", () => {
+    expect(
       tryBuildTelemetryEvent({ name: "lesson_started", courseId: "c" }),
-    ).toThrow(/lessonId/);
+    ).toBeNull();
   });
 
   it("returns built events for valid quiz payloads", () => {

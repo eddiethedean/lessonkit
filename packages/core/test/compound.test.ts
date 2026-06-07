@@ -36,13 +36,14 @@ describe("compound resume state", () => {
     expect(clampCompoundPageIndex(1, 0)).toBe(0);
   });
 
-  it("drops invalid childStates entries", () => {
-    const parsed = parseCompoundResumeState({
-      schemaVersion: COMPOUND_RESUME_SCHEMA_VERSION,
-      activePageIndex: 0,
-      childStates: { valid: { a: 1 }, bad: null, alsoBad: "x" },
-    });
-    expect(parsed?.childStates).toEqual({ valid: { a: 1 } });
+  it("returns null when any childStates entry is invalid (strict mode)", () => {
+    expect(
+      parseCompoundResumeState({
+        schemaVersion: COMPOUND_RESUME_SCHEMA_VERSION,
+        activePageIndex: 0,
+        childStates: { valid: { a: 1 }, bad: null, alsoBad: "x" },
+      }),
+    ).toBeNull();
   });
 
   it("accepts one-level string maps in child states (drag/fill resume)", () => {
@@ -66,17 +67,18 @@ describe("compound resume state", () => {
     expect(parsed?.childStates).toEqual({ drag: dragState, fill: fillState });
   });
 
-  it("rejects child states with functions or deeply nested objects", () => {
-    const parsed = parseCompoundResumeState({
-      schemaVersion: COMPOUND_RESUME_SCHEMA_VERSION,
-      activePageIndex: 0,
-      childStates: {
-        ok: { answer: "a", picks: [1, 2] },
-        nested: { payload: { nested: { deep: true } } },
-        fn: { run: () => {} },
-      },
-    });
-    expect(parsed?.childStates).toEqual({ ok: { answer: "a", picks: [1, 2] } });
+  it("returns null when any child state has nested objects or functions", () => {
+    expect(
+      parseCompoundResumeState({
+        schemaVersion: COMPOUND_RESUME_SCHEMA_VERSION,
+        activePageIndex: 0,
+        childStates: {
+          ok: { answer: "a", picks: [1, 2] },
+          nested: { payload: { nested: { deep: true } } },
+          fn: { run: () => {} },
+        },
+      }),
+    ).toBeNull();
   });
 });
 

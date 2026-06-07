@@ -1,4 +1,4 @@
-import React, { forwardRef, useEffect, useMemo, useRef, useState } from "react";
+import React, { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { AssessmentBaseProps, AssessmentHandle, AssessmentInteractionType } from "@lessonkit/core";
 import type { LessonId } from "@lessonkit/core";
 import { AssessmentLessonGuard } from "../assessment/AssessmentLessonGuard";
@@ -37,8 +37,22 @@ function FillInTheBlanksInner(
   const checkId = useMemo(() => normalizeComponentId(props.checkId, "checkId"), [props.checkId]);
   const assessment = useAssessmentState(props.enclosingLessonId);
   const { config } = useLessonkit();
-  const parsed = useMemo(() => parseTemplate(props.template), [props.template]);
-  const blanks = props.blanks ?? parsed.blanks;
+  const { parts, blanks } = useMemo(() => {
+    const parsed = parseTemplate(props.template);
+    if (!props.blanks) {
+      return { parts: parsed.parts, blanks: parsed.blanks };
+    }
+    let blankIdx = 0;
+    const interleavedParts = parsed.parts.map((part) => {
+      if (part.startsWith("blank-")) {
+        const id = props.blanks![blankIdx]?.id;
+        blankIdx += 1;
+        return id ?? part;
+      }
+      return part;
+    });
+    return { parts: interleavedParts, blanks: props.blanks };
+  }, [props.template, props.blanks]);
   const [values, setValues] = useState<Record<string, string>>(() =>
     Object.fromEntries(blanks.map((b) => [b.id, ""])),
   );
@@ -157,9 +171,7 @@ function FillInTheBlanksInner(
     [allFilled, assessment, blanks, checkId, config.tracking?.replayResumeEvents, maxScore, passed, passedThreshold, props.passingScore, props.template, score, showSolutions, submitted, values],
   );
 
-  useAssessmentHandleRegistration(checkId, handle, ref);
-
-  const check = () => {
+  const check = useCallback(() => {
     if (!hasBlanks) {
       if (isDevEnvironment()) {
         console.warn("[lessonkit] FillInTheBlanks has no blanks in template");
@@ -174,12 +186,12 @@ function FillInTheBlanksInner(
     answeredRef.current = true;
     setSubmitted(true);
     assessment.answer({
-        checkId,
-        interactionType: INTERACTION,
-        question: props.template,
-        response: values,
-        correct: passedThreshold,
-      });
+      checkId,
+      interactionType: INTERACTION,
+      question: props.template,
+      response: values,
+      correct: passedThreshold,
+    });
     if (passedThreshold && !completedRef.current) {
       completedRef.current = true;
       setPassed(true);
@@ -191,7 +203,22 @@ function FillInTheBlanksInner(
         passingScore: props.passingScore ?? maxScore,
       });
     }
-  };
+  }, [
+    allFilled,
+    assessment,
+    blanks.length,
+    checkId,
+    hasBlanks,
+    maxScore,
+    passed,
+    passedThreshold,
+    props.passingScore,
+    props.template,
+    score,
+    values,
+  ]);
+
+  useAssessmentHandleRegistration(checkId, handle, ref);
 
   useEffect(() => {
     if (!allFilled) {
@@ -203,14 +230,14 @@ function FillInTheBlanksInner(
 
   useEffect(() => {
     if (props.autoCheck && allFilled && !passed) check();
-  }, [allFilled, props.autoCheck, values, passedThreshold, passed]);
+  }, [allFilled, check, passed, props.autoCheck]);
 
   const reveal = showSolutions || (passed && props.enableSolutionsButton);
 
   return (
     <section aria-label="Fill in the Blanks" data-lk-check-id={checkId}>
       <p>
-        {parsed.parts.map((part, i) => {
+        {parts.map((part, i) => {
           const blank = blanks.find((b) => b.id === part);
           if (!blank) return <React.Fragment key={i}>{part}</React.Fragment>;
           return (

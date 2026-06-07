@@ -21,8 +21,8 @@ export type WriteLxpackProjectOptions = {
    * For `per-lesson-spa`: map lesson id → absolute path to that lesson's built SPA folder.
    */
   lessonSpaDirs?: Record<string, string>;
-  /** When set, relative `spaDistDir` is resolved under this directory instead of `process.cwd()`. */
-  projectRoot?: string;
+  /** Project root used to resolve relative SPA paths and confine output directories. */
+  projectRoot: string;
 };
 
 export type WriteLxpackProjectResult = {
@@ -51,9 +51,7 @@ export async function writeLxpackProject(
   }
 
   const outDir = resolve(options.outDir);
-  if (options.projectRoot) {
-    assertRealPathUnderRoot(resolve(options.projectRoot), outDir);
-  }
+  assertRealPathUnderRoot(resolve(options.projectRoot), outDir);
   const spaDirs = await resolveSpaDirs({ ...options, descriptor });
   await assertSpaDistContentsSafe(spaDirs, options.projectRoot);
   const interchange = descriptorToInterchange(descriptor);

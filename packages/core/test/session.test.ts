@@ -74,6 +74,36 @@ describe("session", () => {
     expect(getTabSessionId(storage)).toBe("s1");
   });
 
+  it("resolveSessionId rejects invalid provided ids and falls back to stored id", () => {
+    const store: Record<string, string> = { [SESSION_STORAGE_KEY]: "tab-valid" };
+    const storage = {
+      getItem: (k: string) => store[k] ?? null,
+      setItem: (k: string, v: string) => {
+        store[k] = v;
+        return true;
+      },
+    };
+    expect(resolveSessionId(storage, "bad:id")).toBe("tab-valid");
+  });
+
+  it("course started marks use encoded session segments for invalid stored ids", () => {
+    const store: Record<string, string> = {};
+    const storage = {
+      getItem: (k: string) => store[k] ?? null,
+      setItem: (k: string, v: string) => {
+        store[k] = v;
+        return true;
+      },
+      removeItem: (k: string) => {
+        delete store[k];
+      },
+    };
+
+    markCourseStarted(storage, "bad:id", "c1");
+    expect(hasCourseStarted(storage, "bad:id", "c1")).toBe(true);
+    expect(store["lessonkit:course_started:bad%3Aid:c1"]).toBe("1");
+  });
+
   it("course started marks are scoped to courseId", () => {
     const store: Record<string, string> = {};
     const storage = {

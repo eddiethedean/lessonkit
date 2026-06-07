@@ -1,6 +1,7 @@
 import type { CourseId } from "./identityTypes";
 import { createSessionId } from "./ids";
 import type { StoragePort } from "./ports";
+import { validateId } from "./validateId";
 
 export const SESSION_STORAGE_KEY = "lessonkit:sessionId";
 
@@ -21,10 +22,19 @@ const COURSE_STARTED_PREFIX = "lessonkit:course_started:";
 const COURSE_STARTED_TRACKING_PREFIX = "lessonkit:course_started_tracking:";
 const COURSE_STARTED_PIPELINE_PREFIX = "lessonkit:course_started_pipeline:";
 
+/** Safe segment for composite storage keys (avoids colon ambiguity in sessionId). */
+function sessionKeySegment(sessionId: string): string {
+  const validated = validateId(sessionId);
+  return validated.ok ? validated.id : encodeURIComponent(sessionId);
+}
+
 export function resolveSessionId(storage: StoragePort, provided?: string): string {
   if (provided !== undefined) {
     const trimmed = provided.trim();
-    if (trimmed.length > 0) return trimmed;
+    if (trimmed.length > 0) {
+      const validated = validateId(trimmed);
+      if (validated.ok) return validated.id;
+    }
   }
   const existing = storage.getItem(SESSION_STORAGE_KEY);
   if (existing) return existing;
@@ -49,19 +59,19 @@ export function resolveSessionId(storage: StoragePort, provided?: string): strin
 
 function courseStartedStorageKey(sessionId: string, courseId?: CourseId): string {
   /* v8 ignore start -- callers guard undefined courseId before building keys */
-  return `${COURSE_STARTED_PREFIX}${sessionId}:${courseId ?? ""}`;
+  return `${COURSE_STARTED_PREFIX}${sessionKeySegment(sessionId)}:${courseId ?? ""}`;
   /* v8 ignore stop */
 }
 
 function courseStartedTrackingStorageKey(sessionId: string, courseId?: CourseId): string {
   /* v8 ignore start -- callers guard undefined courseId before building keys */
-  return `${COURSE_STARTED_TRACKING_PREFIX}${sessionId}:${courseId ?? ""}`;
+  return `${COURSE_STARTED_TRACKING_PREFIX}${sessionKeySegment(sessionId)}:${courseId ?? ""}`;
   /* v8 ignore stop */
 }
 
 function courseStartedPipelineStorageKey(sessionId: string, courseId?: CourseId): string {
   /* v8 ignore start -- callers guard undefined courseId before building keys */
-  return `${COURSE_STARTED_PIPELINE_PREFIX}${sessionId}:${courseId ?? ""}`;
+  return `${COURSE_STARTED_PIPELINE_PREFIX}${sessionKeySegment(sessionId)}:${courseId ?? ""}`;
   /* v8 ignore stop */
 }
 

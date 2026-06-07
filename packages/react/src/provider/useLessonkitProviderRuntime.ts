@@ -111,6 +111,7 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
   const headlessRef = useRef<HeadlessLessonkitRuntime | null>(null);
 
   const sessionIdRef = useRef<string>(resolveSessionId(defaultStorage, normalizedConfig.session?.sessionId));
+  const [sessionId, setSessionId] = useState(() => sessionIdRef.current);
   const prevConfiguredSessionIdRef = useRef<string | undefined>(normalizedConfig.session?.sessionId);
   if (normalizedConfig.session?.sessionId) {
     sessionIdRef.current = normalizedConfig.session.sessionId;
@@ -345,6 +346,43 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
     [],
   );
 
+  const emitCourseStartedOnce = useCallback(
+    async (sid: string, cid: CourseId) => {
+      if (courseStartedEmittedToSinkRef.current) return;
+
+      const generation = courseStartedEmitGenerationRef.current;
+      const shouldCommit = () => generation === courseStartedEmitGenerationRef.current;
+
+      /* v8 ignore start -- superseded course_started generation exits before emit */
+      if (generation !== courseStartedEmitGenerationRef.current) return;
+      /* v8 ignore stop */
+
+      const result = await emitPendingCourseStarted({
+        pluginHost: pluginHostRef.current,
+        tracking: () => trackingRef.current,
+        xapi: xapiRef.current,
+        storage: defaultStorage,
+        sessionId: sid,
+        courseId: cid,
+        attemptId: attemptIdRef.current,
+        user: userRef.current,
+        lxpackBridge: lxpackBridgeModeRef.current,
+        onLxpackBridgeMiss,
+        extraSinks: extraSinksRef.current,
+        skipXapi:
+          xapiCourseStartedSentOnClientRef.current || xapiBootstrapSendRef.current,
+        onXapiStatementSent: () => {
+          xapiCourseStartedSentOnClientRef.current = true;
+        },
+        shouldCommit,
+      });
+
+      if (generation !== courseStartedEmitGenerationRef.current) return;
+      courseStartedEmittedToSinkRef.current = isCourseStartedSinkSettled(result);
+    },
+    [onLxpackBridgeMiss],
+  );
+
   useIsoLayoutEffect(() => {
     const prev = trackingRef.current;
     const baseSink = wrapTrackingSink(normalizedConfig.tracking?.sink, observabilityRef.current);
@@ -402,42 +440,11 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
     } else if (courseStartedFullySettled) {
       courseStartedEmittedToSinkRef.current = true;
     } else if (!courseStartedEmittedToSinkRef.current) {
-      const generation = courseStartedEmitGenerationRef.current;
-      const shouldCommit = () => generation === courseStartedEmitGenerationRef.current;
-      void (async () => {
-        /* v8 ignore start -- superseded course_started generation exits before emit */
-        if (generation !== courseStartedEmitGenerationRef.current) return;
-        /* v8 ignore stop */
-        const result = await emitPendingCourseStarted({
-          pluginHost: pluginHostRef.current,
-          tracking: () => trackingRef.current,
-          xapi: xapiRef.current,
-          storage: defaultStorage,
-          sessionId,
-          courseId: cid,
-          attemptId: attemptIdRef.current,
-          user: userRef.current,
-          lxpackBridge: lxpackBridgeModeRef.current,
-          onLxpackBridgeMiss,
-          extraSinks: extraSinksRef.current,
-          skipXapi:
-            xapiCourseStartedSentOnClientRef.current || xapiBootstrapSendRef.current,
-          onXapiStatementSent: () => {
-            xapiCourseStartedSentOnClientRef.current = true;
-          },
-          shouldCommit,
-        });
-        if (generation !== courseStartedEmitGenerationRef.current) return;
-        courseStartedEmittedToSinkRef.current = isCourseStartedSinkSettled(result);
-      })();
+      void emitCourseStartedOnce(sessionId, cid);
     }
 
     return () => {
-      /* v8 ignore start -- tracking client unchanged between layout passes */
-      if (prev !== trackingRef.current) {
-        void disposeTrackingClient(prev);
-      }
-      /* v8 ignore stop */
+      void disposeTrackingClient(prev);
     };
   }, [
     trackingEnabled,
@@ -449,6 +456,7 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
     normalizedConfig.plugins,
     normalizedCourseId,
     buildCurrentPluginCtx,
+    emitCourseStartedOnce,
   ]);
 
   const emitWithBridge = useCallback((trackingClient: TrackingClient, event: TelemetryEvent) => {
@@ -530,34 +538,10 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
       }
 
       /* v8 ignore start -- backup emit when tracking effect did not mark course_started */
-      if (!courseStartedEmittedToSinkRef.current) {
-        const generation = courseStartedEmitGenerationRef.current;
-        const shouldCommit = () => generation === courseStartedEmitGenerationRef.current;
-        const result = await emitPendingCourseStarted({
-          pluginHost: pluginHostRef.current,
-          tracking: () => trackingRef.current,
-          xapi: xapiRef.current,
-          storage: defaultStorage,
-          sessionId,
-          courseId: cid,
-          attemptId: attemptIdRef.current,
-          user: userRef.current,
-          lxpackBridge: lxpackBridgeModeRef.current,
-          onLxpackBridgeMiss,
-          extraSinks: extraSinksRef.current,
-          skipXapi:
-            xapiCourseStartedSentOnClientRef.current || xapiBootstrapSendRef.current,
-          onXapiStatementSent: () => {
-            xapiCourseStartedSentOnClientRef.current = true;
-          },
-          shouldCommit,
-        });
-        if (generation !== courseStartedEmitGenerationRef.current) return;
-        courseStartedEmittedToSinkRef.current = isCourseStartedSinkSettled(result);
-      }
+      await emitCourseStartedOnce(sessionId, cid);
       /* v8 ignore stop */
     })();
-  }, [normalizedCourseId, normalizedConfig.tracking?.enabled, syncProgress, onLxpackBridgeMiss]);
+  }, [normalizedCourseId, normalizedConfig.tracking?.enabled, syncProgress, emitCourseStartedOnce]);
 
   const emitLessonCompleted = useCallback(
     (lessonId: LessonId, durationMs?: number) => {
@@ -758,14 +742,22 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
         /* v8 ignore stop */
       }
       sessionIdRef.current = nextConfigured;
+      setSessionId(nextConfigured);
     /* v8 ignore start -- initial mount has no configured session id to migrate from */
     } else if (prevConfigured) {
       const nextAuto = resolveSessionId(defaultStorage, undefined);
       migrateCourseStartedMark(defaultStorage, prevConfigured, nextAuto, cid);
       sessionIdRef.current = nextAuto;
+      setSessionId(nextAuto);
     }
     /* v8 ignore stop */
   }, [sessionConfiguredId, normalizedCourseId]);
+
+  useLayoutEffect(() => {
+    if (sessionIdRef.current !== sessionId) {
+      setSessionId(sessionIdRef.current);
+    }
+  }, [sessionConfiguredId, sessionId]);
 
   const runtime = useMemo<LessonkitRuntime>(
     () => ({
@@ -773,7 +765,7 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
       tracking,
       xapi,
       storage: defaultStorage,
-      session: { sessionId: sessionIdRef.current, attemptId: attemptIdRef.current, user: userRef.current },
+      session: { sessionId, attemptId: attemptIdRef.current, user: userRef.current },
       progress,
       setActiveLesson,
       completeLesson,
@@ -794,6 +786,7 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
       sessionUser,
       sessionAttemptId,
       sessionConfiguredId,
+      sessionId,
     ],
   );
 

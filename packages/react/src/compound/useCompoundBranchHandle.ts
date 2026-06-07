@@ -15,6 +15,7 @@ export function useCompoundBranchHandle(
     visitedNodeIndices: ReadonlySet<number>;
     choiceScores: Record<string, number>;
     meta: BranchingScenarioMeta;
+    maxChoiceScore?: number;
     onResetMeta: () => void;
     enableSolutionsButton?: boolean;
   },
@@ -26,6 +27,7 @@ export function useCompoundBranchHandle(
     visitedNodeIndices,
     choiceScores,
     meta,
+    maxChoiceScore = 0,
     onResetMeta,
     enableSolutionsButton,
   } = opts;
@@ -52,7 +54,7 @@ export function useCompoundBranchHandle(
       },
       getMaxScore: () => {
         const assessment = aggregateAssessmentScores(filterVisited(getRegisteredHandles().values()));
-        return assessment.maxScore;
+        return assessment.maxScore + maxChoiceScore;
       },
       getAnswerGiven: () =>
         aggregateAssessmentScores(filterVisited(getRegisteredHandles().values())).allAnswered,
@@ -94,6 +96,7 @@ export function useCompoundBranchHandle(
       filterVisited,
       getRegisteredHandles,
       meta,
+      maxChoiceScore,
       onResetMeta,
       visitedNodeIndices,
     ],

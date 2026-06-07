@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { createProgressController } from "../src/progress";
 
 describe("createProgressController", () => {
@@ -39,5 +39,17 @@ describe("createProgressController", () => {
     progress.completeCourse();
     expect(progress.getState().activeLessonId).toBeUndefined();
     expect(progress.getState().courseCompleted).toBe(true);
+  });
+
+  it("warns in dev when completing a lesson that was never activated", () => {
+    vi.stubEnv("NODE_ENV", "development");
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const progress = createProgressController();
+    progress.completeLesson("orphan", 100);
+    expect(warn).toHaveBeenCalledWith(
+      expect.stringContaining('completeLesson("orphan") called without activating'),
+    );
+    vi.unstubAllEnvs();
+    warn.mockRestore();
   });
 });

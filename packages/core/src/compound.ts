@@ -76,13 +76,17 @@ export function parseCompoundResumeState(raw: unknown): CompoundResumeState | nu
   if (obj.schemaVersion !== COMPOUND_RESUME_SCHEMA_VERSION) return null;
   if (typeof obj.activePageIndex !== "number" || !Number.isFinite(obj.activePageIndex)) return null;
   const childStates: Record<string, AssessmentResumeState> = {};
+  let droppedChildState = false;
   if (obj.childStates && typeof obj.childStates === "object" && !Array.isArray(obj.childStates)) {
     for (const [key, value] of Object.entries(obj.childStates as Record<string, unknown>)) {
       if (isPlainSerializableChildState(value)) {
         childStates[key] = value;
+      } else {
+        droppedChildState = true;
       }
     }
   }
+  if (droppedChildState) return null;
   const activeChapterIndex =
     typeof obj.activeChapterIndex === "number" && Number.isFinite(obj.activeChapterIndex)
       ? obj.activeChapterIndex

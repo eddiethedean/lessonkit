@@ -6,6 +6,13 @@ const BLOCKED_SANDBOX_TOKENS = new Set([
   "allow-popups-to-escape-sandbox",
 ]);
 
+/**
+ * Sandbox tokens authors may opt into via the Embed `allow` prop.
+ * `allow-popups` lets embedded content open new browsing contexts; keep
+ * `allow-popups-to-escape-sandbox` blocked. In production, Embed strips
+ * `allow-popups` by default unless `config.embed.restrictPopupsInProduction`
+ * is set to `false`.
+ */
 const ALLOWED_SANDBOX_TOKENS = new Set([
   "allow-forms",
   "allow-popups",
@@ -16,10 +23,12 @@ const DEFAULT_SANDBOX = "allow-scripts";
 
 function isProductionEmbedBuild(): boolean {
   try {
-    return (import.meta as { env?: { PROD?: boolean } }).env?.PROD === true;
+    if ((import.meta as { env?: { PROD?: boolean } }).env?.PROD === true) return true;
   } catch {
-    return false;
+    // ignore
   }
+  const g = globalThis as typeof globalThis & { process?: { env?: { NODE_ENV?: string } } };
+  return typeof g.process !== "undefined" && g.process.env?.NODE_ENV === "production";
 }
 
 function allowedEmbedSchemes(): Set<string> {
@@ -46,7 +55,12 @@ export function resolveEmbedSrc(src: string): string | null {
   }
 }
 
-export function buildEmbedSandbox(allow?: string): string {
+export type EmbedSandboxOptions = {
+  /** Strip `allow-popups` in production builds (default true). */
+  restrictPopupsInProduction?: boolean;
+};
+
+export function buildEmbedSandbox(allow?: string, options?: EmbedSandboxOptions): string {
   const tokens = new Set<string>([DEFAULT_SANDBOX]);
   if (allow) {
     for (const raw of allow.split(/\s+/)) {
@@ -54,6 +68,9 @@ export function buildEmbedSandbox(allow?: string): string {
       if (!token || BLOCKED_SANDBOX_TOKENS.has(token)) continue;
       if (ALLOWED_SANDBOX_TOKENS.has(token)) tokens.add(token);
     }
+  }
+  if (options?.restrictPopupsInProduction !== false && isProductionEmbedBuild()) {
+    tokens.delete("allow-popups");
   }
   return [...tokens].join(" ");
 }

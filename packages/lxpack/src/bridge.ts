@@ -92,21 +92,27 @@ function isDevEnvironment(): boolean {
   return typeof g.process !== "undefined" && g.process.env?.NODE_ENV !== "production";
 }
 
+function handleBridgeError(err: unknown, onBridgeError?: (err: unknown) => void): void {
+  onBridgeError?.(err);
+  if (isDevEnvironment()) {
+    console.warn(
+      "[lessonkit/lxpack] lxpack bridge action failed:",
+      err instanceof Error ? err.message : err,
+    );
+  }
+}
+
 /** Apply a mapped bridge action to an LXPack bridge instance. */
 export function dispatchBridgeAction(
   bridge: LxpackBridgeV1,
   action: ReturnType<typeof mapLessonkitTelemetryToBridgeAction>,
+  opts?: { onBridgeError?: (err: unknown) => void },
 ): void {
   if (!action) return;
   try {
     dispatchBridgeActionInner(bridge, action);
   } catch (err) {
-    if (isDevEnvironment()) {
-      console.warn(
-        "[lessonkit/lxpack] lxpack bridge action failed:",
-        err instanceof Error ? err.message : err,
-      );
-    }
+    handleBridgeError(err, opts?.onBridgeError);
   }
 }
 
@@ -169,27 +175,36 @@ function forwardAssessmentCompletedToBridge(
   });
 }
 
+export type ForwardTelemetryToBridgeOptions = {
+  onBridgeError?: (err: unknown) => void;
+};
+
 export function forwardTelemetryToBridge(
   event: TelemetryEvent,
   mode: LxpackBridgeMode = "auto",
   parentWindow?: Window,
+  opts?: ForwardTelemetryToBridgeOptions,
 ): void {
   if (mode === "off") return;
   const bridge = getBridge(parentWindow);
   if (!bridge) return;
-  if (event.name === "assessment_completed") {
-    forwardAssessmentCompletedToBridge(bridge, event);
-    return;
+  try {
+    if (event.name === "assessment_completed") {
+      forwardAssessmentCompletedToBridge(bridge, event);
+      return;
+    }
+    const branchTrack = branchTelemetryToBridgeTrackEvent(event);
+    if (branchTrack) {
+      bridge.track?.(branchTrack);
+      return;
+    }
+    const lessonkitEvent = telemetryEventToLessonkit(event);
+    if (!lessonkitEvent) return;
+    const action = mapLessonkitTelemetryToBridgeAction(lessonkitEvent);
+    dispatchBridgeActionInner(bridge, action);
+  } catch (err) {
+    handleBridgeError(err, opts?.onBridgeError);
   }
-  const branchTrack = branchTelemetryToBridgeTrackEvent(event);
-  if (branchTrack) {
-    bridge.track?.(branchTrack);
-    return;
-  }
-  const lessonkitEvent = telemetryEventToLessonkit(event);
-  if (!lessonkitEvent) return;
-  const action = mapLessonkitTelemetryToBridgeAction(lessonkitEvent);
-  dispatchBridgeAction(bridge, action);
 }
 
 export function createLxpackBridge(): LxpackBridgeV1 | null {

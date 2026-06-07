@@ -21,6 +21,7 @@ export type PackageOptions = {
   noBuild?: boolean;
   out?: string;
   json?: boolean;
+  strictParity?: boolean;
 };
 
 export async function runPackage(opts: PackageOptions): Promise<CliJsonResult> {
@@ -89,6 +90,7 @@ export async function runPackage(opts: PackageOptions): Promise<CliJsonResult> {
     output,
     dir,
     outputBaseDir,
+    strictParity: opts.strictParity,
   });
 
   if (!result.ok) {

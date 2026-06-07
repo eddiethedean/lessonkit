@@ -22,10 +22,12 @@ export type EmbedProps = {
 
 export function Embed(props: EmbedProps) {
   const blockId = normalizeComponentId(props.blockId, "blockId") as BlockId;
-  const { track } = useLessonkit();
+  const { config, track } = useLessonkit();
   const lessonId = useEnclosingLessonId();
   const resolvedSrc = resolveEmbedSrc(props.src);
-  const sandbox = buildEmbedSandbox(props.allow);
+  const sandbox = buildEmbedSandbox(props.allow, {
+    restrictPopupsInProduction: config.embed?.restrictPopupsInProduction ?? true,
+  });
   const aspectRatio = resolveEmbedAspectRatio(props.aspectRatio);
 
   useEffect(() => {

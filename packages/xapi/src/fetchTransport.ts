@@ -150,16 +150,14 @@ export function createFetchTransport(opts: CreateFetchTransportOptions): FetchTr
     }
   };
 
-  const exitTransport = (statement: XAPIStatement): void => {
-    try {
-      void postStatement(opts.url, statement, {
-        ...opts.init,
-        headers: resolveHeaders(opts.headers),
-        keepalive: true,
-      }).catch(() => undefined);
-    } catch {
-      // ignore — page is unloading
-    }
+  const exitTransport = (statement: XAPIStatement): Promise<void> => {
+    return postStatement(opts.url, statement, {
+      ...opts.init,
+      headers: resolveHeaders(opts.headers),
+      keepalive: true,
+    }).catch(() => {
+      throw new Error("xAPI keepalive delivery failed");
+    });
   };
 
   const abortInFlight = (statementId: string): void => {

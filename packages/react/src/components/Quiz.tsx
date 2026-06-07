@@ -134,8 +134,8 @@ function QuizInner(
             setQuizPassed(nextPassed);
             completedRef.current = nextPassed;
             if (nextPassed && config.tracking?.replayResumeEvents === true) {
-              const maxScore = nextCompletedMaxScore ?? completedMaxScore ?? 1;
-              const score = nextCompletedScore ?? completedScore ?? maxScore;
+              const maxScore = nextCompletedMaxScore ?? 1;
+              const score = nextCompletedScore ?? (nextPassed ? maxScore : 0);
               replayTelemetry(
                 nextSelected ?? null,
                 nextCorrect ?? null,
@@ -194,6 +194,18 @@ function QuizInner(
                   setQuizPassed(true);
                   const maxScore = custom?.maxScore ?? 1;
                   const score = custom?.score ?? maxScore;
+                  setCompletedScore(score);
+                  setCompletedMaxScore(maxScore);
+                  quiz.complete({
+                    checkId,
+                    score,
+                    maxScore,
+                    passingScore: props.passingScore ?? maxScore,
+                  });
+                } else if (!correct && props.enableRetry === false && !completedRef.current) {
+                  completedRef.current = true;
+                  const maxScore = custom?.maxScore ?? 1;
+                  const score = custom?.score ?? 0;
                   setCompletedScore(score);
                   setCompletedMaxScore(maxScore);
                   quiz.complete({

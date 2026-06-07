@@ -97,6 +97,35 @@ describe("createLessonkitRuntime", () => {
     expect(events.filter((e) => e === "lesson_completed").length).toBe(1);
   });
 
+  it("setActiveLesson skips auto-complete when autoCompleteOnLessonSwitch is false", () => {
+    const events: string[] = [];
+    const runtime = createLessonkitRuntime({ courseId: "c", autoCompleteOnLessonSwitch: false });
+    runtime.setActiveLesson("lesson-1", (name) => events.push(name));
+    runtime.setActiveLesson("lesson-2", (name) => events.push(name));
+    expect(events.filter((e) => e === "lesson_completed").length).toBe(0);
+    expect(events.filter((e) => e === "lesson_started").length).toBe(2);
+  });
+
+  it("resetForCourseChange disposes and re-runs plugin setup", () => {
+    const log: string[] = [];
+    const plugin = defineLifecyclePlugin({
+      id: "lifecycle-reset",
+      version: "1",
+      kind: "analytics",
+      setup: () => {
+        log.push("setup");
+      },
+      dispose: () => {
+        log.push("dispose");
+      },
+    });
+    const runtime = createLessonkitRuntime({ courseId: "c", plugins: [plugin] });
+    expect(log).toEqual(["setup"]);
+    runtime.resetForCourseChange("c2");
+    expect(log).toEqual(["setup", "dispose", "setup"]);
+    expect(runtime.config.courseId).toBe("c2");
+  });
+
   it("setActiveLesson completes in-progress lesson when navigating to a completed lesson", () => {
     const events: string[] = [];
     const runtime = createLessonkitRuntime({ courseId: "c" });

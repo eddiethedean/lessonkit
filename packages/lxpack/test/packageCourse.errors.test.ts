@@ -118,7 +118,7 @@ describe("packageLessonkitCourse errors", () => {
       spaDistDir: dist,
       target: "scorm12",
       output: "../../../evil.zip",
-    });
+    } as unknown as Parameters<typeof packageLessonkitCourse>[0]);
 
     expect(result.ok).toBe(false);
     if (!result.ok) {
@@ -309,6 +309,7 @@ describe("packageLessonkitCourse errors", () => {
     expect(result.ok).toBe(false);
     if (!result.ok) {
       expect(result.issues.some((i) => i.path === "outputPath")).toBe(true);
+      expect(result.validation?.ok).toBe(false);
     }
   });
 
@@ -408,5 +409,32 @@ describe("packageLessonkitCourse errors", () => {
 
     expect(result.ok).toBe(false);
     if (!result.ok) expect(result.issues[0]?.message).toContain("build failed");
+  });
+
+  it("returns ok false for parity warnings when strictParity is enabled", async () => {
+    const parityModule = await import("../src/validateReactParity");
+    vi.spyOn(parityModule, "validateReactManifestParity").mockReturnValueOnce([
+      { path: "src/", message: "optional warning", severity: "warning" },
+    ]);
+
+    const root = await makeTempDir();
+    const dist = join(root, "dist");
+    await mkdir(dist, { recursive: true });
+    await writeFile(join(dist, "index.html"), "<html></html>", "utf-8");
+    await writeMinimalParitySource(root, descriptor);
+
+    const result = await packageLessonkitCourse({
+      descriptor,
+      outDir: join(root, "course"),
+      spaDistDir: dist,
+      projectRoot: root,
+      target: "scorm12",
+      strictParity: true,
+    });
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.issues.some((i) => i.severity === "warning")).toBe(true);
+    }
   });
 });

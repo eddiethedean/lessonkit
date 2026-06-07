@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import {
   buildEmbedSandbox,
   resolveEmbedAspectRatio,
@@ -33,6 +33,17 @@ describe("embedSecurity", () => {
     expect(buildEmbedSandbox("allow-popups allow-popups-to-escape-sandbox")).toBe(
       "allow-scripts allow-popups",
     );
+  });
+
+  it("strips allow-popups in production when restricted", () => {
+    vi.stubEnv("NODE_ENV", "production");
+    expect(buildEmbedSandbox("allow-popups", { restrictPopupsInProduction: true })).toBe(
+      "allow-scripts",
+    );
+    expect(buildEmbedSandbox("allow-popups", { restrictPopupsInProduction: false })).toBe(
+      "allow-scripts allow-popups",
+    );
+    vi.unstubAllEnvs();
   });
 
   it("rejects invalid aspect ratio denominators", () => {

@@ -33,6 +33,31 @@ describe("production validation", () => {
     vi.unstubAllEnvs();
   });
 
+  it("throws when start node has no choices in multi-node scenario", () => {
+    vi.stubEnv("NODE_ENV", "production");
+    const nodes = [
+      <BranchNode key="start" nodeId="start" title="Start">
+        <p>Intro</p>
+      </BranchNode>,
+      <BranchNode key="next" nodeId="next" title="Next">
+        <p>Done</p>
+      </BranchNode>,
+    ] as React.ReactElement<BranchNodeProps>[];
+    expect(() => validateBranchGraphAtMount("start", nodes)).toThrow(/has no BranchChoice children/);
+    vi.unstubAllEnvs();
+  });
+
+  it("allows single-node scenario with no choices", () => {
+    vi.stubEnv("NODE_ENV", "production");
+    const nodes = [
+      <BranchNode key="start" nodeId="start" title="Start">
+        <p>Only node</p>
+      </BranchNode>,
+    ] as React.ReactElement<BranchNodeProps>[];
+    expect(() => validateBranchGraphAtMount("start", nodes)).not.toThrow();
+    vi.unstubAllEnvs();
+  });
+
   it("throws on disallowed nested BranchingScenario in production", () => {
     vi.stubEnv("NODE_ENV", "production");
     expect(() =>

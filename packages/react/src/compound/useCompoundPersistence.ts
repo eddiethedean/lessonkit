@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useEffect, useRef } from "react";
+import React, { useCallback, useContext, useEffect, useLayoutEffect, useRef } from "react";
 import type { AssessmentResumeState, BlockId, CheckId, CompoundResumeState, CourseId, StoragePort } from "@lessonkit/core";
 import {
   clampCompoundPageIndex,
@@ -8,6 +8,11 @@ import {
 } from "@lessonkit/core";
 import { useCompoundHydrationBridgeRef } from "./CompoundHydrationBridge";
 import { useCompoundHandlesVersion, useCompoundRegistry } from "./CompoundProvider";
+import {
+  clearCompoundHydrated,
+  compoundHydrationKey,
+  markCompoundHydrated,
+} from "./compoundHydration";
 import { filterRegisteredChildStates, registerablePendingKeys, resumeChildHandles } from "./resumeChildHandles";
 import { useCompoundResume } from "./useCompoundResume";
 import { LessonkitContext } from "../context";
@@ -61,33 +66,19 @@ export function useCompoundPersistence(opts: {
   const loadedChildStatesRef = useRef<Record<string, AssessmentResumeState>>({});
   const skipSaveUntilHydratedRef = useRef(false);
   const hydrationKeyRef = useRef("");
-  const hydrationInitRef = useRef(false);
   const hydrationRetryRef = useRef(0);
 
   const hydrationKey = `${opts.courseId ?? ""}:${opts.compoundId}`;
   if (hydrationKeyRef.current !== hydrationKey) {
+    if (hydrationKeyRef.current) {
+      clearCompoundHydrated(hydrationKeyRef.current);
+    }
     hydrationKeyRef.current = hydrationKey;
-    hydrationInitRef.current = false;
     loadedChildStatesRef.current = {};
     skipSaveUntilHydratedRef.current = false;
     pendingChildResumeRef.current = null;
     resumedChildKeysRef.current = new Set();
     hydrationRetryRef.current = 0;
-  }
-
-  if (!hydrationInitRef.current && opts.enabled && opts.courseId) {
-    hydrationInitRef.current = true;
-    const saved = loadCompoundState(storage, opts.courseId, opts.compoundId);
-    if (saved) {
-      if (Object.keys(saved.childStates).length > 0) {
-        loadedChildStatesRef.current = { ...saved.childStates };
-        skipSaveUntilHydratedRef.current = true;
-        pendingChildResumeRef.current = saved;
-      }
-      const clamped = clampCompoundPageIndex(saved.activePageIndex, opts.pageCount);
-      opts.onCompoundResume?.({ ...saved, activePageIndex: clamped });
-      opts.setIndex(clamped);
-    }
   }
 
   const buildState = useCallback((): CompoundResumeState => {
@@ -169,6 +160,22 @@ export function useCompoundPersistence(opts: {
   }, [ctx, finalizeHydration]);
 
   applyPendingChildResumeRef.current = applyPendingChildResume;
+
+  useLayoutEffect(() => {
+    if (!opts.enabled || !opts.courseId) return;
+    markCompoundHydrated(compoundHydrationKey(opts.courseId, opts.compoundId));
+    const saved = loadCompoundState(storage, opts.courseId, opts.compoundId);
+    if (!saved) return;
+    if (Object.keys(saved.childStates).length > 0) {
+      loadedChildStatesRef.current = { ...saved.childStates };
+      skipSaveUntilHydratedRef.current = true;
+      pendingChildResumeRef.current = saved;
+    }
+    const clamped = clampCompoundPageIndex(saved.activePageIndex, opts.pageCount);
+    onCompoundResumeRef.current?.({ ...saved, activePageIndex: clamped });
+    opts.setIndex(clamped);
+    queueMicrotask(() => applyPendingChildResumeRef.current());
+  }, [hydrationKey, opts.courseId, opts.compoundId, opts.enabled, opts.pageCount, storage]);
 
   const saveResume = useCompoundResume({
     courseId: opts.courseId,

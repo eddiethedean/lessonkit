@@ -9,12 +9,24 @@ import {
 } from "@lessonkit/core";
 import { filterRegisteredChildStates, registerablePendingKeys, resumeChildHandles } from "../src/compound/resumeChildHandles";
 import { BS_META_KEY } from "../src/compound/useCompoundBranchShell";
-import { useCompoundResume } from "../src/compound/useCompoundResume";
+import {
+  markCompoundHydrated,
+  resetCompoundHydrationKeys,
+} from "../src/compound/compoundHydration";
+import { useCompoundResume, resetCompoundPersistFailureWarnings } from "../src/compound/useCompoundResume";
 import { readCompoundInitialIndex } from "../src/compound/useCompoundPersistence";
+import { shouldReplayResumeTelemetry } from "../src/assessment/shouldReplayResumeTelemetry";
+import {
+  IV_META_KEY,
+  mergeVideoMetaIntoState,
+  readInteractiveVideoMeta,
+} from "../src/compound/useCompoundVideoShell";
 import { createSessionStoragePort } from "../src/runtime/ports";
 
 afterEach(() => {
   cleanup();
+  resetCompoundHydrationKeys();
+  resetCompoundPersistFailureWarnings();
 });
 
 describe("filterRegisteredChildStates", () => {
@@ -94,10 +106,11 @@ describe("resumeChildHandles", () => {
     expect(resume).toHaveBeenCalledWith({ selected: true });
   });
 
-  it("registerablePendingKeys excludes branch meta", () => {
+  it("registerablePendingKeys excludes branch and video meta", () => {
     expect(
       registerablePendingKeys({
         [BS_META_KEY]: { activeNodeId: "start" },
+        [IV_META_KEY]: { currentTime: 1 },
         "check-1": { selected: true },
       }),
     ).toEqual(["check-1"]);
@@ -174,6 +187,63 @@ describe("useCompoundResume", () => {
     expect(onResume).toHaveBeenCalledTimes(1);
     expect(onResume.mock.calls[0]?.[0]?.activePageIndex).toBe(2);
   });
+
+  it("skips mount load when compound was already hydrated by persistence", () => {
+    const storage = createSessionStoragePort();
+    saveCompoundState(
+      storage,
+      "course-1",
+      "book-hydrated",
+      createCompoundResumeState({ activePageIndex: 3 }),
+    );
+    const onResume = vi.fn();
+    markCompoundHydrated("course-1:book-hydrated");
+
+    function Probe() {
+      useCompoundResume({
+        courseId: "course-1",
+        compoundId: "book-hydrated",
+        enabled: true,
+        storage,
+        onResume,
+      });
+      return null;
+    }
+
+    render(React.createElement(Probe));
+    expect(onResume).not.toHaveBeenCalled();
+  });
+
+  it("warns per compound id when persist fails", () => {
+    vi.stubEnv("NODE_ENV", "development");
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const storage = createSessionStoragePort();
+    storage.setItem = () => false;
+
+    function Probe({ compoundId }: { compoundId: string }) {
+      const save = useCompoundResume({
+        courseId: "course-1",
+        compoundId,
+        enabled: true,
+        storage,
+      });
+      save(createCompoundResumeState({ activePageIndex: 0 }));
+      return null;
+    }
+
+    render(React.createElement(Probe, { compoundId: "book-a" }));
+    render(React.createElement(Probe, { compoundId: "book-b" }));
+    expect(warn).toHaveBeenCalledTimes(2);
+    expect(warn.mock.calls[0]?.[0]).toContain("book-a");
+    expect(warn.mock.calls[1]?.[0]).toContain("book-b");
+
+    warn.mockClear();
+    render(React.createElement(Probe, { compoundId: "book-a" }));
+    expect(warn).not.toHaveBeenCalled();
+
+    warn.mockRestore();
+    vi.unstubAllEnvs();
+  });
 });
 
 describe("readCompoundInitialIndex", () => {
@@ -193,5 +263,42 @@ describe("readCompoundInitialIndex", () => {
       JSON.stringify(createCompoundResumeState({ activePageIndex: 2, childStates: {} })),
     );
     expect(readCompoundInitialIndex("course-1", "book-1", 3, false, storage)).toBe(0);
+  });
+});
+
+describe("shouldReplayResumeTelemetry", () => {
+  it("defaults to false unless replayResumeEvents is true", () => {
+    expect(shouldReplayResumeTelemetry(undefined)).toBe(false);
+    expect(shouldReplayResumeTelemetry({ tracking: {} })).toBe(false);
+    expect(shouldReplayResumeTelemetry({ tracking: { replayResumeEvents: true } })).toBe(true);
+  });
+});
+
+describe("readInteractiveVideoMeta", () => {
+  it("reads firedCueIndices and falls back to completedCueIndices", () => {
+    expect(
+      readInteractiveVideoMeta({
+        [IV_META_KEY]: { currentTime: 12, completedCueIndices: [0], firedCueIndices: [0, 1] },
+      }),
+    ).toEqual({ currentTime: 12, completedCueIndices: [0], firedCueIndices: [0, 1] });
+
+    expect(
+      readInteractiveVideoMeta({
+        [IV_META_KEY]: { currentTime: 5, completedCueIndices: [0] },
+      }),
+    ).toEqual({ currentTime: 5, completedCueIndices: [0], firedCueIndices: [0] });
+  });
+
+  it("persists firedCueIndices via mergeVideoMetaIntoState", () => {
+    const merged = mergeVideoMetaIntoState(createCompoundResumeState(), {
+      currentTime: 9,
+      completedCueIndices: [0],
+      firedCueIndices: [0, 1],
+    });
+    expect(merged.childStates[IV_META_KEY]).toEqual({
+      currentTime: 9,
+      completedCueIndices: [0],
+      firedCueIndices: [0, 1],
+    });
   });
 });

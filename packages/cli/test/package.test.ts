@@ -79,6 +79,21 @@ describe("runPackage", () => {
     );
   });
 
+  it("passes strictParity to packageLessonkitCourse", async () => {
+    mockedPackage.mockResolvedValue({
+      ok: true,
+      courseDir: join(dir, ".lxpack/course"),
+      target: "scorm12",
+      outputPath: join(dir, ".lxpack/course/.lxpack/out/course-scorm12.zip"),
+      fileCount: 3,
+      validation: { ok: true, issues: [], manifest: {} as never },
+      build: { ok: true, issues: [], fileCount: 3, target: "scorm12", manifest: {} as never },
+    } satisfies PackageLessonkitCourseResult);
+
+    await runPackage({ target: "scorm12", cwd: dir, noBuild: true, strictParity: true });
+    expect(mockedPackage).toHaveBeenCalledWith(expect.objectContaining({ strictParity: true }));
+  });
+
   it("rejects --no-build when dist is missing", async () => {
     await rm(join(dir, "dist"), { recursive: true, force: true });
     await expect(runPackage({ target: "scorm12", cwd: dir, noBuild: true })).rejects.toMatchObject({

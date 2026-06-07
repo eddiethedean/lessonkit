@@ -1,7 +1,7 @@
 import React, { forwardRef, useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { deriveId } from "@lessonkit/core";
 import type { AssessmentBehaviour, BlockId, CompoundHandle } from "@lessonkit/core";
-import { CompoundProvider } from "../compound/CompoundProvider";
+import { CompoundProvider, useCompoundHandlesVersion, useCompoundRegistry } from "../compound/CompoundProvider";
 import { useCompoundInitialIndex, useCompoundShell } from "../compound/useCompoundShell";
 import { CompoundPageIndexProvider } from "../compound/CompoundPageIndexContext";
 import { validateCompoundChildren } from "../compound/validateChildren";
@@ -17,6 +17,8 @@ export type AssessmentSequenceProps = AssessmentBehaviour & {
   children: React.ReactNode;
   /** Show one child assessment at a time (Question Set). */
   sequential?: boolean;
+  /** When sequential, require an answer on the active step before Next. Default true. */
+  requireAnswerBeforeNext?: boolean;
   blockId?: BlockId;
 };
 
@@ -32,7 +34,10 @@ const AssessmentSequenceInner = forwardRef<CompoundHandle, AssessmentSequenceInn
   function AssessmentSequenceInner(props, ref) {
     const { compoundId, childArray, index, setIndex, persistEnabled } = props;
     const sequential = props.sequential !== false;
+    const requireAnswerBeforeNext = props.requireAnswerBeforeNext !== false;
     const { config } = useLessonkit();
+    const registry = useCompoundRegistry();
+    const handlesVersion = useCompoundHandlesVersion();
 
     const { visibleIndex, goNext, goPrev, progress } = useCompoundShell({
       courseId: config.courseId,
@@ -46,6 +51,15 @@ const AssessmentSequenceInner = forwardRef<CompoundHandle, AssessmentSequenceInn
     });
 
     validateCompoundChildren("AssessmentSequence", props.children);
+
+    const activeStepAnswered = useMemo(() => {
+      if (!requireAnswerBeforeNext || !registry) return true;
+      for (const entry of registry.getRegisteredHandles().values()) {
+        if (entry.pageIndex !== visibleIndex) continue;
+        if (!entry.handle.getAnswerGiven()) return false;
+      }
+      return true;
+    }, [handlesVersion, registry, requireAnswerBeforeNext, visibleIndex]);
 
     if (!sequential) {
       return (
@@ -79,7 +93,11 @@ const AssessmentSequenceInner = forwardRef<CompoundHandle, AssessmentSequenceInn
           <button
             type="button"
             data-testid="sequence-next"
-            disabled={visibleIndex >= childArray.length - 1 || childArray.length === 0}
+            disabled={
+              visibleIndex >= childArray.length - 1 ||
+              childArray.length === 0 ||
+              !activeStepAnswered
+            }
             onClick={goNext}
           >
             Next

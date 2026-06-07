@@ -45,4 +45,19 @@ describe("validateBranchGraph", () => {
     expect(result.ok).toBe(false);
     expect(result.issues.some((i) => i.code === "duplicate_node_id")).toBe(true);
   });
+
+  it("rejects start node with no choices in multi-node graphs", () => {
+    const result = validateBranchGraph("start", [
+      { nodeId: "start", choices: [] },
+      { nodeId: "next", choices: [] },
+    ]);
+    expect(result.ok).toBe(false);
+    expect(result.issues.some((i) => i.code === "start_no_choices")).toBe(true);
+  });
+
+  it("allows single-node start with no choices", () => {
+    const result = validateBranchGraph("start", [{ nodeId: "start", choices: [] }]);
+    expect(result.ok).toBe(true);
+    expect(result.issues.some((i) => i.code === "start_no_choices")).toBe(false);
+  });
 });

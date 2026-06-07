@@ -7,6 +7,7 @@ export type BranchGraphValidationIssue = {
   code:
     | "duplicate_node_id"
     | "start_not_found"
+    | "start_no_choices"
     | "unknown_target"
     | "unreachable_node"
     | "empty_graph";
@@ -49,6 +50,17 @@ export function validateBranchGraph(
       message: `startNodeId "${startNodeId}" does not match any BranchNode`,
       nodeId: startNodeId,
     });
+  }
+
+  if (nodes.length > 1 && nodeIds.has(startNodeId)) {
+    const startNode = nodes.find((n) => n.nodeId === startNodeId);
+    if (startNode && startNode.choices.length === 0) {
+      issues.push({
+        code: "start_no_choices",
+        message: `startNodeId "${startNodeId}" has no BranchChoice children in a multi-node scenario`,
+        nodeId: startNodeId,
+      });
+    }
   }
 
   for (const node of nodes) {

@@ -16,6 +16,8 @@ export type LessonkitObservabilityConfig = {
   onLxpackBridgeMiss?: (event: TelemetryEvent) => void;
   /** xAPI transport failure after retries (statement re-queued). */
   onXapiTransportError?: (err: unknown) => void;
+  /** Telemetry → xAPI mapping failure (statement skipped). */
+  onXapiMappingError?: (err: unknown) => void;
 };
 
 export function createXapiQueueFromObservability(
@@ -74,6 +76,7 @@ export function warnMissingProductionObservability(
       observability?.onXapiQueueDepth,
       observability?.onXapiQueueCap,
       observability?.onXapiTransportError,
+      observability?.onXapiMappingError,
     );
   }
   if (!required.some((hook) => !hook)) return;

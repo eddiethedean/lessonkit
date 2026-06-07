@@ -60,6 +60,20 @@ function statementFor(
   };
 }
 
+/** Strip credentials and query params from embed URLs before xAPI emission. */
+function sanitizeTelemetryEmbedSrc(src: string): string {
+  try {
+    const url = new URL(src);
+    url.username = "";
+    url.password = "";
+    url.search = "";
+    url.hash = "";
+    return `${url.origin}${url.pathname}`;
+  } catch {
+    return src;
+  }
+}
+
 function experiencedBlockStatement(
   courseId: TelemetryEvent["courseId"],
   lessonId: string,
@@ -84,7 +98,7 @@ const experiencedBlockMapper: EventMapper = (event, ctx) => {
       extensions["https://lessonkit.dev/xapi/interactionKind"] = kind;
       const data = event.data;
       if (kind === "embed_viewed" && data && typeof data.src === "string") {
-        extensions["https://lessonkit.dev/xapi/embedSrc"] = data.src;
+        extensions["https://lessonkit.dev/xapi/embedSrc"] = sanitizeTelemetryEmbedSrc(data.src);
       }
       if (kind === "chart_viewed" && data && typeof data.chartType === "string") {
         extensions["https://lessonkit.dev/xapi/chartType"] = data.chartType;

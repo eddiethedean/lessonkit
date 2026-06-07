@@ -1,9 +1,11 @@
 import React, { forwardRef, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { BlockId, CompoundHandle, CompoundResumeState } from "@lessonkit/core";
+import { clampCompoundPageIndex } from "@lessonkit/core";
 import { CompoundProvider, useCompoundRegistry } from "../compound/CompoundProvider";
 import { useCompoundPersistence } from "../compound/useCompoundPersistence";
 import {
   applyChoiceScoreUpdate,
+  BS_META_KEY,
   createInitialBranchMeta,
   mergeBranchMetaIntoState,
   readBranchingScenarioMeta,
@@ -58,6 +60,25 @@ const BranchingScenarioInner = forwardRef<
   const nodeIndexMap = useMemo(() => buildNodeIndexMap(nodes), [nodes]);
   const nodeLabels = useMemo(() => buildNodeLabels(nodes), [nodes]);
 
+  const maxChoiceWeightByNode = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const node of nodes) {
+      let maxWeight = 0;
+      let hasScoredChoice = false;
+      React.Children.forEach(node.props.children, (child) => {
+        if (!React.isValidElement(child)) return;
+        if (getLessonkitBlockType(child.type) !== "BranchChoice") return;
+        const weight = (child.props as { scoreWeight?: number }).scoreWeight;
+        if (weight !== undefined && Number.isFinite(weight)) {
+          hasScoredChoice = true;
+          maxWeight = Math.max(maxWeight, weight);
+        }
+      });
+      if (hasScoredChoice) map.set(node.props.nodeId, maxWeight);
+    }
+    return map;
+  }, [nodes]);
+
   const [meta, setMeta] = useState<BranchingScenarioMeta>(() => createInitialBranchMeta(startNodeId));
   const metaRef = useRef(meta);
   const branchViewedRef = useRef(new Set<string>());
@@ -101,6 +122,32 @@ const BranchingScenarioInner = forwardRef<
         syncBranchViewedRef(sanitized);
         return;
       }
+      const hasChildCheckStates = Object.keys(state.childStates).some((k) => k !== BS_META_KEY);
+      const clampedIndex = clampCompoundPageIndex(state.activePageIndex, nodes.length);
+      const nodeAtIndex = nodes[clampedIndex];
+      if (nodeAtIndex || hasChildCheckStates) {
+        const nodeId = nodeAtIndex?.props.nodeId ?? startNodeId;
+        const visitedNodeIds = [startNodeId];
+        if (nodeId !== startNodeId) visitedNodeIds.push(nodeId);
+        const legacyMeta = sanitizeBranchMeta(
+          { activeNodeId: nodeId, visitedNodeIds, choiceScores: {} },
+          nodeIndexMap,
+          startNodeId,
+        );
+        commitMeta(legacyMeta);
+        syncBranchViewedRef(legacyMeta);
+        if (
+          !legacyResumeWarnedRef.current &&
+          isDevEnvironment() &&
+          (hasChildCheckStates || state.activePageIndex !== 0)
+        ) {
+          legacyResumeWarnedRef.current = true;
+          console.warn(
+            "[lessonkit] BranchingScenario: legacy save without branch meta; restored via activePageIndex and child states",
+          );
+        }
+        return;
+      }
       if (
         !legacyResumeWarnedRef.current &&
         isDevEnvironment() &&
@@ -115,7 +162,7 @@ const BranchingScenarioInner = forwardRef<
       commitMeta(fresh);
       syncBranchViewedRef(fresh);
     },
-    [commitMeta, nodeIndexMap, startNodeId, syncBranchViewedRef],
+    [commitMeta, nodeIndexMap, nodes, startNodeId, syncBranchViewedRef],
   );
 
   const resetBranchMeta = useCallback(() => {
@@ -147,12 +194,21 @@ const BranchingScenarioInner = forwardRef<
     shouldIncludeChildState,
   });
 
+  const maxChoiceScoreOnPath = useMemo(() => {
+    let sum = 0;
+    for (const nodeId of meta.visitedNodeIds) {
+      sum += maxChoiceWeightByNode.get(nodeId) ?? 0;
+    }
+    return sum;
+  }, [maxChoiceWeightByNode, meta.visitedNodeIds]);
+
   useCompoundBranchHandle(ref, {
     activePageIndex: activeIndex,
     getRegisteredHandles: () => ctx?.getRegisteredHandles() ?? new Map(),
     visitedNodeIndices,
     choiceScores: meta.choiceScores ?? {},
     meta,
+    maxChoiceScore: maxChoiceScoreOnPath,
     onResetMeta: resetBranchMeta,
     enableSolutionsButton: props.enableSolutionsButton,
   });
@@ -196,6 +252,16 @@ const BranchingScenarioInner = forwardRef<
         if (isDevEnvironment()) {
           console.warn(
             `[lessonkit] BranchingScenario: unknown targetNodeId "${toNodeId}" from "${fromNodeId}"`,
+          );
+        }
+        return;
+      }
+
+      const activeNodeId = metaRef.current.activeNodeId;
+      if (fromNodeId !== activeNodeId) {
+        if (isDevEnvironment()) {
+          console.warn(
+            `[lessonkit] BranchingScenario: navigateToNode from "${fromNodeId}" but active node is "${activeNodeId}"`,
           );
         }
         return;
@@ -264,7 +330,7 @@ const BranchingScenarioInner = forwardRef<
   const pathMaxScore = ctx
     ? Array.from(ctx.getRegisteredHandles().values())
         .filter((h) => h.pageIndex !== undefined && visitedNodeIndices.has(h.pageIndex))
-        .reduce((s, h) => s + h.handle.getMaxScore(), 0)
+        .reduce((s, h) => s + h.handle.getMaxScore(), 0) + maxChoiceScoreOnPath
     : 0;
 
   return (

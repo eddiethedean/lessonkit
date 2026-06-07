@@ -235,6 +235,18 @@ describe("telemetryEventToXAPIStatement", () => {
     expect(embedExt?.["https://lessonkit.dev/xapi/interactionKind"]).toBe("embed_viewed");
     expect(embedExt?.["https://lessonkit.dev/xapi/embedSrc"]).toBe("https://example.com/video");
 
+    const embedWithToken = telemetryEventToXAPIStatement({
+      name: "interaction",
+      ...base,
+      data: {
+        kind: "embed_viewed",
+        blockId: "embed-1",
+        src: "https://user:secret@example.com/doc?token=secret#frag",
+      },
+    });
+    const tokenExt = embedWithToken?.context?.extensions as Record<string, unknown> | undefined;
+    expect(tokenExt?.["https://lessonkit.dev/xapi/embedSrc"]).toBe("https://example.com/doc");
+
     const chart = telemetryEventToXAPIStatement({
       name: "interaction",
       ...base,

@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import catalogJson from "../telemetry-catalog.v1.json";
 import identityContractJson from "../identity-contract.v1.json";
 import {
@@ -97,6 +97,26 @@ describe("@lessonkit/core identity", () => {
     const id = deriveId(longBase, used);
     expect(validateId(id).ok).toBe(true);
     expect(id.length).toBeLessThanOrEqual(64);
+  });
+
+  it("deriveId uses random suffix fallback when numeric suffixes are exhausted", () => {
+    const title = "Intro";
+    const base = slugifyId(title);
+    const used = new Set<string>([base]);
+    for (let n = 2; n < 1000; n++) used.add(`${base}-${n}`);
+
+    vi.spyOn(Date, "now").mockReturnValue(1_700_000_000_000);
+    const randomSpy = vi
+      .spyOn(Math, "random")
+      .mockReturnValueOnce(0.999999)
+      .mockReturnValueOnce(0.000001);
+
+    const id = deriveId(title, used);
+    expect(validateId(id).ok).toBe(true);
+    expect(used.has(id)).toBe(false);
+
+    randomSpy.mockRestore();
+    vi.spyOn(Date, "now").mockRestore();
   });
 
   it("identity-contract.v1.json idPattern matches ID_PATTERN", () => {

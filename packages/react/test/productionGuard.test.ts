@@ -8,6 +8,7 @@ const fullObservability = {
   onXapiQueueCap: () => undefined,
   onLxpackBridgeMiss: () => undefined,
   onXapiTransportError: () => undefined,
+  onXapiMappingError: () => undefined,
 };
 
 describe("assertProductionCourseConfig", () => {
@@ -75,6 +76,27 @@ describe("assertProductionCourseConfig", () => {
     ).toThrow(/xAPI enabled but no transport/);
   });
 
+  it("does not require xAPI transport when xapi is omitted or not explicitly enabled", () => {
+    vi.stubEnv("NODE_ENV", "production");
+    expect(() =>
+      assertProductionCourseConfig({
+        tracking: { enabled: false },
+      }),
+    ).not.toThrow();
+    expect(() =>
+      assertProductionCourseConfig({
+        tracking: { enabled: false },
+        xapi: {},
+      }),
+    ).not.toThrow();
+    expect(() =>
+      assertProductionCourseConfig({
+        tracking: { enabled: false },
+        xapi: { enabled: false },
+      }),
+    ).not.toThrow();
+  });
+
   it("throws when production xAPI omits onXapiTransportError", () => {
     vi.stubEnv("NODE_ENV", "production");
     expect(() =>
@@ -89,7 +111,7 @@ describe("assertProductionCourseConfig", () => {
           onLxpackBridgeMiss: () => undefined,
         },
       }),
-    ).toThrow(/4 config\.observability/);
+    ).toThrow(/5 config\.observability/);
   });
 
   it("passes with real sinks and observability in production", () => {

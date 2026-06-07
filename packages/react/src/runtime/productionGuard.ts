@@ -69,6 +69,7 @@ function observabilityIncomplete(
       observability?.onXapiQueueDepth,
       observability?.onXapiQueueCap,
       observability?.onXapiTransportError,
+      observability?.onXapiMappingError,
     );
   }
   return required.some((hook) => !hook);
@@ -77,7 +78,7 @@ function observabilityIncomplete(
 function requiredObservabilityHookCount(opts: { trackingEnabled: boolean; xapiEnabled: boolean }): number {
   let count = 1;
   if (opts.trackingEnabled) count += 2;
-  if (opts.xapiEnabled) count += 3;
+  if (opts.xapiEnabled) count += 4;
   return count;
 }
 
@@ -118,7 +119,7 @@ export function assertProductionCourseConfig(
     );
   }
 
-  if (config.xapi?.enabled !== false && config.xapi !== undefined && !isXapiDeliveryConfigured(config.xapi)) {
+  if (config.xapi?.enabled === true && !isXapiDeliveryConfigured(config.xapi)) {
     throw new Error(
       "[lessonkit] Production build has xAPI enabled but no transport or client configured.",
     );

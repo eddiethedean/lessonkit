@@ -50,8 +50,11 @@ async function walkDistDir(rootReal: string, current: string, label: string): Pr
     let entryReal: string;
     try {
       entryReal = realpathSync(entryPath);
-    } catch {
-      entryReal = entryPath;
+    } catch (err) {
+      throw new Error(
+        `spa dist for "${label}" could not resolve path: ${entryPath}`,
+        { cause: err },
+      );
     }
     assertResolvedPathUnderRoot(rootReal, entryReal);
     if (stat.isDirectory()) {

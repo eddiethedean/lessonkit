@@ -154,6 +154,37 @@ describe("@lessonkit/lxpack/bridge", () => {
     warn.mockRestore();
   });
 
+  it("calls onBridgeError when assessment_completed bridge throws", () => {
+    const onBridgeError = vi.fn();
+    const submitAssessment = vi.fn(() => {
+      throw new Error("submit failed");
+    });
+    vi.stubGlobal("window", {
+      parent: { lxpackBridge: { v1: { submitAssessment } } },
+    });
+
+    const event: TelemetryEvent = {
+      name: "assessment_completed",
+      courseId: "c",
+      lessonId: "l1",
+      sessionId: "s",
+      timestamp: "2026-01-01T00:00:00.000Z",
+      data: {
+        checkId: "tf-1",
+        interactionType: "trueFalse",
+        score: 1,
+        maxScore: 1,
+      },
+    };
+
+    try {
+      expect(() => forwardTelemetryToBridge(event, "auto", undefined, { onBridgeError })).not.toThrow();
+      expect(onBridgeError).toHaveBeenCalledWith(expect.any(Error));
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
   it("forwards branch telemetry via bridge.track", () => {
     const track = vi.fn();
     vi.stubGlobal("window", {

@@ -7,7 +7,9 @@ import { readBooleanStateField } from "../assessment/internal/resumeState";
 import { useAssessmentHandleRegistration } from "../assessment/internal/useAssessmentHandleRegistration";
 import { meetsPassingThreshold } from "../assessment/scoring";
 import { useAssessmentState } from "../assessment/useAssessmentState";
+import { shouldReplayResumeTelemetry } from "../assessment/shouldReplayResumeTelemetry";
 import { setLessonkitBlockType } from "../compound/blockType";
+import { useLessonkit } from "../hooks";
 import { normalizeComponentId } from "../runtime/validateComponentId";
 
 export type ArithmeticProblem = {
@@ -27,6 +29,7 @@ function ArithmeticQuizInner(
   ref: React.Ref<AssessmentHandle>,
 ) {
   const checkId = useMemo(() => normalizeComponentId(props.checkId, "checkId"), [props.checkId]);
+  const { config } = useLessonkit();
   const assessment = useAssessmentState(props.enclosingLessonId);
   const problemsKey = props.problems.map((p) => `${p.question}\0${p.answer}`).join("|");
 
@@ -101,7 +104,7 @@ function ArithmeticQuizInner(
     () =>
       buildAssessmentHandle({
         checkId,
-        getScore: () => (passed ? score : 0),
+        getScore: () => score,
         getMaxScore: () => maxScore,
         getAnswerGiven: () => allFilled,
         resetTask: reset,
@@ -111,7 +114,7 @@ function ArithmeticQuizInner(
           interactionType: INTERACTION,
           response: answers,
           correct: passedThreshold,
-          score: passed ? score : 0,
+          score,
           maxScore,
         }),
         getCurrentState: () => ({ answers, passed, checked, timeLeft }),
@@ -125,7 +128,11 @@ function ArithmeticQuizInner(
           readBooleanStateField(state, "passed", (value) => {
             setPassed(value);
             completedRef.current = value;
-            if (value && !telemetryReplayedRef.current) {
+            if (
+              value &&
+              !telemetryReplayedRef.current &&
+              shouldReplayResumeTelemetry(config)
+            ) {
               telemetryReplayedRef.current = true;
               let nextScore = 0;
               props.problems.forEach((p, i) => {
@@ -150,7 +157,7 @@ function ArithmeticQuizInner(
           if (typeof state.timeLeft === "number") setTimeLeft(state.timeLeft);
         },
       }),
-    [allFilled, answers, checkId, checked, maxScore, passed, passedThreshold, score, timeLeft],
+    [allFilled, answers, checkId, checked, config, maxScore, passed, passedThreshold, props.problems, props.passingScore, score, timeLeft],
   );
 
   useAssessmentHandleRegistration(checkId, handle, ref);

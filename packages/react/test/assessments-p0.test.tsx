@@ -199,6 +199,7 @@ describe("1.1.x P0 assessment blocks", () => {
       ),
     );
     expect(screen.getByText(/Question 1 of 2/)).toBeTruthy();
+    fireEvent.click(screen.getAllByLabelText("True")[0]!);
     fireEvent.click(screen.getByTestId("sequence-next"));
     expect(screen.getByText(/Question 2 of 2/)).toBeTruthy();
     fireEvent.click(screen.getByTestId("sequence-prev"));

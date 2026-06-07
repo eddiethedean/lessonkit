@@ -30,16 +30,21 @@ function promoteLockPath(outDir: string): string {
 
 const STALE_LOCK_TTL_MS = 5 * 60 * 1000;
 
+const LOCK_TOKEN_RE = /^(\d+)\n([0-9a-f-]{36})\n?$/i;
+
 async function isStalePromoteLock(lockPath: string): Promise<boolean> {
   try {
     const content = await fsp.readFile(lockPath, "utf8");
-    const pid = Number.parseInt(content.trim(), 10);
-    if (Number.isFinite(pid) && pid > 0) {
-      try {
-        process.kill(pid, 0);
-        return false;
-      } catch {
-        return true;
+    const match = content.match(LOCK_TOKEN_RE);
+    if (match) {
+      const pid = Number.parseInt(match[1]!, 10);
+      if (Number.isFinite(pid) && pid > 0) {
+        try {
+          process.kill(pid, 0);
+          return false;
+        } catch {
+          return true;
+        }
       }
     }
     const stat = await fsp.stat(lockPath);
@@ -57,7 +62,7 @@ async function withPromoteLock<T>(outDir: string, fn: () => Promise<T>): Promise
   for (let attempt = 0; attempt < 200; attempt++) {
     try {
       lockHandle = await fsp.open(lockPath, "wx");
-      await lockHandle.writeFile(`${process.pid}\n`, "utf8");
+      await lockHandle.writeFile(`${process.pid}\n${randomUUID()}\n`, "utf8");
       break;
     } catch (err) {
       const code =

@@ -6,7 +6,9 @@ import { buildAssessmentHandle } from "../assessment/internal/buildAssessmentHan
 import { readBooleanStateField, readStringField } from "../assessment/internal/resumeState";
 import { useAssessmentHandleRegistration } from "../assessment/internal/useAssessmentHandleRegistration";
 import { useAssessmentState } from "../assessment/useAssessmentState";
+import { shouldReplayResumeTelemetry } from "../assessment/shouldReplayResumeTelemetry";
 import { setLessonkitBlockType } from "../compound/blockType";
+import { useLessonkit } from "../hooks";
 import { normalizeComponentId } from "../runtime/validateComponentId";
 
 export type EssayProps = AssessmentBaseProps & {
@@ -21,6 +23,7 @@ function EssayInner(
   ref: React.Ref<AssessmentHandle>,
 ) {
   const checkId = useMemo(() => normalizeComponentId(props.checkId, "checkId"), [props.checkId]);
+  const { config } = useLessonkit();
   const assessment = useAssessmentState(props.enclosingLessonId);
   const [text, setText] = useState("");
   const [submitted, setSubmitted] = useState(false);
@@ -64,16 +67,26 @@ function EssayInner(
           const nextText = readStringField(state, "text");
           if (typeof nextText === "string") setText(nextText);
           readBooleanStateField(state, "submitted", (value) => {
+            const textVal = typeof nextText === "string" ? nextText : text;
+            const meetsMin = textVal.trim().length >= minLength;
+            if (value && !meetsMin) {
+              setSubmitted(false);
+              completedRef.current = false;
+              return;
+            }
             setSubmitted(value);
             completedRef.current = value;
-            if (value && !telemetryReplayedRef.current) {
+            if (
+              value &&
+              !telemetryReplayedRef.current &&
+              shouldReplayResumeTelemetry(config)
+            ) {
               telemetryReplayedRef.current = true;
-              const response = typeof nextText === "string" ? nextText : text;
               assessment.answer({
                 checkId,
                 interactionType: INTERACTION,
                 question: props.question,
-                response,
+                response: textVal,
                 correct: false,
               });
               assessment.complete({
@@ -87,7 +100,7 @@ function EssayInner(
           });
         },
       }),
-    [checkId, meetsMinLength, props.question, submitted, text],
+    [assessment, checkId, config, meetsMinLength, minLength, props.passingScore, props.question, submitted, text],
   );
 
   useAssessmentHandleRegistration(checkId, handle, ref);

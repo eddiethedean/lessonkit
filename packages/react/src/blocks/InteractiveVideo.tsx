@@ -29,11 +29,12 @@ function loadVideoMeta(
   blockId: BlockId,
   enabled: boolean,
 ) {
-  if (!enabled || !courseId) return { currentTime: 0, completedCueIndices: [] as number[] };
+  const empty = { currentTime: 0, completedCueIndices: [] as number[], firedCueIndices: [] as number[] };
+  if (!enabled || !courseId) return empty;
   const saved = loadCompoundState(storage, courseId, blockId);
-  if (!saved) return { currentTime: 0, completedCueIndices: [] as number[] };
+  if (!saved) return empty;
   const meta = readInteractiveVideoMeta(saved.childStates);
-  return meta ?? { currentTime: 0, completedCueIndices: [] as number[] };
+  return meta ?? empty;
 }
 
 function getCueChildCheckId(cue: CueElement): string | null {
@@ -56,7 +57,7 @@ const InteractiveVideoInner = forwardRef<
     index: number;
     setIndex: React.Dispatch<React.SetStateAction<number>>;
     persistEnabled: boolean;
-    initialMeta: { currentTime: number; completedCueIndices: number[] };
+    initialMeta: { currentTime: number; completedCueIndices: number[]; firedCueIndices: number[] };
   }
 >(function InteractiveVideoInner(props, ref) {
   const { blockId, cues, index, setIndex, persistEnabled, initialMeta } = props;
@@ -65,12 +66,19 @@ const InteractiveVideoInner = forwardRef<
   const { config, track, storage } = useLessonkit();
   const lessonId = useEnclosingLessonId();
   const videoRef = useRef<HTMLVideoElement>(null);
+  const lastKnownTimeRef = useRef(initialMeta.currentTime);
   const completedCuesRef = useRef(new Set<number>(initialMeta.completedCueIndices));
   const [completedCues, setCompletedCues] = useState<Set<number>>(
     () => new Set(initialMeta.completedCueIndices),
   );
   const [overlayActive, setOverlayActive] = useState(false);
-  const firedCuesRef = useRef(new Set<number>(initialMeta.completedCueIndices));
+  const firedCuesRef = useRef(
+    new Set<number>(
+      initialMeta.firedCueIndices.length > 0
+        ? initialMeta.firedCueIndices
+        : initialMeta.completedCueIndices,
+    ),
+  );
   const resumeOverlayCheckedRef = useRef(false);
 
   const sortedCues = useMemo(
@@ -83,12 +91,19 @@ const InteractiveVideoInner = forwardRef<
   }, [completedCues]);
 
   const transformState = useCallback(
-    (state: CompoundResumeState) =>
-      mergeVideoMetaIntoState(state, {
-        currentTime: videoRef.current?.currentTime ?? initialMeta.currentTime,
+    (state: CompoundResumeState) => {
+      const liveTime = videoRef.current?.currentTime;
+      const currentTime = Math.max(
+        lastKnownTimeRef.current,
+        typeof liveTime === "number" && Number.isFinite(liveTime) ? liveTime : 0,
+      );
+      return mergeVideoMetaIntoState(state, {
+        currentTime,
         completedCueIndices: [...completedCuesRef.current],
-      }),
-    [initialMeta.currentTime],
+        firedCueIndices: [...firedCuesRef.current],
+      });
+    },
+    [],
   );
 
   const { ctx } = useCompoundShell({
@@ -197,6 +212,7 @@ const InteractiveVideoInner = forwardRef<
     const video = videoRef.current;
     if (!video || overlayActive) return;
     const t = video.currentTime;
+    lastKnownTimeRef.current = Math.max(lastKnownTimeRef.current, t);
 
     const blockSeek = mandatoryIncompleteBefore(t);
     if (blockSeek !== null && t > blockSeek + 0.5) {
@@ -331,7 +347,7 @@ export const InteractiveVideo = forwardRef<CompoundHandle, InteractiveVideoProps
 
     useEffect(() => {
       setIndex(initialIndex);
-    }, [config.courseId, blockId, initialIndex]);
+    }, [config.courseId, blockId]);
 
     return (
       <CompoundProvider activePageIndex={index} onActivePageIndexChange={setIndexStable}>

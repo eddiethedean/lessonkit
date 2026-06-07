@@ -10,7 +10,7 @@ export type {
   XAPIVerbIri,
 } from "./types";
 export { createInMemoryXAPIQueue, type InMemoryXAPIQueueOptions } from "./queue";
-export { createXAPIClient } from "./client";
+export { createXAPIClient, resetXAPIDeadLetterForTests } from "./client";
 export {
   createFetchTransport,
   createFetchBatchSink,
@@ -22,4 +22,5 @@ export {
   type CreateFetchBatchSinkOptions,
   type FetchBatchSinkBundle,
 } from "./fetchTransport";
+export { loadDeadLetterStatements, persistDeadLetterStatement } from "./deadLetter";
 export { telemetryEventToXAPIStatement } from "./telemetryMap";

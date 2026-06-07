@@ -31,6 +31,8 @@ export type HeadlessLessonkitConfig = {
     attemptId?: string;
     user?: TelemetryUser;
   };
+  /** When true (default), switching lessons auto-completes the previous in-progress lesson. */
+  autoCompleteOnLessonSwitch?: boolean;
   /** Plugin list or registry; hooks run on {@link HeadlessLessonkitRuntime.track} and lifecycle emits. */
   plugins?: HeadlessLessonkitPlugins;
   /** When true, skip initial {@link PluginHost.setupAll}; host caller runs setup (React v2 provider). */
@@ -184,6 +186,8 @@ export function createLessonkitRuntime(
     }
   };
 
+  const autoCompleteOnLessonSwitch = () => configSnapshot.autoCompleteOnLessonSwitch ?? true;
+
   return {
     get config() {
       return configSnapshot;
@@ -203,6 +207,9 @@ export function createLessonkitRuntime(
       if (next.runtimeVersion !== undefined) {
         if (next.runtimeVersion === "v1") warnRuntimeV1Deprecated();
         configSnapshot.runtimeVersion = next.runtimeVersion;
+      }
+      if (next.autoCompleteOnLessonSwitch !== undefined) {
+        configSnapshot.autoCompleteOnLessonSwitch = next.autoCompleteOnLessonSwitch;
       }
       if (next.session !== undefined) {
         configSnapshot.session = { ...configSnapshot.session, ...next.session };
@@ -235,7 +242,12 @@ export function createLessonkitRuntime(
       if (current.activeLessonId === lessonId) return;
 
       const previous = current.activeLessonId;
-      if (previous && previous !== lessonId && !current.completedLessonIds.has(previous)) {
+      if (
+        autoCompleteOnLessonSwitch() &&
+        previous &&
+        previous !== lessonId &&
+        !current.completedLessonIds.has(previous)
+      ) {
         const completed = progress.completeLesson(previous, clock.nowMs());
         if (completed.didComplete) {
           emitLessonCompletedEvents(previous, completed.durationMs, wrapped);
@@ -280,6 +292,10 @@ export function createLessonkitRuntime(
       configSnapshot.courseId = nextCourseId;
       courseId = nextCourseId;
       progress = createProgressController();
+      pluginHost?.disposeAll();
+      if (!configSnapshot.deferPluginSetup) {
+        pluginHost?.setupAll(getPluginCtx());
+      }
     },
     dispose() {
       pluginHost?.disposeAll();

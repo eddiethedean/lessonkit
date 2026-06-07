@@ -1,9 +1,10 @@
 import type { AssessmentHandle, AssessmentResumeState, CheckId } from "@lessonkit/core";
 import { BS_META_KEY } from "./useCompoundBranchShell";
+import { IV_META_KEY } from "./useCompoundVideoShell";
 
 export type ChildHandleRegistry = Map<CheckId, AssessmentHandle>;
 
-const DEFAULT_PRESERVED_CHILD_STATE_KEYS = new Set<string>([BS_META_KEY]);
+const DEFAULT_PRESERVED_CHILD_STATE_KEYS = new Set<string>([BS_META_KEY, IV_META_KEY]);
 
 /** Pending child-state keys that require a registered assessment handle. */
 export function registerablePendingKeys(

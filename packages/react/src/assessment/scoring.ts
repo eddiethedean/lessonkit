@@ -24,13 +24,17 @@ export function scoreFromCustom(
   passingScore?: number,
 ): { score: number; maxScore: number; passed: boolean } {
   const maxScore = custom?.maxScore ?? fallbackMax;
-  if (custom?.passed !== undefined) {
-    const score = custom.passed ? (custom.score ?? maxScore) : (custom.score ?? 0);
-    return { score, maxScore, passed: custom.passed };
+  const hasNumericScore = custom?.score != null && Number.isFinite(custom.score);
+  if (hasNumericScore) {
+    const passed =
+      custom!.passed !== undefined
+        ? custom!.passed
+        : meetsPassingThreshold(custom!.score!, maxScore, passingScore);
+    return { score: custom!.score!, maxScore, passed };
   }
-  if (custom?.maxScore != null && custom.maxScore > 0 && custom.score != null) {
-    const passed = meetsPassingThreshold(custom.score, custom.maxScore, passingScore);
-    return { score: custom.score, maxScore: custom.maxScore, passed };
+  if (custom?.passed !== undefined) {
+    const score = custom.passed ? maxScore : 0;
+    return { score, maxScore, passed: custom.passed };
   }
   const score = fallbackCorrect ? maxScore : 0;
   const passed = meetsPassingThreshold(score, maxScore, passingScore);

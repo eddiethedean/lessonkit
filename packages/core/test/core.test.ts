@@ -352,5 +352,78 @@ describe("@lessonkit/core", () => {
     expect(exitEvents).toHaveLength(1);
     expect(exitEvents[0]).toHaveLength(1);
   });
+
+  it("flushOnExit does not duplicate events owned by an in-flight batchSink delivery", async () => {
+    let resolveFlush!: () => void;
+    const exitEvents: TelemetryEvent[][] = [];
+    const batchSink = vi.fn<TelemetryBatchSink>(
+      () =>
+        new Promise<void>((r) => {
+          resolveFlush = r;
+        }),
+    );
+    const client = createTrackingClient({
+      batchSink,
+      exitBatchSink: (events) => {
+        exitEvents.push([...events]);
+      },
+      batch: { enabled: true, flushIntervalMs: 0, maxBatchSize: 100 },
+    });
+
+    client.track(interactionEvent("inflight-1"));
+    client.track(interactionEvent("inflight-2"));
+    void client.flush?.();
+    await new Promise((r) => setTimeout(r, 0));
+
+    client.track(interactionEvent("buffered-1"));
+    client.flushOnExit?.();
+
+    expect(exitEvents).toHaveLength(1);
+    expect(exitEvents[0]?.map((e) => e.timestamp)).toEqual(["buffered-1"]);
+
+    resolveFlush();
+    await new Promise((r) => setTimeout(r, 10));
+    expect(batchSink).toHaveBeenCalledTimes(1);
+    const firstCall = batchSink.mock.calls[0];
+    expect(firstCall).toBeDefined();
+    const firstBatch = firstCall![0] as import("../src/telemetryTypes").TelemetryEvent[];
+    expect(firstBatch.map((e) => e.timestamp)).toEqual([
+      "inflight-1",
+      "inflight-2",
+    ]);
+  });
+
+  it("deliver returns false when event is dropped at buffer cap", async () => {
+    const batchSink = vi.fn(async () => {
+      throw new Error("down");
+    });
+    const client = createTrackingClient({
+      batchSink,
+      batch: { enabled: true, flushIntervalMs: 60_000, maxBatchSize: 10_000 },
+    });
+
+    for (let i = 0; i < 1000; i++) {
+      client.track(interactionEvent(`t${i}`));
+    }
+    await expect(client.deliver?.(interactionEvent("overflow"))).resolves.toBe(false);
+  });
+
+  it("dispose calls onBufferDrop for each event dropped after flush cap", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    const onBufferDrop = vi.fn();
+    const batchSink = vi.fn(async () => {
+      throw new Error("down");
+    });
+    const client = createTrackingClient({
+      batchSink,
+      onBufferDrop,
+      batch: { enabled: true, flushIntervalMs: 0, maxBatchSize: 100 },
+    });
+
+    client.track(interactionEvent("t1"));
+    await client.dispose?.();
+    expect(onBufferDrop).toHaveBeenCalledTimes(1);
+    vi.unstubAllEnvs();
+  });
 });
 

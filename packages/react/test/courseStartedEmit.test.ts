@@ -93,6 +93,25 @@ describe("emitCourseStartedToTracking", () => {
     expect(deliverCalls).toBe(1);
   });
 
+  it("marks dedupe after sync track when client has no deliver or flush", async () => {
+    const storage = createSessionStoragePort();
+    const tracking: TrackingClient = {
+      track: vi.fn(),
+    };
+
+    const ok = await emitCourseStartedToTracking(
+      tracking,
+      storage,
+      "session-1",
+      "course-1",
+      event,
+    );
+
+    expect(ok).toBe(true);
+    expect(tracking.track).toHaveBeenCalledWith(event);
+    expect(hasCourseStartedEmittedToTracking(storage, "session-1", "course-1")).toBe(true);
+  });
+
   it("marks dedupe after flush succeeds", async () => {
     const storage = createSessionStoragePort();
     const tracking: TrackingClient = {
@@ -153,6 +172,7 @@ describe("emitPendingCourseStarted", () => {
     const tracking: TrackingClient = {
       track: () => {
         trackCalls += 1;
+        return true;
       },
       flush: async () => true,
     };

@@ -7,7 +7,9 @@ import { readBooleanStateField } from "../assessment/internal/resumeState";
 import { useAssessmentHandleRegistration } from "../assessment/internal/useAssessmentHandleRegistration";
 import { meetsPassingThreshold } from "../assessment/scoring";
 import { useAssessmentState } from "../assessment/useAssessmentState";
+import { shouldReplayResumeTelemetry } from "../assessment/shouldReplayResumeTelemetry";
 import { setLessonkitBlockType } from "../compound/blockType";
+import { useLessonkit } from "../hooks";
 import { normalizeComponentId } from "../runtime/validateComponentId";
 
 export type ImagePair = {
@@ -55,6 +57,7 @@ function ImagePairingInner(
   ref: React.Ref<AssessmentHandle>,
 ) {
   const checkId = useMemo(() => normalizeComponentId(props.checkId, "checkId"), [props.checkId]);
+  const { config } = useLessonkit();
   const assessment = useAssessmentState(props.enclosingLessonId);
   const pairsKey = props.pairs.map((p) => p.id).join("\0");
 
@@ -190,17 +193,26 @@ function ImagePairingInner(
           readBooleanStateField(state, "passed", (value) => {
             setPassed(value);
             completedRef.current = value;
-            if (value && !telemetryReplayedRef.current) {
+            if (
+              value &&
+              !telemetryReplayedRef.current &&
+              shouldReplayResumeTelemetry(config)
+            ) {
               telemetryReplayedRef.current = true;
               const matchedIds = Array.isArray(state.matched)
                 ? (state.matched as string[])
                 : [...matched];
               const finalScore = matchedIds.length;
+              const finalPassed = meetsPassingThreshold(
+                finalScore,
+                maxScore,
+                props.passingScore,
+              );
               assessment.answer({
                 checkId,
                 interactionType: INTERACTION,
                 response: { matchedPairIds: matchedIds },
-                correct: true,
+                correct: finalPassed,
               });
               assessment.complete({
                 checkId,
@@ -213,7 +225,7 @@ function ImagePairingInner(
           });
         },
       }),
-    [allMatched, checkId, keyboardSelection, matched, matchedCount, maxScore, passed, passedThreshold, revealed, score],
+    [allMatched, checkId, config, keyboardSelection, matched, matchedCount, maxScore, passed, passedThreshold, props.passingScore, revealed, score],
   );
 
   useAssessmentHandleRegistration(checkId, handle, ref);

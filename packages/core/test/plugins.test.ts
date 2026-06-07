@@ -175,6 +175,34 @@ describe("createPluginRegistry", () => {
     expect(userIds).toEqual(["user-a", "user-b"]);
   });
 
+  it("recomposes wrapTrackingSink when non-id user fields change", async () => {
+    let setupCount = 0;
+    const host = createPluginRegistry([
+      defineTelemetryPlugin({
+        id: "user-fields",
+        version: "1",
+        kind: "analytics",
+        wrapTrackingSink: (sink, pluginCtx) => {
+          setupCount += 1;
+          void pluginCtx.user?.email;
+          return sink;
+        },
+      }),
+    ]);
+
+    let currentUser = { id: "user-a", email: "a@example.com" };
+    const sink = vi.fn(async () => {});
+    const wrapped = host.composeTrackingSink(sink, () => ({
+      courseId: "course-a",
+      user: currentUser,
+    }))!;
+    await wrapped(baseEvent);
+    currentUser = { id: "user-a", email: "b@example.com" };
+    await wrapped(baseEvent);
+
+    expect(setupCount).toBe(2);
+  });
+
   it("warns on duplicate plugin ids in development", () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
     vi.stubEnv("NODE_ENV", "development");

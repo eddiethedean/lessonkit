@@ -264,7 +264,8 @@ export type TelemetrySink = (event: TelemetryEvent) => void | Promise<void>;
 export type TelemetryBatchSink = (events: TelemetryEvent[]) => void | Promise<void>;
 
 export type TrackingClient = {
-  track: (event: TelemetryEvent) => void;
+  /** Returns false when the event was dropped (e.g. buffer cap or after dispose). */
+  track: (event: TelemetryEvent) => boolean;
   /** Delivers one event and resolves to true only when the sink accepted it (batch: includes flush). */
   deliver?: (event: TelemetryEvent) => Promise<boolean>;
   /** Resolves to true when all buffered events were delivered; false when a sink failure re-queued events. */

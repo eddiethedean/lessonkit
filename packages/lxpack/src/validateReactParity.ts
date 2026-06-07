@@ -1,5 +1,6 @@
 import { readFileSync, existsSync, readdirSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
+import { isSafeRelativeSpaPath } from "./spaPath";
 import type { LessonkitCourseDescriptor } from "./types";
 
 export type ReactParityIssue = {
@@ -38,6 +39,7 @@ function collectSourceUnderSrc(projectRoot: string): string[] {
 
 function readAppSources(projectRoot: string, appSources: string[]): string {
   return appSources
+    .filter((rel) => isSafeRelativeSpaPath(rel))
     .map((rel) => join(projectRoot, rel))
     .filter((abs) => existsSync(abs))
     .map((abs) => readFileSync(abs, "utf8"))
@@ -51,14 +53,40 @@ function stripComments(source: string): string {
     .replace(/\/\/[^\n]*/g, " ");
 }
 
-function idPropPatterns(prop: "courseId" | "checkId", id: string): string[] {
-  return [
-    `${prop}="${id}"`,
-    `${prop}='${id}'`,
-    `${prop}={'${id}'}`,
-    `${prop}={"${id}"}`,
-    `${prop}={\`${id}\`}`,
-  ];
+/** Mask string/template literals except JSX courseId/checkId attribute values. */
+function maskUnrelatedStringLiterals(source: string): string {
+  return source.replace(/(["'`])(?:\\.|(?!\1).)*\1/g, (match, _quote, offset, full) => {
+    const before = full.slice(Math.max(0, offset - 24), offset);
+    if (/\b(?:courseId|checkId)\s*=\s*$/.test(before)) {
+      return match;
+    }
+    return '""';
+  });
+}
+
+function idPropPresent(source: string, prop: "courseId" | "checkId", id: string): boolean {
+  const stripped = stripComments(source);
+  const masked = maskUnrelatedStringLiterals(stripped);
+  return jsxPropRegex(prop, id).test(masked);
+}
+
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function jsxPropRegex(prop: "courseId" | "checkId", id: string): RegExp {
+  const escapedId = escapeRegExp(id);
+  return new RegExp(
+    `(?<![A-Za-z0-9_$])${prop}\\s*=\\s*(?:` +
+      `"${escapedId}"|'${escapedId}'|` +
+      `\\{\\s*["'\`]${escapedId}["'\`]\\s*\\}|` +
+      `\\{\\s*\`${escapedId}\`\\s*\\}` +
+      `)`,
+  );
+}
+
+function maskStringLiterals(source: string): string {
+  return source.replace(/(["'`])(?:\\.|(?!\1).)*\1/g, '""');
 }
 
 function extractStringConstants(source: string): Map<string, string> {
@@ -72,11 +100,13 @@ function extractStringConstants(source: string): Map<string, string> {
 }
 
 function idUsedViaConstant(
-  stripped: string,
+  source: string,
   prop: "courseId" | "checkId",
   id: string,
   constants: Map<string, string>,
 ): boolean {
+  const stripped = stripComments(source);
+  const masked = maskStringLiterals(stripped);
   for (const [name, value] of constants) {
     if (value !== id) continue;
     const jsxPatterns = [
@@ -85,24 +115,22 @@ function idUsedViaConstant(
       `${prop}={${name} }`,
       `${prop}={ ${name}}`,
     ];
-    if (jsxPatterns.some((p) => stripped.includes(p))) return true;
+    if (jsxPatterns.some((p) => masked.includes(p))) return true;
 
     const objPatterns = [`${prop}: ${name}`, `${prop}:${name}`];
-    if (objPatterns.some((p) => stripped.includes(p))) return true;
+    if (objPatterns.some((p) => masked.includes(p))) return true;
   }
   return false;
 }
 
 function courseIdPresent(source: string, courseId: string): boolean {
-  const stripped = stripComments(source);
-  if (idPropPatterns("courseId", courseId).some((p) => stripped.includes(p))) return true;
-  return idUsedViaConstant(stripped, "courseId", courseId, extractStringConstants(source));
+  if (idPropPresent(source, "courseId", courseId)) return true;
+  return idUsedViaConstant(source, "courseId", courseId, extractStringConstants(source));
 }
 
 function checkIdPresent(source: string, checkId: string): boolean {
-  const stripped = stripComments(source);
-  if (idPropPatterns("checkId", checkId).some((p) => stripped.includes(p))) return true;
-  return idUsedViaConstant(stripped, "checkId", checkId, extractStringConstants(source));
+  if (idPropPresent(source, "checkId", checkId)) return true;
+  return idUsedViaConstant(source, "checkId", checkId, extractStringConstants(source));
 }
 
 const ID_SYNC_DOC =

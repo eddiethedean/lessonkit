@@ -43,6 +43,7 @@ describe("buildStagingPackage errors", () => {
         outDir: join(root, "out"),
         spaDistDir: dist,
         target: "scorm12",
+        projectRoot: root,
       }),
     ).rejects.toThrow("boom");
   });
@@ -70,6 +71,7 @@ describe("buildStagingPackage errors", () => {
       outDir: join(root, "out"),
       spaDistDir: dist,
       target: "scorm12",
+      projectRoot: root,
     });
 
     expect(result.ok).toBe(false);
