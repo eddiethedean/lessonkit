@@ -142,6 +142,55 @@ describe("lxpackBridge", () => {
     vi.unstubAllGlobals();
   });
 
+  it("forwards assessment_completed and assessment_answered", () => {
+    const submitAssessment = vi.fn();
+    const track = vi.fn();
+    vi.stubGlobal("window", {
+      parent: { lxpackBridge: { v1: { submitAssessment, track } } },
+    } as unknown as Window);
+
+    forwardTelemetryToLxpack(
+      buildTelemetryEvent({
+        name: "assessment_completed",
+        courseId: "c",
+        lessonId: "l",
+        sessionId: "s",
+        data: {
+          checkId: "tf-1",
+          interactionType: "trueFalse",
+          score: 1,
+          maxScore: 1,
+          passingScore: 0.8,
+        },
+      }),
+    );
+    forwardTelemetryToLxpack(
+      buildTelemetryEvent({
+        name: "assessment_answered",
+        courseId: "c",
+        lessonId: "l",
+        sessionId: "s",
+        data: {
+          checkId: "tf-1",
+          interactionType: "trueFalse",
+          response: true,
+          correct: true,
+        },
+      }),
+    );
+
+    expect(submitAssessment).toHaveBeenCalledWith({
+      id: "tf-1",
+      score: 1,
+      passingScore: 0.8,
+      maxScore: 1,
+    });
+    expect(track).toHaveBeenCalledWith(
+      expect.objectContaining({ type: "assessment", id: "tf-1" }),
+    );
+    vi.unstubAllGlobals();
+  });
+
   it("forwards generic track events to the bridge", () => {
     const track = vi.fn();
     vi.stubGlobal("window", {
@@ -185,6 +234,30 @@ describe("lxpackBridge", () => {
     const event = buildTelemetryEvent({ name: "course_completed", courseId: "c", sessionId: "s" });
     forwardTelemetryToLxpack(event, "auto", { onBridgeMiss });
     expect(onBridgeMiss).toHaveBeenCalledWith(event);
+    vi.unstubAllGlobals();
+  });
+
+  it("calls onBridgeError when bridge host throws", () => {
+    const onBridgeError = vi.fn();
+    vi.stubGlobal("window", {
+      parent: {
+        lxpackBridge: {
+          v1: {
+            completeCourse: () => {
+              throw new Error("bridge failed");
+            },
+          },
+        },
+      },
+    });
+
+    forwardTelemetryToLxpack(
+      buildTelemetryEvent({ name: "course_completed", courseId: "c", sessionId: "s" }),
+      "auto",
+      { onBridgeError },
+    );
+
+    expect(onBridgeError).toHaveBeenCalledWith(expect.any(Error));
     vi.unstubAllGlobals();
   });
 

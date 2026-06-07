@@ -67,7 +67,7 @@
     "typecheck": "tsc -p tsconfig.json",
     "test": "vitest run --passWithNoTests",
     "test:coverage": "vitest run --coverage --passWithNoTests=false",
-    "lint": "echo \"(no lint configured yet)\""
+    "lint": "eslint --max-warnings 0 \"src/**/*.{ts,tsx}\" \"test/**/*.{ts,tsx}\" \"stories/**/*.{ts,tsx}\""
   },
   "peerDependencies": {
     "@lessonkit/lxpack": "1.5.0",

@@ -80,6 +80,7 @@ export {
   createCompoundResumeState,
   parseCompoundResumeState,
 } from "./compound";
+export type { ParseCompoundResumeStateOptions } from "./compound";
 
 export {
   compoundStateStorageKey,
@@ -87,6 +88,7 @@ export {
   saveCompoundState,
   clearCompoundState,
 } from "./compoundState";
+export type { LoadCompoundStateOptions } from "./compoundState";
 
 export {
   PAGE_ALLOWED_CHILD_TYPES,

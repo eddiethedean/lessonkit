@@ -12,6 +12,7 @@ export type LxpackBridgeMode = LmsBridgeMode;
 
 export type ForwardTelemetryToLxpackOptions = {
   onBridgeMiss?: (event: TelemetryEvent) => void;
+  onBridgeError?: (err: unknown) => void;
   allowedParentOrigins?: string[];
 };
 
@@ -19,6 +20,7 @@ const BRIDGE_MISS_EVENT_NAMES = new Set<TelemetryEvent["name"]>([
   "course_started",
   "course_completed",
   "lesson_completed",
+  "assessment_answered",
   "assessment_completed",
   "quiz_completed",
 ]);
@@ -39,6 +41,7 @@ export function forwardTelemetryToLxpack(
   }
   forwardTelemetryToBridge(event, mode, undefined, {
     allowedParentOrigins: opts?.allowedParentOrigins,
+    onBridgeError: opts?.onBridgeError,
   });
 }
 

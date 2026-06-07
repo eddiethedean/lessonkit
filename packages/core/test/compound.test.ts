@@ -71,6 +71,22 @@ describe("compound resume state", () => {
     expect(parsed?.childStates).toEqual({ drag: dragState, fill: fillState });
   });
 
+  it("reports dropped child keys via onDroppedChildKeys", () => {
+    const dropped: string[] = [];
+    parseCompoundResumeState(
+      {
+        schemaVersion: COMPOUND_RESUME_SCHEMA_VERSION,
+        activePageIndex: 0,
+        childStates: {
+          ok: { answer: "a" },
+          bad: { run: () => {} },
+        },
+      },
+      { onDroppedChildKeys: (keys) => dropped.push(...keys) },
+    );
+    expect(dropped).toEqual(["bad"]);
+  });
+
   it("salvages valid child states when some entries are nested or invalid", () => {
     expect(
       parseCompoundResumeState({

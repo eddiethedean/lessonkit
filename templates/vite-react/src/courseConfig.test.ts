@@ -44,6 +44,8 @@ describe("createCourseConfig", () => {
       courseId: "my-course",
     } as TelemetryEvent);
     config.observability?.onXapiTransportError?.(new Error("transport"));
+    config.observability?.onXapiMappingError?.(new Error("mapping"));
+    config.observability?.onLxpackBridgeError?.(new Error("bridge"));
 
     expect(warn).toHaveBeenCalled();
     warn.mockRestore();

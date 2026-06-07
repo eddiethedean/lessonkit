@@ -30,6 +30,8 @@ export type CourseStartedEmitOpts = {
   lxpackBridge: LxpackBridgeMode;
   allowedParentOrigins?: string[];
   onLxpackBridgeMiss?: (event: TelemetryEvent) => void;
+  onLxpackBridgeError?: (err: unknown) => void;
+  onXapiMappingError?: (err: unknown) => void;
   extraSinks?: import("@lessonkit/core").TelemetryPipelineSink[];
   skipXapi?: boolean;
   onXapiStatementSent?: () => void;
@@ -208,6 +210,8 @@ export async function emitCourseStartedPipelineOnly(
       lxpackBridge: opts.lxpackBridge,
       allowedParentOrigins: opts.allowedParentOrigins,
       onLxpackBridgeMiss: opts.onLxpackBridgeMiss,
+      onLxpackBridgeError: opts.onLxpackBridgeError,
+      onXapiMappingError: opts.onXapiMappingError,
       extraSinks: opts.extraSinks,
       skipXapi,
       onXapiDelivered: () => {
@@ -305,6 +309,8 @@ export async function emitCourseStartedToTrackingOnly(
       lxpackBridge: opts.lxpackBridge,
       allowedParentOrigins: opts.allowedParentOrigins,
       onLxpackBridgeMiss: opts.onLxpackBridgeMiss,
+      onLxpackBridgeError: opts.onLxpackBridgeError,
+      onXapiMappingError: opts.onXapiMappingError,
       extraSinks: opts.extraSinks,
       skipXapi: true,
     });

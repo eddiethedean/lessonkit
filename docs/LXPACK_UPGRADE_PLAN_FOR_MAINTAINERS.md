@@ -261,8 +261,10 @@ export type LxpackBridgeV1 = {
 | `course_completed` | course completed |
 | `lesson_started` | lesson initialized |
 | `lesson_completed` | `completeLesson` + completed verb |
-| `quiz_answered` | interaction / answered |
+| `quiz_answered` | `bridge.track` (assessment / answered) |
 | `quiz_completed` | `submitAssessment` + scored |
+| `assessment_answered` | `bridge.track` (assessment / answered; normalized to `quiz_answered` for `@lxpack/tracking-schema`) |
+| `assessment_completed` | `submitAssessment` + scored |
 | `interaction` | `track({ type, id, data })` |
 
 **Acceptance criteria:**

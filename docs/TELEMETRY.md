@@ -114,9 +114,15 @@ The runtime uses separate session-storage marks:
 
 When `config.session.sessionId` changes, `migrateCourseStartedMark` moves dedupe state to the new session id so learners do not receive duplicate `course_started` events after LMS handoff.
 
-### Quiz telemetry
+### Quiz and assessment telemetry
 
 Built-in `Quiz` / `KnowledgeCheck` must be wrapped in `<Lesson>`. Events without an enclosing `lessonId` are dropped by `tryBuildTelemetryEvent`.
+
+P0 assessment blocks (`TrueFalse`, `FillInTheBlanks`, etc.) emit `assessment_answered` / `assessment_completed`. Legacy `Quiz` emits `quiz_answered` / `quiz_completed`. Both namespaces map to xAPI; LMS bridge forwarding uses `bridge.track` for answered events and `submitAssessment` for completion (see [Packaging](PACKAGING.md)).
+
+### LMS bridge (LXPack)
+
+When `config.lxpack.bridge` is `"auto"`, completion events (`course_completed`, `lesson_completed`, `assessment_completed`, `quiz_completed`) call the parent `lxpackBridge.v1` API. Answered events (`assessment_answered`, `quiz_answered`) forward via `bridge.track`. Wire `observability.onLxpackBridgeMiss` and `onLxpackBridgeError` in production.
 
 ## Production observability
 

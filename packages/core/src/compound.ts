@@ -70,18 +70,31 @@ function isPlainSerializableChildState(value: unknown): value is AssessmentResum
   );
 }
 
-export function parseCompoundResumeState(raw: unknown): CompoundResumeState | null {
+export type ParseCompoundResumeStateOptions = {
+  onDroppedChildKeys?: (keys: string[]) => void;
+};
+
+export function parseCompoundResumeState(
+  raw: unknown,
+  opts?: ParseCompoundResumeStateOptions,
+): CompoundResumeState | null {
   if (!raw || typeof raw !== "object") return null;
   const obj = raw as Record<string, unknown>;
   if (obj.schemaVersion !== COMPOUND_RESUME_SCHEMA_VERSION) return null;
   if (typeof obj.activePageIndex !== "number" || !Number.isFinite(obj.activePageIndex)) return null;
   const childStates: Record<string, AssessmentResumeState> = {};
+  const droppedChildKeys: string[] = [];
   if (obj.childStates && typeof obj.childStates === "object" && !Array.isArray(obj.childStates)) {
     for (const [key, value] of Object.entries(obj.childStates as Record<string, unknown>)) {
       if (isPlainSerializableChildState(value)) {
         childStates[key] = value;
+      } else {
+        droppedChildKeys.push(key);
       }
     }
+  }
+  if (droppedChildKeys.length > 0) {
+    opts?.onDroppedChildKeys?.(droppedChildKeys);
   }
   const activeChapterIndex =
     typeof obj.activeChapterIndex === "number" && Number.isFinite(obj.activeChapterIndex)

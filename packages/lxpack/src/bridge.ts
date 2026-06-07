@@ -30,7 +30,11 @@ export {
 } from "@lxpack/tracking-schema";
 import { mapLessonkitTelemetryToBridgeAction } from "@lxpack/tracking-schema";
 
-import { telemetryEventToLessonkit, branchTelemetryToBridgeTrackEvent } from "./telemetry";
+import {
+  answeredTelemetryToBridgeTrackEvent,
+  branchTelemetryToBridgeTrackEvent,
+  telemetryEventToLessonkit,
+} from "./telemetry";
 
 type LxpackBridgeHost = {
   lxpackBridge?: { v1?: LxpackBridgeV1 };
@@ -254,6 +258,11 @@ export function forwardTelemetryToBridge(
   try {
     if (event.name === "assessment_completed") {
       forwardAssessmentCompletedToBridge(bridge, event);
+      return;
+    }
+    const answeredTrack = answeredTelemetryToBridgeTrackEvent(event);
+    if (answeredTrack) {
+      bridge.track?.(answeredTrack);
       return;
     }
     const branchTrack = branchTelemetryToBridgeTrackEvent(event);

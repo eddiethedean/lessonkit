@@ -1,7 +1,7 @@
 import type { TelemetryEvent } from "@lessonkit/core";
 import { describe, expect, it } from "vitest";
 import { mapLessonkitTelemetryToBridgeAction } from "@lxpack/tracking-schema";
-import { telemetryEventToLessonkit } from "../src/telemetry";
+import { answeredTelemetryToBridgeTrackEvent, telemetryEventToLessonkit } from "../src/telemetry";
 
 describe("telemetryEventToLessonkit", () => {
   it("maps quiz_completed checkId to assessmentId", () => {
@@ -56,6 +56,38 @@ describe("telemetryEventToLessonkit", () => {
     } as TelemetryEvent;
 
     expect(telemetryEventToLessonkit(event)).toBeNull();
+  });
+
+  it("maps assessment_answered checkId to assessmentId and bridge track", () => {
+    const event = {
+      name: "assessment_answered",
+      courseId: "c",
+      lessonId: "l",
+      sessionId: "s",
+      timestamp: new Date().toISOString(),
+      data: {
+        checkId: "tf-1",
+        interactionType: "trueFalse",
+        response: true,
+        correct: true,
+      },
+    } as TelemetryEvent;
+
+    const mapped = telemetryEventToLessonkit(event);
+    expect(mapped?.assessmentId).toBe("tf-1");
+    expect(mapped?.data).toMatchObject({ interactionType: "trueFalse", correct: true });
+
+    const action = mapLessonkitTelemetryToBridgeAction({
+      ...mapped!,
+      name: "quiz_answered",
+    });
+    expect(action).toBeNull();
+
+    const track = answeredTelemetryToBridgeTrackEvent(event);
+    expect(track).toMatchObject({
+      type: "assessment",
+      id: "tf-1",
+    });
   });
 
   it("maps branch telemetry events with data payloads", () => {

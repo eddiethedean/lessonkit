@@ -140,9 +140,11 @@ export function createProgram(baseLogger: CliLogger = console): Command {
 
   program
     .command("publish")
-    .description("Publish package artifacts (stub)")
+    .description("[maintainers] Not implemented — use Changesets (see RELEASING.md)")
     .action(() => {
-      baseLogger.log("lessonkit publish is not implemented. See RELEASING.md for npm publish workflow.");
+      baseLogger.log(
+        "lessonkit publish is not implemented. Monorepo releases use Changesets: npm run changeset && npm run version-packages && npm run release. See RELEASING.md.",
+      );
     });
 
   return program;

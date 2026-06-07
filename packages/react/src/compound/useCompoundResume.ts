@@ -6,6 +6,7 @@ import type { StoragePort } from "@lessonkit/core";
 import { isCompoundHydrated } from "./compoundHydration";
 import { isDevEnvironment } from "../runtime/validateComponentId";
 import { LessonkitContext } from "../context";
+import { compoundLoadOpts } from "./compoundLoadOpts";
 
 const warnedCompoundPersistFailures = new Set<string>();
 
@@ -55,7 +56,12 @@ export function useCompoundResume(opts: {
       resumedRef.current = true;
       return;
     }
-    const saved = loadCompoundState(storageRef.current, opts.courseId, opts.compoundId);
+    const saved = loadCompoundState(
+      storageRef.current,
+      opts.courseId,
+      opts.compoundId,
+      compoundLoadOpts(lessonkitCtx, opts.compoundId),
+    );
     if (saved) {
       resumedRef.current = true;
       opts.onResume?.(saved);

@@ -151,6 +151,10 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
     observabilityRef.current?.onLxpackBridgeMiss?.(event);
   }, []);
 
+  const onLxpackBridgeError = useCallback((err: unknown) => {
+    observabilityRef.current?.onLxpackBridgeError?.(err);
+  }, []);
+
   const pluginsFingerprint =
     normalizedConfig.plugins?.map((p) => `${p.id}\0${p.version}`).join("|") ?? "";
   const pluginHost = useMemo(
@@ -322,8 +326,8 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
               bootstrapSent = true;
             }
           }
-        } catch {
-          // xAPI mapping may skip invalid ids; ignore
+        } catch (err) {
+          observabilityRef.current?.onXapiMappingError?.(err);
         }
       }
     }
@@ -415,6 +419,8 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
         lxpackBridge: lxpackBridgeModeRef.current,
         allowedParentOrigins: allowedParentOriginsRef.current,
         onLxpackBridgeMiss,
+        onLxpackBridgeError,
+        onXapiMappingError: observabilityRef.current?.onXapiMappingError,
         extraSinks: extraSinksRef.current,
         skipXapi:
           xapiCourseStartedSentOnClientRef.current ||
@@ -430,7 +436,7 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
       if (generation !== courseStartedEmitGenerationRef.current) return;
       courseStartedEmittedToSinkRef.current = isCourseStartedSinkSettled(result);
     },
-    [onLxpackBridgeMiss],
+    [onLxpackBridgeMiss, onLxpackBridgeError],
   );
 
   useIsoLayoutEffect(() => {
@@ -524,11 +530,12 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
       lxpackBridge: lxpackBridgeModeRef.current,
       allowedParentOrigins: allowedParentOriginsRef.current,
       onLxpackBridgeMiss,
+      onLxpackBridgeError,
       extraSinks: extraSinksRef.current,
       onXapiMappingError: observabilityRef.current?.onXapiMappingError,
       onXapiTransportError: observabilityRef.current?.onXapiTransportError,
     });
-  }, [onLxpackBridgeMiss]);
+  }, [onLxpackBridgeMiss, onLxpackBridgeError]);
 
   const emitLifecycleEvent: TelemetryEmitFn = useCallback(
     (event) => {

@@ -75,6 +75,21 @@ describe("emitCourseStartedNonTrackingPipeline", () => {
     expect(result.xapiStatementSent).toBe(false);
   });
 
+  it("invokes onXapiMappingError when mapping throws", async () => {
+    const onXapiMappingError = vi.fn();
+    vi.spyOn(xapiModule, "telemetryEventToXAPIStatement").mockImplementation(() => {
+      throw new Error("mapping failed");
+    });
+    const result = await emitCourseStartedNonTrackingPipeline({
+      event: courseStartedEvent,
+      xapi: mockXapiClient(vi.fn()),
+      lxpackBridge: "off",
+      onXapiMappingError,
+    });
+    expect(onXapiMappingError).toHaveBeenCalledWith(expect.any(Error));
+    expect(result.xapiStatementSent).toBe(false);
+  });
+
   it("does not send when mapping returns no statement", async () => {
     const send = vi.fn();
     vi.spyOn(xapiModule, "telemetryEventToXAPIStatement").mockReturnValue(null);

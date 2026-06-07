@@ -63,6 +63,11 @@ const LIFECYCLE_EVENTS_FOR_STABLE_ID = new Set([
   "lesson_completed",
 ]);
 
+const ASSESSMENT_COMPLETION_EVENTS_FOR_STABLE_ID = new Set([
+  "assessment_completed",
+  "quiz_completed",
+]);
+
 /** Stable telemetry event id for lifecycle emits (excludes timestamp so retries dedupe). */
 export function stableTelemetryEventId(event: {
   name: string;
@@ -81,13 +86,61 @@ export function stableTelemetryEventId(event: {
   return hashSeedToUuid(seed);
 }
 
-/** Assign stable event.id for lifecycle telemetry before xAPI mapping (idempotent retries). */
-export function enrichTelemetryEventForXapi<T extends { id?: string; name: string; courseId: string; lessonId?: string; sessionId?: string; attemptId?: string }>(
-  event: T,
-): T {
+function stableAssessmentCompletionEventId(event: {
+  name: string;
+  courseId: string;
+  lessonId?: string;
+  sessionId?: string;
+  attemptId?: string;
+  data?: { checkId?: string };
+}): string {
+  const checkId =
+    event.data && typeof event.data === "object" && "checkId" in event.data
+      ? String((event.data as { checkId?: string }).checkId ?? "")
+      : "";
+  const seed = [
+    event.name,
+    event.courseId,
+    event.lessonId ?? "",
+    event.sessionId ?? "",
+    event.attemptId ?? "",
+    checkId,
+  ].join("|");
+  return hashSeedToUuid(seed);
+}
+
+/** Assign stable event.id for lifecycle and assessment-completion telemetry before xAPI mapping. */
+export function enrichTelemetryEventForXapi<
+  T extends {
+    id?: string;
+    name: string;
+    courseId: string;
+    lessonId?: string;
+    sessionId?: string;
+    attemptId?: string;
+    data?: unknown;
+  },
+>(event: T): T {
   if (event.id?.trim()) return event;
-  if (!LIFECYCLE_EVENTS_FOR_STABLE_ID.has(event.name)) return event;
-  return { ...event, id: stableTelemetryEventId(event) };
+  if (LIFECYCLE_EVENTS_FOR_STABLE_ID.has(event.name)) {
+    return { ...event, id: stableTelemetryEventId(event) };
+  }
+  if (ASSESSMENT_COMPLETION_EVENTS_FOR_STABLE_ID.has(event.name)) {
+    return {
+      ...event,
+      id: stableAssessmentCompletionEventId(
+        event as {
+          name: string;
+          courseId: string;
+          lessonId?: string;
+          sessionId?: string;
+          attemptId?: string;
+          data?: { checkId?: string };
+        },
+      ),
+    };
+  }
+  return event;
 }
 
 /** Stable xAPI statement id from telemetry event identity (idempotent across retries). */

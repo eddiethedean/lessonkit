@@ -22,6 +22,7 @@ export function emitTelemetry(
     allowedParentOrigins?: string[];
     extraSinks?: import("@lessonkit/core").TelemetryPipelineSink[];
     onLxpackBridgeMiss?: (event: TelemetryEvent) => void;
+    onLxpackBridgeError?: import("./observability").LessonkitObservabilityConfig["onLxpackBridgeError"];
     onXapiMappingError?: import("./observability").LessonkitObservabilityConfig["onXapiMappingError"];
     onXapiTransportError?: import("./observability").LessonkitObservabilityConfig["onXapiTransportError"];
   },
@@ -40,6 +41,7 @@ export function emitTelemetry(
     lxpackBridge: opts?.lxpackBridge ?? "auto",
     allowedParentOrigins: opts?.allowedParentOrigins,
     onLxpackBridgeMiss: opts?.onLxpackBridgeMiss,
+    onLxpackBridgeError: opts?.onLxpackBridgeError,
     onXapiMappingError: opts?.onXapiMappingError,
     onXapiTransportError: opts?.onXapiTransportError,
   };

@@ -14,6 +14,8 @@ export type LessonkitObservabilityConfig = {
   onTelemetryBufferDrop?: () => void;
   /** LMS bridge missing for a completion-related telemetry event (`bridge: auto`). */
   onLxpackBridgeMiss?: (event: TelemetryEvent) => void;
+  /** LMS bridge host threw while forwarding telemetry (`bridge: auto`). */
+  onLxpackBridgeError?: (err: unknown) => void;
   /** xAPI transport failure after retries (statement re-queued). */
   onXapiTransportError?: (err: unknown) => void;
   /** Telemetry → xAPI mapping failure (statement skipped). */
@@ -22,6 +24,12 @@ export type LessonkitObservabilityConfig = {
   onCompoundHydrationPartial?: (ctx: {
     compoundId: string;
     missingCheckIds: string[];
+  }) => void;
+  /** Corrupt compound resume blob or invalid child states stripped on load. */
+  onCompoundResumeCorrupt?: (ctx: {
+    compoundId: string;
+    droppedChildKeys?: string[];
+    corrupt?: boolean;
   }) => void;
 };
 

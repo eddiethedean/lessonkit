@@ -16,6 +16,7 @@ export type LegacyEmitOptions = {
   lxpackBridge: LxpackBridgeMode;
   allowedParentOrigins?: string[];
   onLxpackBridgeMiss?: (event: TelemetryEvent) => void;
+  onLxpackBridgeError?: LessonkitObservabilityConfig["onLxpackBridgeError"];
   onXapiMappingError?: LessonkitObservabilityConfig["onXapiMappingError"];
   onXapiTransportError?: LessonkitObservabilityConfig["onXapiTransportError"];
 };
@@ -69,6 +70,7 @@ function createLegacyPipeline(
       emit(event) {
         forwardTelemetryToLxpack(event, opts.lxpackBridge, {
           onBridgeMiss: opts.onLxpackBridgeMiss,
+          onBridgeError: opts.onLxpackBridgeError,
           allowedParentOrigins: opts.allowedParentOrigins,
         });
       },

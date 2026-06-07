@@ -95,7 +95,7 @@ describe("enrichTelemetryEventForXapi", () => {
     ).toBe(enriched.id);
   });
 
-  it("does not assign id to assessment events", () => {
+  it("does not assign id to assessment_answered events", () => {
     const event = {
       name: "assessment_answered" as const,
       courseId: "c1",
@@ -105,5 +105,25 @@ describe("enrichTelemetryEventForXapi", () => {
       data: { checkId: "q1" },
     };
     expect((enrichTelemetryEventForXapi(event) as { id?: string }).id).toBeUndefined();
+  });
+
+  it("assigns stable id to assessment_completed across timestamps", () => {
+    const base = {
+      name: "assessment_completed" as const,
+      courseId: "c1",
+      lessonId: "l1",
+      sessionId: "s1",
+      data: { checkId: "tf-1", interactionType: "trueFalse" as const, score: 1, maxScore: 1 },
+    };
+    const enriched = enrichTelemetryEventForXapi({
+      ...base,
+      timestamp: "2026-01-01T00:00:00.000Z",
+    }) as typeof base & { id?: string };
+    const retry = enrichTelemetryEventForXapi({
+      ...base,
+      timestamp: "2026-06-07T12:00:00.000Z",
+    }) as typeof base & { id?: string };
+    expect(enriched.id).toMatch(UUID_RE);
+    expect(retry.id).toBe(enriched.id);
   });
 });

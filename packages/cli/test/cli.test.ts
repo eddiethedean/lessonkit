@@ -42,8 +42,9 @@ describe("@lessonkit/cli program", () => {
     const log = vi.fn();
     await run(["node", "lessonkit", "publish"], { log, error: () => {} });
     expect(log).toHaveBeenCalledWith(
-      "lessonkit publish is not implemented. See RELEASING.md for npm publish workflow.",
+      expect.stringContaining("lessonkit publish is not implemented"),
     );
+    expect(log).toHaveBeenCalledWith(expect.stringContaining("RELEASING.md"));
   });
 
   it("package requires --target", async () => {

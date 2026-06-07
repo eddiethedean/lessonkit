@@ -258,7 +258,7 @@ export function validateReactManifestParity(
     issues.push({
       path: appSources.length > 0 ? appSources.join(", ") : "src/",
       message: hasDescriptorIds
-        ? "React app source not found for ID parity check"
+        ? "React app source required for ID parity check when descriptor defines courseId or assessments"
         : "React app source not found for ID parity check",
       severity: hasDescriptorIds ? "error" : "warning",
     });

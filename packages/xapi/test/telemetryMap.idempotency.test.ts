@@ -32,6 +32,31 @@ describe("telemetryEventToXAPIStatement idempotency", () => {
     expect(first?.id).toBe(second?.id);
   });
 
+  it("maps assessment_completed with different timestamps to identical statement ids", () => {
+    const base = {
+      name: "assessment_completed" as const,
+      courseId: "c1",
+      lessonId: "l1",
+      sessionId: "s1",
+      data: {
+        checkId: "tf-1",
+        interactionType: "trueFalse" as const,
+        score: 1,
+        maxScore: 1,
+      },
+    };
+    const first = telemetryEventToXAPIStatement({
+      ...base,
+      timestamp: "2026-01-01T00:00:00.000Z",
+    });
+    const second = telemetryEventToXAPIStatement({
+      ...base,
+      timestamp: "2026-06-07T12:00:00.000Z",
+    });
+    expect(first?.id).toBeTruthy();
+    expect(first?.id).toBe(second?.id);
+  });
+
   it("maps assessment_answered with same checkId but different answers to different ids", () => {
     const base = {
       name: "assessment_answered" as const,
