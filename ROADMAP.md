@@ -25,14 +25,14 @@ Packaging and LMS delivery lean on **LXPack** via `@lessonkit/lxpack` (see 0.6.x
 ## Status
 
 - **Framework:** **1.5.0** — `BranchingScenario` + `Embed` + `Chart` (see [1.5.x](#15x--branchingscenario))
-- **Focus (now):** **1.6.x** — interchange format + optional H5P import spike
+- **Focus (now):** **1.6.x** — portable interchange (`.lkcourse`) + block registry CLI ([1.6.x](#16x--portable-interchange))
 
 ## Guiding principles
 
 - **React-first**: author learning experiences as components, not timelines.
 - **Accessibility-first**: WCAG 2.1 AA target; keyboard + focus management by default.
 - **Interop-ready**: analytics primitives now; SCORM/xAPI/cmi5 via LXPack export is additive.
-- **Proven interactions**: adopt high-value patterns from the broader interactive-content ecosystem (notably [H5P](https://h5p.org/content-types-and-applications)) as first-class React blocks with shared contracts—not embedded H5P iframes.
+- **Proven interactions**: adopt high-value patterns from the broader interactive-content ecosystem (notably [H5P](https://h5p.org/content-types-and-applications)) as first-class React blocks with shared contracts—not embedded H5P iframes and **not** `.h5p` import or merge.
 - **DX matters**: fast local dev, simple project bootstrap, excellent docs.
 - **Stable API**: semver expectations from **1.0.0** onward.
 
@@ -307,7 +307,7 @@ Framework **1.0.0** shipped **2026-05-30**.
 #### Out of scope for 1.2.x
 
 - `SlideDeck` (Course Presentation) — shipped in **1.3.x**
-- H5P `.h5p` import — **1.6.x** research spike
+- H5P platform interop — **out of scope** (see [H5P authors guide](docs/guides/h5p-for-lessonkit-authors.md))
 - Tier C–E media/game blocks — later framework minors per [capability map](docs/project/h5p-capability-map.md)
 
 ---
@@ -388,7 +388,7 @@ Framework **1.0.0** shipped **2026-05-30**.
 
 #### Out of scope for 1.4.x
 
-- **H5P runtime embedding** and **`.h5p` import** for Interactive Video (P2, timeline complexity — stays **1.6.x**)
+- **H5P platform interop** — out of scope; native `InteractiveVideo` ships in **1.4.x**
 - **`BranchingScenario`** — [1.5.x](#15x--branchingscenario)
 - **YouTube/Vimeo embed-first video** — self-hosted `<video>` + optional `src` URL only in 1.4.0; external embeds research later
 - **Adaptive bitrate / HLS/DASH** — out of scope
@@ -495,7 +495,7 @@ Ship only if 1.5.0 core is stable; each item completes the [H5P documentation ch
 #### Out of scope for 1.5.x
 
 - **Visual graph editor** or canvas authoring UI — React/JSX remains source of truth
-- **H5P `.h5p` import** for Branching Scenario — stays **1.6.x** research spike
+- **H5P platform interop** — out of scope; native `BranchingScenario` ships in **1.5.x**
 - **Nested `BranchingScenario`** inside another compound — defer until nesting policy is explicit
 - **`GameMap`** spatial branching — **1.7.x**
 - **Adaptive / ML routing** — authors declare static graphs only
@@ -515,6 +515,40 @@ Ship only if 1.5.0 core is stable; each item completes the [H5P documentation ch
 - SCORM 1.2 package from golden example reports aggregated score from assessments on the taken path.
 - `branch_selected` appears in telemetry catalog JSON and Storybook telemetry panel; xAPI statements include choice target IRIs.
 - Capability map row `H5P.BranchingScenario` → ✅ with checklist complete.
+
+---
+
+### 1.6.x — Portable interchange
+
+**Status:** **In progress** (next framework minor after 1.5.0).
+
+#### Goals
+
+- Ship a **portable course interchange** (`.lkcourse`) so teams can archive, share, and tool against LessonKit courses without treating LMS packaging artifacts as the source of truth.
+- Expose the **block catalog as a first-class registry** (`lessonkit blocks list`) for AI assistants, codegen, and future palette UIs.
+- Document the **manifest layers** so authors understand root `lessonkit.json` vs LXPack interchange vs `.lkcourse`.
+
+**Explicit non-goal:** any **H5P platform interop** — no `.h5p` import/merge, no H5P Hub, no H5P `semantics.json` transport, no H5P runtime embedding. LessonKit implements H5P-*aligned* interaction patterns as native React blocks ([capability map](docs/project/h5p-capability-map.md)). Authors coming from H5P **rebuild** in React—not by ingesting H5P packages.
+
+#### Deliverables — 1.6.0
+
+- [ ] **Interchange spec** — `docs/reference/interchange.md`; `@lessonkit/lxpack/block-tree.v1.json` + `lkcourse-format.v1.json`
+- [ ] **`.lkcourse` export** — `lessonkit export` producing zip with `manifest.json`, `interchange.json`, `dist/`, optional `block-tree.json`
+- [ ] **`@lessonkit/lxpack`** — `exportLkcourse()`, `validateLkcourse()`, `importLkcourse()` (round-trip tests)
+- [ ] **Block registry CLI** — `lessonkit blocks list` (reads `block-catalog.v3.json`)
+- [ ] **Integration test** — export from golden example → validate → manifest parity on import
+- [ ] **Docs** — update [manifest reference](docs/MANIFEST.md); `MIGRATION-1.5-to-1.6.md`
+
+#### Out of scope for 1.6.x
+
+- **H5P platform interop** — `.h5p` packages, H5P Hub, H5P `semantics.json`, runtime embedding, or bidirectional H5P export
+- **Visual block editor** — **1.6.x+** / tooling research
+- **New scored block types** — content waves remain **1.7.x+** (not required for interchange milestone)
+
+#### Success criteria
+
+- `lessonkit export` produces a valid `.lkcourse` with round-trip `lessonkit.json` parity.
+- `lessonkit blocks list --json` enumerates all v3 catalog entries with `h5pMachineName` where mapped (traceability only—not import).
 
 ---
 
@@ -554,7 +588,7 @@ Ship only if 1.5.0 core is stable; each item completes the [H5P documentation ch
 
 ## H5P-aligned capability backlog
 
-[H5P](https://h5p.org/) is a mature catalog of **50+ interactive content types** plus **compound containers** (Interactive Book, Course Presentation, Interactive Video, Branching Scenario) and **platform services** (Hub, `.h5p` transport, question-type contracts, xAPI). LessonKit should **not** embed H5P runtimes in iframes—we should **incorporate the interaction patterns** as native `@lessonkit/react` primitives with the same guarantees we already ship: identity v1, WCAG 2.1 AA, telemetry catalog, export parity, and machine-readable block contracts.
+[H5P](https://h5p.org/) is a mature catalog of **50+ interactive content types** plus **compound containers** (Interactive Book, Course Presentation, Interactive Video, Branching Scenario) and **platform services** (Hub, `.h5p` transport, question-type contracts, xAPI). LessonKit uses H5P only as a **pattern reference** for native React blocks—we **do not** integrate H5P Hub, `.h5p` packages, H5P Core, or H5P authoring transport. Ship interaction patterns as `@lessonkit/react` primitives with identity v1, WCAG 2.1 AA, telemetry catalog, export parity, and machine-readable block contracts.
 
 **Legend:** ✅ shipped · 🟡 partial · ⬜ planned
 
@@ -666,20 +700,24 @@ Lower priority unless a customer/LMS parity request surfaces; still catalog for 
 | Advent Calendar | `AdventCalendar` | P3 |
 | Agora World (AR) | `AugmentedReality` | P4 / research |
 
-### Tier F — Platform, authoring ecosystem, and interoperability
+### Tier F — LessonKit platform (H5P analogues for reference only)
 
-| H5P capability | LessonKit target | Milestone hint |
-|----------------|------------------|----------------|
-| **Content Type Hub** (discover/install/update libraries) | **Block registry** + documented npm packages (`@lessonkit/blocks-*` optional split); CLI `lessonkit blocks list` | CLI **1.6.x** |
-| **`.h5p` import/export** | **`.lkcourse` / interchange** JSON + assets zip; optional **H5P import adapter** (read-only, map subset) | Framework **1.6.x** (research spike) |
-| **Question-type contract** | `Assessment` interface + `block-contract` enforcement | Framework **1.1.x** ✅ |
-| **Compound sub-content allowlists** | Per-parent `allowedChildTypes` in catalog | Framework **1.2.x** ✅ |
-| **Resume / attempt state** | `getCurrentState` on assessments + compounds; session storage v2 | Framework **1.2.x** ✅ |
-| **Hub OER / content reuse** | Template gallery + import from shared examples repo | Examples + docs **1.x** |
-| **Community / third-party blocks** | Plugin `interactionBlocks` + marketplace | Framework plugins **2.x** |
-| **LTI / embed** | Already via LMS packaging; document embed snippet for standalone | Docs + lxpack **1.x** |
-| **Mobile (iOS / Android)** | **`@lessonkit/react-native`** — shared core contracts, native UI blocks, offline xAPI queue | Framework **2.x** |
-| **Fresh UI / theming per widget** | Single `--lk-*` theme across all blocks (advantage over H5P per-library CSS) | Ongoing `@lessonkit/themes` |
+LessonKit ships its **own** platform surfaces (block registry, `.lkcourse`, LMS packaging). Rows below name familiar **H5P services** only to show what LessonKit does instead—not as integration targets.
+
+| H5P analogue (not integrated) | LessonKit approach | Milestone |
+|-------------------------------|-------------------|-----------|
+| Content Type Hub | **Block registry** — `lessonkit blocks list`, `block-catalog.v3.json`; optional `@lessonkit/blocks-*` split later | CLI **1.6.x** |
+| `.h5p` transport | **`.lkcourse`** portable zip + interchange spec (LessonKit-native only) | Framework **1.6.0** |
+| `.h5p` import / Hub install | — | 🚫 **Out of scope** — rebuild as native blocks |
+| H5P `semantics.json` editor | — | 🚫 **Out of scope** — use block catalog + React props (future inspector is LessonKit-schema only) |
+| Question-type contract | `Assessment` interface + `block-contract` enforcement | Framework **1.1.x** ✅ |
+| Compound sub-content allowlists | Per-parent `allowedChildTypes` in catalog | Framework **1.2.x** ✅ |
+| Resume / attempt state | `getCurrentState` on assessments + compounds; session storage v2 | Framework **1.2.x** ✅ |
+| H5P OER Hub | **Example template gallery** (LessonKit examples repo; not H5P content) | Examples + docs **1.x** |
+| Community libraries | Plugin `interactionBlocks` + marketplace | Framework **2.x** |
+| LTI / embed | LMS packaging (SCORM/xAPI/cmi5); standalone embed snippet in docs | Docs + lxpack **1.x** |
+| Mobile apps | **`@lessonkit/react-native`** | Framework **2.x** |
+| Per-widget CSS | Global `--lk-*` tokens via `@lessonkit/themes` | Ongoing |
 
 ### Implementation principles (learned from H5P)
 
@@ -720,14 +758,14 @@ Framework 1.3.x   SlideDeck (Course Presentation) + H5P docs
 Framework 1.4.0   InteractiveVideo + Video + TimedCue + Tier B/C/D blocks + golden example
 Framework 1.5.0   BranchingScenario + Embed + Chart + branch telemetry + golden example
 Framework 1.5.x   _(stretch items shipped in 1.5.0)_
-Framework 1.6.x   Interchange format + optional H5P import spike + import guide callouts
+Framework 1.6.0   `.lkcourse` export + interchange spec + `lessonkit blocks list`
 Framework 1.7.x+  Tier C–E blocks by demand; plugin marketplace; H5P doc checklist each
 Framework 2.x     @lessonkit/react-native (iOS/Android) + shared core/xapi contracts
 ```
 
 **Documentation:** [`docs/project/h5p-capability-map.md`](docs/project/h5p-capability-map.md) — traceability matrix (status ✅ as blocks ship). **Per-block gate:** [H5P documentation checklist](#h5p-documentation-checklist-per-block) required for every new H5P-parity feature. **Hub pages:** [`docs/guides/h5p-for-lessonkit-authors.md`](docs/guides/h5p-for-lessonkit-authors.md), [docs index](docs/index.md), [block catalog](docs/reference/block-catalog.md), components guide.
 
-**Out of scope (explicit):** running H5P Core inside LessonKit exports; maintaining parity with every unmaintained H5P third-party type; iframe-first embed model.
+**Out of scope (explicit):** H5P Core, H5P Hub, `.h5p` import/merge/export, H5P `semantics.json` transport, iframe-first H5P embeds, and parity with every unmaintained H5P third-party type.
 
 ---
 

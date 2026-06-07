@@ -88,7 +88,7 @@ Identity rules (`courseId`, `lessonId`, `checkId`, URNs): [`docs/IDENTITY.md`](d
 
 **Status:** Shipped in framework **1.1.0+** and expanded through **1.5.x**. See [block catalog](docs/reference/block-catalog.md) and [H5P capability map](docs/project/h5p-capability-map.md) for current coverage.
 
-Aligns with H5P's [question type contract](https://h5p.org/documentation/developers/contracts) but is implemented in React, not `H5P.Question`.
+Aligns with H5P's [question type contract](https://h5p.org/documentation/developers/contracts) but is implemented in React, not `H5P.Question`. H5P platform interop (`.h5p` import, Hub, `semantics.json`) is out of scope—see [H5P capability map](docs/project/h5p-capability-map.md).
 
 ## Scored blocks
 

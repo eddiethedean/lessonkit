@@ -75,7 +75,7 @@ Core building blocks for courses, assessments, compound layouts (books, decks, v
 | **Assessments** | `TrueFalse`, `FillInTheBlanks`, `DragAndDrop`, `Summary`, and more |
 | **Delivery** | SCORM 1.2/2004, standalone, xAPI, cmi5 from one Vite app |
 
-Full component list with props and H5P mappings: [block catalog](https://lessonkit.readthedocs.io/en/latest/reference/block-catalog.html) · [components & hooks](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/components-and-hooks.html). Tier labels (A/B/C/D) in the catalog map to [H5P capability priorities](https://lessonkit.readthedocs.io/en/latest/project/h5p-capability-map.html).
+Full component list with props and H5P mappings: [block catalog](https://lessonkit.readthedocs.io/en/latest/reference/block-catalog.html) · [components & hooks](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/components-and-hooks.html). Tier labels (A/B/C/D) in the catalog map to [H5P capability priorities](https://lessonkit.readthedocs.io/en/latest/project/h5p-capability-map.html). H5P is a **pattern reference only**—LessonKit does not import `.h5p` packages or integrate with H5P Hub.
 
 - **Identity v1** — Required `courseId`, `lessonId`, and `checkId`; stable URNs for telemetry and xAPI
 - **Telemetry & xAPI** — Session-aware events, batching, pluggable sinks; statement mapping via `@lessonkit/xapi`

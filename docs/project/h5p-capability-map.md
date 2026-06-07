@@ -6,7 +6,9 @@
 Use this page as a **lookup table**: H5P display name and machine name → LessonKit component. Narrative guide: **[Coming from H5P?](../guides/h5p-for-lessonkit-authors.md)**.
 :::
 
-Traceability matrix for adopting [H5P](https://h5p.org/content-types-and-applications) interaction patterns as native LessonKit blocks—not as embedded H5P runtimes.
+Traceability matrix for adopting [H5P](https://h5p.org/content-types-and-applications) interaction patterns as native LessonKit blocks.
+
+**Not in scope:** H5P Hub, `.h5p` import/merge, H5P `semantics.json` transport, H5P Core, or iframe runtimes. Rebuild activities in React using this map.
 
 **Roadmap:** [ROADMAP.md — H5P-aligned backlog](roadmap.md#h5p-aligned-capability-backlog)  
 **Runtime catalog (today):** [Block catalog](../reference/block-catalog.md) (`blockCatalogVersion = 3` — default since framework 1.2; 1.5 adds `BranchingScenario`, `Embed`, `Chart`)  
@@ -133,13 +135,14 @@ H5P **machine names** follow common library ids (e.g. `H5P.MultiChoice`). Displa
 | `H5P.TwitterUserFeed` | Twitter User Feed | — | — | — | 🚫 | — |
 | `H5P.AppearIn` | appear.in | — | — | — | 🚫 | — |
 
-### Platform capabilities (not content types)
+### Platform capabilities (LessonKit-native; H5P analogues for reference)
 
-| H5P capability | LessonKit target | Status | Milestone |
+| H5P analogue (not integrated) | LessonKit approach | Status | Milestone |
 | --- | --- | --- | --- |
 | Content Type Hub | Block registry + `lessonkit blocks list` | ⬜ | CLI 1.6.x |
-| `.h5p` package | `.lkcourse` zip + optional import adapter | ⬜ | 1.6.x |
-| `semantics.json` editor | JSON Schema–driven block inspector | ⬜ | 1.6.x+ |
+| `.h5p` transport | `.lkcourse` portable zip | ⬜ | 1.6.0 |
+| `.h5p` import / Hub | — | 🚫 | Out of scope |
+| H5P `semantics.json` editor | — | 🚫 | Out of scope (future inspector uses LessonKit block catalog only) |
 | Question type contract | `Assessment` interface | ✅ | 1.1.x |
 | Compound allowlists | `allowedChildTypes` in catalog | ✅ | 1.2.x |
 | Resume state | `getCurrentState` / session v2 | ✅ | 1.2.x |
@@ -168,19 +171,9 @@ Mirrors H5P maintainer curation ([why sub-content differs](https://snordian.de/2
 
 ---
 
-## H5P import adapter (research, 1.6.x)
+## Migration from H5P (rebuild only)
 
-Read-only mapping for a **subset** of `.h5p` content into LessonKit project JSON / React codegen—not runtime embedding.
-
-| H5P type | Import priority | Notes |
-| --- | --- | --- |
-| `H5P.MultiChoice` | P0 | Maps to `Quiz` |
-| `H5P.TrueFalse` | P0 | Maps to `TrueFalse` |
-| `H5P.Blanks` | P0 | Text normalization |
-| `H5P.InteractiveBook` | P1 | Chapter → pages |
-| `H5P.CoursePresentation` | P2 | Slide → `SlideDeck` |
-| `H5P.InteractiveVideo` | P2 | Timeline complexity |
-| Branching / games | P3+ | Manual rewrite likely |
+LessonKit does **not** import, merge, or sync with H5P Hub, `.h5p` packages, or H5P `semantics.json`. Use this map to **rebuild** each activity as a native `@lessonkit/react` block and wire IDs in `lessonkit.json`. Guide: [Coming from H5P?](../guides/h5p-for-lessonkit-authors.md).
 
 ---
 

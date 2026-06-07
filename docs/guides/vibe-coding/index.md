@@ -9,7 +9,7 @@ Instructional designers, trainers, and builders who **do not write React by hand
 :::{admonition} Used H5P before?
 :class: tip
 
-Ask your AI to follow LessonKit patterns and map activities using **[Coming from H5P?](../h5p-for-lessonkit-authors.md)** (e.g. “use `Quiz` like H5P Multiple Choice”). Capability list: **[H5P capability map](../../project/h5p-capability-map.md)**.
+Ask your AI to follow LessonKit patterns and **rebuild** activities using **[Coming from H5P?](../h5p-for-lessonkit-authors.md)** (e.g. “use `Quiz` like H5P Multiple Choice”—no `.h5p` import). Capability list: **[H5P capability map](../../project/h5p-capability-map.md)**.
 :::
 
 :::{admonition} Library Skills (recommended)

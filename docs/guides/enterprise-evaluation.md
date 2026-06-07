@@ -5,7 +5,7 @@ One-page summary for security, compliance, and platform teams evaluating LessonK
 ## Product summary
 
 - **What:** React-first framework + CLI for authoring trackable courses and exporting SCORM, xAPI, cmi5, or standalone SPAs.
-- **What it is not:** Visual timeline authoring (Storyline/Captivate), embedded H5P runtime, or an LMS. See [Design philosophy](design-philosophy.md).
+- **What it is not:** Visual timeline authoring (Storyline/Captivate), H5P platform interop (`.h5p` import, Hub, runtime embedding), or an LMS. See [Design philosophy](design-philosophy.md).
 - **License:** [Apache-2.0](https://github.com/eddiethedean/lessonkit/blob/main/LICENSE)
 - **npm scope:** [@lessonkit/*](https://www.npmjs.com/org/lessonkit) (seven packages, aligned semver)
 

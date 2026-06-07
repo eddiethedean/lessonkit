@@ -12,11 +12,11 @@ LessonKit courses are **Vite + React + TypeScript** applications. Authors compos
 
 ## Native blocks, not embedded H5P
 
-LessonKit ships **React implementations** inspired by H5P content types. It does **not** embed H5P iframes or run H5P Core inside exported packages.
+LessonKit ships **React implementations** inspired by H5P content types. It does **not** embed H5P, import `.h5p` packages, use H5P Hub, or run H5P Core inside exported courses.
 
 **Why:** One bundle, one telemetry path, one accessibility surface, full control over UX and theming.
 
-**Trade-off:** You cannot drop a `.h5p` file into LessonKit. Map H5P types to LessonKit blocks via the [H5P capability map](../project/h5p-capability-map.md).
+**Trade-off:** You cannot drop a `.h5p` file into LessonKit or sync from H5P Hub. Map activity types to LessonKit blocks via the [H5P capability map](../project/h5p-capability-map.md) and rebuild in React.
 
 ## Identity and telemetry by design
 
@@ -41,7 +41,7 @@ Components target WCAG 2.1 AA patterns. Production builds enforce observability 
 | Non-goal | Alternative |
 | --- | --- |
 | Visual graph editor for branching | JSX + `BranchingScenario` (graph validated at runtime) |
-| H5P `.h5p` import (1.5.x) | Native blocks; import research in 1.6.x roadmap |
+| H5P interop (`.h5p`, Hub, semantics.json) | Out of scope — native blocks only; see capability map |
 | Embedded LMS | Export packages for your existing LMS |
 | Guaranteed LMS compatibility without staging tests | [LMS compatibility](../reference/lms-compatibility.md) + your staging environment |
 

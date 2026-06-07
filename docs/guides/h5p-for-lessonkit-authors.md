@@ -3,7 +3,9 @@
 :::{admonition} H5P authors
 :class: tip
 
-If you already use **[H5P](https://h5p.org/content-types-and-applications)** in Moodle, WordPress, or another LMS, LessonKit offers the **same kinds of interactions** as native **React components**—with one course app, stable IDs, and SCORM/xAPI/cmi5 export via the CLI. We do **not** embed H5P iframes or `.h5p` runtimes inside shipped courses.
+If you already use **[H5P](https://h5p.org/content-types-and-applications)** in Moodle, WordPress, or another LMS, LessonKit offers the **same kinds of interactions** as native **React components**—with one course app, stable IDs, and SCORM/xAPI/cmi5 export via the CLI.
+
+**Policy:** LessonKit does **not** embed H5P, import `.h5p` files, connect to H5P Hub, or consume H5P `semantics.json`. You **reimplement** familiar activity types using LessonKit blocks.
 :::
 
 LessonKit is **React-first**, not a plugin inside your LMS’s content bank. You author a small web app (`Course` → `Lesson` → blocks), declare assessments in **`lessonkit.json`**, then **`lessonkit package`** for delivery.
@@ -14,7 +16,7 @@ Use the **[H5P capability map](../project/h5p-capability-map.md)** for the full 
 
 ### Available today (framework 1.5.0)
 
-| H5P name | LessonKit | Import / notes |
+| H5P name | LessonKit | Notes |
 | --- | --- | --- |
 | **Multiple Choice** (`H5P.MultiChoice`) | `Quiz` / `KnowledgeCheck` | Set `checkId`; mirror in `lessonkit.json` `assessments[]` |
 | **True/False** | `TrueFalse` | `kind: "trueFalse"` in manifest; LXPack packages as 2-choice MCQ |
@@ -54,7 +56,7 @@ Use the **[H5P capability map](../project/h5p-capability-map.md)** for the full 
 
 ### Planned (roadmap / capability map)
 
-See the [capability map](../project/h5p-capability-map.md) for Tier A–E blocks not yet shipped (e.g. `GameMap`, H5P import in 1.6.x).
+See the [capability map](../project/h5p-capability-map.md) for Tier A–E blocks not yet shipped (e.g. `GameMap`, `SortParagraphs`).
 
 :::{admonition} Renamed on purpose
 :class: important
@@ -72,12 +74,14 @@ A few LessonKit ids differ from H5P labels where we already shipped or need clea
 | Theming | Per content-type CSS | Global `--lk-*` via `@lessonkit/themes` |
 | Nesting | Curated sub-content lists | Same idea via compound blocks + catalog allowlists (shipped in 1.2.x+) |
 
-## Import from existing H5P content
+## Migrating from existing H5P content
 
-:::{admonition} H5P import (research)
-:class: note
+:::{admonition} Rebuild only — no H5P interop
+:class: important
 
-**Runtime embedding of H5P is not planned.** A future **read-only `.h5p` import** (framework **1.6.x**) may translate a subset of activities into LessonKit project JSON or React source—still using LessonKit components after export. Until then, rebuild high-value activities using the capability map and [block catalog](../reference/block-catalog.md).
+There is **no** `.h5p` import, H5P Hub integration, `semantics.json` bridge, or H5P runtime embedding. Migration means mapping each legacy activity to a LessonKit block in the [capability map](../project/h5p-capability-map.md), authoring it in React, and syncing `courseId` / `lessonId` / `checkId` with `lessonkit.json`.
+
+Framework **1.6.x** adds **`.lkcourse`** export for sharing LessonKit projects between teams—not for reading H5P packages.
 :::
 
 ## Next steps

@@ -47,7 +47,7 @@ Pick the path that matches how you work:
 :::{admonition} Coming from H5P?
 :class: tip
 
-You can map familiar H5P content types to LessonKit components. LessonKit ships **40+ native React blocks** with H5P capability mappings. Start with **[Coming from H5P?](guides/h5p-for-lessonkit-authors.md)** and the **[H5P capability map](project/h5p-capability-map.md)**.
+You can map familiar H5P content types to LessonKit components and **rebuild** them as native React blocks—LessonKit does **not** import `.h5p` files or integrate with H5P Hub. Start with **[Coming from H5P?](guides/h5p-for-lessonkit-authors.md)** and the **[H5P capability map](project/h5p-capability-map.md)**.
 :::
 
 :::{admonition} New to React?

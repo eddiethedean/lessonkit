@@ -27,7 +27,7 @@ A **React-first framework** for building trackable learning experiences and expo
 | **Storyline / Captivate** | Visual timeline authoring, traditional e-learning teams |
 | **LessonKit** | React/TypeScript teams, custom UX, one codebase → SCORM/xAPI/cmi5 |
 
-LessonKit ships **native React blocks** inspired by H5P patterns—it does **not** embed H5P iframes. See [Coming from H5P?](h5p-for-lessonkit-authors.md).
+LessonKit ships **native React blocks** inspired by H5P patterns—it does **not** embed H5P, import `.h5p` files, or integrate with H5P Hub. Rebuild activities in React. See [Coming from H5P?](h5p-for-lessonkit-authors.md).
 
 ## When should I **not** use LessonKit?
 
