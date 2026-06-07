@@ -18,6 +18,8 @@ export type InMemoryXAPIQueueOptions = {
   onDepth?: (size: number) => void;
   /** Called when an oldest statement is dropped because the queue is at maxSize. */
   onCap?: () => void;
+  /** Called when a statement cannot be enqueued because the queue is full and the head is in-flight. */
+  onOverflow?: (statement: XAPIStatement) => void;
   /** Failures at queue head before skipping (default 10). */
   maxHeadFailures?: number;
   /** Called when the queue head is skipped after repeated transport failures. */
@@ -88,14 +90,16 @@ export function createInMemoryXAPIQueue(opts?: InMemoryXAPIQueueOptions): XAPIQu
         if (headInFlight) {
           if (buffer.length > 1) {
             buffer.splice(1, 1);
+            opts?.onCap?.();
           } else {
             opts?.onCap?.();
+            opts?.onOverflow?.(normalized);
             return;
           }
         } else {
           buffer.shift();
+          opts?.onCap?.();
         }
-        opts?.onCap?.();
       }
       buffer.push(normalized);
       notifyDepth();

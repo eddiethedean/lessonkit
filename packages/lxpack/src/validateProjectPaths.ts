@@ -8,16 +8,33 @@ export type ProjectPathsInput = {
   outputBaseDir?: string;
 };
 
+/** Directory names that must not be used as packaging output targets. */
+const RESERVED_OUTPUT_SEGMENTS = new Set([".git", "node_modules", ".github"]);
+
+export function isReservedOutputPath(value: string): boolean {
+  const normalized = value.replace(/\\/g, "/").replace(/^\/+|\/+$/g, "");
+  const segments = normalized.split("/").filter(Boolean);
+  return segments.some((segment) => RESERVED_OUTPUT_SEGMENTS.has(segment));
+}
+
 function validatePathField(
   value: string,
   fieldPath: string,
   projectRoot: string,
   issues: DescriptorValidationIssue[],
+  options?: { rejectReserved?: boolean },
 ): void {
   if (!isSafeRelativeSpaPath(value)) {
     issues.push({
       path: fieldPath,
       message: "path must be relative without '..' segments or absolute prefixes",
+    });
+    return;
+  }
+  if (options?.rejectReserved && isReservedOutputPath(value)) {
+    issues.push({
+      path: fieldPath,
+      message: "path must not target reserved directories (.git, node_modules, .github)",
     });
     return;
   }
@@ -43,10 +60,14 @@ export function validateProjectPaths(
     validatePathField(paths.spaDistDir.trim(), "paths.spaDistDir", root, issues);
   }
   if (paths.lxpackOutDir?.trim()) {
-    validatePathField(paths.lxpackOutDir.trim(), "paths.lxpackOutDir", root, issues);
+    validatePathField(paths.lxpackOutDir.trim(), "paths.lxpackOutDir", root, issues, {
+      rejectReserved: true,
+    });
   }
   if (paths.outputBaseDir?.trim()) {
-    validatePathField(paths.outputBaseDir.trim(), "paths.outputBaseDir", root, issues);
+    validatePathField(paths.outputBaseDir.trim(), "paths.outputBaseDir", root, issues, {
+      rejectReserved: true,
+    });
   }
 
   return issues;
@@ -67,10 +88,16 @@ export function resolveSafePackageOutputOverride(
   if (isAbsolute(trimmed)) {
     const resolved = resolve(trimmed);
     assertRealPathUnderRoot(root, resolved);
+    if (isReservedOutputPath(trimmed)) {
+      throw new Error(`unsafe output path: ${override} targets a reserved directory`);
+    }
     return resolved;
   }
   if (!isSafeRelativeSpaPath(trimmed)) {
     throw new Error(`unsafe output path: ${override}`);
+  }
+  if (isReservedOutputPath(trimmed)) {
+    throw new Error(`unsafe output path: ${override} targets a reserved directory`);
   }
   const resolved = resolve(root, trimmed);
   assertRealPathUnderRoot(root, resolved);

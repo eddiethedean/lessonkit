@@ -11,7 +11,7 @@ import { buildPluginContext } from "../plugins/context";
 import { createPluginRegistry } from "../plugins/registry";
 import { createDefaultClock, createSessionStoragePort, type ClockPort, type StoragePort } from "../ports";
 import { createProgressController, type ProgressController, type ProgressState } from "../progress";
-import { resolveSessionId } from "../session";
+import { resolveSessionId, migrateCourseStartedMark } from "../session";
 import { tryBuildTelemetryEvent } from "../telemetryBuilder";
 import type { TelemetryDataFor } from "../telemetryTypes";
 import {
@@ -54,6 +54,8 @@ export type HeadlessLessonkitRuntime = {
   getProgressState: () => ProgressState;
   getSession: () => { sessionId: string; attemptId?: string; user?: TelemetryUser };
   updateConfig: (next: Partial<HeadlessLessonkitConfig>) => void;
+  /** Move course-started dedupe marks between session ids (e.g. LMS anonymous → authenticated handoff). */
+  migrateSessionMarks: (fromSessionId: string, toSessionId: string) => void;
   setActiveLesson: (lessonId: LessonId, emit: TelemetryEmitFn) => void;
   completeLesson: (lessonId: LessonId, emit: TelemetryEmitFn) => void;
   completeCourse: (emit: TelemetryEmitFn) => void;
@@ -200,6 +202,10 @@ export function createLessonkitRuntime(
     },
     getProgressState: () => progress.getState(),
     getSession,
+    migrateSessionMarks(fromSessionId, toSessionId) {
+      if (disposed) return;
+      migrateCourseStartedMark(storage, fromSessionId, toSessionId, courseId);
+    },
     updateConfig(next) {
       if (disposed) return;
       const previousCourseId = courseId;

@@ -103,17 +103,15 @@ function isProductionRuntime(): boolean {
   return typeof g.process !== "undefined" && g.process.env?.NODE_ENV === "production";
 }
 
-function requiresProductionAllowlist(mode?: LxpackBridgeMode): boolean {
-  return mode === "auto" && isProductionRuntime();
-}
-
 /** Returns true when no allowlist is configured or the resolved parent origin is listed. */
 export function isParentOriginAllowed(
   allowedParentOrigins: string[] | undefined,
   parentWindow?: Window,
   mode?: LxpackBridgeMode,
 ): boolean {
-  if (requiresProductionAllowlist(mode) && !allowedParentOrigins?.length) return false;
+  if (mode === "off") return false;
+  // Production: fail closed when no allowlist (all entry points, not only mode "auto").
+  if (isProductionRuntime() && !allowedParentOrigins?.length) return false;
   if (!allowedParentOrigins?.length) return true;
   const origin = resolveParentOrigin(parentWindow);
   if (!origin) return false;
@@ -121,7 +119,8 @@ export function isParentOriginAllowed(
 }
 
 function getBridge(parentWindow?: Window, opts?: BridgeAccessOptions): LxpackBridgeV1 | null {
-  if (!isParentOriginAllowed(opts?.allowedParentOrigins, parentWindow, opts?.mode)) return null;
+  const mode = opts?.mode ?? "auto";
+  if (!isParentOriginAllowed(opts?.allowedParentOrigins, parentWindow, mode)) return null;
   const fromSdk = getLxpackBridgeFromParent(parentWindow);
   if (fromSdk) return fromSdk;
   if (typeof window === "undefined") return null;

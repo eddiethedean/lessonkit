@@ -420,10 +420,11 @@ describe("@lessonkit/xapi", () => {
     expect(delivered[0]?.timestamp).toBe("t2");
   });
 
-  it("evicts the head when maxSize is 1 and head is in flight", async () => {
+  it("persists overflow to onOverflow when maxSize is 1 and head is in flight", async () => {
     const verb = "http://adlnet.gov/expapi/verbs/experienced";
     const onCap = vi.fn();
-    const queue = createInMemoryXAPIQueue({ maxSize: 1, onCap });
+    const onOverflow = vi.fn();
+    const queue = createInMemoryXAPIQueue({ maxSize: 1, onCap, onOverflow });
     let release!: () => void;
     const gate = new Promise<void>((resolve) => {
       release = resolve;
@@ -437,6 +438,9 @@ describe("@lessonkit/xapi", () => {
 
     queue.enqueue({ id: "overflow", timestamp: "t", verb, object: { id: "o2" } });
     expect(onCap).toHaveBeenCalledTimes(1);
+    expect(onOverflow).toHaveBeenCalledWith(
+      expect.objectContaining({ id: "overflow", object: { id: "o2" } }),
+    );
     expect(queue.size()).toBe(1);
 
     release();

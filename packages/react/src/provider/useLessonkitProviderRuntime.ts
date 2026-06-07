@@ -36,7 +36,9 @@ import {
   hasCourseStartedEmittedToTracking,
   hasCourseStartedPipelineDelivered,
   markCourseStarted,
+  markCourseStartedXapiSent,
   migrateCourseStartedMark,
+  hasCourseStartedXapiSent,
   resolveSessionId,
 } from "../runtime/session";
 import {
@@ -63,15 +65,19 @@ const useIsoLayoutEffect =
   /* v8 ignore next -- SSR uses useEffect when window is unavailable */
   typeof window !== "undefined" ? useLayoutEffect : useEffect;
 
-const defaultStorage = createSessionStoragePort();
+const providerStoragesForTests = new Set<StoragePort>();
 
-/** @internal Reset provider session dedupe between tests. */
+/** @internal Most recently mounted provider storage (test helper). */
 export function getLessonkitProviderStorage(): StoragePort {
-  return defaultStorage;
+  const last = [...providerStoragesForTests].at(-1);
+  return last ?? createSessionStoragePort();
 }
 
 export function resetLessonkitProviderStorageForTests(): void {
-  resetStoragePortForTests(defaultStorage);
+  for (const storage of providerStoragesForTests) {
+    resetStoragePortForTests(storage);
+  }
+  providerStoragesForTests.clear();
   resetSharedVolatileSessionIdForTests();
 }
 
@@ -112,7 +118,16 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
 
   const headlessRef = useRef<HeadlessLessonkitRuntime | null>(null);
 
-  const sessionIdRef = useRef<string>(resolveSessionId(defaultStorage, normalizedConfig.session?.sessionId));
+  const providerStorageRef = useRef<StoragePort | null>(null);
+  if (!providerStorageRef.current) {
+    providerStorageRef.current = normalizedConfig.storage ?? createSessionStoragePort();
+    providerStoragesForTests.add(providerStorageRef.current);
+  }
+  const providerStorage = providerStorageRef.current;
+
+  const sessionIdRef = useRef<string>(
+    resolveSessionId(providerStorage, normalizedConfig.session?.sessionId),
+  );
   const [sessionId, setSessionId] = useState(() => sessionIdRef.current);
   const prevConfiguredSessionIdRef = useRef<string | undefined>(normalizedConfig.session?.sessionId);
 
@@ -164,19 +179,24 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
   const xapiCourseStartedSentOnClientRef = useRef(false);
   const xapiBootstrapSendRef = useRef(false);
   const xapiBootstrapQueuedRef = useRef(false);
+  const xapiBootstrapInFlightRef = useRef(false);
 
   if (prevUseV2RuntimeRef.current !== useV2Runtime) {
     prevUseV2RuntimeRef.current = useV2Runtime;
     if (useV2Runtime) {
-      headlessRef.current = createLessonkitRuntime({
-        courseId: normalizedCourseId,
-        runtimeVersion: "v2",
-        session: normalizedConfig.session,
-        plugins: pluginHostRef.current ?? normalizedConfig.plugins,
-        deferPluginSetup: true,
-      });
+      headlessRef.current = createLessonkitRuntime(
+        {
+          courseId: normalizedCourseId,
+          runtimeVersion: "v2",
+          session: normalizedConfig.session,
+          plugins: pluginHostRef.current ?? normalizedConfig.plugins,
+          deferPluginSetup: true,
+        },
+        { storage: providerStorage },
+      );
       progressRef.current = headlessRef.current.progress;
     } else {
+      headlessRef.current?.dispose();
       headlessRef.current = null;
       progressRef.current = createProgressController();
     }
@@ -184,13 +204,16 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
     courseStartedEmittedToSinkRef.current = false;
     courseStartedEmitGenerationRef.current += 1;
   } else if (useV2Runtime && !headlessRef.current) {
-    headlessRef.current = createLessonkitRuntime({
-      courseId: normalizedCourseId,
-      runtimeVersion: "v2",
-      session: normalizedConfig.session,
-      plugins: pluginHostRef.current ?? normalizedConfig.plugins,
-      deferPluginSetup: true,
-    });
+    headlessRef.current = createLessonkitRuntime(
+      {
+        courseId: normalizedCourseId,
+        runtimeVersion: "v2",
+        session: normalizedConfig.session,
+        plugins: pluginHostRef.current ?? normalizedConfig.plugins,
+        deferPluginSetup: true,
+      },
+      { storage: providerStorage },
+    );
   }
 
   if (prevCourseIdForProgressRef.current !== normalizedCourseId) {
@@ -249,6 +272,7 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
       xapiCourseStartedSentOnClientRef.current = false;
       xapiBootstrapSendRef.current = false;
       xapiBootstrapQueuedRef.current = false;
+      xapiBootstrapInFlightRef.current = false;
     }
 
     const prev = xapiRef.current;
@@ -267,14 +291,16 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
       const sessionId = sessionIdRef.current;
       const cid = courseIdRef.current;
       const trackingActive = isTrackingActive(normalizedConfig.tracking);
-      bootstrapAlreadyStarted = hasCourseStarted(defaultStorage, sessionId, cid);
+      bootstrapAlreadyStarted = hasCourseStarted(providerStorage, sessionId, cid);
       const clientChanged = !prev || prev !== next;
       // When tracking is on, course_started (and xAPI) normally flow through emitTelemetry on first start.
       const skipBootstrap = trackingActive && !bootstrapAlreadyStarted;
+      const xapiAlreadySentForSession = hasCourseStartedXapiSent(providerStorage, sessionId, cid);
       const needsBootstrap =
         !skipBootstrap &&
         !xapiCourseStartedSentOnClientRef.current &&
         !xapiBootstrapQueuedRef.current &&
+        !xapiAlreadySentForSession &&
         (!bootstrapAlreadyStarted || clientChanged);
       if (needsBootstrap) {
         try {
@@ -292,6 +318,7 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
             if (statement) {
               next.send(statement);
               xapiBootstrapQueuedRef.current = true;
+              xapiBootstrapInFlightRef.current = true;
               bootstrapSent = true;
             }
           }
@@ -317,14 +344,17 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
         await next?.flush();
         if (bootstrapSent && !cancelled) {
           xapiBootstrapSendRef.current = true;
+          xapiBootstrapInFlightRef.current = false;
           if (!bootstrapAlreadyStarted) {
-            markCourseStarted(defaultStorage, sessionIdRef.current, courseIdRef.current);
+            markCourseStarted(providerStorage, sessionIdRef.current, courseIdRef.current);
           }
+          markCourseStartedXapiSent(providerStorage, sessionIdRef.current, courseIdRef.current);
           xapiCourseStartedSentOnClientRef.current = true;
         }
       } catch {
         if (bootstrapSent && !cancelled) {
           xapiBootstrapQueuedRef.current = false;
+          xapiBootstrapInFlightRef.current = false;
         }
         // ignore — do not mark session or bootstrap skip until xAPI flush succeeds
       }
@@ -377,7 +407,7 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
         pluginHost: pluginHostRef.current,
         tracking: () => trackingRef.current,
         xapi: xapiRef.current,
-        storage: defaultStorage,
+        storage: providerStorage,
         sessionId: sid,
         courseId: cid,
         attemptId: attemptIdRef.current,
@@ -387,7 +417,9 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
         onLxpackBridgeMiss,
         extraSinks: extraSinksRef.current,
         skipXapi:
-          xapiCourseStartedSentOnClientRef.current || xapiBootstrapSendRef.current,
+          xapiCourseStartedSentOnClientRef.current ||
+          xapiBootstrapSendRef.current ||
+          xapiBootstrapInFlightRef.current,
         onXapiStatementSent: () => {
           xapiCourseStartedSentOnClientRef.current = true;
         },
@@ -449,9 +481,9 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
     const trackingActive = isTrackingActive(normalizedConfig.tracking);
 
     const courseStartedFullySettled =
-      hasCourseStartedEmittedToTracking(defaultStorage, sessionId, cid) &&
-      hasCourseStarted(defaultStorage, sessionId, cid) &&
-      hasCourseStartedPipelineDelivered(defaultStorage, sessionId, cid);
+      hasCourseStartedEmittedToTracking(providerStorage, sessionId, cid) &&
+      hasCourseStarted(providerStorage, sessionId, cid) &&
+      hasCourseStartedPipelineDelivered(providerStorage, sessionId, cid);
 
     if (!trackingActive) {
       courseStartedEmittedToSinkRef.current = false;
@@ -493,6 +525,8 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
       allowedParentOrigins: allowedParentOriginsRef.current,
       onLxpackBridgeMiss,
       extraSinks: extraSinksRef.current,
+      onXapiMappingError: observabilityRef.current?.onXapiMappingError,
+      onXapiTransportError: observabilityRef.current?.onXapiTransportError,
     });
   }, [onLxpackBridgeMiss]);
 
@@ -727,8 +761,8 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
     const cid = courseIdRef.current;
 
     if (nextConfigured !== undefined) {
-      const resolved = resolveSessionId(defaultStorage, nextConfigured);
-      const tabId = getTabSessionId(defaultStorage);
+      const resolved = resolveSessionId(providerStorage, nextConfigured);
+      const tabId = getTabSessionId(providerStorage);
       const isExplicitLearnerSwap =
         prevConfigured !== undefined && prevConfigured !== nextConfigured;
 
@@ -737,14 +771,14 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
         courseStartedEmitGenerationRef.current += 1;
         pendingSessionReEmitRef.current = true;
       } else if (tabId && tabId !== resolved) {
-        migrateCourseStartedMark(defaultStorage, tabId, resolved, cid);
+        migrateCourseStartedMark(providerStorage, tabId, resolved, cid);
       }
       sessionIdRef.current = resolved;
       setSessionId(resolved);
     /* v8 ignore start -- initial mount has no configured session id to migrate from */
     } else if (prevConfigured) {
-      const nextAuto = resolveSessionId(defaultStorage, undefined);
-      migrateCourseStartedMark(defaultStorage, prevConfigured, nextAuto, cid);
+      const nextAuto = resolveSessionId(providerStorage, undefined);
+      migrateCourseStartedMark(providerStorage, prevConfigured, nextAuto, cid);
       sessionIdRef.current = nextAuto;
       setSessionId(nextAuto);
     }
@@ -776,7 +810,7 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
       config: normalizedConfig,
       tracking,
       xapi,
-      storage: defaultStorage,
+      storage: providerStorage,
       session: { sessionId, attemptId: attemptIdRef.current, user: userRef.current },
       progress,
       setActiveLesson,

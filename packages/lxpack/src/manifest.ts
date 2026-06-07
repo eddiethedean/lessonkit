@@ -1,6 +1,7 @@
 import type { LessonkitCourseDescriptor } from "./types";
 import { validateDescriptor } from "./validateDescriptor";
-import { validateProjectPaths } from "./validateProjectPaths";
+import { validateProjectPaths, isReservedOutputPath } from "./validateProjectPaths";
+import { isSafeRelativeSpaPath } from "./spaPath";
 
 export type LessonkitManifestPaths = {
   spaDistDir: string;
@@ -120,6 +121,24 @@ export function parseLessonkitManifest(
       path: "course.spaDistDir",
       message: `"course.spaDistDir" (${courseSpaDistDir}) differs from "paths.spaDistDir" (${paths.spaDistDir}). Use paths.spaDistDir for CLI build and package.`,
     });
+  }
+
+  for (const key of ["spaDistDir", "lxpackOutDir", "outputBaseDir"] as const) {
+    const value = paths[key];
+    if (!isSafeRelativeSpaPath(value)) {
+      issues.push({
+        path: `paths.${key}`,
+        message: "path must be relative without '..' segments or absolute prefixes",
+      });
+    } else if (
+      (key === "lxpackOutDir" || key === "outputBaseDir") &&
+      isReservedOutputPath(value)
+    ) {
+      issues.push({
+        path: `paths.${key}`,
+        message: "path must not target reserved directories (.git, node_modules, .github)",
+      });
+    }
   }
 
   if (projectRoot) {

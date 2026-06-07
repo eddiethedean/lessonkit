@@ -1039,6 +1039,44 @@ describe("InteractiveVideo", () => {
     expect(screen.getByTestId("timed-cue-1")).toBeTruthy();
     expect((screen.getByTestId("timed-cue-0") as HTMLElement).hidden).toBe(true);
   });
+
+  it("uses time-sorted cue index for persisted activePageIndex when JSX order differs", () => {
+    sessionStorage.setItem(
+      "lessonkit:compound:compound-course:iv-sort",
+      JSON.stringify({
+        schemaVersion: 1,
+        activePageIndex: 1,
+        childStates: {
+          [IV_META_KEY]: {
+            currentTime: 31,
+            completedCueIndices: [0],
+            firedCueIndices: [0],
+          },
+        },
+      }),
+    );
+
+    render(
+      wrap(
+        <InteractiveVideo blockId="iv-sort" title="Briefing" src="/sample.mp4">
+          <TimedCue atSeconds={30} label="Later in JSX">
+            <Text>Late cue</Text>
+          </TimedCue>
+          <TimedCue atSeconds={10} label="Earlier in time">
+            <Text>Early cue</Text>
+          </TimedCue>
+        </InteractiveVideo>,
+        true,
+      ),
+    );
+
+    const video = screen.getByTestId("interactive-video-player") as HTMLVideoElement;
+    Object.defineProperty(video, "currentTime", { value: 31, writable: true, configurable: true });
+    fireEvent.timeUpdate(video);
+    expect(screen.getByTestId("timed-cue-1")).toBeTruthy();
+    expect(screen.getByText("Late cue")).toBeTruthy();
+    expect((screen.getByTestId("timed-cue-0") as HTMLElement).hidden).toBe(true);
+  });
 });
 
 describe("BranchingScenario", () => {

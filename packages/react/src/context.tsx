@@ -74,6 +74,8 @@ export type LessonkitConfig = {
   sinks?: import("@lessonkit/core").TelemetryPipelineSink[];
   /** Production hooks for sink failures, xAPI queue depth, and LMS bridge misses. */
   observability?: LessonkitObservabilityConfig;
+  /** Optional storage port override (default: per-provider sessionStorage-backed port). */
+  storage?: StoragePort;
   /** Embed block security defaults. */
   embed?: {
     /** Strip `allow-popups` from iframe sandbox in production builds (default true). */

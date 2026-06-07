@@ -25,6 +25,10 @@ export type InteractiveVideoProps = {
 
 type CueElement = React.ReactElement<TimedCueProps>;
 
+function sortCuesByTime(cues: CueElement[]): CueElement[] {
+  return [...cues].sort((a, b) => (a.props.atSeconds ?? 0) - (b.props.atSeconds ?? 0));
+}
+
 function loadVideoMeta(
   storage: ReturnType<typeof useLessonkit>["storage"],
   courseId: CourseId | undefined,
@@ -89,10 +93,7 @@ const InteractiveVideoInner = forwardRef<
   const [persistTrigger, setPersistTrigger] = useState(0);
   const lastPersistTimeRef = useRef(0);
 
-  const sortedCues = useMemo(
-    () => [...cues].sort((a, b) => (a.props.atSeconds ?? 0) - (b.props.atSeconds ?? 0)),
-    [cues],
-  );
+  const sortedCues = cues;
 
   useEffect(() => {
     completedCuesRef.current = completedCues;
@@ -366,6 +367,7 @@ export const InteractiveVideo = forwardRef<CompoundHandle, InteractiveVideoProps
     const cues = React.Children.toArray(props.children).filter(
       React.isValidElement,
     ) as CueElement[];
+    const sortedCues = useMemo(() => sortCuesByTime(cues), [cues]);
     const { config, storage } = useLessonkit();
     const persistEnabled = config.session?.persistCompoundState !== false;
 
@@ -388,7 +390,7 @@ export const InteractiveVideo = forwardRef<CompoundHandle, InteractiveVideoProps
     const initialIndex = useCompoundInitialIndex({
       courseId: config.courseId,
       compoundId: blockId,
-      pageCount: cues.length,
+      pageCount: sortedCues.length,
       persistEnabled,
       storage,
     });
@@ -398,7 +400,7 @@ export const InteractiveVideo = forwardRef<CompoundHandle, InteractiveVideoProps
 
     useEffect(() => {
       setIndex(initialIndex);
-    }, [config.courseId, blockId, initialIndex, cues.length]);
+    }, [config.courseId, blockId, initialIndex, sortedCues.length]);
 
     return (
       <CompoundProvider activePageIndex={index} onActivePageIndexChange={setIndexStable}>
@@ -406,7 +408,7 @@ export const InteractiveVideo = forwardRef<CompoundHandle, InteractiveVideoProps
           {...props}
           ref={ref}
           blockId={blockId}
-          cues={cues}
+          cues={sortedCues}
           index={index}
           setIndex={setIndex}
           persistEnabled={persistEnabled}

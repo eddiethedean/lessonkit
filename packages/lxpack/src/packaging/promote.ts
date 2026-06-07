@@ -1,6 +1,7 @@
 import * as fsp from "node:fs/promises";
 import { createHash, randomUUID } from "node:crypto";
 import { dirname, join, resolve } from "node:path";
+import { assertRealPathUnderRoot } from "../spaPath";
 
 async function pathExists(path: string): Promise<boolean> {
   try {
@@ -164,6 +165,8 @@ async function mergePreservedOutArtifacts(
 export type PromoteStagingOptions = {
   /** Relative path under `outDir` where LMS artifacts live (default `.lxpack/out`). */
   outputBaseDir?: string;
+  /** When set, re-validates `outDir` is under the project root immediately before promote. */
+  projectRoot?: string;
 };
 
 /**
@@ -187,6 +190,10 @@ export async function promoteStagingToOutDir(
   options?: PromoteStagingOptions,
 ): Promise<void> {
   const outputBaseDir = options?.outputBaseDir ?? ".lxpack/out";
+
+  if (options?.projectRoot) {
+    assertRealPathUnderRoot(resolve(options.projectRoot), resolve(outDir));
+  }
 
   return withPromoteLock(outDir, async () => {
     await removeStaleLegacyPromoteArtifacts(outDir);

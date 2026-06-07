@@ -8,6 +8,7 @@ import {
 import type { XAPIClient } from "@lessonkit/xapi";
 import { telemetryEventToXAPIStatement } from "@lessonkit/xapi";
 import { forwardTelemetryToLxpack, type LxpackBridgeMode } from "./lxpackBridge";
+import type { LessonkitObservabilityConfig } from "./observability";
 
 export type LegacyEmitOptions = {
   tracking: TrackingClient;
@@ -15,6 +16,8 @@ export type LegacyEmitOptions = {
   lxpackBridge: LxpackBridgeMode;
   allowedParentOrigins?: string[];
   onLxpackBridgeMiss?: (event: TelemetryEvent) => void;
+  onXapiMappingError?: LessonkitObservabilityConfig["onXapiMappingError"];
+  onXapiTransportError?: LessonkitObservabilityConfig["onXapiTransportError"];
 };
 
 function isDevEnvironment(): boolean {
@@ -31,17 +34,30 @@ function createLegacyPipeline(
     {
       id: "xapi",
       async emit(event) {
+        let statement;
         try {
-          const statement = telemetryEventToXAPIStatement(event);
-          if (!statement || !opts.xapi) return;
+          statement = telemetryEventToXAPIStatement(event);
+        } catch (err) {
+          opts.onXapiMappingError?.(err);
+          if (isDevEnvironment()) {
+            console.warn(
+              "[lessonkit] xAPI mapping skipped:",
+              err instanceof Error ? err.message : err,
+            );
+          }
+          return;
+        }
+        if (!statement || !opts.xapi) return;
+        try {
           opts.xapi.send(statement);
           if (isLifecycleTelemetryEvent(event.name)) {
             await opts.xapi.flush();
           }
         } catch (err) {
+          opts.onXapiTransportError?.(err);
           if (isDevEnvironment()) {
             console.warn(
-              "[lessonkit] xAPI mapping skipped:",
+              "[lessonkit] xAPI delivery failed:",
               err instanceof Error ? err.message : err,
             );
           }

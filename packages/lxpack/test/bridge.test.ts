@@ -255,11 +255,32 @@ describe("@lessonkit/lxpack/bridge", () => {
     vi.stubEnv("NODE_ENV", "production");
     try {
       expect(isParentOriginAllowed(undefined, undefined, "auto")).toBe(false);
+      expect(isParentOriginAllowed(undefined, undefined, undefined)).toBe(false);
       expect(
         getLxpackBridge(undefined, { allowedParentOrigins: ["https://lms.example"], mode: "auto" }),
       ).toBeNull();
     } finally {
       vi.unstubAllEnvs();
+    }
+  });
+
+  it("denies notify APIs in production without allowedParentOrigins regardless of mode", () => {
+    const completeLesson = vi.fn();
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubGlobal("window", {
+      parent: {
+        location: { origin: "https://lms.example" },
+        lxpackBridge: { v1: { completeLesson } },
+      },
+      location: { origin: "https://course.example" },
+    });
+
+    try {
+      expect(notifyLxpackLessonComplete("lesson-1")).toBe(false);
+      expect(completeLesson).not.toHaveBeenCalled();
+    } finally {
+      vi.unstubAllEnvs();
+      vi.unstubAllGlobals();
     }
   });
 

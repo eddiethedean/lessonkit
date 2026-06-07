@@ -231,7 +231,10 @@ export async function packageLessonkitCourse(
 
   try {
     await ensureOutDirParent(outDir);
-    await promoteStagingToOutDir(stagingDir, outDir, { outputBaseDir: outputBaseDir ?? ".lxpack/out" });
+    await promoteStagingToOutDir(stagingDir, outDir, {
+      outputBaseDir: outputBaseDir ?? ".lxpack/out",
+      projectRoot: writeOpts.projectRoot,
+    });
   } catch (err) {
     await fsp.rm(stagingDir, { recursive: true, force: true }).catch(/* v8 ignore next */ () => undefined);
     return {

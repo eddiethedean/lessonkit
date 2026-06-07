@@ -292,7 +292,64 @@ describe("@lessonkit/react runtime modules", () => {
     }
   });
 
-  it("telemetryPipeline: swallows mapping errors in production without warning", async () => {
+  it("telemetryPipeline: invokes onXapiMappingError in production when mapping throws", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const onXapiMappingError = vi.fn();
+    vi.spyOn(xapiMapModule, "telemetryEventToXAPIStatement").mockImplementation(() => {
+      throw new Error("bad mapping");
+    });
+    try {
+      const tracking = { track: vi.fn() } as TrackingClient;
+      const xapi = {
+        send: vi.fn(),
+        flush: async () => {},
+        queueSize: () => 0,
+        startedLesson: () => {},
+        completeLesson: () => {},
+        completeCourse: () => {},
+      };
+      await emitThroughPipeline(
+        { name: "interaction", timestamp: "t", courseId: "c" },
+        { tracking, xapi, lxpackBridge: "off", onXapiMappingError },
+      );
+      expect(warn).not.toHaveBeenCalled();
+      expect(onXapiMappingError).toHaveBeenCalledWith(expect.any(Error));
+      expect(xapi.send).not.toHaveBeenCalled();
+    } finally {
+      vi.restoreAllMocks();
+      vi.unstubAllEnvs();
+    }
+  });
+
+  it("telemetryPipeline: invokes onXapiTransportError when flush fails", async () => {
+    const onXapiTransportError = vi.fn();
+    const tracking = { track: vi.fn() } as TrackingClient;
+    const xapi = {
+      send: vi.fn(),
+      flush: vi.fn(async () => {
+        throw new Error("transport down");
+      }),
+      queueSize: () => 0,
+      startedLesson: () => {},
+      completeLesson: () => {},
+      completeCourse: () => {},
+    };
+    await emitThroughPipeline(
+      {
+        name: "lesson_completed",
+        timestamp: "t",
+        courseId: "c",
+        sessionId: "s",
+        lessonId: "lesson-1",
+        data: { lessonId: "lesson-1" },
+      },
+      { tracking, xapi, lxpackBridge: "off", onXapiTransportError },
+    );
+    expect(onXapiTransportError).toHaveBeenCalledWith(expect.any(Error));
+  });
+
+  it("telemetryPipeline: swallows mapping errors in production without observability hook", async () => {
     vi.stubEnv("NODE_ENV", "production");
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
     vi.spyOn(xapiMapModule, "telemetryEventToXAPIStatement").mockImplementation(() => {

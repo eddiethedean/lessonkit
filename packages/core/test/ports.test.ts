@@ -65,6 +65,37 @@ describe("ports", () => {
     expect(getCalls).toBe(1);
   });
 
+  it("createSessionStoragePort invalidates cache on cross-tab storage events", () => {
+    const store: Record<string, string> = { seeded: "v1" };
+    vi.stubGlobal("sessionStorage", {
+      getItem: (k: string) => store[k] ?? null,
+      setItem: (k: string, v: string) => {
+        store[k] = v;
+      },
+      removeItem: (k: string) => {
+        delete store[k];
+      },
+    });
+    const listeners = new Map<string, (event: StorageEvent) => void>();
+    vi.stubGlobal("window", {
+      addEventListener: (type: string, handler: (event: StorageEvent) => void) => {
+        if (type === "storage") listeners.set("storage", handler);
+      },
+    });
+
+    const storage = createSessionStoragePort();
+    expect(storage.getItem("seeded")).toBe("v1");
+
+    store.seeded = "v2";
+    listeners.get("storage")?.({
+      key: "seeded",
+      newValue: "v2",
+      storageArea: sessionStorage,
+    } as StorageEvent);
+
+    expect(storage.getItem("seeded")).toBe("v2");
+  });
+
   it("createSessionStoragePort ignores storage errors but keeps in-memory dedupe", () => {
     vi.stubGlobal("sessionStorage", {
       getItem: () => {

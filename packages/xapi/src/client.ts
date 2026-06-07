@@ -75,6 +75,9 @@ export function createXAPIClient(opts?: {
       maxHeadFailures: opts?.maxHeadFailures,
       onDepth: opts?.onQueueDepth,
       onCap: opts?.onQueueCap ?? defaultQueueCapHandler,
+      onOverflow: (statement) => {
+        persistDeadLetterStatement(statement);
+      },
       onHeadSkipped: (statement, err) => {
         persistDeadLetterStatement(statement);
         (opts?.onHeadSkipped ?? defaultHeadSkippedHandler)(statement, err);

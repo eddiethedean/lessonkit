@@ -48,6 +48,27 @@ function createMemoryBackedSessionStorage(
   const tombstones = new Set<string>();
   let warnedPersistFailure = false;
 
+  const syncFromStorageEvent = (key: string | null, newValue: string | null) => {
+    if (key === null) {
+      memory.clear();
+      tombstones.clear();
+      return;
+    }
+    tombstones.delete(key);
+    if (newValue === null) {
+      memory.delete(key);
+    } else {
+      memory.set(key, newValue);
+    }
+  };
+
+  if (typeof window !== "undefined") {
+    window.addEventListener("storage", (event) => {
+      if (event.storageArea !== sessionStorage) return;
+      syncFromStorageEvent(event.key, event.newValue);
+    });
+  }
+
   const warnPersistFailure = () => {
     if (warnedPersistFailure) return;
     warnedPersistFailure = true;

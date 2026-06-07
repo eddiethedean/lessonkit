@@ -1,6 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
 import { defineAssessmentPlugin, defineLifecyclePlugin, defineTelemetryPlugin } from "../src/plugins/define";
+import { createNoopStorage } from "../src/ports";
 import { createLessonkitRuntime } from "../src/runtime/createLessonkitRuntime";
+import { hasCourseStarted, markCourseStarted } from "../src/session";
 
 describe("createLessonkitRuntime", () => {
   it("tracks lesson lifecycle via injected emit callback", () => {
@@ -34,6 +36,18 @@ describe("createLessonkitRuntime", () => {
       attemptId: "a1",
       user: { id: "u1" },
     });
+  });
+
+  it("migrateSessionMarks moves course-started marks between session ids", () => {
+    const storage = createNoopStorage();
+    markCourseStarted(storage, "s1", "c");
+    const runtime = createLessonkitRuntime(
+      { courseId: "c", session: { sessionId: "s1" } },
+      { storage },
+    );
+    runtime.migrateSessionMarks("s1", "s2");
+    expect(hasCourseStarted(storage, "s2", "c")).toBe(true);
+    expect(hasCourseStarted(storage, "s1", "c")).toBe(false);
   });
 
   it("updateConfig updates courseId and runtimeVersion on config snapshot", () => {
