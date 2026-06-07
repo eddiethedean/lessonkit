@@ -1,10 +1,30 @@
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 import {
   createXAPIClient,
   loadDeadLetterStatements,
   resetXAPIDeadLetterForTests,
 } from "../src";
 import type { XAPIStatement } from "../src";
+
+function createMockSessionStorage(): Storage {
+  const store = new Map<string, string>();
+  return {
+    get length() {
+      return store.size;
+    },
+    clear: () => {
+      store.clear();
+    },
+    getItem: (key) => store.get(key) ?? null,
+    key: (index) => [...store.keys()][index] ?? null,
+    removeItem: (key) => {
+      store.delete(key);
+    },
+    setItem: (key, value) => {
+      store.set(key, value);
+    },
+  } as Storage;
+}
 
 const stmt: XAPIStatement = {
   id: "exit-stmt-1",
@@ -15,8 +35,12 @@ const stmt: XAPIStatement = {
 
 describe("xAPI exit delivery (C-1)", () => {
   beforeEach(() => {
+    vi.stubGlobal("sessionStorage", createMockSessionStorage());
     resetXAPIDeadLetterForTests();
-    sessionStorage.clear();
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
   });
 
   it("persists to dead-letter when async exit transport rejects", async () => {
@@ -66,5 +90,30 @@ describe("xAPI flush serialization (H-10)", () => {
     client.send({ ...stmt, id: "b" });
     await flushPromise;
     expect(transport).toHaveBeenCalledTimes(2);
+  });
+
+  it("flushOnExit dispatches in-flight statements through exit transport", async () => {
+    const abortInFlight = vi.fn();
+    let resolveTransport!: () => void;
+    const transport = vi.fn(
+      () =>
+        new Promise<void>((resolve) => {
+          resolveTransport = resolve;
+        }),
+    );
+    const exitTransport = vi.fn(async () => {});
+    const client = createXAPIClient({
+      courseId: "course-1",
+      transport,
+      exitTransport,
+      abortInFlight,
+    });
+    client.send({ ...stmt, id: "inflight-exit" });
+    await Promise.resolve();
+    client.flushOnExit?.();
+    expect(abortInFlight).toHaveBeenCalledWith("inflight-exit");
+    expect(exitTransport).toHaveBeenCalled();
+    resolveTransport();
+    await client.flush();
   });
 });

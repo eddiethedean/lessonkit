@@ -5,7 +5,8 @@ const MAX_DEAD_LETTER = 200;
 
 function readStorage(): Storage | null {
   try {
-    return globalThis.sessionStorage ?? null;
+    const storage = (globalThis as typeof globalThis & { sessionStorage?: Storage }).sessionStorage;
+    return storage ?? null;
   } catch {
     return null;
   }
