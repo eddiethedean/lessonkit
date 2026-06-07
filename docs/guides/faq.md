@@ -40,7 +40,7 @@ LessonKit ships **native React blocks** inspired by H5P patterns—it does **not
 
 Default path (relative to project root):
 
-**`{{ scorm_zip_path }}`**
+**{{ scorm_zip_path }}**
 
 The CLI prints the resolved path. `lessonkit.json` → `paths.outputBaseDir` is **inside** `paths.lxpackOutDir`, not at the project root. See [First LMS export — where the SCORM zip lands](react-developers/first-lms-export.md#where-the-scorm-zip-lands).
 

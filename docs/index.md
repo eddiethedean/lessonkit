@@ -58,8 +58,8 @@ LessonKit courses are React apps. If you want to learn React before the develope
 
 ```{raw} html
 <div class="lk-callout">
-  <strong>Node.js:</strong> <strong>18+</strong> minimum for dev, build, and <code>lessonkit package</code>.
-  Use <strong>20.19+</strong> for the CLI scaffold (Vite 8), monorepo CI, and Playwright e2e.
+  <strong>Node.js:</strong> <strong>{{ node_minimum }}</strong> minimum for dev, build, and <code>lessonkit package</code>.
+  Use <strong>{{ node_recommended }}</strong> for the CLI scaffold (Vite 8), monorepo CI, and Playwright e2e.
 </div>
 ```
 
@@ -67,9 +67,9 @@ LessonKit courses are React apps. If you want to learn React before the develope
 
 | Task | Node.js |
 | --- | --- |
-| **`npx @lessonkit/cli init`** (Vite 8 scaffold) | **20.19+** recommended |
-| Dev, build, package in an existing course | **18+** minimum |
-| Monorepo CI and Playwright e2e | **20.19+** (CI runs Node 20 only) |
+| **`npx @lessonkit/cli init`** (Vite 8 scaffold) | **{{ node_recommended }}** recommended |
+| Dev, build, package in an existing course | **{{ node_minimum }}** minimum |
+| Monorepo CI and Playwright e2e | **{{ node_recommended }}** (CI runs Node 20 only) |
 
 See [Prerequisites](guides/prerequisites.md) for details.
 

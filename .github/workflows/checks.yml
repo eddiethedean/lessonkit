@@ -103,6 +103,9 @@ jobs:
       - name: Build HTML
         run: sphinx-build -b html docs docs/_build/html -W
 
+      - name: Verify doc substitutions expanded
+        run: bash docs/scripts/verify-doc-substitutions.sh
+
   packaging:
     name: Packaging smoke (Node 20)
     runs-on: ubuntu-latest

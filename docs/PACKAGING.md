@@ -80,7 +80,7 @@ Failed promotes may leave recovery dirs next to `outDir`: `.lk-backup-*`, `.lk-f
 :::{admonition} Full project path vs staging-relative
 :class: note
 
-API examples often use staging-relative paths such as `output: ".lxpack/out/course-scorm12.zip"` inside `outDir` (`.lxpack/course`). From the **project root**, the default SCORM 1.2 artifact is **`{{ scorm_zip_path }}`**. See [FAQ — SCORM zip location](../guides/faq.md#where-is-my-scorm-zip-after-packaging).
+API examples often use staging-relative paths such as `output: ".lxpack/out/course-scorm12.zip"` inside `outDir` (`.lxpack/course`). From the **project root**, the default SCORM 1.2 artifact is **{{ scorm_zip_path }}**. See [FAQ — SCORM zip location](../guides/faq.md#where-is-my-scorm-zip-after-packaging).
 :::
 
 ## Targets

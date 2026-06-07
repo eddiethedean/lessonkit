@@ -47,12 +47,11 @@ Corporate InfoSec annual module in the security theme: policy attestation, email
   title="Cybersecurity awareness training demo"
   loading="lazy"
 ></iframe>
-```
-
 <p class="lk-demo-links">
   <a href="../_static/demos/react-vite/index.html" target="_blank" rel="noopener noreferrer">Open in full tab</a>
   · <a href="https://github.com/eddiethedean/lessonkit/tree/main/examples/react-vite">Source on GitHub</a>
 </p>
+```
 
 ## Data privacy essentials (`examples/data-privacy`)
 
@@ -65,12 +64,11 @@ GDPR compliance track (compliance theme): lawful-basis lab, audit case files, ro
   title="Data privacy essentials training demo"
   loading="lazy"
 ></iframe>
-```
-
 <p class="lk-demo-links">
   <a href="../_static/demos/data-privacy/index.html" target="_blank" rel="noopener noreferrer">Open in full tab</a>
   · <a href="https://github.com/eddiethedean/lessonkit/tree/main/examples/data-privacy">Source on GitHub</a>
 </p>
+```
 
 ## Customer de-escalation (`examples/customer-service`)
 
@@ -83,12 +81,11 @@ Contact-center training in the support theme: channel briefing, chat bubbles, vo
   title="Customer de-escalation training demo"
   loading="lazy"
 ></iframe>
-```
-
 <p class="lk-demo-links">
   <a href="../_static/demos/customer-service/index.html" target="_blank" rel="noopener noreferrer">Open in full tab</a>
   · <a href="https://github.com/eddiethedean/lessonkit/tree/main/examples/customer-service">Source on GitHub</a>
 </p>
+```
 
 ## Workplace safety briefing (`examples/lxpack-golden`)
 
@@ -101,12 +98,11 @@ Warehouse new-hire briefing in the compact field theme: PPE sign-off, photo haza
   title="Workplace safety briefing demo"
   loading="lazy"
 ></iframe>
-```
-
 <p class="lk-demo-links">
   <a href="../_static/demos/lxpack-golden/index.html" target="_blank" rel="noopener noreferrer">Open in full tab</a>
   · <a href="https://github.com/eddiethedean/lessonkit/tree/main/examples/lxpack-golden">Source on GitHub</a>
 </p>
+```
 
 ## Framework 1.1 showcase (`examples/framework-11-showcase`)
 
@@ -119,12 +115,11 @@ Warehouse new-hire briefing in the compact field theme: PPE sign-off, photo haza
   title="Framework 1.1 showcase demo"
   loading="lazy"
 ></iframe>
-```
-
 <p class="lk-demo-links">
   <a href="../_static/demos/framework-11-showcase/index.html" target="_blank" rel="noopener noreferrer">Open in full tab</a>
   · <a href="https://github.com/eddiethedean/lessonkit/tree/main/examples/framework-11-showcase">Source on GitHub</a>
 </p>
+```
 
 ## Framework 1.2 showcase (`examples/framework-12-showcase`)
 
@@ -137,36 +132,41 @@ Warehouse new-hire briefing in the compact field theme: PPE sign-off, photo haza
   title="Framework 1.2 showcase demo"
   loading="lazy"
 ></iframe>
-```
-
 <p class="lk-demo-links">
   <a href="../_static/demos/framework-12-showcase/index.html" target="_blank" rel="noopener noreferrer">Open in full tab</a>
   · <a href="https://github.com/eddiethedean/lessonkit/tree/main/examples/framework-12-showcase">Source on GitHub</a>
 </p>
+```
 
 ## Interactive book (`examples/interactive-book`)
 
 Compound `Page` and `InteractiveBook` patterns (framework 1.2). Source-only on this site—run locally from the monorepo.
 
+```{raw} html
 <p class="lk-demo-links">
   <a href="https://github.com/eddiethedean/lessonkit/tree/main/examples/interactive-book">Source on GitHub</a>
 </p>
+```
 
 ## Slide deck (`examples/slide-deck`)
 
 **Recommended starting point for 1.3.** Compound `Slide` and `SlideDeck` (H5P Course Presentation): keyboard navigation, deck scoring, and session resume. Source-only on this site—run locally from the monorepo.
 
+```{raw} html
 <p class="lk-demo-links">
   <a href="https://github.com/eddiethedean/lessonkit/tree/main/examples/slide-deck">Source on GitHub</a>
 </p>
+```
 
 ## Assessment showcase (`examples/assessments-p0`)
 
 P0 blocks: `TrueFalse`, drag/drop, hotspots, fill-in-blanks, and related types. Source-only on this site.
 
+```{raw} html
 <p class="lk-demo-links">
   <a href="https://github.com/eddiethedean/lessonkit/tree/main/examples/assessments-p0">Source on GitHub</a>
 </p>
+```
 
 ## Run examples locally
 

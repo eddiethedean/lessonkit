@@ -13,7 +13,7 @@ copyright = f"{datetime.now().year}, LessonKit contributors"
 author = "LessonKit contributors"
 release = "1.5.0"
 
-# Substitutions for MyST pages (e.g. {{ release }}). Keep docs/index.md hero badge in sync with `release`.
+# Substitutions for MyST pages. source-read expands these in raw HTML and inline code too.
 myst_substitutions = {
     "release": release,
     "scorm_zip_path": ".lxpack/course/.lxpack/out/course-scorm12.zip",
@@ -146,14 +146,22 @@ copybutton_prompt_text = r">>> |\.\.\. |\$ |bash# "
 copybutton_prompt_is_regexp = True
 
 
-def _substitute_release_in_source(
+def _apply_myst_substitutions_in_source(
     _app: Sphinx, _docname: str, source: list[str]
 ) -> None:
-    """MyST substitutions do not run inside ``{raw} html`` blocks."""
-    if "{{ release }}" in source[0]:
-        source[0] = source[0].replace("{{ release }}", release)
+    """Expand myst_substitutions before parse.
+
+    MyST skips substitutions inside ``{raw} html`` blocks and inline code spans.
+    Pre-expanding here keeps a single source of truth in ``myst_substitutions``.
+    """
+    text = source[0]
+    for key, value in myst_substitutions.items():
+        token = f"{{{{ {key} }}}}"
+        if token in text:
+            text = text.replace(token, value)
+    source[0] = text
 
 
 def setup(app: Sphinx) -> dict[str, bool]:
-    app.connect("source-read", _substitute_release_in_source)
+    app.connect("source-read", _apply_myst_substitutions_in_source)
     return {"version": "1.0", "parallel_read_safe": True}
