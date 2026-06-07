@@ -36,6 +36,7 @@
     "storybook": "npm run storybook -w @lessonkit/react",
     "build-storybook": "npm run build-storybook -w @lessonkit/react",
     "docs:api": "bash docs/scripts/build-api-docs.sh",
+    "docs:verify": "bash docs/scripts/verify-doc-includes.sh && python3 docs/scripts/verify_doc_substitutions.py",
     "changeset": "changeset",
     "version-packages": "changeset version",
     "release": "changeset publish"

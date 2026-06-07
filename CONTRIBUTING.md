@@ -46,9 +46,10 @@ npm run docs:api
 bash docs/scripts/verify-doc-includes.sh
 node docs/scripts/generate-block-props-doc.mjs
 cd docs && pip install -r requirements.txt && sphinx-build -W -b html . _build/html
+npm run docs:verify
 ```
 
-Requires **Python 3.12+** and Node. Skip `build-docs-demos.sh` unless you changed example embeds.
+Requires **Python 3.12+** and Node. Skip `build-docs-demos.sh` unless you changed example embeds. `docs:verify` checks reference includes and that MyST substitution tokens (version badge, SCORM path, Node versions) expanded in the built HTML.
 
 | Change type | Usually enough |
 | --- | --- |

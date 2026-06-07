@@ -23,10 +23,19 @@ bash docs/scripts/verify-doc-includes.sh
 pip install -r docs/requirements.txt
 bash docs/scripts/build-docs-demos.sh   # optional: embed example course bundles
 sphinx-build -W -b html docs docs/_build/html
+npm run docs:verify   # after sphinx-build: includes + substitution tokens in HTML
 sphinx-build -b linkcheck docs docs/_build/linkcheck   # optional: external link audit
 ```
 
 Without `npm run docs:api`, [API reference](reference/api.md) TypeDoc links will be broken in the built site.
+
+### MyST substitutions (`{{ release }}`, paths, Node versions)
+
+Shared values live in **`conf.py`** → `release` and `myst_substitutions`. Use `{{ key }}` in Markdown **or** in `{raw} html` blocks — `conf.py` expands every token on `source-read` before Sphinx parses the page.
+
+When adding a new substitution key, define it only in `myst_substitutions`; CI runs `verify_doc_substitutions.py`, which reads that dict and fails if any `{{ key }}` survives in built HTML.
+
+Do **not** hard-code the framework version in the home hero badge; keep `v{{ release }}` in `index.md`.
 
 ## Source layout
 

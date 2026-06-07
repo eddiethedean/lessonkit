@@ -16,7 +16,7 @@
 
 - [ ] `npm test` (or scoped workspace tests — see CONTRIBUTING.md)
 - [ ] `npm run lint` and `npm run typecheck` (when code changed)
-- [ ] Docs build when `docs/` changed — canonical command from [CONTRIBUTING.md](CONTRIBUTING.md#faster-loops): `npm run build:packages && npm run docs:api && bash docs/scripts/verify-doc-includes.sh && node docs/scripts/generate-block-props-doc.mjs && cd docs && pip install -r requirements.txt && sphinx-build -W -b html . _build/html`
+- [ ] Docs build when `docs/` changed — canonical command from [CONTRIBUTING.md](CONTRIBUTING.md#faster-loops): `npm run build:packages && npm run docs:api && bash docs/scripts/verify-doc-includes.sh && node docs/scripts/generate-block-props-doc.mjs && cd docs && pip install -r requirements.txt && sphinx-build -W -b html . _build/html && cd .. && npm run docs:verify`
 - [ ] Integration / e2e (when CLI, packaging, or examples changed)
 
 ## Checklist

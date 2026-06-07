@@ -34,7 +34,8 @@ Older version-specific checklists (1.4.0, 1.3.x, …) live in [docs/project/rele
 
 Keep these in sync when bumping version:
 
-- `docs/conf.py` → `release`
-- [docs/index.md](docs/index.md) hero badge
+- `docs/conf.py` → `release` (also drives `myst_substitutions.release` and the home hero badge via `v{{ release }}` in [docs/index.md](docs/index.md))
 - [README.md](README.md) release table
 - Init template `package.json` dependency pins
+
+After bumping `release`, run `sphinx-build -W -b html docs docs/_build/html` then `npm run docs:verify` — CI fails if the hero still shows a literal `{{ release }}` or any other unexpanded substitution token.

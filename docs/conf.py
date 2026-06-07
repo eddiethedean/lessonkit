@@ -14,6 +14,7 @@ author = "LessonKit contributors"
 release = "1.5.0"
 
 # Substitutions for MyST pages. source-read expands these in raw HTML and inline code too.
+# New keys are picked up automatically by docs/scripts/verify_doc_substitutions.py (CI).
 myst_substitutions = {
     "release": release,
     "scorm_zip_path": ".lxpack/course/.lxpack/out/course-scorm12.zip",
