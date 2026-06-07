@@ -118,7 +118,7 @@ When `config.session.sessionId` changes, `migrateCourseStartedMark` moves dedupe
 
 Built-in `Quiz` / `KnowledgeCheck` must be wrapped in `<Lesson>`. Events without an enclosing `lessonId` are dropped by `tryBuildTelemetryEvent`.
 
-P0 assessment blocks (`TrueFalse`, `FillInTheBlanks`, etc.) emit `assessment_answered` / `assessment_completed`. Legacy `Quiz` emits `quiz_answered` / `quiz_completed`. Both namespaces map to xAPI; LMS bridge forwarding uses `bridge.track` for answered events and `submitAssessment` for completion (see [Packaging](PACKAGING.md)).
+P0 assessment blocks (`TrueFalse`, `FillInTheBlanks`, etc.) emit `assessment_answered` / `assessment_completed`. Legacy `Quiz` emits `quiz_answered` / `quiz_completed`. Both namespaces map to xAPI; LMS bridge forwarding uses `bridge.track` for answered events and `submitAssessment` for completion (see [Packaging reference](reference/packaging.md)).
 
 ### LMS bridge (LXPack)
 
