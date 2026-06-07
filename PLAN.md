@@ -1,5 +1,7 @@
 # LessonKit Plan Document
 
+> **Maintainer note (framework 1.5.x):** Product vision document. For **current execution status**, see [ROADMAP.md](ROADMAP.md) and [CHANGELOG.md](CHANGELOG.md). For author-facing docs, see [lessonkit.readthedocs.io](https://lessonkit.readthedocs.io/en/latest/).
+
 ## Vision
 
 LessonKit is a React-first learning experience development framework for modern learning experience developers, instructional designers, and frontend engineers.

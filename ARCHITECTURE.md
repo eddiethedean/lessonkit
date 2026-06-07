@@ -18,3 +18,5 @@ This repository is a **monorepo** for the `@lessonkit/*` npm packages, examples,
 | [SPEC.md](SPEC.md) | Framework technical requirements |
 
 User-facing reference material lives under [`docs/`](docs/) and publishes to [lessonkit.readthedocs.io](https://lessonkit.readthedocs.io/en/latest/).
+
+**Evaluators and platform teams:** Start with the [Evaluators section on Read the Docs](https://lessonkit.readthedocs.io/en/latest/) — [enterprise evaluation](https://lessonkit.readthedocs.io/en/latest/guides/enterprise-evaluation.html), [architecture overview](https://lessonkit.readthedocs.io/en/latest/guides/architecture-overview.html), [LMS compatibility](https://lessonkit.readthedocs.io/en/latest/reference/lms-compatibility.html), [security policy](https://lessonkit.readthedocs.io/en/latest/project/security.html), and [accessibility conformance](https://lessonkit.readthedocs.io/en/latest/project/accessibility-conformance.html).

@@ -11,7 +11,7 @@ import { buildPluginContext } from "../plugins/context";
 import { createPluginRegistry } from "../plugins/registry";
 import { createDefaultClock, createSessionStoragePort, type ClockPort, type StoragePort } from "../ports";
 import { createProgressController, type ProgressController, type ProgressState } from "../progress";
-import { resolveSessionId } from "../session";
+import { resolveSessionId, migrateCourseStartedMark } from "../session";
 import { tryBuildTelemetryEvent } from "../telemetryBuilder";
 import type { TelemetryDataFor } from "../telemetryTypes";
 import {
@@ -31,6 +31,8 @@ export type HeadlessLessonkitConfig = {
     attemptId?: string;
     user?: TelemetryUser;
   };
+  /** When true (default), switching lessons auto-completes the previous in-progress lesson. */
+  autoCompleteOnLessonSwitch?: boolean;
   /** Plugin list or registry; hooks run on {@link HeadlessLessonkitRuntime.track} and lifecycle emits. */
   plugins?: HeadlessLessonkitPlugins;
   /** When true, skip initial {@link PluginHost.setupAll}; host caller runs setup (React v2 provider). */
@@ -42,13 +44,8 @@ export type HeadlessRuntimePorts = {
   clock?: ClockPort;
 };
 
-export type TelemetryEmitFn = {
-  <N extends TelemetryEventName>(
-    name: N,
-    data?: TelemetryDataFor<N>,
-    lessonId?: LessonId,
-  ): void;
-};
+/** Delivers a fully-built lifecycle telemetry event (plugins already applied). */
+export type TelemetryEmitFn = (event: TelemetryEvent) => void;
 
 export type HeadlessLessonkitRuntime = {
   readonly config: HeadlessLessonkitConfig;
@@ -57,6 +54,8 @@ export type HeadlessLessonkitRuntime = {
   getProgressState: () => ProgressState;
   getSession: () => { sessionId: string; attemptId?: string; user?: TelemetryUser };
   updateConfig: (next: Partial<HeadlessLessonkitConfig>) => void;
+  /** Move course-started dedupe marks between session ids (e.g. LMS anonymous → authenticated handoff). */
+  migrateSessionMarks: (fromSessionId: string, toSessionId: string) => void;
   setActiveLesson: (lessonId: LessonId, emit: TelemetryEmitFn) => void;
   completeLesson: (lessonId: LessonId, emit: TelemetryEmitFn) => void;
   completeCourse: (emit: TelemetryEmitFn) => void;
@@ -86,6 +85,10 @@ function warnRuntimeV1Deprecated(): void {
   );
 }
 
+/**
+ * Create a headless LessonKit runtime for non-React tooling and tests.
+ * Powers `LessonkitProvider` from `@lessonkit/react` when `runtimeVersion` is `"v2"` (default).
+ */
 export function createLessonkitRuntime(
   config: HeadlessLessonkitConfig,
   ports: HeadlessRuntimePorts = {},
@@ -104,6 +107,7 @@ export function createLessonkitRuntime(
 
   let progress = createProgressController();
   let pluginHost = resolvePluginHost(configSnapshot.plugins);
+  let disposed = false;
 
   const getPluginCtx = () =>
     buildPluginContext({
@@ -149,14 +153,14 @@ export function createLessonkitRuntime(
     return applyPluginsToEvent(event);
   };
 
-  const wrapEmitFn = (emitFn: TelemetryEmitFn): TelemetryEmitFn => {
-    return (name, data, lessonId) => {
-      const event = buildAndApply(name, data, lessonId);
-      if (event === null) return;
-      const eventLessonId = "lessonId" in event ? event.lessonId : lessonId;
-      const eventData = "data" in event ? event.data : data;
-      emitFn(event.name as typeof name, eventData as TelemetryDataFor<typeof name>, eventLessonId);
-    };
+  const emitLifecycleEvent = <N extends TelemetryEventName>(
+    emitFn: TelemetryEmitFn,
+    name: N,
+    data?: TelemetryDataFor<N>,
+    lessonId?: LessonId,
+  ): void => {
+    const event = buildAndApply(name, data, lessonId);
+    if (event) emitFn(event);
   };
 
   syncSessionFromConfig(configSnapshot);
@@ -167,6 +171,7 @@ export function createLessonkitRuntime(
     emit: (event: TelemetryEvent) => void,
     lessonId?: LessonId,
   ) => {
+    if (disposed) return;
     const event = buildAndApply(name, data, lessonId);
     if (!event) return;
     emit(event);
@@ -177,12 +182,13 @@ export function createLessonkitRuntime(
     durationMs: number | undefined,
     emitFn: TelemetryEmitFn,
   ) => {
-    const wrapped = wrapEmitFn(emitFn);
-    wrapped("lesson_completed", { lessonId, durationMs }, lessonId);
+    emitLifecycleEvent(emitFn, "lesson_completed", { lessonId, durationMs }, lessonId);
     if (durationMs !== undefined) {
-      wrapped("lesson_time_on_task", { lessonId, durationMs }, lessonId);
+      emitLifecycleEvent(emitFn, "lesson_time_on_task", { lessonId, durationMs }, lessonId);
     }
   };
+
+  const autoCompleteOnLessonSwitch = () => configSnapshot.autoCompleteOnLessonSwitch ?? true;
 
   return {
     get config() {
@@ -196,13 +202,21 @@ export function createLessonkitRuntime(
     },
     getProgressState: () => progress.getState(),
     getSession,
+    migrateSessionMarks(fromSessionId, toSessionId) {
+      if (disposed) return;
+      migrateCourseStartedMark(storage, fromSessionId, toSessionId, courseId);
+    },
     updateConfig(next) {
+      if (disposed) return;
       const previousCourseId = courseId;
       const sessionKeyBefore = JSON.stringify({ sessionId, attemptId, user });
       if (next.courseId !== undefined) configSnapshot.courseId = next.courseId;
       if (next.runtimeVersion !== undefined) {
         if (next.runtimeVersion === "v1") warnRuntimeV1Deprecated();
         configSnapshot.runtimeVersion = next.runtimeVersion;
+      }
+      if (next.autoCompleteOnLessonSwitch !== undefined) {
+        configSnapshot.autoCompleteOnLessonSwitch = next.autoCompleteOnLessonSwitch;
       }
       if (next.session !== undefined) {
         configSnapshot.session = { ...configSnapshot.session, ...next.session };
@@ -230,15 +244,20 @@ export function createLessonkitRuntime(
       }
     },
     setActiveLesson(lessonId, emitFn) {
-      const wrapped = wrapEmitFn(emitFn);
+      if (disposed) return;
       const current = progress.getState();
       if (current.activeLessonId === lessonId) return;
 
       const previous = current.activeLessonId;
-      if (previous && previous !== lessonId && !current.completedLessonIds.has(previous)) {
+      if (
+        autoCompleteOnLessonSwitch() &&
+        previous &&
+        previous !== lessonId &&
+        !current.completedLessonIds.has(previous)
+      ) {
         const completed = progress.completeLesson(previous, clock.nowMs());
         if (completed.didComplete) {
-          emitLessonCompletedEvents(previous, completed.durationMs, wrapped);
+          emitLessonCompletedEvents(previous, completed.durationMs, emitFn);
         }
       }
 
@@ -248,40 +267,47 @@ export function createLessonkitRuntime(
       }
 
       progress.setActiveLesson(lessonId, clock.nowMs());
-      wrapped("lesson_started", { lessonId }, lessonId);
+      emitLifecycleEvent(emitFn, "lesson_started", { lessonId }, lessonId);
     },
     completeLesson(lessonId, emitFn) {
+      if (disposed) return;
       completeLessonWithTelemetry({
         progress,
         lessonId,
         nowMs: clock.nowMs(),
-        emitLessonCompleted: (id, durationMs) =>
-          emitLessonCompletedEvents(id, durationMs, wrapEmitFn(emitFn)),
+        emitLessonCompleted: (id, durationMs) => emitLessonCompletedEvents(id, durationMs, emitFn),
       });
     },
     completeCourse(emitFn) {
+      if (disposed) return;
       completeCourseWithTelemetry({
         progress,
         nowMs: clock.nowMs(),
-        emitLessonCompleted: (id, durationMs) =>
-          emitLessonCompletedEvents(id, durationMs, wrapEmitFn(emitFn)),
-        emitCourseCompleted: () => wrapEmitFn(emitFn)("course_completed"),
+        emitLessonCompleted: (id, durationMs) => emitLessonCompletedEvents(id, durationMs, emitFn),
+        emitCourseCompleted: () => emitLifecycleEvent(emitFn, "course_completed"),
       });
     },
     track,
     scoreAssessment(input, lessonId) {
-      if (!pluginHost) return null;
+      if (disposed || !pluginHost) return null;
       return pluginHost.scoreAssessment(
         { ...input, lessonId: input.lessonId ?? lessonId },
         getPluginCtx(),
       );
     },
     resetForCourseChange(nextCourseId) {
+      if (disposed) return;
       configSnapshot.courseId = nextCourseId;
       courseId = nextCourseId;
       progress = createProgressController();
+      pluginHost?.disposeAll();
+      if (!configSnapshot.deferPluginSetup) {
+        pluginHost?.setupAll(getPluginCtx());
+      }
     },
     dispose() {
+      if (disposed) return;
+      disposed = true;
       pluginHost?.disposeAll();
     },
   };

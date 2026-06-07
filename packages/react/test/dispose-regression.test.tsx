@@ -146,6 +146,62 @@ describe("@lessonkit/react provider dispose regression", () => {
     );
   });
 
+  it("retries xAPI bootstrap when the initial flush fails", async () => {
+    const statements: import("@lessonkit/xapi").XAPIStatement[] = [];
+    let deliveries = 0;
+    const transport: import("@lessonkit/xapi").XAPITransport = async (statement) => {
+      statements.push(statement);
+      deliveries += 1;
+      if (deliveries === 1) throw new Error("network blip");
+    };
+
+    const { unmount } = render(
+      <LessonkitProvider
+        config={{
+          courseId: "course-xapi-retry",
+          tracking: { enabled: false },
+          xapi: { transport },
+        }}
+      >
+        <div>xapi-retry</div>
+      </LessonkitProvider>,
+    );
+
+    await waitFor(() => expect(statements.length).toBeGreaterThan(0));
+    await waitFor(() =>
+      expect(
+        Object.keys(sessionStorage).some((k) => k.startsWith("lessonkit:course_started:")),
+      ).toBe(false),
+    );
+
+    unmount();
+    resetLessonkitProviderStorageForTests();
+
+    render(
+      <LessonkitProvider
+        config={{
+          courseId: "course-xapi-retry",
+          tracking: { enabled: false },
+          xapi: { transport },
+        }}
+      >
+        <div>xapi-retry-again</div>
+      </LessonkitProvider>,
+    );
+
+    await waitFor(() =>
+      expect(
+        Object.keys(sessionStorage).some((k) => k.startsWith("lessonkit:course_started:")),
+      ).toBe(true),
+    );
+    const courseInit = statements.filter(
+      (s) =>
+        s.verb === "http://adlnet.gov/expapi/verbs/initialized" &&
+        s.object.id === "urn:lessonkit:course:course-xapi-retry",
+    );
+    expect(courseInit.length).toBeGreaterThanOrEqual(1);
+  });
+
   it("bootstraps xAPI course_started once under StrictMode when tracking is disabled", async () => {
     const statements: import("@lessonkit/xapi").XAPIStatement[] = [];
     const transport: import("@lessonkit/xapi").XAPITransport = async (statement) => {
@@ -402,7 +458,7 @@ describe("@lessonkit/react provider dispose regression", () => {
     expect(events.filter((e) => e.name === "course_started")).toHaveLength(0);
   });
 
-  it("migrates course_started dedup when session.sessionId changes", async () => {
+  it("re-emits course_started when session.sessionId changes between explicit ids", async () => {
     const events: TelemetryEvent[] = [];
     const sink = (e: TelemetryEvent) => void events.push(e);
 
@@ -435,7 +491,7 @@ describe("@lessonkit/react provider dispose regression", () => {
       </LessonkitProvider>,
     );
 
-    await waitFor(() => expect(events.filter((e) => e.name === "course_started")).toHaveLength(1));
+    await waitFor(() => expect(events.filter((e) => e.name === "course_started")).toHaveLength(2));
   });
 
   it("Lesson under StrictMode does not complete until removed from the tree", async () => {

@@ -117,7 +117,6 @@ it("ProgressTracker reflects completion count and does not allow external mutati
       const p = useProgress();
       const t = useTracking();
 
-      // Use hooks so their lines are covered.
       expect(p).toBe(progress);
       expect(typeof t.track).toBe("function");
 

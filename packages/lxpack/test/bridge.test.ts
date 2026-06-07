@@ -3,9 +3,12 @@ import type { TelemetryEvent } from "@lessonkit/core";
 import {
   dispatchBridgeAction,
   forwardTelemetryToBridge,
+  getLxpackBridge,
+  isParentOriginAllowed,
   normalizeAssessmentPassingScore,
   normalizeAssessmentScore,
   notifyLxpackLessonComplete,
+  resolveParentOrigin,
 } from "../src/bridge";
 import type { LxpackBridgeV1 } from "../src/bridge";
 
@@ -152,5 +155,181 @@ describe("@lessonkit/lxpack/bridge", () => {
 
     process.env.NODE_ENV = prevEnv;
     warn.mockRestore();
+  });
+
+  it("calls onBridgeError when assessment_completed bridge throws", () => {
+    const onBridgeError = vi.fn();
+    const submitAssessment = vi.fn(() => {
+      throw new Error("submit failed");
+    });
+    vi.stubGlobal("window", {
+      parent: { lxpackBridge: { v1: { submitAssessment } } },
+    });
+
+    const event: TelemetryEvent = {
+      name: "assessment_completed",
+      courseId: "c",
+      lessonId: "l1",
+      sessionId: "s",
+      timestamp: "2026-01-01T00:00:00.000Z",
+      data: {
+        checkId: "tf-1",
+        interactionType: "trueFalse",
+        score: 1,
+        maxScore: 1,
+      },
+    };
+
+    try {
+      expect(() => forwardTelemetryToBridge(event, "auto", undefined, { onBridgeError })).not.toThrow();
+      expect(onBridgeError).toHaveBeenCalledWith(expect.any(Error));
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it("blocks bridge calls when parent origin is not allowlisted", () => {
+    const completeLesson = vi.fn();
+    vi.stubGlobal("window", {
+      parent: {
+        location: { origin: "https://evil.example" },
+        lxpackBridge: { v1: { completeLesson } },
+      },
+      location: { origin: "https://course.example" },
+    });
+
+    try {
+      expect(
+        notifyLxpackLessonComplete("lesson-1", {
+          allowedParentOrigins: ["https://lms.example"],
+        }),
+      ).toBe(false);
+      expect(completeLesson).not.toHaveBeenCalled();
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it("allows bridge calls when parent origin matches allowlist", () => {
+    const completeLesson = vi.fn();
+    vi.stubGlobal("window", {
+      parent: {
+        location: { origin: "https://lms.example" },
+        lxpackBridge: { v1: { completeLesson } },
+      },
+      location: { origin: "https://course.example" },
+    });
+
+    try {
+      expect(
+        notifyLxpackLessonComplete("lesson-1", {
+          allowedParentOrigins: ["https://lms.example"],
+        }),
+      ).toBe(true);
+      expect(completeLesson).toHaveBeenCalledWith("lesson-1");
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it("resolveParentOrigin falls back to document.referrer", () => {
+    vi.stubGlobal("document", { referrer: "https://lms.example/course/launch" });
+    vi.stubGlobal("window", {
+      parent: {
+        get location() {
+          throw new Error("cross-origin");
+        },
+      },
+    });
+
+    try {
+      expect(resolveParentOrigin()).toBe("https://lms.example");
+      expect(isParentOriginAllowed(["https://lms.example"])).toBe(true);
+      expect(isParentOriginAllowed(["https://other.example"])).toBe(false);
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it("denies auto bridge in production without allowedParentOrigins", () => {
+    vi.stubEnv("NODE_ENV", "production");
+    try {
+      expect(isParentOriginAllowed(undefined, undefined, "auto")).toBe(false);
+      expect(isParentOriginAllowed(undefined, undefined, undefined)).toBe(false);
+      expect(
+        getLxpackBridge(undefined, { allowedParentOrigins: ["https://lms.example"], mode: "auto" }),
+      ).toBeNull();
+    } finally {
+      vi.unstubAllEnvs();
+    }
+  });
+
+  it("denies notify APIs in production without allowedParentOrigins regardless of mode", () => {
+    const completeLesson = vi.fn();
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubGlobal("window", {
+      parent: {
+        location: { origin: "https://lms.example" },
+        lxpackBridge: { v1: { completeLesson } },
+      },
+      location: { origin: "https://course.example" },
+    });
+
+    try {
+      expect(notifyLxpackLessonComplete("lesson-1")).toBe(false);
+      expect(completeLesson).not.toHaveBeenCalled();
+    } finally {
+      vi.unstubAllEnvs();
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it("getLxpackBridge returns null when origin is not allowlisted", () => {
+    vi.stubGlobal("window", {
+      parent: {
+        location: { origin: "https://evil.example" },
+        lxpackBridge: { v1: { completeCourse: vi.fn() } },
+      },
+    });
+
+    try {
+      expect(getLxpackBridge(undefined, { allowedParentOrigins: ["https://lms.example"] })).toBeNull();
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it("forwards branch telemetry via bridge.track", () => {
+    const track = vi.fn();
+    vi.stubGlobal("window", {
+      parent: { lxpackBridge: { v1: { track } } },
+    });
+
+    forwardTelemetryToBridge(
+      {
+        name: "branch_selected",
+        courseId: "c",
+        lessonId: "l1",
+        sessionId: "s",
+        timestamp: "2026-01-01T00:00:00.000Z",
+        data: {
+          blockId: "bs-1",
+          fromNodeId: "offer",
+          toNodeId: "credit",
+          label: "Credit",
+        },
+      } as TelemetryEvent,
+      "auto",
+    );
+
+    expect(track).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: "interaction",
+        id: "branch_selected",
+        data: expect.objectContaining({ toNodeId: "credit" }),
+      }),
+    );
+
+    vi.unstubAllGlobals();
   });
 });

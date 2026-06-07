@@ -7,7 +7,15 @@ from datetime import datetime
 project = "LessonKit"
 copyright = f"{datetime.now().year}, LessonKit contributors"
 author = "LessonKit contributors"
-release = "1.4.0"
+release = "1.5.0"
+
+# Substitutions for MyST pages (e.g. {{ release }}). Keep docs/index.md hero badge in sync with `release`.
+myst_substitutions = {
+    "release": release,
+    "scorm_zip_path": ".lxpack/course/.lxpack/out/course-scorm12.zip",
+    "node_recommended": "20.19+",
+    "node_minimum": "18+",
+}
 
 extensions = [
     "myst_parser",
@@ -27,6 +35,7 @@ exclude_patterns = [
     "README.md",
     "READTHEDOCS.md",
     "CLI.md",
+    "MANIFEST.md",
     "PACKAGING.md",
     "IDENTITY.md",
     "TELEMETRY.md",
@@ -38,6 +47,8 @@ exclude_patterns = [
     "LXPACK_BRIDGE.md",
     "LXPACK_UPGRADES_FOR_LESSONKIT.md",
     "LXPACK_UPGRADE_PLAN_FOR_MAINTAINERS.md",
+    "H5P_CATALOG_CROSSWALK.md",
+    "_generated",
 ]
 
 source_suffix = {
@@ -121,6 +132,7 @@ pygments_dark_style = "monokai"
 myst_enable_extensions = [
     "colon_fence",
     "deflist",
+    "substitution",
     "tasklist",
 ]
 myst_heading_anchors = 4

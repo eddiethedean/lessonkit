@@ -8,11 +8,13 @@ export function useLessonkit() {
   return ctx;
 }
 
+/** Read course progress state (completed lessons, active lesson). */
 export function useProgress() {
   const { progress } = useLessonkit();
   return progress;
 }
 
+/** Emit typed telemetry events from custom UI (`track("interaction", …)`). */
 export function useTracking() {
   const { track } = useLessonkit();
   return useMemo(() => ({ track }), [track]);

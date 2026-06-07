@@ -36,13 +36,18 @@ describe("compound resume state", () => {
     expect(clampCompoundPageIndex(1, 0)).toBe(0);
   });
 
-  it("drops invalid childStates entries", () => {
-    const parsed = parseCompoundResumeState({
+  it("salvages valid childStates when some entries are invalid", () => {
+    expect(
+      parseCompoundResumeState({
+        schemaVersion: COMPOUND_RESUME_SCHEMA_VERSION,
+        activePageIndex: 2,
+        childStates: { valid: { a: 1 }, bad: null, alsoBad: "x" },
+      }),
+    ).toEqual({
       schemaVersion: COMPOUND_RESUME_SCHEMA_VERSION,
-      activePageIndex: 0,
-      childStates: { valid: { a: 1 }, bad: null, alsoBad: "x" },
+      activePageIndex: 2,
+      childStates: { valid: { a: 1 } },
     });
-    expect(parsed?.childStates).toEqual({ valid: { a: 1 } });
   });
 
   it("accepts one-level string maps in child states (drag/fill resume)", () => {
@@ -66,17 +71,38 @@ describe("compound resume state", () => {
     expect(parsed?.childStates).toEqual({ drag: dragState, fill: fillState });
   });
 
-  it("rejects child states with functions or deeply nested objects", () => {
-    const parsed = parseCompoundResumeState({
+  it("reports dropped child keys via onDroppedChildKeys", () => {
+    const dropped: string[] = [];
+    parseCompoundResumeState(
+      {
+        schemaVersion: COMPOUND_RESUME_SCHEMA_VERSION,
+        activePageIndex: 0,
+        childStates: {
+          ok: { answer: "a" },
+          bad: { run: () => {} },
+        },
+      },
+      { onDroppedChildKeys: (keys) => dropped.push(...keys) },
+    );
+    expect(dropped).toEqual(["bad"]);
+  });
+
+  it("salvages valid child states when some entries are nested or invalid", () => {
+    expect(
+      parseCompoundResumeState({
+        schemaVersion: COMPOUND_RESUME_SCHEMA_VERSION,
+        activePageIndex: 0,
+        childStates: {
+          ok: { answer: "a", picks: [1, 2] },
+          nested: { payload: { nested: { deep: true } } },
+          fn: { run: () => {} },
+        },
+      }),
+    ).toEqual({
       schemaVersion: COMPOUND_RESUME_SCHEMA_VERSION,
       activePageIndex: 0,
-      childStates: {
-        ok: { answer: "a", picks: [1, 2] },
-        nested: { payload: { nested: { deep: true } } },
-        fn: { run: () => {} },
-      },
+      childStates: { ok: { answer: "a", picks: [1, 2] } },
     });
-    expect(parsed?.childStates).toEqual({ ok: { answer: "a", picks: [1, 2] } });
   });
 });
 
@@ -170,6 +196,8 @@ describe("telemetry catalog v3", () => {
     expect(names).toContain("slide_viewed");
     expect(names).toContain("video_cue_reached");
     expect(names).toContain("video_segment_completed");
+    expect(names).toContain("branch_node_viewed");
+    expect(names).toContain("branch_selected");
   });
 
   it("builds book_page_viewed events", () => {
@@ -258,5 +286,36 @@ describe("telemetry catalog v3", () => {
       data: { blockId: "survey-1", fieldCount: 3 },
     });
     expect(survey.name).toBe("questionnaire_submitted");
+
+    const branchViewed = buildTelemetryEvent({
+      name: "branch_node_viewed",
+      courseId: "c1",
+      lessonId: "l1",
+      sessionId: "s1",
+      data: { blockId: "bs-1", nodeId: "offer", nodeIndex: 0, nodeTitle: "Offer" },
+    });
+    expect(branchViewed.name).toBe("branch_node_viewed");
+
+    const branchSelected = buildTelemetryEvent({
+      name: "branch_selected",
+      courseId: "c1",
+      lessonId: "l1",
+      sessionId: "s1",
+      data: {
+        blockId: "bs-1",
+        fromNodeId: "offer",
+        toNodeId: "credit",
+        label: "Credit",
+        scoreWeight: 1,
+      },
+    });
+    expect(branchSelected.name).toBe("branch_selected");
+  });
+
+  it("allows BranchNode under BranchingScenario", () => {
+    expect(isChildTypeAllowed("BranchingScenario", "BranchNode")).toBe(true);
+    expect(isChildTypeAllowed("BranchNode", "BranchChoice")).toBe(true);
+    expect(isChildTypeAllowed("BranchNode", "Embed")).toBe(true);
+    expect(isChildTypeAllowed("BranchNode", "Chart")).toBe(true);
   });
 });

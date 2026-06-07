@@ -1,6 +1,8 @@
 import {
   Accordion,
+  Chart,
   DialogCards,
+  Embed,
   Flashcards,
   Heading,
   ImageHotspots,
@@ -105,6 +107,29 @@ export function PlatformTourLesson() {
               y: 78,
               content: <Text>Safe for all-hands slides after weekly refresh.</Text>,
             },
+          ]}
+        />
+      </section>
+
+      <section className="showcase-section">
+        <Heading blockId="tour-embed-title" level={3}>
+          Embed
+        </Heading>
+        <Embed blockId="atlas-docs-embed" src="https://example.com/atlas/docs" title="Atlas documentation" />
+      </section>
+
+      <section className="showcase-section">
+        <Heading blockId="tour-chart-title" level={3}>
+          Chart
+        </Heading>
+        <Chart
+          blockId="atlas-adoption-chart"
+          type="bar"
+          title="Weekly active workspaces"
+          data={[
+            { label: "Week 1", value: 12 },
+            { label: "Week 2", value: 18 },
+            { label: "Week 3", value: 24 },
           ]}
         />
       </section>

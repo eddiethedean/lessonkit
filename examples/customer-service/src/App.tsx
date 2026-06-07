@@ -1,5 +1,8 @@
 import React from "react";
 import {
+  BranchChoice,
+  BranchingScenario,
+  BranchNode,
   Course,
   Lesson,
   ProgressTracker,
@@ -14,6 +17,7 @@ import {
 import type { TelemetryEvent } from "@lessonkit/core";
 import type { XAPIStatement } from "@lessonkit/xapi";
 import { CourseTopbar, LessonIntro, SidebarLessons, type LessonMeta } from "../../_shared/course-ui";
+import { allowConsoleTelemetryForDocsDemo } from "../../_shared/docsDemoConfig";
 
 const COURSE_ID = "customer-de-escalation";
 
@@ -30,6 +34,7 @@ export default function App() {
 
   const courseConfig = React.useMemo(
     () => ({
+      ...allowConsoleTelemetryForDocsDemo(),
       tracking: { sink: (event: TelemetryEvent) => console.log("[telemetry]", event) },
       xapi: { transport: (statement: XAPIStatement) => console.log("[xapi]", statement) },
     }),
@@ -103,10 +108,31 @@ export default function App() {
 
               {step === 3 ? (
                 <Lesson title={LESSONS[3].title} lessonId={LESSONS[3].id}>
-                  <Scenario>
-                    <p>Part ships tomorrow but the customer missed a client deadline. Choose how to close the loop.</p>
-                  </Scenario>
-                  <EscalationBranch />
+                  <BranchingScenario
+                    blockId="escalation-paths"
+                    title="Resolution paths"
+                    startNodeId="offer"
+                    showPathRecap
+                  >
+                    <BranchNode nodeId="offer">
+                      <Scenario>
+                        <p>Part ships tomorrow but the customer missed a client deadline. Choose how to close the loop.</p>
+                      </Scenario>
+                      <BranchChoice label="Offer shipping credit + proactive updates" targetNodeId="credit" />
+                      <BranchChoice label="Warm-transfer to supervisor" targetNodeId="supervisor" />
+                    </BranchNode>
+                    <BranchNode nodeId="credit" terminal>
+                      <div className="callout" role="status">
+                        <strong>Tier-1 resolution.</strong> Document credit code, set callback, and tag case to prevent re-queue.
+                      </div>
+                      <Reflection prompt="Write the one-sentence case note the next agent should see first." />
+                    </BranchNode>
+                    <BranchNode nodeId="supervisor" terminal>
+                      <div className="callout" role="status">
+                        <strong>Appropriate escalation.</strong> Stay on the line until the supervisor joins—no cold transfer.
+                      </div>
+                    </BranchNode>
+                  </BranchingScenario>
                 </Lesson>
               ) : null}
 
@@ -290,63 +316,6 @@ function PhoneEmpathy() {
       ) : null}
     </section>
   );
-}
-
-function EscalationBranch() {
-  const { track } = useTracking();
-  const [stage, setStage] = React.useState<"offer" | "credit" | "supervisor" | "done">("offer");
-
-  const choose = (next: typeof stage, event: string) => {
-    setStage(next);
-    track("interaction", { kind: "escalation_branch", event });
-  };
-
-  if (stage === "offer") {
-    return (
-      <section className="panel chat-panel">
-        <div className="chat-log">
-          <ChatBubble who="customer">Tomorrow doesn’t help—I lost a client. What are you going to do?</ChatBubble>
-        </div>
-        <div className="actions">
-          <button type="button" onClick={() => choose("credit", "shipping_credit")}>
-            Offer shipping credit + proactive tracking updates
-          </button>
-          <button type="button" onClick={() => choose("supervisor", "supervisor_early")}>
-            Warm-transfer to supervisor for goodwill review
-          </button>
-        </div>
-      </section>
-    );
-  }
-
-  if (stage === "credit") {
-    return (
-      <section className="panel">
-        <div className="callout" role="status">
-          <strong>Tier-1 resolution.</strong> Document credit code, set callback, and tag case to prevent re-queue.
-        </div>
-        <Reflection prompt="Write the one-sentence case note the next agent should see first." />
-        <button type="button" onClick={() => setStage("done")}>
-          Continue
-        </button>
-      </section>
-    );
-  }
-
-  if (stage === "supervisor") {
-    return (
-      <section className="panel">
-        <div className="callout" role="status">
-          <strong>Appropriate escalation.</strong> Stay on the line until the supervisor joins—no cold transfer.
-        </div>
-        <button type="button" onClick={() => setStage("done")}>
-          Continue
-        </button>
-      </section>
-    );
-  }
-
-  return <p className="muted">Resolution path complete—open the skills check.</p>;
 }
 
 function FinishCourse() {

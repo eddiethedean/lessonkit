@@ -58,9 +58,26 @@ Canonical mapper: `telemetryEventToXAPIStatement(event)` in `@lessonkit/xapi`.
 | `lesson_started` | initialized | `…:lesson:{lessonId}` |
 | `lesson_completed` | completed | `…:lesson:{lessonId}` (+ `result.duration` when `durationMs` set) |
 | `lesson_time_on_task` | *(none)* | Returns `null` — use `lesson_completed` for xAPI duration |
-| `quiz_answered` | answered | `…:check:{checkId}` |
+| `quiz_answered` | answered | `…:check:{checkId}` (+ `result.success` when `correct` set) |
 | `quiz_completed` | completed | `…:check:{checkId}` (+ score when provided) |
-| `interaction` | experienced | `…:block:{blockId}` only when `lessonId` and `data.blockId` are set |
+| `assessment_answered` | answered | `…:check:{checkId}` (+ `result.success` when `correct` set) |
+| `assessment_completed` | completed | `…:check:{checkId}` (+ score when provided) |
+| `interaction` | experienced | `…:block:{blockId}` when `lessonId` and `data.blockId` are set |
+| `book_page_viewed` | experienced | `…:block:{blockId}` |
+| `slide_viewed` | experienced | `…:block:{blockId}` |
+| `compound_page_viewed` | experienced | `…:block:{blockId}` |
+| `hotspot_opened` | experienced | `…:block:{blockId}` |
+| `accordion_section_toggled` | experienced | `…:block:{blockId}` |
+| `flashcard_flipped` | experienced | `…:block:{blockId}` |
+| `image_slider_changed` | experienced | `…:block:{blockId}` |
+| `video_cue_reached` | experienced | `…:block:{blockId}` |
+| `video_segment_completed` | completed | `…:block:{blockId}` |
+| `memory_card_flipped` | experienced | `…:block:{blockId}` |
+| `information_wall_search` | experienced | `…:block:{blockId}` |
+| `parallax_slide_viewed` | experienced | `…:block:{blockId}` |
+| `questionnaire_submitted` | completed | `…:block:{blockId}` |
+| `branch_node_viewed` | experienced | `…:block:{blockId}:node:{nodeId}` |
+| `branch_selected` | experienced | `…:block:{blockId}:node:{toNodeId}` |
 
 For block-level `interaction` events, set `blockId` on `Scenario` / `Reflection` and ensure an active `lessonId`. See [telemetry reference](telemetry.md) for the full event catalog.
 
@@ -74,7 +91,21 @@ Direct `createXAPIClient` usage is optional for non-React tooling; prefer the ma
 
 If `transport` throws or rejects, statements are retained in the in-memory queue. Call `await client.flush()` to retry. The React provider calls `flushOnExit()` then `flush()` when the tab is hidden (`visibilitychange` / `pagehide`).
 
-When the queue exceeds `maxSize` (default **1000**), the oldest statement is dropped and `onCap` runs (wire via `config.observability.onXapiQueueCap` in React). Under prolonged LRS outage, statements are lost silently unless you monitor queue depth via `onXapiQueueDepth` or handle `onXapiQueueCap`. See [production checklist](../guides/react-developers/production-checklist.md).
+When the queue exceeds `maxSize` (default **1000**), the oldest statement is dropped and `onCap` runs (wire via `config.observability.onXapiQueueCap` in React). Under prolonged LRS outage, statements are lost silently unless you monitor queue depth via `onXapiQueueDepth` or handle `onXapiQueueCap`. See [production checklist](../guides/react-developers/production-checklist.md) and [LRS operations](../guides/react-developers/lrs-operations.md).
+
+## Dead-letter and URL safety (advanced)
+
+| Export | Purpose |
+| --- | --- |
+| `persistDeadLetterStatement(storage, statement)` | Persist a statement that exceeded retry/cap to `sessionStorage` for manual replay |
+| `loadDeadLetterStatements(storage)` | Read persisted dead-letter statements |
+| `resetXAPIDeadLetterForTests()` | Clear dead-letter storage in tests (`@lessonkit/xapi/testing` pattern via main export in test files) |
+| `assertSafeLrsUrl(url, opts?)` | Reject unsafe LRS URLs (credentials in URL, private hosts in production) |
+| `isRetryableFetchError(err)` | Whether a transport error should retry |
+| `isRetryableFetchHttpStatus(status)` | HTTP statuses eligible for retry (429, 5xx) |
+| `FetchHttpError` | Typed error from fetch transport with `status` |
+
+**Ops pattern:** Wire `onXapiTransportError` and `onXapiQueueCap` in `config.observability`. On cap, export dead letters with `loadDeadLetterStatements` and replay through your backend proxy when the LRS recovers. Never point production courses at a public LRS with embedded credentials — use `assertSafeLrsUrl` in custom transports.
 
 ## Related
 

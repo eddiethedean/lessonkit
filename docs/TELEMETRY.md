@@ -1,4 +1,4 @@
-# Telemetry & xAPI (v1)
+# Telemetry & xAPI (1.5.x)
 
 LessonKit emits versioned telemetry events from `@lessonkit/react` and maps them to xAPI via `@lessonkit/xapi`.
 
@@ -27,6 +27,8 @@ LessonKit emits versioned telemetry events from `@lessonkit/react` and maps them
 | `information_wall_search` | `InformationWall` search (1.4+) | `blockId`, `query` |
 | `parallax_slide_viewed` | `ParallaxSlideshow` slide view (1.4+) | `blockId`, `slideIndex` |
 | `questionnaire_submitted` | `Questionnaire` submit (1.4+) | `blockId`, `fieldCount` |
+| `branch_node_viewed` | `BranchingScenario` node activation (1.5+) | `blockId`, `nodeId`, `nodeIndex`, `nodeTitle?` |
+| `branch_selected` | `BranchChoice` selection (1.5+) | `blockId`, `fromNodeId`, `toNodeId`, `label`, `scoreWeight?` |
 
 Session fields on all events: `sessionId`, optional `attemptId`, optional `user`.
 
@@ -41,9 +43,26 @@ Canonical mapper: `telemetryEventToXAPIStatement(event)` in `@lessonkit/xapi`.
 | `lesson_started` | initialized | `…:lesson:{lessonId}` |
 | `lesson_completed` | completed | `…:lesson:{lessonId}` (+ `result.duration` when `durationMs` set) |
 | `lesson_time_on_task` | *(none)* | Returns `null` — use `lesson_completed` for xAPI duration |
-| `quiz_answered` | answered | `…:check:{checkId}` |
+| `quiz_answered` | answered | `…:check:{checkId}` (+ `result.success` when `correct` set) |
 | `quiz_completed` | completed | `…:check:{checkId}` (+ score when provided) |
-| `interaction` | experienced | `…:block:{blockId}` only when `lessonId` and `data.blockId` are set |
+| `assessment_answered` | answered | `…:check:{checkId}` (+ `result.success` when `correct` set) |
+| `assessment_completed` | completed | `…:check:{checkId}` (+ score when provided) |
+| `interaction` | experienced | `…:block:{blockId}` when `lessonId` and `data.blockId` are set |
+| `book_page_viewed` | experienced | `…:block:{blockId}` |
+| `slide_viewed` | experienced | `…:block:{blockId}` |
+| `compound_page_viewed` | experienced | `…:block:{blockId}` |
+| `hotspot_opened` | experienced | `…:block:{blockId}` |
+| `accordion_section_toggled` | experienced | `…:block:{blockId}` |
+| `flashcard_flipped` | experienced | `…:block:{blockId}` |
+| `image_slider_changed` | experienced | `…:block:{blockId}` |
+| `video_cue_reached` | experienced | `…:block:{blockId}` |
+| `video_segment_completed` | completed | `…:block:{blockId}` |
+| `memory_card_flipped` | experienced | `…:block:{blockId}` |
+| `information_wall_search` | experienced | `…:block:{blockId}` |
+| `parallax_slide_viewed` | experienced | `…:block:{blockId}` |
+| `questionnaire_submitted` | completed | `…:block:{blockId}` |
+| `branch_node_viewed` | experienced | `…:block:{blockId}:node:{nodeId}` |
+| `branch_selected` | experienced | `…:block:{blockId}:node:{toNodeId}` |
 
 React runtime: after each `track()`, the provider calls the mapper and `xapi.send(statement)` when a statement is returned (single path; no duplicate lifecycle helpers).
 
@@ -95,9 +114,15 @@ The runtime uses separate session-storage marks:
 
 When `config.session.sessionId` changes, `migrateCourseStartedMark` moves dedupe state to the new session id so learners do not receive duplicate `course_started` events after LMS handoff.
 
-### Quiz telemetry
+### Quiz and assessment telemetry
 
 Built-in `Quiz` / `KnowledgeCheck` must be wrapped in `<Lesson>`. Events without an enclosing `lessonId` are dropped by `tryBuildTelemetryEvent`.
+
+P0 assessment blocks (`TrueFalse`, `FillInTheBlanks`, etc.) emit `assessment_answered` / `assessment_completed`. Legacy `Quiz` emits `quiz_answered` / `quiz_completed`. Both namespaces map to xAPI; LMS bridge forwarding uses `bridge.track` for answered events and `submitAssessment` for completion (see [Packaging reference](reference/packaging.md)).
+
+### LMS bridge (LXPack)
+
+When `config.lxpack.bridge` is `"auto"`, completion events (`course_completed`, `lesson_completed`, `assessment_completed`, `quiz_completed`) call the parent `lxpackBridge.v1` API. Answered events (`assessment_answered`, `quiz_answered`) forward via `bridge.track`. Wire `observability.onLxpackBridgeMiss` and `onLxpackBridgeError` in production.
 
 ## Production observability
 

@@ -224,6 +224,47 @@ describe("telemetryEventToXAPIStatement", () => {
     ).toBe("urn:lessonkit:course:cyber-basics:lesson:phishing-101:block:intro");
   });
 
+  it("maps embed_viewed and chart_viewed interactions with xAPI extensions", () => {
+    const embed = telemetryEventToXAPIStatement({
+      name: "interaction",
+      ...base,
+      data: { kind: "embed_viewed", blockId: "embed-1", src: "https://example.com/video" },
+    });
+    const embedExt = embed?.context?.extensions as Record<string, unknown> | undefined;
+    expect(embed?.verb).toBe("http://adlnet.gov/expapi/verbs/experienced");
+    expect(embedExt?.["https://lessonkit.dev/xapi/interactionKind"]).toBe("embed_viewed");
+    expect(embedExt?.["https://lessonkit.dev/xapi/embedSrc"]).toBe("https://example.com/video");
+
+    const embedWithToken = telemetryEventToXAPIStatement({
+      name: "interaction",
+      ...base,
+      data: {
+        kind: "embed_viewed",
+        blockId: "embed-1",
+        src: "https://user:secret@example.com/doc?token=secret#frag",
+      },
+    });
+    const tokenExt = embedWithToken?.context?.extensions as Record<string, unknown> | undefined;
+    expect(tokenExt?.["https://lessonkit.dev/xapi/embedSrc"]).toBe("https://example.com/doc");
+
+    const chart = telemetryEventToXAPIStatement({
+      name: "interaction",
+      ...base,
+      data: { kind: "chart_viewed", blockId: "chart-1", chartType: "bar" },
+    });
+    const chartExt = chart?.context?.extensions as Record<string, unknown> | undefined;
+    expect(chartExt?.["https://lessonkit.dev/xapi/interactionKind"]).toBe("chart_viewed");
+    expect(chartExt?.["https://lessonkit.dev/xapi/chartType"]).toBe("bar");
+
+    const embedNoSrc = telemetryEventToXAPIStatement({
+      name: "interaction",
+      ...base,
+      data: { kind: "embed_viewed", blockId: "embed-2" },
+    });
+    const embedNoSrcExt = embedNoSrc?.context?.extensions as Record<string, unknown> | undefined;
+    expect(embedNoSrcExt?.["https://lessonkit.dev/xapi/embedSrc"]).toBeUndefined();
+  });
+
   it("maps assessment_answered and assessment_completed", () => {
     const answered = telemetryEventToXAPIStatement({
       name: "assessment_answered",
@@ -389,6 +430,67 @@ describe("telemetryEventToXAPIStatement", () => {
         data: { blockId: "survey-1", fieldCount: 3 },
       })?.verb,
     ).toBe("http://adlnet.gov/expapi/verbs/completed");
+
+    const branchViewed = telemetryEventToXAPIStatement({
+      name: "branch_node_viewed",
+      ...base,
+      data: { blockId: "branch-1", nodeId: "offer", nodeIndex: 0, nodeTitle: "Offer" },
+    });
+    expect(branchViewed?.verb).toBe("http://adlnet.gov/expapi/verbs/experienced");
+    expect(branchViewed?.object.id).toBe(
+      "urn:lessonkit:course:cyber-basics:lesson:phishing-101:block:branch-1:node:offer",
+    );
+
+    const branchSelected = telemetryEventToXAPIStatement({
+      name: "branch_selected",
+      ...base,
+      data: {
+        blockId: "branch-1",
+        fromNodeId: "offer",
+        toNodeId: "credit",
+        label: "Credit",
+        scoreWeight: 1,
+      },
+    });
+    expect(branchSelected?.verb).toBe("http://adlnet.gov/expapi/verbs/experienced");
+    expect(branchSelected?.object.id).toContain(":node:credit");
+    expect(branchSelected?.result?.score).toBeUndefined();
+  });
+
+  it("maps branch_selected without scoreWeight as experienced", () => {
+    const branchSelected = telemetryEventToXAPIStatement({
+      name: "branch_selected",
+      courseId: "c1",
+      lessonId: "l1",
+      timestamp: "2026-01-01T00:00:00.000Z",
+      sessionId: "s1",
+      data: {
+        blockId: "branch-1",
+        fromNodeId: "offer",
+        toNodeId: "supervisor",
+        label: "Supervisor",
+      },
+    });
+    expect(branchSelected?.verb).toBe("http://adlnet.gov/expapi/verbs/experienced");
+  });
+
+  it("maps branch_selected with NaN scoreWeight as experienced", () => {
+    const branchSelected = telemetryEventToXAPIStatement({
+      name: "branch_selected",
+      courseId: "c1",
+      lessonId: "l1",
+      timestamp: "2026-01-01T00:00:00.000Z",
+      sessionId: "s1",
+      data: {
+        blockId: "branch-1",
+        fromNodeId: "offer",
+        toNodeId: "supervisor",
+        label: "Supervisor",
+        scoreWeight: Number.NaN,
+      },
+    });
+    expect(branchSelected?.verb).toBe("http://adlnet.gov/expapi/verbs/experienced");
+    expect(branchSelected?.result).toBeUndefined();
   });
 
   it("throws for unknown event names", () => {

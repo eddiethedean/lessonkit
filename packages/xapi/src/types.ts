@@ -51,7 +51,7 @@ export type XAPIQueue = {
   getHeadInFlightId?: () => string | undefined;
 };
 
-export type XAPIExitTransport = (statement: XAPIStatement) => void;
+export type XAPIExitTransport = (statement: XAPIStatement) => void | Promise<void>;
 
 export type XAPIClient = {
   send: (statement: XAPIStatement) => void;

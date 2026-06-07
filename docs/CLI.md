@@ -1,4 +1,4 @@
-# LessonKit CLI (1.0+)
+# LessonKit CLI (1.5.x)
 
 The `@lessonkit/cli` package provides the developer workflow for LessonKit projects: scaffold, dev, build, and dual export packaging.
 
@@ -24,7 +24,7 @@ lessonkit package --target scorm12
 
 ## Project manifest: `lessonkit.json`
 
-Every LessonKit project includes a `lessonkit.json` at the project root. The CLI walks up from `--cwd` to find it.
+Every LessonKit project includes a `lessonkit.json` at the project root. The CLI walks up from `--cwd` to find it. **Full schema:** [Manifest reference](reference/manifest.md).
 
 ```json
 {
@@ -66,11 +66,23 @@ Every LessonKit project includes a `lessonkit.json` at the project root. The CLI
 | `course` | [`LessonkitCourseDescriptor`](https://github.com/eddiethedean/lessonkit/blob/main/packages/lxpack/src/types.ts) passed to `@lessonkit/lxpack` |
 | `paths.spaDistDir` | Vite build output (default `dist`) |
 | `paths.lxpackOutDir` | LXPack project directory (default `.lxpack/course`) |
-| `paths.outputBaseDir` | Packaged artifact base under the LXPack project dir (default `.lxpack/out`; artifacts are `{outputBaseDir}/course-<target>.zip` or `{outputBaseDir}/standalone`) |
+| `paths.outputBaseDir` | Packaged artifact base **under** `paths.lxpackOutDir` (default `.lxpack/out`; artifacts are `{outputBaseDir}/course-<target>.zip` or `{outputBaseDir}/standalone`) |
 
-Keep `course.courseId`, `course.lessons[].id`, and `course.assessments[].checkId` aligned with your React component props. `lessonkit init` updates `lessonkit.json` (including `tracking.xapi.activityIri`), `src/courseConfig.ts` `courseId`, and patches `src/App.tsx` `courseId` / course title for you. See [Identity reference](reference/identity.md).
+Default artifact layout (paths relative to project root):
 
-The CLI only recognizes project manifests with `schemaVersion: 1` (not the interchange `lessonkit.json` written under `.lxpack/course`). `per-lesson-spa` layout is not supported by `lessonkit package` (1.0.0) — use `single-spa`. Use `@lessonkit/lxpack` directly if you need `per-lesson-spa`. SPA build output is controlled by `paths.spaDistDir` (not `course.spaDistDir`).
+```text
+my-course/
+├── dist/                              ← paths.spaDistDir
+└── .lxpack/course/                    ← paths.lxpackOutDir
+    └── .lxpack/out/                   ← paths.outputBaseDir
+        └── course-scorm12.zip         ← upload to LMS
+```
+
+`lessonkit package` prints the resolved zip path on stdout. Trust that path even when your manifest overrides `paths.*`.
+
+Before packaging, keep `courseId`, `course.lessons[].id`, and `course.assessments[].checkId` aligned with your React component props. `lessonkit init` updates `lessonkit.json` (including `tracking.xapi.activityIri`), `src/courseConfig.ts` `courseId`, and patches `src/App.tsx` `courseId` / course title for you. See [Identity reference](reference/identity.md).
+
+The CLI only recognizes project manifests with `schemaVersion: 1` (not the interchange `lessonkit.json` written under `.lxpack/course`). `per-lesson-spa` layout is not supported by `lessonkit package` (1.x) — use `single-spa`. Use `@lessonkit/lxpack` directly if you need `per-lesson-spa`. SPA build output is controlled by `paths.spaDistDir` (not `course.spaDistDir`).
 
 ## Commands
 
@@ -80,9 +92,9 @@ Scaffold a Vite + React project from the bundled template.
 
 ```bash
 lessonkit init my-course
-lessonkit init --here          # init in current directory
+lessonkit init --here
+lessonkit init --here --force  # empty dir or dotfiles only; requires --here
 lessonkit init my-course --skip-install
-lessonkit init my-course --force
 ```
 
 | Flag | Description |
@@ -103,7 +115,7 @@ lessonkit dev --cwd ./apps/training
 
 ### `lessonkit build`
 
-Production Vite build to `dist/` (or `paths.spaDistDir` from `lessonkit.json`; the CLI passes `--outDir` when it differs from `dist`).
+Production Vite build to `dist/` (or `paths.spaDistDir` from `lessonkit.json`). The CLI always strips passthrough `--outDir` from Vite args and appends the configured `paths.spaDistDir`.
 
 ```bash
 lessonkit build
@@ -137,6 +149,7 @@ lessonkit package --target scorm12 --out .lxpack/out/custom.zip
 | `--cwd` | Project root (default: current directory) |
 | `--no-build` | Skip the implicit Vite build; requires an existing `dist/` (fails fast if `dist/` is missing) |
 | `--out` | Override output artifact path (must resolve inside the project root) |
+| `--strict-parity` | Treat React ↔ `lessonkit.json` ID parity **warnings** as packaging errors (exit code 3). Use in CI when you want zero tolerance for drift. |
 | `--json` | Structured JSON result on stdout (CI/codegen) |
 
 Lxpack targets run `packageLessonkitCourse()` from `@lessonkit/lxpack`. Output layout matches [Packaging reference](reference/packaging.md).
@@ -184,6 +197,23 @@ Failure:
   "exitCode": 2
 }
 ```
+
+## Programmatic API
+
+Embed the CLI in Node scripts or tests:
+
+```ts
+import { createProgram, run } from "@lessonkit/cli";
+
+// Build a Commander program (same commands as the `lessonkit` binary)
+const program = createProgram(console);
+await program.parseAsync(["node", "lessonkit", "build", "--cwd", "./my-course"]);
+
+// Or parse process.argv directly
+await run(process.argv);
+```
+
+Set `LESSONKIT_CMD_TIMEOUT_MS` to override subprocess timeouts for `dev`/`build` (see package README).
 
 ## Related
 

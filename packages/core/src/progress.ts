@@ -1,4 +1,5 @@
 import type { LessonId } from "./identityTypes";
+import { isDevEnvironment } from "./internal/env";
 
 export type ProgressState = {
   activeLessonId?: LessonId;
@@ -40,6 +41,11 @@ export function createProgressController(): ProgressController {
           activeLessonId = undefined;
         }
         return { didComplete: false };
+      }
+      if (!lessonStartTimes.has(lessonId) && isDevEnvironment()) {
+        console.warn(
+          `[lessonkit] completeLesson("${lessonId}") called without activating the lesson first`,
+        );
       }
       completedLessonIds = new Set(completedLessonIds).add(lessonId);
       if (activeLessonId === lessonId) {

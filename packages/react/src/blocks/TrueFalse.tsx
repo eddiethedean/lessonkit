@@ -60,7 +60,7 @@ function TrueFalseInner(
     if (passed) {
       return { score: completedScore ?? maxScore, maxScore };
     }
-    if (selectionCorrect) {
+    if (selected !== null && selectionCorrect) {
       return { score: completedMaxScore ?? maxScore, maxScore };
     }
     return { score: 0, maxScore };
@@ -141,7 +141,9 @@ function TrueFalseInner(
             if (nextPassed) {
               const maxScore = nextCompletedMaxScore ?? completedMaxScore ?? 1;
               const score = nextCompletedScore ?? completedScore ?? maxScore;
-              replayTelemetry(nextSelected ?? null, nextCorrect ?? null, nextPassed, score, maxScore);
+              if (config.tracking?.replayResumeEvents === true) {
+                replayTelemetry(nextSelected ?? null, nextCorrect ?? null, nextPassed, score, maxScore);
+              }
             }
           }
           readBooleanStateField(state, "showSolutions", setShowSolutions);
@@ -158,6 +160,7 @@ function TrueFalseInner(
       selected,
       selectionCorrect,
       showSolutions,
+      config.tracking?.replayResumeEvents,
     ],
   );
 
@@ -179,6 +182,17 @@ function TrueFalseInner(
     if (scored.passed && !completedRef.current) {
       completedRef.current = true;
       setPassed(true);
+      setCompletedScore(scored.score);
+      setCompletedMaxScore(scored.maxScore);
+      assessment.complete({
+        checkId,
+        interactionType: INTERACTION,
+        score: scored.score,
+        maxScore: scored.maxScore,
+        passingScore: props.passingScore ?? scored.maxScore,
+      });
+    } else if (!scored.passed && props.enableRetry === false && !completedRef.current) {
+      completedRef.current = true;
       setCompletedScore(scored.score);
       setCompletedMaxScore(scored.maxScore);
       assessment.complete({

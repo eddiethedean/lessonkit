@@ -11,7 +11,7 @@ import {
 } from "../assessment/internal/resumeState";
 import { useAssessmentHandleRegistration } from "../assessment/internal/useAssessmentHandleRegistration";
 import { usePluginScoring } from "../assessment/internal/usePluginScoring";
-import { useQuizState } from "../hooks";
+import { useLessonkit, useQuizState } from "../hooks";
 import { normalizeComponentId } from "../runtime/validateComponentId";
 
 export type QuizProps = McqAssessmentProps;
@@ -23,7 +23,8 @@ function QuizInner(
   const { enclosingLessonId } = props;
   const checkId = useMemo(() => normalizeComponentId(props.checkId, "checkId"), [props.checkId]);
   const quiz = useQuizState(enclosingLessonId);
-  const { getPluginScore, isChoiceCorrect } = usePluginScoring(checkId, enclosingLessonId);
+  const { config } = useLessonkit();
+  const { scoreResponse } = usePluginScoring(checkId, enclosingLessonId);
   const [selected, setSelected] = useState<string | null>(null);
   const [selectionCorrect, setSelectionCorrect] = useState<boolean | null>(null);
   const [quizPassed, setQuizPassed] = useState(false);
@@ -132,9 +133,9 @@ function QuizInner(
           if (nextPassed === true || nextPassed === false) {
             setQuizPassed(nextPassed);
             completedRef.current = nextPassed;
-            if (nextPassed) {
-              const maxScore = nextCompletedMaxScore ?? completedMaxScore ?? 1;
-              const score = nextCompletedScore ?? completedScore ?? maxScore;
+            if (nextPassed && config.tracking?.replayResumeEvents === true) {
+              const maxScore = nextCompletedMaxScore ?? 1;
+              const score = nextCompletedScore ?? (nextPassed ? maxScore : 0);
               replayTelemetry(
                 nextSelected ?? null,
                 nextCorrect ?? null,
@@ -150,6 +151,7 @@ function QuizInner(
       checkId,
       completedMaxScore,
       completedScore,
+      config.tracking?.replayResumeEvents,
       props.passingScore,
       props.question,
       quiz,
@@ -173,32 +175,40 @@ function QuizInner(
               name={questionId}
               value={c}
               checked={selected === c}
-              disabled={passed}
+              disabled={passed && !props.enableRetry}
               aria-invalid={selected === c && selectionCorrect === false ? true : undefined}
               onChange={() => {
-                if (passed) return;
+                if (passed && !props.enableRetry) return;
                 setSelected(c);
-                const custom = getPluginScore(c);
-                const correct = isChoiceCorrect(c, props.answer, custom, props.passingScore);
-                setSelectionCorrect(correct);
+                const defaultCorrect = c === props.answer;
+                const scored = scoreResponse(c, defaultCorrect, 1, props.passingScore);
+                setSelectionCorrect(scored.passed);
                 quiz.answer({
                   checkId,
                   question: props.question,
                   choice: c,
-                  correct,
+                  correct: scored.passed,
                 });
-                if (correct && !completedRef.current) {
+                if (scored.passed && !completedRef.current) {
                   completedRef.current = true;
                   setQuizPassed(true);
-                  const maxScore = custom?.maxScore ?? 1;
-                  const score = custom?.score ?? maxScore;
-                  setCompletedScore(score);
-                  setCompletedMaxScore(maxScore);
+                  setCompletedScore(scored.score);
+                  setCompletedMaxScore(scored.maxScore);
                   quiz.complete({
                     checkId,
-                    score,
-                    maxScore,
-                    passingScore: props.passingScore ?? maxScore,
+                    score: scored.score,
+                    maxScore: scored.maxScore,
+                    passingScore: props.passingScore ?? scored.maxScore,
+                  });
+                } else if (!scored.passed && props.enableRetry === false && !completedRef.current) {
+                  completedRef.current = true;
+                  setCompletedScore(scored.score);
+                  setCompletedMaxScore(scored.maxScore);
+                  quiz.complete({
+                    checkId,
+                    score: scored.score,
+                    maxScore: scored.maxScore,
+                    passingScore: props.passingScore ?? scored.maxScore,
                   });
                 }
               }}
@@ -211,6 +221,23 @@ function QuizInner(
         <p role="status" aria-live="polite">
           {selectionCorrect ? "Correct" : "Try again"}
         </p>
+      ) : null}
+      {props.enableRetry && passed ? (
+        <button
+          type="button"
+          data-testid="quiz-retry"
+          onClick={() => {
+            completedRef.current = false;
+            telemetryReplayedRef.current = false;
+            setQuizPassed(false);
+            setSelected(null);
+            setSelectionCorrect(null);
+            setCompletedScore(null);
+            setCompletedMaxScore(null);
+          }}
+        >
+          Try again
+        </button>
       ) : null}
     </section>
   );
@@ -227,15 +254,7 @@ export const Quiz = forwardRef<AssessmentHandle, QuizProps>(function Quiz(props,
 });
 
 export function KnowledgeCheck(props: QuizProps) {
-  return (
-    <Quiz
-      checkId={props.checkId}
-      question={props.question}
-      choices={props.choices}
-      answer={props.answer}
-      passingScore={props.passingScore}
-    />
-  );
+  return <Quiz {...props} />;
 }
 
 /** @internal Reset module warnings between tests. */

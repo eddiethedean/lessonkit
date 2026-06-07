@@ -9,6 +9,7 @@ export const ASSESSMENTS_P0_DIR = join(REPO_ROOT, "examples/assessments-p0");
 export const INTERACTIVE_BOOK_DIR = join(REPO_ROOT, "examples/interactive-book");
 export const SLIDE_DECK_DIR = join(REPO_ROOT, "examples/slide-deck");
 export const INTERACTIVE_VIDEO_DIR = join(REPO_ROOT, "examples/interactive-video");
+export const BRANCHING_SCENARIO_DIR = join(REPO_ROOT, "examples/branching-scenario");
 export const MINIMAL_FIXTURE_DIR = join(INTEGRATION_ROOT, "fixtures/minimal-course");
 
 export const LESSONKIT_PACKAGES = [

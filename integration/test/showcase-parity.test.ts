@@ -57,6 +57,16 @@ const SHOWCASES: ShowcaseExample[] = [
     courseId: "framework-12-showcase",
     scanAllSrc: true,
   },
+  {
+    dir: "interactive-video",
+    courseId: "interactive-video-demo",
+    checkIds: ["ppe-video-tf"],
+  },
+  {
+    dir: "branching-scenario",
+    courseId: "branching-scenario-demo",
+    checkIds: ["credit-check"],
+  },
 ];
 
 function readReactSource(exampleDir: string, scanAllSrc: boolean): string {

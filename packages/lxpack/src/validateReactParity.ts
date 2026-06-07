@@ -1,5 +1,6 @@
-import { readFileSync, existsSync, readdirSync, statSync } from "node:fs";
+import { readFileSync, existsSync, readdirSync, lstatSync } from "node:fs";
 import { join, relative } from "node:path";
+import { assertRealPathUnderRoot, isSafeRelativeSpaPath } from "./spaPath";
 import type { LessonkitCourseDescriptor } from "./types";
 
 export type ReactParityIssue = {
@@ -17,7 +18,10 @@ export type ValidateReactManifestParityOptions = {
 
 const SCANNABLE_EXTENSIONS = [".tsx", ".ts", ".jsx", ".js"];
 
-function collectSourceUnderSrc(projectRoot: string): string[] {
+function collectSourceUnderSrc(
+  projectRoot: string,
+  issues: ReactParityIssue[],
+): string[] {
   const srcDir = join(projectRoot, "src");
   if (!existsSync(srcDir)) return [];
 
@@ -25,9 +29,43 @@ function collectSourceUnderSrc(projectRoot: string): string[] {
   const walk = (dir: string) => {
     for (const entry of readdirSync(dir)) {
       const abs = join(dir, entry);
-      if (statSync(abs).isDirectory()) {
+      let stat;
+      try {
+        stat = lstatSync(abs);
+      } catch {
+        continue;
+      }
+      if (stat.isSymbolicLink()) {
+        issues.push({
+          path: relative(projectRoot, abs),
+          message: `Source tree contains symlink (rejected for parity scan): ${relative(projectRoot, abs)}`,
+          severity: "error",
+        });
+        continue;
+      }
+      if (stat.isDirectory()) {
+        try {
+          assertRealPathUnderRoot(projectRoot, abs);
+        } catch {
+          issues.push({
+            path: relative(projectRoot, abs),
+            message: `Source directory escapes project root: ${relative(projectRoot, abs)}`,
+            severity: "error",
+          });
+          continue;
+        }
         walk(abs);
       } else if (SCANNABLE_EXTENSIONS.some((ext) => entry.endsWith(ext))) {
+        try {
+          assertRealPathUnderRoot(projectRoot, abs);
+        } catch {
+          issues.push({
+            path: relative(projectRoot, abs),
+            message: `Source file escapes project root: ${relative(projectRoot, abs)}`,
+            severity: "error",
+          });
+          continue;
+        }
         results.push(relative(projectRoot, abs));
       }
     }
@@ -36,11 +74,47 @@ function collectSourceUnderSrc(projectRoot: string): string[] {
   return results;
 }
 
-function readAppSources(projectRoot: string, appSources: string[]): string {
+function readAppSources(
+  projectRoot: string,
+  appSources: string[],
+  issues: ReactParityIssue[],
+  customSourcesProvided: boolean,
+): string {
   return appSources
-    .map((rel) => join(projectRoot, rel))
-    .filter((abs) => existsSync(abs))
-    .map((abs) => readFileSync(abs, "utf8"))
+    .map((rel) => {
+      if (!isSafeRelativeSpaPath(rel)) {
+        if (customSourcesProvided) {
+          issues.push({
+            path: rel,
+            message: `Unsafe appSources path skipped: ${rel}`,
+            severity: "warning",
+          });
+        }
+        return null;
+      }
+      const abs = join(projectRoot, rel);
+      try {
+        assertRealPathUnderRoot(projectRoot, abs);
+        if (existsSync(abs) && lstatSync(abs).isSymbolicLink()) {
+          issues.push({
+            path: rel,
+            message: `appSources path is a symlink: ${rel}`,
+            severity: "error",
+          });
+          return null;
+        }
+      } catch {
+        issues.push({
+          path: rel,
+          message: `appSources path escapes project root: ${rel}`,
+          severity: "error",
+        });
+        return null;
+      }
+      if (!existsSync(abs)) return null;
+      return readFileSync(abs, "utf8");
+    })
+    .filter((content): content is string => content != null)
     .join("\n");
 }
 
@@ -51,14 +125,40 @@ function stripComments(source: string): string {
     .replace(/\/\/[^\n]*/g, " ");
 }
 
-function idPropPatterns(prop: "courseId" | "checkId", id: string): string[] {
-  return [
-    `${prop}="${id}"`,
-    `${prop}='${id}'`,
-    `${prop}={'${id}'}`,
-    `${prop}={"${id}"}`,
-    `${prop}={\`${id}\`}`,
-  ];
+/** Mask string/template literals except JSX courseId/checkId attribute values. */
+function maskUnrelatedStringLiterals(source: string): string {
+  return source.replace(/(["'`])(?:\\.|(?!\1).)*\1/g, (match, _quote, offset, full) => {
+    const before = full.slice(Math.max(0, offset - 24), offset);
+    if (/\b(?:courseId|checkId|lessonId)\s*=\s*$/.test(before)) {
+      return match;
+    }
+    return '""';
+  });
+}
+
+function idPropPresent(source: string, prop: "courseId" | "checkId" | "lessonId", id: string): boolean {
+  const stripped = stripComments(source);
+  const masked = maskUnrelatedStringLiterals(stripped);
+  return jsxPropRegex(prop, id).test(masked);
+}
+
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function jsxPropRegex(prop: "courseId" | "checkId" | "lessonId", id: string): RegExp {
+  const escapedId = escapeRegExp(id);
+  return new RegExp(
+    `(?<![A-Za-z0-9_$])${prop}\\s*=\\s*(?:` +
+      `"${escapedId}"|'${escapedId}'|` +
+      `\\{\\s*["'\`]${escapedId}["'\`]\\s*\\}|` +
+      `\\{\\s*\`${escapedId}\`\\s*\\}` +
+      `)`,
+  );
+}
+
+function maskStringLiterals(source: string): string {
+  return source.replace(/(["'`])(?:\\.|(?!\1).)*\1/g, '""');
 }
 
 function extractStringConstants(source: string): Map<string, string> {
@@ -72,11 +172,13 @@ function extractStringConstants(source: string): Map<string, string> {
 }
 
 function idUsedViaConstant(
-  stripped: string,
-  prop: "courseId" | "checkId",
+  source: string,
+  prop: "courseId" | "checkId" | "lessonId",
   id: string,
   constants: Map<string, string>,
 ): boolean {
+  const stripped = stripComments(source);
+  const masked = maskStringLiterals(stripped);
   for (const [name, value] of constants) {
     if (value !== id) continue;
     const jsxPatterns = [
@@ -85,24 +187,44 @@ function idUsedViaConstant(
       `${prop}={${name} }`,
       `${prop}={ ${name}}`,
     ];
-    if (jsxPatterns.some((p) => stripped.includes(p))) return true;
-
-    const objPatterns = [`${prop}: ${name}`, `${prop}:${name}`];
-    if (objPatterns.some((p) => stripped.includes(p))) return true;
+    if (jsxPatterns.some((p) => masked.includes(p))) return true;
   }
   return false;
 }
 
-function courseIdPresent(source: string, courseId: string): boolean {
+function lessonIdInDataLiteral(source: string, lessonId: string): boolean {
   const stripped = stripComments(source);
-  if (idPropPatterns("courseId", courseId).some((p) => stripped.includes(p))) return true;
-  return idUsedViaConstant(stripped, "courseId", courseId, extractStringConstants(source));
+  const escaped = escapeRegExp(lessonId);
+  return new RegExp(`\\bid\\s*:\\s*["'\`]${escaped}["'\`]`).test(stripped);
+}
+
+function lessonIdPresent(source: string, lessonId: string): boolean {
+  if (idPropPresent(source, "lessonId", lessonId)) return true;
+  if (idUsedViaConstant(source, "lessonId", lessonId, extractStringConstants(source))) return true;
+  return lessonIdInDataLiteral(source, lessonId);
+}
+
+function courseConfigCourseIdPresent(source: string, courseId: string): boolean {
+  const stripped = stripComments(source);
+  const escaped = escapeRegExp(courseId);
+  const literalPattern = new RegExp(
+    `(?<![A-Za-z0-9_$])courseId\\s*:\\s*(?:` +
+      `"${escaped}"|'${escaped}'` +
+      `)`,
+  );
+  if (literalPattern.test(stripped)) return true;
+  return idUsedViaConstant(source, "courseId", courseId, extractStringConstants(source));
+}
+
+function courseIdPresent(source: string, courseId: string): boolean {
+  if (idPropPresent(source, "courseId", courseId)) return true;
+  if (idUsedViaConstant(source, "courseId", courseId, extractStringConstants(source))) return true;
+  return courseConfigCourseIdPresent(source, courseId);
 }
 
 function checkIdPresent(source: string, checkId: string): boolean {
-  const stripped = stripComments(source);
-  if (idPropPatterns("checkId", checkId).some((p) => stripped.includes(p))) return true;
-  return idUsedViaConstant(stripped, "checkId", checkId, extractStringConstants(source));
+  if (idPropPresent(source, "checkId", checkId)) return true;
+  return idUsedViaConstant(source, "checkId", checkId, extractStringConstants(source));
 }
 
 const ID_SYNC_DOC =
@@ -119,24 +241,30 @@ function parityHint(message: string): string {
 export function validateReactManifestParity(
   opts: ValidateReactManifestParityOptions,
 ): ReactParityIssue[] {
-  const appSources = opts.appSources ?? collectSourceUnderSrc(opts.projectRoot);
-  const source = readAppSources(opts.projectRoot, appSources);
+  const issues: ReactParityIssue[] = [];
+  const customSourcesProvided = opts.appSources !== undefined;
+  const appSources =
+    opts.appSources ?? collectSourceUnderSrc(opts.projectRoot, issues);
+  const source = readAppSources(
+    opts.projectRoot,
+    appSources,
+    issues,
+    customSourcesProvided,
+  );
   const hasDescriptorIds =
     Boolean(opts.descriptor.courseId) || (opts.descriptor.assessments?.length ?? 0) > 0;
 
   if (!source.trim()) {
-    return [
-      {
-        path: appSources.length > 0 ? appSources.join(", ") : "src/",
-        message: hasDescriptorIds
-          ? "React app source not found for ID parity check"
-          : "React app source not found for ID parity check",
-        severity: hasDescriptorIds ? "error" : "warning",
-      },
-    ];
+    issues.push({
+      path: appSources.length > 0 ? appSources.join(", ") : "src/",
+      message: hasDescriptorIds
+        ? "React app source required for ID parity check when descriptor defines courseId or assessments"
+        : "React app source not found for ID parity check",
+      severity: hasDescriptorIds ? "error" : "warning",
+    });
+    return issues;
   }
 
-  const issues: ReactParityIssue[] = [];
   const courseId = opts.descriptor.courseId;
 
   if (!courseIdPresent(source, courseId)) {
@@ -147,6 +275,20 @@ export function validateReactManifestParity(
       ),
       severity: "error",
     });
+  }
+
+  for (const lesson of opts.descriptor.lessons ?? []) {
+    const lessonId = lesson.id;
+    if (!lessonId) continue;
+    if (!lessonIdPresent(source, lessonId)) {
+      issues.push({
+        path: `lessons.id:${lessonId}`,
+        message: parityHint(
+          `React app source missing lessonId="${lessonId}" declared in lessonkit.json.`,
+        ),
+        severity: "error",
+      });
+    }
   }
 
   for (const assessment of opts.descriptor.assessments ?? []) {

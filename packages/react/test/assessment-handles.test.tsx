@@ -1,15 +1,18 @@
 import React, { createRef } from "react";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { defineAssessmentPlugin, type AssessmentHandle } from "@lessonkit/core";
 import {
   Course,
   DragAndDrop,
   DragTheWords,
+  Essay,
   FillInTheBlanks,
+  KnowledgeCheck,
   Lesson,
   MarkTheWords,
   Quiz,
+  Summary,
   TrueFalse,
 } from "../src";
 
@@ -191,6 +194,21 @@ describe("AssessmentHandle (imperative API)", () => {
     );
   });
 
+  it("MarkTheWords shows status when passingScore threshold is met", () => {
+    render(
+      wrap(
+        <MarkTheWords
+          checkId="mtw-partial"
+          text="one two three"
+          correctWords={["two", "three"]}
+          passingScore={1}
+        />,
+      ),
+    );
+    fireEvent.click(screen.getByRole("button", { name: "two" }));
+    expect(screen.getByRole("status").textContent).toContain("Correct");
+  });
+
   it("MarkTheWords handle reflects selection state", () => {
     const ref = createRef<AssessmentHandle>();
     render(
@@ -221,6 +239,232 @@ describe("AssessmentHandle (imperative API)", () => {
     expect(ref.current?.getScore()).toBe(1);
     ref.current?.showSolutions();
     expect(screen.getByTestId("check-blanks")).toBeTruthy();
+  });
+
+  it("FillInTheBlanks falls back when blanks length mismatches template", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    render(
+      wrap(
+        <FillInTheBlanks
+          checkId="fib-mismatch"
+          template="The *capital* of France is *Paris*."
+          blanks={[{ id: "only-one", answer: "capital" }]}
+        />,
+      ),
+    );
+    expect(screen.getByTestId("blank-blank-0")).toBeTruthy();
+    expect(screen.getByTestId("blank-blank-1")).toBeTruthy();
+    expect(warn).toHaveBeenCalled();
+    warn.mockRestore();
+  });
+
+  it("FillInTheBlanks renders custom blank ids from blanks prop", () => {
+    render(
+      wrap(
+        <FillInTheBlanks
+          checkId="fib-custom"
+          template="The *capital* of France is *Paris*."
+          blanks={[
+            { id: "city-blank", answer: "capital" },
+            { id: "name-blank", answer: "Paris" },
+          ]}
+        />,
+      ),
+    );
+    expect(screen.getByTestId("blank-city-blank")).toBeTruthy();
+    expect(screen.getByTestId("blank-name-blank")).toBeTruthy();
+    fireEvent.change(screen.getByTestId("blank-city-blank"), { target: { value: "capital" } });
+    fireEvent.change(screen.getByTestId("blank-name-blank"), { target: { value: "Paris" } });
+    fireEvent.click(screen.getByTestId("check-blanks"));
+    expect(screen.getByRole("status").textContent).toContain("Correct");
+  });
+
+  it("Summary getScore reflects live selection before check", () => {
+    const ref = createRef<AssessmentHandle>();
+    render(
+      wrap(
+        <Summary
+          ref={ref}
+          checkId="summary-live"
+          statements={["First", "Second", "Noise"]}
+          correct={["First", "Second"]}
+        />,
+      ),
+    );
+    expect(ref.current?.getScore()).toBe(0);
+    fireEvent.click(screen.getByTestId("summary-statement-0"));
+    fireEvent.click(screen.getByTestId("summary-statement-1"));
+    expect(ref.current?.getScore()).toBe(2);
+  });
+
+  it("Quiz allows retry after a correct answer when enableRetry is true", () => {
+    render(
+      wrap(
+        <Quiz
+          checkId="quiz-retry"
+          question="Pick one"
+          choices={["A", "B"]}
+          answer="B"
+          enableRetry
+        />,
+      ),
+    );
+    fireEvent.click(screen.getByLabelText("B"));
+    expect(screen.getByRole("status").textContent).toContain("Correct");
+    fireEvent.click(screen.getByTestId("quiz-retry"));
+    fireEvent.click(screen.getByLabelText("A"));
+    expect(screen.getByRole("status").textContent).toContain("Try again");
+    expect((screen.getByLabelText("B") as HTMLInputElement).disabled).toBe(false);
+  });
+
+  it("FillInTheBlanks completes on failure when enableRetry is false", async () => {
+    const events: { name: string }[] = [];
+    render(
+      <Course
+        title="Handles"
+        courseId="handle-course"
+        config={{
+          xapi: { enabled: false },
+          tracking: { sink: (e) => { events.push(e); } },
+        }}
+      >
+        <Lesson title="L1" lessonId="lesson-1">
+          <FillInTheBlanks
+            checkId="fib-no-retry"
+            template="The *right* answer"
+            enableRetry={false}
+          />
+        </Lesson>
+      </Course>,
+    );
+    fireEvent.change(screen.getByTestId("blank-blank-0"), { target: { value: "wrong" } });
+    fireEvent.click(screen.getByTestId("check-blanks"));
+    await waitFor(() => {
+      expect(events.some((e) => e.name === "assessment_completed")).toBe(true);
+    });
+  });
+
+  it("DragTheWords completes on failure when enableRetry is false", async () => {
+    const events: { name: string }[] = [];
+    render(
+      <Course
+        title="Handles"
+        courseId="handle-course"
+        config={{
+          xapi: { enabled: false },
+          tracking: { sink: (e) => { events.push(e); } },
+        }}
+      >
+        <Lesson title="L1" lessonId="lesson-1">
+          <DragTheWords
+            checkId="dtw-no-retry"
+            template="Pick *right*"
+            words={["right", "wrong"]}
+            enableRetry={false}
+          />
+        </Lesson>
+      </Course>,
+    );
+    fireEvent.click(screen.getByTestId("word-wrong"));
+    fireEvent.click(screen.getByTestId("zone-0"));
+    fireEvent.click(screen.getByTestId("check-drag-words"));
+    await waitFor(() => {
+      expect(events.some((e) => e.name === "assessment_completed")).toBe(true);
+    });
+  });
+
+  it("Quiz completes on wrong answer when enableRetry is false", async () => {
+    const events: { name: string }[] = [];
+    render(
+      <Course
+        title="Handles"
+        courseId="handle-course"
+        config={{
+          xapi: { enabled: false },
+          tracking: { sink: (e) => { events.push(e); } },
+        }}
+      >
+        <Lesson title="L1" lessonId="lesson-1">
+          <Quiz
+            checkId="quiz-no-retry"
+            question="Pick one"
+            choices={["A", "B"]}
+            answer="B"
+            enableRetry={false}
+          />
+        </Lesson>
+      </Course>,
+    );
+    fireEvent.click(screen.getByLabelText("A"));
+    await waitFor(() => {
+      expect(events.some((e) => e.name === "quiz_completed")).toBe(true);
+    });
+  });
+
+  it("KnowledgeCheck forwards enableRetry like Quiz", async () => {
+    const events: { name: string }[] = [];
+    render(
+      <Course
+        title="Handles"
+        courseId="handle-course"
+        config={{
+          xapi: { enabled: false },
+          tracking: { sink: (e) => { events.push(e); } },
+        }}
+      >
+        <Lesson title="L1" lessonId="lesson-1">
+          <KnowledgeCheck
+            checkId="kc-no-retry"
+            question="Pick one"
+            choices={["A", "B"]}
+            answer="B"
+            enableRetry={false}
+          />
+        </Lesson>
+      </Course>,
+    );
+    fireEvent.click(screen.getByLabelText("A"));
+    await waitFor(() => {
+      expect(events.some((e) => e.name === "quiz_completed")).toBe(true);
+    });
+  });
+
+  it("Quiz resume replay uses scores from saved state", async () => {
+    const events: { name: string; data?: unknown }[] = [];
+    const ref = createRef<AssessmentHandle>();
+    render(
+      <Course
+        title="Handles"
+        courseId="handle-course"
+        config={{
+          xapi: { enabled: false },
+          tracking: { replayResumeEvents: true, sink: (e) => { events.push(e); } },
+        }}
+      >
+        <Lesson title="L1" lessonId="lesson-1">
+          <Quiz
+            ref={ref}
+            checkId="quiz-replay-scores"
+            question="Pick one"
+            choices={["A", "B"]}
+            answer="B"
+          />
+        </Lesson>
+      </Course>,
+    );
+    act(() => {
+      ref.current?.resume?.({
+        quizPassed: true,
+        selected: "B",
+        selectionCorrect: true,
+        completedScore: 4,
+        completedMaxScore: 4,
+      });
+    });
+    await waitFor(() => {
+      const completed = events.find((e) => e.name === "quiz_completed");
+      expect(completed?.data).toMatchObject({ score: 4, maxScore: 4 });
+    });
   });
 
   it("DragTheWords and DragAndDrop handles report completion", () => {
@@ -258,5 +502,50 @@ describe("AssessmentHandle (imperative API)", () => {
     fireEvent.click(screen.getByTestId("drop-t1"));
     fireEvent.click(screen.getByTestId("check-drag-drop"));
     expect(dadRef.current?.getScore()).toBe(1);
+  });
+
+  it("DragAndDrop resume normalizes corrupt pool and assignments", () => {
+    const ref = createRef<AssessmentHandle>();
+    render(
+      wrap(
+        <DragAndDrop
+          ref={ref}
+          checkId="dad-resume"
+          items={[
+            { id: "a", label: "Apple" },
+            { id: "b", label: "Banana" },
+          ]}
+          targets={[
+            { id: "t1", label: "Fruit A", accepts: "a" },
+            { id: "t2", label: "Fruit B", accepts: "b" },
+          ]}
+        />,
+      ),
+    );
+    act(() => {
+      expect(ref.current?.resume).toBeDefined();
+      ref.current!.resume!({
+        assignments: { t1: "a", t2: "a", unknown: "z" },
+        pool: ["a", "b", "b", "ghost"],
+        passed: false,
+        checked: false,
+      });
+    });
+    expect(screen.queryByTestId("drag-item-a")).toBeNull();
+    expect(screen.getByTestId("drag-item-b")).toBeTruthy();
+    expect(ref.current!.getCurrentState!().pool).toEqual(["b"]);
+  });
+
+  it("Essay resume clears submitted when text is below minLength", () => {
+    const ref = createRef<AssessmentHandle>();
+    render(
+      wrap(<Essay ref={ref} checkId="essay-resume" question="Describe." minLength={10} />),
+    );
+    act(() => {
+      expect(ref.current?.resume).toBeDefined();
+      ref.current!.resume!({ text: "short", submitted: true });
+    });
+    expect(ref.current!.getCurrentState!().submitted).toBe(false);
+    expect(screen.queryByTestId("essay-submitted")).toBeNull();
   });
 });

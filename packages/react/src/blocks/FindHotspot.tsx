@@ -6,8 +6,10 @@ import { buildAssessmentHandle } from "../assessment/internal/buildAssessmentHan
 import { readBooleanStateField, readStringField } from "../assessment/internal/resumeState";
 import { useAssessmentHandleRegistration } from "../assessment/internal/useAssessmentHandleRegistration";
 import { useAssessmentState } from "../assessment/useAssessmentState";
+import { useLessonkit } from "../hooks";
 import { setLessonkitBlockType } from "../compound/blockType";
 import { normalizeComponentId } from "../runtime/validateComponentId";
+import { resolveMediaSrc } from "./embedSecurity";
 
 export type HotspotTarget = {
   id: string;
@@ -30,6 +32,8 @@ function FindHotspotInner(
   ref: React.Ref<AssessmentHandle>,
 ) {
   const checkId = useMemo(() => normalizeComponentId(props.checkId, "checkId"), [props.checkId]);
+  const { config } = useLessonkit();
+  const resolvedSrc = resolveMediaSrc(props.src, { allowedHosts: config.embed?.allowedHosts });
   const [selected, setSelected] = useState<string | null>(null);
   const [checked, setChecked] = useState(false);
   const telemetryReplayedRef = useRef(false);
@@ -75,7 +79,7 @@ function FindHotspotInner(
         checkId,
         getScore: () => (checked && correct ? 1 : 0),
         getMaxScore: () => 1,
-        getAnswerGiven: () => selected !== null,
+        getAnswerGiven: () => checked,
         resetTask: () => {
           setSelected(null);
           setChecked(false);
@@ -106,10 +110,12 @@ function FindHotspotInner(
             setChecked(value);
           });
           const nextCorrect = nextSelected === props.correctTargetId;
-          replayTelemetry(nextSelected, nextChecked, nextCorrect);
+          if (config.tracking?.replayResumeEvents === true) {
+            replayTelemetry(nextSelected, nextChecked, nextCorrect);
+          }
         },
       }),
-    [assessment, checkId, checked, correct, props.correctTargetId, props.passingScore, props.targets, selected],
+    [assessment, checkId, checked, config.tracking?.replayResumeEvents, correct, props.correctTargetId, props.passingScore, props.targets, selected],
   );
 
   useAssessmentHandleRegistration(checkId, handle, ref);
@@ -136,13 +142,25 @@ function FindHotspotInner(
         maxScore: 1,
         passingScore: props.passingScore ?? 1,
       });
+    } else if (props.enableRetry === false) {
+      assessment.complete({
+        checkId,
+        interactionType: INTERACTION,
+        score: 0,
+        maxScore: 1,
+        passingScore: props.passingScore ?? 1,
+      });
     }
   };
 
   return (
     <section aria-label="Find the hotspot" data-lk-check-id={checkId} data-testid="find-hotspot">
       <div style={{ position: "relative", display: "inline-block" }}>
-        <img src={props.src} alt={props.alt} style={{ maxWidth: "100%" }} />
+        {resolvedSrc ? (
+          <img src={resolvedSrc} alt={props.alt} style={{ maxWidth: "100%" }} />
+        ) : (
+          <p role="alert">This image URL is not allowed.</p>
+        )}
         {props.targets.map((t) => (
           <button
             key={t.id}

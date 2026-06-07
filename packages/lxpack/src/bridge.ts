@@ -11,7 +11,6 @@ export type { LxpackBridgeSubmitAssessmentPayload, LxpackBridgeV1 } from "@lxpac
 export {
   createLxpackBridgeHost,
   DEFAULT_BRIDGE_PASSING_SCORE,
-  getLxpackBridge,
   LXPACK_BRIDGE_VERSIONS,
   normalizePassingThreshold,
   normalizeScore,
@@ -31,7 +30,11 @@ export {
 } from "@lxpack/tracking-schema";
 import { mapLessonkitTelemetryToBridgeAction } from "@lxpack/tracking-schema";
 
-import { telemetryEventToLessonkit } from "./telemetry";
+import {
+  answeredTelemetryToBridgeTrackEvent,
+  branchTelemetryToBridgeTrackEvent,
+  telemetryEventToLessonkit,
+} from "./telemetry";
 
 type LxpackBridgeHost = {
   lxpackBridge?: { v1?: LxpackBridgeV1 };
@@ -39,7 +42,7 @@ type LxpackBridgeHost = {
   lxpack?: LxpackBridgeV1;
 };
 
-export { telemetryEventToLessonkit };
+export { telemetryEventToLessonkit, branchTelemetryToBridgeTrackEvent, BRANCH_TELEMETRY_EVENTS } from "./telemetry";
 
 /**
  * Scale a raw quiz score to 0–1 for the LXPack parent bridge.
@@ -69,7 +72,59 @@ export function normalizeAssessmentPassingScore(opts?: {
   });
 }
 
-function getBridge(parentWindow?: Window): LxpackBridgeV1 | null {
+export type BridgeAccessOptions = {
+  /** Allowed parent-frame origins (scheme + host + port). When set, bridge calls require a matching origin. */
+  allowedParentOrigins?: string[];
+  /** LMS bridge mode; `"auto"` in production requires `allowedParentOrigins`. */
+  mode?: LxpackBridgeMode;
+};
+
+/** Resolve the parent frame origin when embedded (same-origin parent or document.referrer fallback). */
+export function resolveParentOrigin(parentWindow?: Window): string | null {
+  if (typeof window === "undefined") return null;
+  const parent = parentWindow ?? window.parent;
+  if (!parent || parent === window) return null;
+  try {
+    return parent.location.origin;
+  } catch {
+    const referrer = typeof document !== "undefined" ? document.referrer : "";
+    if (!referrer) return null;
+    try {
+      return new URL(referrer).origin;
+    } catch {
+      return null;
+    }
+  }
+}
+
+function isProductionRuntime(): boolean {
+  try {
+    if ((import.meta as { env?: { PROD?: boolean } }).env?.PROD === true) return true;
+  } catch {
+    // no import.meta
+  }
+  const g = globalThis as typeof globalThis & { process?: { env?: { NODE_ENV?: string } } };
+  return typeof g.process !== "undefined" && g.process.env?.NODE_ENV === "production";
+}
+
+/** Returns true when no allowlist is configured or the resolved parent origin is listed. */
+export function isParentOriginAllowed(
+  allowedParentOrigins: string[] | undefined,
+  parentWindow?: Window,
+  mode?: LxpackBridgeMode,
+): boolean {
+  if (mode === "off") return false;
+  // Production: fail closed when no allowlist (all entry points, not only mode "auto").
+  if (isProductionRuntime() && !allowedParentOrigins?.length) return false;
+  if (!allowedParentOrigins?.length) return true;
+  const origin = resolveParentOrigin(parentWindow);
+  if (!origin) return false;
+  return allowedParentOrigins.includes(origin);
+}
+
+function getBridge(parentWindow?: Window, opts?: BridgeAccessOptions): LxpackBridgeV1 | null {
+  const mode = opts?.mode ?? "auto";
+  if (!isParentOriginAllowed(opts?.allowedParentOrigins, parentWindow, mode)) return null;
   const fromSdk = getLxpackBridgeFromParent(parentWindow);
   if (fromSdk) return fromSdk;
   if (typeof window === "undefined") return null;
@@ -78,29 +133,49 @@ function getBridge(parentWindow?: Window): LxpackBridgeV1 | null {
   return parent.lxpackBridge?.v1 ?? parent.lxpack ?? null;
 }
 
+/** Resolve the LXPack parent bridge when the parent origin passes validation. */
+export function getLxpackBridge(
+  parentWindow?: Window,
+  opts?: BridgeAccessOptions,
+): LxpackBridgeV1 | null {
+  return getBridge(parentWindow, opts);
+}
+
 /** @deprecated Use `LmsBridgeMode` from `@lessonkit/core`. */
 export type LxpackBridgeMode = LmsBridgeMode;
 
 function isDevEnvironment(): boolean {
+  try {
+    if ((import.meta as { env?: { DEV?: boolean; PROD?: boolean } }).env?.DEV === true) return true;
+    if ((import.meta as { env?: { PROD?: boolean } }).env?.PROD === true) return false;
+  } catch {
+    // no import.meta
+  }
   const g = globalThis as typeof globalThis & { process?: { env?: { NODE_ENV?: string } } };
   return typeof g.process !== "undefined" && g.process.env?.NODE_ENV !== "production";
+}
+
+function handleBridgeError(err: unknown, onBridgeError?: (err: unknown) => void): void {
+  onBridgeError?.(err);
+  if (isDevEnvironment()) {
+    console.warn(
+      "[lessonkit/lxpack] lxpack bridge action failed:",
+      err instanceof Error ? err.message : err,
+    );
+  }
 }
 
 /** Apply a mapped bridge action to an LXPack bridge instance. */
 export function dispatchBridgeAction(
   bridge: LxpackBridgeV1,
   action: ReturnType<typeof mapLessonkitTelemetryToBridgeAction>,
+  opts?: { onBridgeError?: (err: unknown) => void },
 ): void {
   if (!action) return;
   try {
     dispatchBridgeActionInner(bridge, action);
   } catch (err) {
-    if (isDevEnvironment()) {
-      console.warn(
-        "[lessonkit/lxpack] lxpack bridge action failed:",
-        err instanceof Error ? err.message : err,
-      );
-    }
+    handleBridgeError(err, opts?.onBridgeError);
   }
 }
 
@@ -163,37 +238,63 @@ function forwardAssessmentCompletedToBridge(
   });
 }
 
+export type ForwardTelemetryToBridgeOptions = {
+  onBridgeError?: (err: unknown) => void;
+  allowedParentOrigins?: string[];
+};
+
 export function forwardTelemetryToBridge(
   event: TelemetryEvent,
   mode: LxpackBridgeMode = "auto",
   parentWindow?: Window,
+  opts?: ForwardTelemetryToBridgeOptions,
 ): void {
   if (mode === "off") return;
-  const bridge = getBridge(parentWindow);
+  const bridge = getBridge(parentWindow, {
+    allowedParentOrigins: opts?.allowedParentOrigins,
+    mode,
+  });
   if (!bridge) return;
-  if (event.name === "assessment_completed") {
-    forwardAssessmentCompletedToBridge(bridge, event);
-    return;
+  try {
+    if (event.name === "assessment_completed") {
+      forwardAssessmentCompletedToBridge(bridge, event);
+      return;
+    }
+    const answeredTrack = answeredTelemetryToBridgeTrackEvent(event);
+    if (answeredTrack) {
+      bridge.track?.(answeredTrack);
+      return;
+    }
+    const branchTrack = branchTelemetryToBridgeTrackEvent(event);
+    if (branchTrack) {
+      bridge.track?.(branchTrack);
+      return;
+    }
+    const lessonkitEvent = telemetryEventToLessonkit(event);
+    if (!lessonkitEvent) return;
+    const action = mapLessonkitTelemetryToBridgeAction(lessonkitEvent);
+    dispatchBridgeActionInner(bridge, action);
+  } catch (err) {
+    handleBridgeError(err, opts?.onBridgeError);
   }
-  const lessonkitEvent = telemetryEventToLessonkit(event);
-  if (!lessonkitEvent) return;
-  const action = mapLessonkitTelemetryToBridgeAction(lessonkitEvent);
-  dispatchBridgeAction(bridge, action);
 }
 
-export function createLxpackBridge(): LxpackBridgeV1 | null {
-  return getBridge();
+export function createLxpackBridge(opts?: BridgeAccessOptions): LxpackBridgeV1 | null {
+  return getBridge(undefined, opts);
 }
 
-export function notifyLxpackLessonComplete(lessonId: LessonId): boolean {
-  const bridge = getBridge();
+export function notifyLxpackLessonComplete(
+  lessonId: LessonId,
+  opts?: BridgeAccessOptions,
+): boolean {
+  const bridge = getBridge(undefined, opts);
   if (!bridge?.completeLesson) return false;
   bridge.completeLesson(lessonId);
   return true;
 }
 
-export function notifyLxpackCourseComplete(): boolean {
-  const bridge = getBridge();
+export function notifyLxpackCourseComplete(opts?: BridgeAccessOptions): boolean {
+  const bridge = getBridge(undefined, opts);
   if (!bridge?.completeCourse) return false;
   bridge.completeCourse();
   return true;
@@ -205,8 +306,9 @@ export function notifyLxpackCourseComplete(): boolean {
  */
 export function notifyLxpackAssessment(
   payload: LxpackBridgeSubmitAssessmentPayload & { id: CheckId },
+  opts?: BridgeAccessOptions,
 ): boolean {
-  const bridge = getBridge();
+  const bridge = getBridge(undefined, opts);
   if (!bridge?.submitAssessment) return false;
   bridge.submitAssessment(payload);
   return true;

@@ -30,6 +30,15 @@ describe("validateProjectPaths", () => {
     expect(issues.some((i) => i.path === "paths.spaDistDir")).toBe(true);
   });
 
+  it("rejects reserved output directories", () => {
+    const root = resolve("/tmp/my-project");
+    const issues = validateProjectPaths(root, { lxpackOutDir: ".git" });
+    expect(issues.some((i) => i.message.includes("reserved"))).toBe(true);
+    expect(() => resolveSafePackageOutputOverride(root, "node_modules/out")).toThrow(
+      /reserved directory/,
+    );
+  });
+
   it("rejects spaDistDir of only a dot segment", () => {
     const root = resolve("/tmp/my-project");
     const issues = validateProjectPaths(root, { spaDistDir: "." });

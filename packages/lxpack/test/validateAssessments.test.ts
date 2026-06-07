@@ -75,6 +75,19 @@ describe("validateAssessmentEntry", () => {
     return issues;
   }
 
+  it("rejects fillInBlanks blanks length mismatch with template", () => {
+    checkIds.clear();
+    const issues = collect({
+      kind: "fillInBlanks",
+      checkId: "fib-mismatch",
+      question: "Fill both",
+      template: "A *one* B *two*",
+      blanks: [{ id: "b1", answer: "one" }],
+    });
+    expect(issues.some((i) => i.path === "assessments[0].blanks")).toBe(true);
+    expect(issues.some((i) => i.message.includes("must match template blank count"))).toBe(true);
+  });
+
   it("rejects passingScore above achievable score for fillInBlanks", () => {
     checkIds.clear();
     const issues = collect({

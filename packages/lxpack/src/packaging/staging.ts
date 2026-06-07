@@ -37,6 +37,7 @@ export async function buildStagingPackage(
 ): Promise<BuildStagingPackageResult> {
   const { target, output, dir, outputBaseDir, descriptor, ...writeOpts } = options;
   const stagingDir = await fsp.mkdtemp(join(tmpdir(), "lessonkit-lxpack-"));
+  let succeeded = false;
 
   try {
     let spaDirs: Record<string, string>;
@@ -99,6 +100,7 @@ export async function buildStagingPackage(
       };
     }
 
+    succeeded = true;
     return {
       ok: true,
       stagingDir,
@@ -109,6 +111,10 @@ export async function buildStagingPackage(
   } catch (err) {
     await fsp.rm(stagingDir, { recursive: true, force: true }).catch(/* v8 ignore next */ () => undefined);
     throw err;
+  } finally {
+    if (!succeeded) {
+      await fsp.rm(stagingDir, { recursive: true, force: true }).catch(/* v8 ignore next */ () => undefined);
+    }
   }
 }
 

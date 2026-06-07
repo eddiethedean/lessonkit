@@ -25,13 +25,60 @@ import {
   Scenario,
 } from "../src";
 
-const EXPORTED_BLOCK_TYPES = [
+const EXPORTED_BLOCK_TYPES_V1 = [
   "Course",
   "Lesson",
   "Scenario",
   "Quiz",
   "Reflection",
   "ProgressTracker",
+] as const;
+
+const EXPORTED_BLOCK_TYPES_V3 = [
+  "Course",
+  "Lesson",
+  "Scenario",
+  "Quiz",
+  "KnowledgeCheck",
+  "Reflection",
+  "ProgressTracker",
+  "TrueFalse",
+  "MarkTheWords",
+  "FillInTheBlanks",
+  "DragTheWords",
+  "DragAndDrop",
+  "AssessmentSequence",
+  "Text",
+  "Heading",
+  "Image",
+  "Video",
+  "Page",
+  "InteractiveBook",
+  "Slide",
+  "SlideDeck",
+  "TimedCue",
+  "InteractiveVideo",
+  "Summary",
+  "ImagePairing",
+  "ImageSequencing",
+  "ArithmeticQuiz",
+  "Essay",
+  "Questionnaire",
+  "MemoryGame",
+  "InformationWall",
+  "ParallaxSlideshow",
+  "Accordion",
+  "DialogCards",
+  "Flashcards",
+  "ImageHotspots",
+  "ImageSlider",
+  "FindHotspot",
+  "FindMultipleHotspots",
+  "BranchingScenario",
+  "BranchNode",
+  "BranchChoice",
+  "Embed",
+  "Chart",
 ] as const;
 
 describe("@lessonkit/react block catalog", () => {
@@ -47,11 +94,20 @@ describe("@lessonkit/react block catalog", () => {
   });
 
   it("BLOCK_CATALOG has an entry for every exported block type", () => {
-    for (const type of EXPORTED_BLOCK_TYPES) {
+    for (const type of EXPORTED_BLOCK_TYPES_V1) {
       expect(getBlockCatalogEntry(type, { version: 1 })).toBeDefined();
     }
     expect(getBlockCatalogEntry("KnowledgeCheck", { version: 1 })).toBe(
       getBlockCatalogEntry("Quiz", { version: 1 }),
+    );
+  });
+
+  it("v3 catalog has an entry for every exported block component", () => {
+    for (const type of EXPORTED_BLOCK_TYPES_V3) {
+      expect(getBlockCatalogEntry(type, { version: 3 })).toBeDefined();
+    }
+    expect(getBlockCatalogEntry("KnowledgeCheck", { version: 3 })).toBe(
+      getBlockCatalogEntry("Quiz", { version: 3 }),
     );
   });
 
@@ -151,7 +207,7 @@ describe("@lessonkit/react block catalog", () => {
     expect(buildBlockCatalogV1()).toEqual(buildBlockCatalog({ version: 1 }));
   });
 
-  it("renders every catalog block type in a minimal Course/Lesson tree", () => {
+  it("smoke-renders core catalog block types in a minimal Course/Lesson tree", () => {
     render(
       <Course title="Catalog smoke" courseId="catalog-smoke" config={{ xapi: { enabled: false } }}>
         <ProgressTracker />

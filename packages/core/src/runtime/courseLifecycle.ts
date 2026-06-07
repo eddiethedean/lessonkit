@@ -6,7 +6,7 @@ import type { ProgressController } from "../progress";
 import type { StoragePort } from "../ports";
 import { hasCourseStarted, markCourseStarted } from "../session";
 
-const courseStartedEmitFlights = new Set<string>();
+const courseStartedEmitFlights = new Map<string, Promise<{ emitted: boolean; marked: boolean }>>();
 
 /** @internal Reset in-flight course_started guard between tests. */
 export function resetCourseStartedEmitFlightForTests(): void {
@@ -27,32 +27,47 @@ export type CourseLifecycleDeps = {
   emitCourseStartedEvent: (ctx: CourseLifecycleContext) => boolean;
 };
 
+/**
+ * Emit `course_started` once per tab session when tracking/xAPI are active.
+ * Coalesces concurrent calls via an in-flight guard.
+ */
 export function tryEmitCourseStarted(
   ctx: CourseLifecycleContext,
   deps: CourseLifecycleDeps,
   alreadyEmittedToSink: boolean,
-): { emitted: boolean; marked: boolean } {
+): Promise<{ emitted: boolean; marked: boolean }> {
   const flightKey = `${ctx.sessionId}:${ctx.courseId}`;
   const marked = hasCourseStarted(ctx.storage, ctx.sessionId, ctx.courseId);
   if (alreadyEmittedToSink) {
-    return { emitted: true, marked };
+    return Promise.resolve({ emitted: true, marked });
   }
-  if (courseStartedEmitFlights.has(flightKey)) {
-    return { emitted: false, marked };
+
+  const existing = courseStartedEmitFlights.get(flightKey);
+  if (existing) {
+    return existing;
   }
-  courseStartedEmitFlights.add(flightKey);
-  try {
-    const emitted = deps.emitCourseStartedEvent(ctx);
-    if (emitted && !marked) {
-      markCourseStarted(ctx.storage, ctx.sessionId, ctx.courseId);
+
+  const flight = Promise.resolve().then(() => {
+    try {
+      const emitted = deps.emitCourseStartedEvent(ctx);
+      if (emitted && !marked) {
+        markCourseStarted(ctx.storage, ctx.sessionId, ctx.courseId);
+      }
+      return {
+        emitted,
+        marked: hasCourseStarted(ctx.storage, ctx.sessionId, ctx.courseId),
+      };
+    } catch {
+      return { emitted: false, marked };
+    } finally {
+      if (courseStartedEmitFlights.get(flightKey) === flight) {
+        courseStartedEmitFlights.delete(flightKey);
+      }
     }
-    return {
-      emitted,
-      marked: hasCourseStarted(ctx.storage, ctx.sessionId, ctx.courseId),
-    };
-  } finally {
-    courseStartedEmitFlights.delete(flightKey);
-  }
+  });
+  courseStartedEmitFlights.set(flightKey, flight);
+
+  return flight;
 }
 
 export function buildCourseStartedTelemetryEvent(ctx: CourseLifecycleContext) {

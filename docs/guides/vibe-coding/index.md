@@ -12,11 +12,24 @@ Instructional designers, trainers, and builders who **do not write React by hand
 Ask your AI to follow LessonKit patterns and map activities using **[Coming from H5P?](../h5p-for-lessonkit-authors.md)** (e.g. “use `Quiz` like H5P Multiple Choice”). Capability list: **[H5P capability map](../../project/h5p-capability-map.md)**.
 :::
 
+:::{admonition} Library Skills (recommended)
+:class: tip
+
+Install Cursor-compatible authoring skills from the repo:
+
+```bash
+git clone https://github.com/eddiethedean/lessonkit.git
+cd lessonkit && ./library-skills/install.sh --project -C /path/to/your-course
+```
+
+Details: [Library Skills](../library-skills.md).
+:::
+
 These guides are for **instructional designers, trainers, and builders who do not write React by hand**. You will use an AI assistant in your editor (Cursor, VS Code + Copilot, Windsurf, etc.) and the LessonKit CLI to create and ship courses.
 
 You do not need to understand TypeScript, hooks, or bundlers. You **do** need to:
 
-- Install **Node.js 18+** (required for dev, build, and LMS packaging)
+- Install **Node.js 18+** minimum (**20.19+** recommended — the CLI scaffold uses Vite 8)
 - Follow prompts carefully and paste suggested commands into a terminal
 - Review AI-generated changes before publishing
 

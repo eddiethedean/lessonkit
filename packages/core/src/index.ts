@@ -44,6 +44,8 @@ export type {
   InformationWallSearchData,
   ParallaxSlideViewedData,
   QuestionnaireSubmittedData,
+  BranchNodeViewedData,
+  BranchSelectedData,
   TelemetryBatchSink,
   TelemetryEvent,
   TelemetryEventBase,
@@ -78,6 +80,7 @@ export {
   createCompoundResumeState,
   parseCompoundResumeState,
 } from "./compound";
+export type { ParseCompoundResumeStateOptions } from "./compound";
 
 export {
   compoundStateStorageKey,
@@ -85,6 +88,7 @@ export {
   saveCompoundState,
   clearCompoundState,
 } from "./compoundState";
+export type { LoadCompoundStateOptions } from "./compoundState";
 
 export {
   PAGE_ALLOWED_CHILD_TYPES,
@@ -94,6 +98,8 @@ export {
   TIMED_CUE_ALLOWED_CHILD_TYPES,
   INTERACTIVE_VIDEO_ALLOWED_CHILD_TYPES,
   ASSESSMENT_SEQUENCE_ALLOWED_CHILD_TYPES,
+  BRANCHING_SCENARIO_ALLOWED_CHILD_TYPES,
+  BRANCH_NODE_ALLOWED_CHILD_TYPES,
   COMPOUND_MAX_NESTING_DEPTH,
   ACCORDION_FORBIDDEN_CHILD_TYPES,
   BLOCKS_14_PAGE_SLIDE,
@@ -101,6 +107,13 @@ export {
   isChildTypeAllowed,
   type CompoundParentType,
 } from "./compoundAllowlists";
+
+export {
+  validateBranchGraph,
+  type BranchGraphNodeInput,
+  type BranchGraphValidationIssue,
+  type BranchGraphValidationResult,
+} from "./branchGraph";
 
 export {
   buildTelemetryCatalog,
@@ -136,7 +149,11 @@ export {
 } from "./telemetryBuilder";
 
 export type { EmitContext, TelemetryPipeline, TelemetryPipelineSink } from "./telemetryPipeline";
-export { createTelemetryPipeline, createTrackingPipelineSink } from "./telemetryPipeline";
+export {
+  createTelemetryPipeline,
+  createTrackingPipelineSink,
+  isLifecycleTelemetryEvent,
+} from "./telemetryPipeline";
 
 export type { StoragePort, ClockPort, TimerPort } from "./ports";
 export {
@@ -162,6 +179,8 @@ export {
   markCourseStartedEmittedToTracking,
   hasCourseStartedPipelineDelivered,
   markCourseStartedPipelineDelivered,
+  hasCourseStartedXapiSent,
+  markCourseStartedXapiSent,
   /** @deprecated Import from `@lessonkit/core/testing`. */
   resetSharedVolatileSessionIdForTests,
 } from "./session";

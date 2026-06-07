@@ -1,4 +1,4 @@
-# `@lessonkit/core` reference (1.0)
+# `@lessonkit/core` reference (1.5.x)
 
 Headless runtime, telemetry pipeline, plugins, identity, and session helpers shared across LessonKit packages.
 
@@ -125,3 +125,63 @@ See [Plugins reference](reference/plugins.md) and [LXPack bridge reference](refe
 ## Ports
 
 Testable abstractions: `createSessionStoragePort`, `createDefaultClock`, `createGlobalTimer`, `createNoopStorage`.
+
+## Compound state and resume
+
+Compound blocks (`InteractiveBook`, `SlideDeck`, `InteractiveVideo`, `BranchingScenario`) persist navigation and child assessment state in `sessionStorage` when `config.session.persistCompoundState` is true (default).
+
+### Storage helpers
+
+```typescript
+import {
+  compoundStateStorageKey,
+  loadCompoundState,
+  saveCompoundState,
+  clearCompoundState,
+} from "@lessonkit/core";
+
+const key = compoundStateStorageKey("my-course", "safety-book");
+const saved = loadCompoundState(storagePort, key);
+saveCompoundState(storagePort, key, { pageIndex: 2, childState: { /* ... */ } });
+clearCompoundState(storagePort, key);
+```
+
+### Resume state shape
+
+```typescript
+import {
+  createCompoundResumeState,
+  parseCompoundResumeState,
+  clampCompoundPageIndex,
+} from "@lessonkit/core";
+
+const state = createCompoundResumeState({ pageIndex: 0, pageCount: 5 });
+const parsed = parseCompoundResumeState(JSON.parse(raw)); // null if invalid
+const index = clampCompoundPageIndex(7, 5); // 4
+```
+
+`CompoundResumeState` includes `pageIndex`, optional `childState` map, and extension `meta` for compound-specific fields (for example video time or branch path).
+
+### Branching scenario meta
+
+`BranchingScenario` stores branch resume under meta key `__lk_bs__` (active node id, visited nodes). Sessions saved before framework **1.5.0** without this meta restart at `startNodeId`.
+
+### Branch graph validation
+
+```typescript
+import { validateBranchGraph } from "@lessonkit/core";
+
+const result = validateBranchGraph([
+  { id: "start", choices: [{ targetId: "end", label: "Finish" }] },
+  { id: "end", choices: [] },
+]);
+// result.ok === true; result.issues lists cycles, orphans, missing startNodeId
+```
+
+### Allowlists
+
+`getAllowedChildTypes(parent)` and `isChildTypeAllowed(parent, childType)` enforce catalog nesting rules (for example `Page` inside `InteractiveBook`, `TimedCue` inside `InteractiveVideo`). See [Block catalog](reference/block-catalog.md).
+
+### CompoundHandle (React)
+
+Compound containers implement `CompoundHandle` for parent scoring and navigation: `getScore()`, `getMaxScore()`, `resetTask()`, `showSolutions()`, etc. See [Components and hooks](../guides/react-developers/components-and-hooks.md).

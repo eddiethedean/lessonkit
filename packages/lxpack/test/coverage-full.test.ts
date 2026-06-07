@@ -516,7 +516,7 @@ describe("coverage-full lxpack", () => {
           timestamp: new Date().toISOString(),
           data: { notCheckId: true },
         } as unknown as TelemetryEvent),
-      ).toMatchObject({ name: "quiz_completed", lessonId: "l" });
+      ).toBeNull();
     });
 
     it("defaults preset when theme is omitted", () => {
@@ -536,6 +536,7 @@ describe("coverage-full lxpack", () => {
         const { resolveSpaDirs } = await import("../src/spaDirs");
         const dirs = await resolveSpaDirs({
           descriptor: { ...baseDescriptor, spaDistDir: "build/custom" },
+          projectRoot: root,
         });
         expect(dirs["phishing-101"]).toMatch(/build[\\/]custom$/);
       } finally {
@@ -582,6 +583,7 @@ describe("coverage-full lxpack", () => {
         const dirs = await resolveSpaDirs({
           descriptor: baseDescriptor,
           spaDistDir: "dist",
+          projectRoot: root,
         });
         expect(dirs["phishing-101"]).toMatch(/\/dist$/);
       } finally {
@@ -628,7 +630,7 @@ describe("coverage-full lxpack", () => {
       const result = validatePackageInputs({
         target: "scorm12",
         outDir: join(root, "course"),
-      });
+      } as Parameters<typeof validatePackageInputs>[0]);
       expect(result.ok).toBe(false);
       if (!result.ok) {
         expect(result.issues.some((i) => i.path === "projectRoot")).toBe(true);
@@ -726,6 +728,7 @@ describe("coverage-full lxpack", () => {
         spaDistDir: dist,
         target: "standalone",
         dir: true,
+        projectRoot: root,
       });
       expect(result.ok).toBe(true);
     });
@@ -735,11 +738,13 @@ describe("coverage-full lxpack", () => {
     it("maps non-Error spaDirs failures to issues", async () => {
       const spaDirsMod = await import("../src/spaDirs");
       vi.spyOn(spaDirsMod, "resolveSpaDirs").mockRejectedValueOnce("spa failure");
+      const root = await makeTempDir("lk-staging-spa-fail-");
       const result = await buildStagingPackage({
         descriptor: baseDescriptor,
-        outDir: "/tmp/out",
-        spaDistDir: "/tmp/dist",
+        outDir: join(root, "out"),
+        spaDistDir: join(root, "dist"),
         target: "scorm12",
+        projectRoot: root,
       });
       expect(result.ok).toBe(false);
       if (!result.ok) {
@@ -749,11 +754,13 @@ describe("coverage-full lxpack", () => {
     });
 
     it("returns ok false when spa dist is missing", async () => {
+      const root = await makeTempDir("lk-staging-missing-dist-");
       const result = await buildStagingPackage({
         descriptor: baseDescriptor,
-        outDir: "/tmp/out",
-        spaDistDir: "/tmp/missing-dist",
+        outDir: join(root, "out"),
+        spaDistDir: join(root, "missing-dist"),
         target: "scorm12",
+        projectRoot: root,
       });
       expect(result.ok).toBe(false);
       if (!result.ok) {
@@ -817,7 +824,12 @@ describe("coverage-full lxpack", () => {
       await mkdir(dist, { recursive: true });
       await writeFile(join(dist, "index.html"), "ok", "utf8");
       await expect(
-        writeLxpackProject({ descriptor: baseDescriptor, outDir: join(root, "out"), spaDistDir: dist }),
+        writeLxpackProject({
+          descriptor: baseDescriptor,
+          outDir: join(root, "out"),
+          spaDistDir: dist,
+          projectRoot: root,
+        }),
       ).rejects.toThrow(/invalid interchange/);
     });
   });

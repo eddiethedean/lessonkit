@@ -1,13 +1,14 @@
 import { slugifyId } from "@lessonkit/core";
-import { cp, mkdir, readdir, readFile, writeFile } from "node:fs/promises";
+import { cp, mkdir, readdir, readFile, rename, rm, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
+import { randomUUID } from "node:crypto";
 import { basename, dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { CliLogger } from "../lib/logger.js";
 import { CliError, EXIT_INVALID_PROJECT, type CliJsonResult } from "../lib/errors.js";
 import { runNpmInstall } from "../lib/exec.js";
 
-const SKIP_DIRS = new Set(["node_modules", "dist", ".lxpack", ".git"]);
+const SKIP_DIRS = new Set(["node_modules", "dist", ".lxpack", ".git", "coverage", ".nyc_output"]);
 const SKIP_FILES = new Set([".DS_Store"]);
 
 export type InitOptions = {
@@ -50,6 +51,8 @@ function escapeJsxString(value: string): string {
     .replace(/\{/g, "\\{")
     .replace(/\}/g, "\\}")
     .replace(/</g, "\\u003c")
+    .replace(/\u2028/g, "\\u2028")
+    .replace(/\u2029/g, "\\u2029")
     .replace(/\r\n|\n|\r/g, "\\n");
 }
 
@@ -78,7 +81,7 @@ async function applyTemplateSubstitutions(projectDir: string, projectName: strin
   const lessonkitPath = join(projectDir, "lessonkit.json");
 
   const pkg = JSON.parse(await readFile(pkgPath, "utf8")) as Record<string, unknown>;
-  pkg.name = projectName;
+  pkg.name = slug;
   await writeFile(pkgPath, `${JSON.stringify(pkg, null, 2)}\n`, "utf8");
 
   const lessonkit = JSON.parse(await readFile(lessonkitPath, "utf8")) as Record<string, unknown>;
@@ -86,11 +89,11 @@ async function applyTemplateSubstitutions(projectDir: string, projectName: strin
   const course = lessonkit.course as Record<string, unknown>;
   course.courseId = slug;
   course.title = projectName;
-  const tracking = (lessonkit.tracking ?? {}) as Record<string, unknown>;
-  const xapi = (tracking.xapi ?? {}) as Record<string, unknown>;
-  xapi.activityIri = `https://example.com/courses/${slug}`;
-  tracking.xapi = xapi;
-  lessonkit.tracking = tracking;
+  const courseTracking = (course.tracking ?? {}) as Record<string, unknown>;
+  const courseXapi = (courseTracking.xapi ?? {}) as Record<string, unknown>;
+  courseXapi.activityIri = `https://example.com/courses/${slug}`;
+  courseTracking.xapi = courseXapi;
+  course.tracking = courseTracking;
   await writeFile(lessonkitPath, `${JSON.stringify(lessonkit, null, 2)}\n`, "utf8");
 
   const courseConfigPath = join(projectDir, "src", "courseConfig.ts");
@@ -105,6 +108,22 @@ async function applyTemplateSubstitutions(projectDir: string, projectName: strin
   await writeFile(appPath, appSource, "utf8");
 }
 
+async function promoteStagingToProjectDir(stagingDir: string, projectDir: string): Promise<void> {
+  await mkdir(projectDir, { recursive: true });
+  const entries = await readdir(stagingDir, { withFileTypes: true });
+  for (const entry of entries) {
+    const srcPath = join(stagingDir, entry.name);
+    const destPath = join(projectDir, entry.name);
+    if (entry.isDirectory()) {
+      await cp(srcPath, destPath, { recursive: true });
+    } else if (entry.isFile()) {
+      await cp(srcPath, destPath);
+    } else {
+      /* v8 ignore next -- template tree entries are files or directories */
+    }
+  }
+}
+
 /** @internal Exported for coverage of edge-case helpers only. */
 export const __testInitHelpers = {
   getTemplateDir,
@@ -112,6 +131,7 @@ export const __testInitHelpers = {
   isDirEmptyOrDotfilesOnly,
   escapeJsxString,
   copyTemplate,
+  promoteStagingToProjectDir,
 };
 
 export async function runInit(opts: InitOptions, logger: CliLogger): Promise<CliJsonResult> {
@@ -148,7 +168,7 @@ export async function runInit(opts: InitOptions, logger: CliLogger): Promise<Cli
     );
   }
 
-  if (opts.here && !(await isDirEmpty(projectDir)) && !opts.force) {
+  if (opts.here && !(await isDirEmptyOrDotfilesOnly(projectDir)) && !opts.force) {
     throw new CliError(`Directory is not empty: ${projectDir}. Use --force to initialize anyway.`, {
       code: "INVALID_PROJECT",
       exitCode: EXIT_INVALID_PROJECT,
@@ -173,12 +193,28 @@ export async function runInit(opts: InitOptions, logger: CliLogger): Promise<Cli
     });
   }
 
-  await copyTemplate(templateDir, projectDir);
-  await applyTemplateSubstitutions(projectDir, projectName, slug);
+  const stagingDir = opts.here
+    ? join(cwd, `.lessonkit-init-${randomUUID()}`)
+    : join(cwd, `.${slug}-init-${randomUUID()}`);
 
-  if (!opts.skipInstall) {
-    if (!opts.json) logger.log(`Installing dependencies in ${projectDir}…`);
-    await runNpmInstall(projectDir);
+  try {
+    await copyTemplate(templateDir, stagingDir);
+    await applyTemplateSubstitutions(stagingDir, projectName, slug);
+
+    if (!opts.skipInstall) {
+      if (!opts.json) logger.log(`Installing dependencies in ${stagingDir}…`);
+      await runNpmInstall(stagingDir);
+    }
+
+    if (opts.here) {
+      await promoteStagingToProjectDir(stagingDir, projectDir);
+      await rm(stagingDir, { recursive: true, force: true });
+    } else {
+      await rename(stagingDir, projectDir);
+    }
+  } catch (err) {
+    await rm(stagingDir, { recursive: true, force: true }).catch(/* v8 ignore next */ () => undefined);
+    throw err;
   }
 
   if (!opts.json) {

@@ -25,9 +25,19 @@ export function createDefaultClock(): ClockPort {
 }
 
 export function createNoopStorage(): StoragePort {
+  const memory = new Map<string, string>();
   return {
-    getItem: () => null,
-    setItem: () => true,
+    getItem: (key) => memory.get(key) ?? null,
+    setItem: (key, value) => {
+      memory.set(key, value);
+      return true;
+    },
+    removeItem: (key) => {
+      memory.delete(key);
+    },
+    resetForTests: () => {
+      memory.clear();
+    },
   };
 }
 
@@ -35,7 +45,29 @@ function createMemoryBackedSessionStorage(
   session: Pick<Storage, "getItem" | "setItem" | "removeItem">,
 ): StoragePort {
   const memory = new Map<string, string>();
+  const tombstones = new Set<string>();
   let warnedPersistFailure = false;
+
+  const syncFromStorageEvent = (key: string | null, newValue: string | null) => {
+    if (key === null) {
+      memory.clear();
+      tombstones.clear();
+      return;
+    }
+    tombstones.delete(key);
+    if (newValue === null) {
+      memory.delete(key);
+    } else {
+      memory.set(key, newValue);
+    }
+  };
+
+  if (typeof window !== "undefined") {
+    window.addEventListener("storage", (event) => {
+      if (event.storageArea !== sessionStorage) return;
+      syncFromStorageEvent(event.key, event.newValue);
+    });
+  }
 
   const warnPersistFailure = () => {
     if (warnedPersistFailure) return;
@@ -50,6 +82,7 @@ function createMemoryBackedSessionStorage(
 
   return {
     getItem: (key) => {
+      if (tombstones.has(key)) return null;
       if (memory.has(key)) return memory.get(key)!;
       try {
         const value = session.getItem(key);
@@ -60,6 +93,7 @@ function createMemoryBackedSessionStorage(
       }
     },
     setItem: (key, value) => {
+      tombstones.delete(key);
       memory.set(key, value);
       try {
         session.setItem(key, value);
@@ -73,12 +107,15 @@ function createMemoryBackedSessionStorage(
       memory.delete(key);
       try {
         session.removeItem(key);
+        tombstones.delete(key);
       } catch {
         warnPersistFailure();
+        tombstones.add(key);
       }
     },
     resetForTests: () => {
       memory.clear();
+      tombstones.clear();
     },
   };
 }

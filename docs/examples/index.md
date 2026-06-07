@@ -2,10 +2,12 @@
 
 These pages embed **production builds** of the monorepo examples, compiled when the documentation site is built (CI and Read the Docs). Each course uses the same modern LMS layout (sidebar curriculum, progress ring, lesson cards) with a different color theme and scenario content.
 
-:::{admonition} Demo telemetry
+:::{admonition} Demo telemetry — not for production
 :class: warning
 
-Embedded demos and some examples still log telemetry/xAPI to the browser console for illustration. **Do not copy that pattern for production**—use the [production checklist](../guides/react-developers/production-checklist.md) and `createFetchTransport` instead.
+Embedded demos and monorepo examples log telemetry/xAPI to the **browser console** for illustration (`examples/_shared/docsDemoConfig.ts`). **Do not copy that pattern for production.**
+
+For LMS go-live, use the CLI template **`src/courseConfig.ts`** from `npx @lessonkit/cli init` and complete the [production checklist](../guides/react-developers/production-checklist.md) (proxy URLs, observability hooks, `lxpack.bridge` allowlist).
 :::
 
 :::{admonition} Local preview
@@ -13,6 +15,26 @@ Embedded demos and some examples still log telemetry/xAPI to the browser console
 
 From the repo root, run `bash docs/scripts/build-docs-demos.sh` before `make html` in `docs/` so the bundles exist under `_static/demos/`.
 :::
+
+## Example picker
+
+| Example | Embedded on RTD | npm workspace | Framework | Start here when |
+| --- | --- | --- | --- | --- |
+| [react-vite](#cybersecurity-awareness-examplesreact-vite) | Yes | `lessonkit-example-react-vite` | 1.x UX | First full course / monorepo smoke |
+| [framework-11-showcase](#framework-11-showcase-examplesframework-11-showcase) | Yes | `lessonkit-example-framework-11-showcase` | 1.1 blocks | P0 assessments catalog |
+| [framework-12-showcase](#framework-12-showcase-examplesframework-12-showcase) | Yes | `lessonkit-example-framework-12-showcase` | 1.2 blocks | Content + compound + Tier C/D |
+| [data-privacy](#data-privacy-essentials-examplesdata-privacy) | Yes | `lessonkit-example-data-privacy` | 1.x | Compliance-themed course |
+| [customer-service](#customer-de-escalation-examplescustomer-service) | Yes | `lessonkit-example-customer-service` | 1.5 branching | Support + branching scenario |
+| [lxpack-golden](#workplace-safety-briefing-exampleslxpack-golden) | Yes | `lessonkit-example-lxpack-golden` | Packaging | SCORM/xAPI export reference |
+| [slide-deck](#slide-deck-examplesslide-deck) | No | `lessonkit-example-slide-deck` | 1.3 | `SlideDeck` compound |
+| [interactive-book](#interactive-book-examplesinteractive-book) | No | `lessonkit-example-interactive-book` | 1.2 | `InteractiveBook` compound |
+| [assessments-p0](#assessment-showcase-examplesassessments-p0) | No | `lessonkit-example-assessments-p0` | 1.1 | Minimal assessment sample |
+| interactive-video | No (GitHub) | `lessonkit-example-interactive-video` | 1.4 | `InteractiveVideo` compound |
+| branching-scenario | No (GitHub) | `lessonkit-example-branching-scenario` | 1.5 | `BranchingScenario` graph |
+
+**External starter:** `npx @lessonkit/cli init` — not in this table; use for new projects outside the monorepo.
+
+Run locally (after `npm run build:packages`): `npm -w <workspace> run dev`. Full table: [examples/README on GitHub](https://github.com/eddiethedean/lessonkit/blob/main/examples/README.md).
 
 ## Cybersecurity awareness (`examples/react-vite`)
 

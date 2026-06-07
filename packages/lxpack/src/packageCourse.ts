@@ -46,6 +46,8 @@ export type PackageLessonkitCourseOptions = WriteLxpackProjectOptions & {
   output?: string;
   dir?: boolean;
   outputBaseDir?: string;
+  /** Treat React parity warnings as packaging errors. */
+  strictParity?: boolean;
 };
 
 export type PackageLessonkitCourseResult =
@@ -94,6 +96,10 @@ export async function buildLessonkitProject(
 export { promoteStagingToOutDir } from "./packaging/promote";
 export { buildStagingPackage, ensureOutDirParent } from "./packaging/staging";
 
+/**
+ * Package a built SPA into SCORM, xAPI, cmi5, or standalone LMS artifacts.
+ * Prefer `lessonkit package --target …` in course projects; call directly for custom pipelines.
+ */
 export async function packageLessonkitCourse(
   options: PackageLessonkitCourseOptions,
 ): Promise<PackageLessonkitCourseResult> {
@@ -131,24 +137,24 @@ export async function packageLessonkitCourse(
 
   const descriptor = descriptorValidation.descriptor;
 
-  if (writeOpts.projectRoot) {
-    const parityIssues = validateReactManifestParity({
-      projectRoot: writeOpts.projectRoot,
-      descriptor,
-    });
-    const parityErrors = parityIssues.filter((i) => i.severity === "error");
-    if (parityErrors.length > 0) {
-      return {
-        ok: false,
-        courseDir: outDir,
-        target,
-        issues: parityErrors.map((i) => ({
-          path: i.path,
-          message: i.message,
-          severity: i.severity,
-        })),
-      };
-    }
+  const parityIssues = validateReactManifestParity({
+    projectRoot: writeOpts.projectRoot,
+    descriptor,
+  });
+  const parityFailures = writeOpts.strictParity
+    ? parityIssues
+    : parityIssues.filter((i) => i.severity === "error");
+  if (parityFailures.length > 0) {
+    return {
+      ok: false,
+      courseDir: outDir,
+      target,
+      issues: parityFailures.map((i) => ({
+        path: i.path,
+        message: i.message,
+        severity: i.severity,
+      })),
+    };
   }
 
   const staged = await buildStagingPackage({
@@ -208,7 +214,7 @@ export async function packageLessonkitCourse(
       ok: false,
       courseDir: outDir,
       target,
-      validation: { ok: true, manifest: build.manifest, issues: build.issues },
+      validation: { ok: false, manifest: build.manifest, issues: build.issues },
       build,
       issues: artifactIssues,
     };
@@ -225,7 +231,10 @@ export async function packageLessonkitCourse(
 
   try {
     await ensureOutDirParent(outDir);
-    await promoteStagingToOutDir(stagingDir, outDir);
+    await promoteStagingToOutDir(stagingDir, outDir, {
+      outputBaseDir: outputBaseDir ?? ".lxpack/out",
+      projectRoot: writeOpts.projectRoot,
+    });
   } catch (err) {
     await fsp.rm(stagingDir, { recursive: true, force: true }).catch(/* v8 ignore next */ () => undefined);
     return {

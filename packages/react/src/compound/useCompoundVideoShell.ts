@@ -6,6 +6,7 @@ export const IV_META_KEY = "__lk_iv__";
 export type InteractiveVideoMeta = {
   currentTime: number;
   completedCueIndices: number[];
+  firedCueIndices: number[];
 };
 
 export function readInteractiveVideoMeta(
@@ -17,7 +18,10 @@ export function readInteractiveVideoMeta(
   const completedCueIndices = Array.isArray(raw.completedCueIndices)
     ? (raw.completedCueIndices as number[]).filter((n) => typeof n === "number")
     : [];
-  return { currentTime, completedCueIndices };
+  const firedCueIndices = Array.isArray(raw.firedCueIndices)
+    ? (raw.firedCueIndices as number[]).filter((n) => typeof n === "number")
+    : completedCueIndices;
+  return { currentTime, completedCueIndices, firedCueIndices };
 }
 
 export function mergeVideoMetaIntoState(

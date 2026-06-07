@@ -43,6 +43,11 @@ export {
   ImageSlider,
   FindHotspot,
   FindMultipleHotspots,
+  BranchingScenario,
+  BranchNode,
+  BranchChoice,
+  Embed,
+  Chart,
 } from "./blocks";
 
 export type {
@@ -85,6 +90,12 @@ export type {
   FindHotspotProps,
   HotspotTarget,
   FindMultipleHotspotsProps,
+  BranchingScenarioProps,
+  BranchNodeProps,
+  BranchChoiceProps,
+  EmbedProps,
+  ChartProps,
+  ChartDatum,
   VideoProps,
   TimedCueProps,
   InteractiveVideoProps,
@@ -170,6 +181,7 @@ export type {
   ThemeResolvedMode,
 } from "./theme/ThemeProvider";
 export { ThemeProvider, useTheme } from "./theme/ThemeProvider";
+export { useBranchingScenario } from "./compound/useBranchingScenario";
 export type { ThemePresetName } from "@lessonkit/themes";
 
 export type {

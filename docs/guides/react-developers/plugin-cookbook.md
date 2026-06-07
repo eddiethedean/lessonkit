@@ -80,9 +80,71 @@ onTelemetry(event) {
 },
 ```
 
-## 5. Assessment plugins
+## 5. Custom scoring with `scoreAssessment`
 
-Use `kind: "assessment"` and implement `scoreAssessment` when you need custom scoring (open response, rubrics). The host returns the first non-null result from assessment plugins.
+Use `kind: "assessment"` and implement `scoreAssessment` for open-response or rubric scoring. The host uses the first non-null result from assessment plugins.
+
+### Define the plugin
+
+```ts
+import { defineAssessmentPlugin } from "@lessonkit/react";
+
+export const rubricPlugin = defineAssessmentPlugin({
+  id: "example.rubric",
+  version: "1.0.0",
+  kind: "assessment",
+  name: "Simple rubric",
+  scoreAssessment(ctx) {
+    if (ctx.interactionType !== "essay") return null;
+    const text = String(ctx.response ?? "");
+    const passed = text.trim().length >= 20;
+    return {
+      score: passed ? 1 : 0,
+      maxScore: 1,
+      passed,
+    };
+  },
+});
+```
+
+### Register and verify telemetry
+
+```tsx
+<Course
+  courseId="plugin-demo"
+  title="Essay demo"
+  config={{
+    plugins: [rubricPlugin],
+    tracking: { sink: (e) => console.log(e.name, e) },
+  }}
+>
+  <Lesson title="Lesson" lessonId="lesson-1">
+    <Essay checkId="essay-1" prompt="Describe your incident response plan." />
+  </Lesson>
+</Course>
+```
+
+Complete the essay and confirm `assessment_completed` in the sink with your custom `score` / `maxScore`.
+
+### Test the plugin
+
+```ts
+import { describe, expect, it } from "vitest";
+import { rubricPlugin } from "./rubricPlugin";
+
+describe("rubricPlugin", () => {
+  it("passes long responses", () => {
+    const result = rubricPlugin.scoreAssessment?.({
+      interactionType: "essay",
+      response: "a".repeat(25),
+      checkId: "essay-1",
+      lessonId: "lesson-1",
+      courseId: "plugin-demo",
+    } as never);
+    expect(result?.passed).toBe(true);
+  });
+});
+```
 
 ## Related
 

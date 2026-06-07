@@ -34,12 +34,14 @@ function MarkTheWordsInner(
   );
   const [marked, setMarked] = useState<Set<number>>(() => new Set());
   const [passed, setPassed] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
   const [showSolutions, setShowSolutions] = useState(false);
   const completedRef = useRef(false);
 
   const reset = () => {
     completedRef.current = false;
     setPassed(false);
+    setSubmitted(false);
     setMarked(new Set());
     setShowSolutions(false);
   };
@@ -105,6 +107,28 @@ function MarkTheWordsInner(
     });
   };
 
+  const submitMarks = () => {
+    if (!hasTargets || completedRef.current || marked.size === 0) return;
+    completedRef.current = true;
+    setSubmitted(true);
+    const didPass = passedThreshold;
+    if (didPass) setPassed(true);
+    assessment.answer({
+      checkId,
+      interactionType: INTERACTION,
+      question: props.text,
+      response: [...marked].map((i) => tokens[i]),
+      correct: didPass,
+    });
+    assessment.complete({
+      checkId,
+      interactionType: INTERACTION,
+      score,
+      maxScore,
+      passingScore: props.passingScore ?? maxScore,
+    });
+  };
+
   useEffect(() => {
     if (!hasTargets) {
       if (isDevEnvironment()) {
@@ -115,8 +139,10 @@ function MarkTheWordsInner(
       }
       return;
     }
+    if (props.enableRetry === false) return;
     if (!passedThreshold || completedRef.current) return;
     completedRef.current = true;
+    setSubmitted(true);
     setPassed(true);
     assessment.answer({
       checkId,
@@ -139,6 +165,7 @@ function MarkTheWordsInner(
     marked,
     maxScore,
     passedThreshold,
+    props.enableRetry,
     props.passingScore,
     props.correctWords,
     props.text,
@@ -181,10 +208,15 @@ function MarkTheWordsInner(
           );
         })}
       </p>
-      {allMarked ? (
+      {passedThreshold ? (
         <p role="status" aria-live="polite">
           Correct
         </p>
+      ) : null}
+      {props.enableRetry === false && hasTargets && marked.size > 0 && !submitted ? (
+        <button type="button" data-testid="mark-the-words-submit" onClick={submitMarks}>
+          Submit
+        </button>
       ) : null}
       {props.enableRetry && passed ? (
         <button type="button" onClick={reset}>

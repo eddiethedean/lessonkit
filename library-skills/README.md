@@ -11,7 +11,7 @@ Agent Skills ([`SKILL.md`](https://agentskills.io)) that teach AI coding assista
 | `lessonkit-author` | Editing `App.tsx`, `lessonkit.json`, Course/Lesson/Quiz blocks |
 | `lessonkit-packaging` | Choosing LMS target, running `lessonkit package` |
 | `lessonkit-telemetry` | Tracking sinks, xAPI transport, plugins, LXPack bridge |
-| `lessonkit-migrate` | Upgrading 0.9.x projects to 1.0 |
+| `lessonkit-migrate` | Upgrading `@lessonkit/*` across versions (0.9.x through 1.5.x) |
 
 ## Install
 
@@ -33,7 +33,7 @@ Installs to `~/.cursor/skills/`, `~/.claude/skills/`, or `<project>/.cursor/skil
 
 ## Requirements
 
-Node.js **18+** for `lessonkit dev`, `build`, and `package`.
+Node.js **20.19+ recommended** for `npx @lessonkit/cli init` (Vite 8). Node **18+** minimum for `lessonkit dev`, `build`, and `package` in an existing course.
 
 ## License
 

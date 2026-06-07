@@ -22,6 +22,12 @@ npm run test:integration
 | `assessments-p0-package.test.ts` | assessments-p0 SCORM packaging |
 | `interactive-book-package.test.ts` | interactive-book SCORM packaging |
 | `slide-deck-package.test.ts` | slide-deck SCORM packaging (1.3 golden path) |
+| `branching-scenario-package.test.ts` | branching-scenario SCORM packaging |
+| `interactive-video-package.test.ts` | interactive-video SCORM packaging |
+| `cli-strict-parity.test.ts` | Strict manifest ↔ React ID parity |
+| `validation-guards.test.ts` | Packaging validation guardrails |
+| `standalone-server.test.ts` | Standalone package HTTP smoke |
+| `cli-out.test.ts` | CLI `--out` output path overrides |
 
 Fixtures: [`fixtures/minimal-course/`](https://github.com/eddiethedean/lessonkit/tree/main/integration/fixtures/minimal-course) — rewrites deps to monorepo `file:` URLs.
 

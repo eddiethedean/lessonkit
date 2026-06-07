@@ -26,7 +26,9 @@ export type TelemetryEventName =
   | "memory_card_flipped"
   | "information_wall_search"
   | "parallax_slide_viewed"
-  | "questionnaire_submitted";
+  | "questionnaire_submitted"
+  | "branch_node_viewed"
+  | "branch_selected";
 
 export type TelemetryUser = {
   id?: string;
@@ -38,6 +40,8 @@ export type TelemetryUser = {
 export type TelemetryEventBase = {
   timestamp: string;
   courseId: CourseId;
+  /** Optional stable id for sink deduplication (e.g. deliver retry). */
+  id?: string;
   sessionId?: string;
   attemptId?: string;
   user?: TelemetryUser;
@@ -164,6 +168,21 @@ export type QuestionnaireSubmittedData = {
   fieldCount: number;
 };
 
+export type BranchNodeViewedData = {
+  blockId: BlockId;
+  nodeId: string;
+  nodeIndex: number;
+  nodeTitle?: string;
+};
+
+export type BranchSelectedData = {
+  blockId: BlockId;
+  fromNodeId: string;
+  toNodeId: string;
+  label: string;
+  scoreWeight?: number;
+};
+
 export type TelemetryEvent =
   | (TelemetryEventBase & { name: "course_started"; lessonId?: LessonId; data?: undefined })
   | (TelemetryEventBase & { name: "course_completed"; lessonId?: LessonId; data?: undefined })
@@ -223,6 +242,16 @@ export type TelemetryEvent =
       name: "questionnaire_submitted";
       lessonId: LessonId;
       data: QuestionnaireSubmittedData;
+    })
+  | (TelemetryEventBase & {
+      name: "branch_node_viewed";
+      lessonId: LessonId;
+      data: BranchNodeViewedData;
+    })
+  | (TelemetryEventBase & {
+      name: "branch_selected";
+      lessonId: LessonId;
+      data: BranchSelectedData;
     });
 
 /** Payload shape for a telemetry event name. */
@@ -237,7 +266,8 @@ export type TelemetrySink = (event: TelemetryEvent) => void | Promise<void>;
 export type TelemetryBatchSink = (events: TelemetryEvent[]) => void | Promise<void>;
 
 export type TrackingClient = {
-  track: (event: TelemetryEvent) => void;
+  /** Returns false when the event was dropped (e.g. buffer cap or after dispose). */
+  track: (event: TelemetryEvent) => boolean;
   /** Delivers one event and resolves to true only when the sink accepted it (batch: includes flush). */
   deliver?: (event: TelemetryEvent) => Promise<boolean>;
   /** Resolves to true when all buffered events were delivered; false when a sink failure re-queued events. */

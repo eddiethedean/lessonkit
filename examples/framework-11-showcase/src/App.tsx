@@ -3,6 +3,7 @@ import type { TelemetryEvent } from "@lessonkit/core";
 import type { ThemeMode } from "@lessonkit/react";
 import type { XAPIStatement } from "@lessonkit/xapi";
 import { ShowcaseShell } from "../../_shared/showcase/ShowcaseShell";
+import { allowConsoleTelemetryForDocsDemo } from "../../_shared/docsDemoConfig";
 import { SHOWCASE_META } from "./constants";
 import { BriefingLesson } from "./lessons/BriefingLesson";
 import { CertificationLesson } from "./lessons/CertificationLesson";
@@ -31,6 +32,7 @@ export default function App() {
 
   const courseConfig = React.useMemo(
     () => ({
+      ...allowConsoleTelemetryForDocsDemo(),
       session: { persistCompoundState: true },
       tracking: {
         sink: (event: TelemetryEvent) => {

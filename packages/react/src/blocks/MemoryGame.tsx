@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import type { BlockId } from "@lessonkit/core";
 import { setLessonkitBlockType } from "../compound/blockType";
 import { useLessonkit } from "../hooks";
@@ -49,17 +49,31 @@ export function MemoryGame(props: MemoryGameProps) {
   const [revealed, setRevealed] = useState<Set<string>>(() => new Set());
   const [selection, setSelection] = useState<string | null>(null);
   const [complete, setComplete] = useState(false);
+  const mismatchTimeoutRef = useRef<number | null>(null);
   const { track } = useLessonkit();
   const lessonId = useEnclosingLessonId();
   const trackOpts = lessonId ? { lessonId } : undefined;
 
   useEffect(() => {
+    if (mismatchTimeoutRef.current !== null) {
+      window.clearTimeout(mismatchTimeoutRef.current);
+      mismatchTimeoutRef.current = null;
+    }
     setCards(buildDeck(props.pairs));
     setMatched(new Set());
     setRevealed(new Set());
     setSelection(null);
     setComplete(false);
   }, [props.blockId, pairsKey]);
+
+  useEffect(
+    () => () => {
+      if (mismatchTimeoutRef.current !== null) {
+        window.clearTimeout(mismatchTimeoutRef.current);
+      }
+    },
+    [],
+  );
 
   const cardIndexByKey = useMemo(
     () => Object.fromEntries(cards.map((c, i) => [c.cardKey, i])),
@@ -94,7 +108,11 @@ export function MemoryGame(props: MemoryGameProps) {
       setRevealed(new Set());
       setSelection(null);
     } else {
-      window.setTimeout(() => {
+      if (mismatchTimeoutRef.current !== null) {
+        window.clearTimeout(mismatchTimeoutRef.current);
+      }
+      mismatchTimeoutRef.current = window.setTimeout(() => {
+        mismatchTimeoutRef.current = null;
         setRevealed((prev) => {
           const next = new Set(prev);
           next.delete(firstKey);

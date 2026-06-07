@@ -34,6 +34,10 @@ async function handleCommand<T extends CliJsonResult>(
   }
 }
 
+/**
+ * Build the Commander program used by the `lessonkit` CLI binary.
+ * Useful for embedding init/build/package in Node scripts and tests.
+ */
 export function createProgram(baseLogger: CliLogger = console): Command {
   const program = new Command();
 
@@ -103,8 +107,9 @@ export function createProgram(baseLogger: CliLogger = console): Command {
     .option("--cwd <dir>", "Project root directory")
     .option("--no-build", "Skip implicit Vite build for LMS targets")
     .option("--out <path>", "Override output artifact path")
+    .option("--strict-parity", "Treat React ID parity warnings as packaging errors")
     .option("--json", "Emit structured JSON result")
-    .action(async (opts: { target: string; cwd?: string; build?: boolean; out?: string; json?: boolean }) => {
+    .action(async (opts: { target: string; cwd?: string; build?: boolean; out?: string; json?: boolean; strictParity?: boolean }) => {
       const logger = createLogger({ json: opts.json });
       await handleCommand(
         async () => {
@@ -114,6 +119,7 @@ export function createProgram(baseLogger: CliLogger = console): Command {
             noBuild: opts.build === false,
             out: opts.out,
             json: opts.json,
+            strictParity: opts.strictParity,
           });
           if (!opts.json && result.ok && result.command === "package") {
             if (result.target === "react-vite") {
@@ -134,14 +140,19 @@ export function createProgram(baseLogger: CliLogger = console): Command {
 
   program
     .command("publish")
-    .description("Publish package artifacts (stub)")
+    .description("[maintainers] Not implemented — use Changesets (see RELEASING.md)")
     .action(() => {
-      baseLogger.log("lessonkit publish is not implemented. See RELEASING.md for npm publish workflow.");
+      baseLogger.log(
+        "lessonkit publish is not implemented. Monorepo releases use Changesets: npm run changeset && npm run version-packages && npm run release. See RELEASING.md.",
+      );
     });
 
   return program;
 }
 
+/**
+ * Parse argv and run the LessonKit CLI (same as the `lessonkit` binary entrypoint).
+ */
 export async function run(argv: string[] = process.argv, logger: CliLogger = console): Promise<void> {
   const program = createProgram(logger);
   await program.parseAsync(argv);

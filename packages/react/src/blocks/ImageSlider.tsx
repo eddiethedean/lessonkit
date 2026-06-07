@@ -3,6 +3,7 @@ import type { BlockId } from "@lessonkit/core";
 import { setLessonkitBlockType } from "../compound/blockType";
 import { useLessonkit } from "../hooks";
 import { useEnclosingLessonId } from "../lessonContext";
+import { resolveMediaSrc } from "./embedSecurity";
 
 export type ImageSlide = {
   src: string;
@@ -17,9 +18,11 @@ export type ImageSliderProps = {
 
 export function ImageSlider(props: ImageSliderProps) {
   const [index, setIndex] = useState(0);
-  const { track } = useLessonkit();
+  const { track, config } = useLessonkit();
   const lessonId = useEnclosingLessonId();
   const slide = props.slides[index];
+  const mediaOptions = { allowedHosts: config.embed?.allowedHosts };
+  const resolvedSrc = slide ? resolveMediaSrc(slide.src, mediaOptions) : null;
 
   if (!slide) return null;
 
@@ -34,7 +37,11 @@ export function ImageSlider(props: ImageSliderProps) {
 
   return (
     <section aria-label="Image slider" data-lk-block-id={props.blockId} data-testid="image-slider">
-      <img src={slide.src} alt={slide.alt} style={{ maxWidth: "100%" }} />
+      {resolvedSrc ? (
+        <img src={resolvedSrc} alt={slide.alt} style={{ maxWidth: "100%" }} />
+      ) : (
+        <p role="alert">This image URL is not allowed.</p>
+      )}
       {slide.caption ? <p>{slide.caption}</p> : null}
       <nav aria-label="Slide navigation">
         <button

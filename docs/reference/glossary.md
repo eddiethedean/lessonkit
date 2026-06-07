@@ -12,7 +12,7 @@ The command-line tool from **`@lessonkit/cli`**: `lessonkit init`, `dev`, `build
 
 ## lessonkit.json
 
-Project manifest (`schemaVersion: 1`) at the repo root. Describes the course for packaging (IDs, assessments, theme, paths). React props for `courseId`, `lessonId`, and `checkId` must stay in sync with this file.
+Project manifest (`schemaVersion: 1`) at the repo root. Describes the course for packaging (IDs, assessments, theme, paths). React props for `courseId`, `lessonId`, and `checkId` must stay in sync with this file. Full field reference: [lessonkit.json manifest](manifest.md).
 
 ## LessonkitProvider
 
@@ -26,9 +26,18 @@ External packaging engine used by **`@lessonkit/lxpack`** and the CLI. Produces 
 
 Browser bridge (`window.parent.lxpackBridge.v1`) used when a packaged course runs inside an LXPack-hosted iframe. Set `config.lxpack.bridge` to `"auto"` for LMS iframe shells; the init template defaults to `"off"`.
 
+## allowedParentOrigins
+
+List of parent-frame origins (scheme + host + port) permitted to receive bridge telemetry when `config.lxpack.bridge` is `"auto"`. **Required in production builds** when the bridge is enabled. Example: `["https://lms.example"]`. See [LXPack bridge](lxpack-bridge.md).
+
 ## .lxpack/
 
-Working directories created during packaging (descriptor staging, output zips). Default output base: **`.lxpack/out/`** (see section **Package for your LMS** in [Getting started in 5 minutes](../guides/react-developers/getting-started-in-5-minutes.md)).
+Working directories created during packaging (descriptor staging, output zips). Default layout:
+
+- **`paths.lxpackOutDir`** — `.lxpack/course` (LXPack project root)
+- **`paths.outputBaseDir`** — `.lxpack/out` (resolved **inside** `lxpackOutDir`, not at the project root)
+
+Default SCORM artifact: **`.lxpack/course/.lxpack/out/course-scorm12.zip`**. The CLI prints the resolved path after `lessonkit package`. See [First LMS export — where the SCORM zip lands](../guides/react-developers/first-lms-export.md#where-the-scorm-zip-lands).
 
 ## single-spa
 

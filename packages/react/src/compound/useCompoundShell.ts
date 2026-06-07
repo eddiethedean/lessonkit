@@ -18,6 +18,8 @@ export function useCompoundShell(opts: {
   enableSolutionsButton?: boolean;
   storage?: StoragePort;
   transformState?: (state: CompoundResumeState) => CompoundResumeState;
+  persistTrigger?: number;
+  onCompoundResume?: (state: CompoundResumeState) => void;
 }) {
   const ctx = useCompoundRegistry();
 
@@ -30,6 +32,8 @@ export function useCompoundShell(opts: {
     enabled: opts.persistEnabled,
     storage: opts.storage,
     transformState: opts.transformState,
+    persistTrigger: opts.persistTrigger,
+    onCompoundResume: opts.onCompoundResume,
   });
 
   const { goNext, goPrev, progress } = useCompoundNavigation(opts.pageCount, opts.index, opts.setIndex);

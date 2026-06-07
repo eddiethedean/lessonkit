@@ -7,16 +7,18 @@
 
 **LessonKit** is a React-first framework for building accessible, trackable learning experiences—and shipping them to the LMS. Author courses as components, wire telemetry and xAPI, theme with design tokens, and export **SCORM**, **standalone**, **xAPI**, or **cmi5** packages from the same codebase.
 
+LessonKit solves: *"We want custom React learning UX with LMS completion and xAPI—not another WYSIWYG authoring tool."*
+
 Developer tooling, not a timeline authoring tool: **React + telemetry + packaging**, not Storyline-in-a-box.
 
 > **Building a course?** You do not need to clone this repo. Run `npx @lessonkit/cli init my-course` and follow the [5-minute getting started guide](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/getting-started-in-5-minutes.html). Clone only if you are [contributing](CONTRIBUTING.md) or running [examples](examples/README.md).
 
 | | |
 | --- | --- |
-| **Release** | [1.4.0](https://github.com/eddiethedean/lessonkit/blob/main/CHANGELOG.md#140---2026-06-06) |
+| **Release** | [1.5.0](https://github.com/eddiethedean/lessonkit/blob/main/CHANGELOG.md#150---2026-06-06) |
 | **npm** | [`@lessonkit/*`](https://www.npmjs.com/org/lessonkit) |
 | **Docs** | [lessonkit.readthedocs.io](https://lessonkit.readthedocs.io/en/latest/) |
-| **Node.js** | **20+** (dev, build, LMS packaging, and CI); Vite 8 requires Node 20.19+ |
+| **Node.js** | **18+** minimum; **20.19+** recommended (CLI scaffold uses Vite 8; monorepo CI and e2e use Node 20) |
 
 ---
 
@@ -24,7 +26,9 @@ Developer tooling, not a timeline authoring tool: **React + telemetry + packagin
 
 | Path | Start here |
 | --- | --- |
-| **New course (CLI)** | `npx @lessonkit/cli init` → [5-minute guide](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/getting-started-in-5-minutes.html) · [Quickstart](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/quickstart.html#cli-scaffold) |
+| **Not sure?** | [Start here](https://lessonkit.readthedocs.io/en/latest/guides/start-here.html) on Read the Docs |
+| **New course (CLI)** | `npx @lessonkit/cli init` → [5-minute guide](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/getting-started-in-5-minutes.html) · [First LMS export](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/first-lms-export.html) |
+| **AI-assisted authoring** | [Vibe coding](https://lessonkit.readthedocs.io/en/latest/guides/vibe-coding/index.html) · [Library Skills](https://lessonkit.readthedocs.io/en/latest/guides/library-skills.html) |
 | **Existing React app** | `npm install @lessonkit/react` (+ CLI as devDep) → [Quickstart — add to Vite](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/quickstart.html#add-to-an-existing-vite-react-app) |
 | **Contribute** | Clone this repo → [Contributing](CONTRIBUTING.md) |
 
@@ -62,16 +66,20 @@ Developer tooling, not a timeline authoring tool: **React + telemetry + packagin
 
 ## Features
 
-- **Structure** — `Course`, `Lesson`, `Scenario`, `Quiz`, `KnowledgeCheck`, `Reflection`, `ProgressTracker`, `LessonkitProvider`; hooks for progress, tracking, and completion
-- **Compound & resume** — `Page`, `InteractiveBook`, `Slide`, `SlideDeck`, `InteractiveVideo`, `TimedCue`, `AssessmentSequence` (`CompoundHandle`, session resume)
-- **Content** — `Text`, `Heading`, `Image`, `Video`
-- **Assessments (P0 + 1.4)** — `TrueFalse`, `MarkTheWords`, `FillInTheBlanks`, `DragTheWords`, `DragAndDrop`, `FindHotspot`, `FindMultipleHotspots`, `Summary`, `ImagePairing`, `ImageSequencing`, `ArithmeticQuiz`, `Essay`
-- **Presentation (Tier C/D)** — `Accordion`, `DialogCards`, `Flashcards`, `ImageHotspots`, `ImageSlider`, `MemoryGame`, `InformationWall`, `ParallaxSlideshow`, `Questionnaire`
+Core building blocks for courses, assessments, compound layouts (books, decks, video, branching), telemetry, xAPI, theming, and LMS export via the CLI.
+
+| Area | Examples |
+| --- | --- |
+| **Structure** | `Course`, `Lesson`, `Scenario`, `Quiz`, `KnowledgeCheck`, `ProgressTracker` |
+| **Compound** | `InteractiveBook`, `SlideDeck`, `InteractiveVideo`, `BranchingScenario`, `AssessmentSequence` |
+| **Assessments** | `TrueFalse`, `FillInTheBlanks`, `DragAndDrop`, `Summary`, and more |
+| **Delivery** | SCORM 1.2/2004, standalone, xAPI, cmi5 from one Vite app |
+
+Full component list with props and H5P mappings: [block catalog](https://lessonkit.readthedocs.io/en/latest/reference/block-catalog.html) · [components & hooks](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/components-and-hooks.html). Tier labels (A/B/C/D) in the catalog map to [H5P capability priorities](https://lessonkit.readthedocs.io/en/latest/project/h5p-capability-map.html).
+
 - **Identity v1** — Required `courseId`, `lessonId`, and `checkId`; stable URNs for telemetry and xAPI
-- **Telemetry** — Session-aware events, optional batching, pluggable pipeline sinks
-- **xAPI** — Statement generation, in-memory queueing, and transport hooks via `@lessonkit/xapi`
+- **Telemetry & xAPI** — Session-aware events, batching, pluggable sinks; statement mapping via `@lessonkit/xapi`
 - **Theming** — `ThemeProvider`, presets, and `--lk-*` CSS design tokens
-- **LMS export** — SCORM 1.2/2004, standalone, xAPI, cmi5 from a built Vite app
 - **CLI** — Scaffold projects and package with a root `lessonkit.json` manifest
 - **Agent skills** — [Library Skills](https://github.com/eddiethedean/lessonkit/tree/main/library-skills) for Cursor, Claude Code, and compatible assistants
 
@@ -103,27 +111,24 @@ cd my-course
 npm run dev
 ```
 
+Open the URL Vite prints. Follow the [5-minute getting started guide](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/getting-started-in-5-minutes.html) to edit your first quiz.
+
+When you are ready to export to an LMS, continue with [First LMS export](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/first-lms-export.html).
+
 (`init` runs `npm install` by default.) Use `npx lessonkit dev` or a global CLI (`npm install -g @lessonkit/cli`) if you prefer.
 
-Build and package for an LMS:
-
-```bash
-npm run build
-npm run package:scorm12
-# or: npx lessonkit build && npx lessonkit package --target scorm12
-```
-
-SCORM zip output path: see [getting started in 5 minutes](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/getting-started-in-5-minutes.html#package-for-your-lms).
-
-Each project includes [`lessonkit.json`](https://lessonkit.readthedocs.io/en/latest/reference/cli.html) (`schemaVersion: 1`) that ties React props to the LXPack course descriptor.
+Each project includes [`lessonkit.json`](https://lessonkit.readthedocs.io/en/latest/reference/manifest.html) (`schemaVersion: 1`) that ties React props to the LXPack course descriptor.
 
 ### Existing React app
 
 ```bash
 npm install @lessonkit/react react react-dom
+npm install -D @lessonkit/cli @lessonkit/xapi
 ```
 
-Optional: `@lessonkit/xapi` (typed helpers), `@lessonkit/themes`, `@lessonkit/accessibility`, `@lessonkit/core` (headless APIs).
+You need `@lessonkit/cli` to run `lessonkit build` and `lessonkit package`. See the [quickstart for existing Vite apps](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/quickstart.html#add-to-an-existing-vite-react-app).
+
+Optional: `@lessonkit/themes`, `@lessonkit/accessibility`, `@lessonkit/core` (headless APIs).
 
 ### Guides
 
@@ -158,7 +163,6 @@ At runtime, `@lessonkit/react` emits telemetry and xAPI, and forwards scores to 
 
 ```tsx
 import { useMemo } from "react";
-import type { TelemetryEvent } from "@lessonkit/core";
 import {
   Course,
   Lesson,
@@ -167,18 +171,12 @@ import {
   ProgressTracker,
   ThemeProvider,
 } from "@lessonkit/react";
-import type { XAPIStatement } from "@lessonkit/xapi";
 
 export default function SecurityTraining() {
+  // Disable telemetry for this minimal example. For dev/prod wiring, use the CLI
+  // template `src/courseConfig.ts` or the [quickstart](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/quickstart.html).
   const config = useMemo(
-    () => ({
-      tracking: {
-        sink: (event: TelemetryEvent) => console.log("[telemetry]", event),
-      },
-      xapi: {
-        transport: (statement: XAPIStatement) => console.log("[xapi]", statement),
-      },
-    }),
+    () => ({ tracking: { enabled: false }, xapi: { enabled: false } }),
     [],
   );
 
@@ -213,24 +211,13 @@ Component gallery: [Storybook on GitHub Pages](https://eddiethedean.github.io/le
 
 ## Upgrading from an older version
 
-<details>
-<summary>Migration guides (skip if you used <code>npx @lessonkit/cli init</code> recently)</summary>
-
-| From | Guide |
-| --- | --- |
-| 1.3.x | [MIGRATION-1.3-to-1.4.md](https://github.com/eddiethedean/lessonkit/blob/main/docs/MIGRATION-1.3-to-1.4.md) — `InteractiveVideo`, `Video`, Tier B/C/D blocks |
-| 1.2.x | [MIGRATION-1.2-to-1.3.md](https://github.com/eddiethedean/lessonkit/blob/main/docs/MIGRATION-1.2-to-1.3.md) — `SlideDeck`, production transport helpers |
-| 1.1.x | [MIGRATION-1.1-to-1.2.md](https://github.com/eddiethedean/lessonkit/blob/main/docs/MIGRATION-1.1-to-1.2.md) — catalog v3 default, compound persistence, `AssessmentSequence` scores |
-| 1.0.x | [MIGRATION-1.0-to-1.1.md](https://github.com/eddiethedean/lessonkit/blob/main/docs/MIGRATION-1.0-to-1.1.md) |
-| 0.9.x | [MIGRATION-0.x-to-1.0.md](https://github.com/eddiethedean/lessonkit/blob/main/docs/MIGRATION-0.x-to-1.0.md) |
-
-**1.1.x → 1.2.x highlights:** `buildBlockCatalog()` defaults to catalog v3; `persistCompoundState` defaults to `true`; set a unique `blockId` on compound containers.
-
-</details>
+See the [Upgrade guide](https://lessonkit.readthedocs.io/en/latest/guides/upgrading-lessonkit.html) for migration guides by version.
 
 ---
 
 ## Packages
+
+Index: [packages/README.md](packages/README.md)
 
 | Package | npm | Description |
 | --- | --- | --- |
@@ -268,21 +255,33 @@ Source markdown: [`docs/`](https://github.com/eddiethedean/lessonkit/tree/main/d
 ```bash
 git clone https://github.com/eddiethedean/lessonkit.git
 cd lessonkit
-npm install
-npm run build
+npm ci
+npm run build:packages
 npm test
 ```
 
+Full contributor setup (Playwright, scoped loops, CI checklist): [CONTRIBUTING.md](CONTRIBUTING.md). Most PRs do **not** need the full monorepo build. Use scoped loops from CONTRIBUTING:
+
+| Change type | Usually enough |
+| --- | --- |
+| `docs/` only | See [CONTRIBUTING.md](CONTRIBUTING.md) — docs build requires `docs:api`, include verification, and block-props generation before Sphinx |
+| Single package | `npm run build -w @lessonkit/react` then `npm test -w @lessonkit/react` |
+| Examples after API change | `npm run build:packages` then `npm -w lessonkit-example-react-vite run dev` |
+| Release / wide refactor | `npm run build` (all packages + examples) |
+
 | Script | Purpose |
 | --- | --- |
-| `npm run build` | Build all packages and example apps |
-| `npm test` / `npm run coverage` | Unit tests |
+| `npm run build:packages` | Build `@lessonkit/*` workspaces only |
+| `npm run build` | Full build (packages + all example apps) |
+| `npm test` / `npm run coverage` | Unit tests (`pretest` runs `build:packages`) |
 | `npm run lint` / `npm run typecheck` | Quality gates |
 | `npm run test:integration` | CLI init → build → package |
-| `npm run test:e2e` | Playwright export parity |
+| `npm run test:e2e` | Playwright export parity (Node 20+) |
 | `npm run storybook` | Component gallery |
 
-Run an example (after `npm run build:packages`): `npm -w lessonkit-example-react-vite run dev` — see [examples/README.md](examples/README.md)
+Run an example (after `npm run build:packages`): `npm -w lessonkit-example-react-vite run dev` — see [examples/README.md](examples/README.md) for the tiered “start here” table.
+
+Package index: [packages/README.md](packages/README.md)
 
 Contributors: [CONTRIBUTING.md](CONTRIBUTING.md) · [monorepo guide](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/contributing-to-the-monorepo.html) · [Architecture & design docs](ARCHITECTURE.md) · [RELEASING.md](RELEASING.md) · [ROADMAP.md](ROADMAP.md)
 

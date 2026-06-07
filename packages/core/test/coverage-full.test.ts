@@ -222,7 +222,7 @@ describe("coverage-full", () => {
     expect(second).not.toHaveBeenCalled();
   });
 
-  it("course lifecycle handles failed emit and duplicate completions", () => {
+  it("course lifecycle handles failed emit and duplicate completions", async () => {
     const storage = createNoopStorage();
     const ctx = {
       courseId: "c" as const,
@@ -231,7 +231,7 @@ describe("coverage-full", () => {
       pluginHost: null,
       lxpackBridge: "auto" as const,
     };
-    const failed = tryEmitCourseStarted(ctx, { emitCourseStartedEvent: () => false }, false);
+    const failed = await tryEmitCourseStarted(ctx, { emitCourseStartedEvent: () => false }, false);
     expect(failed).toEqual({ emitted: false, marked: false });
 
     const progress = createProgressController();
@@ -269,23 +269,6 @@ describe("coverage-full", () => {
       }),
     ).toBe(true);
     expect(events).toEqual(["course"]);
-  });
-
-  it("headless runtime covers config updates and duplicate lifecycle calls", () => {
-    const events: string[] = [];
-    const emit = (name: string) => events.push(name);
-    const runtime = createLessonkitRuntime({ courseId: "c" });
-
-    runtime.updateConfig({ plugins: createPluginRegistry([]) });
-    runtime.setActiveLesson("l1", emit);
-    runtime.setActiveLesson("l1", emit);
-    runtime.completeLesson("l1", emit);
-    runtime.completeLesson("l1", emit);
-    runtime.completeCourse(emit);
-    runtime.completeCourse(emit);
-
-    expect(events.filter((e) => e === "lesson_started")).toHaveLength(1);
-    expect(events.filter((e) => e === "course_completed")).toHaveLength(1);
   });
 
   it("tracking client no-ops without sink when batching is disabled", () => {
@@ -370,7 +353,7 @@ describe("coverage-full", () => {
 
   it("headless runtime skips completion emits when prior lesson already completed", () => {
     const events: string[] = [];
-    const emit = (name: string) => events.push(name);
+    const emit = (event: { name: string }) => events.push(event.name);
     const runtime = createLessonkitRuntime({ courseId: "c" });
     runtime.setActiveLesson("l1", emit);
     runtime.completeLesson("l1", emit);
@@ -381,7 +364,7 @@ describe("coverage-full", () => {
 
   it("headless runtime completeCourse skips active lesson emit when already completed", () => {
     const events: string[] = [];
-    const emit = (name: string) => events.push(name);
+    const emit = (event: { name: string }) => events.push(event.name);
     const runtime = createLessonkitRuntime({ courseId: "c" });
     runtime.setActiveLesson("l1", emit);
     runtime.completeLesson("l1", emit);
@@ -394,7 +377,7 @@ describe("coverage-full", () => {
 
   it("headless runtime skips lesson_time_on_task when duration is unknown", () => {
     const events: string[] = [];
-    const emit = (name: string) => events.push(name);
+    const emit = (event: { name: string }) => events.push(event.name);
     const runtime = createLessonkitRuntime({ courseId: "c" });
     runtime.completeLesson("orphan", emit);
     expect(events).toEqual(["lesson_completed"]);

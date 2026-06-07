@@ -1,6 +1,6 @@
 {
   "name": "@lessonkit/core",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "private": false,
   "description": "Shared types and telemetry primitives for LessonKit.",
   "license": "Apache-2.0",
@@ -54,7 +54,7 @@
     "typecheck": "tsc -p tsconfig.json",
     "test": "vitest run --passWithNoTests",
     "test:coverage": "vitest run --coverage --passWithNoTests=false",
-    "lint": "echo \"(no lint configured yet)\""
+    "lint": "eslint --max-warnings 0 \"src/**/*.{ts,tsx}\" \"test/**/*.{ts,tsx}\""
   },
   "devDependencies": {
     "@types/node": "^25.9.2",

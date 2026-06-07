@@ -5,10 +5,12 @@ import { CompoundProvider } from "../compound/CompoundProvider";
 import { useCompoundInitialIndex, useCompoundShell } from "../compound/useCompoundShell";
 import { mergeVideoMetaIntoState, readInteractiveVideoMeta } from "../compound/useCompoundVideoShell";
 import { validateCompoundChildren } from "../compound/validateChildren";
+import { requireCompoundBlockIdWhenPersisting } from "../compound/requireCompoundBlockId";
 import { setLessonkitBlockType } from "../compound/blockType";
 import { useLessonkit } from "../hooks";
 import { useEnclosingLessonId } from "../lessonContext";
 import { normalizeComponentId } from "../runtime/validateComponentId";
+import { resolveMediaSrc } from "./embedSecurity";
 import type { TimedCueProps } from "./TimedCue";
 
 export type InteractiveVideoProps = {
@@ -23,17 +25,22 @@ export type InteractiveVideoProps = {
 
 type CueElement = React.ReactElement<TimedCueProps>;
 
+function sortCuesByTime(cues: CueElement[]): CueElement[] {
+  return [...cues].sort((a, b) => (a.props.atSeconds ?? 0) - (b.props.atSeconds ?? 0));
+}
+
 function loadVideoMeta(
   storage: ReturnType<typeof useLessonkit>["storage"],
   courseId: CourseId | undefined,
   blockId: BlockId,
   enabled: boolean,
 ) {
-  if (!enabled || !courseId) return { currentTime: 0, completedCueIndices: [] as number[] };
+  const empty = { currentTime: 0, completedCueIndices: [] as number[], firedCueIndices: [] as number[] };
+  if (!enabled || !courseId) return empty;
   const saved = loadCompoundState(storage, courseId, blockId);
-  if (!saved) return { currentTime: 0, completedCueIndices: [] as number[] };
+  if (!saved) return empty;
   const meta = readInteractiveVideoMeta(saved.childStates);
-  return meta ?? { currentTime: 0, completedCueIndices: [] as number[] };
+  return meta ?? empty;
 }
 
 function getCueChildCheckId(cue: CueElement): string | null {
@@ -56,7 +63,7 @@ const InteractiveVideoInner = forwardRef<
     index: number;
     setIndex: React.Dispatch<React.SetStateAction<number>>;
     persistEnabled: boolean;
-    initialMeta: { currentTime: number; completedCueIndices: number[] };
+    initialMeta: { currentTime: number; completedCueIndices: number[]; firedCueIndices: number[] };
   }
 >(function InteractiveVideoInner(props, ref) {
   const { blockId, cues, index, setIndex, persistEnabled, initialMeta } = props;
@@ -64,34 +71,66 @@ const InteractiveVideoInner = forwardRef<
 
   const { config, track, storage } = useLessonkit();
   const lessonId = useEnclosingLessonId();
+  const mediaOptions = { allowedHosts: config.embed?.allowedHosts };
+  const resolvedSrc = resolveMediaSrc(props.src, mediaOptions);
+  const resolvedPoster = resolveMediaSrc(props.poster, mediaOptions);
+  const resolvedCaptions = resolveMediaSrc(props.captions, mediaOptions);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const lastKnownTimeRef = useRef(initialMeta.currentTime);
   const completedCuesRef = useRef(new Set<number>(initialMeta.completedCueIndices));
   const [completedCues, setCompletedCues] = useState<Set<number>>(
     () => new Set(initialMeta.completedCueIndices),
   );
   const [overlayActive, setOverlayActive] = useState(false);
-  const firedCuesRef = useRef(new Set<number>(initialMeta.completedCueIndices));
-  const resumeOverlayCheckedRef = useRef(false);
-
-  const sortedCues = useMemo(
-    () => [...cues].sort((a, b) => (a.props.atSeconds ?? 0) - (b.props.atSeconds ?? 0)),
-    [cues],
+  const firedCuesRef = useRef(
+    new Set<number>(
+      initialMeta.firedCueIndices.length > 0
+        ? initialMeta.firedCueIndices
+        : initialMeta.completedCueIndices,
+    ),
   );
+  const resumeOverlayCheckedRef = useRef(false);
+  const [persistTrigger, setPersistTrigger] = useState(0);
+  const lastPersistTimeRef = useRef(0);
+
+  const sortedCues = cues;
 
   useEffect(() => {
     completedCuesRef.current = completedCues;
   }, [completedCues]);
 
   const transformState = useCallback(
-    (state: CompoundResumeState) =>
-      mergeVideoMetaIntoState(state, {
-        currentTime: videoRef.current?.currentTime ?? initialMeta.currentTime,
+    (state: CompoundResumeState) => {
+      const liveTime = videoRef.current?.currentTime;
+      const currentTime = Math.max(
+        lastKnownTimeRef.current,
+        typeof liveTime === "number" && Number.isFinite(liveTime) ? liveTime : 0,
+      );
+      return mergeVideoMetaIntoState(state, {
+        currentTime,
         completedCueIndices: [...completedCuesRef.current],
-      }),
-    [initialMeta.currentTime],
+        firedCueIndices: [...firedCuesRef.current],
+      });
+    },
+    [],
   );
 
-  const { ctx } = useCompoundShell({
+  const applyVideoMetaFromState = useCallback((state: CompoundResumeState) => {
+    const meta = readInteractiveVideoMeta(state.childStates);
+    if (!meta) return;
+    lastKnownTimeRef.current = meta.currentTime;
+    completedCuesRef.current = new Set(meta.completedCueIndices);
+    firedCuesRef.current = new Set(
+      meta.firedCueIndices.length > 0 ? meta.firedCueIndices : meta.completedCueIndices,
+    );
+    setCompletedCues(new Set(meta.completedCueIndices));
+    const video = videoRef.current;
+    if (video && meta.currentTime > 0) {
+      video.currentTime = meta.currentTime;
+    }
+  }, []);
+
+  const { visibleIndex, ctx } = useCompoundShell({
     courseId: config.courseId,
     compoundId: blockId,
     pageCount: sortedCues.length,
@@ -101,9 +140,11 @@ const InteractiveVideoInner = forwardRef<
     ref,
     storage,
     transformState,
+    persistTrigger,
+    onCompoundResume: applyVideoMetaFromState,
   });
 
-  const activeCue = sortedCues[index];
+  const activeCue = sortedCues[visibleIndex];
 
   const cueCanContinue = useCallback(
     (cue: CueElement | undefined) => {
@@ -141,8 +182,8 @@ const InteractiveVideoInner = forwardRef<
     const video = videoRef.current;
     if (!video) return;
 
-    const cue = sortedCues[index];
-    if (!cue || completedCues.has(index)) return;
+    const cue = sortedCues[visibleIndex];
+    if (!cue || completedCues.has(visibleIndex)) return;
 
     setOverlayActive(true);
     video.pause();
@@ -155,6 +196,7 @@ const InteractiveVideoInner = forwardRef<
     completedCues,
     config.courseId,
     index,
+    visibleIndex,
     initialMeta.completedCueIndices.length,
     initialMeta.currentTime,
     persistEnabled,
@@ -197,6 +239,13 @@ const InteractiveVideoInner = forwardRef<
     const video = videoRef.current;
     if (!video || overlayActive) return;
     const t = video.currentTime;
+    lastKnownTimeRef.current = Math.max(lastKnownTimeRef.current, t);
+
+    const now = Date.now();
+    if (now - lastPersistTimeRef.current >= 5000) {
+      lastPersistTimeRef.current = now;
+      setPersistTrigger((n) => n + 1);
+    }
 
     const blockSeek = mandatoryIncompleteBefore(t);
     if (blockSeek !== null && t > blockSeek + 0.5) {
@@ -215,10 +264,10 @@ const InteractiveVideoInner = forwardRef<
   };
 
   const completeCue = () => {
-    const cue = sortedCues[index];
+    const cue = sortedCues[visibleIndex];
     if (!cue || !cueCanContinue(cue)) return;
     setCompletedCues((prev) => {
-      const next = new Set([...prev, index]);
+      const next = new Set([...prev, visibleIndex]);
       completedCuesRef.current = next;
       return next;
     });
@@ -228,7 +277,7 @@ const InteractiveVideoInner = forwardRef<
         "video_segment_completed",
         {
           blockId,
-          segmentIndex: index,
+          segmentIndex: visibleIndex,
           atSeconds: cue.props.atSeconds ?? 0,
           segmentLabel: cue.props.label,
         },
@@ -247,33 +296,45 @@ const InteractiveVideoInner = forwardRef<
           {Array.from(ctx.getHandles().values()).reduce((s, h) => s + h.getMaxScore(), 0)}
         </p>
       ) : null}
-      <div style={{ position: "relative" }}>
-        <video
-          ref={videoRef}
-          src={props.src}
-          poster={props.poster}
-          controls
-          data-testid="interactive-video-player"
-          onTimeUpdate={onTimeUpdate}
-          onSeeking={() => {
-            const video = videoRef.current;
-            if (!video) return;
-            const blockSeek = mandatoryIncompleteBefore(video.currentTime);
-            if (blockSeek !== null && video.currentTime > blockSeek + 0.5) {
-              video.currentTime = blockSeek;
-            }
-          }}
-        >
-          {props.captions ? (
-            <track kind="captions" src={props.captions} srcLang="en" label="Captions" default />
-          ) : null}
-        </video>
-      </div>
+      {!resolvedSrc ? (
+        <p role="alert" data-testid="interactive-video-blocked">
+          This video URL is not allowed.
+        </p>
+      ) : (
+        <div style={{ position: "relative" }}>
+          <video
+            ref={videoRef}
+            src={resolvedSrc}
+            poster={resolvedPoster ?? undefined}
+            controls
+            data-testid="interactive-video-player"
+            onTimeUpdate={onTimeUpdate}
+            onSeeking={() => {
+              const video = videoRef.current;
+              if (!video) return;
+              const blockSeek = mandatoryIncompleteBefore(video.currentTime);
+              if (blockSeek !== null && video.currentTime > blockSeek + 0.5) {
+                video.currentTime = blockSeek;
+              }
+            }}
+          >
+            {resolvedCaptions ? (
+              <track
+                kind="captions"
+                src={resolvedCaptions}
+                srcLang="en"
+                label="Captions"
+                default
+              />
+            ) : null}
+          </video>
+        </div>
+      )}
       <div data-testid="interactive-video-cues">
         {sortedCues.map((cue, i) =>
           React.cloneElement(cue, {
             key: cue.key ?? i,
-            hidden: !overlayActive || i !== index,
+            hidden: !overlayActive || i !== visibleIndex,
             cueIndex: i,
             parentType: "InteractiveVideo",
           }),
@@ -303,15 +364,23 @@ const InteractiveVideoInner = forwardRef<
 
 export const InteractiveVideo = forwardRef<CompoundHandle, InteractiveVideoProps>(
   function InteractiveVideo(props, ref) {
+    const cues = React.Children.toArray(props.children).filter(
+      React.isValidElement,
+    ) as CueElement[];
+    const sortedCues = useMemo(() => sortCuesByTime(cues), [cues]);
+    const { config, storage } = useLessonkit();
+    const persistEnabled = config.session?.persistCompoundState !== false;
+
+    requireCompoundBlockIdWhenPersisting({
+      persistEnabled,
+      blockId: props.blockId,
+      componentName: "InteractiveVideo",
+    });
+
     const blockId = useMemo(
       () => normalizeComponentId(props.blockId, "blockId") as BlockId,
       [props.blockId],
     );
-    const cues = React.Children.toArray(props.children).filter(
-      React.isValidElement,
-    ) as CueElement[];
-    const { config, storage } = useLessonkit();
-    const persistEnabled = config.session?.persistCompoundState !== false;
 
     const initialMeta = useMemo(
       () => loadVideoMeta(storage, config.courseId, blockId, persistEnabled),
@@ -321,7 +390,7 @@ export const InteractiveVideo = forwardRef<CompoundHandle, InteractiveVideoProps
     const initialIndex = useCompoundInitialIndex({
       courseId: config.courseId,
       compoundId: blockId,
-      pageCount: cues.length,
+      pageCount: sortedCues.length,
       persistEnabled,
       storage,
     });
@@ -331,7 +400,7 @@ export const InteractiveVideo = forwardRef<CompoundHandle, InteractiveVideoProps
 
     useEffect(() => {
       setIndex(initialIndex);
-    }, [config.courseId, blockId, initialIndex]);
+    }, [config.courseId, blockId, initialIndex, sortedCues.length]);
 
     return (
       <CompoundProvider activePageIndex={index} onActivePageIndexChange={setIndexStable}>
@@ -339,7 +408,7 @@ export const InteractiveVideo = forwardRef<CompoundHandle, InteractiveVideoProps
           {...props}
           ref={ref}
           blockId={blockId}
-          cues={cues}
+          cues={sortedCues}
           index={index}
           setIndex={setIndex}
           persistEnabled={persistEnabled}

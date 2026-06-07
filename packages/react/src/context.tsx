@@ -18,6 +18,10 @@ import { useLessonkitProviderRuntime } from "./provider/useLessonkitProviderRunt
 
 export type { LessonkitObservabilityConfig };
 
+/**
+ * Runtime configuration for {@link LessonkitProvider} and {@link Course}.
+ * Pass tracking, xAPI, LMS bridge, observability hooks, and plugins here.
+ */
 export type LessonkitConfig = {
   courseId: CourseId;
   session?: {
@@ -31,6 +35,12 @@ export type LessonkitConfig = {
     enabled?: boolean;
     sink?: (event: Parameters<TrackingClient["track"]>[0]) => void | Promise<void>;
     batchSink?: (events: Parameters<TrackingClient["track"]>[0][]) => void | Promise<void>;
+    /** Factory for a custom tracking client (alternative to sink/batchSink). */
+    createClient?: () => TrackingClient;
+    /** Explicit opt-in for console sinks in production builds. */
+    consoleSink?: boolean;
+    /** Re-emit assessment telemetry when restoring session state (default false). */
+    replayResumeEvents?: boolean;
     /** Keepalive batch delivery for pagehide (e.g. from createFetchBatchSink). */
     exitBatchSink?: (events: Parameters<TrackingClient["track"]>[0][]) => void | Promise<void>;
     batch?: {
@@ -42,6 +52,8 @@ export type LessonkitConfig = {
   xapi?: {
     enabled?: boolean;
     transport?: XAPITransport;
+    /** Explicit opt-in for console transport in production builds. */
+    consoleTransport?: boolean;
     /** Keepalive transport for pagehide (e.g. from createFetchTransport). */
     exitTransport?: import("@lessonkit/xapi").XAPIExitTransport;
     /** Abort in-flight transport by statement id (e.g. from createFetchTransport). */
@@ -51,6 +63,8 @@ export type LessonkitConfig = {
   lxpack?: {
     /** Forward completion events to `window.parent.lxpackBridge.v1` when embedded (default `auto`). */
     bridge?: LmsBridgeMode;
+    /** Parent-frame origins allowed to receive bridge calls when `bridge` is `auto`. */
+    allowedParentOrigins?: string[];
   };
   /** Framework plugins (analytics, LMS, assessment, interaction, AI). */
   plugins?: LessonkitPlugin[];
@@ -60,6 +74,22 @@ export type LessonkitConfig = {
   sinks?: import("@lessonkit/core").TelemetryPipelineSink[];
   /** Production hooks for sink failures, xAPI queue depth, and LMS bridge misses. */
   observability?: LessonkitObservabilityConfig;
+  /** Optional storage port override (default: per-provider sessionStorage-backed port). */
+  storage?: StoragePort;
+  /** Embed block security defaults. */
+  embed?: {
+    /** Strip `allow-popups` from iframe sandbox in production builds (default true). */
+    restrictPopupsInProduction?: boolean;
+    /** Hostnames allowed to bypass the production private-network media/embed blocklist. */
+    allowedHosts?: string[];
+  };
+  /**
+   * Non-production preview options. `allowConsoleTelemetry` skips production guard
+   * checks for console sinks (docs demos only — not for shipped LMS courses).
+   */
+  preview?: {
+    allowConsoleTelemetry?: boolean;
+  };
 };
 
 export type { ProgressState };
@@ -93,6 +123,10 @@ export type LessonkitRuntime = {
 
 export const LessonkitContext = createContext<LessonkitRuntime | null>(null);
 
+/**
+ * Root runtime provider for telemetry, xAPI, progress, and LMS bridge forwarding.
+ * Prefer wrapping with {@link Course} unless you need a custom layout.
+ */
 export function LessonkitProvider(props: LessonkitProviderProps) {
   const runtime = useLessonkitProviderRuntime(props.config);
   return <LessonkitContext.Provider value={runtime}>{props.children}</LessonkitContext.Provider>;

@@ -26,12 +26,13 @@ export function buildTelemetryEvent(opts: BuildTelemetryEventInput): TelemetryEv
 }
 
 /**
- * Like `buildTelemetryEvent`, but returns null (with a dev warning) when quiz events lack an active lesson.
+ * Like `buildTelemetryEvent`, but returns null when lesson-scoped events lack `lessonId`
+ * (with dev warnings for quiz/assessment events).
  */
 export function tryBuildTelemetryEvent(opts: BuildTelemetryEventInput): TelemetryEvent | null {
   const entry = getTelemetryEventRegistryEntry(opts.name);
-  if (entry.requiresLessonId && !opts.lessonId && entry.tryBuildMissingLessonWarning) {
-    if (isDevEnvironment()) {
+  if (entry.requiresLessonId && !opts.lessonId) {
+    if (isDevEnvironment() && entry.tryBuildMissingLessonWarning) {
       if (entry.tryBuildMissingLessonWarning === "quiz" && !warnedMissingQuizLesson) {
         warnedMissingQuizLesson = true;
         console.warn(

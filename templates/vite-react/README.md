@@ -18,10 +18,35 @@ npm run package:scorm12
 - `.env.example` — `VITE_XAPI_PROXY_URL` and `VITE_ANALYTICS_URL` for production builds
 - `lessonkit.json` — manifest for CLI and LXPack packaging
 
+## Before LMS packaging
+
+1. **LMS bridge** — In `src/courseConfig.ts`, enable the bridge for SCORM/xAPI/cmi5 export (template defaults to `"off"` for local preview):
+
+   ```ts
+   lxpack: {
+     bridge: "auto",
+     allowedParentOrigins: ["https://your-lms.example"], // required in production builds
+   },
+   ```
+
+   Development builds allow `bridge: "auto"` without an allowlist; **production builds do not**. Discover your LMS origin from the SCORM preview URL or browser devtools (`document.referrer`).
+
+2. **Production runtime** — Copy `.env.example` to `.env`, set `VITE_ANALYTICS_URL` and `VITE_XAPI_PROXY_URL`, and wire the observability hooks in `courseConfig.ts` (see comments there). Rebuild with `npm run build` before packaging. Alternatively, disable `tracking` and `xapi` for a first test export only.
+
+3. **Activity IRI** — Replace the `example.com` placeholder in `lessonkit.json` → `course.tracking.xapi.activityIri` before xAPI/cmi5 export (must be HTTPS).
+
+## SCORM output path
+
+After `npm run package:scorm12`, the CLI prints the resolved ZIP path. Default:
+
+**`.lxpack/course/.lxpack/out/course-scorm12.zip`**
+
+(`paths.outputBaseDir` is resolved inside `paths.lxpackOutDir`, not at the project root.)
+
 ## Production
 
-Copy `.env.example` to `.env.production` and set your LRS/analytics proxy URLs before `npm run build`. See the [production checklist](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/production-checklist.html).
+Copy `.env.example` to `.env` and set your LRS/analytics proxy URLs before `npm run build`. See the [production checklist](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/production-checklist.html) and [Ship to LMS checklist](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/ship-to-lms.html).
 
 ## Docs
 
-[CLI reference](https://lessonkit.readthedocs.io/en/latest/reference/cli.html) · [React quickstart](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/quickstart.html) · [Packaging guide](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/packaging-and-cli.html)
+[5-minute guide](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/getting-started-in-5-minutes.html) · [First LMS export](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/first-lms-export.html) · [CLI reference](https://lessonkit.readthedocs.io/en/latest/reference/cli.html) · [Packaging guide](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/packaging-and-cli.html)

@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import {
   assessmentDescriptorToLxpack,
   descriptorToInterchange,
+  escapeShellText,
   extractAssessments,
   mapLessonkitIds,
   packageLessonkitCourse,
@@ -266,6 +267,49 @@ describe("assessments", () => {
     expect(extractAssessments(baseDescriptor)).toHaveLength(1);
   });
 
+  it("escapes safe assessment text for SCORM interchange", () => {
+    const lx = assessmentDescriptorToLxpack({
+      checkId: "safe-check",
+      question: 'Say "hello" & go',
+      choices: ["A&B", "Plain"],
+      answer: "A&B",
+    });
+    expect(lx).not.toBeNull();
+    expect(lx!.questions[0]?.prompt).toBe("Say &quot;hello&quot; &amp; go");
+    expect(lx!.questions[0]?.choices[0]?.text).toBe("A&amp;B");
+    expect(escapeShellText("<not-allowed>")).toBe("&lt;not-allowed&gt;");
+  });
+
+  it("rejects entity-encoded unsafe SCORM markup in assessment fields", () => {
+    expect(
+      assessmentDescriptorToLxpack({
+        checkId: "entity-xss",
+        question: "Pick one",
+        choices: ["&lt;script&gt;alert(1)&lt;/script&gt;"],
+        answer: "&lt;script&gt;alert(1)&lt;/script&gt;",
+      }),
+    ).toBeNull();
+  });
+
+  it("rejects unsafe SCORM markup in assessment fields", () => {
+    expect(
+      assessmentDescriptorToLxpack({
+        checkId: "xss-check",
+        question: "</script><script>alert(1)</script>",
+        choices: ["A"],
+        answer: "A",
+      }),
+    ).toBeNull();
+    expect(
+      assessmentDescriptorToLxpack({
+        checkId: "safe-check",
+        question: "Pick one",
+        choices: ["<!-- leak"],
+        answer: "<!-- leak",
+      }),
+    ).toBeNull();
+  });
+
   it("extractAssessments skips kinds that do not package to shell quizzes", () => {
     const injected = extractAssessments({
       ...baseDescriptor,
@@ -374,6 +418,7 @@ describe("writeLxpackProject", () => {
       descriptor: baseDescriptor,
       outDir,
       spaDistDir: dist,
+      projectRoot: root,
     });
 
     const yaml = await readFile(result.courseYamlPath, "utf-8");
@@ -397,6 +442,7 @@ describe("writeLxpackProject", () => {
         },
         outDir: join(root, "out"),
         lessonSpaDirs: {},
+        projectRoot: root,
       }),
     ).rejects.toThrow(/missing build output/);
   });
@@ -424,6 +470,7 @@ describe("writeLxpackProject", () => {
       },
       outDir,
       lessonSpaDirs: { a: lessonA, b: lessonB },
+      projectRoot: root,
     });
 
     expect(await readFile(join(outDir, "dist/lessons/a/index.html"), "utf-8")).toBe("a");
@@ -455,6 +502,7 @@ describe("writeLxpackProject errors", () => {
         descriptor: { ...baseDescriptor, courseId: "" } as typeof baseDescriptor,
         outDir: join(root, "out"),
         spaDistDir: join(root, "dist"),
+        projectRoot: root,
       }),
     ).rejects.toThrow(/courseId/);
   });
@@ -466,6 +514,7 @@ describe("writeLxpackProject errors", () => {
         descriptor: baseDescriptor,
         outDir: join(root, "out"),
         spaDistDir: join(root, "missing-dist"),
+        projectRoot: root,
       }),
     ).rejects.toThrow(/spaDistDir not found/);
   });
@@ -584,6 +633,20 @@ describe("validateDescriptor edge cases", () => {
     }
   });
 
+  it("validateDescriptorForTarget rejects invalid activityIri for scorm12 when tracking.xapi is set", () => {
+    const invalid = validateDescriptorForTarget(
+      {
+        ...baseDescriptor,
+        tracking: { xapi: { activityIri: "http://example.com/activity/1" } },
+      },
+      "scorm12",
+    );
+    expect(invalid.ok).toBe(false);
+    if (!invalid.ok) {
+      expect(invalid.issues.some((i) => i.path === "tracking.xapi.activityIri")).toBe(true);
+    }
+  });
+
   it("validateDescriptorForTarget rejects non-injectable assessments for LMS targets", () => {
     const descriptor = {
       ...baseDescriptor,
@@ -618,6 +681,7 @@ describe("writeLxpackProject with assessments", () => {
       descriptor: baseDescriptor,
       outDir,
       spaDistDir: dist,
+      projectRoot: root,
     });
 
     const courseYaml = await readFile(join(outDir, "course.yaml"), "utf-8");

@@ -6,6 +6,7 @@ export type LessonkitUrnParts = {
   lessonId?: LessonId;
   checkId?: CheckId;
   blockId?: BlockId;
+  nodeId?: string;
 };
 
 /**
@@ -33,6 +34,13 @@ export function buildLessonkitUrn(parts: LessonkitUrnParts): LessonkitUrn {
       throw new Error("buildLessonkitUrn: blockId requires lessonId");
     }
     urn += `:block:${blockId}`;
+  }
+  if (parts.nodeId !== undefined) {
+    const nodeId = assertValidId(parts.nodeId, "blockId");
+    if (parts.blockId === undefined) {
+      throw new Error("buildLessonkitUrn: nodeId requires blockId");
+    }
+    urn += `:node:${nodeId}`;
   }
 
   return urn;

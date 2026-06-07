@@ -704,14 +704,14 @@ describe("coverage-full CLI", () => {
     it("react-vite fails when dist is missing after build", async () => {
       vi.spyOn(exec, "runCommand").mockResolvedValue(undefined);
       await expect(runPackage({ target: "react-vite", cwd: dir })).rejects.toMatchObject({
-        message: expect.stringContaining("dist directory not found"),
+        message: expect.stringContaining("index.html"),
       });
     });
 
     it("LMS target fails when dist is missing after build", async () => {
       vi.spyOn(exec, "runCommand").mockResolvedValue(undefined);
       await expect(runPackage({ target: "scorm12", cwd: dir })).rejects.toMatchObject({
-        message: expect.stringContaining("Run lessonkit build first"),
+        message: expect.stringContaining("index.html"),
       });
     });
   });
@@ -767,12 +767,24 @@ describe("coverage-full CLI", () => {
 
     it("passes --outDir to vite build", async () => {
       const runCommandSpy = vi.spyOn(exec, "runCommand").mockResolvedValue(undefined);
+      await mkdir(join(dir, "build", "spa"), { recursive: true });
+      await writeFile(join(dir, "build", "spa", "index.html"), "<html></html>", "utf8");
       await runBuild({ cwd: dir, json: true });
       expect(runCommandSpy).toHaveBeenCalledWith(
         process.execPath,
         expect.arrayContaining(["build", "--outDir", "build/spa"]),
         expect.objectContaining({ cwd: dir }),
       );
+    });
+
+    it("ignores passthrough --outDir and uses configured spaDistDir", async () => {
+      const runCommandSpy = vi.spyOn(exec, "runCommand").mockResolvedValue(undefined);
+      await mkdir(join(dir, "build", "spa"), { recursive: true });
+      await writeFile(join(dir, "build", "spa", "index.html"), "<html></html>", "utf8");
+      await runBuild({ cwd: dir, json: true, viteArgs: ["--outDir", "ignored"] });
+      const argv = runCommandSpy.mock.calls[0]![1] as string[];
+      expect(argv).toEqual(expect.arrayContaining(["build", "--outDir", "build/spa"]));
+      expect(argv).not.toContain("ignored");
     });
   });
 });

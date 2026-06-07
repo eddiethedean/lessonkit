@@ -11,6 +11,37 @@ export type LxpackInjectedAssessment = {
   }>;
 };
 
+/** Escape text embedded into LMS shell / SCORM interchange payloads. */
+export function escapeShellText(text: string): string {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function decodeShellEntities(text: string): string {
+  return text
+    .replace(/&amp;/gi, "&")
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">")
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/gi, "'")
+    .replace(/&#x([0-9a-f]+);/gi, (_, hex) => String.fromCharCode(parseInt(hex, 16)))
+    .replace(/&#(\d+);/g, (_, num) => String.fromCharCode(Number(num)));
+}
+
+function containsUnsafeShellMarkup(text: string): boolean {
+  const decoded = decodeShellEntities(text);
+  return /<\/script/i.test(decoded) || /<!--/.test(decoded) || /</.test(decoded);
+}
+
+function sanitizeShellField(text: string): string | null {
+  if (containsUnsafeShellMarkup(text)) return null;
+  return escapeShellText(text);
+}
+
 function slugChoiceId(text: string, index: number): string {
   const base = text
     .toLowerCase()
@@ -21,24 +52,32 @@ function slugChoiceId(text: string, index: number): string {
   return `${stem}-${index + 1}`;
 }
 
-function mcqToLxpack(assessment: McqAssessmentDescriptor): LxpackInjectedAssessment {
+function mcqToLxpack(assessment: McqAssessmentDescriptor): LxpackInjectedAssessment | null {
+  const checkId = sanitizeShellField(assessment.checkId);
+  const prompt = sanitizeShellField(assessment.question);
+  if (!checkId || !prompt) return null;
+
   const choices = assessment.choices.map((text, index) => {
+    const sanitizedText = sanitizeShellField(text);
+    if (!sanitizedText) return null;
     const id = slugChoiceId(text, index);
     return {
       id,
-      text,
+      text: sanitizedText,
       correct: text === assessment.answer,
     };
   });
 
+  if (choices.some((choice) => choice === null)) return null;
+
   return {
-    id: assessment.checkId,
+    id: checkId,
     passingScore: assessment.passingScore ?? 1,
     questions: [
       {
         id: "q1",
-        prompt: assessment.question,
-        choices,
+        prompt,
+        choices: choices as Array<{ id: string; text: string; correct?: boolean }>,
       },
     ],
   };

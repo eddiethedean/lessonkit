@@ -84,7 +84,7 @@ import { forwardTelemetryToBridge, dispatchBridgeAction } from "@lessonkit/lxpac
 // Provider — set "auto" for LMS iframe shells; init template defaults to "off"
 <Course
   courseId="my-course"
-  config={{ lxpack: { bridge: "auto" } }} // or "off"
+  config={{ lxpack: { bridge: "auto", allowedParentOrigins: ["https://your-lms.example"] } }} // or "off"
 >
 ```
 

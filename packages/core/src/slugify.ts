@@ -15,9 +15,28 @@ function uniqueFallbackId(input: string, usedIds: ReadonlySet<string>): string {
     const validated = validateId(candidate);
     if (validated.ok && !usedIds.has(validated.id)) return validated.id;
   }
+  for (let attempt = 0; attempt < 100; attempt++) {
+    const randomSuffix = Math.random().toString(36).slice(2, 8);
+    const candidate = `id-${hash}-${randomSuffix}`.slice(0, 64);
+    const validated = validateId(candidate);
+    if (validated.ok && !usedIds.has(validated.id)) return validated.id;
+  }
   const timed = `id-${hash}-${Date.now().toString(36)}`.slice(0, 64);
-  const validated = validateId(timed);
-  return validated.ok ? validated.id : `id-${hash}`;
+  const timedValidated = validateId(timed);
+  if (timedValidated.ok && !usedIds.has(timedValidated.id)) return timedValidated.id;
+
+  const cryptoApi = globalThis.crypto;
+  for (let attempt = 0; attempt < 1000; attempt++) {
+    const suffix =
+      typeof cryptoApi?.randomUUID === "function"
+        ? cryptoApi.randomUUID().replace(/-/g, "").slice(0, 12)
+        : `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+    const candidate = `id-${hash}-${suffix}`.slice(0, 64);
+    const validated = validateId(candidate);
+    if (validated.ok && !usedIds.has(validated.id)) return validated.id;
+  }
+
+  throw new Error(`[lessonkit] unable to derive unique id for input: ${input.slice(0, 32)}`);
 }
 
 /** Convert human-readable text to a candidate LessonKit id (may still need collision handling via deriveId). */

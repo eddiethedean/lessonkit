@@ -1,5 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
-import { createInMemoryXAPIQueue, createXAPIClient } from "../src";
+import {
+  createInMemoryXAPIQueue,
+  createXAPIClient,
+} from "../src";
+import { cryptoRandomId } from "../src/id";
 import type { XAPIStatement } from "../src";
 
 const courseId = "test";
@@ -119,13 +123,27 @@ describe("@lessonkit/xapi", () => {
     }
   });
 
-  it("uses Math.random fallback when crypto.randomUUID is unavailable", async () => {
-    vi.stubGlobal("crypto", {});
+  it("uses getRandomValues fallback when crypto.randomUUID is unavailable", async () => {
+    vi.stubGlobal("crypto", {
+      getRandomValues: (arr: Uint8Array) => {
+        arr.fill(7);
+        return arr;
+      },
+    });
     const queue = createInMemoryXAPIQueue();
     const client = createXAPIClient({ courseId, queue });
     client.startedLesson({ lessonId: "lesson-1" });
     expect(client.queueSize()).toBe(1);
     vi.unstubAllGlobals();
+  });
+
+  it("throws when secure RNG is unavailable", () => {
+    vi.stubGlobal("crypto", {});
+    try {
+      expect(() => cryptoRandomId()).toThrow(/cryptoRandomId requires/);
+    } finally {
+      vi.unstubAllGlobals();
+    }
   });
 
   it("send() forwards statements to transport", async () => {
@@ -236,6 +254,40 @@ describe("@lessonkit/xapi", () => {
     release();
     await flushPromise;
     expect(exitCalls.map((s) => s.id)).toEqual(["head", "tail"]);
+  });
+
+  it("delivers a replacement payload after an in-flight statement with the same id succeeds", async () => {
+    const statements: XAPIStatement[] = [];
+    let release!: () => void;
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const transport = vi.fn(async (statement: XAPIStatement) => {
+      await gate;
+      statements.push(statement);
+    });
+    const client = createXAPIClient({ transport, courseId });
+    const original: XAPIStatement = {
+      id: "replace-1",
+      timestamp: "t1",
+      verb: "http://adlnet.gov/expapi/verbs/experienced",
+      object: { id: "o-old" },
+    };
+    const replacement: XAPIStatement = {
+      id: "replace-1",
+      timestamp: "t2",
+      verb: "http://adlnet.gov/expapi/verbs/experienced",
+      object: { id: "o-new" },
+    };
+
+    client.send(original);
+    client.send(replacement);
+    release();
+    await new Promise((r) => setTimeout(r, 0));
+    await client.flush();
+
+    expect(transport).toHaveBeenCalledTimes(2);
+    expect(statements.map((s) => s.object.id)).toEqual(["o-old", "o-new"]);
   });
 
   it("does not send duplicate in-flight statements with the same id", async () => {
@@ -353,6 +405,112 @@ describe("@lessonkit/xapi", () => {
     expect(transport).toHaveBeenCalledTimes(2);
   });
 
+  it("replaces a queued statement when enqueue repeats the same id", async () => {
+    const verb = "http://adlnet.gov/expapi/verbs/experienced";
+    const queue = createInMemoryXAPIQueue();
+    queue.enqueue({ id: "dup", timestamp: "t1", verb, object: { id: "o1" } });
+    queue.enqueue({ id: "dup", timestamp: "t2", verb, object: { id: "o2" } });
+    expect(queue.size()).toBe(1);
+
+    const delivered: XAPIStatement[] = [];
+    await queue.flush(async (statement) => {
+      delivered.push(statement);
+    });
+    expect(delivered).toHaveLength(1);
+    expect(delivered[0]?.timestamp).toBe("t2");
+  });
+
+  it("persists overflow to onOverflow when maxSize is 1 and head is in flight", async () => {
+    const verb = "http://adlnet.gov/expapi/verbs/experienced";
+    const onCap = vi.fn();
+    const onOverflow = vi.fn();
+    const queue = createInMemoryXAPIQueue({ maxSize: 1, onCap, onOverflow });
+    let release!: () => void;
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+
+    queue.enqueue({ id: "head", timestamp: "t", verb, object: { id: "o1" } });
+    const flushPromise = queue.flush(async () => {
+      await gate;
+    });
+    await new Promise((r) => setTimeout(r, 0));
+
+    queue.enqueue({ id: "overflow", timestamp: "t", verb, object: { id: "o2" } });
+    expect(onCap).toHaveBeenCalledTimes(1);
+    expect(onOverflow).toHaveBeenCalledWith(
+      expect.objectContaining({ id: "overflow", object: { id: "o2" } }),
+    );
+    expect(queue.size()).toBe(1);
+
+    release();
+    await flushPromise;
+    expect(queue.size()).toBe(0);
+  });
+
+  it("concurrent client flush drains re-queued statements after the first flush finishes", async () => {
+    let attempts = 0;
+    const transport = vi.fn(async () => {
+      attempts += 1;
+      if (attempts === 1) throw new Error("transient");
+    });
+    const client = createXAPIClient({ courseId, transport });
+    client.startedLesson({ lessonId: "lesson-1" });
+    await new Promise((r) => setTimeout(r, 50));
+
+    const first = client.flush().catch(() => undefined);
+    const second = client.flush();
+    await Promise.all([first, second]);
+
+    expect(client.queueSize()).toBe(0);
+    expect(attempts).toBeGreaterThanOrEqual(2);
+  });
+
+  it("default onQueueCap warns in development", () => {
+    vi.stubEnv("NODE_ENV", "development");
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    try {
+      const client = createXAPIClient({ courseId, maxQueueSize: 2 });
+      client.startedLesson({ lessonId: "a" });
+      client.startedLesson({ lessonId: "b" });
+      client.startedLesson({ lessonId: "c" });
+      expect(warn).toHaveBeenCalledWith(
+        "[lessonkit] xAPI queue reached capacity; oldest statement(s) dropped.",
+      );
+    } finally {
+      warn.mockRestore();
+      vi.unstubAllEnvs();
+    }
+  });
+
+  it("flushOnExit hands off in-flight head to exit transport", async () => {
+    let release!: () => void;
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const exitCalls: XAPIStatement[] = [];
+    const abortIds: string[] = [];
+    const client = createXAPIClient({
+      courseId,
+      transport: async () => {
+        await gate;
+      },
+      exitTransport: (statement) => {
+        exitCalls.push(statement);
+      },
+      abortInFlight: (id) => {
+        abortIds.push(id);
+      },
+    });
+
+    client.startedLesson({ lessonId: "lesson-1" });
+    await Promise.resolve();
+    client.flushOnExit?.();
+    expect(abortIds.length).toBeGreaterThan(0);
+    expect(exitCalls.length).toBeGreaterThan(0);
+    release();
+  });
+
   it("queue flush rejects on first transport error and keeps remainder queued", async () => {
     const queue = createInMemoryXAPIQueue();
     queue.enqueue({ id: "1", timestamp: "t", verb: "http://adlnet.gov/expapi/verbs/experienced", object: { id: "o" } });
@@ -399,6 +557,45 @@ describe("@lessonkit/xapi", () => {
     expect(onHeadSkipped).toHaveBeenCalledTimes(1);
     expect(queue.size()).toBe(0);
     expect(transport).toHaveBeenCalledTimes(3);
+  });
+
+  it("queue onHeadSkipped hook persists skipped statements to dead-letter storage", async () => {
+    vi.stubGlobal(
+      "sessionStorage",
+      (() => {
+        const store = new Map<string, string>();
+        return {
+          get length() {
+            return store.size;
+          },
+          clear: () => store.clear(),
+          getItem: (key: string) => store.get(key) ?? null,
+          key: (index: number) => [...store.keys()][index] ?? null,
+          removeItem: (key: string) => store.delete(key),
+          setItem: (key: string, value: string) => store.set(key, value),
+        } as Storage;
+      })(),
+    );
+    const { loadDeadLetterStatements, persistDeadLetterStatement, resetXAPIDeadLetterForTests } =
+      await import("../src");
+    resetXAPIDeadLetterForTests();
+
+    const queue = createInMemoryXAPIQueue({
+      maxHeadFailures: 1,
+      onHeadSkipped: (statement) => persistDeadLetterStatement(statement),
+    });
+    queue.enqueue({
+      id: "bad",
+      timestamp: "t",
+      verb: "http://adlnet.gov/expapi/verbs/experienced",
+      object: { id: "o1" },
+    });
+    await queue.flush(async () => {
+      throw new Error("permanent");
+    });
+
+    expect(loadDeadLetterStatements().map((s) => s.id)).toContain("bad");
+    vi.unstubAllGlobals();
   });
 
   it("adds duration and score to completion result", async () => {

@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "name": "branching-scenario",
+  "course": {
+    "courseId": "branching-scenario-demo",
+    "title": "Branching Scenario (1.5.0)",
+    "layout": "single-spa",
+    "spaLessonId": "branch-lesson",
+    "lessons": [{ "id": "branch-lesson", "title": "Resolution paths" }],
+    "assessments": [
+      {
+        "kind": "trueFalse",
+        "checkId": "credit-check",
+        "question": "Document the credit code?",
+        "answer": true,
+        "passingScore": 1
+      }
+    ],
+    "theme": { "preset": "default" },
+    "tracking": { "completion": { "threshold": 1 } }
+  },
+  "paths": {
+    "spaDistDir": "dist",
+    "lxpackOutDir": ".lxpack/course",
+    "outputBaseDir": ".lxpack/out"
+  }
+}

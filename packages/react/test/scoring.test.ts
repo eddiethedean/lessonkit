@@ -28,6 +28,19 @@ describe("scoreFromCustom", () => {
     });
   });
 
+  it("honors numeric score when passed is false", () => {
+    expect(scoreFromCustom({ passed: false, score: 2, maxScore: 5 }, true)).toEqual({
+      score: 2,
+      maxScore: 5,
+      passed: false,
+    });
+    expect(scoreFromCustom({ passed: false, score: 0, maxScore: 3 }, true)).toEqual({
+      score: 0,
+      maxScore: 3,
+      passed: false,
+    });
+  });
+
   it("derives pass from score ratio when passed is omitted", () => {
     expect(scoreFromCustom({ score: 2, maxScore: 2 }, false)).toEqual({
       score: 2,

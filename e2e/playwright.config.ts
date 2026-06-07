@@ -29,6 +29,7 @@ export default defineConfig({
         "**/interactive-book/**",
         "**/slide-deck/**",
         "**/interactive-video/**",
+        "**/branching-scenario/**",
       ],
       use: {
         ...devices["Desktop Chrome"],
@@ -73,6 +74,14 @@ export default defineConfig({
       use: {
         ...devices["Desktop Chrome"],
         baseURL: "http://127.0.0.1:4185",
+      },
+    },
+    {
+      name: "branching-scenario-vite",
+      testDir: "./tests/branching-scenario",
+      use: {
+        ...devices["Desktop Chrome"],
+        baseURL: "http://127.0.0.1:4188",
       },
     },
   ],
@@ -121,6 +130,14 @@ export default defineConfig({
         "npm run build -w lessonkit-example-interactive-video && npm run preview -w lessonkit-example-interactive-video -- --host 127.0.0.1 --port 4185",
       cwd: repoRoot,
       url: "http://127.0.0.1:4185",
+      reuseExistingServer: !process.env.CI,
+      timeout: 180_000,
+    },
+    {
+      command:
+        "npm run build -w lessonkit-example-branching-scenario && npm run preview -w lessonkit-example-branching-scenario -- --host 127.0.0.1 --port 4188",
+      cwd: repoRoot,
+      url: "http://127.0.0.1:4188",
       reuseExistingServer: !process.env.CI,
       timeout: 180_000,
     },

@@ -6,9 +6,12 @@ import { buildAssessmentHandle } from "../assessment/internal/buildAssessmentHan
 import { readBooleanStateField } from "../assessment/internal/resumeState";
 import { useAssessmentHandleRegistration } from "../assessment/internal/useAssessmentHandleRegistration";
 import { meetsPassingThreshold } from "../assessment/scoring";
+import { shouldReplayResumeTelemetry } from "../assessment/shouldReplayResumeTelemetry";
 import { useAssessmentState } from "../assessment/useAssessmentState";
 import { setLessonkitBlockType } from "../compound/blockType";
+import { useLessonkit } from "../hooks";
 import { normalizeComponentId } from "../runtime/validateComponentId";
+import { resolveMediaSrc } from "./embedSecurity";
 
 export type SequencingImage = {
   id: string;
@@ -28,6 +31,8 @@ function ImageSequencingInner(
   ref: React.Ref<AssessmentHandle>,
 ) {
   const checkId = useMemo(() => normalizeComponentId(props.checkId, "checkId"), [props.checkId]);
+  const { config } = useLessonkit();
+  const mediaOptions = { allowedHosts: config.embed?.allowedHosts };
   const assessment = useAssessmentState(props.enclosingLessonId);
   const imagesKey = props.images.map((i) => i.id).join("\0");
   const orderKey = props.correctOrder.join("\0");
@@ -71,9 +76,9 @@ function ImageSequencingInner(
     () =>
       buildAssessmentHandle({
         checkId,
-        getScore: () => (passed ? score : 0),
+        getScore: () => score,
         getMaxScore: () => maxScore,
-        getAnswerGiven: () => order.length > 0,
+        getAnswerGiven: () => checked,
         resetTask: reset,
         showSolutions: () => {},
         getXAPIData: () => ({
@@ -81,7 +86,7 @@ function ImageSequencingInner(
           interactionType: INTERACTION,
           response: order,
           correct: passedThreshold,
-          score: passed ? score : 0,
+          score,
           maxScore,
         }),
         getCurrentState: () => ({ order, passed, checked }),
@@ -94,7 +99,7 @@ function ImageSequencingInner(
           readBooleanStateField(state, "passed", (value) => {
             setPassed(value);
             completedRef.current = value;
-            if (value && !telemetryReplayedRef.current) {
+            if (value && !telemetryReplayedRef.current && shouldReplayResumeTelemetry(config)) {
               telemetryReplayedRef.current = true;
               const nextIsCorrect = nextOrder.every((id, i) => id === props.correctOrder[i]);
               const nextScore = nextIsCorrect ? maxScore : 0;
@@ -116,7 +121,7 @@ function ImageSequencingInner(
           readBooleanStateField(state, "checked", setChecked);
         },
       }),
-    [checkId, checked, maxScore, order, passed, passedThreshold, score],
+    [assessment, checkId, checked, config, maxScore, order, passed, passedThreshold, props.correctOrder, props.passingScore, score],
   );
 
   useAssessmentHandleRegistration(checkId, handle, ref);
@@ -129,9 +134,9 @@ function ImageSequencingInner(
       response: order,
       correct: passedThreshold,
     });
-    if (passedThreshold && !completedRef.current) {
+    if ((passedThreshold || props.enableRetry === false) && !completedRef.current) {
       completedRef.current = true;
-      setPassed(true);
+      if (passedThreshold) setPassed(true);
       assessment.complete({
         checkId,
         interactionType: INTERACTION,
@@ -149,9 +154,18 @@ function ImageSequencingInner(
         {order.map((id, index) => {
           const image = props.images.find((i) => i.id === id);
           if (!image) return null;
+          const resolvedSrc = resolveMediaSrc(image.src, mediaOptions);
           return (
             <li key={id} data-testid={`sequencing-item-${id}`}>
-              <img src={image.src} alt={image.alt} style={{ maxWidth: "8rem", verticalAlign: "middle" }} />
+              {resolvedSrc ? (
+                <img
+                  src={resolvedSrc}
+                  alt={image.alt}
+                  style={{ maxWidth: "8rem", verticalAlign: "middle" }}
+                />
+              ) : (
+                <span aria-hidden="true">!</span>
+              )}
               <button
                 type="button"
                 data-testid={`sequencing-up-${id}`}

@@ -7,10 +7,17 @@ export type CourseStartedPipelineEmitOpts = {
   event: TelemetryEvent;
   xapi: XAPIClient | null;
   lxpackBridge: LxpackBridgeMode;
+  allowedParentOrigins?: string[];
   onLxpackBridgeMiss?: (event: TelemetryEvent) => void;
+  onLxpackBridgeError?: (err: unknown) => void;
+  onXapiMappingError?: (err: unknown) => void;
   extraSinks?: TelemetryPipelineSink[];
   /** When xAPI already sent course_started for this client (layout bootstrap or prior pipeline). */
   skipXapi?: boolean;
+  /** Called immediately after xAPI flush succeeds, before extra sinks. */
+  onXapiDelivered?: () => void;
+  /** Called after xAPI and lxpack bridge, before extra sinks (for independent mark commits). */
+  onBeforeExtraSinks?: () => void | Promise<void>;
 };
 
 export type CourseStartedPipelineEmitResult = {
@@ -67,17 +74,36 @@ export async function emitCourseStartedNonTrackingPipeline(
   let xapiStatementSent = false;
 
   if (!opts.skipXapi && opts.xapi) {
-    const statement = telemetryEventToXAPIStatement(opts.event);
+    let statement;
+    try {
+      statement = telemetryEventToXAPIStatement(opts.event);
+    } catch (err) {
+      opts.onXapiMappingError?.(err);
+      if (isDevEnvironment()) {
+        console.warn(
+          "[lessonkit] course_started xAPI mapping skipped:",
+          err instanceof Error ? err.message : err,
+        );
+      }
+      statement = null;
+    }
     if (statement) {
       opts.xapi.send(statement);
       await opts.xapi.flush();
       xapiStatementSent = true;
+      opts.onXapiDelivered?.();
     }
   }
 
   forwardTelemetryToLxpack(opts.event, opts.lxpackBridge, {
     onBridgeMiss: opts.onLxpackBridgeMiss,
+    onBridgeError: opts.onLxpackBridgeError,
+    allowedParentOrigins: opts.allowedParentOrigins,
   });
+
+  if (opts.onBeforeExtraSinks) {
+    await opts.onBeforeExtraSinks();
+  }
 
   const emitCtx = {
     courseId: opts.event.courseId as CourseId,

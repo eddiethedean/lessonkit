@@ -74,6 +74,8 @@ describe("resolveSpaDirs", () => {
   });
 
   it("requires lessonSpaDirs for multi-lesson layout", async () => {
+    const root = await mkdtemp(join(tmpdir(), "lk-spa-multi-"));
+    tempDirs.push(root);
     await expect(
       resolveSpaDirs({
         descriptor: {
@@ -86,6 +88,7 @@ describe("resolveSpaDirs", () => {
           ],
           assessments: [],
         },
+        projectRoot: root,
       }),
     ).rejects.toThrow(/lessonSpaDirs missing/);
   });

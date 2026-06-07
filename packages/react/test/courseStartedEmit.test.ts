@@ -93,11 +93,75 @@ describe("emitCourseStartedToTracking", () => {
     expect(deliverCalls).toBe(1);
   });
 
+  it("marks dedupe after sync track when client has no deliver or flush", async () => {
+    const storage = createSessionStoragePort();
+    const tracking: TrackingClient = {
+      track: vi.fn(),
+    };
+
+    const ok = await emitCourseStartedToTracking(
+      tracking,
+      storage,
+      "session-1",
+      "course-1",
+      event,
+    );
+
+    expect(ok).toBe(true);
+    expect(tracking.track).toHaveBeenCalledWith(event);
+    expect(hasCourseStartedEmittedToTracking(storage, "session-1", "course-1")).toBe(true);
+  });
+
+  it("marks dedupe after flush resolves void", async () => {
+    const storage = createSessionStoragePort();
+    const tracking: TrackingClient = {
+      track: vi.fn(),
+      flush: vi.fn(() => {}),
+    };
+
+    const ok = await emitCourseStartedToTracking(
+      tracking,
+      storage,
+      "session-1",
+      "course-1",
+      event,
+    );
+
+    expect(ok).toBe(true);
+    expect(hasCourseStartedEmittedToTracking(storage, "session-1", "course-1")).toBe(true);
+  });
+
   it("marks dedupe after flush succeeds", async () => {
     const storage = createSessionStoragePort();
     const tracking: TrackingClient = {
       track: vi.fn(),
       flush: vi.fn(async () => true),
+    };
+
+    const ok = await emitCourseStartedToTracking(
+      tracking,
+      storage,
+      "session-1",
+      "course-1",
+      event,
+    );
+
+    expect(ok).toBe(true);
+    expect(hasCourseStartedEmittedToTracking(storage, "session-1", "course-1")).toBe(true);
+  });
+
+  it("treats delivery as success when durable mark fails but in-memory dedupe is set", async () => {
+    const memory = new Map<string, string>();
+    const storage = {
+      getItem: (k: string) => memory.get(k) ?? null,
+      setItem: (k: string, v: string) => {
+        memory.set(k, v);
+        return false;
+      },
+    };
+    const tracking: TrackingClient = {
+      deliver: async () => true,
+      track: vi.fn(),
     };
 
     const ok = await emitCourseStartedToTracking(
@@ -153,6 +217,7 @@ describe("emitPendingCourseStarted", () => {
     const tracking: TrackingClient = {
       track: () => {
         trackCalls += 1;
+        return true;
       },
       flush: async () => true,
     };

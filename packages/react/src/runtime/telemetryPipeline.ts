@@ -2,17 +2,23 @@ import type { TelemetryEvent, TrackingClient } from "@lessonkit/core";
 import {
   createTelemetryPipeline,
   createTrackingPipelineSink,
+  isLifecycleTelemetryEvent,
   type TelemetryPipeline,
 } from "@lessonkit/core";
 import type { XAPIClient } from "@lessonkit/xapi";
 import { telemetryEventToXAPIStatement } from "@lessonkit/xapi";
 import { forwardTelemetryToLxpack, type LxpackBridgeMode } from "./lxpackBridge";
+import type { LessonkitObservabilityConfig } from "./observability";
 
 export type LegacyEmitOptions = {
   tracking: TrackingClient;
   xapi: XAPIClient | null;
   lxpackBridge: LxpackBridgeMode;
+  allowedParentOrigins?: string[];
   onLxpackBridgeMiss?: (event: TelemetryEvent) => void;
+  onLxpackBridgeError?: LessonkitObservabilityConfig["onLxpackBridgeError"];
+  onXapiMappingError?: LessonkitObservabilityConfig["onXapiMappingError"];
+  onXapiTransportError?: LessonkitObservabilityConfig["onXapiTransportError"];
 };
 
 function isDevEnvironment(): boolean {
@@ -28,14 +34,31 @@ function createLegacyPipeline(
     createTrackingPipelineSink("tracking", (event) => opts.tracking.track(event)),
     {
       id: "xapi",
-      emit(event) {
+      async emit(event) {
+        let statement;
         try {
-          const statement = telemetryEventToXAPIStatement(event);
-          if (statement) opts.xapi?.send(statement);
+          statement = telemetryEventToXAPIStatement(event);
         } catch (err) {
+          opts.onXapiMappingError?.(err);
           if (isDevEnvironment()) {
             console.warn(
               "[lessonkit] xAPI mapping skipped:",
+              err instanceof Error ? err.message : err,
+            );
+          }
+          return;
+        }
+        if (!statement || !opts.xapi) return;
+        try {
+          opts.xapi.send(statement);
+          if (isLifecycleTelemetryEvent(event.name)) {
+            await opts.xapi.flush();
+          }
+        } catch (err) {
+          opts.onXapiTransportError?.(err);
+          if (isDevEnvironment()) {
+            console.warn(
+              "[lessonkit] xAPI delivery failed:",
               err instanceof Error ? err.message : err,
             );
           }
@@ -47,6 +70,8 @@ function createLegacyPipeline(
       emit(event) {
         forwardTelemetryToLxpack(event, opts.lxpackBridge, {
           onBridgeMiss: opts.onLxpackBridgeMiss,
+          onBridgeError: opts.onLxpackBridgeError,
+          allowedParentOrigins: opts.allowedParentOrigins,
         });
       },
     },
@@ -58,8 +83,8 @@ export function emitThroughPipeline(
   event: TelemetryEvent,
   opts: LegacyEmitOptions,
   extraSinks?: import("@lessonkit/core").TelemetryPipelineSink[],
-): void {
-  createLegacyPipeline(opts, extraSinks).emit(event);
+): void | Promise<void> {
+  return createLegacyPipeline(opts, extraSinks).emit(event);
 }
 
 export function createPipelineFromLegacyConfig(opts: LegacyEmitOptions): TelemetryPipeline {

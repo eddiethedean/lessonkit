@@ -30,3 +30,8 @@ export { ImageHotspots, type ImageHotspotsProps, type HotspotSpec } from "./Imag
 export { ImageSlider, type ImageSliderProps, type ImageSlide } from "./ImageSlider";
 export { FindHotspot, type FindHotspotProps, type HotspotTarget } from "./FindHotspot";
 export { FindMultipleHotspots, type FindMultipleHotspotsProps } from "./FindMultipleHotspots";
+export { BranchingScenario, type BranchingScenarioProps } from "./BranchingScenario";
+export { BranchNode, type BranchNodeProps } from "./BranchNode";
+export { BranchChoice, type BranchChoiceProps } from "./BranchChoice";
+export { Embed, type EmbedProps } from "./Embed";
+export { Chart, type ChartProps, type ChartDatum } from "./Chart";

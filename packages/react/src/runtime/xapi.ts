@@ -28,6 +28,7 @@ export function createXapiClientFromConfig(
     abortInFlight: config.xapi?.abortInFlight,
     queue,
     onTransportError: observability?.onXapiTransportError,
+    onMappingError: observability?.onXapiMappingError,
   });
 }
 

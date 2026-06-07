@@ -11,7 +11,7 @@ function testDescriptor(
   return {
     title: "T",
     layout: "single-spa",
-    lessons: [{ id: "l1", title: "L" }],
+    lessons: [],
     ...overrides,
   };
 }
@@ -130,7 +130,7 @@ describe("validateReactManifestParity", () => {
     expect(issues.filter((i) => i.severity === "error")).toEqual([]);
   });
 
-  it("accepts courseId via object property constant", () => {
+  it("rejects courseId only in object literal without JSX binding", () => {
     const root = mkdtempSync(join(tmpdir(), "lk-parity-"));
     mkdirSync(join(root, "src"), { recursive: true });
     writeFileSync(
@@ -146,7 +146,71 @@ describe("validateReactManifestParity", () => {
       }),
     });
 
+    expect(issues.some((i) => i.path === "course.courseId" && i.severity === "error")).toBe(true);
+  });
+
+  it("accepts courseId in courseConfig.ts", () => {
+    const root = mkdtempSync(join(tmpdir(), "lk-parity-"));
+    mkdirSync(join(root, "src"), { recursive: true });
+    writeFileSync(
+      join(root, "src/courseConfig.ts"),
+      `export const courseConfig = { courseId: "my-course" };`,
+    );
+    writeFileSync(
+      join(root, "src/App.tsx"),
+      `<Lesson lessonId="l1" />`,
+    );
+
+    const issues = validateReactManifestParity({
+      projectRoot: root,
+      descriptor: testDescriptor({
+        courseId: "my-course",
+        lessons: [{ id: "l1", title: "L" }],
+        assessments: [],
+      }),
+    });
+
     expect(issues.filter((i) => i.severity === "error")).toEqual([]);
+  });
+
+  it("accepts lesson id declared in a data literal (e.g. STEPS[].id)", () => {
+    const root = mkdtempSync(join(tmpdir(), "lk-parity-"));
+    mkdirSync(join(root, "src"), { recursive: true });
+    writeFileSync(
+      join(root, "src/App.tsx"),
+      `const STEPS = [{ id: "welcome", title: "Hi" }];
+export default function App() {
+  return <Course courseId="my-course"><Lesson lessonId={STEPS[0].id} /></Course>;
+}`,
+    );
+
+    const issues = validateReactManifestParity({
+      projectRoot: root,
+      descriptor: testDescriptor({
+        courseId: "my-course",
+        lessons: [{ id: "welcome", title: "Welcome" }],
+        assessments: [],
+      }),
+    });
+
+    expect(issues.filter((i) => i.severity === "error")).toEqual([]);
+  });
+
+  it("errors when lessonId missing from React source", () => {
+    const root = mkdtempSync(join(tmpdir(), "lk-parity-"));
+    mkdirSync(join(root, "src"), { recursive: true });
+    writeFileSync(join(root, "src/App.tsx"), `<Course courseId="my-course" />`);
+
+    const issues = validateReactManifestParity({
+      projectRoot: root,
+      descriptor: testDescriptor({
+        courseId: "my-course",
+        lessons: [{ id: "lesson-a", title: "A" }],
+        assessments: [],
+      }),
+    });
+
+    expect(issues.some((i) => i.path === "lessons.id:lesson-a" && i.severity === "error")).toBe(true);
   });
 
   it("accepts single-quoted checkId", () => {
@@ -197,5 +261,44 @@ describe("validateReactManifestParity", () => {
     });
 
     expect(issues.some((i) => i.severity === "error")).toBe(true);
+  });
+
+  it("rejects courseId only inside string literals", () => {
+    const root = mkdtempSync(join(tmpdir(), "lk-parity-"));
+    mkdirSync(join(root, "src"), { recursive: true });
+    writeFileSync(
+      join(root, "src/App.tsx"),
+      `const hint = 'courseId="my-course" checkId="quiz-1"'; export default () => <Course courseId="other" />;`,
+    );
+
+    const issues = validateReactManifestParity({
+      projectRoot: root,
+      descriptor: testDescriptor({
+        courseId: "my-course",
+        assessments: [{ checkId: "quiz-1", question: "Q", choices: ["a"], answer: "a" }],
+      }),
+    });
+
+    expect(issues.some((i) => i.path === "course.courseId" && i.severity === "error")).toBe(true);
+    expect(issues.some((i) => i.path === "assessments.checkId:quiz-1" && i.severity === "error")).toBe(
+      true,
+    );
+  });
+
+  it("ignores unsafe appSources paths", () => {
+    const root = mkdtempSync(join(tmpdir(), "lk-parity-"));
+    mkdirSync(join(root, "src"), { recursive: true });
+    writeFileSync(join(root, "src/App.tsx"), `<Course courseId="my-course" />`);
+
+    const issues = validateReactManifestParity({
+      projectRoot: root,
+      appSources: ["../escape/App.tsx", "src/App.tsx"],
+      descriptor: testDescriptor({
+        courseId: "my-course",
+        assessments: [],
+      }),
+    });
+
+    expect(issues.filter((i) => i.severity === "error")).toEqual([]);
   });
 });

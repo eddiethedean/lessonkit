@@ -8,6 +8,11 @@ import type { XAPIStatement, XAPITransport } from "@lessonkit/xapi";
 import * as courseStartedPipelineModule from "../src/runtime/courseStartedPipeline";
 import { createSessionStoragePort } from "../src/runtime/ports";
 import { markCourseStarted, markCourseStartedEmittedToTracking, markCourseStartedPipelineDelivered } from "../src/runtime/session";
+import {
+  buildCourseStartedEvent,
+  isCourseStartedSinkSettled,
+  isTrackingActive,
+} from "../src/provider/courseStarted";
 
 
 describe("@lessonkit/react runtime — course_started", () => {
@@ -482,7 +487,9 @@ it("forwards course_started to extraSinks when tracking enables after xAPI boots
 
     await waitFor(() => expect(trackingEvents.some((e) => e.name === "course_started")).toBe(true));
     expect(trackingEvents.filter((e) => e.name === "course_started")).toHaveLength(1);
-    expect(pipelineEvents.filter((e) => e.name === "course_started")).toHaveLength(1);
+    await waitFor(() =>
+      expect(pipelineEvents.filter((e) => e.name === "course_started")).toHaveLength(1),
+    );
   });
 
 it("emitCourseStarted returns early when plugin filters course_started", () => {
@@ -511,6 +518,48 @@ it("emitCourseStarted returns early when plugin filters course_started", () => {
     expect(
       Object.keys(sessionStorage).some((k) => k.startsWith("lessonkit:course_started_tracking:")),
     ).toBe(false);
+  });
+
+it("retries course_started to tracking when plugin filter is removed while tracking stays enabled", async () => {
+    const filterPlugin = defineTelemetryPlugin({
+      id: "filter-start",
+      version: "1",
+      kind: "analytics",
+      onTelemetry: (event) => (event.name === "course_started" ? null : event),
+    });
+
+    const trackingEvents: TelemetryEvent[] = [];
+
+    const { rerender } = render(
+      <LessonkitProvider
+        config={{
+          courseId: "course-1",
+          plugins: [filterPlugin],
+          tracking: { sink: (e) => void trackingEvents.push(e) },
+          xapi: { enabled: false },
+        }}
+      >
+        <div>child</div>
+      </LessonkitProvider>,
+    );
+
+    expect(trackingEvents.filter((e) => e.name === "course_started")).toHaveLength(0);
+
+    rerender(
+      <LessonkitProvider
+        config={{
+          courseId: "course-1",
+          plugins: [],
+          tracking: { sink: (e) => void trackingEvents.push(e) },
+          xapi: { enabled: false },
+        }}
+      >
+        <div>child</div>
+      </LessonkitProvider>,
+    );
+
+    await waitFor(() => expect(trackingEvents.some((e) => e.name === "course_started")).toBe(true));
+    expect(trackingEvents.filter((e) => e.name === "course_started")).toHaveLength(1);
   });
 
 it("retries course_started to tracking when plugin filter is removed after xAPI bootstrap", async () => {
@@ -809,6 +858,52 @@ it("emits course_started after courseId change when flush fails once", async () 
       expect(events.some((e) => e.name === "course_started" && e.courseId === "course-b")).toBe(true),
     );
     vi.unmock("@lessonkit/core");
+  });
+});
+
+describe("courseStarted helpers", () => {
+  it("isTrackingActive defaults to true", () => {
+    expect(isTrackingActive(undefined)).toBe(true);
+    expect(isTrackingActive({ enabled: false })).toBe(false);
+  });
+
+  it("isCourseStartedSinkSettled is true only for emitted", () => {
+    expect(isCourseStartedSinkSettled("emitted")).toBe(true);
+    expect(isCourseStartedSinkSettled("filtered")).toBe(false);
+    expect(isCourseStartedSinkSettled("failed")).toBe(false);
+  });
+
+  it("buildCourseStartedEvent returns course_started payload", () => {
+    const event = buildCourseStartedEvent({
+      pluginHost: null,
+      courseId: "course-1",
+      sessionId: "session-1",
+      lxpackBridge: "auto",
+    });
+    expect(event?.name).toBe("course_started");
+    expect(event?.courseId).toBe("course-1");
+  });
+
+  it("buildCourseStartedEvent includes session metadata when provided", () => {
+    const event = buildCourseStartedEvent({
+      pluginHost: null,
+      courseId: "course-1",
+      sessionId: "session-42",
+      lxpackBridge: "auto",
+    });
+    expect(event?.sessionId).toBe("session-42");
+    expect(event?.name).toBe("course_started");
+    expect(event?.courseId).toBe("course-1");
+  });
+
+  it("buildCourseStartedEvent assigns a stable dedupe id", () => {
+    const event = buildCourseStartedEvent({
+      pluginHost: null,
+      courseId: "course-1",
+      sessionId: "session-42",
+      lxpackBridge: "auto",
+    });
+    expect(event?.id).toBe("session-42:course-1:course_started");
   });
 });
 

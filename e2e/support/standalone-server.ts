@@ -1,6 +1,6 @@
 import { createServer, type Server } from "node:http";
 import { readFile } from "node:fs/promises";
-import { extname, join } from "node:path";
+import { extname, resolve, sep } from "node:path";
 
 const MIME: Record<string, string> = {
   ".html": "text/html",
@@ -12,13 +12,31 @@ const MIME: Record<string, string> = {
   ".woff2": "font/woff2",
 };
 
+function resolveSafeFilePath(rootDir: string, requestPath: string): string | null {
+  const resolvedRoot = resolve(rootDir);
+  const filePath = resolve(resolvedRoot, requestPath.replace(/^\//, ""));
+  if (filePath === resolvedRoot) return filePath;
+  if (!filePath.startsWith(resolvedRoot + sep)) return null;
+  return filePath;
+}
+
 export async function startStaticServer(rootDir: string, port: number): Promise<Server> {
   const server = createServer(async (req, res) => {
     try {
-      const url = new URL(req.url ?? "/", `http://127.0.0.1:${port}`);
-      let path = decodeURIComponent(url.pathname);
+      const rawPath = decodeURIComponent(req.url?.split("?")[0] ?? "/");
+      if (rawPath.split("/").includes("..")) {
+        res.writeHead(403);
+        res.end("Forbidden");
+        return;
+      }
+      let path = rawPath;
       if (path.endsWith("/")) path += "index.html";
-      const filePath = join(rootDir, path.replace(/^\//, ""));
+      const filePath = resolveSafeFilePath(rootDir, path);
+      if (!filePath) {
+        res.writeHead(403);
+        res.end("Forbidden");
+        return;
+      }
       const body = await readFile(filePath);
       const ext = extname(filePath);
       res.writeHead(200, { "Content-Type": MIME[ext] ?? "application/octet-stream" });
@@ -29,20 +47,20 @@ export async function startStaticServer(rootDir: string, port: number): Promise<
     }
   });
 
-  await new Promise<void>((resolve) => server.listen(port, "127.0.0.1", resolve));
+  await new Promise<void>((resolveListen) => server.listen(port, "127.0.0.1", resolveListen));
   return server;
 }
 
 export async function stopServer(server: Server | undefined): Promise<void> {
   if (!server?.listening) return;
-  await new Promise<void>((resolve, reject) => {
+  await new Promise<void>((resolveClose, reject) => {
     server.close((err) => {
       if (err && (err as NodeJS.ErrnoException).code === "ERR_SERVER_NOT_RUNNING") {
-        resolve();
+        resolveClose();
         return;
       }
       if (err) reject(err);
-      else resolve();
+      else resolveClose();
     });
   });
 }

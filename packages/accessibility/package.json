@@ -1,6 +1,6 @@
 {
   "name": "@lessonkit/accessibility",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "private": false,
   "description": "Accessibility utilities for LessonKit packages and apps.",
   "license": "Apache-2.0",
@@ -40,7 +40,7 @@
     "typecheck": "tsc -p tsconfig.json",
     "test": "vitest run --passWithNoTests",
     "test:coverage": "vitest run --coverage --passWithNoTests=false",
-    "lint": "echo \"(no lint configured yet)\""
+    "lint": "eslint --max-warnings 0 \"src/**/*.{ts,tsx}\" \"test/**/*.{ts,tsx}\""
   },
   "devDependencies": {
     "tsup": "^8.5.0",

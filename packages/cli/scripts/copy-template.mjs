@@ -29,7 +29,7 @@ pkg.scripts = {
   "test:coverage": "vitest run --coverage --passWithNoTests=false",
 };
 
-const lessonkitVersion = "^1.4.0";
+const lessonkitVersion = "^1.5.0";
 pkg.dependencies = {
   "@lessonkit/core": lessonkitVersion,
   "@lessonkit/react": lessonkitVersion,
@@ -48,7 +48,7 @@ pkg.devDependencies = {
   "@types/react-dom": "^19.2.3",
   "@vitejs/plugin-react": "^6.0.2",
   jsdom: "^29.1.1",
-  typescript: "^5.8.3",
+  typescript: "^6.0.3",
   vite: "^8.0.11",
   vitest: "^4.1.8",
 };

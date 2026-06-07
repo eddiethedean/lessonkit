@@ -2,6 +2,19 @@ import type { TelemetryBatchSink, TelemetryEvent, TelemetrySink, TrackingClient 
 import { invokeTrackingSink, invokeTrackingSinkWithResult } from "./internal/sinkInvoke";
 import { isDevEnvironment } from "./internal/env";
 
+function eventDedupKey(event: TelemetryEvent): string | undefined {
+  const id = event.id?.trim();
+  return id || undefined;
+}
+
+/**
+ * Creates a client that buffers telemetry and flushes in batches.
+ *
+ * **Delivery semantics:** batch mode is at-least-once. A failed flush re-queues the batch for
+ * retry; `flushOnExit` and periodic flushes may deliver the same events more than once unless
+ * the sink deduplicates. Events currently owned by an in-flight `batchSink` call are not included
+ * in `flushOnExit` to avoid duplicate delivery on page unload.
+ */
 export function createTrackingClient(opts?: {
   sink?: TelemetrySink;
   batch?: {
@@ -32,7 +45,7 @@ export function createTrackingClient(opts?: {
     let disposed = false;
     return {
       track: (event) => {
-        if (disposed) return;
+        if (disposed) return false;
         if (sink) {
           try {
             invokeTrackingSink(sink, event);
@@ -40,6 +53,7 @@ export function createTrackingClient(opts?: {
             // invokeTrackingSink logs in dev; track must not throw
           }
         }
+        return true;
       },
       deliver: async (event) => {
         if (disposed) return false;
@@ -53,15 +67,28 @@ export function createTrackingClient(opts?: {
   }
 
   if (!sink && !batchSink) {
-    return { track: () => {} };
+    return { track: () => true };
   }
 
   const buffer: TelemetryEvent[] = [];
+  const pendingDeliverIds = new Set<string>();
   let flushInFlight: Promise<boolean> | null = null;
-  let inflightExitBatch: TelemetryEvent[] | null = null;
   let disposed = false;
   let disposing = false;
   let intervalId: ReturnType<typeof globalThis.setInterval> | undefined;
+
+  const clearPendingDeliverIds = (events: TelemetryEvent[]): void => {
+    for (const event of events) {
+      const key = eventDedupKey(event);
+      if (key) pendingDeliverIds.delete(key);
+    }
+  };
+
+  const isEventBuffered = (event: TelemetryEvent): boolean => {
+    const key = eventDedupKey(event);
+    if (!key) return false;
+    return buffer.some((buffered) => eventDedupKey(buffered) === key);
+  };
 
   const runFlush = (): Promise<boolean> => {
     /* v8 ignore start -- flush() never invokes runFlush with an empty buffer */
@@ -69,7 +96,6 @@ export function createTrackingClient(opts?: {
     /* v8 ignore stop */
 
     const events = buffer.splice(0, buffer.length);
-    inflightExitBatch = events;
     let succeeded = false;
 
     return Promise.resolve()
@@ -94,13 +120,13 @@ export function createTrackingClient(opts?: {
         }
       })
       .then(async () => {
+        if (succeeded) {
+          clearPendingDeliverIds(events);
+        }
         if (succeeded && buffer.length > 0 && !disposed) {
           return runFlush();
         }
         return succeeded;
-      })
-      .finally(() => {
-        inflightExitBatch = null;
       });
   };
 
@@ -125,20 +151,29 @@ export function createTrackingClient(opts?: {
       if (!delivered) break;
     }
     if (buffer.length > 0) {
+      const droppedCount = buffer.length;
       if (isDevEnvironment()) {
         console.warn(
-          `[lessonkit] dropped ${buffer.length} buffered telemetry event(s) after dispose flush cap`,
+          `[lessonkit] dropped ${droppedCount} buffered telemetry event(s) after dispose flush cap`,
         );
       }
+      for (let i = 0; i < droppedCount; i++) {
+        opts?.onBufferDrop?.();
+      }
       buffer.length = 0;
+      pendingDeliverIds.clear();
     }
   };
 
   intervalId = flushIntervalMs > 0 ? globalThis.setInterval(() => void flush(), flushIntervalMs) : undefined;
   (intervalId as unknown as { unref?: () => void } | undefined)?.unref?.();
 
-  const track = (event: TelemetryEvent) => {
-    if (disposed || disposing) return;
+  const track = (event: TelemetryEvent): boolean => {
+    if (disposed || disposing) return false;
+    const key = eventDedupKey(event);
+    if (key && (pendingDeliverIds.has(key) || isEventBuffered(event))) {
+      return true;
+    }
     if (buffer.length >= maxBufferSize) {
       opts?.onBufferDrop?.();
       if (!warnedBufferCap && isDevEnvironment()) {
@@ -147,31 +182,42 @@ export function createTrackingClient(opts?: {
           `[lessonkit] telemetry batch buffer capped at ${maxBufferSize} events; new events are dropped until the buffer drains.`,
         );
       }
-      return;
+      return false;
     }
     buffer.push(event);
     if (buffer.length >= maxBatchSize) void flush();
+    return true;
   };
 
   return {
     track,
     deliver: async (event) => {
-      track(event);
+      const key = eventDedupKey(event);
+      if (key && (pendingDeliverIds.has(key) || isEventBuffered(event))) {
+        return flush();
+      }
+      if (!track(event)) return false;
+      if (key) pendingDeliverIds.add(key);
       return flush();
     },
     flush,
     flushOnExit: opts?.exitBatchSink
       ? () => {
-          const fromBuffer = buffer.splice(0, buffer.length);
-          const fromInflight = inflightExitBatch ? [...inflightExitBatch] : [];
-          const events = [...fromInflight, ...fromBuffer];
+          // In-flight batch is owned by runFlush; only drain the pending buffer here.
+          const events = buffer.splice(0, buffer.length);
           if (!events.length) return;
           try {
             const result = opts.exitBatchSink!(events);
             if (result != null && typeof (result as Promise<void>).catch === "function") {
-              void (result as Promise<void>).catch(() => {
-                buffer.unshift(...events);
-              });
+              void (result as Promise<void>)
+                .then(() => {
+                  clearPendingDeliverIds(events);
+                })
+                .catch(() => {
+                  buffer.unshift(...events);
+                });
+            } else {
+              clearPendingDeliverIds(events);
             }
           } catch {
             buffer.unshift(...events);

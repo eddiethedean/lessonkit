@@ -14,8 +14,23 @@ export type LessonkitObservabilityConfig = {
   onTelemetryBufferDrop?: () => void;
   /** LMS bridge missing for a completion-related telemetry event (`bridge: auto`). */
   onLxpackBridgeMiss?: (event: TelemetryEvent) => void;
+  /** LMS bridge host threw while forwarding telemetry (`bridge: auto`). */
+  onLxpackBridgeError?: (err: unknown) => void;
   /** xAPI transport failure after retries (statement re-queued). */
   onXapiTransportError?: (err: unknown) => void;
+  /** Telemetry → xAPI mapping failure (statement skipped). */
+  onXapiMappingError?: (err: unknown) => void;
+  /** Compound child resume incomplete after hydration retries. */
+  onCompoundHydrationPartial?: (ctx: {
+    compoundId: string;
+    missingCheckIds: string[];
+  }) => void;
+  /** Corrupt compound resume blob or invalid child states stripped on load. */
+  onCompoundResumeCorrupt?: (ctx: {
+    compoundId: string;
+    droppedChildKeys?: string[];
+    corrupt?: boolean;
+  }) => void;
 };
 
 export function createXapiQueueFromObservability(
@@ -74,6 +89,7 @@ export function warnMissingProductionObservability(
       observability?.onXapiQueueDepth,
       observability?.onXapiQueueCap,
       observability?.onXapiTransportError,
+      observability?.onXapiMappingError,
     );
   }
   if (!required.some((hook) => !hook)) return;

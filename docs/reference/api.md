@@ -1,6 +1,46 @@
 # API reference
 
-LessonKit publishes **TypeScript declarations** on npm (`dist/*.d.ts`) and documents behavior in the guides below. There is no separate TypeDoc site yet—use these entry points:
+LessonKit publishes **TypeScript declarations** on npm (`dist/*.d.ts`) and documents behavior in the guides below.
+
+:::{admonition} Guides vs reference
+:class: note
+
+| Read this when… | Start here |
+| --- | --- |
+| Learning workflows (first course, LMS export, theming) | [React developer guides](../guides/react-developers/index.md) |
+| Validating props, IDs, manifest fields, CLI flags | Reference pages on this site (below) + [Block catalog](block-catalog.md) |
+| TypeScript signatures only | [TypeDoc](#generated-api-typedoc) (built on Read the Docs; regenerate locally with `npm run docs:api`) |
+
+TypeDoc lists **signatures** — parameter descriptions and examples expand release over release. For behavior, prefer narrative guides first, then reference contracts.
+:::
+
+## Generated API (TypeDoc)
+
+Browse generated TypeScript API docs (built with the docs site on Read the Docs):
+
+| Package | Generated reference |
+| --- | --- |
+| `@lessonkit/react` | [TypeDoc — react](../_static/typedoc/modules/react_dist.html) |
+| `@lessonkit/react/blocks` | [TypeDoc — react/blocks](../_static/typedoc/modules/react_dist_blocks-entry.html) |
+| `@lessonkit/react/testing` | [TypeDoc — react/testing](../_static/typedoc/modules/react_dist_testing.html) |
+| `@lessonkit/core` | [TypeDoc — core](../_static/typedoc/modules/core_dist.html) |
+| `@lessonkit/core/testing` | [TypeDoc — core/testing](../_static/typedoc/modules/core_dist_testing.html) |
+| `@lessonkit/cli` | [TypeDoc — cli](../_static/typedoc/modules/cli_dist.html) |
+| `@lessonkit/xapi` | [TypeDoc — xapi](../_static/typedoc/modules/xapi_dist.html) |
+| `@lessonkit/lxpack` | [TypeDoc — lxpack](../_static/typedoc/modules/lxpack_dist.html) |
+| `@lessonkit/lxpack/bridge` | [TypeDoc — lxpack/bridge](../_static/typedoc/modules/lxpack_dist_bridge.html) |
+| `@lessonkit/themes` | [TypeDoc — themes](../_static/typedoc/modules/themes_dist.html) |
+| `@lessonkit/accessibility` | [TypeDoc — accessibility](../_static/typedoc/modules/accessibility_dist.html) |
+
+Full index: [TypeDoc home](../_static/typedoc/index.html).
+
+Monorepo maintainers regenerate locally: `npm run build:packages && npm run docs:api`. TypeDoc output lives under `docs/_static/typedoc/` and is **generated on Read the Docs** — local Sphinx builds show broken TypeDoc links until you run `docs:api`. See [Contributing — TypeDoc generation](../guides/react-developers/contributing-to-the-monorepo.md#typedoc-api-docs).
+
+Also use:
+
+1. **IDE** — `Go to Definition` on `@lessonkit/react` imports in a scaffolded project
+2. **Storybook** — component states and props visually
+3. **Narrative guides** — [Components and hooks](../guides/react-developers/components-and-hooks.md) · [Block catalog](block-catalog.md)
 
 ## Interactive
 
@@ -15,10 +55,35 @@ LessonKit publishes **TypeScript declarations** on npm (`dist/*.d.ts`) and docum
 | --- | --- | --- |
 | `@lessonkit/react` | `import type { … } from "@lessonkit/react"` | [Components and hooks](../guides/react-developers/components-and-hooks.md) |
 | `@lessonkit/react/blocks` | Block components only (tree-shake friendly) | [Block catalog](block-catalog.md) |
-| `@lessonkit/react/testing` | Test reset helpers (`resetQuizWarningsForTests`, …) | [Contributing](../guides/react-developers/contributing-to-the-monorepo.md) |
+| `@lessonkit/react/testing` | Test reset helpers (see table below) | [Contributing](../guides/react-developers/contributing-to-the-monorepo.md) |
 | `@lessonkit/core` | `import type { … } from "@lessonkit/core"` | [Core reference](core.md) |
-| `@lessonkit/core/testing` | Headless test reset helpers | [Contributing](../guides/react-developers/contributing-to-the-monorepo.md) |
+| `@lessonkit/core/testing` | Headless test reset helpers (see table below) | [Contributing](../guides/react-developers/contributing-to-the-monorepo.md) |
 | `@lessonkit/xapi` | `import type { … } from "@lessonkit/xapi"` | [xAPI reference](xapi.md) |
+| `@lessonkit/lxpack` | Packaging API | [Packaging reference](packaging.md) |
+| `@lessonkit/themes` | Theme presets and tokens | [Theming reference](theming.md) |
+| `@lessonkit/accessibility` | Focus and motion utilities | [Accessibility reference](accessibility.md) |
+
+### `@lessonkit/react/testing` exports
+
+| Export | Purpose |
+| --- | --- |
+| `resetQuizWarningsForTests` | Clear Quiz dev warnings between tests |
+| `resetAssessmentWarningsForTests` | Clear assessment guard warnings |
+| `resetLessonMountRegistryForTests` | Reset lesson mount registry |
+| `resetCompoundValidationWarningsForTests` | Clear compound child validation warnings |
+| `resetLessonkitProviderStorageForTests` | Clear session storage used by provider |
+| `resetCourseStartedTrackingFlightForTests` | Reset course_started delivery flight state |
+
+### `@lessonkit/core/testing` exports
+
+| Export | Purpose |
+| --- | --- |
+| `resetTelemetryBuilderWarningsForTests` | Clear telemetry builder dev warnings |
+| `resetStoragePortForTests` | Reset default storage port |
+| `resetSharedVolatileSessionIdForTests` | Reset tab session id helper state |
+| `resetCourseStartedEmitFlightForTests` | Reset headless course_started emit flight |
+
+Prefer these subpaths over deprecated main-entry reset helpers.
 
 ### Shared assessment and bridge types
 
@@ -38,6 +103,10 @@ Import from `@lessonkit/core` (re-exported by `@lessonkit/react` where relevant)
 | `onXapiTransportError` | `config.observability` | Required when xAPI delivery is configured; called when transport fails after retries (statement re-queued) |
 
 See the [production checklist](../guides/react-developers/production-checklist.md) for the full observability hook matrix (1–6 hooks depending on tracking/xAPI configuration).
+
+### Framework 1.5 blocks
+
+Export from `@lessonkit/react`: `BranchingScenario`, `BranchNode`, `BranchChoice`, `Embed`, `Chart`, `useBranchingScenario`. See [Block catalog — 1.5](block-catalog.md#catalog-v3-additions-framework-150) and [Migration 1.4 → 1.5](../MIGRATION-1.4-to-1.5.md).
 
 ## Machine-readable contracts
 

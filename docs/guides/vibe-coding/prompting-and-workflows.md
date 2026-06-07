@@ -7,14 +7,15 @@ Good prompts are **specific, bounded, and testable**. Bad prompts are “make it
 Paste this once per chat session:
 
 ```text
-Project: LessonKit 1.0 (Vite + React). Optional: install library-skills (see guides/library-skills.md).
+Project: LessonKit 1.5.x (Vite 8 + React 19). Optional: install library-skills (see guides/library-skills.md).
 Manifest: lessonkit.json (schemaVersion 1).
-Main UI: src/App.tsx.
-Block catalog: @lessonkit/react/block-catalog.v1.json (only use listed block types).
+Main UI: src/App.tsx; production config: src/courseConfig.ts.
+Block catalog: @lessonkit/react/block-catalog.v3.json (only use listed block types).
 Rules:
 - Keep courseId, lessonId, checkId stable; sync lessonkit.json when adding lessons/quizzes.
-- Use only block types from the catalog (Course, Lesson, Scenario, Quiz, KnowledgeCheck, Reflection, ProgressTracker).
+- Use only block types from the catalog (see block-catalog.v3.json).
 - Use ThemeProvider with preset from lessonkit.json.
+- course.layout must be "single-spa" for lessonkit package (1.x).
 - After edits, tell me which files changed and what to verify in the browser.
 ```
 
@@ -51,7 +52,7 @@ Emit no new lessonIds; keep existing lessonId on the Lesson component.
 ## Workflow E — hand off to LMS admin
 
 1. You run `lessonkit build` and `lessonkit package --target scorm12`
-2. You send the ZIP from `.lxpack/out/` (path may vary—CLI prints it)
+2. You send the ZIP from the path the CLI prints (default: `.lxpack/course/.lxpack/out/course-scorm12.zip`)
 3. Admin uploads to LMS; you do **not** need to explain React
 
 ## Prompts to avoid
@@ -61,7 +62,7 @@ Emit no new lessonIds; keep existing lessonId on the Lesson component.
 | “Rewrite everything” | Hard to review; breaks IDs |
 | “Remove TypeScript errors by using any” | Hides real mistakes |
 | “Delete lessonkit.json” | Packaging will fail |
-| “Use per-lesson-spa layout” | Not supported by `lessonkit package` (1.0.0) |
+| “Use per-lesson-spa layout” | Not supported by `lessonkit package` (1.x) |
 
 ## If the AI suggests wrong packages
 

@@ -24,8 +24,8 @@ Packaging and LMS delivery lean on **LXPack** via `@lessonkit/lxpack` (see 0.6.x
 
 ## Status
 
-- **Framework:** **1.4.0** — `InteractiveVideo` + bundled Tier B/C/D blocks (see [1.4.x](#14x--interactivevideo--bundled-blocks))
-- **Focus (now):** **1.5.x** — `BranchingScenario`
+- **Framework:** **1.5.0** — `BranchingScenario` + `Embed` + `Chart` (see [1.5.x](#15x--branchingscenario))
+- **Focus (now):** **1.6.x** — interchange format + optional H5P import spike
 
 ## Guiding principles
 
@@ -389,7 +389,7 @@ Framework **1.0.0** shipped **2026-05-30**.
 #### Out of scope for 1.4.x
 
 - **H5P runtime embedding** and **`.h5p` import** for Interactive Video (P2, timeline complexity — stays **1.6.x**)
-- **`BranchingScenario`** — **1.5.x**
+- **`BranchingScenario`** — [1.5.x](#15x--branchingscenario)
 - **YouTube/Vimeo embed-first video** — self-hosted `<video>` + optional `src` URL only in 1.4.0; external embeds research later
 - **Adaptive bitrate / HLS/DASH** — out of scope
 - **Drag-and-drop inside video canvas**, **bookmarks/chapters UI**, **“go to time” author UI** — defer unless golden example needs a subset
@@ -400,6 +400,121 @@ Framework **1.0.0** shipped **2026-05-30**.
 
 - 1.3.x compound infrastructure — `CompoundHandle`, catalog v3, session resume v2, `useCompoundShell`
 - 1.1.x assessment contract — scored timed overlays call `getScore`, `resetTask`, `getCurrentState`, etc.
+
+---
+
+### 1.5.x — BranchingScenario
+
+**Status:** **Shipped in 1.5.0**.
+
+#### Goals
+
+- Ship H5P-aligned **`BranchingScenario`** compound (`H5P.BranchingScenario`) so authors stop hand-rolling branch state with `useState` + ad hoc `track("interaction", …)` (see `examples/customer-service` → `EscalationBranch`).
+- Replace linear **page-index** navigation with a **declarative branch graph**: start node, content nodes, choice nodes, and terminal nodes—each with an explicit allowlist of child blocks.
+- Extend **telemetry catalog v3+** with first-class branch events (`branch_node_viewed`, `branch_selected`) and xAPI mapping (path + choice outcomes), not only generic `interaction` payloads.
+- Preserve **CompoundHandle** score aggregation, session resume, and export parity for assessments on the **visited path only**.
+
+#### Architecture note
+
+`BranchingScenario` reuses compound registry, child assessment handles, and session resume v2—but **not** linear `useCompoundNavigation`. The main divergence from `InteractiveBook` / `SlideDeck` is **graph navigation** instead of a single `activePageIndex` sequence.
+
+| InteractiveBook / SlideDeck (1.2.x–1.3.x) | BranchingScenario (1.5.x) |
+| --- | --- |
+| Linear page/slide index | `nodeId`-keyed graph; one active node at a time |
+| `goNext` / `goPrev` | `BranchChoice` transitions to `targetNodeId` |
+| `book_page_viewed` / `slide_viewed` | `branch_node_viewed`, `branch_selected` |
+| Resume: `activePageIndex` | Resume: `activeNodeId`, `visitedNodeIds[]`, per-node child states |
+
+**Resume extension:** follow the **`InteractiveVideo` meta pattern**—store graph position (`activeNodeId`, optional `visitedNodeIds`, optional per-choice timestamps) in `CompoundResumeState.childStates` under a reserved meta key until a catalog v4 resume schema is justified. Rehydrate visited-path assessments only; do not reset sibling branches the learner never entered.
+
+**Scoring:** aggregate `getScore` / `getMaxScore` across assessments registered on **visited nodes** (and the active node). Optional `scoreWeight` on `BranchChoice` for H5P-style choice scoring—default unscored choices.
+
+**Author API** (additive, illustrative):
+
+```tsx
+<BranchingScenario
+  blockId="resolution-paths"
+  title="Resolution paths"
+  startNodeId="offer"
+  showPathScore
+>
+  <BranchNode nodeId="offer">
+    <Scenario>
+      <p>Part ships tomorrow but the customer missed a deadline. How do you close the loop?</p>
+    </Scenario>
+    <BranchChoice label="Offer shipping credit + proactive updates" targetNodeId="credit" />
+    <BranchChoice label="Warm-transfer to supervisor" targetNodeId="supervisor" />
+  </BranchNode>
+
+  <BranchNode nodeId="credit" terminal>
+    <Reflection prompt="Write the one-sentence case note the next agent should see first." />
+    <TrueFalse checkId="credit-check" question="Document the credit code?" answer={true} />
+  </BranchNode>
+
+  <BranchNode nodeId="supervisor" terminal>
+    <Text>Stay on the line until the supervisor joins - no cold transfer.</Text>
+  </BranchNode>
+</BranchingScenario>
+```
+
+**Node kinds (1.5.0 scope):**
+
+| Kind | Props | Child allowlist (initial) |
+| --- | --- | --- |
+| `BranchNode` | `nodeId`, `terminal?` | `Scenario`, `Text`, `Heading`, `Image`, `Video`, `Reflection`, assessment contract blocks, Tier C/D content blocks (same curated set as `Page`, minus layout-only blocks) |
+| `BranchChoice` | `label`, `targetNodeId`, `scoreWeight?`, `disabled?` | Leaf transition control inside `BranchNode`; keyboard-focusable; must reference a sibling `BranchNode` |
+
+Validation at mount: unique `nodeId`s, `startNodeId` exists, all `targetNodeId`s resolve, no orphan nodes reachable from start, optional dev warning for unreachable nodes.
+
+#### Deliverables — 1.5.0 (core)
+
+- [x] **`BranchNode`** — graph vertex wrapper; registers with parent compound; emits `branch_node_viewed`
+- [x] **`BranchChoice`** — accessible choice control (button group or radio pattern); emits `branch_selected` with `fromNodeId`, `toNodeId`, optional `scoreWeight`
+- [x] **`BranchingScenario`** — `CompoundHandle` + session resume; graph router; optional `showPathScore`
+- [x] **Graph resume** — `activeNodeId`, `visitedNodeIds`, per-node assessment child states; `resetTask` clears path + child assessments
+- [x] **Allowlists** — `BRANCH_NODE_ALLOWED_CHILD_TYPES`, `BRANCHING_SCENARIO_ALLOWED_CHILD_TYPES` in `@lessonkit/core`; catalog v3 entries
+- [x] **Telemetry** — `branch_node_viewed`, `branch_selected`; extend telemetry catalog v3; xAPI mapping (choice as `answered` where scored; path segments as `experienced`)
+- [x] **`block-catalog.v3.json`** — `BranchingScenario`, `BranchNode`, `BranchChoice`, `Embed`, `Chart` with `h5pMachineName`
+- [x] **Tests** — unit, integration SCORM packaging, Playwright e2e smoke
+- [x] **Golden example** — `examples/branching-scenario`; `customer-service` `EscalationBranch` refactor
+- [x] **Docs** — `MIGRATION-1.4-to-1.5.md`; H5P capability map + authors guide
+
+#### Deliverables — 1.5.0 (also shipped)
+
+- [x] **`Embed`** (P3) — sandboxed iframe block; opt-in `allow` list
+- [x] **`Chart`** (P3) — bar/pie with accessible data table fallback
+- [x] **Path recap UI** — optional read-only “your path” summary on terminal nodes (`showPathRecap`)
+- [x] **`useBranchingScenario()` hook** — imperative navigation + path introspection for custom chrome
+
+#### Deliverables — 1.5.x minors (stretch, after 1.5.0)
+
+Ship only if 1.5.0 core is stable; each item completes the [H5P documentation checklist](#h5p-documentation-checklist-per-block):
+
+- [ ] _(none deferred — stretch items shipped in 1.5.0)_
+
+#### Out of scope for 1.5.x
+
+- **Visual graph editor** or canvas authoring UI — React/JSX remains source of truth
+- **H5P `.h5p` import** for Branching Scenario — stays **1.6.x** research spike
+- **Nested `BranchingScenario`** inside another compound — defer until nesting policy is explicit
+- **`GameMap`** spatial branching — **1.7.x**
+- **Adaptive / ML routing** — authors declare static graphs only
+- **Concurrent multi-active nodes** — one active node at a time in 1.5.0
+- **Full H5P Branching Scenario parity on day one** — document incremental allowlist expansion (e.g. nested compounds inside nodes later)
+
+#### Depends on
+
+- **1.4.x** — compound infrastructure, assessment contract blocks on `Page`, export parity patterns
+- **1.2.x–1.3.x** — `CompoundHandle`, `useCompoundShell` persistence hooks, catalog v3 allowlists
+- **`InteractiveVideo` resume meta pattern** — non-linear state fields without breaking `CompoundResumeState` v1 parsers
+- **`examples/customer-service`** — reference for desired UX; replace manual branch state when compound ships
+
+#### Success criteria
+
+- Author can express the `EscalationBranch` flow declaratively without local `useState` stage machines.
+- SCORM 1.2 package from golden example reports aggregated score from assessments on the taken path.
+- `branch_selected` appears in telemetry catalog JSON and Storybook telemetry panel; xAPI statements include choice target IRIs.
+- Capability map row `H5P.BranchingScenario` → ✅ with checklist complete.
 
 ---
 
@@ -466,7 +581,7 @@ These are H5P's "course builders." Each becomes a **framework container** with a
 | P0 | **Interactive Book** | `InteractiveBook` | **1.2.x** ✅ | Page layout, resume state, sub-block catalog |
 | P0 | **Course Presentation** | `SlideDeck` | **1.3.x** ✅ | Slide schema, per-slide block allowlist, keyboard slide nav |
 | P0 | **Interactive Video** | `InteractiveVideo` | **1.4.0** ✅ | Video block, `TimedCue`, timed overlays, Tier B/C/D blocks |
-| P0 | **Branching Scenario** | `BranchingScenario` | **1.5.x** | Branch graph, scoring, xAPI branching verbs |
+| P0 | **Branching Scenario** | `BranchingScenario` + `BranchNode` + `BranchChoice` | **1.5.0** | Graph navigation, visited-path scoring, `branch_*` telemetry |
 | P1 | **Question Set (Quiz)** | `AssessmentSequence` | **1.1.x** ✅ | Question-type contract (below) |
 | P1 | **Column** → **Page** | `Page` | **1.2.x** ✅ | Unified semantics with Interactive Book chapters |
 | P2 | **Game Map** | `GameMap` | **1.7.x** | Spatial layout, optional non-scored stages |
@@ -477,7 +592,7 @@ These are H5P's "course builders." Each becomes a **framework container** with a
 **Deliverables (cross-cutting for Tier A):**
 
 - **Compound block contract** in `block-contract.v1.json`: allowed child types, max nesting depth, score aggregation, `resetTask` / `getCurrentState` for resume
-- **Telemetry**: `branch_selected`, `slide_viewed`, `video_cue_reached`, `video_segment_completed`, `book_page_viewed` (extend telemetry catalog v3+)
+- **Telemetry**: `branch_node_viewed`, `branch_selected` (**1.5.x**); `slide_viewed`, `video_cue_reached`, `video_segment_completed`, `book_page_viewed` (catalog v3, shipped)
 - **Docs**: composition guide (which blocks nest where), parity with export targets
 
 ### Tier B — Questions and scored tasks
@@ -603,7 +718,8 @@ Framework 1.1.x   Assessment contract + Tier B P0 + H5P doc checklist per block
 Framework 1.2.x   Page/InteractiveBook foundation + resume state + catalog allowlists + H5P docs
 Framework 1.3.x   SlideDeck (Course Presentation) + H5P docs
 Framework 1.4.0   InteractiveVideo + Video + TimedCue + Tier B/C/D blocks + golden example
-Framework 1.5.x   BranchingScenario + branch telemetry + H5P docs
+Framework 1.5.0   BranchingScenario + Embed + Chart + branch telemetry + golden example
+Framework 1.5.x   _(stretch items shipped in 1.5.0)_
 Framework 1.6.x   Interchange format + optional H5P import spike + import guide callouts
 Framework 1.7.x+  Tier C–E blocks by demand; plugin marketplace; H5P doc checklist each
 Framework 2.x     @lessonkit/react-native (iOS/Android) + shared core/xapi contracts

@@ -2,7 +2,7 @@
 
 ## Telemetry (`@lessonkit/core`)
 
-Events include `course_started`, `lesson_started`, `lesson_completed`, `lesson_time_on_task`, `quiz_answered`, `quiz_completed`, and `interaction`.
+Events include `course_started`, `lesson_started`, `lesson_completed`, `lesson_time_on_task`, `quiz_answered`, `quiz_completed`, `assessment_answered`, `assessment_completed`, and `interaction`.
 
 Configure on `Course` / `LessonkitProvider`:
 

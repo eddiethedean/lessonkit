@@ -1,4 +1,4 @@
-import type { TelemetryEvent, TelemetrySink } from "../telemetryTypes";
+import type { TelemetryEvent, TelemetrySink, TelemetryUser } from "../telemetryTypes";
 import type {
   AssessmentScoreInput,
   AssessmentScoreResult,
@@ -12,6 +12,21 @@ function warnDuplicatePlugin(id: string): void {
   const g = globalThis as typeof globalThis & { process?: { env?: { NODE_ENV?: string } } };
   if (typeof g.process !== "undefined" && g.process.env?.NODE_ENV === "production") return;
   console.warn(`[lessonkit] plugin id "${id}" was registered more than once; using the latest definition`);
+}
+
+function stableUserHash(user: TelemetryUser | undefined): string {
+  if (!user) return "";
+  const keys = Object.keys(user).sort();
+  const normalized: Record<string, unknown> = {};
+  for (const key of keys) {
+    normalized[key] = user[key];
+  }
+  let h = 0;
+  const serialized = JSON.stringify(normalized);
+  for (let i = 0; i < serialized.length; i++) {
+    h = (Math.imul(31, h) + serialized.charCodeAt(i)) >>> 0;
+  }
+  return h.toString(36);
 }
 
 export function createPluginRegistry(plugins: readonly LessonkitPlugin[] = []): PluginRegistry {
@@ -73,7 +88,7 @@ export function createPluginRegistry(plugins: readonly LessonkitPlugin[] = []): 
       typeof ctxSource === "function" ? ctxSource() : ctxSource;
 
     const ctxKey = (ctx: LessonkitPluginContext): string =>
-      `${ctx.courseId}\0${ctx.sessionId ?? ""}\0${ctx.attemptId ?? ""}\0${ctx.user?.id ?? ""}`;
+      `${ctx.courseId}\0${ctx.sessionId ?? ""}\0${ctx.attemptId ?? ""}\0${stableUserHash(ctx.user)}`;
 
     type Layer = {
       plugin: LessonkitPlugin;

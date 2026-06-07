@@ -47,6 +47,31 @@ export function resolveViteBuildArgs(project: LessonkitProject): string[] {
   return args;
 }
 
+/** Remove passthrough `--outDir` / `-o` flags so the configured dist dir wins. */
+export function stripOutDirFromViteArgs(viteArgs: readonly string[]): string[] {
+  const stripped: string[] = [];
+  for (let i = 0; i < viteArgs.length; i++) {
+    const arg = viteArgs[i]!;
+    if (arg === "--outDir" || arg === "-o") {
+      i++;
+      continue;
+    }
+    if (arg.startsWith("--outDir=")) {
+      continue;
+    }
+    stripped.push(arg);
+  }
+  return stripped;
+}
+
+export function resolveViteBuildArgv(
+  project: LessonkitProject,
+  viteArgs: readonly string[] = [],
+): string[] {
+  const passthrough = stripOutDirFromViteArgs(viteArgs);
+  return ["build", ...passthrough, "--outDir", project.paths.spaDistDir];
+}
+
 export function parsePackageTarget(value: string | undefined): PackageTarget {
   if (!value) {
     throw new Error("TARGET_REQUIRED");

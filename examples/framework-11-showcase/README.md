@@ -22,7 +22,7 @@ npm install && npm run build:packages
 npm -w lessonkit-example-framework-11-showcase run dev
 ```
 
-Package for LMS:
+Package for LMS (injectable MCQ / true-false assessments only; Tier B/C/D blocks run in-SPA and are omitted from `lessonkit.json` `assessments`):
 
 ```bash
 npm -w lessonkit-example-framework-11-showcase run build
@@ -31,7 +31,7 @@ npm -w lessonkit-example-framework-11-showcase run package:scorm12
 
 ## IDs
 
-React `courseId`, in-app `lessonId`s, and every `checkId` match [`lessonkit.json`](lessonkit.json) assessment entries. The manifest lists only the LMS shell lesson for `single-spa` packaging.
+React `courseId`, in-app `lessonId`s, and LMS-injectable `checkId`s match [`lessonkit.json`](lessonkit.json). Additional in-SPA-only blocks (`MarkTheWords`, `FillInTheBlanks`, `DragTheWords`, `DragAndDrop`, etc.) use matching `checkId`s in React but are not listed in the manifest because they cannot be injected into the LMS shell.
 
 ## Related examples
 

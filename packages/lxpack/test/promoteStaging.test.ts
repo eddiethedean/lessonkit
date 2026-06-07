@@ -1,7 +1,8 @@
-import { mkdir, mkdtemp, readdir, readFile, rm, writeFile } from "node:fs/promises";
-import { join } from "node:path";
+import { mkdir, mkdtemp, readdir, readFile, rm, writeFile, utimes } from "node:fs/promises";
+import { randomUUID } from "node:crypto";
+import { dirname, join } from "node:path";
 import { tmpdir } from "node:os";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const fspMocks = vi.hoisted(() => ({
   rename: vi.fn<typeof import("node:fs/promises").rename>(),
@@ -19,18 +20,27 @@ import { promoteStagingToOutDir } from "../src/packaging/promote";
 
 const tempDirs: string[] = [];
 
-async function makeTempDir(): Promise<string> {
-  const dir = await mkdtemp(join(tmpdir(), "lessonkit-lxpack-promote-"));
-  tempDirs.push(dir);
-  return dir;
+async function restoreRenameMock(): Promise<void> {
+  const actualFsp = await vi.importActual<typeof import("node:fs/promises")>("node:fs/promises");
+  fspMocks.rename.mockImplementation(actualFsp.rename);
 }
 
 afterEach(async () => {
-  fspMocks.rename.mockReset();
+  await restoreRenameMock();
   await Promise.all(tempDirs.splice(0).map((d) => rm(d, { recursive: true, force: true })));
 });
 
+beforeEach(async () => {
+  await restoreRenameMock();
+});
+
 describe("promoteStagingToOutDir", () => {
+  async function makeTempDir(): Promise<string> {
+    const dir = await mkdtemp(join(tmpdir(), "lessonkit-lxpack-promote-"));
+    tempDirs.push(dir);
+    return dir;
+  }
+
   it("formats recovery errors for non-Error promote failures", async () => {
     const actualFsp = await vi.importActual<typeof import("node:fs/promises")>("node:fs/promises");
 
@@ -274,7 +284,7 @@ describe("promoteStagingToOutDir", () => {
     await expect(promoteStagingToOutDir(stagingDir, outDir)).rejects.toThrow(/Recovery:/);
   });
 
-  it("rejects promote when legacy .bak or .tmp-promote artifacts exist", async () => {
+  it("rejects promote when fresh legacy .bak artifact exists", async () => {
     const root = await makeTempDir();
     const outDir = join(root, "course");
     const stagingDir = join(root, "staging");
@@ -287,7 +297,22 @@ describe("promoteStagingToOutDir", () => {
     );
   });
 
-  it("rejects promote when legacy .tmp-promote artifact exists", async () => {
+  it("auto-removes stale legacy .bak artifacts before promote", async () => {
+    const root = await makeTempDir();
+    const outDir = join(root, "course");
+    const stagingDir = join(root, "staging");
+    await mkdir(stagingDir, { recursive: true });
+    await writeFile(join(stagingDir, "course.yaml"), "title: New", "utf-8");
+    const legacyBak = `${outDir}.bak`;
+    await writeFile(legacyBak, "stale", "utf-8");
+    const old = new Date(Date.now() - 10 * 60 * 1000);
+    await utimes(legacyBak, old, old);
+
+    await promoteStagingToOutDir(stagingDir, outDir);
+    expect(await readFile(join(outDir, "course.yaml"), "utf-8")).toBe("title: New");
+  });
+
+  it("rejects promote when fresh legacy .tmp-promote artifact exists", async () => {
     const root = await makeTempDir();
     const outDir = join(root, "course");
     const stagingDir = join(root, "staging");
@@ -298,5 +323,44 @@ describe("promoteStagingToOutDir", () => {
     await expect(promoteStagingToOutDir(stagingDir, outDir)).rejects.toThrow(
       /remove stale packaging artifacts/,
     );
+  });
+
+  it("preserves prior .lxpack/out artifacts when promoting a new target", async () => {
+    const root = await makeTempDir();
+    const outDir = join(root, "course");
+    const outputBase = ".lxpack/out";
+
+    const scormStaging = join(root, "staging-scorm");
+    await mkdir(join(scormStaging, outputBase), { recursive: true });
+    await writeFile(join(scormStaging, "course.yaml"), "title: scorm", "utf-8");
+    await writeFile(join(scormStaging, outputBase, "course-scorm12.zip"), "zip-bytes", "utf-8");
+    await promoteStagingToOutDir(scormStaging, outDir);
+
+    const standaloneStaging = join(root, "staging-standalone");
+    await mkdir(join(standaloneStaging, outputBase, "standalone"), { recursive: true });
+    await writeFile(join(standaloneStaging, "course.yaml"), "title: standalone", "utf-8");
+    await writeFile(join(standaloneStaging, outputBase, "standalone", "index.html"), "<html></html>", "utf-8");
+    await promoteStagingToOutDir(standaloneStaging, outDir);
+
+    expect(await readFile(join(outDir, "course.yaml"), "utf-8")).toBe("title: standalone");
+    expect(await readFile(join(outDir, outputBase, "course-scorm12.zip"), "utf-8")).toBe("zip-bytes");
+    expect(await readFile(join(outDir, outputBase, "standalone", "index.html"), "utf-8")).toBe("<html></html>");
+  });
+
+  it("treats promote locks older than wall-clock TTL as stale", async () => {
+    const root = await makeTempDir();
+    const outDir = join(root, "course");
+    const stagingDir = join(root, "staging");
+    await mkdir(stagingDir, { recursive: true });
+    await writeFile(join(stagingDir, "course.yaml"), "title: locked", "utf-8");
+
+    const { __testPromoteFs } = await import("../src/packaging/promote");
+    const lockPath = __testPromoteFs.promoteLockPath(outDir);
+    await mkdir(dirname(outDir), { recursive: true });
+    const staleStarted = Date.now() - 31 * 60 * 1000;
+    await writeFile(lockPath, `${process.pid}\n${randomUUID()}\n${staleStarted}\n`, "utf-8");
+
+    await promoteStagingToOutDir(stagingDir, outDir);
+    expect(await readFile(join(outDir, "course.yaml"), "utf-8")).toBe("title: locked");
   });
 });

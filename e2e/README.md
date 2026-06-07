@@ -1,6 +1,6 @@
 # E2E & conformance
 
-Playwright export-parity tests and LXPack conformance scripts. Node.js **18+**.
+Playwright export-parity tests and LXPack conformance scripts. Node.js **20.19+** recommended (CI runs Node 20).
 
 ## Setup
 

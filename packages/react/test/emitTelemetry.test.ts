@@ -30,7 +30,7 @@ describe("emitTelemetry", () => {
       courseId: "course-1",
       sessionId: "s1",
     });
-    emitTelemetry(tracking, xapi, event);
+    await emitTelemetry(tracking, xapi, event);
 
     expect(sink).toHaveBeenCalledWith(
       expect.objectContaining({ name: "course_started", courseId: "course-1", sessionId: "s1" }),
@@ -41,6 +41,35 @@ describe("emitTelemetry", () => {
         object: expect.objectContaining({ id: expect.stringContaining("course-1") }),
       }),
     );
+  });
+
+  it("maps repeated lifecycle emits through pipeline to identical statement ids", async () => {
+    const tracking = createTrackingClient();
+    const ids: string[] = [];
+    const xapi = {
+      send: (statement: { id: string }) => {
+        ids.push(statement.id);
+      },
+      flush: async () => {},
+      queueSize: () => 0,
+      startedLesson: () => {},
+      completeLesson: () => {},
+      completeCourse: () => {},
+    };
+
+    const event = buildTelemetryEvent({
+      name: "course_started",
+      courseId: "course-1",
+      sessionId: "s1",
+    });
+    await emitTelemetry(tracking, xapi, event);
+    await emitTelemetry(tracking, xapi, {
+      ...event,
+      timestamp: "2026-06-07T12:00:00.000Z",
+    });
+
+    expect(ids.length).toBe(2);
+    expect(ids[0]).toBe(ids[1]);
   });
 
   it("buildTelemetryEvent throws when lesson lifecycle events lack lessonId", () => {
@@ -81,7 +110,7 @@ describe("emitTelemetry", () => {
     ).toThrow(/Unexpected value/);
   });
 
-  it("forwards lesson_completed to lxpackBridge when embedded", () => {
+  it("forwards lesson_completed to lxpackBridge when embedded", async () => {
     const completeLesson = vi.fn();
     const parent = {
       lxpackBridge: { v1: { completeLesson } },
@@ -96,7 +125,7 @@ describe("emitTelemetry", () => {
       sessionId: "s1",
       data: { lessonId: "lesson-1" },
     });
-    emitTelemetry(tracking, null, event);
+    await emitTelemetry(tracking, null, event);
 
     expect(completeLesson).toHaveBeenCalledWith("lesson-1");
     vi.unstubAllGlobals();
@@ -150,10 +179,10 @@ describe("tryBuildTelemetryEvent", () => {
     vi.unstubAllEnvs();
   });
 
-  it("rethrows when buildTelemetryEvent throws for non-quiz events", () => {
-    expect(() =>
+  it("returns null when lesson-scoped events lack lessonId", () => {
+    expect(
       tryBuildTelemetryEvent({ name: "lesson_started", courseId: "c" }),
-    ).toThrow(/lessonId/);
+    ).toBeNull();
   });
 
   it("returns built events for valid quiz payloads", () => {

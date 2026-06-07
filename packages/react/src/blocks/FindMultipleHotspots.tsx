@@ -1,13 +1,16 @@
-import React, { forwardRef, useMemo, useState } from "react";
+import React, { forwardRef, useEffect, useMemo, useState } from "react";
 import type { AssessmentBaseProps, AssessmentHandle, AssessmentInteractionType } from "@lessonkit/core";
 import type { LessonId } from "@lessonkit/core";
 import { AssessmentLessonGuard } from "../assessment/AssessmentLessonGuard";
 import { buildAssessmentHandle } from "../assessment/internal/buildAssessmentHandle";
 import { readBooleanStateField } from "../assessment/internal/resumeState";
 import { useAssessmentHandleRegistration } from "../assessment/internal/useAssessmentHandleRegistration";
+import { meetsPassingThreshold } from "../assessment/scoring";
 import { useAssessmentState } from "../assessment/useAssessmentState";
+import { useLessonkit } from "../hooks";
 import { setLessonkitBlockType } from "../compound/blockType";
 import { normalizeComponentId } from "../runtime/validateComponentId";
+import { resolveMediaSrc } from "./embedSecurity";
 import type { HotspotTarget } from "./FindHotspot";
 
 export type FindMultipleHotspotsProps = AssessmentBaseProps & {
@@ -24,9 +27,23 @@ function FindMultipleHotspotsInner(
   ref: React.Ref<AssessmentHandle>,
 ) {
   const checkId = useMemo(() => normalizeComponentId(props.checkId, "checkId"), [props.checkId]);
+  const { config } = useLessonkit();
+  const resolvedSrc = resolveMediaSrc(props.src, { allowedHosts: config.embed?.allowedHosts });
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [checked, setChecked] = useState(false);
   const assessment = useAssessmentState(props.enclosingLessonId);
+
+  const correctSet = useMemo(
+    () => new Set(props.correctTargetIds),
+    [props.correctTargetIds],
+  );
+  const targetIdsKey = props.targets.map((t) => t.id).join("\0");
+  const correctIdsKey = props.correctTargetIds.join("\0");
+
+  useEffect(() => {
+    setSelected(new Set());
+    setChecked(false);
+  }, [checkId, correctIdsKey, targetIdsKey]);
 
   const toggle = (id: string) => {
     setSelected((prev) => {
@@ -38,17 +55,33 @@ function FindMultipleHotspotsInner(
     setChecked(false);
   };
 
-  const correct =
-    selected.size === props.correctTargetIds.length &&
-    props.correctTargetIds.every((id) => selected.has(id));
+  const maxScore = props.correctTargetIds.length || 1;
+  const score = props.correctTargetIds.filter((id) => selected.has(id)).length;
+  const wrongSelected = [...selected].filter((id) => !correctSet.has(id)).length;
+  const passedThreshold =
+    meetsPassingThreshold(score, maxScore, props.passingScore) && wrongSelected === 0;
+  const isFactuallyCorrect = (sel: Set<string>) => {
+    const wrong = [...sel].filter((id) => !correctSet.has(id)).length;
+    const matched = props.correctTargetIds.filter((id) => sel.has(id)).length;
+    return (
+      wrong === 0 &&
+      sel.size === props.correctTargetIds.length &&
+      matched === maxScore
+    );
+  };
+  const factualCorrect = checked ? isFactuallyCorrect(selected) : false;
+  const validTargetIds = useMemo(
+    () => new Set(props.targets.map((t) => t.id)),
+    [props.targets],
+  );
 
   const handle = useMemo(
     () =>
       buildAssessmentHandle({
         checkId,
-        getScore: () => (checked && correct ? 1 : 0),
-        getMaxScore: () => 1,
-        getAnswerGiven: () => selected.size > 0,
+        getScore: () => score,
+        getMaxScore: () => maxScore,
+        getAnswerGiven: () => checked,
         resetTask: () => {
           setSelected(new Set());
           setChecked(false);
@@ -58,38 +91,65 @@ function FindMultipleHotspotsInner(
           checkId,
           interactionType: INTERACTION,
           response: [...selected],
-          correct: checked ? correct : undefined,
-          score: checked && correct ? 1 : 0,
-          maxScore: 1,
+          correct: checked ? factualCorrect : undefined,
+          score: checked ? score : 0,
+          maxScore,
         }),
         getCurrentState: () => ({ selected: [...selected], checked }),
         resume: (state) => {
           const raw = state.selected;
-          if (Array.isArray(raw)) setSelected(new Set(raw.filter((id): id is string => typeof id === "string")));
+          if (Array.isArray(raw)) {
+            setSelected(
+              new Set(
+                raw.filter(
+                  (id): id is string =>
+                    typeof id === "string" && validTargetIds.has(id),
+                ),
+              ),
+            );
+          }
           readBooleanStateField(state, "checked", setChecked);
         },
       }),
-    [checkId, selected, checked, correct, props.correctTargetIds],
+    [
+      checkId,
+      checked,
+      factualCorrect,
+      maxScore,
+      props.correctTargetIds,
+      score,
+      selected,
+      validTargetIds,
+    ],
   );
 
   useAssessmentHandleRegistration(checkId, handle, ref);
 
   const submit = () => {
     if (selected.size === 0 || checked) return;
+    const correctAtSubmit = isFactuallyCorrect(selected);
     setChecked(true);
     assessment.answer({
       checkId,
       interactionType: INTERACTION,
       response: [...selected],
-      correct,
+      correct: correctAtSubmit,
     });
-    if (correct) {
+    if (passedThreshold) {
       assessment.complete({
         checkId,
         interactionType: INTERACTION,
-        score: 1,
-        maxScore: 1,
-        passingScore: props.passingScore ?? 1,
+        score,
+        maxScore,
+        passingScore: props.passingScore ?? maxScore,
+      });
+    } else if (props.enableRetry === false) {
+      assessment.complete({
+        checkId,
+        interactionType: INTERACTION,
+        score,
+        maxScore,
+        passingScore: props.passingScore ?? maxScore,
       });
     }
   };
@@ -97,7 +157,11 @@ function FindMultipleHotspotsInner(
   return (
     <section aria-label="Find multiple hotspots" data-lk-check-id={checkId} data-testid="find-multiple-hotspots">
       <div style={{ position: "relative", display: "inline-block" }}>
-        <img src={props.src} alt={props.alt} style={{ maxWidth: "100%" }} />
+        {resolvedSrc ? (
+          <img src={resolvedSrc} alt={props.alt} style={{ maxWidth: "100%" }} />
+        ) : (
+          <p role="alert">This image URL is not allowed.</p>
+        )}
         {props.targets.map((t) => (
           <button
             key={t.id}
@@ -121,7 +185,7 @@ function FindMultipleHotspotsInner(
         Check
       </button>
       {checked ? (
-        <p role="status">{correct ? "Correct" : "Try again"}</p>
+        <p role="status">{passedThreshold ? "Correct" : "Try again"}</p>
       ) : null}
     </section>
   );

@@ -1,5 +1,7 @@
 # React blocks
 
+Use only block types listed in `@lessonkit/react/block-catalog.v3.json`. `buildBlockCatalog()` defaults to catalog v3 (framework 1.5.x).
+
 ## Layout pattern
 
 ```tsx
@@ -24,9 +26,25 @@ export default function App() {
 }
 ```
 
+## Shell components
+
+`Course`, `Lesson`, `Scenario`, `Quiz`, `KnowledgeCheck`, `Reflection`, `ProgressTracker`, `ThemeProvider`
+
+## Assessment blocks (examples)
+
+`TrueFalse`, `MarkTheWords`, `FillInTheBlanks`, `DragTheWords`, `DragAndDrop`, `Summary`, `ImagePairing`, `ImageSequencing`, `ArithmeticQuiz`, `Essay`, `Questionnaire`, `AssessmentSequence`, `ImageHotspots`, `FindHotspot`, `FindMultipleHotspots`
+
+## Compound blocks
+
+`Page`, `InteractiveBook`, `Slide`, `SlideDeck`, `TimedCue`, `InteractiveVideo`, `BranchingScenario`, `BranchNode`, `BranchChoice`
+
+## Content blocks (1.5+)
+
+`Embed`, `Chart`, `Text`, `Heading`, `Image`, `Video`, `Accordion`, `DialogCards`, `Flashcards`, `MemoryGame`, `InformationWall`, `ParallaxSlideshow`, `ImageSlider`
+
 ## Hooks
 
-- `useProgress`, `useTracking`, `useQuizState`, `useCompletion`, `useLessonkit`
+- `useProgress`, `useTracking`, `useQuizState`, `useAssessmentState`, `useCompletion`, `useLessonkit`, `useTheme`, `useBranchingScenario`
 
 ## Multiple lessons mounted
 
@@ -34,4 +52,5 @@ export default function App() {
 - All `<Lesson>` children may be mounted (tabs, scroll). Quiz events use the **enclosing** lesson’s `lessonId`.
 - Only one `<Lesson>` should be active at a time; use `autoCompleteOnUnmount={false}` for routed layouts.
 
-Human reference: https://lessonkit.readthedocs.io/en/latest/guides/react-developers/components-and-hooks.html
+Human reference: https://lessonkit.readthedocs.io/en/latest/guides/react-developers/components-and-hooks.html  
+Block catalog: https://lessonkit.readthedocs.io/en/latest/reference/block-catalog.html

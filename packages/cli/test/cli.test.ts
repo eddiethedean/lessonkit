@@ -1,5 +1,6 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
-import { mkdtemp, rm, writeFile, mkdir, readFile } from "node:fs/promises";
+import { existsSync } from "node:fs";
+import { mkdtemp, rm, writeFile, mkdir, readFile, readdir } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { tmpdir } from "node:os";
 import { fileURLToPath } from "node:url";
@@ -7,7 +8,7 @@ import { createProgram, run } from "../src/index.js";
 import { runInit } from "../src/commands/init.js";
 import { formatCliError, CliError, EXIT_INVALID_PROJECT } from "../src/lib/errors.js";
 import { findProjectRoot, loadLessonkitJson } from "../src/lib/project.js";
-import { parsePackageTarget, resolvePackageOutput, resolveViteBuildArgs } from "../src/lib/paths.js";
+import { parsePackageTarget, resolvePackageOutput, resolveViteBuildArgs, resolveViteBuildArgv, stripOutDirFromViteArgs } from "../src/lib/paths.js";
 import * as exec from "../src/lib/exec.js";
 
 describe("@lessonkit/cli program", () => {
@@ -41,8 +42,9 @@ describe("@lessonkit/cli program", () => {
     const log = vi.fn();
     await run(["node", "lessonkit", "publish"], { log, error: () => {} });
     expect(log).toHaveBeenCalledWith(
-      "lessonkit publish is not implemented. See RELEASING.md for npm publish workflow.",
+      expect.stringContaining("lessonkit publish is not implemented"),
     );
+    expect(log).toHaveBeenCalledWith(expect.stringContaining("RELEASING.md"));
   });
 
   it("package requires --target", async () => {
@@ -446,10 +448,10 @@ describe("runInit", () => {
     expect(appSource).toContain("@lessonkit/react");
     expect(appSource).toContain('courseId="my-demo"');
     expect(appSource).toContain('title="my-demo"');
-    expect(appSource).toContain('preset="default"');
+    expect(appSource).toContain('preset={COURSE_THEME_PRESET}');
     const courseConfigSource = await readFile(join(projectDir, "src/courseConfig.ts"), "utf8");
     expect(courseConfigSource).toContain('courseId: "my-demo"');
-    expect(lessonkit.tracking?.xapi?.activityIri).toBe("https://example.com/courses/my-demo");
+    expect(lessonkit.course.tracking?.xapi?.activityIri).toBe("https://example.com/courses/my-demo");
   });
 
   it("slugifies numeric project names to valid courseId values", async () => {
@@ -464,6 +466,17 @@ describe("runInit", () => {
     expect(lessonkit.course.courseId).toBe("id-9th-grade");
     const appSource = await readFile(join(projectDir, "src/App.tsx"), "utf8");
     expect(appSource).toContain('courseId="id-9th-grade"');
+  });
+
+  it("initializes with --here when the directory contains only dotfiles", async () => {
+    const here = join(parentDir, "git-only");
+    await mkdir(here, { recursive: true });
+    await mkdir(join(here, ".git"), { recursive: true });
+    process.chdir(here);
+
+    await runInit({ here: true, skipInstall: true }, { log: () => {}, error: () => {} });
+
+    expect(existsSync(join(here, "package.json"))).toBe(true);
   });
 
   it("rejects --force without --here", async () => {
@@ -490,6 +503,22 @@ describe("runInit", () => {
       exitCode: EXIT_INVALID_PROJECT,
       message: expect.stringContaining("dotfiles only"),
     });
+  });
+
+  it("rolls back staging when dependency install fails", async () => {
+    process.chdir(parentDir);
+    const runNpmInstallSpy = vi
+      .spyOn(await import("../src/lib/exec.js"), "runNpmInstall")
+      .mockRejectedValueOnce(new Error("simulated install failure"));
+
+    await expect(
+      runInit({ name: "rollback-demo" }, { log: () => {}, error: () => {} }),
+    ).rejects.toThrow("simulated install failure");
+
+    expect(existsSync(join(parentDir, "rollback-demo"))).toBe(false);
+    const entries = await readdir(parentDir);
+    expect(entries.some((name) => name.startsWith(".rollback-demo-init-"))).toBe(false);
+    runNpmInstallSpy.mockRestore();
   });
 });
 
@@ -522,6 +551,55 @@ describe("resolveViteBuildArgs", () => {
         paths: { ...baseProject.paths, spaDistDir: "build/spa" },
       }),
     ).toEqual(["build", "--outDir", "build/spa"]);
+  });
+});
+
+describe("stripOutDirFromViteArgs", () => {
+  it("removes --outDir and its value from passthrough args", () => {
+    expect(stripOutDirFromViteArgs(["--outDir", "other", "--minify"])).toEqual(["--minify"]);
+    expect(stripOutDirFromViteArgs(["--outDir=other", "--minify"])).toEqual(["--minify"]);
+    expect(stripOutDirFromViteArgs(["-o", "other"])).toEqual([]);
+  });
+});
+
+describe("resolveViteBuildArgv", () => {
+  const baseProject = {
+    root: "/proj",
+    schemaVersion: 1 as const,
+    name: "demo",
+    course: {
+      courseId: "demo",
+      title: "Demo",
+      layout: "single-spa" as const,
+      lessons: [{ id: "l1", title: "L1" }],
+    },
+    paths: {
+      spaDistDir: "build/spa",
+      lxpackOutDir: ".lxpack/course",
+      outputBaseDir: ".lxpack/out",
+    },
+  };
+
+  it("appends configured --outDir after passthrough args", () => {
+    expect(resolveViteBuildArgv(baseProject, ["--outDir", "ignored", "--minify"])).toEqual([
+      "build",
+      "--minify",
+      "--outDir",
+      "build/spa",
+    ]);
+  });
+
+  it("always canonicalizes default dist outDir over passthrough", () => {
+    const defaultDistProject = {
+      ...baseProject,
+      paths: { ...baseProject.paths, spaDistDir: "dist" },
+    };
+    expect(resolveViteBuildArgv(defaultDistProject, ["--outDir", "other", "--minify"])).toEqual([
+      "build",
+      "--minify",
+      "--outDir",
+      "dist",
+    ]);
   });
 });
 
@@ -573,5 +651,22 @@ describe("runBuild", () => {
       ]),
       expect.objectContaining({ cwd: expect.stringMatching(/lk-cli-build/) }),
     );
+  });
+
+  it("fails when build does not produce index.html", async () => {
+    vi.spyOn(exec, "runCommand").mockResolvedValue(undefined);
+    const { runBuild } = await import("../src/commands/dev.js");
+    await expect(runBuild({ cwd: dir, json: true })).rejects.toMatchObject({
+      message: expect.stringContaining("index.html"),
+    });
+  });
+
+  it("verifies index.html after a successful build", async () => {
+    vi.spyOn(exec, "runCommand").mockResolvedValue(undefined);
+    await mkdir(join(dir, "dist"), { recursive: true });
+    await writeFile(join(dir, "dist", "index.html"), "<html></html>", "utf8");
+    const { runBuild } = await import("../src/commands/dev.js");
+    const result = await runBuild({ cwd: dir, json: true });
+    expect(result.ok).toBe(true);
   });
 });

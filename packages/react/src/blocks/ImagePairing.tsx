@@ -7,8 +7,11 @@ import { readBooleanStateField } from "../assessment/internal/resumeState";
 import { useAssessmentHandleRegistration } from "../assessment/internal/useAssessmentHandleRegistration";
 import { meetsPassingThreshold } from "../assessment/scoring";
 import { useAssessmentState } from "../assessment/useAssessmentState";
+import { shouldReplayResumeTelemetry } from "../assessment/shouldReplayResumeTelemetry";
 import { setLessonkitBlockType } from "../compound/blockType";
+import { useLessonkit } from "../hooks";
 import { normalizeComponentId } from "../runtime/validateComponentId";
+import { resolveMediaSrc } from "./embedSecurity";
 
 export type ImagePair = {
   id: string;
@@ -50,11 +53,38 @@ function buildDeck(pairs: ImagePair[]): Card[] {
   return shuffleCards(cards);
 }
 
+export function rebuildCardsFromKeys(pairs: ImagePair[], cardKeys: string[]): Card[] | null {
+  const pairMap = new Map(pairs.map((pair) => [pair.id, pair]));
+  if (cardKeys.length !== pairs.length * 2) return null;
+  const seen = new Set<string>();
+  const cards: Card[] = [];
+  for (const cardKey of cardKeys) {
+    if (seen.has(cardKey)) return null;
+    seen.add(cardKey);
+    const match = /^(.+)-([01])$/.exec(cardKey);
+    if (!match) return null;
+    const pairId = match[1]!;
+    const copy = Number(match[2]);
+    if (copy !== 0 && copy !== 1) return null;
+    const pair = pairMap.get(pairId);
+    if (!pair) return null;
+    cards.push({
+      cardKey,
+      pairId: pair.id,
+      label: pair.label,
+      imageSrc: pair.imageSrc,
+    });
+  }
+  return cards;
+}
+
 function ImagePairingInner(
   props: ImagePairingProps & { enclosingLessonId: LessonId },
   ref: React.Ref<AssessmentHandle>,
 ) {
   const checkId = useMemo(() => normalizeComponentId(props.checkId, "checkId"), [props.checkId]);
+  const { config } = useLessonkit();
+  const mediaOptions = { allowedHosts: config.embed?.allowedHosts };
   const assessment = useAssessmentState(props.enclosingLessonId);
   const pairsKey = props.pairs.map((p) => p.id).join("\0");
 
@@ -63,10 +93,16 @@ function ImagePairingInner(
   const [revealed, setRevealed] = useState<Set<string>>(() => new Set());
   const [keyboardSelection, setKeyboardSelection] = useState<string | null>(null);
   const [passed, setPassed] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
   const completedRef = useRef(false);
   const telemetryReplayedRef = useRef(false);
+  const mismatchTimeoutRef = useRef<number | null>(null);
 
   const reset = () => {
+    if (mismatchTimeoutRef.current !== null) {
+      window.clearTimeout(mismatchTimeoutRef.current);
+      mismatchTimeoutRef.current = null;
+    }
     completedRef.current = false;
     telemetryReplayedRef.current = false;
     setCards(buildDeck(props.pairs));
@@ -74,11 +110,21 @@ function ImagePairingInner(
     setRevealed(new Set());
     setKeyboardSelection(null);
     setPassed(false);
+    setSubmitted(false);
   };
 
   useEffect(() => {
     reset();
   }, [checkId, pairsKey]);
+
+  useEffect(
+    () => () => {
+      if (mismatchTimeoutRef.current !== null) {
+        window.clearTimeout(mismatchTimeoutRef.current);
+      }
+    },
+    [],
+  );
 
   const totalPairs = props.pairs.length;
   const matchedCount = matched.size;
@@ -88,25 +134,36 @@ function ImagePairingInner(
   const passedThreshold = meetsPassingThreshold(score, maxScore, props.passingScore);
 
   const completeIfReady = (nextMatched: Set<string>) => {
-    if (nextMatched.size === totalPairs && totalPairs > 0 && !completedRef.current) {
-      const finalScore = nextMatched.size;
-      const finalPassed = meetsPassingThreshold(finalScore, maxScore, props.passingScore);
-      completedRef.current = true;
-      setPassed(true);
-      assessment.answer({
-        checkId,
-        interactionType: INTERACTION,
-        response: { matchedPairIds: [...nextMatched] },
-        correct: finalPassed,
-      });
-      assessment.complete({
-        checkId,
-        interactionType: INTERACTION,
-        score: finalScore,
-        maxScore,
-        passingScore: props.passingScore ?? maxScore,
-      });
-    }
+    if (totalPairs === 0 || completedRef.current) return;
+    const finalScore = nextMatched.size;
+    const finalPassed = meetsPassingThreshold(finalScore, maxScore, props.passingScore);
+    if (!finalPassed && nextMatched.size < totalPairs) return;
+    completeWithScore(nextMatched, finalScore, finalPassed);
+  };
+
+  const completeWithScore = (nextMatched: Set<string>, finalScore: number, finalPassed: boolean) => {
+    if (completedRef.current) return;
+    completedRef.current = true;
+    setSubmitted(true);
+    setPassed(finalPassed);
+    assessment.answer({
+      checkId,
+      interactionType: INTERACTION,
+      response: { matchedPairIds: [...nextMatched] },
+      correct: finalPassed,
+    });
+    assessment.complete({
+      checkId,
+      interactionType: INTERACTION,
+      score: finalScore,
+      maxScore,
+      passingScore: props.passingScore ?? maxScore,
+    });
+  };
+
+  const finishAttempt = () => {
+    if (completedRef.current || matchedCount === 0) return;
+    completeWithScore(matched, matchedCount, passedThreshold);
   };
 
   const tryMatch = (firstKey: string, secondKey: string) => {
@@ -126,7 +183,11 @@ function ImagePairingInner(
       setRevealed(new Set());
       setKeyboardSelection(null);
     } else {
-      window.setTimeout(() => {
+      if (mismatchTimeoutRef.current !== null) {
+        window.clearTimeout(mismatchTimeoutRef.current);
+      }
+      mismatchTimeoutRef.current = window.setTimeout(() => {
+        mismatchTimeoutRef.current = null;
         setRevealed((prev) => {
           const next = new Set(prev);
           next.delete(firstKey);
@@ -172,17 +233,22 @@ function ImagePairingInner(
           checkId,
           interactionType: INTERACTION,
           response: { matchedPairIds: [...matched] },
-          correct: allMatched && passedThreshold,
+          correct: passedThreshold,
           score,
           maxScore,
         }),
         getCurrentState: () => ({
+          cardKeys: cards.map((card) => card.cardKey),
           matched: [...matched],
           revealed: [...revealed],
           keyboardSelection,
           passed,
         }),
         resume: (state) => {
+          if (Array.isArray(state.cardKeys)) {
+            const restored = rebuildCardsFromKeys(props.pairs, state.cardKeys as string[]);
+            if (restored) setCards(restored);
+          }
           if (Array.isArray(state.matched)) setMatched(new Set(state.matched as string[]));
           if (Array.isArray(state.revealed)) setRevealed(new Set(state.revealed as string[]));
           const sel = state.keyboardSelection;
@@ -190,17 +256,26 @@ function ImagePairingInner(
           readBooleanStateField(state, "passed", (value) => {
             setPassed(value);
             completedRef.current = value;
-            if (value && !telemetryReplayedRef.current) {
+            if (
+              value &&
+              !telemetryReplayedRef.current &&
+              shouldReplayResumeTelemetry(config)
+            ) {
               telemetryReplayedRef.current = true;
               const matchedIds = Array.isArray(state.matched)
                 ? (state.matched as string[])
                 : [...matched];
               const finalScore = matchedIds.length;
+              const finalPassed = meetsPassingThreshold(
+                finalScore,
+                maxScore,
+                props.passingScore,
+              );
               assessment.answer({
                 checkId,
                 interactionType: INTERACTION,
                 response: { matchedPairIds: matchedIds },
-                correct: true,
+                correct: finalPassed,
               });
               assessment.complete({
                 checkId,
@@ -213,7 +288,7 @@ function ImagePairingInner(
           });
         },
       }),
-    [allMatched, checkId, keyboardSelection, matched, matchedCount, maxScore, passed, passedThreshold, revealed, score],
+    [allMatched, assessment, cards, checkId, config, keyboardSelection, matched, matchedCount, maxScore, passed, passedThreshold, props.pairs, props.passingScore, revealed, score],
   );
 
   useAssessmentHandleRegistration(checkId, handle, ref);
@@ -226,6 +301,7 @@ function ImagePairingInner(
           const isMatched = matched.has(card.pairId);
           const isRevealed = isMatched || revealed.has(card.cardKey);
           const isSelected = keyboardSelection === card.cardKey;
+          const resolvedCardSrc = resolveMediaSrc(card.imageSrc, mediaOptions);
           return (
             <button
               key={card.cardKey}
@@ -244,7 +320,15 @@ function ImagePairingInner(
             >
               {isRevealed ? (
                 <>
-                  <img src={card.imageSrc} alt={card.label} style={{ maxWidth: "5rem", maxHeight: "5rem" }} />
+                  {resolvedCardSrc ? (
+                    <img
+                      src={resolvedCardSrc}
+                      alt={card.label}
+                      style={{ maxWidth: "5rem", maxHeight: "5rem" }}
+                    />
+                  ) : (
+                    <span aria-hidden="true">!</span>
+                  )}
                   <span className="lk-visually-hidden">{card.label}</span>
                 </>
               ) : (
@@ -257,6 +341,11 @@ function ImagePairingInner(
       <p role="status" aria-live="polite" data-testid="image-pairing-progress">
         {matchedCount} / {totalPairs} pairs matched
       </p>
+      {props.enableRetry === false && matchedCount > 0 && !submitted ? (
+        <button type="button" data-testid="image-pairing-finish" onClick={finishAttempt}>
+          Submit
+        </button>
+      ) : null}
       {props.enableRetry && passed ? (
         <button type="button" data-testid="image-pairing-retry" onClick={reset}>
           Try again

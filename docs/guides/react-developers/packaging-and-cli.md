@@ -47,7 +47,7 @@ Pass **`projectRoot`** when packaging from the CLI path so ID parity validation 
 
 Golden reference: `examples/lxpack-golden` in the repo.
 
-Full guide: [Packaging reference](../../reference/packaging.md).
+Full guide: [Packaging reference](../../reference/packaging.md) · [LMS compatibility](../../reference/lms-compatibility.md) · [Deployment guide](deployment-guide.md).
 
 ## `lessonkit.json` vs interchange file
 
@@ -56,7 +56,7 @@ Full guide: [Packaging reference](../../reference/packaging.md).
 
 ## Layout
 
-Use `single-spa` for CLI packaging (1.0.0). Multi-lesson UX stays inside your React app.
+Use `single-spa` for CLI packaging (1.x). Multi-lesson UX stays inside your React app.
 
 `per-lesson-spa` is supported by `@lessonkit/lxpack` APIs but not `lessonkit package` yet.
 

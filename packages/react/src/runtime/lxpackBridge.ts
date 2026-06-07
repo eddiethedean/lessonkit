@@ -10,9 +10,17 @@ import {
 /** @deprecated Use `LmsBridgeMode` from `@lessonkit/core`. */
 export type LxpackBridgeMode = LmsBridgeMode;
 
+export type ForwardTelemetryToLxpackOptions = {
+  onBridgeMiss?: (event: TelemetryEvent) => void;
+  onBridgeError?: (err: unknown) => void;
+  allowedParentOrigins?: string[];
+};
+
 const BRIDGE_MISS_EVENT_NAMES = new Set<TelemetryEvent["name"]>([
+  "course_started",
   "course_completed",
   "lesson_completed",
+  "assessment_answered",
   "assessment_completed",
   "quiz_completed",
 ]);
@@ -20,17 +28,21 @@ const BRIDGE_MISS_EVENT_NAMES = new Set<TelemetryEvent["name"]>([
 export function forwardTelemetryToLxpack(
   event: TelemetryEvent,
   mode: LmsBridgeMode = "auto",
-  opts?: { onBridgeMiss?: (event: TelemetryEvent) => void },
+  opts?: ForwardTelemetryToLxpackOptions,
 ): void {
+  const bridgeOpts = { allowedParentOrigins: opts?.allowedParentOrigins, mode };
   if (
     mode === "auto" &&
     opts?.onBridgeMiss &&
     BRIDGE_MISS_EVENT_NAMES.has(event.name) &&
-    !getLxpackBridge()
+    !getLxpackBridge(undefined, bridgeOpts)
   ) {
     opts.onBridgeMiss(event);
   }
-  forwardTelemetryToBridge(event, mode);
+  forwardTelemetryToBridge(event, mode, undefined, {
+    allowedParentOrigins: opts?.allowedParentOrigins,
+    onBridgeError: opts?.onBridgeError,
+  });
 }
 
 export {

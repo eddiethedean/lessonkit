@@ -1,4 +1,4 @@
-import React, { forwardRef, useEffect, useMemo, useRef, useState } from "react";
+import React, { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { AssessmentBaseProps, AssessmentHandle, AssessmentInteractionType } from "@lessonkit/core";
 import type { LessonId } from "@lessonkit/core";
 import { AssessmentLessonGuard } from "../assessment/AssessmentLessonGuard";
@@ -8,6 +8,7 @@ import { readBooleanStateField } from "../assessment/internal/resumeState";
 import { useAssessmentHandleRegistration } from "../assessment/internal/useAssessmentHandleRegistration";
 import { meetsPassingThreshold } from "../assessment/scoring";
 import { useAssessmentState } from "../assessment/useAssessmentState";
+import { useLessonkit } from "../hooks";
 import { isDevEnvironment, normalizeComponentId } from "../runtime/validateComponentId";
 
 export type FillInBlankSpec = { id: string; answer: string };
@@ -29,14 +30,53 @@ function parseTemplate(template: string): { parts: string[]; blanks: FillInBlank
   };
 }
 
+function normalizeBlanks(blanks: FillInBlankSpec[]): FillInBlankSpec[] {
+  return blanks
+    .map((b) => ({ id: b.id.trim(), answer: b.answer.trim() }))
+    .filter((b) => b.id.length > 0 && b.answer.length > 0);
+}
+
+function resolveBlanks(
+  template: string,
+  explicitBlanks: FillInBlankSpec[] | undefined,
+): { parts: string[]; blanks: FillInBlankSpec[] } {
+  const parsed = parseTemplate(template);
+  if (!explicitBlanks) {
+    return { parts: parsed.parts, blanks: parsed.blanks };
+  }
+  const normalized = normalizeBlanks(explicitBlanks);
+  if (normalized.length !== parsed.blanks.length) {
+    if (isDevEnvironment()) {
+      console.warn(
+        "[lessonkit] FillInTheBlanks: blanks length does not match template; using parsed blanks",
+        { templateBlanks: parsed.blanks.length, explicitBlanks: normalized.length },
+      );
+    }
+    return { parts: parsed.parts, blanks: parsed.blanks };
+  }
+  let blankIdx = 0;
+  const interleavedParts = parsed.parts.map((part) => {
+    if (part.startsWith("blank-")) {
+      const id = normalized[blankIdx]?.id;
+      blankIdx += 1;
+      return id ?? part;
+    }
+    return part;
+  });
+  return { parts: interleavedParts, blanks: normalized };
+}
+
 function FillInTheBlanksInner(
   props: FillInTheBlanksProps & { enclosingLessonId: LessonId },
   ref: React.Ref<AssessmentHandle>,
 ) {
   const checkId = useMemo(() => normalizeComponentId(props.checkId, "checkId"), [props.checkId]);
   const assessment = useAssessmentState(props.enclosingLessonId);
-  const parsed = useMemo(() => parseTemplate(props.template), [props.template]);
-  const blanks = props.blanks ?? parsed.blanks;
+  const { config } = useLessonkit();
+  const { parts, blanks } = useMemo(
+    () => resolveBlanks(props.template, props.blanks),
+    [props.template, props.blanks],
+  );
   const [values, setValues] = useState<Record<string, string>>(() =>
     Object.fromEntries(blanks.map((b) => [b.id, ""])),
   );
@@ -147,15 +187,15 @@ function FillInTheBlanksInner(
           blanks.forEach((b) => {
             if ((nextValues[b.id] ?? "").trim().toLowerCase() === b.answer.toLowerCase()) nextScore += 1;
           });
-          replayTelemetry(nextValues, nextPassed, nextSubmitted, nextScore, blanks.length);
+          if (config.tracking?.replayResumeEvents === true) {
+            replayTelemetry(nextValues, nextPassed, nextSubmitted, nextScore, blanks.length);
+          }
         },
       }),
-    [allFilled, assessment, blanks, checkId, maxScore, passed, passedThreshold, props.passingScore, props.template, score, showSolutions, submitted, values],
+    [allFilled, assessment, blanks, checkId, config.tracking?.replayResumeEvents, maxScore, passed, passedThreshold, props.passingScore, props.template, score, showSolutions, submitted, values],
   );
 
-  useAssessmentHandleRegistration(checkId, handle, ref);
-
-  const check = () => {
+  const check = useCallback(() => {
     if (!hasBlanks) {
       if (isDevEnvironment()) {
         console.warn("[lessonkit] FillInTheBlanks has no blanks in template");
@@ -163,22 +203,22 @@ function FillInTheBlanksInner(
       return;
     }
     if (!allFilled) return;
-    if (passed) return;
+    if (passed && !props.enableRetry) return;
     const snapshot = JSON.stringify(values);
     if (checkSnapshotRef.current === snapshot) return;
     checkSnapshotRef.current = snapshot;
     answeredRef.current = true;
     setSubmitted(true);
     assessment.answer({
-        checkId,
-        interactionType: INTERACTION,
-        question: props.template,
-        response: values,
-        correct: passedThreshold,
-      });
-    if (passedThreshold && !completedRef.current) {
+      checkId,
+      interactionType: INTERACTION,
+      question: props.template,
+      response: values,
+      correct: passedThreshold,
+    });
+    if ((passedThreshold || props.enableRetry === false) && !completedRef.current) {
       completedRef.current = true;
-      setPassed(true);
+      if (passedThreshold) setPassed(true);
       assessment.complete({
         checkId,
         interactionType: INTERACTION,
@@ -187,7 +227,23 @@ function FillInTheBlanksInner(
         passingScore: props.passingScore ?? maxScore,
       });
     }
-  };
+  }, [
+    allFilled,
+    assessment,
+    blanks.length,
+    checkId,
+    hasBlanks,
+    maxScore,
+    passed,
+    passedThreshold,
+    props.enableRetry,
+    props.passingScore,
+    props.template,
+    score,
+    values,
+  ]);
+
+  useAssessmentHandleRegistration(checkId, handle, ref);
 
   useEffect(() => {
     if (!allFilled) {
@@ -199,19 +255,19 @@ function FillInTheBlanksInner(
 
   useEffect(() => {
     if (props.autoCheck && allFilled && !passed) check();
-  }, [allFilled, props.autoCheck, values, passedThreshold, passed]);
+  }, [allFilled, check, passed, props.autoCheck]);
 
   const reveal = showSolutions || (passed && props.enableSolutionsButton);
 
   return (
     <section aria-label="Fill in the Blanks" data-lk-check-id={checkId}>
       <p>
-        {parsed.parts.map((part, i) => {
+        {parts.map((part, i) => {
           const blank = blanks.find((b) => b.id === part);
           if (!blank) return <React.Fragment key={i}>{part}</React.Fragment>;
           return (
             <label key={blank.id} style={{ margin: "0 0.25em" }}>
-              <span className="lk-visually-hidden">{blank.answer}</span>
+              <span className="lk-visually-hidden">Blank {blank.id}</span>
               <input
                 type="text"
                 data-testid={`blank-${blank.id}`}
@@ -230,7 +286,12 @@ function FillInTheBlanksInner(
         })}
       </p>
       {!props.autoCheck ? (
-        <button type="button" data-testid="check-blanks" disabled={!allFilled || passed} onClick={check}>
+        <button
+          type="button"
+          data-testid="check-blanks"
+          disabled={!allFilled || (passed && !props.enableRetry)}
+          onClick={check}
+        >
           Check
         </button>
       ) : null}

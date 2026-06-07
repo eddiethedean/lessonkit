@@ -68,6 +68,7 @@ export default function App() {
         onXapiQueueCap: () => undefined,
         onLxpackBridgeMiss: () => undefined,
         onXapiTransportError: () => undefined,
+        onXapiMappingError: () => undefined,
       },
       tracking: {
         batch: { enabled: true, flushIntervalMs: 60_000, maxBatchSize: 25 },

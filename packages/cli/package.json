@@ -1,6 +1,6 @@
 {
   "name": "@lessonkit/cli",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "private": false,
   "description": "LessonKit CLI — init, dev, build, and package learning experiences.",
   "license": "Apache-2.0",
@@ -42,11 +42,11 @@
     "typecheck": "tsc -p tsconfig.json",
     "test": "vitest run --passWithNoTests",
     "test:coverage": "vitest run --coverage --passWithNoTests=false",
-    "lint": "echo \"(no lint configured yet)\""
+    "lint": "eslint --max-warnings 0 \"src/**/*.{ts,tsx}\" \"test/**/*.{ts,tsx}\""
   },
   "dependencies": {
-    "@lessonkit/core": "1.4.0",
-    "@lessonkit/lxpack": "1.4.0",
+    "@lessonkit/core": "1.5.0",
+    "@lessonkit/lxpack": "1.5.0",
     "commander": "^15.0.0"
   },
   "engines": {

@@ -13,7 +13,10 @@ import {
 const COURSE_ID = "interactive-book-demo";
 
 export default function App() {
-  const config = useMemo(() => ({ xapi: { enabled: false } }), []);
+  const config = useMemo(
+    () => ({ tracking: { enabled: false }, xapi: { enabled: false } }),
+    [],
+  );
 
   return (
     <ThemeProvider mode="light">

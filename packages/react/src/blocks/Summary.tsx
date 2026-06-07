@@ -7,8 +7,10 @@ import { readBooleanStateField } from "../assessment/internal/resumeState";
 import { useAssessmentHandleRegistration } from "../assessment/internal/useAssessmentHandleRegistration";
 import { meetsPassingThreshold } from "../assessment/scoring";
 import { useAssessmentState } from "../assessment/useAssessmentState";
+import { shouldReplayResumeTelemetry } from "../assessment/shouldReplayResumeTelemetry";
 import { setLessonkitBlockType } from "../compound/blockType";
-import { normalizeComponentId } from "../runtime/validateComponentId";
+import { useLessonkit } from "../hooks";
+import { normalizeComponentId, isDevEnvironment } from "../runtime/validateComponentId";
 
 export type SummaryProps = AssessmentBaseProps & {
   statements: string[];
@@ -23,6 +25,7 @@ function SummaryInner(
   ref: React.Ref<AssessmentHandle>,
 ) {
   const checkId = useMemo(() => normalizeComponentId(props.checkId, "checkId"), [props.checkId]);
+  const { config } = useLessonkit();
   const assessment = useAssessmentState(props.enclosingLessonId);
   const [selectedIndices, setSelectedIndices] = useState<number[]>([]);
   const [passed, setPassed] = useState(false);
@@ -61,7 +64,7 @@ function SummaryInner(
     () =>
       buildAssessmentHandle({
         checkId,
-        getScore: () => (passed ? score : 0),
+        getScore: () => score,
         getMaxScore: () => maxScore,
         getAnswerGiven: () => selectedIndices.length > 0,
         resetTask: reset,
@@ -71,7 +74,7 @@ function SummaryInner(
           interactionType: INTERACTION,
           response: selected,
           correct: passedThreshold,
-          score: passed ? score : 0,
+          score,
           maxScore,
         }),
         getCurrentState: () => ({ selectedIndices, passed, checked }),
@@ -81,6 +84,19 @@ function SummaryInner(
             nextIndices = [...(state.selectedIndices as number[])];
           } else if (Array.isArray(state.selected)) {
             const legacy = state.selected as string[];
+            if (isDevEnvironment()) {
+              const seen = new Set<string>();
+              for (const text of props.statements) {
+                if (seen.has(text)) {
+                  console.warn(
+                    "[lessonkit] Summary: duplicate statement strings; legacy selected resume may be ambiguous",
+                    text,
+                  );
+                  break;
+                }
+                seen.add(text);
+              }
+            }
             nextIndices = legacy
               .map((text) => props.statements.indexOf(text))
               .filter((i) => i >= 0);
@@ -91,28 +107,29 @@ function SummaryInner(
             nextSelected.length === props.correct.length &&
             nextSelected.every((s, i) => s === props.correct[i]);
           const nextScore = nextIsCorrect ? maxScore : 0;
-          readBooleanStateField(state, "passed", (value) => {
-            setPassed(value);
-            completedRef.current = value;
-            if (value) {
-              if (!telemetryReplayedRef.current) {
-                telemetryReplayedRef.current = true;
-                assessment.answer({
-                  checkId,
-                  interactionType: INTERACTION,
-                  response: nextSelected,
-                  correct: true,
-                });
-                assessment.complete({
-                  checkId,
-                  interactionType: INTERACTION,
-                  score: nextScore,
-                  maxScore,
-                  passingScore: props.passingScore ?? maxScore,
-                });
-              }
-            }
-          });
+          const nextPassedThreshold = meetsPassingThreshold(
+            nextScore,
+            maxScore,
+            props.passingScore,
+          );
+          setPassed(nextPassedThreshold);
+          completedRef.current = nextPassedThreshold;
+          if (nextPassedThreshold && !telemetryReplayedRef.current && shouldReplayResumeTelemetry(config)) {
+            telemetryReplayedRef.current = true;
+            assessment.answer({
+              checkId,
+              interactionType: INTERACTION,
+              response: nextSelected,
+              correct: nextPassedThreshold,
+            });
+            assessment.complete({
+              checkId,
+              interactionType: INTERACTION,
+              score: nextScore,
+              maxScore,
+              passingScore: props.passingScore ?? maxScore,
+            });
+          }
           readBooleanStateField(state, "checked", setChecked);
         },
       }),
@@ -120,14 +137,16 @@ function SummaryInner(
       assessment,
       checkId,
       checked,
+      config,
       maxScore,
       passed,
       passedThreshold,
+      props.correct,
       props.passingScore,
       props.statements,
       score,
       selected,
-      selectedIndices.length,
+      selectedIndices,
     ],
   );
 
@@ -154,9 +173,9 @@ function SummaryInner(
       response: selected,
       correct: passedThreshold,
     });
-    if (passedThreshold && !completedRef.current) {
+    if ((passedThreshold || props.enableRetry === false) && !completedRef.current) {
       completedRef.current = true;
-      setPassed(true);
+      if (passedThreshold) setPassed(true);
       assessment.complete({
         checkId,
         interactionType: INTERACTION,

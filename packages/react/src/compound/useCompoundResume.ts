@@ -3,17 +3,24 @@ import type { BlockId, CompoundResumeState, CourseId } from "@lessonkit/core";
 import { loadCompoundState, saveCompoundState } from "@lessonkit/core";
 import { createSessionStoragePort } from "@lessonkit/core";
 import type { StoragePort } from "@lessonkit/core";
+import { isCompoundHydrated } from "./compoundHydration";
 import { isDevEnvironment } from "../runtime/validateComponentId";
 import { LessonkitContext } from "../context";
+import { compoundLoadOpts } from "./compoundLoadOpts";
 
-let warnedCompoundPersistFailure = false;
+const warnedCompoundPersistFailures = new Set<string>();
 
-function warnCompoundPersistFailure(): void {
-  if (warnedCompoundPersistFailure || !isDevEnvironment()) return;
-  warnedCompoundPersistFailure = true;
+function warnCompoundPersistFailure(compoundId: BlockId): void {
+  if (warnedCompoundPersistFailures.has(compoundId) || !isDevEnvironment()) return;
+  warnedCompoundPersistFailures.add(compoundId);
   console.warn(
-    "[lessonkit] compound resume state could not be saved to sessionStorage (quota or privacy mode); progress may be lost on reload.",
+    `[lessonkit] compound resume state for "${compoundId}" could not be saved to sessionStorage (quota or privacy mode); progress may be lost on reload.`,
   );
+}
+
+/** Test-only reset. */
+export function resetCompoundPersistFailureWarnings(): void {
+  warnedCompoundPersistFailures.clear();
 }
 
 export function useCompoundResume(opts: {
@@ -45,7 +52,16 @@ export function useCompoundResume(opts: {
       resumedRef.current = false;
     }
     if (!opts.enabled || !opts.courseId || resumedRef.current) return;
-    const saved = loadCompoundState(storageRef.current, opts.courseId, opts.compoundId);
+    if (isCompoundHydrated(key)) {
+      resumedRef.current = true;
+      return;
+    }
+    const saved = loadCompoundState(
+      storageRef.current,
+      opts.courseId,
+      opts.compoundId,
+      compoundLoadOpts(lessonkitCtx, opts.compoundId),
+    );
     if (saved) {
       resumedRef.current = true;
       opts.onResume?.(saved);
@@ -56,7 +72,7 @@ export function useCompoundResume(opts: {
     (state: CompoundResumeState) => {
       if (!opts.enabled || !opts.courseId) return;
       const persisted = saveCompoundState(storageRef.current, opts.courseId, opts.compoundId, state);
-      if (!persisted) warnCompoundPersistFailure();
+      if (!persisted) warnCompoundPersistFailure(opts.compoundId);
     },
     [opts.enabled, opts.courseId, opts.compoundId],
   );

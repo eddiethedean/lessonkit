@@ -19,7 +19,26 @@ import {
 
 `@lessonkit/react` forwards completion events when `config.lxpack.bridge` is `"auto"`. The init template defaults to `"off"`; set `"auto"` for packaged LMS iframe deployments.
 
+```ts
+lxpack: {
+  bridge: "auto",
+  // Required in production builds — LMS parent frame origins (scheme + host + port).
+  allowedParentOrigins: ["https://your-lms.example"],
+},
+```
+
 Extra pipeline sinks can also call `forwardTelemetryToBridge` directly.
+
+## Production security
+
+| Environment | `bridge: "auto"` behavior |
+| --- | --- |
+| Development (`import.meta.env.DEV`) | Bridge may forward without an allowlist when the parent exposes `lxpackBridge.v1` |
+| Production (`import.meta.env.PROD`) | **`allowedParentOrigins` is required** — forwarding is denied when the list is empty |
+
+List every origin your LMS shell uses to host the packaged iframe (including staging). Use the exact scheme, host, and port (no path). To discover the parent origin in a SCORM preview, open browser devtools and inspect `document.referrer` or the parent frame URL.
+
+Wire `config.observability.onLxpackBridgeMiss` so missing bridges or blocked origins surface in monitoring instead of failing silently.
 
 ## Telemetry → bridge action
 
