@@ -12,7 +12,9 @@ export type ProjectPathsInput = {
 const RESERVED_OUTPUT_SEGMENTS = new Set([".git", "node_modules", ".github"]);
 
 export function isReservedOutputPath(value: string): boolean {
-  const normalized = value.replace(/\\/g, "/").replace(/^\/+|\/+$/g, "");
+  let normalized = value.replace(/\\/g, "/");
+  while (normalized.startsWith("/")) normalized = normalized.slice(1);
+  while (normalized.endsWith("/")) normalized = normalized.slice(0, -1);
   const segments = normalized.split("/").filter(Boolean);
   return segments.some((segment) => RESERVED_OUTPUT_SEGMENTS.has(segment));
 }
