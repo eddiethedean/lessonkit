@@ -23,7 +23,7 @@ See the [5-minute guide](https://lessonkit.readthedocs.io/en/latest/guides/react
 | Tier | Example | When to use |
 | --- | --- | --- |
 | **Start** | [`npx @lessonkit/cli init`](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/getting-started-in-5-minutes.html) (external) or [`react-vite/`](react-vite/README.md) | First course, full UX patterns, or monorepo smoke test |
-| **Blocks** | [`framework-11-showcase/`](framework-11-showcase/) · [`framework-12-showcase/`](framework-12-showcase/) | Block catalog coverage (1.1 P0 assessments vs 1.2+ compound + Tier C/D) |
+| **Blocks** | [`framework-11-showcase/`](framework-11-showcase/) · [`framework-12-showcase/`](framework-12-showcase/) | Block catalog coverage (1.1 P0 assessments vs 1.2+ compound + Tier C/D + **1.6.x content wave**) |
 | **Compound** | [`interactive-book/`](interactive-book/README.md) · [`slide-deck/`](slide-deck/) · [`interactive-video/`](interactive-video/) · [`branching-scenario/`](branching-scenario/) | Books, decks, timed video, branching graphs (1.2–1.5) |
 | **Packaging** | [`lxpack-golden/`](lxpack-golden/) | SCORM/xAPI export reference and validation smoke target |
 
@@ -44,7 +44,7 @@ These workspaces use `file:../../packages/*` dependencies—they are for **monor
 | [`interactive-video/`](interactive-video/) | `lessonkit-example-interactive-video` | Safety briefing | Compound `InteractiveVideo` / `TimedCue` (1.4) |
 | [`branching-scenario/`](branching-scenario/) | `lessonkit-example-branching-scenario` | Resolution paths | Compound `BranchingScenario` / graph branches (1.5) |
 | [`framework-11-showcase/`](framework-11-showcase/) | `lessonkit-example-framework-11-showcase` | Incident Response | **Full 1.1 catalog** — foundation + P0 assessments |
-| [`framework-12-showcase/`](framework-12-showcase/) | `lessonkit-example-framework-12-showcase` | Atlas Analytics | **Full 1.2 catalog** — content, compound, Tier C/D, hotspots |
+| [`framework-12-showcase/`](framework-12-showcase/) | `lessonkit-example-framework-12-showcase` | Atlas Analytics | **1.2 catalog + 1.6.x content wave** — compound, Tier C/D, `Table`/`Timeline`/… lesson |
 | [`assessments-p0/`](assessments-p0/README.md) | `lessonkit-example-assessments-p0` | Assessment showcase | Minimal P0 sample (subset of 1.1) · on RTD |
 
 Each runnable app shares a modern LMS shell (`_shared/lms-ui.css`, `_shared/course-ui.tsx`) with themed variants.

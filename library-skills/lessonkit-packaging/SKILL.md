@@ -1,12 +1,12 @@
 ---
 name: lessonkit-packaging
 description: >-
-  Package LessonKit 1.5.x Vite apps for LMS — lessonkit build, lessonkit package with
-  scorm12/scorm2004/standalone/xapi/cmi5. Node 18+ required. Use when shipping ZIPs
+  Package LessonKit 1.6.x Vite apps for LMS — lessonkit build, lessonkit package with
+  scorm12/scorm2004/standalone/xapi/cmi5. Node 20.19+ for init; 18+ packaging legacy.
   to an LMS or configuring lessonkit.json paths for export.
 license: Apache-2.0
 metadata:
-  lessonkit-version: "1.5.0"
+  lessonkit-version: "1.6.6"
 ---
 
 # LessonKit packaging / LMS export
@@ -15,7 +15,7 @@ LessonKit packages via `@lessonkit/lxpack` (LXPack engine). The CLI wraps build 
 
 ## Prerequisites
 
-- **Node.js 18+** for `lessonkit package`
+- **Node.js 20.19+** recommended; **18+** minimum for `lessonkit package` on existing courses
 - `lessonkit build` succeeded (`dist/` exists)
 - `lessonkit.json` with `course.layout: "single-spa"`
 
@@ -24,6 +24,8 @@ LessonKit packages via `@lessonkit/lxpack` (LXPack engine). The CLI wraps build 
 ```bash
 lessonkit build
 lessonkit package --target TARGET
+lessonkit package --target scorm12 --strict   # fail on build warnings (CI parity)
+lessonkit export --no-build                 # portable .lkcourse archive
 ```
 
 | Target | Use when |

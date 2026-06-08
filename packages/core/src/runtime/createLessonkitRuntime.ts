@@ -93,6 +93,15 @@ function warnRuntimeV1Deprecated(): void {
 /**
  * Create a headless LessonKit runtime for non-React tooling and tests.
  * Powers `LessonkitProvider` from `@lessonkit/react` when `runtimeVersion` is `"v2"` (default).
+ *
+ * @example
+ * ```ts
+ * import { createLessonkitRuntime } from "@lessonkit/core";
+ *
+ * const runtime = createLessonkitRuntime({ courseId: "demo-course" });
+ * runtime.setActiveLesson("lesson-1");
+ * runtime.track("interaction", { label: "opened" }, { lessonId: "lesson-1" });
+ * ```
  */
 export function createLessonkitRuntime(
   config: HeadlessLessonkitConfig,

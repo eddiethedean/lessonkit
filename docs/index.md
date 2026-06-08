@@ -137,6 +137,7 @@ guides/react-developers/getting-started-in-5-minutes
 guides/react-developers/lms-go-live
 guides/react-developers/first-lms-export
 guides/react-developers/ship-to-lms
+guides/react-developers/troubleshooting
 guides/react-developers/quickstart
 guides/react-developers/block-cookbook
 guides/react-developers/project-structure

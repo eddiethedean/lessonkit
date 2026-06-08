@@ -12,6 +12,8 @@ LessonKit publishes **TypeScript declarations** on npm (`dist/*.d.ts`) and docum
 | TypeScript signatures only | [TypeDoc](#generated-api-typedoc) (built on Read the Docs; regenerate locally with `npm run docs:api`) |
 
 TypeDoc lists **signatures** — parameter descriptions and examples expand release over release. For behavior, prefer narrative guides first, then reference contracts.
+
+**Before opening a GitHub issue for API usage:** Check [Components and hooks](../guides/react-developers/components-and-hooks.md), the relevant [component page](components/index.md), and narrative references below. TypeDoc signatures alone are not the supported learning path for runtime behavior.
 :::
 
 ## Generated API (TypeDoc)

@@ -26,6 +26,21 @@ function resolveLessonkitVersion(explicit?: string): string {
   }
 }
 
+/**
+ * Build a portable `.lkcourse` zip (manifest envelope + interchange + dist).
+ * Prefer `lessonkit export` in course projects.
+ *
+ * @example
+ * ```ts
+ * import { exportLkcourse } from "@lessonkit/lxpack";
+ *
+ * const result = await exportLkcourse({
+ *   projectRoot: "/path/to/course",
+ *   manifest: parsedLessonkitJson,
+ *   archivePath: "handoff.lkcourse",
+ * });
+ * ```
+ */
 export async function exportLkcourse(options: ExportLkcourseOptions): Promise<ExportLkcourseResult> {
   const projectRoot = resolve(options.projectRoot);
   const manifest = options.manifest;

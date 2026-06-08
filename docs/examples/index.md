@@ -22,7 +22,7 @@ From the repo root, run `bash docs/scripts/build-docs-demos.sh` before `make htm
 | --- | --- | --- | --- | --- |
 | [react-vite](#cybersecurity-awareness-examplesreact-vite) | Yes | `lessonkit-example-react-vite` | 1.x UX | First full course / monorepo smoke |
 | [framework-11-showcase](#framework-11-showcase-examplesframework-11-showcase) | Yes | `lessonkit-example-framework-11-showcase` | 1.1 blocks | P0 assessments catalog |
-| [framework-12-showcase](#framework-12-showcase-examplesframework-12-showcase) | Yes | `lessonkit-example-framework-12-showcase` | 1.2 blocks | Content + compound + Tier C/D |
+| [framework-12-showcase](#framework-12-showcase-examplesframework-12-showcase) | Yes | `lessonkit-example-framework-12-showcase` | 1.2 + 1.6.x | Content + compound + Tier C/D + content-wave lesson |
 | [data-privacy](#data-privacy-essentials-examplesdata-privacy) | Yes | `lessonkit-example-data-privacy` | 1.x | Compliance-themed course |
 | [customer-service](#customer-de-escalation-examplescustomer-service) | Yes | `lessonkit-example-customer-service` | 1.5 branching | Support + branching scenario |
 | [lxpack-golden](#workplace-safety-briefing-exampleslxpack-golden) | Yes | `lessonkit-example-lxpack-golden` | Packaging | SCORM/xAPI export reference |

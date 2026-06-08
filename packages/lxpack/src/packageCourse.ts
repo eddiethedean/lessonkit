@@ -104,6 +104,21 @@ export { buildStagingPackage, ensureOutDirParent } from "./packaging/staging";
 /**
  * Package a built SPA into SCORM, xAPI, cmi5, or standalone LMS artifacts.
  * Prefer `lessonkit package --target …` in course projects; call directly for custom pipelines.
+ *
+ * @example
+ * ```ts
+ * import { packageLessonkitCourse } from "@lessonkit/lxpack";
+ *
+ * const result = await packageLessonkitCourse({
+ *   descriptor: manifest.course,
+ *   outDir: ".lxpack/course",
+ *   spaDistDir: "dist",
+ *   projectRoot: process.cwd(),
+ *   target: "scorm12",
+ *   strictBuild: true,
+ * });
+ * if (!result.ok) console.error(result.issues);
+ * ```
  */
 export async function packageLessonkitCourse(
   options: PackageLessonkitCourseOptions,

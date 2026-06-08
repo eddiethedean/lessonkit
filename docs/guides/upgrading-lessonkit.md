@@ -5,7 +5,7 @@ Pick the migration guide for your **current** version. After upgrading, run `les
 :::{admonition} Pin aligned versions
 :class: important
 
-Bump all `@lessonkit/*` packages to the same semver (for example **1.6.0**). Mismatched workspace versions cause subtle runtime bugs.
+Bump all `@lessonkit/*` packages to the same semver (for example **1.6.6**). Mismatched workspace versions cause subtle runtime bugs.
 :::
 
 ## Migration guides
@@ -24,7 +24,7 @@ Older jumps (linked from the table below and the [detailed migration pages](#det
 | 1.0.x | 1.1.x | [MIGRATION-1.0-to-1.1](../MIGRATION-1.0-to-1.1.md) |
 | 0.9.x | 1.0.x | [MIGRATION-0.x-to-1.0](../MIGRATION-0.x-to-1.0.md) |
 
-**Planned:** [MIGRATION-1.x-to-2.0](../MIGRATION-1.x-to-2.0.md) — deprecation removal checklist for LessonKit 2.0 (preview; not yet released).
+**Planned:** [MIGRATION-1.x-to-2.0](../MIGRATION-1.x-to-2.0.md) — deprecation removal checklist for LessonKit 2.0 (preview; not yet released). Includes [runtime v1 sunset](../MIGRATION-1.x-to-2.0.md#runtime-v1).
 
 Historical release checklists: [Release history](../project/release-history.md).
 
@@ -52,6 +52,7 @@ If you used `npx @lessonkit/cli init` recently on the latest CLI, you likely do 
 :maxdepth: 1
 
 ../MIGRATION-1.x-to-2.0
+../MIGRATION-v1-runtime
 ../MIGRATION-1.5-to-1.6
 ../MIGRATION-1.4-to-1.5
 ../MIGRATION-1.3-to-1.4

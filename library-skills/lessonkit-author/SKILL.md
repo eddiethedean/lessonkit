@@ -1,18 +1,18 @@
 ---
 name: lessonkit-author
 description: >-
-  Author and fix LessonKit 1.5.x React courses — App.tsx, lessonkit.json, Course/Lesson/Quiz
+  Author and fix LessonKit 1.6.x React courses — App.tsx, lessonkit.json, Course/Lesson/Quiz
   blocks, ThemeProvider, stable courseId/lessonId/checkId. Run lessonkit dev and build.
   Use when the workspace has lessonkit.json or mentions LessonKit, React training, or LMS courses.
 license: Apache-2.0
 metadata:
-  lessonkit-version: "1.5.0"
+  lessonkit-version: "1.6.6"
   docs: https://lessonkit.readthedocs.io/en/latest/
 ---
 
 # LessonKit course authoring
 
-You help edit **LessonKit 1.5.x** projects: Vite + React apps with a root `lessonkit.json` manifest.
+You help edit **LessonKit 1.6.x** projects: Vite + React apps with a root `lessonkit.json` manifest.
 
 ## Before you edit
 
@@ -56,9 +56,11 @@ Import from `@lessonkit/react`. Block contract: `@lessonkit/react/block-catalog.
 
 **Assessments:** `TrueFalse`, `MarkTheWords`, `FillInTheBlanks`, `DragTheWords`, `DragAndDrop`, `Summary`, `ImagePairing`, `ImageSequencing`, `ArithmeticQuiz`, `Essay`, `AssessmentSequence`, and more — see catalog v3.
 
-**Compound:** `Page`, `InteractiveBook`, `Slide`, `SlideDeck`, `TimedCue`, `InteractiveVideo`, `BranchingScenario`, `BranchNode`, `BranchChoice`
+**Compound:** `Page`, `InteractiveBook`, `Slide`, `SlideDeck`, `TimedCue`, `InteractiveVideo`, `BranchingScenario`, `BranchNode`, `BranchChoice`, `GameMap`, `MapStage`, `MapExit`
 
 **Content (1.5+):** `Embed`, `Chart`, `Text`, `Heading`, `Image`, `Video`, `Accordion`, `DialogCards`, `Flashcards`, `MemoryGame`, and others in catalog v3.
+
+**Content waves (1.6.x):** `Table`, `Timeline`, `Crossword`, `WordSearch`, `CombinationLock`, and more — see `block-catalog.v3.json`.
 
 - `LessonkitProvider` is inside `<Course>` — pass `config` for tracking/xAPI/plugins
 

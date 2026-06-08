@@ -1,6 +1,6 @@
 {
   "name": "@lessonkit/xapi",
-  "version": "1.6.0",
+  "version": "1.6.6",
   "private": false,
   "description": "xAPI statement generation primitives for LessonKit.",
   "license": "Apache-2.0",

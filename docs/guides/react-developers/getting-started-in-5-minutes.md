@@ -9,7 +9,7 @@ This guide uses **npm only**. You do not need the LessonKit GitHub monorepo unle
 :::{admonition} LMS export is a separate guide
 :class: note
 
-This page covers **local preview** in about five minutes. SCORM packaging, bridge configuration, and env setup are in [First LMS export](first-lms-export.md). For production go-live, also complete the [production checklist](production-checklist.md).
+This page covers **local preview** in about five minutes. SCORM packaging, bridge configuration, and env setup are in **[LMS Go-Live](lms-go-live.md)** (canonical). Shortcuts: [First LMS export](first-lms-export.md) · [production checklist](production-checklist.md).
 :::
 
 **Prerequisites:** See [Prerequisites](../prerequisites.md). Node.js **20.19+** recommended for `npx @lessonkit/cli init` (Vite 8).
@@ -102,12 +102,13 @@ Output goes to `dist/` (Vite SPA).
 :::{admonition} Do not preview the production bundle yet
 :class: warning
 
-`npm run build` succeeds without env vars, but **`vite preview` or opening `dist/` directly will throw** in production mode unless you add `.env` proxy URLs or disable tracking/xAPI. Keep iterating with `npm run dev`. See [First LMS export](first-lms-export.md) before uploading to an LMS.
+`npm run build` succeeds without env vars, but **`vite preview` or opening `dist/` directly will throw** in production mode unless you add `.env` proxy URLs or disable tracking/xAPI. Keep iterating with `npm run dev`. See [LMS Go-Live](lms-go-live.md) before uploading to an LMS.
 :::
 
 ## Next steps
 
-- [First LMS export](first-lms-export.md) — bridge, env, SCORM zip
+- [LMS Go-Live](lms-go-live.md) — canonical smoke test vs production path
+- [First LMS export](first-lms-export.md) — focused first-export walkthrough
 - [Ship to LMS checklist](ship-to-lms.md) — one-page go-live checklist
 - [Quickstart](quickstart.md) — add LessonKit to an existing Vite app
 - [Block cookbook](block-cookbook.md) — per-block React + manifest examples

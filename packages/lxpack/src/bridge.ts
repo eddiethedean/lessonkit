@@ -285,6 +285,19 @@ export type ForwardTelemetryToBridgeOptions = {
   allowedParentOrigins?: string[];
 };
 
+/**
+ * Map a LessonKit telemetry event to LMS bridge actions (`track`, `complete`, assessment score).
+ *
+ * @example
+ * ```ts
+ * import { forwardTelemetryToBridge } from "@lessonkit/lxpack/bridge";
+ *
+ * forwardTelemetryToBridge(event, "auto", window.parent, {
+ *   allowedParentOrigins: ["https://lms.example.com"],
+ *   onBridgeMiss: (e) => console.warn("bridge miss", e.name),
+ * });
+ * ```
+ */
 export function forwardTelemetryToBridge(
   event: TelemetryEvent,
   mode: LxpackBridgeMode = "auto",

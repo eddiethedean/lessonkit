@@ -14,6 +14,17 @@ function eventDedupKey(event: TelemetryEvent): string | undefined {
  * retry; `flushOnExit` and periodic flushes may deliver the same events more than once unless
  * the sink deduplicates. Events currently owned by an in-flight `batchSink` call are not included
  * in `flushOnExit` to avoid duplicate delivery on page unload.
+ *
+ * @example
+ * ```ts
+ * import { createTrackingClient } from "@lessonkit/core";
+ *
+ * const tracking = createTrackingClient({
+ *   sink: (event) => console.log(event.name, event),
+ *   batch: { enabled: true, flushIntervalMs: 5000 },
+ * });
+ * tracking.track({ name: "course_started", courseId: "c1", sessionId: "s1" });
+ * ```
  */
 export function createTrackingClient(opts?: {
   sink?: TelemetrySink;

@@ -15,7 +15,7 @@ Developer tooling, not a timeline authoring tool: **React + telemetry + packagin
 
 | | |
 | --- | --- |
-| **Release** | [1.6.0](https://github.com/eddiethedean/lessonkit/blob/main/CHANGELOG.md) (npm `@lessonkit/*` — keep all packages on the same version) |
+| **Latest stable** | [@lessonkit/react 1.6.6](https://www.npmjs.com/package/@lessonkit/react) on npm · [CHANGELOG](https://github.com/eddiethedean/lessonkit/blob/main/CHANGELOG.md) · `main` may include [unreleased](https://github.com/eddiethedean/lessonkit/blob/main/CHANGELOG.md#unreleased) fixes — pin all `@lessonkit/*` to the **same version** |
 | **npm** | [`@lessonkit/*`](https://www.npmjs.com/org/lessonkit) |
 | **Docs** | [lessonkit.readthedocs.io](https://lessonkit.readthedocs.io/en/latest/) |
 | **Node.js** | **20.19+** for new projects (`lessonkit init`, Vite 8). Node 18 may work for packaging-only CI agents — not supported for scaffold. |

@@ -7,9 +7,11 @@ import type { WriteLxpackProjectOptions } from "./writeProject";
 
 export type ResolveSpaDirsOptions = Pick<
   WriteLxpackProjectOptions,
-  "spaDistDir" | "lessonSpaDirs" | "projectRoot"
+  "spaDistDir" | "lessonSpaDirs"
 > & {
   descriptor: LessonkitCourseDescriptor;
+  /** When omitted, `spaDistDir` / `lessonSpaDirs` paths are resolved relative to cwd. */
+  projectRoot?: string;
 };
 
 /**

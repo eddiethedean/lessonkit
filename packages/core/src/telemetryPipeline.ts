@@ -51,6 +51,19 @@ async function invokeSink(
   }
 }
 
+/**
+ * Compose multiple telemetry sinks behind a single `emit` call.
+ *
+ * @example
+ * ```ts
+ * import { createTelemetryPipeline, createTrackingPipelineSink } from "@lessonkit/core";
+ *
+ * const pipeline = createTelemetryPipeline([
+ *   createTrackingPipelineSink("console", (e) => console.log(e.name)),
+ * ]);
+ * await pipeline.emit(event, { courseId: "c1", sessionId: "s1" });
+ * ```
+ */
 export function createTelemetryPipeline(sinks: TelemetryPipelineSink[]): TelemetryPipeline {
   const list = [...sinks];
 

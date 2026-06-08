@@ -1,6 +1,6 @@
-# Framework 1.2 showcase
+# Framework 1.2+ / 1.6.x showcase
 
-Canonical **LessonKit 1.2** demo course. Every block added in framework 1.2 appears in a cohesive four-lesson narrative (Atlas Analytics onboarding).
+Canonical **LessonKit** demo course spanning framework **1.2** blocks and the **1.6.x content wave**. Every block added in framework 1.2 appears in a cohesive four-lesson narrative (Atlas Analytics onboarding), plus a fifth in-app lesson for **1.6.x** Tier C/D content blocks.
 
 ## Blocks covered
 
@@ -10,12 +10,15 @@ Canonical **LessonKit 1.2** demo course. Every block added in framework 1.2 appe
 | Compound | `Page`, `InteractiveBook`, `AssessmentSequence` |
 | Presentation (Tier C/D) | `Accordion`, `DialogCards`, `Flashcards`, `ImageHotspots`, `ImageSlider` |
 | Assessments | `TrueFalse`, `FillInTheBlanks`, `MarkTheWords`, `DragTheWords`, `DragAndDrop`, `FindHotspot`, `FindMultipleHotspots` |
+| **1.6.x content wave** | `Table`, `Timeline`, `ImageSequence`, `Collage` (see `content-wave` lesson) |
 
-Also uses pre-1.2 structure blocks: `Course`, `Lesson`, `Scenario`, `ProgressTracker`, `ThemeProvider`.
+Also uses structure blocks: `Course`, `Lesson`, `Scenario`, `ProgressTracker`, `ThemeProvider`.
+
+**1.6.x elsewhere in the monorepo:** `GameMap`, `Crossword`, `WordSearch`, and other Tier E blocks ship in framework **1.6.6** — see the [H5P capability map](https://lessonkit.readthedocs.io/en/latest/project/h5p-capability-map.html) and [block catalog](https://lessonkit.readthedocs.io/en/latest/reference/block-catalog.html).
 
 ## single-spa layout
 
-`lessonkit.json` lists **one** LMS shell lesson (`orientation`). Additional in-app steps (`platform-tour`, `analyst-handbook`, `certification`) exist only in React routing—same pattern as [`lxpack-golden`](../lxpack-golden/).
+`lessonkit.json` lists **one** LMS shell lesson (`orientation`). Additional in-app steps (`platform-tour`, `analyst-handbook`, `certification`, `content-wave`) exist only in React routing—same pattern as [`lxpack-golden`](../lxpack-golden/).
 
 ## Run locally
 

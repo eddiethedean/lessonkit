@@ -1,6 +1,6 @@
 {
   "name": "@lessonkit/react",
-  "version": "1.6.0",
+  "version": "1.6.6",
   "private": false,
   "description": "React components and hooks for building learning experiences with LessonKit.",
   "license": "Apache-2.0",

@@ -1,6 +1,6 @@
 {
   "name": "@lessonkit/cli",
-  "version": "1.6.0",
+  "version": "1.6.6",
   "private": false,
   "description": "LessonKit CLI — init, dev, build, and package learning experiences.",
   "license": "Apache-2.0",

@@ -57,8 +57,10 @@ Use the [Vibe coding guides](../vibe-coding/index.md) with an AI editor and the 
 | --- | --- |
 | Coming from H5P | [../h5p-for-lessonkit-authors.md](../h5p-for-lessonkit-authors.md) |
 | Getting started (5 min) | [getting-started-in-5-minutes.md](getting-started-in-5-minutes.md) |
-| First LMS export | [first-lms-export.md](first-lms-export.md) |
+| **LMS Go-Live (canonical)** | [lms-go-live.md](lms-go-live.md) |
+| First LMS export (shortcut) | [first-lms-export.md](first-lms-export.md) |
 | Ship to LMS (checklist) | [ship-to-lms.md](ship-to-lms.md) |
+| Troubleshooting | [troubleshooting.md](troubleshooting.md) |
 | Quickstart (existing Vite app) | [quickstart.md](quickstart.md) |
 | Block cookbook | [block-cookbook.md](block-cookbook.md) |
 | Project structure | [project-structure.md](project-structure.md) |

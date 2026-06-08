@@ -52,13 +52,47 @@ Set `lxpack: { bridge: "auto", allowedParentOrigins: ["https://your-lms.example"
 
 Development builds allow bridge forwarding without an allowlist. **Production builds require `config.lxpack.allowedParentOrigins`** when `bridge` is `"auto"`. Add your LMS parent frame origin (scheme + host + port). Discover it from the SCORM preview URL, `document.referrer`, or browser devtools. Wire `onLxpackBridgeMiss` in observability. See [React troubleshooting](react-developers/troubleshooting.md#scorm-runs-but-lms-shows-no-completion-or-score).
 
-## Why does my packaged course show a blank page?
+(production-guard)=
+## Why does my packaged course show a blank page or throw on load?
 
-Production mode requires proxy URLs (`VITE_ANALYTICS_URL`, `VITE_XAPI_PROXY_URL`) or explicitly disabled tracking/xAPI. See [Production runtime for LMS](react-developers/first-lms-export.md#production-runtime-for-lms).
+**Production guard:** After `npm run build`, the SPA runs in production mode inside the LMS. Console-only telemetry sinks and missing proxy URLs are **rejected** — the app may throw or show a blank screen.
+
+**Fix (pick one path):**
+
+1. **Smoke test only** — Temporarily set `tracking: { enabled: false }` and `xapi: { enabled: false }` in `courseConfig.ts`, rebuild, and repackage (not for production analytics).
+2. **Production** — Copy `.env.example` → `.env`, set `VITE_ANALYTICS_URL` and `VITE_XAPI_PROXY_URL` to backend proxies, rebuild, and repackage.
+
+See **[LMS Go-Live](react-developers/lms-go-live.md)** (smoke vs production decision tree) · [Production runtime for LMS](react-developers/first-lms-export.md#production-runtime-for-lms).
 
 ## Why did `npm run build` succeed but my packaged course is blank or throws?
 
 `npm run build` only compiles the Vite bundle — it does not validate production runtime config. When the LMS launches the course, production mode enforces real analytics/xAPI transports (or explicit `enabled: false`), observability hooks, and bridge allowlists. Dev console sinks are rejected. See [Production checklist](react-developers/production-checklist.md) · [Troubleshooting — production build throws](react-developers/troubleshooting.md#production-build-or-packaged-course-throws-on-load) · [Ship to LMS checklist](react-developers/ship-to-lms.md).
+
+(strict-packaging)=
+## What does `lessonkit package --strict` do?
+
+`--strict` maps to lxpack **`strictBuild`**: packaging **fails** when the LXPack build reports **warning-severity** issues (non-fatal validation noise that would otherwise still produce a zip).
+
+Use it in CI or before production handoff when you want warnings treated as errors. It is separate from **`--strict-parity`**, which fails on React ↔ manifest ID mismatches and optional parity warnings.
+
+```bash
+lessonkit package --target scorm12 --strict
+```
+
+See [Packaging & CLI](react-developers/packaging-and-cli.md) · [CLI reference](../reference/cli.md).
+
+(passing-score)=
+## What is the default passing score for quizzes?
+
+In the **React SPA**, `Quiz` / assessment plugins use `passingScore` on the block (default **1.0** = 100% when omitted in many paths).
+
+In the **LMS shell** and **lxpack bridge**, omitted `passingScore` in `lessonkit.json` assessments also defaults to **1.0** (aligned with SPA since 1.6.x audit fixes).
+
+**Factual correctness vs pass threshold:** Telemetry may record whether the learner selected the correct answer separately from whether they met the `passingScore` threshold. Custom plugins should follow the same split. See [Telemetry](../reference/telemetry.md).
+
+## Why can't I package `fillInBlanks` / hotspot assessments into the LMS shell?
+
+Kinds such as `fillInBlanks`, `findHotspot`, and `findMultipleHotspots` are **SPA-only** — they score in the React app and emit bridge events, but are **not injected** as LMS shell quizzes. Remove them from `lessonkit.json` `assessments[]` for LMS targets, or use injectable kinds (`mcq`, `trueFalse`). The CLI prints SPA-only guidance on failure.
 
 ## How do I keep React and `lessonkit.json` in sync?
 

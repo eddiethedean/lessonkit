@@ -28,6 +28,8 @@ npm run test:integration
 | `validation-guards.test.ts` | Packaging validation guardrails |
 | `standalone-server.test.ts` | Standalone package HTTP smoke |
 | `cli-out.test.ts` | CLI `--out` output path overrides |
+| `lkcourse-roundtrip.test.ts` | `lessonkit export` → validate → import `.lkcourse` archive |
+| `framework-12-showcase-package.test.ts` | framework-12-showcase SCORM packaging (1.2 + 1.6.x content wave) |
 
 Fixtures: [`fixtures/minimal-course/`](https://github.com/eddiethedean/lessonkit/tree/main/integration/fixtures/minimal-course) — rewrites deps to monorepo `file:` URLs.
 

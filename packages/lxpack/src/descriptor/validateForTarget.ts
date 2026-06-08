@@ -42,6 +42,17 @@ function appendActivityIriIssues(
   }
 }
 
+/**
+ * Validate a course descriptor for a specific LMS export target (injectable assessments, xAPI IRI).
+ *
+ * @example
+ * ```ts
+ * import { validateDescriptorForExportTarget } from "@lessonkit/lxpack";
+ *
+ * const issues = validateDescriptorForExportTarget(descriptor, "scorm12");
+ * if (issues.length) console.warn(issues);
+ * ```
+ */
 export function validateDescriptorForExportTarget(
   descriptor: LessonkitCourseDescriptor,
   target: ExportTarget,

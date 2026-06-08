@@ -32,6 +32,18 @@ export type WriteLxpackProjectResult = {
 
 /**
  * Materialize an LXPack project tree from a LessonKit descriptor (delegates to LXPack 0.6+).
+ *
+ * @example
+ * ```ts
+ * import { writeLxpackProject } from "@lessonkit/lxpack";
+ *
+ * await writeLxpackProject({
+ *   descriptor: courseFromLessonkitJson,
+ *   outDir: ".lxpack/course",
+ *   spaDistDir: "dist",
+ *   projectRoot: process.cwd(),
+ * });
+ * ```
  */
 export async function writeLxpackProject(
   options: WriteLxpackProjectOptions,

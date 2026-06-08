@@ -48,6 +48,29 @@ Diagram and package boundaries: [Architecture overview](architecture-overview.md
 
 Details: [LMS compatibility](../reference/lms-compatibility.md) · [Export parity](react-developers/export-parity.md) · [LMS Go-Live](react-developers/lms-go-live.md).
 
+## Test and conformance evidence
+
+Runnable proof lives in the monorepo. Clone only if you need to reproduce CI locally.
+
+| Evidence | Location | What it proves |
+| --- | --- | --- |
+| Integration tests (CLI + packaging) | [integration/README.md](https://github.com/eddiethedean/lessonkit/blob/main/integration/README.md) | `lessonkit init` / `build` / `package` matrix, `.lkcourse` round-trip, framework-12 showcase packaging |
+| Playwright e2e (LMS launch) | [e2e/README.md](https://github.com/eddiethedean/lessonkit/blob/main/e2e/README.md) | SCORM 1.2/2004, xAPI, cmi5 launch smoke; golden quiz a11y (axe-core) |
+| Export parity matrix | [Export parity](react-developers/export-parity.md) | React vs LMS artifact conformance per target |
+| LXPack conformance | `npm run conformance:lxpack` · `npm run conformance:golden` | Packaging engine matrix against golden example |
+| CI workflow | [.github/workflows/checks.yml](https://github.com/eddiethedean/lessonkit/blob/main/.github/workflows/checks.yml) | Checks, docs, packaging, integration, e2e, audit, CodeQL |
+
+**Reproduce locally:** `npm ci && npm run build:packages && npm run test:integration && npm run test:e2e` (see [Contributing on GitHub](https://github.com/eddiethedean/lessonkit/blob/main/CONTRIBUTING.md)).
+
+## Compliance artifacts (status)
+
+| Artifact | Status |
+| --- | --- |
+| VPAT / ACR | Not published — interim per-block notes in [accessibility conformance](../project/accessibility-conformance.md) |
+| SOC 2 / ISO | Not documented in-repo |
+| SBOM / license matrix | Apache-2.0; run `npm audit` in your course repo; no published SBOM |
+| Data processing agreement | Not in-repo — you control LRS endpoints and telemetry sinks |
+
 ## Accessibility
 
 - **Target:** WCAG 2.1 AA patterns for shipped components (framework **1.6.x** block catalog v3).

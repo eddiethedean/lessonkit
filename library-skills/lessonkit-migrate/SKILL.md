@@ -2,11 +2,11 @@
 name: lessonkit-migrate
 description: >-
   Migrate LessonKit projects across major versions — 0.9→1.0 (telemetry, plugins),
-  1.4→1.5 (BranchingScenario, Embed, Chart, branch resume). Use when upgrading
+  1.4→1.5 (BranchingScenario), 1.5→1.6 (.lkcourse, blocks list). Use when upgrading
   @lessonkit/* deps or fixing breaking changes after a release bump.
 license: Apache-2.0
 metadata:
-  lessonkit-version: "1.5.0"
+  lessonkit-version: "1.6.6"
 ---
 
 # LessonKit version migrations
@@ -15,6 +15,7 @@ Pick the guide that matches your **from** version. Run `lessonkit build` and fix
 
 | From | Human guide |
 | --- | --- |
+| 1.5.x | https://lessonkit.readthedocs.io/en/latest/MIGRATION-1.5-to-1.6.html |
 | 1.4.x | https://lessonkit.readthedocs.io/en/latest/MIGRATION-1.4-to-1.5.html |
 | 1.3.x | https://lessonkit.readthedocs.io/en/latest/MIGRATION-1.3-to-1.4.html |
 | 1.2.x | https://lessonkit.readthedocs.io/en/latest/MIGRATION-1.2-to-1.3.html |

@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import type { AssessmentDescriptor } from "../src/types";
 import { validateInjectableAssessments } from "../src/descriptor/validateInjectableAssessments";
 
 describe("validateInjectableAssessments", () => {
@@ -10,13 +11,23 @@ describe("validateInjectableAssessments", () => {
         layout: "single-spa",
         lessons: [{ id: "l1", title: "L" }],
         assessments: [
-          {
-            kind,
-            checkId: "hs-1",
-            question: "Find",
-            imageUrl: "https://example.com/img.png",
-            hotspots: [{ id: "h1", x: 0.5, y: 0.5, width: 0.1, height: 0.1 }],
-          },
+          kind === "findHotspot"
+            ? {
+                kind: "findHotspot",
+                checkId: "hs-1",
+                question: "Find",
+                src: "/images/map.png",
+                alt: "Map",
+                correctTargetId: "t1",
+              }
+            : {
+                kind: "findMultipleHotspots",
+                checkId: "hs-1",
+                question: "Find all",
+                src: "/images/map.png",
+                alt: "Map",
+                correctTargetIds: ["t1"],
+              },
         ],
       });
       expect(issues).toHaveLength(1);
@@ -31,14 +42,14 @@ describe("validateInjectableAssessments", () => {
       title: "T",
       layout: "single-spa",
       lessons: [{ id: "l1", title: "L" }],
-      assessments: [{ checkId: "orphan", question: "Incomplete" }],
+      assessments: [{ checkId: "orphan", question: "Incomplete" } as AssessmentDescriptor],
     });
     expect(issues).toHaveLength(1);
     expect(issues[0]!.message).toContain('kind "mcq"');
     expect(issues[0]!.message).not.toContain("SPA only");
   });
 
-  it("omits SPA-only hint for non-injectable mcq assessments", () => {
+  it("omits SPA-only hint for non-injectable kinds outside the SPA-only set", () => {
     const issues = validateInjectableAssessments({
       courseId: "c",
       title: "T",
@@ -46,16 +57,14 @@ describe("validateInjectableAssessments", () => {
       lessons: [{ id: "l1", title: "L" }],
       assessments: [
         {
-          kind: "dragAndDrop",
-          checkId: "dnd-1",
-          question: "Drag",
-          items: [{ id: "i1", label: "A" }],
-          dropZones: [{ id: "z1", label: "Zone" }],
-        },
+          kind: "essay",
+          checkId: "essay-1",
+          question: "Reflect",
+        } as unknown as AssessmentDescriptor,
       ],
     });
     expect(issues).toHaveLength(1);
-    expect(issues[0]!.message).toContain("dragAndDrop");
+    expect(issues[0]!.message).toContain("essay");
     expect(issues[0]!.message).not.toContain("SPA only");
   });
 

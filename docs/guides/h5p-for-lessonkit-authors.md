@@ -14,7 +14,7 @@ LessonKit is **React-first**, not a plugin inside your LMS’s content bank. You
 
 Use the **[H5P capability map](../project/h5p-capability-map.md)** for the full table (machine name, display name, LessonKit id, roadmap status). Shipped blocks link to **[component pages](../reference/components/index.md)** with live demos.
 
-### Available today (framework 1.5.0)
+### Available today (framework 1.6.x)
 
 | H5P name | LessonKit | Notes |
 | --- | --- | --- |
@@ -53,10 +53,13 @@ Use the **[H5P capability map](../project/h5p-capability-map.md)** for the full 
 | Course shell | [`Course`](../reference/components/course-structure.md), [`Lesson`](../reference/components/course-structure.md) | One SPA vs one H5P activity per embed |
 | Progress | [`ProgressTracker`](../reference/components/course-structure.md) | Course-level progress, not per-iframe |
 | Content text / heading / image | [`Text`](../reference/components/text-and-heading.md), [`Heading`](../reference/components/text-and-heading.md), [`Image`](../reference/components/image.md) | Framework content primitives |
+| **Game Map** | [`GameMap`](../reference/components/game-map.md) + [`MapStage`](../reference/components/map-stage.md) + [`MapExit`](../reference/components/map-exit.md) | Spatial compound navigation; optional non-scored stages (**1.6.6**) |
+| **Table** | [`Table`](../reference/components/table.md) | Accessible data table (**1.6.x**) |
+| **Crossword** / **Word search** | [`Crossword`](../reference/components/crossword.md), [`WordSearch`](../reference/components/word-search.md) | Puzzle blocks (**1.6.x**) |
 
 ### Planned (roadmap / capability map)
 
-See the [capability map](../project/h5p-capability-map.md) for Tier A–E blocks not yet shipped (e.g. `SortParagraphs`, `VirtualTour`). `GameMap` and Tier C–E puzzle blocks shipped in **1.6.x**.
+See the [capability map](../project/h5p-capability-map.md) for Tier A–E blocks not yet shipped (e.g. `SortParagraphs`, `VirtualTour`).
 
 :::{admonition} Renamed on purpose
 :class: important

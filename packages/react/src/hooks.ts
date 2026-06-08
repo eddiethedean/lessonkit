@@ -2,6 +2,15 @@ import { useContext, useMemo } from "react";
 import type { CheckId, LessonId } from "@lessonkit/core";
 import { LessonkitContext } from "./context";
 
+/**
+ * Access the LessonKit runtime from a component under {@link LessonkitProvider} or {@link Course}.
+ *
+ * @example
+ * ```tsx
+ * const { track, completeLesson, progress } = useLessonkit();
+ * track("interaction", { label: "help-opened" }, { lessonId: "lesson-1" });
+ * ```
+ */
 export function useLessonkit() {
   const ctx = useContext(LessonkitContext);
   if (!ctx) throw new Error("LessonKit: missing LessonkitProvider");

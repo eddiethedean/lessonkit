@@ -57,6 +57,19 @@ async function promoteImportStaging(stagingDir: string, targetDir: string): Prom
   }
 }
 
+/**
+ * Extract a `.lkcourse` archive into a project directory (manifest + dist tree).
+ *
+ * @example
+ * ```ts
+ * import { importLkcourse } from "@lessonkit/lxpack";
+ *
+ * const result = await importLkcourse({
+ *   archivePath: "handoff.lkcourse",
+ *   projectRoot: "/path/to/dest",
+ * });
+ * ```
+ */
 export async function importLkcourse(
   options: ImportLkcourseOptions,
 ): Promise<ImportLkcourseResult> {

@@ -109,6 +109,19 @@ export type LessonCompletionEmitter = (
   durationMs?: number,
 ) => void;
 
+/**
+ * Mark a lesson complete in progress state and emit `lesson_completed` when newly completed.
+ *
+ * @example
+ * ```ts
+ * completeLessonWithTelemetry({
+ *   progress,
+ *   lessonId: "lesson-1",
+ *   nowMs: Date.now(),
+ *   emitLessonCompleted: (id, durationMs) => track("lesson_completed", { lessonId: id, durationMs }),
+ * });
+ * ```
+ */
 export function completeLessonWithTelemetry(opts: {
   progress: ProgressController;
   lessonId: LessonId;
@@ -121,6 +134,19 @@ export function completeLessonWithTelemetry(opts: {
   return true;
 }
 
+/**
+ * Complete the active lesson (if any), then mark the course complete and emit `course_completed`.
+ *
+ * @example
+ * ```ts
+ * completeCourseWithTelemetry({
+ *   progress,
+ *   nowMs: Date.now(),
+ *   emitLessonCompleted: (id) => track("lesson_completed", { lessonId: id }),
+ *   emitCourseCompleted: () => track("course_completed", {}),
+ * });
+ * ```
+ */
 export function completeCourseWithTelemetry(opts: {
   progress: ProgressController;
   nowMs: number;
