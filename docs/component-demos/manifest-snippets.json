@@ -1,0 +1,98 @@
+{
+  "true-false": {
+    "note": "Add under `course.assessments[]`. `checkId` must match the React prop.",
+    "snippet": "{\n  \"checkId\": \"phishing-tf\",\n  \"kind\": \"trueFalse\",\n  \"question\": \"Phishing emails always use your real name in the greeting.\",\n  \"answer\": false\n}"
+  },
+  "quiz": {
+    "note": "Omit `kind` or set `\"kind\": \"mcq\"`. Choices and answer must match React props exactly.",
+    "snippet": "{\n  \"checkId\": \"verify-quiz\",\n  \"kind\": \"mcq\",\n  \"question\": \"What should you verify before clicking a password-reset link?\",\n  \"choices\": [\"The sender domain\", \"The email font\", \"How urgent it sounds\"],\n  \"answer\": \"The sender domain\"\n}"
+  },
+  "knowledge-check": {
+    "note": "Same manifest shape as `Quiz`. Prefer importing `Quiz` in new React code.",
+    "snippet": "{\n  \"checkId\": \"kc-demo\",\n  \"kind\": \"mcq\",\n  \"question\": \"Which channel is approved for password resets?\",\n  \"choices\": [\"Self-service portal\", \"Reply to the email\", \"Text a colleague\"],\n  \"answer\": \"Self-service portal\"\n}"
+  },
+  "fill-in-the-blanks": {
+    "note": "Use `template` with `*` blanks in React; manifest can list explicit `blanks` for packaging.",
+    "snippet": "{\n  \"checkId\": \"report-fib\",\n  \"kind\": \"fillInBlanks\",\n  \"question\": \"Report suspicious messages to the security team within one hour.\",\n  \"template\": \"Report suspicious messages to the *security* team within *one hour*.\",\n  \"blanks\": [\n    { \"id\": \"blank-0\", \"answer\": \"security\" },\n    { \"id\": \"blank-1\", \"answer\": \"one hour\" }\n  ]\n}"
+  },
+  "mark-the-words": {
+    "snippet": "{\n  \"checkId\": \"policy-mtw\",\n  \"kind\": \"markTheWords\",\n  \"question\": \"Never share your password or MFA codes with colleagues.\",\n  \"correctWords\": [\"password\", \"MFA\"]\n}"
+  },
+  "drag-the-words": {
+    "snippet": "{\n  \"checkId\": \"action-dtw\",\n  \"kind\": \"dragTheWords\",\n  \"question\": \"Use Report phishing instead of forwarding suspicious mail.\",\n  \"zones\": [\"Report phishing\"]\n}"
+  },
+  "drag-and-drop": {
+    "snippet": "{\n  \"checkId\": \"channel-dad\",\n  \"kind\": \"dragAndDrop\",\n  \"question\": \"Sort channels by risk\",\n  \"items\": [\"email\", \"portal\"],\n  \"targets\": [\"risk\", \"safe\"]\n}"
+  },
+  "summary": {
+    "snippet": "{\n  \"checkId\": \"summary-1\",\n  \"kind\": \"summary\",\n  \"question\": \"Select the correct policy statements.\",\n  \"statements\": [\"Wear PPE\", \"Report hazards\", \"Ignore alarms\"],\n  \"correct\": [\"Wear PPE\", \"Report hazards\"]\n}"
+  },
+  "essay": {
+    "note": "Essay blocks are typically completion-scored; include `checkId` for telemetry and export parity.",
+    "snippet": "{\n  \"checkId\": \"policy-essay\",\n  \"kind\": \"essay\",\n  \"question\": \"Describe how you would handle a suspicious invoice request.\"\n}"
+  },
+  "combination-lock": {
+    "snippet": "{\n  \"checkId\": \"vault-lock\",\n  \"kind\": \"combinationLock\",\n  \"question\": \"Enter the vault code.\",\n  \"combination\": \"1234\"\n}"
+  },
+  "crossword": {
+    "snippet": "{\n  \"checkId\": \"security-crossword\",\n  \"kind\": \"crossword\",\n  \"question\": \"Complete the security crossword.\"\n}"
+  },
+  "word-search": {
+    "snippet": "{\n  \"checkId\": \"policy-ws\",\n  \"kind\": \"wordSearch\",\n  \"question\": \"Find the security terms.\",\n  \"words\": [\"PHISH\", \"MFA\"]\n}"
+  },
+  "image-pairing": {
+    "snippet": "{\n  \"checkId\": \"ppe-pairing\",\n  \"kind\": \"imagePairing\",\n  \"question\": \"Match the PPE pairs.\"\n}"
+  },
+  "image-sequencing": {
+    "snippet": "{\n  \"checkId\": \"procedure-seq\",\n  \"kind\": \"imageSequencing\",\n  \"question\": \"Order the procedure steps.\",\n  \"correctOrder\": [\"step-1\", \"step-2\"]\n}"
+  },
+  "arithmetic-quiz": {
+    "snippet": "{\n  \"checkId\": \"arith-quiz\",\n  \"kind\": \"arithmeticQuiz\",\n  \"question\": \"Quick math check\",\n  \"problems\": [\n    { \"question\": \"3 + 4\", \"answer\": \"7\" }\n  ]\n}"
+  },
+  "find-hotspot": {
+    "snippet": "{\n  \"checkId\": \"hazard-hotspot\",\n  \"kind\": \"findHotspot\",\n  \"question\": \"Locate the blocked aisle.\",\n  \"src\": \"./images/floor-plan.svg\",\n  \"alt\": \"Floor plan\",\n  \"correctTargetId\": \"hazard\"\n}"
+  },
+  "find-multiple-hotspots": {
+    "snippet": "{\n  \"checkId\": \"multi-hotspot\",\n  \"kind\": \"findMultipleHotspots\",\n  \"question\": \"Mark all hazards.\",\n  \"src\": \"./images/floor-plan.svg\",\n  \"alt\": \"Floor plan\",\n  \"correctTargetIds\": [\"cable\", \"spill\"]\n}"
+  },
+  "assessment-sequence": {
+    "note": "The sequence container uses **`blockId`**, not `checkId`. Set a stable `blockId` when `config.session.persistCompoundState` is true so learners resume the active step.\n\nList **each child** `checkId` under `course.assessments[]`:",
+    "snippet": "[\n  {\n    \"checkId\": \"seq-tf\",\n    \"kind\": \"trueFalse\",\n    \"question\": \"Public Wi‑Fi is safe for payroll access.\",\n    \"answer\": false\n  },\n  {\n    \"checkId\": \"seq-quiz\",\n    \"kind\": \"mcq\",\n    \"question\": \"Best first step for a suspicious invoice?\",\n    \"choices\": [\"Pay immediately\", \"Verify through procurement\"],\n    \"answer\": \"Verify through procurement\"\n  }\n]"
+  },
+  "interactive-book": {
+    "note": "Compound blocks are authored in React — there is no `lessonkit.json` row for `InteractiveBook` itself.\n\n- Set stable **`blockId`** on `InteractiveBook` and each child **`Page`** when `config.session.persistCompoundState` is true (default).\n- Add nested assessment **`checkId`** values under `course.assessments[]` (for example `book-tf` on a page).\n- Session resume stores page index and child assessment state. See [Core — compound state](../core.md#compound-state-and-resume)."
+  },
+  "page": {
+    "note": "`Page` has no manifest entry — it is a child of [`InteractiveBook`](interactive-book.md).\n\n- Each `Page` needs a stable **`blockId`** for compound resume when persistence is enabled.\n- The parent book owns navigation and stored state.\n- Mirror any nested **`checkId`** values in `course.assessments[]` like standalone assessments."
+  },
+  "slide-deck": {
+    "note": "No `lessonkit.json` row for `SlideDeck` — compose slides in React.\n\n- Set **`blockId`** on `SlideDeck` and each **`Slide`** when `persistCompoundState` is enabled.\n- Add child assessment **`checkId`** values (for example `deck-tf`) under `course.assessments[]`.\n- Resume persists active slide index and child assessment state."
+  },
+  "slide": {
+    "note": "`Slide` is a [`SlideDeck`](slide-deck.md) child — no manifest row for the slide itself.\n\n- Stable **`blockId`** per slide helps resume and telemetry URNs.\n- Nested assessments need matching `course.assessments[]` entries."
+  },
+  "interactive-video": {
+    "note": "No manifest row for `InteractiveVideo` — author [`TimedCue`](timed-cue.md) children in React.\n\n- Set **`blockId`** on the video compound when `persistCompoundState` is enabled.\n- List each scored cue's **`checkId`** under `course.assessments[]`.\n- Resume stores playback time and completed cue state."
+  },
+  "timed-cue": {
+    "note": "`TimedCue` is a child of [`InteractiveVideo`](interactive-video.md) — no manifest row for the cue wrapper.\n\n- Scored children inside a cue need **`checkId`** entries in `course.assessments[]`.\n- Set **`mustComplete`** on cues that should block video progress."
+  },
+  "branching-scenario": {
+    "note": "No manifest row for `BranchingScenario` unless nodes contain scored blocks.\n\n- Set stable **`blockId`** and valid **`startNodeId`** when using session resume.\n- Optional **`showPathScore`** aggregates visited-path weights from [`BranchChoice`](branch-choice.md).\n- Validate the graph with `validateBranchGraph()` from `@lessonkit/core`. See [Core — branching](../core.md#branching-scenario-meta).\n- Add `course.assessments[]` only for embedded checks (for example `branch-tf` on a terminal node)."
+  },
+  "branch-node": {
+    "note": "`BranchNode` is a child of [`BranchingScenario`](branching-scenario.md) — configure the graph in React, not `lessonkit.json`.\n\n- Unique **`nodeId`** per node; **`startNodeId`** on the parent must match one node.\n- Mark ending nodes with **`terminal`** when the path should stop."
+  },
+  "branch-choice": {
+    "note": "`BranchChoice` links [`BranchNode`](branch-node.md) steps — no manifest entry.\n\n- **`targetNodeId`** must reference another node in the same scenario.\n- Optional **`scoreWeight`** contributes to `showPathScore` on the parent scenario."
+  },
+  "game-map": {
+    "note": "No manifest row for `GameMap` — author [`MapStage`](map-stage.md) and [`MapExit`](map-exit.md) children in React.\n\n- Set **`blockId`**, **`startStageId`**, and stable **`stageId`** on each stage when resume is enabled.\n- Nested assessment **`checkId`** values belong in `course.assessments[]`.\n- Enable **`showMapScore`** when stages contain scored children or weighted exits."
+  },
+  "map-stage": {
+    "note": "`MapStage` is a child of [`GameMap`](game-map.md) — no manifest row for the stage itself.\n\n- Unique **`stageId`** per stage; **`startStageId`** on the parent must match one stage.\n- Children may include `MapExit`, content blocks, and assessments."
+  },
+  "map-exit": {
+    "note": "`MapExit` links [`MapStage`](map-stage.md) steps inside a [`GameMap`](game-map.md) — no manifest entry.\n\n- **`targetStageId`** must reference another stage in the same map.\n- Optional **`scoreWeight`** when `showMapScore` is enabled on the parent."
+  }
+}

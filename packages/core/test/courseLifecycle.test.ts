@@ -67,7 +67,7 @@ describe("courseLifecycle", () => {
     expect(emit).toHaveBeenCalledTimes(1);
   });
 
-  it("tryEmitCourseStarted reports unmarked storage when alreadyEmittedToSink is true", async () => {
+  it("tryEmitCourseStarted persists mark when alreadyEmittedToSink is true but storage is unmarked", async () => {
     const storage = createNoopStorage();
     const ctx = {
       courseId: "c" as const,
@@ -78,17 +78,14 @@ describe("courseLifecycle", () => {
     };
     const result = await tryEmitCourseStarted(ctx, { emitCourseStartedEvent: () => true }, true);
     expect(result.emitted).toBe(true);
-    expect(result.marked).toBe(false);
+    expect(result.marked).toBe(true);
   });
 
-  it("tryEmitCourseStarted reports marked when in-memory dedupe succeeds despite failed durable write", async () => {
+  it("tryEmitCourseStarted reports marked false when durable write fails", async () => {
     const memory = new Map<string, string>();
     const storage = {
       getItem: (k: string) => memory.get(k) ?? null,
-      setItem: (k: string, v: string) => {
-        memory.set(k, v);
-        return false;
-      },
+      setItem: (_k: string, _v: string) => false,
     };
     const ctx = {
       courseId: "c" as const,
@@ -100,10 +97,8 @@ describe("courseLifecycle", () => {
     const emit = vi.fn(() => true);
     const first = await tryEmitCourseStarted(ctx, { emitCourseStartedEvent: emit }, false);
     expect(first.emitted).toBe(true);
-    expect(first.marked).toBe(true);
-    const second = await tryEmitCourseStarted(ctx, { emitCourseStartedEvent: emit }, first.emitted);
-    expect(second.emitted).toBe(true);
-    expect(emit).toHaveBeenCalledTimes(1);
+    expect(first.marked).toBe(false);
+    expect(memory.size).toBe(0);
   });
 
   it("tryEmitCourseStarted retries emit when storage is marked but sink has not received event", async () => {
@@ -185,5 +180,22 @@ describe("courseLifecycle", () => {
     });
     expect(ok).toBe(true);
     expect(events).toEqual(["lesson:l1", "course"]);
+  });
+
+  it("completeCourseWithTelemetry emits active lesson when course was already completed", () => {
+    const progress = createProgressController();
+    progress.setActiveLesson("l1", 0);
+    progress.completeLesson("l1", 10);
+    progress.completeCourse();
+    progress.setActiveLesson("l2", 20);
+    const events: string[] = [];
+    const ok = completeCourseWithTelemetry({
+      progress,
+      nowMs: 50,
+      emitLessonCompleted: (id, ms) => events.push(`lesson:${id}:${ms ?? ""}`),
+      emitCourseCompleted: () => events.push("course"),
+    });
+    expect(ok).toBe(false);
+    expect(events).toEqual(["lesson:l2:30"]);
   });
 });

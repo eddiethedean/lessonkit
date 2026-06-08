@@ -31,6 +31,10 @@ export type LessonkitObservabilityConfig = {
     droppedChildKeys?: string[];
     corrupt?: boolean;
   }) => void;
+  /** Duplicate checkId registered in the same compound container. */
+  onCompoundDuplicateCheckId?: (ctx: { checkId: string }) => void;
+  /** config.storage changed after LessonkitProvider mount (ignored in production). */
+  onStoragePortChangeIgnored?: () => void;
 };
 
 export function createXapiQueueFromObservability(

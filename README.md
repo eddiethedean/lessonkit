@@ -15,10 +15,10 @@ Developer tooling, not a timeline authoring tool: **React + telemetry + packagin
 
 | | |
 | --- | --- |
-| **Release** | [1.5.0](https://github.com/eddiethedean/lessonkit/blob/main/CHANGELOG.md#150---2026-06-06) |
+| **Latest stable** | [@lessonkit/react 1.6.0](https://www.npmjs.com/package/@lessonkit/react) on npm · [CHANGELOG](https://github.com/eddiethedean/lessonkit/blob/main/CHANGELOG.md) — pin all `@lessonkit/*` to the **same version** |
 | **npm** | [`@lessonkit/*`](https://www.npmjs.com/org/lessonkit) |
 | **Docs** | [lessonkit.readthedocs.io](https://lessonkit.readthedocs.io/en/latest/) |
-| **Node.js** | **18+** minimum; **20.19+** recommended (CLI scaffold uses Vite 8; monorepo CI and e2e use Node 20) |
+| **Node.js** | **20.19+** for new projects (`lessonkit init`, Vite 8). Node 18 may work for packaging-only CI agents — not supported for scaffold. |
 
 ---
 
@@ -27,12 +27,12 @@ Developer tooling, not a timeline authoring tool: **React + telemetry + packagin
 | Path | Start here |
 | --- | --- |
 | **Not sure?** | [Start here](https://lessonkit.readthedocs.io/en/latest/guides/start-here.html) on Read the Docs |
-| **New course (CLI)** | `npx @lessonkit/cli init` → [5-minute guide](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/getting-started-in-5-minutes.html) · [First LMS export](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/first-lms-export.html) |
+| **New course (CLI)** | `npx @lessonkit/cli init` → [5-minute guide](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/getting-started-in-5-minutes.html) · [LMS Go-Live](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/lms-go-live.html) |
 | **AI-assisted authoring** | [Vibe coding](https://lessonkit.readthedocs.io/en/latest/guides/vibe-coding/index.html) · [Library Skills](https://lessonkit.readthedocs.io/en/latest/guides/library-skills.html) |
 | **Existing React app** | `npm install @lessonkit/react` (+ CLI as devDep) → [Quickstart — add to Vite](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/quickstart.html#add-to-an-existing-vite-react-app) |
 | **Contribute** | Clone this repo → [Contributing](CONTRIBUTING.md) |
 
-**Live demos:** [Examples on Read the Docs](https://lessonkit.readthedocs.io/en/latest/examples/index.html) · **Block catalogs:** [1.1](examples/framework-11-showcase) · [1.2](examples/framework-12-showcase)
+**Live demos:** [Examples on Read the Docs](https://lessonkit.readthedocs.io/en/latest/examples/index.html) · **Monorepo block showcases (contributors):** [1.1](examples/framework-11-showcase) · [1.2](examples/framework-12-showcase)
 
 ---
 
@@ -75,7 +75,7 @@ Core building blocks for courses, assessments, compound layouts (books, decks, v
 | **Assessments** | `TrueFalse`, `FillInTheBlanks`, `DragAndDrop`, `Summary`, and more |
 | **Delivery** | SCORM 1.2/2004, standalone, xAPI, cmi5 from one Vite app |
 
-Full component list with props and H5P mappings: [block catalog](https://lessonkit.readthedocs.io/en/latest/reference/block-catalog.html) · [components & hooks](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/components-and-hooks.html). Tier labels (A/B/C/D) in the catalog map to [H5P capability priorities](https://lessonkit.readthedocs.io/en/latest/project/h5p-capability-map.html). H5P is a **pattern reference only**—LessonKit does not import `.h5p` packages or integrate with H5P Hub.
+Full component list with props and H5P mappings: [block catalog](https://lessonkit.readthedocs.io/en/latest/reference/block-catalog.html) · [component pages](https://lessonkit.readthedocs.io/en/latest/reference/components/index.html) (live demos) · [components & hooks](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/components-and-hooks.html). Tier labels (A/B/C/D) in the catalog map to [H5P capability priorities](https://lessonkit.readthedocs.io/en/latest/project/h5p-capability-map.html). H5P is a **pattern reference only**—LessonKit does not import `.h5p` packages or integrate with H5P Hub.
 
 - **Identity v1** — Required `courseId`, `lessonId`, and `checkId`; stable URNs for telemetry and xAPI
 - **Telemetry & xAPI** — Session-aware events, batching, pluggable sinks; statement mapping via `@lessonkit/xapi`
@@ -113,7 +113,7 @@ npm run dev
 
 Open the URL Vite prints. Follow the [5-minute getting started guide](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/getting-started-in-5-minutes.html) to edit your first quiz.
 
-When you are ready to export to an LMS, continue with [First LMS export](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/first-lms-export.html).
+When you are ready to export to an LMS, continue with [LMS Go-Live](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/lms-go-live.html).
 
 (`init` runs `npm install` by default.) Use `npx lessonkit dev` or a global CLI (`npm install -g @lessonkit/cli`) if you prefer.
 
@@ -143,6 +143,14 @@ Optional: `@lessonkit/themes`, `@lessonkit/accessibility`, `@lessonkit/core` (he
 ## How it works
 
 ```text
+  Dev preview (npm run dev)     LMS production (package + upload)
+  ───────────────────────     ─────────────────────────────────
+  bridge: off OK              bridge: auto + allowedParentOrigins
+  telemetry optional          observability hooks + real transports
+  local Vite only             build → package → staging LMS QA
+```
+
+```text
   Author (React + lessonkit.json)
            │
            ▼
@@ -155,7 +163,7 @@ Optional: `@lessonkit/themes`, `@lessonkit/accessibility`, `@lessonkit/core` (he
          LMS upload
 ```
 
-At runtime, `@lessonkit/react` emits telemetry and xAPI, and forwards scores to an embedded LXPack bridge when packaged.
+At runtime, `@lessonkit/react` emits telemetry and xAPI, and forwards scores to an embedded LXPack bridge when packaged. **Dev preview** disables delivery by default in the init template; **LMS production** requires the [LMS Go-Live guide](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/lms-go-live.html).
 
 ---
 

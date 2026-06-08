@@ -42,16 +42,12 @@ export function TimedCue(props: TimedCueProps) {
       data-testid={`timed-cue-${props.cueIndex ?? 0}`}
       data-lk-cue-at={props.atSeconds}
       className="lk-timed-cue-overlay"
-      style={{
-        position: "relative",
-        zIndex: 2,
-        background: "var(--lk-surface, #fff)",
-        padding: "1rem",
-        border: "1px solid var(--lk-border, #ccc)",
-        marginTop: "0.5rem",
-      }}
     >
-      {props.hidden ? null : props.label ? <p data-testid="timed-cue-label">{props.label}</p> : null}
+      {props.hidden ? null : props.label ? (
+        <p className="lk-timed-cue-label" data-testid="timed-cue-label">
+          {props.label}
+        </p>
+      ) : null}
       <CompoundPageIndexProvider pageIndex={props.cueIndex ?? 0}>
         {child}
       </CompoundPageIndexProvider>

@@ -386,6 +386,40 @@ describe("packageLessonkitCourse errors", () => {
     }
   });
 
+  it("returns ok false when successful build reports error-severity issues", async () => {
+    packageLessonkit.mockImplementationOnce(async (opts) => {
+      const { realpath } = await import("node:fs/promises");
+      const stagingRoot = await realpath(String(opts.courseDir));
+      return {
+        ok: true,
+        target: "scorm12",
+        fileCount: 1,
+        outputPath: join(stagingRoot, ".lxpack/out/course-scorm12.zip"),
+        manifest: { title: "Test" },
+        issues: [{ severity: "error", message: "fatal build issue", path: "dist" }],
+      };
+    });
+
+    const root = await makeTempDir();
+    const dist = join(root, "dist");
+    await mkdir(dist, { recursive: true });
+    await writeFile(join(dist, "index.html"), "<html></html>", "utf-8");
+    await writeMinimalParitySource(root, descriptor);
+
+    const result = await packageLessonkitCourse({
+      descriptor,
+      outDir: join(root, "course"),
+      spaDistDir: dist,
+      projectRoot: root,
+      target: "scorm12",
+    });
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.issues.some((i) => i.message?.includes("fatal build issue"))).toBe(true);
+    }
+  });
+
   it("returns ok false when packageLessonkit build fails", async () => {
     packageLessonkit.mockResolvedValueOnce({
       ok: false,
@@ -409,6 +443,108 @@ describe("packageLessonkitCourse errors", () => {
 
     expect(result.ok).toBe(false);
     if (!result.ok) expect(result.issues[0]?.message).toContain("build failed");
+  });
+
+  it("succeeds with parity warnings when strictParity is disabled", async () => {
+    const parityModule = await import("../src/validateReactParity");
+    vi.spyOn(parityModule, "validateReactManifestParity").mockReturnValueOnce([
+      { path: "src/", message: "optional warning", severity: "warning" },
+    ]);
+
+    packageLessonkit.mockImplementationOnce(async (opts) => {
+      const { realpath } = await import("node:fs/promises");
+      const stagingRoot = await realpath(String(opts.courseDir));
+      return {
+        ok: true,
+        target: "scorm12",
+        fileCount: 1,
+        outputPath: join(stagingRoot, ".lxpack/out/course-scorm12.zip"),
+        manifest: { title: "Test" },
+        issues: [],
+      };
+    });
+
+    const root = await makeTempDir();
+    const dist = join(root, "dist");
+    await mkdir(dist, { recursive: true });
+    await writeFile(join(dist, "index.html"), "<html></html>", "utf-8");
+    await writeMinimalParitySource(root, descriptor);
+
+    const result = await packageLessonkitCourse({
+      descriptor,
+      outDir: join(root, "course"),
+      spaDistDir: dist,
+      projectRoot: root,
+      target: "scorm12",
+    });
+
+    expect(result.ok).toBe(true);
+  });
+
+  it("succeeds with build warnings when strictBuild is disabled", async () => {
+    packageLessonkit.mockImplementationOnce(async (opts) => {
+      const { realpath } = await import("node:fs/promises");
+      const stagingRoot = await realpath(String(opts.courseDir));
+      return {
+        ok: true,
+        target: "scorm12",
+        fileCount: 1,
+        outputPath: join(stagingRoot, ".lxpack/out/course-scorm12.zip"),
+        manifest: { title: "Test" },
+        issues: [{ severity: "warning", message: "build warning", path: "dist" }],
+      };
+    });
+
+    const root = await makeTempDir();
+    const dist = join(root, "dist");
+    await mkdir(dist, { recursive: true });
+    await writeFile(join(dist, "index.html"), "<html></html>", "utf-8");
+    await writeMinimalParitySource(root, descriptor);
+
+    const result = await packageLessonkitCourse({
+      descriptor,
+      outDir: join(root, "course"),
+      spaDistDir: dist,
+      projectRoot: root,
+      target: "scorm12",
+    });
+
+    expect(result.ok).toBe(true);
+  });
+
+  it("returns ok false for build warnings when strictBuild is enabled", async () => {
+    packageLessonkit.mockImplementationOnce(async (opts) => {
+      const { realpath } = await import("node:fs/promises");
+      const stagingRoot = await realpath(String(opts.courseDir));
+      return {
+        ok: true,
+        target: "scorm12",
+        fileCount: 1,
+        outputPath: join(stagingRoot, ".lxpack/out/course-scorm12.zip"),
+        manifest: { title: "Test" },
+        issues: [{ severity: "warning", message: "build warning", path: "dist" }],
+      };
+    });
+
+    const root = await makeTempDir();
+    const dist = join(root, "dist");
+    await mkdir(dist, { recursive: true });
+    await writeFile(join(dist, "index.html"), "<html></html>", "utf-8");
+    await writeMinimalParitySource(root, descriptor);
+
+    const result = await packageLessonkitCourse({
+      descriptor,
+      outDir: join(root, "course"),
+      spaDistDir: dist,
+      projectRoot: root,
+      target: "scorm12",
+      strictBuild: true,
+    });
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.issues.some((i) => i.message?.includes("build warning"))).toBe(true);
+    }
   });
 
   it("returns ok false for parity warnings when strictParity is enabled", async () => {

@@ -1,5 +1,5 @@
 import { slugifyId } from "@lessonkit/core";
-import { cp, mkdir, readdir, readFile, rename, rm, writeFile } from "node:fs/promises";
+import { cp, mkdir, readdir, readFile, rename, rm, stat, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { randomUUID } from "node:crypto";
 import { basename, dirname, join, resolve } from "node:path";
@@ -108,6 +108,61 @@ async function applyTemplateSubstitutions(projectDir: string, projectName: strin
   await writeFile(appPath, appSource, "utf8");
 }
 
+async function backupConflictingFiles(
+  stagingDir: string,
+  projectDir: string,
+): Promise<Map<string, Buffer>> {
+  const backups = new Map<string, Buffer>();
+  const stagingEntries = await readdir(stagingDir, { withFileTypes: true });
+  for (const entry of stagingEntries) {
+    const destPath = join(projectDir, entry.name);
+    if (!existsSync(destPath)) continue;
+    const destStat = await stat(destPath);
+    if (destStat.isFile()) {
+      backups.set(entry.name, await readFile(destPath));
+    }
+  }
+  return backups;
+}
+
+async function rollbackPromotedFiles(
+  projectDir: string,
+  stagingDir: string,
+  preExisting: Set<string>,
+  backups: Map<string, Buffer>,
+): Promise<void> {
+  const failures: string[] = [];
+  let stagingEntries;
+  try {
+    stagingEntries = await readdir(stagingDir, { withFileTypes: true });
+  } catch {
+    return;
+  }
+  for (const entry of stagingEntries) {
+    if (preExisting.has(entry.name)) continue;
+    try {
+      await rm(join(projectDir, entry.name), { recursive: true, force: true });
+    } catch (err) {
+      failures.push(
+        `remove ${entry.name}: ${err instanceof Error ? err.message : String(err)}`,
+      );
+    }
+  }
+  for (const [name, content] of backups) {
+    try {
+      await writeFile(join(projectDir, name), content);
+    } catch (err) {
+      failures.push(`restore ${name}: ${err instanceof Error ? err.message : String(err)}`);
+    }
+  }
+  if (failures.length > 0) {
+    throw new CliError(`Init rollback failed: ${failures.join("; ")}`, {
+      code: "RUNTIME",
+      exitCode: EXIT_INVALID_PROJECT,
+    });
+  }
+}
+
 async function promoteStagingToProjectDir(stagingDir: string, projectDir: string): Promise<void> {
   await mkdir(projectDir, { recursive: true });
   const entries = await readdir(stagingDir, { withFileTypes: true });
@@ -132,6 +187,8 @@ export const __testInitHelpers = {
   escapeJsxString,
   copyTemplate,
   promoteStagingToProjectDir,
+  rollbackPromotedFiles,
+  backupConflictingFiles,
 };
 
 export async function runInit(opts: InitOptions, logger: CliLogger): Promise<CliJsonResult> {
@@ -169,10 +226,13 @@ export async function runInit(opts: InitOptions, logger: CliLogger): Promise<Cli
   }
 
   if (opts.here && !(await isDirEmptyOrDotfilesOnly(projectDir)) && !opts.force) {
-    throw new CliError(`Directory is not empty: ${projectDir}. Use --force to initialize anyway.`, {
-      code: "INVALID_PROJECT",
-      exitCode: EXIT_INVALID_PROJECT,
-    });
+    throw new CliError(
+      `Directory is not empty: ${projectDir}. Use --here --force only when the directory is empty or contains dotfiles only (e.g. .git).`,
+      {
+        code: "INVALID_PROJECT",
+        exitCode: EXIT_INVALID_PROJECT,
+      },
+    );
   }
 
   if (opts.here && opts.force && !(await isDirEmptyOrDotfilesOnly(projectDir))) {
@@ -207,7 +267,25 @@ export async function runInit(opts: InitOptions, logger: CliLogger): Promise<Cli
     }
 
     if (opts.here) {
-      await promoteStagingToProjectDir(stagingDir, projectDir);
+      const preExisting = new Set(await readdir(projectDir));
+      const backups = await backupConflictingFiles(stagingDir, projectDir);
+      try {
+        await __testInitHelpers.promoteStagingToProjectDir(stagingDir, projectDir);
+      } catch (promoteErr) {
+        try {
+          await rollbackPromotedFiles(projectDir, stagingDir, preExisting, backups);
+        } catch (rollbackErr) {
+          const promoteMessage =
+            promoteErr instanceof Error ? promoteErr.message : String(promoteErr);
+          const rollbackMessage =
+            rollbackErr instanceof Error ? rollbackErr.message : String(rollbackErr);
+          throw new CliError(`${promoteMessage}; ${rollbackMessage}`, {
+            code: "RUNTIME",
+            exitCode: EXIT_INVALID_PROJECT,
+          });
+        }
+        throw promoteErr;
+      }
       await rm(stagingDir, { recursive: true, force: true });
     } else {
       await rename(stagingDir, projectDir);

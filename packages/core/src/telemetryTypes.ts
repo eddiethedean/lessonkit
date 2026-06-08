@@ -28,7 +28,16 @@ export type TelemetryEventName =
   | "parallax_slide_viewed"
   | "questionnaire_submitted"
   | "branch_node_viewed"
-  | "branch_selected";
+  | "branch_selected"
+  | "image_juxtaposition_changed"
+  | "timeline_event_viewed"
+  | "image_sequence_changed"
+  | "audio_recording_started"
+  | "audio_recording_completed"
+  | "qr_content_revealed"
+  | "advent_door_opened"
+  | "map_stage_viewed"
+  | "map_exit_selected";
 
 export type TelemetryUser = {
   id?: string;
@@ -183,6 +192,50 @@ export type BranchSelectedData = {
   scoreWeight?: number;
 };
 
+export type ImageJuxtapositionChangedData = {
+  blockId: BlockId;
+  position: number;
+};
+
+export type TimelineEventViewedData = {
+  blockId: BlockId;
+  eventId: string;
+};
+
+export type ImageSequenceChangedData = {
+  blockId: BlockId;
+  frameIndex: number;
+};
+
+export type AudioRecordingData = {
+  blockId: BlockId;
+};
+
+export type QrContentRevealedData = {
+  blockId: BlockId;
+};
+
+export type AdventDoorOpenedData = {
+  blockId: BlockId;
+  doorId: string;
+  day: number;
+};
+
+export type MapStageViewedData = {
+  blockId: BlockId;
+  stageId: string;
+  stageIndex: number;
+  stageLabel?: string;
+};
+
+export type MapExitSelectedData = {
+  blockId: BlockId;
+  fromStageId: string;
+  toStageId: string;
+  label: string;
+  scoreWeight?: number;
+};
+
 export type TelemetryEvent =
   | (TelemetryEventBase & { name: "course_started"; lessonId?: LessonId; data?: undefined })
   | (TelemetryEventBase & { name: "course_completed"; lessonId?: LessonId; data?: undefined })
@@ -252,6 +305,51 @@ export type TelemetryEvent =
       name: "branch_selected";
       lessonId: LessonId;
       data: BranchSelectedData;
+    })
+  | (TelemetryEventBase & {
+      name: "image_juxtaposition_changed";
+      lessonId?: LessonId;
+      data: ImageJuxtapositionChangedData;
+    })
+  | (TelemetryEventBase & {
+      name: "timeline_event_viewed";
+      lessonId?: LessonId;
+      data: TimelineEventViewedData;
+    })
+  | (TelemetryEventBase & {
+      name: "image_sequence_changed";
+      lessonId?: LessonId;
+      data: ImageSequenceChangedData;
+    })
+  | (TelemetryEventBase & {
+      name: "audio_recording_started";
+      lessonId?: LessonId;
+      data: AudioRecordingData;
+    })
+  | (TelemetryEventBase & {
+      name: "audio_recording_completed";
+      lessonId?: LessonId;
+      data: AudioRecordingData;
+    })
+  | (TelemetryEventBase & {
+      name: "qr_content_revealed";
+      lessonId?: LessonId;
+      data: QrContentRevealedData;
+    })
+  | (TelemetryEventBase & {
+      name: "advent_door_opened";
+      lessonId?: LessonId;
+      data: AdventDoorOpenedData;
+    })
+  | (TelemetryEventBase & {
+      name: "map_stage_viewed";
+      lessonId: LessonId;
+      data: MapStageViewedData;
+    })
+  | (TelemetryEventBase & {
+      name: "map_exit_selected";
+      lessonId: LessonId;
+      data: MapExitSelectedData;
     });
 
 /** Payload shape for a telemetry event name. */

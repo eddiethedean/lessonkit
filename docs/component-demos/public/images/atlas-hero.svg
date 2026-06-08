@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="420" viewBox="0 0 720 420" role="img" aria-label="Atlas analytics dashboard">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#312e81"/>
+    </linearGradient>
+  </defs>
+  <rect width="720" height="420" fill="url(#bg)" rx="16"/>
+  <rect x="32" y="32" width="656" height="48" fill="#1e293b" rx="8"/>
+  <text x="48" y="62" fill="#e2e8f0" font-family="system-ui,sans-serif" font-size="18" font-weight="600">Atlas Analytics</text>
+  <rect x="32" y="96" width="200" height="280" fill="#111827" rx="10"/>
+  <rect x="248" y="96" width="440" height="132" fill="#1d4ed8" opacity="0.35" rx="10"/>
+  <rect x="248" y="244" width="208" height="132" fill="#059669" opacity="0.35" rx="10"/>
+  <rect x="480" y="244" width="208" height="132" fill="#7c3aed" opacity="0.35" rx="10"/>
+  <text x="48" y="130" fill="#94a3b8" font-family="system-ui,sans-serif" font-size="13">Navigation</text>
+  <text x="268" y="130" fill="#dbeafe" font-family="system-ui,sans-serif" font-size="14">Live metrics</text>
+  <text x="268" y="280" fill="#d1fae5" font-family="system-ui,sans-serif" font-size="14">Exports</text>
+  <text x="500" y="280" fill="#ede9fe" font-family="system-ui,sans-serif" font-size="14">Alerts</text>
+</svg>

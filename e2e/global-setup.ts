@@ -45,6 +45,8 @@ function ensureTelemetryHarnessDist(): string {
 function manifestIsComplete(existing: Record<string, unknown>): boolean {
   return Boolean(
     existing.telemetryHarnessDistDir &&
+      existing.standaloneDir &&
+      existing.scorm12UnpackedDir &&
       existing.scorm2004UnpackedDir &&
       existing.xapiUnpackedDir &&
       existing.cmi5UnpackedDir,

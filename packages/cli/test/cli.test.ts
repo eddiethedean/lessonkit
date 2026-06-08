@@ -5,7 +5,7 @@ import { dirname, join } from "node:path";
 import { tmpdir } from "node:os";
 import { fileURLToPath } from "node:url";
 import { createProgram, run } from "../src/index.js";
-import { runInit } from "../src/commands/init.js";
+import { runInit, __testInitHelpers } from "../src/commands/init.js";
 import { formatCliError, CliError, EXIT_INVALID_PROJECT } from "../src/lib/errors.js";
 import { findProjectRoot, loadLessonkitJson } from "../src/lib/project.js";
 import { parsePackageTarget, resolvePackageOutput, resolveViteBuildArgs, resolveViteBuildArgv, stripOutDirFromViteArgs } from "../src/lib/paths.js";
@@ -38,6 +38,62 @@ describe("@lessonkit/cli program", () => {
     expect(program.description()).toBe("LessonKit CLI");
   });
 
+  it("blocks list prints TSV without --json", async () => {
+    const consoleLog = vi.spyOn(console, "log").mockImplementation(() => {});
+    await run(["node", "lessonkit", "blocks", "list"], { log: () => {}, error: () => {} });
+    expect(consoleLog).toHaveBeenCalledWith(expect.stringContaining("type\tcategory\th5pMachineName"));
+    expect(consoleLog).toHaveBeenCalledWith(expect.stringContaining("TrueFalse"));
+    consoleLog.mockRestore();
+  });
+
+  it("blocks list --category filters entries", async () => {
+    const consoleLog = vi.spyOn(console, "log").mockImplementation(() => {});
+    await run(
+      ["node", "lessonkit", "blocks", "list", "--json", "--category", "assessment"],
+      { log: () => {}, error: () => {} },
+    );
+    const payload = JSON.parse(consoleLog.mock.calls[0]![0] as string) as {
+      count: number;
+      entries: Array<{ category?: string }>;
+    };
+    expect(payload.count).toBeGreaterThan(0);
+    expect(payload.entries.every((e) => e.category === "assessment")).toBe(true);
+    consoleLog.mockRestore();
+  });
+
+  it("blocks list --tier B returns assessment blocks", async () => {
+    const consoleLog = vi.spyOn(console, "log").mockImplementation(() => {});
+    await run(["node", "lessonkit", "blocks", "list", "--json", "--tier", "B"], {
+      log: () => {},
+      error: () => {},
+    });
+    const payload = JSON.parse(consoleLog.mock.calls[0]![0] as string) as {
+      ok: boolean;
+      count: number;
+      entries: Array<{ type: string; tier?: string }>;
+    };
+    expect(payload.ok).toBe(true);
+    expect(payload.count).toBeGreaterThan(0);
+    expect(payload.entries.every((e) => e.tier === "B")).toBe(true);
+    expect(payload.entries.some((e) => e.type === "TrueFalse")).toBe(true);
+    consoleLog.mockRestore();
+  });
+
+  it("blocks list --json includes TrueFalse with h5pMachineName", async () => {
+    const consoleLog = vi.spyOn(console, "log").mockImplementation(() => {});
+    await run(["node", "lessonkit", "blocks", "list", "--json"], { log: () => {}, error: () => {} });
+    const payload = JSON.parse(consoleLog.mock.calls[0]![0] as string) as {
+      ok: boolean;
+      count: number;
+      entries: Array<{ type: string; h5pMachineName?: string }>;
+    };
+    expect(payload.ok).toBe(true);
+    expect(payload.count).toBe(57);
+    const trueFalse = payload.entries.find((e) => e.type === "TrueFalse");
+    expect(trueFalse?.h5pMachineName).toBe("H5P.TrueFalse");
+    consoleLog.mockRestore();
+  });
+
   it("publish remains a stub", async () => {
     const log = vi.fn();
     await run(["node", "lessonkit", "publish"], { log, error: () => {} });
@@ -45,6 +101,42 @@ describe("@lessonkit/cli program", () => {
       expect.stringContaining("lessonkit publish is not implemented"),
     );
     expect(log).toHaveBeenCalledWith(expect.stringContaining("RELEASING.md"));
+  });
+
+  it("export logs human-readable success without --json", async () => {
+    const root = await mkdtemp(join(tmpdir(), "lk-cli-export-"));
+    const manifest = {
+      schemaVersion: 1 as const,
+      name: "export-cli-test",
+      course: {
+        courseId: "export-cli-test",
+        title: "Export CLI Test",
+        layout: "single-spa" as const,
+        lessons: [{ id: "lesson-1", title: "Lesson one" }],
+        theme: { preset: "default" as const },
+      },
+      paths: {
+        spaDistDir: "dist",
+        lxpackOutDir: ".lxpack/course",
+        outputBaseDir: ".lxpack/out",
+      },
+    };
+    await writeFile(join(root, "lessonkit.json"), JSON.stringify(manifest));
+    await writeFile(join(root, "package.json"), JSON.stringify({ name: "export-cli-test" }));
+    await mkdir(join(root, "dist", "assets"), { recursive: true });
+    await writeFile(join(root, "dist", "index.html"), "<!doctype html><html></html>\n");
+    await writeFile(join(root, "dist", "assets", "app.js"), "console.log('ok');\n");
+
+    const consoleLog = vi.spyOn(console, "log").mockImplementation(() => {});
+    await run(
+      ["node", "lessonkit", "export", "--no-build", "--cwd", root],
+      { log: () => {}, error: () => {} },
+    );
+    expect(consoleLog).toHaveBeenCalledWith(
+      expect.stringMatching(/Exported \.lkcourse → .+ \(\d+ files\)/),
+    );
+    consoleLog.mockRestore();
+    await rm(root, { recursive: true, force: true });
   });
 
   it("package requires --target", async () => {
@@ -189,6 +281,28 @@ describe("resolvePackageOutput", () => {
     const { output, dir } = resolvePackageOutput(project, "standalone");
     expect(output).toBe(".lxpack/out/standalone");
     expect(dir).toBe(true);
+  });
+
+  it("treats standalone --out override ending in .zip as a file target", () => {
+    const project = {
+      root: "/proj",
+      schemaVersion: 1 as const,
+      name: "demo",
+      course: {
+        courseId: "demo",
+        title: "Demo",
+        layout: "single-spa" as const,
+        lessons: [{ id: "l1", title: "L1" }],
+      },
+      paths: {
+        spaDistDir: "dist",
+        lxpackOutDir: ".lxpack/course",
+        outputBaseDir: ".lxpack/out",
+      },
+    };
+    const { output, dir } = resolvePackageOutput(project, "standalone", "artifacts/course.zip");
+    expect(output).toBe("/proj/artifacts/course.zip");
+    expect(dir).toBe(false);
   });
 });
 
@@ -375,6 +489,25 @@ describe("findProjectRoot", () => {
     expect(findProjectRoot(nested)).toBe(dir);
   });
 
+  it("accepts lessonkit.json with string schemaVersion", async () => {
+    await writeFile(
+      join(dir, "lessonkit.json"),
+      JSON.stringify({
+        schemaVersion: "1",
+        name: "demo",
+        course: {
+          courseId: "demo",
+          title: "Demo",
+          layout: "single-spa",
+          lessons: [{ id: "l1", title: "L1" }],
+        },
+      }),
+      "utf8",
+    );
+
+    expect(findProjectRoot(dir)).toBe(dir);
+  });
+
   it("skips lxpack interchange lessonkit.json without schemaVersion", async () => {
     const nested = join(dir, ".lxpack", "course");
     await mkdir(nested, { recursive: true });
@@ -477,6 +610,25 @@ describe("runInit", () => {
     await runInit({ here: true, skipInstall: true }, { log: () => {}, error: () => {} });
 
     expect(existsSync(join(here, "package.json"))).toBe(true);
+  });
+
+  it("rolls back --here project files when promote fails", async () => {
+    const here = join(parentDir, "promote-fail");
+    await mkdir(here, { recursive: true });
+    await writeFile(join(here, ".gitkeep"), "", "utf8");
+    process.chdir(here);
+
+    const promoteSpy = vi
+      .spyOn(__testInitHelpers, "promoteStagingToProjectDir")
+      .mockRejectedValueOnce(new Error("simulated promote failure"));
+
+    await expect(
+      runInit({ here: true, skipInstall: true }, { log: () => {}, error: () => {} }),
+    ).rejects.toThrow("simulated promote failure");
+
+    expect(existsSync(join(here, "package.json"))).toBe(false);
+    expect(existsSync(join(here, ".gitkeep"))).toBe(true);
+    promoteSpy.mockRestore();
   });
 
   it("rejects --force without --here", async () => {

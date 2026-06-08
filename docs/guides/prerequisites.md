@@ -6,11 +6,11 @@ Install these before following any LessonKit tutorial.
 
 | Task | Node.js |
 | --- | --- |
-| **`npx @lessonkit/cli init`** (Vite 8 scaffold) | **{{ node_recommended }}** recommended |
-| `lessonkit dev`, `build`, `package` in an existing course | **{{ node_minimum }}** minimum |
+| **`npx @lessonkit/cli init`** (Vite 8 scaffold) | **{{ node_new_projects }}** required |
+| `lessonkit dev`, `build`, `package` in an existing course | **{{ node_new_projects }}** recommended; {{ node_minimum }} minimum (packaging-only legacy) |
 | Monorepo CI and Playwright e2e | **{{ node_recommended }}** (CI runs Node 20 only) |
 
-**Node.js {{ node_recommended }} is recommended** for new projects. Node {{ node_minimum }} may work for packaging-only workflows on an existing course but is not tested in CI.
+**Use Node.js {{ node_new_projects }} for all new projects.** Node {{ node_minimum }} may work for packaging-only CI agents on an existing course but is not supported for `lessonkit init`.
 
 Install [Node.js LTS](https://nodejs.org/) and npm (bundled with Node).
 

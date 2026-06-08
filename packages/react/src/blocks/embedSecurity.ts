@@ -24,7 +24,27 @@ const DEFAULT_SANDBOX = "allow-scripts";
 export type MediaSrcOptions = {
   /** Hostnames allowed to bypass the production private-network blocklist. */
   allowedHosts?: readonly string[];
+  /**
+   * Docs/preview only (`preview.allowConsoleTelemetry`). Allows same-origin media
+   * URLs to bypass production scheme and host blocklists.
+   */
+  trustSameOriginMedia?: boolean;
+  /** Apply private-network blocklist regardless of production build mode. */
+  strictHosts?: boolean;
 };
+
+export type MediaConfig = {
+  embed?: { allowedHosts?: readonly string[]; strictHosts?: boolean };
+  preview?: { allowConsoleTelemetry?: boolean };
+};
+
+export function buildMediaOptions(config: MediaConfig): MediaSrcOptions {
+  return {
+    allowedHosts: config.embed?.allowedHosts,
+    trustSameOriginMedia: config.preview?.allowConsoleTelemetry === true,
+    strictHosts: config.embed?.strictHosts === true,
+  };
+}
 
 function isProductionEmbedBuild(): boolean {
   try {
@@ -106,7 +126,11 @@ function isRfc1918Host(hostname: string): boolean {
 }
 
 /** Returns true for loopback, RFC1918, link-local, and cloud metadata hostnames. */
-export function isBlockedHost(hostname: string, allowedHosts?: readonly string[]): boolean {
+export function isBlockedHost(
+  hostname: string,
+  allowedHosts?: readonly string[],
+  strictHosts?: boolean,
+): boolean {
   const normalized = normalizeHostname(hostname);
   const canonical = canonicalHostnameForBlocklist(hostname);
   if (
@@ -119,7 +143,7 @@ export function isBlockedHost(hostname: string, allowedHosts?: readonly string[]
   ) {
     return false;
   }
-  if (!isProductionEmbedBuild()) return false;
+  if (!isProductionEmbedBuild() && !strictHosts) return false;
   return (
     isLoopbackHost(canonical) ||
     isLinkLocalOrMetadataHost(canonical) ||
@@ -134,12 +158,37 @@ function resolveAllowedUrl(
 ): string | null {
   const trimmed = src.trim();
   if (!trimmed) return null;
+  const lower = trimmed.toLowerCase();
+  if (lower.startsWith("data:image/")) {
+    return trimmed;
+  }
   try {
     const base =
       typeof window !== "undefined" ? window.location.href : "https://example.com/";
     const url = new URL(trimmed, base);
-    if (!allowedEmbedSchemes().has(url.protocol)) return null;
-    if (isBlockedHost(url.hostname, options?.allowedHosts)) return null;
+    if (
+      options?.trustSameOriginMedia &&
+      typeof window !== "undefined" &&
+      url.origin === window.location.origin &&
+      url.protocol !== "javascript:" &&
+      url.protocol !== "data:"
+    ) {
+      url.username = "";
+      url.password = "";
+      return url.href;
+    }
+    if (!allowedEmbedSchemes().has(url.protocol)) {
+      const sameOriginHttp =
+        url.protocol === "http:" &&
+        typeof window !== "undefined" &&
+        url.origin === window.location.origin;
+      if (!sameOriginHttp) return null;
+    }
+    if (isBlockedHost(url.hostname, options?.allowedHosts, options?.strictHosts)) {
+      const sameOriginBlockedHost =
+        typeof window !== "undefined" && url.origin === window.location.origin;
+      if (!sameOriginBlockedHost) return null;
+    }
     if (typeof window !== "undefined") {
       const pageOrigin = window.location.origin;
       const isAbsolute = /^[a-zA-Z][a-zA-Z\d+\-.]*:/.test(trimmed) || trimmed.startsWith("//");

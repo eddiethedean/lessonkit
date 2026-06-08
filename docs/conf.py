@@ -11,13 +11,14 @@ if TYPE_CHECKING:
 project = "LessonKit"
 copyright = f"{datetime.now().year}, LessonKit contributors"
 author = "LessonKit contributors"
-release = "1.5.0"
+release = "1.6.0"
 
 # Substitutions for MyST pages. source-read expands these in raw HTML and inline code too.
 # New keys are picked up automatically by docs/scripts/verify_doc_substitutions.py (CI).
 myst_substitutions = {
     "release": release,
     "scorm_zip_path": ".lxpack/course/.lxpack/out/course-scorm12.zip",
+    "node_new_projects": "20.19+",
     "node_recommended": "20.19+",
     "node_minimum": "18+",
 }
@@ -52,6 +53,7 @@ exclude_patterns = [
     "LXPACK_BRIDGE.md",
     "LXPACK_UPGRADES_FOR_LESSONKIT.md",
     "LXPACK_UPGRADE_PLAN_FOR_MAINTAINERS.md",
+    "CLI_ERRORS.md",
     "H5P_CATALOG_CROSSWALK.md",
     "_generated",
 ]
@@ -67,9 +69,10 @@ html_static_path = ["_static"]
 html_css_files = ["custom.css"]
 html_favicon = "_static/favicon.svg"
 html_title = "LessonKit"
-html_logo = "_static/logo.svg"
 
 html_theme_options = {
+    "light_logo": "logo.svg",
+    "dark_logo": "logo-dark.svg",
     "source_repository": "https://github.com/eddiethedean/lessonkit/",
     "source_branch": "main",
     "source_directory": "docs/",

@@ -216,9 +216,22 @@ function courseConfigCourseIdPresent(source: string, courseId: string): boolean 
   return idUsedViaConstant(source, "courseId", courseId, extractStringConstants(source));
 }
 
+function courseMetaCourseIdPresent(source: string, courseId: string): boolean {
+  const constants = extractStringConstants(source);
+  const stripped = stripComments(source);
+  for (const [name, value] of constants) {
+    if (value !== courseId) continue;
+    if (!new RegExp(`\\bcourseId\\s*:\\s*${name}\\b`).test(stripped)) continue;
+    // Showcase-style meta wires courseId alongside a lessons catalog in the same module.
+    if (/\blessons\s*:\s*\S/.test(stripped)) return true;
+  }
+  return false;
+}
+
 function courseIdPresent(source: string, courseId: string): boolean {
   if (idPropPresent(source, "courseId", courseId)) return true;
   if (idUsedViaConstant(source, "courseId", courseId, extractStringConstants(source))) return true;
+  if (courseMetaCourseIdPresent(source, courseId)) return true;
   return courseConfigCourseIdPresent(source, courseId);
 }
 

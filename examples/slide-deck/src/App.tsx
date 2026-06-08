@@ -7,9 +7,9 @@ import {
   Slide,
   SlideDeck,
   Text,
-  ThemeProvider,
   TrueFalse,
 } from "@lessonkit/react";
+import { ExampleThemeShell } from "../../_shared/ExampleThemeShell";
 
 const COURSE_ID = "slide-deck-demo";
 
@@ -20,7 +20,7 @@ export default function App() {
   );
 
   return (
-    <ThemeProvider mode="light">
+    <ExampleThemeShell>
       <Course title="Warehouse onboarding" courseId={COURSE_ID} config={config}>
         <Lesson title="Presentation" lessonId="deck-lesson">
           <SlideDeck blockId="onboarding-deck" title="New hire onboarding" showDeckScore>
@@ -53,6 +53,6 @@ export default function App() {
           </SlideDeck>
         </Lesson>
       </Course>
-    </ThemeProvider>
+    </ExampleThemeShell>
   );
 }

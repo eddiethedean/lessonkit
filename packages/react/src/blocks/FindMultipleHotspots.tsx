@@ -1,4 +1,4 @@
-import React, { forwardRef, useEffect, useMemo, useState } from "react";
+import React, { forwardRef, useEffect, useMemo, useRef, useState } from "react";
 import type { AssessmentBaseProps, AssessmentHandle, AssessmentInteractionType } from "@lessonkit/core";
 import type { LessonId } from "@lessonkit/core";
 import { AssessmentLessonGuard } from "../assessment/AssessmentLessonGuard";
@@ -10,7 +10,7 @@ import { useAssessmentState } from "../assessment/useAssessmentState";
 import { useLessonkit } from "../hooks";
 import { setLessonkitBlockType } from "../compound/blockType";
 import { normalizeComponentId } from "../runtime/validateComponentId";
-import { resolveMediaSrc } from "./embedSecurity";
+import { buildMediaOptions, resolveMediaSrc } from "./embedSecurity";
 import type { HotspotTarget } from "./FindHotspot";
 
 export type FindMultipleHotspotsProps = AssessmentBaseProps & {
@@ -28,9 +28,10 @@ function FindMultipleHotspotsInner(
 ) {
   const checkId = useMemo(() => normalizeComponentId(props.checkId, "checkId"), [props.checkId]);
   const { config } = useLessonkit();
-  const resolvedSrc = resolveMediaSrc(props.src, { allowedHosts: config.embed?.allowedHosts });
+  const resolvedSrc = resolveMediaSrc(props.src, buildMediaOptions(config));
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [checked, setChecked] = useState(false);
+  const telemetryReplayedRef = useRef(false);
   const assessment = useAssessmentState(props.enclosingLessonId);
 
   const correctSet = useMemo(
@@ -43,6 +44,7 @@ function FindMultipleHotspotsInner(
   useEffect(() => {
     setSelected(new Set());
     setChecked(false);
+    telemetryReplayedRef.current = false;
   }, [checkId, correctIdsKey, targetIdsKey]);
 
   const toggle = (id: string) => {
@@ -70,6 +72,33 @@ function FindMultipleHotspotsInner(
     );
   };
   const factualCorrect = checked ? isFactuallyCorrect(selected) : false;
+
+  const replayTelemetry = (
+    nextSelected: Set<string>,
+    nextChecked: boolean,
+    nextScore: number,
+    nextPassed: boolean,
+  ) => {
+    if (telemetryReplayedRef.current || !nextChecked) return;
+    telemetryReplayedRef.current = true;
+    const correctAtSubmit = isFactuallyCorrect(nextSelected);
+    assessment.answer({
+      checkId,
+      interactionType: INTERACTION,
+      response: [...nextSelected],
+      correct: correctAtSubmit,
+    });
+    if (nextPassed || props.enableRetry === false) {
+      assessment.complete({
+        checkId,
+        interactionType: INTERACTION,
+        score: nextScore,
+        maxScore,
+        passingScore: props.passingScore ?? maxScore,
+      });
+    }
+  };
+
   const validTargetIds = useMemo(
     () => new Set(props.targets.map((t) => t.id)),
     [props.targets],
@@ -85,6 +114,7 @@ function FindMultipleHotspotsInner(
         resetTask: () => {
           setSelected(new Set());
           setChecked(false);
+          telemetryReplayedRef.current = false;
         },
         showSolutions: () => setSelected(new Set(props.correctTargetIds)),
         getXAPIData: () => ({
@@ -97,26 +127,42 @@ function FindMultipleHotspotsInner(
         }),
         getCurrentState: () => ({ selected: [...selected], checked }),
         resume: (state) => {
+          let nextSelected = selected;
           const raw = state.selected;
           if (Array.isArray(raw)) {
-            setSelected(
-              new Set(
-                raw.filter(
-                  (id): id is string =>
-                    typeof id === "string" && validTargetIds.has(id),
-                ),
+            nextSelected = new Set(
+              raw.filter(
+                (id): id is string =>
+                  typeof id === "string" && validTargetIds.has(id),
               ),
             );
+            setSelected(nextSelected);
           }
-          readBooleanStateField(state, "checked", setChecked);
+          let nextChecked = checked;
+          readBooleanStateField(state, "checked", (value) => {
+            nextChecked = value;
+            setChecked(value);
+          });
+          const nextScore = props.correctTargetIds.filter((id) => nextSelected.has(id)).length;
+          const nextWrong = [...nextSelected].filter((id) => !correctSet.has(id)).length;
+          const nextPassed =
+            meetsPassingThreshold(nextScore, maxScore, props.passingScore) && nextWrong === 0;
+          if (config.tracking?.replayResumeEvents === true) {
+            replayTelemetry(nextSelected, nextChecked, nextScore, nextPassed);
+          }
         },
       }),
     [
+      assessment,
       checkId,
       checked,
+      config.tracking?.replayResumeEvents,
+      correctSet,
       factualCorrect,
       maxScore,
       props.correctTargetIds,
+      props.enableRetry,
+      props.passingScore,
       score,
       selected,
       validTargetIds,
@@ -127,13 +173,12 @@ function FindMultipleHotspotsInner(
 
   const submit = () => {
     if (selected.size === 0 || checked) return;
-    const correctAtSubmit = isFactuallyCorrect(selected);
     setChecked(true);
     assessment.answer({
       checkId,
       interactionType: INTERACTION,
       response: [...selected],
-      correct: correctAtSubmit,
+      correct: passedThreshold,
     });
     if (passedThreshold) {
       assessment.complete({

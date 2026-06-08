@@ -10,7 +10,7 @@ import { setLessonkitBlockType } from "../compound/blockType";
 import { useLessonkit } from "../hooks";
 import { useEnclosingLessonId } from "../lessonContext";
 import { normalizeComponentId } from "../runtime/validateComponentId";
-import { resolveMediaSrc } from "./embedSecurity";
+import { buildMediaOptions, resolveMediaSrc } from "./embedSecurity";
 import type { TimedCueProps } from "./TimedCue";
 
 export type InteractiveVideoProps = {
@@ -71,7 +71,7 @@ const InteractiveVideoInner = forwardRef<
 
   const { config, track, storage } = useLessonkit();
   const lessonId = useEnclosingLessonId();
-  const mediaOptions = { allowedHosts: config.embed?.allowedHosts };
+  const mediaOptions = buildMediaOptions(config);
   const resolvedSrc = resolveMediaSrc(props.src, mediaOptions);
   const resolvedPoster = resolveMediaSrc(props.poster, mediaOptions);
   const resolvedCaptions = resolveMediaSrc(props.captions, mediaOptions);
@@ -301,9 +301,10 @@ const InteractiveVideoInner = forwardRef<
           This video URL is not allowed.
         </p>
       ) : (
-        <div style={{ position: "relative" }}>
+        <div className="lk-interactive-video-stage" data-testid="interactive-video-stage">
           <video
             ref={videoRef}
+            className="lk-interactive-video-player"
             src={resolvedSrc}
             poster={resolvedPoster ?? undefined}
             controls
@@ -328,36 +329,51 @@ const InteractiveVideoInner = forwardRef<
               />
             ) : null}
           </video>
+          <div
+            className={[
+              "lk-interactive-video-overlay",
+              overlayActive ? "lk-interactive-video-overlay--active" : "",
+            ]
+              .filter(Boolean)
+              .join(" ")}
+            data-testid="interactive-video-overlay"
+            aria-hidden={overlayActive ? undefined : true}
+          >
+            <div className="lk-interactive-video-backdrop" aria-hidden />
+            <div className="lk-interactive-video-overlay-content">
+              <div data-testid="interactive-video-cues" className="lk-interactive-video-cues">
+                {sortedCues.map((cue, i) =>
+                  React.cloneElement(cue, {
+                    key: cue.key ?? i,
+                    hidden: !overlayActive || i !== visibleIndex,
+                    cueIndex: i,
+                    parentType: "InteractiveVideo",
+                  }),
+                )}
+              </div>
+              {overlayActive ? (
+                <div className="lk-interactive-video-overlay-actions">
+                  {activeCue?.props.mustComplete && !canContinueActiveCue ? (
+                    <p role="status" data-testid="cue-must-complete-hint">
+                      Complete the interaction to continue.
+                    </p>
+                  ) : null}
+                  <button
+                    type="button"
+                    className="lk-button lk-interactive-video-continue"
+                    data-testid="cue-continue"
+                    disabled={!canContinueActiveCue}
+                    aria-disabled={!canContinueActiveCue}
+                    onClick={completeCue}
+                  >
+                    Continue video
+                  </button>
+                </div>
+              ) : null}
+            </div>
+          </div>
         </div>
       )}
-      <div data-testid="interactive-video-cues">
-        {sortedCues.map((cue, i) =>
-          React.cloneElement(cue, {
-            key: cue.key ?? i,
-            hidden: !overlayActive || i !== visibleIndex,
-            cueIndex: i,
-            parentType: "InteractiveVideo",
-          }),
-        )}
-      </div>
-      {overlayActive ? (
-        <>
-          {activeCue?.props.mustComplete && !canContinueActiveCue ? (
-            <p role="status" data-testid="cue-must-complete-hint">
-              Complete the interaction to continue.
-            </p>
-          ) : null}
-          <button
-            type="button"
-            data-testid="cue-continue"
-            disabled={!canContinueActiveCue}
-            aria-disabled={!canContinueActiveCue}
-            onClick={completeCue}
-          >
-            Continue video
-          </button>
-        </>
-      ) : null}
     </section>
   );
 });

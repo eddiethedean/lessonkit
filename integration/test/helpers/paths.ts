@@ -10,6 +10,7 @@ export const INTERACTIVE_BOOK_DIR = join(REPO_ROOT, "examples/interactive-book")
 export const SLIDE_DECK_DIR = join(REPO_ROOT, "examples/slide-deck");
 export const INTERACTIVE_VIDEO_DIR = join(REPO_ROOT, "examples/interactive-video");
 export const BRANCHING_SCENARIO_DIR = join(REPO_ROOT, "examples/branching-scenario");
+export const FRAMEWORK_12_SHOWCASE_DIR = join(REPO_ROOT, "examples/framework-12-showcase");
 export const MINIMAL_FIXTURE_DIR = join(INTEGRATION_ROOT, "fixtures/minimal-course");
 
 export const LESSONKIT_PACKAGES = [
@@ -25,4 +26,18 @@ export const LESSONKIT_PACKAGES = [
 export function packageDir(name: string): string {
   const dir = name.replace("@lessonkit/", "");
   return join(REPO_ROOT, "packages", dir);
+}
+
+export function requireCliOutputPath(json: { outputPath?: string }): string {
+  if (!json.outputPath) {
+    throw new Error("CLI JSON missing required outputPath");
+  }
+  return json.outputPath;
+}
+
+export function requireCliOutputDir(json: { outputDir?: string }): string {
+  if (!json.outputDir) {
+    throw new Error("CLI JSON missing required outputDir");
+  }
+  return json.outputDir;
 }

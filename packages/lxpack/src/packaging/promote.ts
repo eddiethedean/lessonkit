@@ -69,12 +69,17 @@ async function isStalePromoteLock(lockPath: string): Promise<boolean> {
   }
 }
 
+/** Max wait before promote lock acquisition fails (~15s with backoff). */
+export const PROMOTE_LOCK_TIMEOUT_MS = 15_000;
+
 async function withPromoteLock<T>(outDir: string, fn: () => Promise<T>): Promise<T> {
   const lockPath = promoteLockPath(outDir);
   await fsp.mkdir(dirname(outDir), { recursive: true });
 
   let lockHandle: fsp.FileHandle | undefined;
-  for (let attempt = 0; attempt < 200; attempt++) {
+  const maxAttempts = 400;
+  const started = Date.now();
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
     try {
       lockHandle = await fsp.open(lockPath, "wx");
       await lockHandle.writeFile(`${process.pid}\n${randomUUID()}\n${Date.now()}\n`, "utf8");
@@ -87,7 +92,9 @@ async function withPromoteLock<T>(outDir: string, fn: () => Promise<T>): Promise
         await fsp.rm(lockPath, { force: true }).catch(/* v8 ignore next */ () => undefined);
         continue;
       }
-      await new Promise((resolveWait) => setTimeout(resolveWait, 25));
+      if (Date.now() - started >= PROMOTE_LOCK_TIMEOUT_MS) break;
+      const delayMs = Math.min(25 * 2 ** Math.floor(attempt / 20), 250);
+      await new Promise((resolveWait) => setTimeout(resolveWait, delayMs));
     }
   }
   if (!lockHandle) {

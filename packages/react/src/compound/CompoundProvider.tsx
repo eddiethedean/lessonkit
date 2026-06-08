@@ -7,6 +7,7 @@ import {
   useCompoundHydrationBridgeRef,
 } from "./CompoundHydrationBridge";
 import { useCompoundPageIndex } from "./CompoundPageIndexContext";
+import { LessonkitContext } from "../context";
 import { isDevEnvironment } from "../runtime/validateComponentId";
 
 export type RegisteredAssessmentHandle = {
@@ -36,16 +37,19 @@ export function CompoundProvider({
 }) {
   const registryRef = useRef<Registry>(new Map());
   const [handlesVersion, setHandlesVersion] = useState(0);
+  const lessonkit = useContext(LessonkitContext);
+  const onCompoundDuplicateCheckId =
+    lessonkit?.config.observability?.onCompoundDuplicateCheckId;
 
   const register = useCallback((checkId: CheckId, handle: AssessmentHandle, pageIndex?: number) => {
     const prev = registryRef.current.get(checkId);
     if (prev && prev.handle !== handle) {
-      const message = `[lessonkit] duplicate checkId "${checkId}" registered in the same compound container; the previous handle was replaced.`;
+      const message = `[lessonkit] duplicate checkId "${checkId}" registered in the same compound container.`;
+      onCompoundDuplicateCheckId?.({ checkId });
       if (isDevEnvironment()) {
-        console.error(message);
-      } else {
-        console.warn(message);
+        throw new Error(message);
       }
+      return () => {};
     }
     registryRef.current.set(checkId, { handle, pageIndex });
     if (prev?.handle !== handle || prev?.pageIndex !== pageIndex) {
@@ -58,7 +62,7 @@ export function CompoundProvider({
         setHandlesVersion((v) => v + 1);
       }
     };
-  }, []);
+  }, [onCompoundDuplicateCheckId]);
 
   const registryValue = useMemo(
     () => ({

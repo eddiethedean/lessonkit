@@ -909,9 +909,14 @@ describe("InteractiveVideo", () => {
         </InteractiveVideo>,
       ),
     );
+    const stage = screen.getByTestId("interactive-video-stage");
+    const overlay = screen.getByTestId("interactive-video-overlay");
     const video = screen.getByTestId("interactive-video-player") as HTMLVideoElement;
+    expect(stage.contains(video)).toBe(true);
+    expect(stage.contains(overlay)).toBe(true);
     Object.defineProperty(video, "currentTime", { value: 1.5, writable: true });
     fireEvent.timeUpdate(video);
+    expect(overlay.className).toContain("lk-interactive-video-overlay--active");
     expect(screen.getByTestId("timed-cue-0")).toBeTruthy();
     expect(screen.getByTestId("cue-continue")).toBeTruthy();
   });
@@ -1333,5 +1338,30 @@ describe("BranchingScenario", () => {
       expect.stringContaining('navigateToNode from "offer" but active node is "credit"'),
     );
     warn.mockRestore();
+  });
+
+  it("calls onCompoundDuplicateCheckId when duplicate checkId is registered in production", () => {
+    const onCompoundDuplicateCheckId = vi.fn();
+    const prevEnv = process.env.NODE_ENV;
+    process.env.NODE_ENV = "production";
+    render(
+      <Course
+        title="Compound"
+        courseId={COURSE_ID}
+        config={{
+          xapi: { enabled: false },
+          observability: { onCompoundDuplicateCheckId },
+        }}
+      >
+        <Lesson title="L1" lessonId="lesson-1">
+          <AssessmentSequence blockId="dup-seq">
+            <TrueFalse checkId="dup-id" question="Q1?" answer={true} />
+            <TrueFalse checkId="dup-id" question="Q2?" answer={false} />
+          </AssessmentSequence>
+        </Lesson>
+      </Course>,
+    );
+    expect(onCompoundDuplicateCheckId).toHaveBeenCalledWith({ checkId: "dup-id" });
+    process.env.NODE_ENV = prevEnv;
   });
 });

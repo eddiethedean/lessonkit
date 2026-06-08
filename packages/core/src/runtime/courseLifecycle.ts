@@ -4,7 +4,11 @@ import { buildTelemetryEvent } from "../telemetryBuilder";
 import type { PluginRegistry } from "../plugins/types";
 import type { ProgressController } from "../progress";
 import type { StoragePort } from "../ports";
-import { hasCourseStarted, markCourseStarted } from "../session";
+import {
+  hasCourseStarted,
+  hasCourseStartedEmittedToTracking,
+  markCourseStarted,
+} from "../session";
 
 const courseStartedEmitFlights = new Map<string, Promise<{ emitted: boolean; marked: boolean }>>();
 
@@ -39,7 +43,23 @@ export function tryEmitCourseStarted(
   const flightKey = `${ctx.sessionId}:${ctx.courseId}`;
   const marked = hasCourseStarted(ctx.storage, ctx.sessionId, ctx.courseId);
   if (alreadyEmittedToSink) {
-    return Promise.resolve({ emitted: true, marked });
+    const markPersisted = marked
+      ? true
+      : markCourseStarted(ctx.storage, ctx.sessionId, ctx.courseId);
+    return Promise.resolve({
+      emitted: true,
+      marked: markPersisted,
+    });
+  }
+
+  if (
+    marked &&
+    hasCourseStartedEmittedToTracking(ctx.storage, ctx.sessionId, ctx.courseId)
+  ) {
+    return Promise.resolve({
+      emitted: true,
+      marked: true,
+    });
   }
 
   const existing = courseStartedEmitFlights.get(flightKey);
@@ -50,15 +70,19 @@ export function tryEmitCourseStarted(
   const flight = Promise.resolve().then(() => {
     try {
       const emitted = deps.emitCourseStartedEvent(ctx);
-      if (emitted && !marked) {
-        markCourseStarted(ctx.storage, ctx.sessionId, ctx.courseId);
-      }
+      const markPersisted =
+        emitted && !marked
+          ? markCourseStarted(ctx.storage, ctx.sessionId, ctx.courseId)
+          : marked;
       return {
         emitted,
-        marked: hasCourseStarted(ctx.storage, ctx.sessionId, ctx.courseId),
+        marked: markPersisted,
       };
     } catch {
-      return { emitted: false, marked };
+      return {
+        emitted: false,
+        marked: hasCourseStarted(ctx.storage, ctx.sessionId, ctx.courseId),
+      };
     } finally {
       if (courseStartedEmitFlights.get(flightKey) === flight) {
         courseStartedEmitFlights.delete(flightKey);
@@ -85,6 +109,19 @@ export type LessonCompletionEmitter = (
   durationMs?: number,
 ) => void;
 
+/**
+ * Mark a lesson complete in progress state and emit `lesson_completed` when newly completed.
+ *
+ * @example
+ * ```ts
+ * completeLessonWithTelemetry({
+ *   progress,
+ *   lessonId: "lesson-1",
+ *   nowMs: Date.now(),
+ *   emitLessonCompleted: (id, durationMs) => track("lesson_completed", { lessonId: id, durationMs }),
+ * });
+ * ```
+ */
 export function completeLessonWithTelemetry(opts: {
   progress: ProgressController;
   lessonId: LessonId;
@@ -97,6 +134,19 @@ export function completeLessonWithTelemetry(opts: {
   return true;
 }
 
+/**
+ * Complete the active lesson (if any), then mark the course complete and emit `course_completed`.
+ *
+ * @example
+ * ```ts
+ * completeCourseWithTelemetry({
+ *   progress,
+ *   nowMs: Date.now(),
+ *   emitLessonCompleted: (id) => track("lesson_completed", { lessonId: id }),
+ *   emitCourseCompleted: () => track("course_completed", {}),
+ * });
+ * ```
+ */
 export function completeCourseWithTelemetry(opts: {
   progress: ProgressController;
   nowMs: number;
@@ -113,7 +163,16 @@ export function completeCourseWithTelemetry(opts: {
     });
   }
   const result = opts.progress.completeCourse();
-  if (!result.didComplete) return false;
+  if (!result.didComplete) {
+    const after = opts.progress.getState();
+    if (after.activeLessonId) {
+      const lessonResult = opts.progress.completeLesson(after.activeLessonId, opts.nowMs);
+      if (lessonResult.didComplete) {
+        opts.emitLessonCompleted(after.activeLessonId, lessonResult.durationMs);
+      }
+    }
+    return false;
+  }
   opts.emitCourseCompleted();
   return true;
 }

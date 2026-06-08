@@ -7,8 +7,9 @@ release on `main` and backported to the current npm `@lessonkit/*` versions when
 
 | Version | Supported |
 | ------- | --------- |
+| 1.6.x   | Yes       |
 | 1.5.x   | Yes       |
-| 1.4.x   | Yes       |
+| 1.4.x   | Best effort |
 | 1.3.x   | Best effort |
 | 1.1.x   | Best effort |
 | 1.0.x   | Best effort |

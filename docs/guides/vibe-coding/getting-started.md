@@ -26,14 +26,15 @@ cd my-phishing-course
 
 ## 2.5. Install Library Skills (recommended)
 
-If you use **Cursor**, install LessonKit authoring skills so the AI follows `lessonkit.json` and block contracts:
+If you use **Cursor**, install LessonKit authoring skills so the AI follows `lessonkit.json` and block contracts — **no full monorepo clone required**:
 
 ```bash
-git clone https://github.com/eddiethedean/lessonkit.git
-cd lessonkit && ./library-skills/install.sh --project -C "$(pwd)/my-phishing-course"
+curl -fsSL https://raw.githubusercontent.com/eddiethedean/lessonkit/main/library-skills/install-remote.sh | bash -s -- --project -C ~/my-phishing-course
 ```
 
-See [Library Skills](../library-skills.md) for other editors and options.
+Replace `~/my-phishing-course` with your project path. Requires **git** on your PATH (shallow clone of `library-skills/` only).
+
+See [Library Skills](../library-skills.md) for global install, contributors, and other editors.
 
 ## 3. Open the project in your AI editor
 

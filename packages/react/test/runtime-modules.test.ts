@@ -4,7 +4,7 @@ import type { TelemetryEvent, TrackingClient } from "@lessonkit/core";
 import type { XAPIStatement, XAPITransport } from "@lessonkit/xapi";
 import { createDefaultClock, createGlobalTimer, createNoopStorage, createSessionStoragePort } from "../src/runtime/ports";
 import { createProgressController } from "../src/runtime/progress";
-import { buildTelemetryEvent } from "@lessonkit/core";
+import { buildTelemetryEvent, createTrackingClient } from "@lessonkit/core";
 import { createTrackingClientFromConfig, disposeTrackingClient } from "../src/runtime/telemetry";
 import { createXapiClientFromConfig } from "../src/runtime/xapi";
 import * as xapiMapModule from "@lessonkit/xapi";
@@ -232,6 +232,39 @@ describe("@lessonkit/react runtime modules", () => {
     );
     expect(send).toHaveBeenCalledTimes(1);
     expect(flush).toHaveBeenCalledTimes(1);
+  });
+
+  it("telemetryPipeline: delivers lifecycle events to batch sink before xAPI flush", async () => {
+    const order: string[] = [];
+    const tracking = createTrackingClient({
+      batchSink: async () => {
+        order.push("batch");
+      },
+    });
+    const xapi = {
+      send: () => {
+        order.push("xapi-send");
+      },
+      flush: async () => {
+        order.push("xapi-flush");
+      },
+      queueSize: () => 0,
+      startedLesson: () => {},
+      completeLesson: () => {},
+      completeCourse: () => {},
+    };
+    await emitThroughPipeline(
+      {
+        name: "lesson_completed",
+        timestamp: "t",
+        courseId: "c",
+        sessionId: "s",
+        lessonId: "lesson-1",
+        data: { lessonId: "lesson-1" },
+      },
+      { tracking, xapi, lxpackBridge: "off" },
+    );
+    expect(order).toEqual(["batch", "xapi-send", "xapi-flush"]);
   });
 
   it("telemetryPipeline: emitThroughPipeline invokes extra sinks", async () => {

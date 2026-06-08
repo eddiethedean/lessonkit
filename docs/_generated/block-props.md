@@ -8,6 +8,8 @@ Auto-generated from `@lessonkit/react/block-catalog.v3.json`. Regenerate: `node 
 
 Binary true/false question with assessment contract.
 
+**Component page:** [TrueFalse demo](components/true-false.md) (live embed + when to use)
+
 **Storybook:** [TrueFalse demo](https://eddiethedean.github.io/lessonkit/storybook/?path=/story/components-truefalse--default)
 
 | Prop | Type | Required | Description |
@@ -28,6 +30,8 @@ Binary true/false question with assessment contract.
 
 Fill-in-the-blank text with *answer* markers in template.
 
+**Component page:** [FillInTheBlanks demo](components/fill-in-the-blanks.md) (live embed + when to use)
+
 | Prop | Type | Required | Description |
 | --- | --- | --- | --- |
 | `checkId` | CheckId | yes | Stable check id. |
@@ -45,6 +49,8 @@ Fill-in-the-blank text with *answer* markers in template.
 ## DragAndDrop
 
 Drag items onto labeled targets.
+
+**Component page:** [DragAndDrop demo](components/drag-and-drop.md) (live embed + when to use)
 
 | Prop | Type | Required | Description |
 | --- | --- | --- | --- |
@@ -64,6 +70,8 @@ Drag items onto labeled targets.
 
 Drag words into inline blanks.
 
+**Component page:** [DragTheWords demo](components/drag-the-words.md) (live embed + when to use)
+
 | Prop | Type | Required | Description |
 | --- | --- | --- | --- |
 | `checkId` | CheckId | yes | Stable check id. |
@@ -81,6 +89,8 @@ Drag words into inline blanks.
 ## MarkTheWords
 
 Select correct words in a sentence.
+
+**Component page:** [MarkTheWords demo](components/mark-the-words.md) (live embed + when to use)
 
 | Prop | Type | Required | Description |
 | --- | --- | --- | --- |
@@ -100,6 +110,8 @@ Select correct words in a sentence.
 
 Ordered sequence of contract-compliant assessments.
 
+**Component page:** [AssessmentSequence demo](components/assessment-sequence.md) (live embed + when to use)
+
 | Prop | Type | Required | Description |
 | --- | --- | --- | --- |
 | `children` | ReactNode | yes | Assessment blocks. |
@@ -113,6 +125,8 @@ Ordered sequence of contract-compliant assessments.
 ## Summary
 
 Construct a summary from a statement bank in correct order.
+
+**Component page:** [Summary demo](components/summary.md) (live embed + when to use)
 
 | Prop | Type | Required | Description |
 | --- | --- | --- | --- |
@@ -132,6 +146,8 @@ Construct a summary from a statement bank in correct order.
 
 Match image pairs in a memory-style task.
 
+**Component page:** [ImagePairing demo](components/image-pairing.md) (live embed + when to use)
+
 | Prop | Type | Required | Description |
 | --- | --- | --- | --- |
 | `checkId` | CheckId | yes | Stable check id. |
@@ -148,6 +164,8 @@ Match image pairs in a memory-style task.
 ## ImageSequencing
 
 Order images in the correct sequence.
+
+**Component page:** [ImageSequencing demo](components/image-sequencing.md) (live embed + when to use)
 
 | Prop | Type | Required | Description |
 | --- | --- | --- | --- |
@@ -167,6 +185,8 @@ Order images in the correct sequence.
 
 Timed arithmetic problems with optional timer.
 
+**Component page:** [ArithmeticQuiz demo](components/arithmetic-quiz.md) (live embed + when to use)
+
 | Prop | Type | Required | Description |
 | --- | --- | --- | --- |
 | `checkId` | CheckId | yes | Stable check id. |
@@ -184,6 +204,8 @@ Timed arithmetic problems with optional timer.
 ## Essay
 
 Open text response; manual or plugin grading.
+
+**Component page:** [Essay demo](components/essay.md) (live embed + when to use)
 
 | Prop | Type | Required | Description |
 | --- | --- | --- | --- |
@@ -203,6 +225,8 @@ Open text response; manual or plugin grading.
 
 Paragraph text content.
 
+**Component page:** [Text demo](components/text-and-heading.md) (live embed + when to use)
+
 | Prop | Type | Required | Description |
 | --- | --- | --- | --- |
 | `blockId` | BlockId | no | Stable block id. |
@@ -211,6 +235,8 @@ Paragraph text content.
 ## Heading
 
 Heading levels 1–3.
+
+**Component page:** [Heading demo](components/text-and-heading.md) (live embed + when to use)
 
 | Prop | Type | Required | Description |
 | --- | --- | --- | --- |
@@ -222,6 +248,8 @@ Heading levels 1–3.
 
 Image with required alt text.
 
+**Component page:** [Image demo](components/image.md) (live embed + when to use)
+
 | Prop | Type | Required | Description |
 | --- | --- | --- | --- |
 | `blockId` | BlockId | no | Stable block id. |
@@ -231,6 +259,8 @@ Image with required alt text.
 ## Video
 
 Self-hosted video with native controls and optional captions.
+
+**Component page:** [Video demo](components/video.md) (live embed + when to use)
 
 | Prop | Type | Required | Description |
 | --- | --- | --- | --- |
@@ -246,6 +276,8 @@ Self-hosted video with native controls and optional captions.
 
 Column layout container (H5P Column / Page).
 
+**Component page:** [Page demo](components/page.md) (live embed + when to use)
+
 | Prop | Type | Required | Description |
 | --- | --- | --- | --- |
 | `blockId` | BlockId | yes | Stable block id. |
@@ -259,6 +291,8 @@ Column layout container (H5P Column / Page).
 ## InteractiveBook
 
 Multi-page book with chapter navigation.
+
+**Component page:** [InteractiveBook demo](components/interactive-book.md) (live embed + when to use)
 
 **Storybook:** [InteractiveBook demo](https://eddiethedean.github.io/lessonkit/storybook/?path=/story/components-compound-tier-c-d--interactive-book-block)
 
@@ -279,6 +313,8 @@ Multi-page book with chapter navigation.
 
 Single slide row in a SlideDeck. Supports Video, Summary, and 1.4 blocks.
 
+**Component page:** [Slide demo](components/slide.md) (live embed + when to use)
+
 | Prop | Type | Required | Description |
 | --- | --- | --- | --- |
 | `blockId` | BlockId | yes | Stable block id. |
@@ -292,6 +328,8 @@ Single slide row in a SlideDeck. Supports Video, Summary, and 1.4 blocks.
 ## SlideDeck
 
 Multi-slide presentation with keyboard navigation.
+
+**Component page:** [SlideDeck demo](components/slide-deck.md) (live embed + when to use)
 
 **Storybook:** [SlideDeck demo](https://eddiethedean.github.io/lessonkit/storybook/?path=/story/components-compound-tier-c-d--slide-deck-block)
 
@@ -312,6 +350,8 @@ Multi-slide presentation with keyboard navigation.
 
 Timed overlay cue within InteractiveVideo.
 
+**Component page:** [TimedCue demo](components/timed-cue.md) (live embed + when to use)
+
 | Prop | Type | Required | Description |
 | --- | --- | --- | --- |
 | `atSeconds` | number | yes | Cue time in seconds. |
@@ -324,6 +364,8 @@ Timed overlay cue within InteractiveVideo.
 ## InteractiveVideo
 
 Video with timed interaction overlays.
+
+**Component page:** [InteractiveVideo demo](components/interactive-video.md) (live embed + when to use)
 
 **Storybook:** [InteractiveVideo demo](https://eddiethedean.github.io/lessonkit/storybook/?path=/story/components-compound-tier-c-d--interactive-video-block)
 
@@ -347,6 +389,8 @@ Video with timed interaction overlays.
 
 Graph node in a BranchingScenario with content and choices.
 
+**Component page:** [BranchNode demo](components/branch-node.md) (live embed + when to use)
+
 | Prop | Type | Required | Description |
 | --- | --- | --- | --- |
 | `nodeId` | string | yes | Unique node id within the scenario. |
@@ -362,6 +406,8 @@ Graph node in a BranchingScenario with content and choices.
 
 Transition control linking to a target BranchNode.
 
+**Component page:** [BranchChoice demo](components/branch-choice.md) (live embed + when to use)
+
 | Prop | Type | Required | Description |
 | --- | --- | --- | --- |
 | `label` | string | yes | Choice label. |
@@ -376,6 +422,8 @@ Transition control linking to a target BranchNode.
 ## BranchingScenario
 
 Graph-based branching narrative with scored paths.
+
+**Component page:** [BranchingScenario demo](components/branching-scenario.md) (live embed + when to use)
 
 **Storybook:** [BranchingScenario demo](https://eddiethedean.github.io/lessonkit/storybook/?path=/story/components-compound-tier-c-d--branching-scenario-block)
 
@@ -398,6 +446,8 @@ Graph-based branching narrative with scored paths.
 
 Sandboxed iframe embed with restrictive defaults.
 
+**Component page:** [Embed demo](components/embed.md) (live embed + when to use)
+
 | Prop | Type | Required | Description |
 | --- | --- | --- | --- |
 | `blockId` | BlockId | yes | Stable block id. |
@@ -414,6 +464,8 @@ Sandboxed iframe embed with restrictive defaults.
 
 Simple bar or pie chart with accessible data table.
 
+**Component page:** [Chart demo](components/chart.md) (live embed + when to use)
+
 | Prop | Type | Required | Description |
 | --- | --- | --- | --- |
 | `blockId` | BlockId | yes | Stable block id. |
@@ -429,6 +481,8 @@ Simple bar or pie chart with accessible data table.
 
 Unscored multi-field survey.
 
+**Component page:** [Questionnaire demo](components/questionnaire.md) (live embed + when to use)
+
 | Prop | Type | Required | Description |
 | --- | --- | --- | --- |
 | `blockId` | BlockId | yes | Stable block id. |
@@ -441,6 +495,8 @@ Unscored multi-field survey.
 ## MemoryGame
 
 Card flip memory matching game.
+
+**Component page:** [MemoryGame demo](components/memory-game.md) (live embed + when to use)
 
 | Prop | Type | Required | Description |
 | --- | --- | --- | --- |
@@ -456,6 +512,8 @@ Card flip memory matching game.
 
 Searchable information panels.
 
+**Component page:** [InformationWall demo](components/information-wall.md) (live embed + when to use)
+
 | Prop | Type | Required | Description |
 | --- | --- | --- | --- |
 | `blockId` | BlockId | yes | Stable block id. |
@@ -468,6 +526,8 @@ Searchable information panels.
 ## ParallaxSlideshow
 
 Slideshow with parallax; static fallback when reduced motion.
+
+**Component page:** [ParallaxSlideshow demo](components/parallax-slideshow.md) (live embed + when to use)
 
 | Prop | Type | Required | Description |
 | --- | --- | --- | --- |
@@ -482,6 +542,8 @@ Slideshow with parallax; static fallback when reduced motion.
 
 Expandable sections.
 
+**Component page:** [Accordion demo](components/accordion.md) (live embed + when to use)
+
 | Prop | Type | Required | Description |
 | --- | --- | --- | --- |
 | `blockId` | BlockId | yes | Stable block id. |
@@ -495,6 +557,8 @@ Expandable sections.
 
 Flip cards with front/back text.
 
+**Component page:** [DialogCards demo](components/dialog-cards.md) (live embed + when to use)
+
 | Prop | Type | Required | Description |
 | --- | --- | --- | --- |
 | `blockId` | BlockId | yes | Stable block id. |
@@ -505,6 +569,8 @@ Flip cards with front/back text.
 ## Flashcards
 
 Study flashcards with optional self-score.
+
+**Component page:** [Flashcards demo](components/flashcards.md) (live embed + when to use)
 
 | Prop | Type | Required | Description |
 | --- | --- | --- | --- |
@@ -519,6 +585,8 @@ Study flashcards with optional self-score.
 ## ImageHotspots
 
 Image with clickable hotspot popovers.
+
+**Component page:** [ImageHotspots demo](components/image-hotspots.md) (live embed + when to use)
 
 | Prop | Type | Required | Description |
 | --- | --- | --- | --- |
@@ -535,6 +603,8 @@ Image with clickable hotspot popovers.
 
 Carousel of images.
 
+**Component page:** [ImageSlider demo](components/image-slider.md) (live embed + when to use)
+
 | Prop | Type | Required | Description |
 | --- | --- | --- | --- |
 | `blockId` | BlockId | yes | Stable block id. |
@@ -547,6 +617,8 @@ Carousel of images.
 ## FindHotspot
 
 Select the correct region on an image.
+
+**Component page:** [FindHotspot demo](components/find-hotspot.md) (live embed + when to use)
 
 | Prop | Type | Required | Description |
 | --- | --- | --- | --- |
@@ -568,6 +640,8 @@ Select the correct region on an image.
 
 Select all correct regions on an image.
 
+**Component page:** [FindMultipleHotspots demo](components/find-multiple-hotspots.md) (live embed + when to use)
+
 | Prop | Type | Required | Description |
 | --- | --- | --- | --- |
 | `checkId` | CheckId | yes | Stable check id. |
@@ -583,3 +657,240 @@ Select all correct regions on an image.
 **Required IDs:** `checkId`
 
 **Telemetry:** `assessment_answered`, `assessment_completed`
+
+## Table
+
+Rich text table with caption.
+
+**Component page:** [Table demo](components/table.md) (live embed + when to use)
+
+| Prop | Type | Required | Description |
+| --- | --- | --- | --- |
+| `blockId` | BlockId | yes | Stable block id. |
+| `caption` | string | no | Table caption. |
+| `headers` | string[] | yes | Column headers. |
+| `rows` | string[][] | yes | Table rows. |
+
+**Required IDs:** `blockId`
+
+## ImageJuxtaposition
+
+Before/after image comparison slider.
+
+**Component page:** [ImageJuxtaposition demo](components/image-juxtaposition.md) (live embed + when to use)
+
+| Prop | Type | Required | Description |
+| --- | --- | --- | --- |
+| `blockId` | BlockId | yes | Stable block id. |
+| `beforeSrc` | string | yes | Before image URL. |
+| `afterSrc` | string | yes | After image URL. |
+| `beforeAlt` | string | yes | Before alt text. |
+| `afterAlt` | string | yes | After alt text. |
+
+**Required IDs:** `blockId`
+
+**Telemetry:** `image_juxtaposition_changed`
+
+## Timeline
+
+Vertical timeline of events.
+
+**Component page:** [Timeline demo](components/timeline.md) (live embed + when to use)
+
+| Prop | Type | Required | Description |
+| --- | --- | --- | --- |
+| `blockId` | BlockId | yes | Stable block id. |
+| `events` | TimelineEvent[] | yes | Timeline events. |
+
+**Required IDs:** `blockId`
+
+**Telemetry:** `timeline_event_viewed`
+
+## ImageSequence
+
+Progressive image sequence blend.
+
+**Component page:** [ImageSequence demo](components/image-sequence.md) (live embed + when to use)
+
+| Prop | Type | Required | Description |
+| --- | --- | --- | --- |
+| `blockId` | BlockId | yes | Stable block id. |
+| `frames` | SequenceFrame[] | yes | Sequence frames. |
+
+**Required IDs:** `blockId`
+
+**Telemetry:** `image_sequence_changed`
+
+## Collage
+
+Multi-image grid collage.
+
+**Component page:** [Collage demo](components/collage.md) (live embed + when to use)
+
+| Prop | Type | Required | Description |
+| --- | --- | --- | --- |
+| `blockId` | BlockId | yes | Stable block id. |
+| `columns` | number | no | Grid columns. |
+| `cells` | CollageCell[] | yes | Collage cells. |
+
+**Required IDs:** `blockId`
+
+## AudioRecorder
+
+Learner audio recording (client-only storage).
+
+**Component page:** [AudioRecorder demo](components/audio-recorder.md) (live embed + when to use)
+
+| Prop | Type | Required | Description |
+| --- | --- | --- | --- |
+| `blockId` | BlockId | yes | Stable block id. |
+| `maxDurationSeconds` | number | no | Max recording length. |
+| `consentLabel` | string | no | Consent checkbox label. |
+
+**Required IDs:** `blockId`
+
+**Telemetry:** `audio_recording_started`, `audio_recording_completed`
+
+## CombinationLock
+
+Enter a digit combination to unlock.
+
+**Component page:** [CombinationLock demo](components/combination-lock.md) (live embed + when to use)
+
+| Prop | Type | Required | Description |
+| --- | --- | --- | --- |
+| `checkId` | CheckId | yes | Stable check id. |
+| `combination` | string | yes | Correct combination. |
+| `label` | string | no | Prompt label. |
+| `enableRetry` | boolean | no | Allow retry after completion. |
+| `enableSolutionsButton` | boolean | no | Show solution control. |
+| `autoCheck` | boolean | no | Check answers automatically when possible. |
+| `passingScore` | number | no | Minimum score to pass. |
+
+**Required IDs:** `checkId`
+
+**Telemetry:** `assessment_answered`, `assessment_completed`
+
+## QrContent
+
+QR code with revealable hidden content.
+
+**Component page:** [QrContent demo](components/qr-content.md) (live embed + when to use)
+
+| Prop | Type | Required | Description |
+| --- | --- | --- | --- |
+| `blockId` | BlockId | yes | Stable block id. |
+| `payload` | string | yes | QR payload URL or text. |
+| `title` | string | no | Block title. |
+| `hiddenTitle` | string | no | Revealed title. |
+| `hiddenBody` | string | no | Revealed body. |
+
+**Required IDs:** `blockId`
+
+**Telemetry:** `qr_content_revealed`
+
+## Crossword
+
+Crossword puzzle grid.
+
+**Component page:** [Crossword demo](components/crossword.md) (live embed + when to use)
+
+| Prop | Type | Required | Description |
+| --- | --- | --- | --- |
+| `checkId` | CheckId | yes | Stable check id. |
+| `rows` | number | yes | Grid rows. |
+| `cols` | number | yes | Grid columns. |
+| `entries` | CrosswordEntry[] | yes | Clues and answers. |
+| `enableRetry` | boolean | no | Allow retry after completion. |
+| `enableSolutionsButton` | boolean | no | Show solution control. |
+| `autoCheck` | boolean | no | Check answers automatically when possible. |
+| `passingScore` | number | no | Minimum score to pass. |
+
+**Required IDs:** `checkId`
+
+**Telemetry:** `assessment_answered`, `assessment_completed`
+
+## WordSearch
+
+Word search puzzle (page-level only; excluded from compounds).
+
+**Component page:** [WordSearch demo](components/word-search.md) (live embed + when to use)
+
+| Prop | Type | Required | Description |
+| --- | --- | --- | --- |
+| `checkId` | CheckId | yes | Stable check id. |
+| `words` | string[] | yes | Words to find. |
+| `size` | number | no | Grid size. |
+| `enableRetry` | boolean | no | Allow retry after completion. |
+| `enableSolutionsButton` | boolean | no | Show solution control. |
+| `autoCheck` | boolean | no | Check answers automatically when possible. |
+| `passingScore` | number | no | Minimum score to pass. |
+
+**Required IDs:** `checkId`
+
+**Telemetry:** `assessment_answered`, `assessment_completed`
+
+## AdventCalendar
+
+Calendar with openable doors.
+
+**Component page:** [AdventCalendar demo](components/advent-calendar.md) (live embed + when to use)
+
+| Prop | Type | Required | Description |
+| --- | --- | --- | --- |
+| `blockId` | BlockId | yes | Stable block id. |
+| `doors` | AdventDoor[] | yes | Calendar doors. |
+| `unlockFrom` | string | no | ISO date to unlock doors. |
+
+**Required IDs:** `blockId`
+
+**Telemetry:** `advent_door_opened`
+
+## MapStage
+
+Spatial stage in a GameMap with content and exits.
+
+**Component page:** [MapStage demo](components/map-stage.md) (live embed + when to use)
+
+| Prop | Type | Required | Description |
+| --- | --- | --- | --- |
+| `stageId` | string | yes | Unique stage id. |
+| `x` | number | yes | X position percent on map. |
+| `y` | number | yes | Y position percent on map. |
+| `label` | string | no | Stage label. |
+| `children` | ReactNode | yes | Content and MapExit controls. |
+
+**Telemetry:** `map_stage_viewed`
+
+## MapExit
+
+Transition control linking to a target MapStage.
+
+**Component page:** [MapExit demo](components/map-exit.md) (live embed + when to use)
+
+| Prop | Type | Required | Description |
+| --- | --- | --- | --- |
+| `label` | string | yes | Exit label. |
+| `targetStageId` | string | yes | Target stage id. |
+| `scoreWeight` | number | no | Optional exit score weight. |
+
+**Telemetry:** `map_exit_selected`
+
+## GameMap
+
+Spatial map branching with scored stages.
+
+**Component page:** [GameMap demo](components/game-map.md) (live embed + when to use)
+
+| Prop | Type | Required | Description |
+| --- | --- | --- | --- |
+| `blockId` | BlockId | yes | Stable block id. |
+| `title` | string | yes | Map title. |
+| `backgroundSrc` | string | yes | Background image URL. |
+| `startStageId` | string | yes | Entry stage id. |
+| `showMapScore` | boolean | no | Show visited-path score. |
+| `children` | MapStage[] | yes | Map stages. |
+
+**Required IDs:** `blockId`
+
+**Telemetry:** `map_stage_viewed`, `map_exit_selected`

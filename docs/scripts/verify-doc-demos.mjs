@@ -21,6 +21,9 @@ const SAMPLES = [
   "customer-service",
   "framework-11-showcase",
   "framework-12-showcase",
+  "interactive-book",
+  "slide-deck",
+  "assessments-p0",
   "lxpack-golden",
 ];
 

@@ -86,6 +86,34 @@ describe("session", () => {
     expect(resolveSessionId(storage, "bad:id")).toBe("tab-valid");
   });
 
+  it("resolveSessionId regenerates invalid stored tab session id", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    vi.stubEnv("NODE_ENV", "development");
+    const store: Record<string, string> = { [SESSION_STORAGE_KEY]: "bad:id" };
+    const storage = {
+      getItem: (k: string) => store[k] ?? null,
+      setItem: (k: string, v: string) => {
+        store[k] = v;
+        return true;
+      },
+      removeItem: (k: string) => {
+        delete store[k];
+      },
+    };
+
+    try {
+      const id = resolveSessionId(storage, undefined);
+      expect(id).toMatch(/^s-/);
+      expect(store[SESSION_STORAGE_KEY]).toBe(id);
+      expect(warn).toHaveBeenCalledWith(
+        expect.stringContaining("Invalid stored sessionId"),
+      );
+    } finally {
+      vi.unstubAllEnvs();
+      warn.mockRestore();
+    }
+  });
+
   it("course started marks use encoded session segments for invalid stored ids", () => {
     const store: Record<string, string> = {};
     const storage = {

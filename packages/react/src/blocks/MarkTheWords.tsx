@@ -70,7 +70,7 @@ function MarkTheWordsInner(
         checkId,
         getScore: () => score,
         getMaxScore: () => maxScore || 1,
-        getAnswerGiven: () => marked.size > 0,
+        getAnswerGiven: () => submitted,
         resetTask: reset,
         showSolutions: () => setShowSolutions(true),
         getXAPIData: () => ({
@@ -81,7 +81,7 @@ function MarkTheWordsInner(
           score,
           maxScore: maxScore || 1,
         }),
-        getCurrentState: () => ({ marked: [...marked], passed, showSolutions }),
+        getCurrentState: () => ({ marked: [...marked], passed, showSolutions, submitted }),
         resume: (state) => {
           const raw = state.marked;
           if (Array.isArray(raw)) setMarked(new Set(raw.filter((i): i is number => typeof i === "number")));
@@ -89,6 +89,7 @@ function MarkTheWordsInner(
             setPassed(value);
             completedRef.current = value;
           });
+          readBooleanStateField(state, "submitted", setSubmitted);
           readBooleanStateField(state, "showSolutions", setShowSolutions);
         },
       }),

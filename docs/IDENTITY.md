@@ -1,4 +1,4 @@
-# Identity model (1.5.x)
+# Identity model (1.6.x)
 
 LessonKit **1.x** requires explicit, stable identifiers for courses, lessons, and knowledge checks.
 Generators and authors must supply IDs in source — the runtime does not invent lesson or check IDs.
@@ -54,7 +54,7 @@ Machine-readable rules: `@lessonkit/core/identity-contract.v1.json`.
 |-----------|--------|
 | `courseId` | Course / activity id in `lessonkit.json` + manifest |
 | `lessonId` | SPA lesson `id` (and `completeLesson(lessonId)` bridge arg) |
-| `checkId` | Assessment `id` in `assessments/*.yaml` and injected build data |
+| `checkId` | `course.assessments[].checkId` in root `lessonkit.json` (see [Manifest reference](reference/manifest.md)) |
 
 Ids are **not rewritten** — use the same slugs in React props and in your `LessonkitCourseDescriptor`.
 

@@ -111,6 +111,25 @@ describe("validateReactManifestParity", () => {
     expect(issues.filter((i) => i.severity === "error")).toEqual([]);
   });
 
+  it("accepts courseId via showcase meta object (courseId: COURSE_ID)", () => {
+    const root = mkdtempSync(join(tmpdir(), "lk-parity-"));
+    mkdirSync(join(root, "src"), { recursive: true });
+    writeFileSync(
+      join(root, "src/constants.ts"),
+      `export const COURSE_ID = "my-course";\nexport const SHOWCASE_META = { courseId: COURSE_ID, lessons: [] };`,
+    );
+
+    const issues = validateReactManifestParity({
+      projectRoot: root,
+      descriptor: testDescriptor({
+        courseId: "my-course",
+        assessments: [],
+      }),
+    });
+
+    expect(issues.filter((i) => i.severity === "error")).toEqual([]);
+  });
+
   it("accepts checkId via string constant", () => {
     const root = mkdtempSync(join(tmpdir(), "lk-parity-"));
     mkdirSync(join(root, "src"), { recursive: true });

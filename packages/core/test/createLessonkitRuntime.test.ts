@@ -325,6 +325,48 @@ describe("createLessonkitRuntime", () => {
     expect(pluginRuns).toBe(1);
   });
 
+  it("deferPluginSetup skips plugin dispose on runtime dispose", () => {
+    const log: string[] = [];
+    const plugin = defineLifecyclePlugin({
+      id: "defer",
+      version: "1",
+      kind: "lms",
+      setup: () => {
+        log.push("setup");
+      },
+      dispose: () => {
+        log.push("dispose");
+      },
+    });
+    const runtime = createLessonkitRuntime({
+      courseId: "c",
+      plugins: [plugin],
+      deferPluginSetup: true,
+    });
+    expect(log).toEqual([]);
+    runtime.dispose();
+    expect(log).toEqual([]);
+  });
+
+  it("deferPluginSetup skips plugin dispose on resetForCourseChange", () => {
+    const log: string[] = [];
+    const plugin = defineLifecyclePlugin({
+      id: "defer-reset",
+      version: "1",
+      kind: "lms",
+      dispose: () => {
+        log.push("dispose");
+      },
+    });
+    const runtime = createLessonkitRuntime({
+      courseId: "c",
+      plugins: [plugin],
+      deferPluginSetup: true,
+    });
+    runtime.resetForCourseChange("course-2");
+    expect(log).toEqual([]);
+  });
+
   it("warns when runtimeVersion is v1 in development", () => {
     const spy = vi.spyOn(console, "warn").mockImplementation(() => {});
     createLessonkitRuntime({ courseId: "c", runtimeVersion: "v1" });

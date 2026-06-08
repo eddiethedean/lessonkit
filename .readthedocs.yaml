@@ -9,9 +9,17 @@ build:
   commands:
     - npm ci
     - bash docs/scripts/build-docs-demos.sh
+    - bash docs/scripts/build-component-demos.sh
+    - npx playwright install chromium
+    - bash docs/scripts/verify-doc-demos.sh
+    - bash docs/scripts/verify-component-demos.sh
     - npm run docs:api
+    - bash docs/scripts/verify-release-version.sh
     - bash docs/scripts/verify-doc-includes.sh
+    - node docs/scripts/generate-block-props-doc.mjs
+    - node docs/scripts/generate-h5p-component-page-index.mjs
     - pip install -r docs/requirements.txt
     - sphinx-build -b html docs $READTHEDOCS_OUTPUT/html -W
+    - bash docs/scripts/verify-doc-substitutions.sh
 
 formats: []

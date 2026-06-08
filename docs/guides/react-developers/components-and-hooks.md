@@ -3,7 +3,7 @@
 :::{admonition} Guides vs reference
 :class: note
 
-**Guides** (this page) explain how to use components in a course. **Reference** docs hold contracts and machine-readable schemas: [Block catalog](../../reference/block-catalog.md) (includes [generated prop tables](../../reference/block-catalog.md#generated-prop-reference-catalog-v3)), and [TypeDoc signatures](../../reference/api.md). Start here for workflows; open reference when implementing or validating props.
+**Guides** (this page) explain how to use components in a course. **Reference** docs hold contracts and machine-readable schemas: [Block catalog](../../reference/block-catalog.md) (includes [generated prop tables](../../reference/block-catalog.md#generated-prop-reference-catalog-v3)), [Component pages](../../reference/components/index.md) (live demos + when to use each block), and [TypeDoc signatures](../../reference/api.md). Start here for workflows; open reference when implementing or validating props.
 :::
 
 :::{admonition} H5P equivalents
@@ -34,10 +34,24 @@
 | `BranchingScenario` / `BranchNode` / `BranchChoice` | Branching Scenario |
 | `Embed` | Iframe Embedder |
 | `Chart` | Chart (bar / list pie + table) |
+| `Table` | Table |
+| `Timeline` | Timeline |
+| `Crossword` | Crossword |
+| `WordSearch` | Word Search |
+| `CombinationLock` | Combination Lock |
+| `GameMap` / `MapStage` / `MapExit` | Game Map |
+| `ImageJuxtaposition` | Image Juxtaposition |
+| `ImageSequence` | Image Sequence |
+| `Collage` | Collage |
+| `AudioRecorder` | Audio Recorder |
+| `QrContent` | QR Content |
+| `AdventCalendar` | Advent Calendar |
 | `Scenario` | Scenario / narrative block |
 | `Reflection` | Open response (manual scoring) |
 
-Compound containers include `InteractiveBook`, `SlideDeck`, `InteractiveVideo`, and **`BranchingScenario`** (1.5). See **[Coming from H5P?](../h5p-for-lessonkit-authors.md)** and the **[capability map](../../project/h5p-capability-map.md)**.
+Compound containers include `InteractiveBook`, `SlideDeck`, `InteractiveVideo`, **`BranchingScenario`** (1.5), and **`GameMap`** (1.6). See **[Coming from H5P?](../h5p-for-lessonkit-authors.md)** and the **[capability map](../../project/h5p-capability-map.md)**.
+
+**Framework 1.6 blocks** (`Table`, `Timeline`, `Crossword`, `WordSearch`, `GameMap`, `CombinationLock`, and others): see [Block catalog — 1.6.0](../../reference/block-catalog.md#catalog-v3-additions-framework-160) and [generated prop tables](../../reference/block-catalog.md#generated-prop-reference-catalog-v3).
 :::
 
 Canonical block list, props, and contracts: [Block catalog reference](../../reference/block-catalog.md).
@@ -55,7 +69,7 @@ Canonical block list, props, and contracts: [Block catalog reference](../../refe
 | `DragTheWords` | `checkId`, `template`, `words` | Inline drag targets; `interactionType: dragTheWords` |
 | `DragAndDrop` | `checkId`, `items[]`, `targets[]` | Drag items to targets; keyboard alternative |
 | `MarkTheWords` | `checkId`, `text`, `correctWords` | Select correct word tokens in running text |
-| `AssessmentSequence` | `checkId`, children with `checkId` | Question-set container; aggregates child handles |
+| `AssessmentSequence` | `blockId?`, children with `checkId` | Question-set container; aggregates child handles |
 | `SlideDeck` | `blockId`, `title`, `Slide` children | Course Presentation; keyboard slide nav; `CompoundHandle` |
 | `Slide` | `blockId`, optional `title` | Single slide row inside `SlideDeck` |
 | `InteractiveVideo` | `blockId`, `title`, `src`, `TimedCue` children | Interactive Video; pause on cue; `CompoundHandle` |
@@ -83,8 +97,8 @@ These blocks ship in `@lessonkit/react` and appear in the [block catalog](../../
 | `ImageSequencing` | `checkId`, `images[]` | Order images correctly |
 | `ArithmeticQuiz` | `checkId`, `problems[]` | Numeric drill assessment |
 | `Essay` | `checkId`, `prompt` | Long-form text (manual scoring) |
-| `Questionnaire` | `checkId`, `fields[]` | Multi-field form |
-| `MemoryGame` | `checkId`, `pairs[]` | Card-matching game |
+| `Questionnaire` | `blockId`, `fields[]` | Multi-field form |
+| `MemoryGame` | `blockId`, `pairs[]` | Card-matching game |
 | `InformationWall` | `blockId`, `panels[]` | Searchable panel grid |
 | `ParallaxSlideshow` | `blockId`, `slides[]` | Parallax image slideshow |
 | `Accordion` | `blockId`, `sections[]` | Expandable sections |
@@ -94,6 +108,18 @@ These blocks ship in `@lessonkit/react` and appear in the [block catalog](../../
 | `ImageSlider` | `blockId`, `slides[]` | Before/after or image carousel |
 | `FindHotspot` | `checkId`, `src`, `targets[]` | Single hotspot find task |
 | `FindMultipleHotspots` | `checkId`, `src`, `targets[]` | Multiple hotspot find task |
+| `Table` | `blockId`, `headers[]`, `rows[][]` | Accessible data table (1.6) |
+| `Timeline` | `blockId`, `events[]` | Event list with focus tracking (1.6) |
+| `Crossword` | `checkId`, `grid`, `clues[]` | Grid fill assessment (1.6) |
+| `WordSearch` | `checkId`, `grid`, `words[]` | Letter grid word find (1.6) |
+| `CombinationLock` | `checkId`, `digits`, `answer` | Digit entry assessment (1.6) |
+| `GameMap` | `blockId`, `title`, `MapStage` / `MapExit` children | Spatial compound map (1.6) |
+| `ImageJuxtaposition` | `blockId`, `before`, `after` | Before/after slider (1.6) |
+| `ImageSequence` | `blockId`, `frames[]` | Stepped image frames (1.6) |
+| `Collage` | `blockId`, `images[]` | Multi-image layout (1.6) |
+| `AudioRecorder` | `blockId` | Browser audio capture (1.6) |
+| `QrContent` | `blockId`, `payload` | QR payload with reveal (1.6) |
+| `AdventCalendar` | `blockId`, `doors[]` | Door-based reveal calendar (1.6) |
 
 Import tree-shake friendly: `import { Quiz } from "@lessonkit/react/blocks"`.
 

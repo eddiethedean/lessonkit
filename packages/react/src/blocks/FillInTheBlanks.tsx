@@ -1,3 +1,4 @@
+import { visuallyHiddenStyle } from "@lessonkit/accessibility";
 import React, { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { AssessmentBaseProps, AssessmentHandle, AssessmentInteractionType } from "@lessonkit/core";
 import type { LessonId } from "@lessonkit/core";
@@ -6,6 +7,7 @@ import { parseStarDelimitedTemplate } from "../assessment/internal/parseStarDeli
 import { buildAssessmentHandle } from "../assessment/internal/buildAssessmentHandle";
 import { readBooleanStateField } from "../assessment/internal/resumeState";
 import { useAssessmentHandleRegistration } from "../assessment/internal/useAssessmentHandleRegistration";
+import { usePluginScoring } from "../assessment/internal/usePluginScoring";
 import { meetsPassingThreshold } from "../assessment/scoring";
 import { useAssessmentState } from "../assessment/useAssessmentState";
 import { useLessonkit } from "../hooks";
@@ -73,6 +75,7 @@ function FillInTheBlanksInner(
   const checkId = useMemo(() => normalizeComponentId(props.checkId, "checkId"), [props.checkId]);
   const assessment = useAssessmentState(props.enclosingLessonId);
   const { config } = useLessonkit();
+  const { scoreResponse } = usePluginScoring(checkId, props.enclosingLessonId);
   const { parts, blanks } = useMemo(
     () => resolveBlanks(props.template, props.blanks),
     [props.template, props.blanks],
@@ -101,7 +104,7 @@ function FillInTheBlanksInner(
 
   useEffect(() => {
     reset();
-  }, [checkId, props.template, blanks.map((b) => b.answer).join("\0")]);
+  }, [checkId, props.template, blanks.map((b) => b.id).join("\0"), blanks.map((b) => b.answer).join("\0")]);
 
   const hasBlanks = blanks.length > 0;
   const allFilled = hasBlanks && blanks.every((b) => (values[b.id] ?? "").trim().length > 0);
@@ -133,7 +136,7 @@ function FillInTheBlanksInner(
       response: nextValues,
       correct: nextPassedThreshold,
     });
-    if (nextPassed || nextPassedThreshold) {
+    if (nextPassedThreshold || props.enableRetry === false) {
       assessment.complete({
         checkId,
         interactionType: INTERACTION,
@@ -150,7 +153,7 @@ function FillInTheBlanksInner(
         checkId,
         getScore: () => score,
         getMaxScore: () => maxScore || 1,
-        getAnswerGiven: () => allFilled,
+        getAnswerGiven: () => submitted,
         resetTask: reset,
         showSolutions: () => setShowSolutions(true),
         getXAPIData: () => ({
@@ -175,7 +178,11 @@ function FillInTheBlanksInner(
             nextPassed = value;
             setPassed(value);
             completedRef.current = value;
-            answeredRef.current = value;
+            if (value) {
+              answeredRef.current = true;
+              nextSubmitted = true;
+              setSubmitted(true);
+            }
           });
           readBooleanStateField(state, "showSolutions", setShowSolutions);
           readBooleanStateField(state, "submitted", (value) => {
@@ -204,9 +211,12 @@ function FillInTheBlanksInner(
     }
     if (!allFilled) return;
     if (passed && !props.enableRetry) return;
-    const snapshot = JSON.stringify(values);
-    if (checkSnapshotRef.current === snapshot) return;
-    checkSnapshotRef.current = snapshot;
+    if (props.autoCheck) {
+      const snapshot = JSON.stringify(values);
+      if (checkSnapshotRef.current === snapshot) return;
+      checkSnapshotRef.current = snapshot;
+    }
+    const scored = scoreResponse(values, passedThreshold, maxScore || 1, props.passingScore);
     answeredRef.current = true;
     setSubmitted(true);
     assessment.answer({
@@ -214,17 +224,17 @@ function FillInTheBlanksInner(
       interactionType: INTERACTION,
       question: props.template,
       response: values,
-      correct: passedThreshold,
+      correct: scored.passed,
     });
-    if ((passedThreshold || props.enableRetry === false) && !completedRef.current) {
+    if ((scored.passed || props.enableRetry === false) && !completedRef.current) {
       completedRef.current = true;
-      if (passedThreshold) setPassed(true);
+      if (scored.passed) setPassed(true);
       assessment.complete({
         checkId,
         interactionType: INTERACTION,
-        score,
-        maxScore,
-        passingScore: props.passingScore ?? maxScore,
+        score: scored.score,
+        maxScore: scored.maxScore,
+        passingScore: props.passingScore ?? scored.maxScore,
       });
     }
   }, [
@@ -236,10 +246,12 @@ function FillInTheBlanksInner(
     maxScore,
     passed,
     passedThreshold,
+    props.autoCheck,
     props.enableRetry,
     props.passingScore,
     props.template,
     score,
+    scoreResponse,
     values,
   ]);
 
@@ -267,7 +279,7 @@ function FillInTheBlanksInner(
           if (!blank) return <React.Fragment key={i}>{part}</React.Fragment>;
           return (
             <label key={blank.id} style={{ margin: "0 0.25em" }}>
-              <span className="lk-visually-hidden">Blank {blank.id}</span>
+              <span style={visuallyHiddenStyle}>Blank {blank.id}</span>
               <input
                 type="text"
                 data-testid={`blank-${blank.id}`}
@@ -300,7 +312,7 @@ function FillInTheBlanksInner(
       ) : null}
       {submitted ? (
         <p role="status" aria-live="polite">
-          {passed || passedThreshold ? "Correct" : "Try again"}
+          {passed ? "Correct" : "Try again"}
         </p>
       ) : null}
       {props.enableRetry && passed ? (

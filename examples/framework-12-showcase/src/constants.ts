@@ -41,6 +41,13 @@ export const LESSONS = [
       "FindMultipleHotspots",
     ],
   },
+  {
+    id: "content-wave",
+    title: "1.6 content wave",
+    duration: "4 min",
+    type: "Reference",
+    blocks: ["Table", "Timeline", "ImageSequence", "Collage", "GameMap"],
+  },
 ] as const;
 
 export type LessonId = (typeof LESSONS)[number]["id"];

@@ -45,6 +45,27 @@ export function assertStandaloneDir(standaloneDir: string): void {
   }
 }
 
+export function assertLkcourseZip(zipPath: string): void {
+  if (!existsSync(zipPath)) {
+    throw new Error(`.lkcourse archive not found: ${zipPath}`);
+  }
+  const stat = statSync(zipPath);
+  if (!stat.isFile() || stat.size === 0) {
+    throw new Error(`.lkcourse archive empty or invalid: ${zipPath}`);
+  }
+
+  const listing = execFileSync("unzip", ["-l", zipPath], { encoding: "utf8" });
+  if (!listing.includes("manifest.json")) {
+    throw new Error(`.lkcourse missing manifest.json: ${zipPath}`);
+  }
+  if (!listing.includes("interchange.json")) {
+    throw new Error(`.lkcourse missing interchange.json: ${zipPath}`);
+  }
+  if (!listing.includes("dist/index.html")) {
+    throw new Error(`.lkcourse missing dist/index.html: ${zipPath}`);
+  }
+}
+
 export function assertZipExists(zipPath: string): void {
   if (!existsSync(zipPath)) {
     throw new Error(`Zip artifact not found: ${zipPath}`);

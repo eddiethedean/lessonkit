@@ -45,6 +45,16 @@ export const PAGE_ALLOWED_CHILD_TYPES = [
   "ImageSlider",
   "Embed",
   "Chart",
+  "Table",
+  "ImageJuxtaposition",
+  "Timeline",
+  "ImageSequence",
+  "Collage",
+  "AudioRecorder",
+  "CombinationLock",
+  "QrContent",
+  "Crossword",
+  "AdventCalendar",
   "ProgressTracker",
 ] as const;
 
@@ -81,10 +91,68 @@ export const BRANCH_NODE_ALLOWED_CHILD_TYPES = [
   "ImageSlider",
   "Embed",
   "Chart",
+  "Table",
+  "ImageJuxtaposition",
+  "Timeline",
+  "ImageSequence",
+  "Collage",
+  "AudioRecorder",
+  "CombinationLock",
+  "QrContent",
+  "Crossword",
+  "AdventCalendar",
   "BranchChoice",
 ] as const;
 
 export const BRANCHING_SCENARIO_ALLOWED_CHILD_TYPES = ["BranchNode"] as const;
+
+export const GAME_MAP_ALLOWED_CHILD_TYPES = ["MapStage"] as const;
+
+/** Map stage content (BranchNode parity; WordSearch excluded from compounds). */
+export const MAP_STAGE_ALLOWED_CHILD_TYPES = [
+  "Text",
+  "Heading",
+  "Image",
+  "Video",
+  "Scenario",
+  "Reflection",
+  "Quiz",
+  "KnowledgeCheck",
+  "TrueFalse",
+  "FillInTheBlanks",
+  "DragAndDrop",
+  "DragTheWords",
+  "MarkTheWords",
+  "Summary",
+  "ImagePairing",
+  "ImageSequencing",
+  "MemoryGame",
+  "InformationWall",
+  "ParallaxSlideshow",
+  "Questionnaire",
+  "Essay",
+  "ArithmeticQuiz",
+  "Accordion",
+  "DialogCards",
+  "Flashcards",
+  "ImageHotspots",
+  "FindHotspot",
+  "FindMultipleHotspots",
+  "ImageSlider",
+  "Embed",
+  "Chart",
+  "Table",
+  "ImageJuxtaposition",
+  "Timeline",
+  "ImageSequence",
+  "Collage",
+  "AudioRecorder",
+  "CombinationLock",
+  "QrContent",
+  "Crossword",
+  "AdventCalendar",
+  "MapExit",
+] as const;
 
 export const INTERACTIVE_BOOK_ALLOWED_CHILD_TYPES = ["Page"] as const;
 
@@ -121,6 +189,16 @@ export const SLIDE_ALLOWED_CHILD_TYPES = [
   "ImageSlider",
   "Embed",
   "Chart",
+  "Table",
+  "ImageJuxtaposition",
+  "Timeline",
+  "ImageSequence",
+  "Collage",
+  "AudioRecorder",
+  "CombinationLock",
+  "QrContent",
+  "Crossword",
+  "AdventCalendar",
 ] as const;
 
 export const SLIDE_DECK_ALLOWED_CHILD_TYPES = ["Slide"] as const;
@@ -169,7 +247,9 @@ export type CompoundParentType =
   | "InteractiveVideo"
   | "AssessmentSequence"
   | "BranchingScenario"
-  | "BranchNode";
+  | "BranchNode"
+  | "GameMap"
+  | "MapStage";
 
 const ALLOWLISTS: Record<CompoundParentType, readonly string[]> = {
   Page: PAGE_ALLOWED_CHILD_TYPES,
@@ -181,6 +261,8 @@ const ALLOWLISTS: Record<CompoundParentType, readonly string[]> = {
   AssessmentSequence: ASSESSMENT_SEQUENCE_ALLOWED_CHILD_TYPES,
   BranchingScenario: BRANCHING_SCENARIO_ALLOWED_CHILD_TYPES,
   BranchNode: BRANCH_NODE_ALLOWED_CHILD_TYPES,
+  GameMap: GAME_MAP_ALLOWED_CHILD_TYPES,
+  MapStage: MAP_STAGE_ALLOWED_CHILD_TYPES,
 };
 
 export const COMPOUND_MAX_NESTING_DEPTH: Record<CompoundParentType, number> = {
@@ -193,6 +275,8 @@ export const COMPOUND_MAX_NESTING_DEPTH: Record<CompoundParentType, number> = {
   AssessmentSequence: 1,
   BranchingScenario: 2,
   BranchNode: 1,
+  GameMap: 2,
+  MapStage: 1,
 };
 
 export function getAllowedChildTypes(parent: CompoundParentType): readonly string[] {

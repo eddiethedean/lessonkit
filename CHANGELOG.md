@@ -4,7 +4,34 @@ All notable changes to the LessonKit monorepo are documented here.
 
 - [`@lessonkit/*`](https://www.npmjs.com/org/lessonkit) — core platform (tag `v*.*.*`)
 
-## Unreleased
+## [1.6.0] - 2026-06-08
+
+Framework **1.6.x** — portable `.lkcourse` interchange, block registry CLI, Tier C–E content blocks, `GameMap` compound, and release-stabilization fixes across LMS scoring, packaging, telemetry, and assessments. All seven `@lessonkit/*` packages ship at **1.6.0**. Additive release (no breaking API changes).
+
+### Added
+
+- **`.lkcourse` archive** — `lessonkit export` produces zip with `manifest.json` (envelope), `interchange.json`, `dist/`, optional `block-tree.json`
+- **`@lessonkit/lxpack`** — `exportLkcourse()`, `validateLkcourse()`, `importLkcourse()`, `extractBlockTree()`; schemas `lkcourse-format.v1.json`, `block-tree.v1.json`; `fflate` zip helpers with zip-slip guards
+- **CLI** — `lessonkit blocks list` (`--json`, `--category`, `--tier`) over `block-catalog.v3.json`; `lessonkit package --strict` exposes lxpack `strictBuild`
+- **Tier C/D blocks** — `Table`, `ImageJuxtaposition`, `Timeline`, `ImageSequence`, `Collage`, `AudioRecorder`
+- **Tier E puzzles** — `CombinationLock`, `QrContent`, `Crossword`, `WordSearch`, `AdventCalendar`
+- **`GameMap` compound** — `MapStage`, `MapExit`; spatial map UI; `map_stage_viewed`, `map_exit_selected` telemetry
+- **Block catalog v3** — 14 new entries; `WordSearch` page-level only (excluded from compound allowlists); `tier` field restores `lessonkit blocks list --tier`
+- **Observability** — `onCompoundDuplicateCheckId` and `onStoragePortChangeIgnored` hooks; compound score contract documented
+- **Docs** — [interchange reference](docs/reference/interchange.md), [MIGRATION-1.5-to-1.6](docs/MIGRATION-1.5-to-1.6.md), [plugin marketplace research](docs/guides/plugin-marketplace-research.md); manifest layers in [manifest reference](docs/reference/manifest.md); capability map ✅ for all 1.6.x blocks
+- **Examples** — `framework-12-showcase` content-wave lesson; `presetAnalyticsPack` plugin preset
+- **Integration test** — `lxpack-golden` export → validate → import round-trip with `lessonkit.json` parity
+- **Tests & CI** — framework-12 e2e smoke; assessments-p0 FillInTheBlanks compound gating e2e; xAPI/cmi5 lesson completion assertions; golden axe-core a11y gate; `blockTiers.ts` canonical tier source
+
+### Fixed
+
+- **LMS scoring** — `normalizeScore` no longer mis-scales `{ score: 2, maxScore: 1 }`; `notifyLxpackAssessment` normalizes raw points; LMS shell and bridge default `passingScore` is **1.0** (100%) when omitted, matching React SPA; bridge routes invalid `assessment_completed` scores through `onBridgeMiss`; Quiz UI/telemetry use factual answer correctness separate from plugin pass threshold
+- **Packaging paths** — `spaDistDir` and packaging `outDir` reject reserved directories (`.git`, `node_modules`, `.github`); descriptor `spaDistDir` validated at parse time; `output` must resolve inside `outDir`
+- **Packaging pipeline** — `writeLxpackProject` no longer blocks SPA-only assessment kinds; rejects non-injectable assessments; `packageLessonkitCourse` returns structured errors on staging failures; `validation.ok` aligned on warning builds; promote lock timeout increased; SPA-only assessment packaging errors include actionable hints
+- **CLI** — `lessonkit build` rejects symlinked `dist`; init rollback surfaces failures; `lessonkit dev` strips passthrough `--outDir`
+- **Core runtime** — stable auto-resolved session IDs; explicit learner session swaps re-emit `course_started`; telemetry batch re-queues full batch on partial sink failure; course-started dedupe uses tracking mark; compound resume clamps `activePageIndex` when `pageCount` provided; telemetry `track()` dedupes during in-flight flush; course-started marks not cached when durable `setItem` fails
+- **React assessments** — Fill/Drag blocks require Check before Next in compounds; plugin scoring wired; `scoreFromCustom` fails closed on `maxScore <= 0`; duplicate `checkId` rejected in compounds; `config.embed.strictHosts` option; storage port cannot change after mount; assessment feedback/telemetry parity across Fill/Drag/DnD/FindMultipleHotspots/Quiz/Summary resume paths
+- **Subtle audit (2nd pass)** — MCQ shell injection marks trimmed answers correct; `fillInBlanks` rejects invalid blank entries; empty `tracking.xapi: {}` no longer forces `activityIri`; SCORM e2e requires LMS store status; CI e2e forces artifact rebuild
 
 ## [1.5.0] - 2026-06-06
 

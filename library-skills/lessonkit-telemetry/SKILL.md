@@ -1,12 +1,12 @@
 ---
 name: lessonkit-telemetry
 description: >-
-  Wire LessonKit 1.5.x telemetry, xAPI, plugins, and LXPack bridge — LessonkitProvider
+  Wire LessonKit 1.6.x telemetry, xAPI, plugins, and LXPack bridge — LessonkitProvider
   config, tracking sinks, batchSink, defineTelemetryPlugin, runtimeVersion v2.
   Use when adding analytics, LRS, SCORM completion, or custom plugins.
 license: Apache-2.0
 metadata:
-  lessonkit-version: "1.5.0"
+  lessonkit-version: "1.6.0"
 ---
 
 # LessonKit telemetry and plugins

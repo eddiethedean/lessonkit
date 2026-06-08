@@ -15,6 +15,7 @@ export type CliErrorCode =
   | "RUNTIME"
   | "INVALID_PROJECT"
   | "PACKAGING"
+  | "EXPORT_FAILED"
   | "NODE_VERSION"
   | "TARGET_REQUIRED";
 
@@ -49,6 +50,22 @@ export type CliSuccessResult =
       outputDir?: string;
       fileCount: number;
       warnings?: CliIssue[];
+    }
+  | {
+      ok: true;
+      command: "export";
+      projectRoot: string;
+      archivePath: string;
+      fileCount: number;
+      includeBlockTree: boolean;
+    }
+  | {
+      ok: true;
+      command: "blocks list";
+      schemaVersion: number;
+      count: number;
+      entries?: Array<Record<string, unknown>>;
+      text?: string;
     };
 
 export type CliFailureResult = {

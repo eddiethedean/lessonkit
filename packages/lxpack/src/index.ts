@@ -58,6 +58,7 @@ export {
   type ValidatePackageInputsResult,
 } from "./packaging/validateInputs";
 
+export { assertSpaDistContentsSafe } from "./spaDistValidation";
 export { promoteStagingToOutDir } from "./packaging/promote";
 export {
   buildStagingPackage,
@@ -93,3 +94,25 @@ export {
   materializeLessonkitProject,
   parseLessonkitInterchange,
 } from "@lxpack/validators";
+
+export type {
+  BlockTreeNodeV1,
+  BlockTreeV1,
+  ExportLkcourseOptions,
+  ExportLkcourseResult,
+  ExtractBlockTreeOptions,
+  ImportLkcourseOptions,
+  ImportLkcourseResult,
+  LkcourseEnvelopeV1,
+  LkcourseValidationIssue,
+  ValidateLkcourseResult,
+} from "./lkcourse";
+
+export {
+  exportLkcourse,
+  extractBlockTree,
+  importLkcourse,
+  parseLkcourseEnvelope,
+  validateLkcourse,
+  validateLkcourseArchiveEntries,
+} from "./lkcourse";

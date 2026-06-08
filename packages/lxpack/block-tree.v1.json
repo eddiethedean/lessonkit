@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lessonkit.dev/schemas/block-tree.v1.json",
+  "title": "BlockTreeV1",
+  "description": "Best-effort static JSX block inventory for a LessonKit course",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "blocks", "sources"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "sources": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "blocks": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/BlockTreeNode" }
+    }
+  },
+  "$defs": {
+    "BlockTreeNode": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type"],
+      "properties": {
+        "type": { "type": "string", "minLength": 1 },
+        "rawTag": { "type": "string" },
+        "courseId": { "type": "string" },
+        "lessonId": { "type": "string" },
+        "checkId": { "type": "string" },
+        "blockId": { "type": "string" },
+        "nodeId": { "type": "string" },
+        "children": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/BlockTreeNode" }
+        }
+      }
+    }
+  }
+}

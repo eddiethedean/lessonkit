@@ -102,6 +102,8 @@ function SummaryInner(
               .filter((i) => i >= 0);
           }
           setSelectedIndices(nextIndices);
+          const wasChecked = typeof state.checked === "boolean" ? state.checked : false;
+          readBooleanStateField(state, "checked", setChecked);
           const nextSelected = nextIndices.map((i) => props.statements[i] ?? "");
           const nextIsCorrect =
             nextSelected.length === props.correct.length &&
@@ -112,25 +114,33 @@ function SummaryInner(
             maxScore,
             props.passingScore,
           );
-          setPassed(nextPassedThreshold);
-          completedRef.current = nextPassedThreshold;
-          if (nextPassedThreshold && !telemetryReplayedRef.current && shouldReplayResumeTelemetry(config)) {
-            telemetryReplayedRef.current = true;
-            assessment.answer({
-              checkId,
-              interactionType: INTERACTION,
-              response: nextSelected,
-              correct: nextPassedThreshold,
-            });
-            assessment.complete({
-              checkId,
-              interactionType: INTERACTION,
-              score: nextScore,
-              maxScore,
-              passingScore: props.passingScore ?? maxScore,
-            });
+          if (wasChecked) {
+            setPassed(nextPassedThreshold);
+            completedRef.current = nextPassedThreshold || props.enableRetry === false;
+            if (
+              (nextPassedThreshold || props.enableRetry === false) &&
+              !telemetryReplayedRef.current &&
+              shouldReplayResumeTelemetry(config)
+            ) {
+              telemetryReplayedRef.current = true;
+              assessment.answer({
+                checkId,
+                interactionType: INTERACTION,
+                response: nextSelected,
+                correct: nextPassedThreshold,
+              });
+              assessment.complete({
+                checkId,
+                interactionType: INTERACTION,
+                score: nextScore,
+                maxScore,
+                passingScore: props.passingScore ?? maxScore,
+              });
+            }
+          } else {
+            setPassed(false);
+            completedRef.current = false;
           }
-          readBooleanStateField(state, "checked", setChecked);
         },
       }),
     [

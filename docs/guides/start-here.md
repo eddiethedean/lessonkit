@@ -1,6 +1,6 @@
 # Start here
 
-**Before you start:** Node.js **20.19+** recommended for `npx @lessonkit/cli init` (**18+** minimum for some packaging workflows). See [Prerequisites](prerequisites.md). Basic React and TypeScript help on the developer path; [vibe coding](vibe-coding/index.md) does not require studying React first.
+**Before you start:** Node.js **20.19+** required for `npx @lessonkit/cli init` (Vite 8). Node **18+** may work for packaging-only workflows on an existing course — not supported for scaffold. See [Prerequisites](prerequisites.md). Basic React and TypeScript help on the developer path; [vibe coding](vibe-coding/index.md) does not require studying React first.
 
 Pick the path that matches how you work. Each link is a single next step—not the full documentation map.
 
@@ -8,7 +8,7 @@ Pick the path that matches how you work. Each link is a single next step—not t
 
 [Getting started in 5 minutes](react-developers/getting-started-in-5-minutes.md) — `npx @lessonkit/cli init`, preview locally, edit one quiz.
 
-**Then ship to an LMS:** [First LMS export](react-developers/first-lms-export.md) — bridge, env vars, SCORM zip. One-page checklist: [Ship to LMS](react-developers/ship-to-lms.md).
+**Then ship to an LMS:** Start with **[LMS Go-Live](react-developers/lms-go-live.md)** (smoke test vs production). Shortcuts: [First LMS export](react-developers/first-lms-export.md) · [Ship to LMS checklist](react-developers/ship-to-lms.md).
 
 ## Build with AI (no React required)
 

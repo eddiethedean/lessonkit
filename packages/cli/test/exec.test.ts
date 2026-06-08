@@ -49,6 +49,25 @@ describe("runCommand", () => {
     vi.useRealTimers();
   });
 
+  it("uses LESSONKIT_CMD_TIMEOUT_MS when set", async () => {
+    process.env.LESSONKIT_CMD_TIMEOUT_MS = "5000";
+    const child = new EventEmitter() as EventEmitter & { on: EventEmitter["on"] };
+    mockedSpawn.mockReturnValue(child as never);
+
+    const promise = runCommand("/bin/vite", ["build"], { cwd: "/tmp" });
+    child.emit("close", 0);
+    await expect(promise).resolves.toBeUndefined();
+  });
+
+  it("disables timeout when timeoutMs is 0", async () => {
+    const child = new EventEmitter() as EventEmitter & { on: EventEmitter["on"] };
+    mockedSpawn.mockReturnValue(child as never);
+
+    const promise = runCommand("/bin/vite", ["build"], { cwd: "/tmp", timeoutMs: 0 });
+    child.emit("close", 0);
+    await expect(promise).resolves.toBeUndefined();
+  });
+
   it("rejects on spawn error", async () => {
     const child = new EventEmitter() as EventEmitter & {
       on: EventEmitter["on"];

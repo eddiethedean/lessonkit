@@ -21,6 +21,14 @@ import type {
   QuestionnaireSubmittedData,
   BranchNodeViewedData,
   BranchSelectedData,
+  ImageJuxtapositionChangedData,
+  TimelineEventViewedData,
+  ImageSequenceChangedData,
+  AudioRecordingData,
+  QrContentRevealedData,
+  AdventDoorOpenedData,
+  MapStageViewedData,
+  MapExitSelectedData,
   QuizAnsweredData,
   QuizCompletedData,
   TelemetryEvent,
@@ -343,6 +351,90 @@ export const TELEMETRY_EVENT_REGISTRY: Record<BuildTelemetryEventInput["name"], 
         ...base,
         lessonId,
         data: opts.data as BranchSelectedData,
+      };
+    },
+  },
+  image_juxtaposition_changed: {
+    build: (opts, base) => ({
+      name: "image_juxtaposition_changed",
+      ...base,
+      lessonId: opts.lessonId,
+      data: opts.data as ImageJuxtapositionChangedData,
+    }),
+  },
+  timeline_event_viewed: {
+    build: (opts, base) => ({
+      name: "timeline_event_viewed",
+      ...base,
+      lessonId: opts.lessonId,
+      data: opts.data as TimelineEventViewedData,
+    }),
+  },
+  image_sequence_changed: {
+    build: (opts, base) => ({
+      name: "image_sequence_changed",
+      ...base,
+      lessonId: opts.lessonId,
+      data: opts.data as ImageSequenceChangedData,
+    }),
+  },
+  audio_recording_started: {
+    build: (opts, base) => ({
+      name: "audio_recording_started",
+      ...base,
+      lessonId: opts.lessonId,
+      data: opts.data as AudioRecordingData,
+    }),
+  },
+  audio_recording_completed: {
+    build: (opts, base) => ({
+      name: "audio_recording_completed",
+      ...base,
+      lessonId: opts.lessonId,
+      data: opts.data as AudioRecordingData,
+    }),
+  },
+  qr_content_revealed: {
+    build: (opts, base) => ({
+      name: "qr_content_revealed",
+      ...base,
+      lessonId: opts.lessonId,
+      data: opts.data as QrContentRevealedData,
+    }),
+  },
+  advent_door_opened: {
+    build: (opts, base) => ({
+      name: "advent_door_opened",
+      ...base,
+      lessonId: opts.lessonId,
+      data: opts.data as AdventDoorOpenedData,
+    }),
+  },
+  map_stage_viewed: {
+    requiresLessonId: true,
+    build: (opts, base) => {
+      if (opts.name !== "map_stage_viewed") throw new Error("unexpected event");
+      const lessonId = opts.lessonId;
+      if (!lessonId) throw new Error("map_stage_viewed requires active lessonId");
+      return {
+        name: "map_stage_viewed",
+        ...base,
+        lessonId,
+        data: opts.data as MapStageViewedData,
+      };
+    },
+  },
+  map_exit_selected: {
+    requiresLessonId: true,
+    build: (opts, base) => {
+      if (opts.name !== "map_exit_selected") throw new Error("unexpected event");
+      const lessonId = opts.lessonId;
+      if (!lessonId) throw new Error("map_exit_selected requires active lessonId");
+      return {
+        name: "map_exit_selected",
+        ...base,
+        lessonId,
+        data: opts.data as MapExitSelectedData,
       };
     },
   },

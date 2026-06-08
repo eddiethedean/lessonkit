@@ -95,7 +95,9 @@
         "InteractiveVideo",
         "AssessmentSequence",
         "BranchingScenario",
-        "BranchNode"
+        "BranchNode",
+        "GameMap",
+        "MapStage"
       ],
       "a11y": {
         "element": "article",
@@ -147,7 +149,9 @@
         "InteractiveVideo",
         "AssessmentSequence",
         "BranchingScenario",
-        "BranchNode"
+        "BranchNode",
+        "GameMap",
+        "MapStage"
       ],
       "a11y": {
         "element": "section",
@@ -223,7 +227,9 @@
         "InteractiveVideo",
         "AssessmentSequence",
         "BranchingScenario",
-        "BranchNode"
+        "BranchNode",
+        "GameMap",
+        "MapStage"
       ],
       "a11y": {
         "element": "section",
@@ -296,7 +302,9 @@
         "InteractiveVideo",
         "AssessmentSequence",
         "BranchingScenario",
-        "BranchNode"
+        "BranchNode",
+        "GameMap",
+        "MapStage"
       ],
       "a11y": {
         "element": "section",
@@ -318,7 +326,8 @@
           "quiz_completed"
         ],
         "requiresActiveLesson": true
-      }
+      },
+      "tier": "B"
     },
     {
       "type": "ProgressTracker",
@@ -344,7 +353,9 @@
         "InteractiveVideo",
         "AssessmentSequence",
         "BranchingScenario",
-        "BranchNode"
+        "BranchNode",
+        "GameMap",
+        "MapStage"
       ],
       "a11y": {
         "element": "aside",
@@ -424,7 +435,9 @@
         "TimedCue",
         "InteractiveVideo",
         "BranchingScenario",
-        "BranchNode"
+        "BranchNode",
+        "GameMap",
+        "MapStage"
       ],
       "a11y": {
         "element": "section",
@@ -446,7 +459,8 @@
           "assessment_completed"
         ],
         "requiresActiveLesson": true
-      }
+      },
+      "tier": "B"
     },
     {
       "type": "FillInTheBlanks",
@@ -512,7 +526,9 @@
         "TimedCue",
         "InteractiveVideo",
         "BranchingScenario",
-        "BranchNode"
+        "BranchNode",
+        "GameMap",
+        "MapStage"
       ],
       "a11y": {
         "element": "section",
@@ -533,7 +549,8 @@
           "assessment_completed"
         ],
         "requiresActiveLesson": true
-      }
+      },
+      "tier": "B"
     },
     {
       "type": "DragAndDrop",
@@ -599,7 +616,9 @@
         "TimedCue",
         "InteractiveVideo",
         "BranchingScenario",
-        "BranchNode"
+        "BranchNode",
+        "GameMap",
+        "MapStage"
       ],
       "a11y": {
         "element": "section",
@@ -620,7 +639,8 @@
           "assessment_completed"
         ],
         "requiresActiveLesson": true
-      }
+      },
+      "tier": "B"
     },
     {
       "type": "DragTheWords",
@@ -686,7 +706,9 @@
         "TimedCue",
         "InteractiveVideo",
         "BranchingScenario",
-        "BranchNode"
+        "BranchNode",
+        "GameMap",
+        "MapStage"
       ],
       "a11y": {
         "element": "section",
@@ -707,7 +729,8 @@
           "assessment_completed"
         ],
         "requiresActiveLesson": true
-      }
+      },
+      "tier": "B"
     },
     {
       "type": "MarkTheWords",
@@ -773,7 +796,9 @@
         "TimedCue",
         "InteractiveVideo",
         "BranchingScenario",
-        "BranchNode"
+        "BranchNode",
+        "GameMap",
+        "MapStage"
       ],
       "a11y": {
         "element": "section",
@@ -794,7 +819,8 @@
           "assessment_completed"
         ],
         "requiresActiveLesson": true
-      }
+      },
+      "tier": "B"
     },
     {
       "type": "AssessmentSequence",
@@ -845,7 +871,9 @@
         "InteractiveVideo",
         "AssessmentSequence",
         "BranchingScenario",
-        "BranchNode"
+        "BranchNode",
+        "GameMap",
+        "MapStage"
       ],
       "a11y": {
         "element": "section",
@@ -878,7 +906,8 @@
         "ArithmeticQuiz",
         "Essay"
       ],
-      "maxNestingDepth": 1
+      "maxNestingDepth": 1,
+      "tier": "A"
     },
     {
       "type": "Summary",
@@ -944,7 +973,9 @@
         "SlideDeck",
         "InteractiveVideo",
         "BranchingScenario",
-        "BranchNode"
+        "BranchNode",
+        "GameMap",
+        "MapStage"
       ],
       "a11y": {
         "element": "section",
@@ -965,7 +996,8 @@
           "assessment_completed"
         ],
         "requiresActiveLesson": true
-      }
+      },
+      "tier": "B"
     },
     {
       "type": "ImagePairing",
@@ -1025,7 +1057,9 @@
         "SlideDeck",
         "InteractiveVideo",
         "BranchingScenario",
-        "BranchNode"
+        "BranchNode",
+        "GameMap",
+        "MapStage"
       ],
       "a11y": {
         "element": "section",
@@ -1046,7 +1080,8 @@
           "assessment_completed"
         ],
         "requiresActiveLesson": true
-      }
+      },
+      "tier": "C"
     },
     {
       "type": "ImageSequencing",
@@ -1112,7 +1147,9 @@
         "SlideDeck",
         "InteractiveVideo",
         "BranchingScenario",
-        "BranchNode"
+        "BranchNode",
+        "GameMap",
+        "MapStage"
       ],
       "a11y": {
         "element": "section",
@@ -1133,7 +1170,8 @@
           "assessment_completed"
         ],
         "requiresActiveLesson": true
-      }
+      },
+      "tier": "C"
     },
     {
       "type": "ArithmeticQuiz",
@@ -1199,7 +1237,9 @@
         "SlideDeck",
         "InteractiveVideo",
         "BranchingScenario",
-        "BranchNode"
+        "BranchNode",
+        "GameMap",
+        "MapStage"
       ],
       "a11y": {
         "element": "section",
@@ -1220,7 +1260,8 @@
           "assessment_completed"
         ],
         "requiresActiveLesson": true
-      }
+      },
+      "tier": "B"
     },
     {
       "type": "Essay",
@@ -1286,7 +1327,9 @@
         "SlideDeck",
         "InteractiveVideo",
         "BranchingScenario",
-        "BranchNode"
+        "BranchNode",
+        "GameMap",
+        "MapStage"
       ],
       "a11y": {
         "element": "section",
@@ -1307,7 +1350,8 @@
           "assessment_completed"
         ],
         "requiresActiveLesson": true
-      }
+      },
+      "tier": "B"
     },
     {
       "type": "Text",
@@ -1338,7 +1382,9 @@
         "InteractiveVideo",
         "AssessmentSequence",
         "BranchingScenario",
-        "BranchNode"
+        "BranchNode",
+        "GameMap",
+        "MapStage"
       ],
       "a11y": {
         "element": "p",
@@ -1389,7 +1435,9 @@
         "InteractiveVideo",
         "AssessmentSequence",
         "BranchingScenario",
-        "BranchNode"
+        "BranchNode",
+        "GameMap",
+        "MapStage"
       ],
       "a11y": {
         "element": "h1-h3",
@@ -1440,7 +1488,9 @@
         "InteractiveVideo",
         "AssessmentSequence",
         "BranchingScenario",
-        "BranchNode"
+        "BranchNode",
+        "GameMap",
+        "MapStage"
       ],
       "a11y": {
         "element": "img",
@@ -1505,7 +1555,9 @@
         "InteractiveVideo",
         "AssessmentSequence",
         "BranchingScenario",
-        "BranchNode"
+        "BranchNode",
+        "GameMap",
+        "MapStage"
       ],
       "a11y": {
         "element": "video",
@@ -1560,6 +1612,16 @@
         "ImageSlider",
         "Embed",
         "Chart",
+        "Table",
+        "ImageJuxtaposition",
+        "Timeline",
+        "ImageSequence",
+        "Collage",
+        "AudioRecorder",
+        "CombinationLock",
+        "QrContent",
+        "Crossword",
+        "AdventCalendar",
         "ProgressTracker"
       ],
       "maxNestingDepth": 1,
@@ -1606,7 +1668,8 @@
           "compound_page_viewed"
         ],
         "requiresActiveLesson": true
-      }
+      },
+      "tier": "A"
     },
     {
       "type": "InteractiveBook",
@@ -1666,7 +1729,8 @@
           "book_page_viewed"
         ],
         "requiresActiveLesson": true
-      }
+      },
+      "tier": "A"
     },
     {
       "type": "Slide",
@@ -1706,7 +1770,17 @@
         "FindMultipleHotspots",
         "ImageSlider",
         "Embed",
-        "Chart"
+        "Chart",
+        "Table",
+        "ImageJuxtaposition",
+        "Timeline",
+        "ImageSequence",
+        "Collage",
+        "AudioRecorder",
+        "CombinationLock",
+        "QrContent",
+        "Crossword",
+        "AdventCalendar"
       ],
       "maxNestingDepth": 1,
       "props": [
@@ -1811,7 +1885,8 @@
           "slide_viewed"
         ],
         "requiresActiveLesson": true
-      }
+      },
+      "tier": "A"
     },
     {
       "type": "TimedCue",
@@ -1957,7 +2032,8 @@
           "video_segment_completed"
         ],
         "requiresActiveLesson": true
-      }
+      },
+      "tier": "A"
     },
     {
       "type": "BranchNode",
@@ -1998,6 +2074,16 @@
         "ImageSlider",
         "Embed",
         "Chart",
+        "Table",
+        "ImageJuxtaposition",
+        "Timeline",
+        "ImageSequence",
+        "Collage",
+        "AudioRecorder",
+        "CombinationLock",
+        "QrContent",
+        "Crossword",
+        "AdventCalendar",
         "BranchChoice"
       ],
       "maxNestingDepth": 1,
@@ -2172,7 +2258,8 @@
           "branch_selected"
         ],
         "requiresActiveLesson": true
-      }
+      },
+      "tier": "A"
     },
     {
       "type": "Embed",
@@ -2225,7 +2312,9 @@
         "InteractiveVideo",
         "AssessmentSequence",
         "BranchingScenario",
-        "BranchNode"
+        "BranchNode",
+        "GameMap",
+        "MapStage"
       ],
       "a11y": {
         "element": "iframe",
@@ -2241,7 +2330,8 @@
         "emits": [
           "interaction"
         ]
-      }
+      },
+      "tier": "C"
     },
     {
       "type": "Chart",
@@ -2288,7 +2378,9 @@
         "InteractiveVideo",
         "AssessmentSequence",
         "BranchingScenario",
-        "BranchNode"
+        "BranchNode",
+        "GameMap",
+        "MapStage"
       ],
       "a11y": {
         "element": "figure",
@@ -2304,7 +2396,8 @@
         "emits": [
           "interaction"
         ]
-      }
+      },
+      "tier": "C"
     },
     {
       "type": "Questionnaire",
@@ -2339,7 +2432,9 @@
         "InteractiveVideo",
         "AssessmentSequence",
         "BranchingScenario",
-        "BranchNode"
+        "BranchNode",
+        "GameMap",
+        "MapStage"
       ],
       "a11y": {
         "element": "form",
@@ -2356,7 +2451,8 @@
           "questionnaire_submitted"
         ],
         "requiresActiveLesson": true
-      }
+      },
+      "tier": "B"
     },
     {
       "type": "MemoryGame",
@@ -2397,7 +2493,9 @@
         "InteractiveVideo",
         "AssessmentSequence",
         "BranchingScenario",
-        "BranchNode"
+        "BranchNode",
+        "GameMap",
+        "MapStage"
       ],
       "a11y": {
         "element": "section",
@@ -2413,7 +2511,8 @@
         "emits": [
           "memory_card_flipped"
         ]
-      }
+      },
+      "tier": "C"
     },
     {
       "type": "InformationWall",
@@ -2448,7 +2547,9 @@
         "InteractiveVideo",
         "AssessmentSequence",
         "BranchingScenario",
-        "BranchNode"
+        "BranchNode",
+        "GameMap",
+        "MapStage"
       ],
       "a11y": {
         "element": "section",
@@ -2464,7 +2565,8 @@
         "emits": [
           "information_wall_search"
         ]
-      }
+      },
+      "tier": "D"
     },
     {
       "type": "ParallaxSlideshow",
@@ -2499,7 +2601,9 @@
         "InteractiveVideo",
         "AssessmentSequence",
         "BranchingScenario",
-        "BranchNode"
+        "BranchNode",
+        "GameMap",
+        "MapStage"
       ],
       "a11y": {
         "element": "section",
@@ -2515,7 +2619,8 @@
         "emits": [
           "parallax_slide_viewed"
         ]
-      }
+      },
+      "tier": "D"
     },
     {
       "type": "Accordion",
@@ -2550,7 +2655,9 @@
         "InteractiveVideo",
         "AssessmentSequence",
         "BranchingScenario",
-        "BranchNode"
+        "BranchNode",
+        "GameMap",
+        "MapStage"
       ],
       "a11y": {
         "element": "section",
@@ -2566,7 +2673,8 @@
         "emits": [
           "accordion_section_toggled"
         ]
-      }
+      },
+      "tier": "D"
     },
     {
       "type": "DialogCards",
@@ -2601,7 +2709,9 @@
         "InteractiveVideo",
         "AssessmentSequence",
         "BranchingScenario",
-        "BranchNode"
+        "BranchNode",
+        "GameMap",
+        "MapStage"
       ],
       "a11y": {
         "element": "section",
@@ -2615,7 +2725,8 @@
       },
       "telemetry": {
         "emits": []
-      }
+      },
+      "tier": "D"
     },
     {
       "type": "Flashcards",
@@ -2656,7 +2767,9 @@
         "InteractiveVideo",
         "AssessmentSequence",
         "BranchingScenario",
-        "BranchNode"
+        "BranchNode",
+        "GameMap",
+        "MapStage"
       ],
       "a11y": {
         "element": "section",
@@ -2672,7 +2785,8 @@
         "emits": [
           "flashcard_flipped"
         ]
-      }
+      },
+      "tier": "D"
     },
     {
       "type": "ImageHotspots",
@@ -2719,7 +2833,9 @@
         "InteractiveVideo",
         "AssessmentSequence",
         "BranchingScenario",
-        "BranchNode"
+        "BranchNode",
+        "GameMap",
+        "MapStage"
       ],
       "a11y": {
         "element": "section",
@@ -2735,7 +2851,8 @@
         "emits": [
           "hotspot_opened"
         ]
-      }
+      },
+      "tier": "C"
     },
     {
       "type": "ImageSlider",
@@ -2770,7 +2887,9 @@
         "InteractiveVideo",
         "AssessmentSequence",
         "BranchingScenario",
-        "BranchNode"
+        "BranchNode",
+        "GameMap",
+        "MapStage"
       ],
       "a11y": {
         "element": "section",
@@ -2786,7 +2905,8 @@
         "emits": [
           "image_slider_changed"
         ]
-      }
+      },
+      "tier": "C"
     },
     {
       "type": "FindHotspot",
@@ -2864,7 +2984,9 @@
         "InteractiveVideo",
         "AssessmentSequence",
         "BranchingScenario",
-        "BranchNode"
+        "BranchNode",
+        "GameMap",
+        "MapStage"
       ],
       "a11y": {
         "element": "section",
@@ -2885,7 +3007,8 @@
           "assessment_completed"
         ],
         "requiresActiveLesson": true
-      }
+      },
+      "tier": "C"
     },
     {
       "type": "FindMultipleHotspots",
@@ -2963,7 +3086,9 @@
         "InteractiveVideo",
         "AssessmentSequence",
         "BranchingScenario",
-        "BranchNode"
+        "BranchNode",
+        "GameMap",
+        "MapStage"
       ],
       "a11y": {
         "element": "section",
@@ -2984,7 +3109,994 @@
           "assessment_completed"
         ],
         "requiresActiveLesson": true
+      },
+      "tier": "C"
+    },
+    {
+      "type": "Table",
+      "category": "content",
+      "h5pMachineName": "H5P.Table",
+      "h5pAlias": "Table",
+      "description": "Rich text table with caption.",
+      "props": [
+        {
+          "name": "blockId",
+          "type": "BlockId",
+          "required": true,
+          "description": "Stable block id."
+        },
+        {
+          "name": "caption",
+          "type": "string",
+          "required": false,
+          "description": "Table caption."
+        },
+        {
+          "name": "headers",
+          "type": "string[]",
+          "required": true,
+          "description": "Column headers."
+        },
+        {
+          "name": "rows",
+          "type": "string[][]",
+          "required": true,
+          "description": "Table rows."
+        }
+      ],
+      "requiredIds": [
+        "blockId"
+      ],
+      "parentConstraints": [
+        "Lesson",
+        "Page",
+        "InteractiveBook",
+        "Slide",
+        "SlideDeck",
+        "TimedCue",
+        "InteractiveVideo",
+        "AssessmentSequence",
+        "BranchingScenario",
+        "BranchNode",
+        "GameMap",
+        "MapStage"
+      ],
+      "a11y": {
+        "element": "table",
+        "ariaLabel": "Table",
+        "keyboard": "N/A",
+        "notes": "Semantic table."
+      },
+      "theming": {
+        "surface": "global-inherit",
+        "stylingNotes": "Responsive scroll."
+      },
+      "telemetry": {
+        "emits": []
+      },
+      "tier": "D"
+    },
+    {
+      "type": "ImageJuxtaposition",
+      "category": "content",
+      "h5pMachineName": "H5P.ImageJuxtaposition",
+      "h5pAlias": "Image Juxtaposition",
+      "description": "Before/after image comparison slider.",
+      "props": [
+        {
+          "name": "blockId",
+          "type": "BlockId",
+          "required": true,
+          "description": "Stable block id."
+        },
+        {
+          "name": "beforeSrc",
+          "type": "string",
+          "required": true,
+          "description": "Before image URL."
+        },
+        {
+          "name": "afterSrc",
+          "type": "string",
+          "required": true,
+          "description": "After image URL."
+        },
+        {
+          "name": "beforeAlt",
+          "type": "string",
+          "required": true,
+          "description": "Before alt text."
+        },
+        {
+          "name": "afterAlt",
+          "type": "string",
+          "required": true,
+          "description": "After alt text."
+        }
+      ],
+      "requiredIds": [
+        "blockId"
+      ],
+      "parentConstraints": [
+        "Lesson",
+        "Page",
+        "InteractiveBook",
+        "Slide",
+        "SlideDeck",
+        "TimedCue",
+        "InteractiveVideo",
+        "AssessmentSequence",
+        "BranchingScenario",
+        "BranchNode",
+        "GameMap",
+        "MapStage"
+      ],
+      "a11y": {
+        "element": "section",
+        "ariaLabel": "Image juxtaposition",
+        "keyboard": "Range slider.",
+        "notes": "Before/after."
+      },
+      "theming": {
+        "surface": "global-inherit",
+        "stylingNotes": "Overlay slider."
+      },
+      "telemetry": {
+        "emits": [
+          "image_juxtaposition_changed"
+        ]
+      },
+      "tier": "C"
+    },
+    {
+      "type": "Timeline",
+      "category": "content",
+      "h5pMachineName": "H5P.Timeline",
+      "h5pAlias": "Timeline",
+      "description": "Vertical timeline of events.",
+      "props": [
+        {
+          "name": "blockId",
+          "type": "BlockId",
+          "required": true,
+          "description": "Stable block id."
+        },
+        {
+          "name": "events",
+          "type": "TimelineEvent[]",
+          "required": true,
+          "description": "Timeline events."
+        }
+      ],
+      "requiredIds": [
+        "blockId"
+      ],
+      "parentConstraints": [
+        "Lesson",
+        "Page",
+        "InteractiveBook",
+        "Slide",
+        "SlideDeck",
+        "TimedCue",
+        "InteractiveVideo",
+        "AssessmentSequence",
+        "BranchingScenario",
+        "BranchNode",
+        "GameMap",
+        "MapStage"
+      ],
+      "a11y": {
+        "element": "section",
+        "ariaLabel": "Timeline",
+        "keyboard": "Focus events.",
+        "notes": "Ordered list."
+      },
+      "theming": {
+        "surface": "global-inherit",
+        "stylingNotes": "Vertical timeline."
+      },
+      "telemetry": {
+        "emits": [
+          "timeline_event_viewed"
+        ]
+      },
+      "tier": "D"
+    },
+    {
+      "type": "ImageSequence",
+      "category": "content",
+      "h5pMachineName": "H5P.Agamotto",
+      "h5pAlias": "Agamotto (Image Blender)",
+      "description": "Progressive image sequence blend.",
+      "props": [
+        {
+          "name": "blockId",
+          "type": "BlockId",
+          "required": true,
+          "description": "Stable block id."
+        },
+        {
+          "name": "frames",
+          "type": "SequenceFrame[]",
+          "required": true,
+          "description": "Sequence frames."
+        }
+      ],
+      "requiredIds": [
+        "blockId"
+      ],
+      "parentConstraints": [
+        "Lesson",
+        "Page",
+        "InteractiveBook",
+        "Slide",
+        "SlideDeck",
+        "TimedCue",
+        "InteractiveVideo",
+        "AssessmentSequence",
+        "BranchingScenario",
+        "BranchNode",
+        "GameMap",
+        "MapStage"
+      ],
+      "a11y": {
+        "element": "section",
+        "ariaLabel": "Image sequence",
+        "keyboard": "Slider or step buttons.",
+        "notes": "Reduced motion uses steps."
+      },
+      "theming": {
+        "surface": "global-inherit",
+        "stylingNotes": "Blend slider."
+      },
+      "telemetry": {
+        "emits": [
+          "image_sequence_changed"
+        ]
+      },
+      "tier": "C"
+    },
+    {
+      "type": "Collage",
+      "category": "content",
+      "h5pMachineName": "H5P.Collage",
+      "h5pAlias": "Collage",
+      "description": "Multi-image grid collage.",
+      "props": [
+        {
+          "name": "blockId",
+          "type": "BlockId",
+          "required": true,
+          "description": "Stable block id."
+        },
+        {
+          "name": "columns",
+          "type": "number",
+          "required": false,
+          "description": "Grid columns."
+        },
+        {
+          "name": "cells",
+          "type": "CollageCell[]",
+          "required": true,
+          "description": "Collage cells."
+        }
+      ],
+      "requiredIds": [
+        "blockId"
+      ],
+      "parentConstraints": [
+        "Lesson",
+        "Page",
+        "InteractiveBook",
+        "Slide",
+        "SlideDeck",
+        "TimedCue",
+        "InteractiveVideo",
+        "AssessmentSequence",
+        "BranchingScenario",
+        "BranchNode",
+        "GameMap",
+        "MapStage"
+      ],
+      "a11y": {
+        "element": "section",
+        "ariaLabel": "Collage",
+        "keyboard": "N/A",
+        "notes": "Figure per cell."
+      },
+      "theming": {
+        "surface": "global-inherit",
+        "stylingNotes": "CSS grid."
+      },
+      "telemetry": {
+        "emits": []
+      },
+      "tier": "C"
+    },
+    {
+      "type": "AudioRecorder",
+      "category": "content",
+      "h5pMachineName": "H5P.AudioRecorder",
+      "h5pAlias": "Audio Recorder",
+      "description": "Learner audio recording (client-only storage).",
+      "props": [
+        {
+          "name": "blockId",
+          "type": "BlockId",
+          "required": true,
+          "description": "Stable block id."
+        },
+        {
+          "name": "maxDurationSeconds",
+          "type": "number",
+          "required": false,
+          "description": "Max recording length."
+        },
+        {
+          "name": "consentLabel",
+          "type": "string",
+          "required": false,
+          "description": "Consent checkbox label."
+        }
+      ],
+      "requiredIds": [
+        "blockId"
+      ],
+      "parentConstraints": [
+        "Lesson",
+        "Page",
+        "InteractiveBook",
+        "Slide",
+        "SlideDeck",
+        "TimedCue",
+        "InteractiveVideo",
+        "AssessmentSequence",
+        "BranchingScenario",
+        "BranchNode",
+        "GameMap",
+        "MapStage"
+      ],
+      "a11y": {
+        "element": "section",
+        "ariaLabel": "Audio recorder",
+        "keyboard": "Record controls.",
+        "notes": "Consent required."
+      },
+      "theming": {
+        "surface": "global-inherit",
+        "stylingNotes": "Recorder UI."
+      },
+      "telemetry": {
+        "emits": [
+          "audio_recording_started",
+          "audio_recording_completed"
+        ]
+      },
+      "tier": "D"
+    },
+    {
+      "type": "CombinationLock",
+      "category": "assessment",
+      "assessmentContract": true,
+      "h5pMachineName": "H5P.CombinationLock",
+      "h5pAlias": "Combination Lock",
+      "description": "Enter a digit combination to unlock.",
+      "props": [
+        {
+          "name": "checkId",
+          "type": "CheckId",
+          "required": true,
+          "description": "Stable check id."
+        },
+        {
+          "name": "combination",
+          "type": "string",
+          "required": true,
+          "description": "Correct combination."
+        },
+        {
+          "name": "label",
+          "type": "string",
+          "required": false,
+          "description": "Prompt label."
+        },
+        {
+          "name": "enableRetry",
+          "type": "boolean",
+          "required": false,
+          "description": "Allow retry after completion."
+        },
+        {
+          "name": "enableSolutionsButton",
+          "type": "boolean",
+          "required": false,
+          "description": "Show solution control."
+        },
+        {
+          "name": "autoCheck",
+          "type": "boolean",
+          "required": false,
+          "description": "Check answers automatically when possible."
+        },
+        {
+          "name": "passingScore",
+          "type": "number",
+          "required": false,
+          "description": "Minimum score to pass."
+        }
+      ],
+      "requiredIds": [
+        "checkId"
+      ],
+      "parentConstraints": [
+        "Lesson",
+        "Page",
+        "InteractiveBook",
+        "Slide",
+        "SlideDeck",
+        "TimedCue",
+        "InteractiveVideo",
+        "AssessmentSequence",
+        "BranchingScenario",
+        "BranchNode",
+        "GameMap",
+        "MapStage"
+      ],
+      "a11y": {
+        "element": "section",
+        "ariaLabel": "Combination lock",
+        "keyboard": "Digit inputs.",
+        "notes": "Scored."
+      },
+      "theming": {
+        "surface": "global-inherit",
+        "dataAttributes": [
+          "data-lk-check-id"
+        ],
+        "stylingNotes": "Uses data-lk-check-id."
+      },
+      "telemetry": {
+        "emits": [
+          "assessment_answered",
+          "assessment_completed"
+        ],
+        "requiresActiveLesson": true
+      },
+      "tier": "E"
+    },
+    {
+      "type": "QrContent",
+      "category": "content",
+      "h5pMachineName": "H5P.KewArCode",
+      "h5pAlias": "KewAr Code",
+      "description": "QR code with revealable hidden content.",
+      "props": [
+        {
+          "name": "blockId",
+          "type": "BlockId",
+          "required": true,
+          "description": "Stable block id."
+        },
+        {
+          "name": "payload",
+          "type": "string",
+          "required": true,
+          "description": "QR payload URL or text."
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "required": false,
+          "description": "Block title."
+        },
+        {
+          "name": "hiddenTitle",
+          "type": "string",
+          "required": false,
+          "description": "Revealed title."
+        },
+        {
+          "name": "hiddenBody",
+          "type": "string",
+          "required": false,
+          "description": "Revealed body."
+        }
+      ],
+      "requiredIds": [
+        "blockId"
+      ],
+      "parentConstraints": [
+        "Lesson",
+        "Page",
+        "InteractiveBook",
+        "Slide",
+        "SlideDeck",
+        "TimedCue",
+        "InteractiveVideo",
+        "AssessmentSequence",
+        "BranchingScenario",
+        "BranchNode",
+        "GameMap",
+        "MapStage"
+      ],
+      "a11y": {
+        "element": "section",
+        "ariaLabel": "QR content",
+        "keyboard": "Reveal button.",
+        "notes": "Simulated scan."
+      },
+      "theming": {
+        "surface": "global-inherit",
+        "stylingNotes": "QR display."
+      },
+      "telemetry": {
+        "emits": [
+          "qr_content_revealed"
+        ]
+      },
+      "tier": "E"
+    },
+    {
+      "type": "Crossword",
+      "category": "assessment",
+      "assessmentContract": true,
+      "h5pMachineName": "H5P.Crossword",
+      "h5pAlias": "Crossword",
+      "description": "Crossword puzzle grid.",
+      "props": [
+        {
+          "name": "checkId",
+          "type": "CheckId",
+          "required": true,
+          "description": "Stable check id."
+        },
+        {
+          "name": "rows",
+          "type": "number",
+          "required": true,
+          "description": "Grid rows."
+        },
+        {
+          "name": "cols",
+          "type": "number",
+          "required": true,
+          "description": "Grid columns."
+        },
+        {
+          "name": "entries",
+          "type": "CrosswordEntry[]",
+          "required": true,
+          "description": "Clues and answers."
+        },
+        {
+          "name": "enableRetry",
+          "type": "boolean",
+          "required": false,
+          "description": "Allow retry after completion."
+        },
+        {
+          "name": "enableSolutionsButton",
+          "type": "boolean",
+          "required": false,
+          "description": "Show solution control."
+        },
+        {
+          "name": "autoCheck",
+          "type": "boolean",
+          "required": false,
+          "description": "Check answers automatically when possible."
+        },
+        {
+          "name": "passingScore",
+          "type": "number",
+          "required": false,
+          "description": "Minimum score to pass."
+        }
+      ],
+      "requiredIds": [
+        "checkId"
+      ],
+      "parentConstraints": [
+        "Lesson",
+        "Page",
+        "InteractiveBook",
+        "Slide",
+        "SlideDeck",
+        "TimedCue",
+        "InteractiveVideo",
+        "AssessmentSequence",
+        "BranchingScenario",
+        "BranchNode",
+        "GameMap",
+        "MapStage"
+      ],
+      "a11y": {
+        "element": "section",
+        "ariaLabel": "Crossword",
+        "keyboard": "Grid navigation.",
+        "notes": "Scored."
+      },
+      "theming": {
+        "surface": "global-inherit",
+        "dataAttributes": [
+          "data-lk-check-id"
+        ],
+        "stylingNotes": "Uses data-lk-check-id."
+      },
+      "telemetry": {
+        "emits": [
+          "assessment_answered",
+          "assessment_completed"
+        ],
+        "requiresActiveLesson": true
+      },
+      "tier": "E"
+    },
+    {
+      "type": "WordSearch",
+      "category": "assessment",
+      "assessmentContract": true,
+      "h5pMachineName": "H5P.FindTheWords",
+      "h5pAlias": "Find the Words",
+      "description": "Word search puzzle (page-level only; excluded from compounds).",
+      "props": [
+        {
+          "name": "checkId",
+          "type": "CheckId",
+          "required": true,
+          "description": "Stable check id."
+        },
+        {
+          "name": "words",
+          "type": "string[]",
+          "required": true,
+          "description": "Words to find."
+        },
+        {
+          "name": "size",
+          "type": "number",
+          "required": false,
+          "description": "Grid size."
+        },
+        {
+          "name": "enableRetry",
+          "type": "boolean",
+          "required": false,
+          "description": "Allow retry after completion."
+        },
+        {
+          "name": "enableSolutionsButton",
+          "type": "boolean",
+          "required": false,
+          "description": "Show solution control."
+        },
+        {
+          "name": "autoCheck",
+          "type": "boolean",
+          "required": false,
+          "description": "Check answers automatically when possible."
+        },
+        {
+          "name": "passingScore",
+          "type": "number",
+          "required": false,
+          "description": "Minimum score to pass."
+        }
+      ],
+      "requiredIds": [
+        "checkId"
+      ],
+      "parentConstraints": [
+        "Lesson"
+      ],
+      "a11y": {
+        "element": "section",
+        "ariaLabel": "Word search",
+        "keyboard": "Select letters.",
+        "notes": "Not nestable in compounds."
+      },
+      "theming": {
+        "surface": "global-inherit",
+        "dataAttributes": [
+          "data-lk-check-id"
+        ],
+        "stylingNotes": "Uses data-lk-check-id."
+      },
+      "telemetry": {
+        "emits": [
+          "assessment_answered",
+          "assessment_completed"
+        ],
+        "requiresActiveLesson": true
+      },
+      "tier": "E"
+    },
+    {
+      "type": "AdventCalendar",
+      "category": "content",
+      "h5pMachineName": "H5P.AdventCalendar",
+      "h5pAlias": "Advent Calendar",
+      "description": "Calendar with openable doors.",
+      "props": [
+        {
+          "name": "blockId",
+          "type": "BlockId",
+          "required": true,
+          "description": "Stable block id."
+        },
+        {
+          "name": "doors",
+          "type": "AdventDoor[]",
+          "required": true,
+          "description": "Calendar doors."
+        },
+        {
+          "name": "unlockFrom",
+          "type": "string",
+          "required": false,
+          "description": "ISO date to unlock doors."
+        }
+      ],
+      "requiredIds": [
+        "blockId"
+      ],
+      "parentConstraints": [
+        "Lesson",
+        "Page",
+        "InteractiveBook",
+        "Slide",
+        "SlideDeck",
+        "TimedCue",
+        "InteractiveVideo",
+        "AssessmentSequence",
+        "BranchingScenario",
+        "BranchNode",
+        "GameMap",
+        "MapStage"
+      ],
+      "a11y": {
+        "element": "section",
+        "ariaLabel": "Advent calendar",
+        "keyboard": "Door buttons.",
+        "notes": "Optional date gating."
+      },
+      "theming": {
+        "surface": "global-inherit",
+        "stylingNotes": "Door grid."
+      },
+      "telemetry": {
+        "emits": [
+          "advent_door_opened"
+        ]
+      },
+      "tier": "E"
+    },
+    {
+      "type": "MapStage",
+      "category": "container",
+      "compoundContract": true,
+      "h5pMachineName": "H5P.GameMap",
+      "h5pAlias": "Game Map stage",
+      "description": "Spatial stage in a GameMap with content and exits.",
+      "allowedChildTypes": [
+        "Text",
+        "Heading",
+        "Image",
+        "Video",
+        "Scenario",
+        "Reflection",
+        "Quiz",
+        "KnowledgeCheck",
+        "TrueFalse",
+        "FillInTheBlanks",
+        "DragAndDrop",
+        "DragTheWords",
+        "MarkTheWords",
+        "Summary",
+        "ImagePairing",
+        "ImageSequencing",
+        "MemoryGame",
+        "InformationWall",
+        "ParallaxSlideshow",
+        "Questionnaire",
+        "Essay",
+        "ArithmeticQuiz",
+        "Accordion",
+        "DialogCards",
+        "Flashcards",
+        "ImageHotspots",
+        "FindHotspot",
+        "FindMultipleHotspots",
+        "ImageSlider",
+        "Embed",
+        "Chart",
+        "Table",
+        "ImageJuxtaposition",
+        "Timeline",
+        "ImageSequence",
+        "Collage",
+        "AudioRecorder",
+        "CombinationLock",
+        "QrContent",
+        "Crossword",
+        "AdventCalendar",
+        "MapExit"
+      ],
+      "maxNestingDepth": 1,
+      "props": [
+        {
+          "name": "stageId",
+          "type": "string",
+          "required": true,
+          "description": "Unique stage id."
+        },
+        {
+          "name": "x",
+          "type": "number",
+          "required": true,
+          "description": "X position percent on map."
+        },
+        {
+          "name": "y",
+          "type": "number",
+          "required": true,
+          "description": "Y position percent on map."
+        },
+        {
+          "name": "label",
+          "type": "string",
+          "required": false,
+          "description": "Stage label."
+        },
+        {
+          "name": "children",
+          "type": "ReactNode",
+          "required": true,
+          "description": "Content and MapExit controls."
+        }
+      ],
+      "requiredIds": [],
+      "parentConstraints": [
+        "GameMap"
+      ],
+      "a11y": {
+        "element": "section",
+        "ariaLabel": "Map stage",
+        "keyboard": "Map exits are buttons.",
+        "notes": "H5P Game Map stage."
+      },
+      "theming": {
+        "surface": "global-inherit",
+        "stylingNotes": "Stage panel."
+      },
+      "telemetry": {
+        "emits": [
+          "map_stage_viewed"
+        ],
+        "requiresActiveLesson": true
       }
+    },
+    {
+      "type": "MapExit",
+      "category": "content",
+      "h5pMachineName": "H5P.GameMap",
+      "h5pAlias": "Game Map exit",
+      "description": "Transition control linking to a target MapStage.",
+      "props": [
+        {
+          "name": "label",
+          "type": "string",
+          "required": true,
+          "description": "Exit label."
+        },
+        {
+          "name": "targetStageId",
+          "type": "string",
+          "required": true,
+          "description": "Target stage id."
+        },
+        {
+          "name": "scoreWeight",
+          "type": "number",
+          "required": false,
+          "description": "Optional exit score weight."
+        }
+      ],
+      "requiredIds": [],
+      "parentConstraints": [
+        "MapStage"
+      ],
+      "a11y": {
+        "element": "button",
+        "ariaLabel": "Map exit",
+        "keyboard": "Activate to travel.",
+        "notes": "Radio group pattern."
+      },
+      "theming": {
+        "surface": "global-inherit",
+        "stylingNotes": "Exit button."
+      },
+      "telemetry": {
+        "emits": [
+          "map_exit_selected"
+        ],
+        "requiresActiveLesson": true
+      }
+    },
+    {
+      "type": "GameMap",
+      "category": "container",
+      "compoundContract": true,
+      "h5pMachineName": "H5P.GameMap",
+      "h5pAlias": "Game Map",
+      "description": "Spatial map branching with scored stages.",
+      "allowedChildTypes": [
+        "MapStage"
+      ],
+      "maxNestingDepth": 2,
+      "props": [
+        {
+          "name": "blockId",
+          "type": "BlockId",
+          "required": true,
+          "description": "Stable block id."
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "required": true,
+          "description": "Map title."
+        },
+        {
+          "name": "backgroundSrc",
+          "type": "string",
+          "required": true,
+          "description": "Background image URL."
+        },
+        {
+          "name": "startStageId",
+          "type": "string",
+          "required": true,
+          "description": "Entry stage id."
+        },
+        {
+          "name": "showMapScore",
+          "type": "boolean",
+          "required": false,
+          "description": "Show visited-path score."
+        },
+        {
+          "name": "children",
+          "type": "MapStage[]",
+          "required": true,
+          "description": "Map stages."
+        }
+      ],
+      "requiredIds": [
+        "blockId"
+      ],
+      "parentConstraints": [
+        "Lesson"
+      ],
+      "a11y": {
+        "element": "section",
+        "ariaLabel": "Game map",
+        "keyboard": "Map markers and exits.",
+        "notes": "H5P Game Map equivalent."
+      },
+      "theming": {
+        "surface": "global-inherit",
+        "stylingNotes": "Spatial map."
+      },
+      "telemetry": {
+        "emits": [
+          "map_stage_viewed",
+          "map_exit_selected"
+        ],
+        "requiresActiveLesson": true
+      },
+      "tier": "A"
     }
   ]
 }

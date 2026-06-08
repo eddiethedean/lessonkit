@@ -9,10 +9,27 @@ import { fileURLToPath } from "node:url";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "../..");
 const catalogPath = join(root, "packages/react/block-catalog.v3.json");
+const manifestPath = join(root, "docs/component-demos/manifest.json");
 const outDir = join(root, "docs/_generated");
 const outPath = join(outDir, "block-props.md");
 
 const catalog = JSON.parse(readFileSync(catalogPath, "utf8"));
+const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
+
+function buildComponentPageSlugByType() {
+  const map = new Map();
+  for (const entry of manifest.components) {
+    if (entry.blockType) map.set(entry.blockType, entry.slug);
+  }
+  map.set("Text", "text-and-heading");
+  map.set("Heading", "text-and-heading");
+  map.set("Course", "course-structure");
+  map.set("Lesson", "course-structure");
+  map.set("ProgressTracker", "course-structure");
+  return map;
+}
+
+const componentPageSlugByType = buildComponentPageSlugByType();
 
 const COMPOUND_TYPES = new Set([
   "InteractiveBook",
@@ -60,6 +77,14 @@ for (const entry of catalog.entries) {
   lines.push("");
   if (entry.description) lines.push(entry.description);
   lines.push("");
+
+  const componentSlug = componentPageSlugByType.get(entry.type);
+  if (componentSlug) {
+    lines.push(
+      `**Component page:** [${entry.type} demo](components/${componentSlug}.md) (live embed + when to use)`,
+    );
+    lines.push("");
+  }
 
   if (STORYBOOK[entry.type]) {
     lines.push(`**Storybook:** [${entry.type} demo](${STORYBOOK[entry.type]})`);

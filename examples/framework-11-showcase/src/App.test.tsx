@@ -51,7 +51,7 @@ describe("framework 1.1 showcase App", () => {
     render(<App />);
     expect(screen.getByRole("button", { name: "Previous" })).toBeDefined();
     expect(screen.getByRole("button", { name: "Continue" })).toBeDefined();
-    expect(screen.getByRole("group", { name: "Theme mode" })).toBeDefined();
+    expect(screen.getByRole("group", { name: "Display theme" })).toBeDefined();
     vi.mocked(console.log).mockRestore();
   });
 });

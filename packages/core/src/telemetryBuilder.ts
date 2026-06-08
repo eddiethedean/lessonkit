@@ -20,6 +20,18 @@ export function resetTelemetryBuilderWarningsForTests(): void {
 /**
  * Build a typed telemetry event from a catalog event name and context.
  * Validates lesson-scoped events require `lessonId`.
+ *
+ * @example
+ * ```ts
+ * import { buildTelemetryEvent } from "@lessonkit/core";
+ *
+ * const event = buildTelemetryEvent({
+ *   name: "lesson_completed",
+ *   courseId: "sec-101",
+ *   lessonId: "phishing-101",
+ *   sessionId: "tab-abc",
+ * });
+ * ```
  */
 export function buildTelemetryEvent(opts: BuildTelemetryEventInput): TelemetryEvent {
   return buildTelemetryEventFromRegistry(opts);

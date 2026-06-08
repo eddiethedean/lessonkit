@@ -81,6 +81,9 @@ jobs:
       - name: Build example bundles for docs
         run: bash docs/scripts/build-docs-demos.sh
 
+      - name: Build component demo bundles for docs
+        run: bash docs/scripts/build-component-demos.sh
+
       - name: Install Playwright browsers
         run: npx playwright install chromium
         working-directory: e2e
@@ -88,14 +91,23 @@ jobs:
       - name: Verify doc demo bundles render
         run: bash docs/scripts/verify-doc-demos.sh
 
+      - name: Verify component demo bundles render
+        run: bash docs/scripts/verify-component-demos.sh
+
       - name: Generate API docs (TypeDoc)
         run: npm run docs:api
+
+      - name: Verify release version sync
+        run: bash docs/scripts/verify-release-version.sh
 
       - name: Verify doc include wrappers
         run: bash docs/scripts/verify-doc-includes.sh
 
       - name: Generate block prop reference
         run: node docs/scripts/generate-block-props-doc.mjs
+
+      - name: Generate H5P component page index
+        run: node docs/scripts/generate-h5p-component-page-index.mjs
 
       - name: Setup Python
         uses: actions/setup-python@v6
@@ -213,6 +225,8 @@ jobs:
 
       - name: E2E tests
         run: npm run test:e2e
+        env:
+          E2E_FORCE_REBUILD: "1"
 
   security-audit:
     name: Security (npm audit)

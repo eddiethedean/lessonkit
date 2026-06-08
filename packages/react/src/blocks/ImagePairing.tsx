@@ -1,3 +1,4 @@
+import { visuallyHiddenStyle } from "@lessonkit/accessibility";
 import React, { forwardRef, useEffect, useMemo, useRef, useState } from "react";
 import type { AssessmentBaseProps, AssessmentHandle, AssessmentInteractionType } from "@lessonkit/core";
 import type { LessonId } from "@lessonkit/core";
@@ -11,7 +12,7 @@ import { shouldReplayResumeTelemetry } from "../assessment/shouldReplayResumeTel
 import { setLessonkitBlockType } from "../compound/blockType";
 import { useLessonkit } from "../hooks";
 import { normalizeComponentId } from "../runtime/validateComponentId";
-import { resolveMediaSrc } from "./embedSecurity";
+import { buildMediaOptions, resolveMediaSrc } from "./embedSecurity";
 
 export type ImagePair = {
   id: string;
@@ -84,7 +85,7 @@ function ImagePairingInner(
 ) {
   const checkId = useMemo(() => normalizeComponentId(props.checkId, "checkId"), [props.checkId]);
   const { config } = useLessonkit();
-  const mediaOptions = { allowedHosts: config.embed?.allowedHosts };
+  const mediaOptions = buildMediaOptions(config);
   const assessment = useAssessmentState(props.enclosingLessonId);
   const pairsKey = props.pairs.map((p) => p.id).join("\0");
 
@@ -329,7 +330,7 @@ function ImagePairingInner(
                   ) : (
                     <span aria-hidden="true">!</span>
                   )}
-                  <span className="lk-visually-hidden">{card.label}</span>
+                  <span style={visuallyHiddenStyle}>{card.label}</span>
                 </>
               ) : (
                 "?"

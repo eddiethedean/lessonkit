@@ -30,6 +30,7 @@ export default defineConfig({
         "**/slide-deck/**",
         "**/interactive-video/**",
         "**/branching-scenario/**",
+        "**/framework-12-showcase/**",
       ],
       use: {
         ...devices["Desktop Chrome"],
@@ -46,7 +47,7 @@ export default defineConfig({
     },
     {
       name: "assessments-p0-vite",
-      testDir: "./tests/assessments-p0",
+      testMatch: /assessments-p0\/(?!.*scorm).*\.spec\.ts/,
       use: {
         ...devices["Desktop Chrome"],
         baseURL: "http://127.0.0.1:4179",
@@ -82,6 +83,14 @@ export default defineConfig({
       use: {
         ...devices["Desktop Chrome"],
         baseURL: "http://127.0.0.1:4188",
+      },
+    },
+    {
+      name: "framework-12-showcase-vite",
+      testDir: "./tests/framework-12-showcase",
+      use: {
+        ...devices["Desktop Chrome"],
+        baseURL: "http://127.0.0.1:4190",
       },
     },
   ],
@@ -138,6 +147,14 @@ export default defineConfig({
         "npm run build -w lessonkit-example-branching-scenario && npm run preview -w lessonkit-example-branching-scenario -- --host 127.0.0.1 --port 4188",
       cwd: repoRoot,
       url: "http://127.0.0.1:4188",
+      reuseExistingServer: !process.env.CI,
+      timeout: 180_000,
+    },
+    {
+      command:
+        "DOCS_DEMO_BUILD=1 npm run build -w lessonkit-example-framework-12-showcase && npm run preview -w lessonkit-example-framework-12-showcase -- --host 127.0.0.1 --port 4190",
+      cwd: repoRoot,
+      url: "http://127.0.0.1:4190",
       reuseExistingServer: !process.env.CI,
       timeout: 180_000,
     },

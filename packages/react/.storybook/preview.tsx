@@ -1,5 +1,6 @@
 import type { Preview } from "@storybook/react";
 import React from "react";
+import "@lessonkit/themes/base.css";
 import { ThemeProvider } from "../src/theme/ThemeProvider";
 
 const preview: Preview = {

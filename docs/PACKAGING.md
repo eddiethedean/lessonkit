@@ -1,4 +1,4 @@
-# Packaging with LXPack (1.5.x)
+# Packaging with LXPack (1.6.x)
 
 LessonKit authors courses in React (`@lessonkit/react`). **LXPack** validates and packages them for LMS delivery. **`@lessonkit/lxpack`** is the adapter between the two.
 
@@ -192,7 +192,23 @@ await promoteStagingToOutDir(staged.stagingDir, validation.outDir);
 
 Project manifests (`lessonkit.json` with `schemaVersion: 1`) are parsed by `parseLessonkitManifest` in `@lessonkit/lxpack`; the CLI delegates to the same module.
 
+## Portable interchange (`.lkcourse`)
+
+**1.6.0** adds a LessonKit-native archive distinct from LMS zips:
+
+| Target | Output | Use |
+| --- | --- | --- |
+| `lessonkit package --target scorm12` | SCORM zip | LMS upload |
+| `lessonkit export` | `.lkcourse` zip | Archive, team handoff, tooling |
+
+```ts
+import { exportLkcourse, validateLkcourse, importLkcourse } from "@lessonkit/lxpack";
+```
+
+Import restores `lessonkit.json` + `dist/` only (not `src/`). See [Portable interchange](reference/interchange.md).
+
 ## Related
 
+- [Portable interchange](reference/interchange.md)
 - [LXPack interoperability](reference/lxpack-upgrades.md)
 - [LXPack LessonKit interoperability](https://lxpack.readthedocs.io/en/latest/guides/lessonkit-interoperability/)

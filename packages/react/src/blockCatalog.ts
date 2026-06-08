@@ -1,4 +1,5 @@
 import { buildV3CatalogFromV2 } from "./catalogV3Entries";
+import { tierForBlockType } from "./blockTiers";
 
 export const blockCatalogVersion = 1 as const;
 export const blockCatalogV2Version = 2 as const;
@@ -50,7 +51,9 @@ export type BlockCatalogEntryV2 = BlockCatalogEntryBase & {
   maxNestingDepth?: number;
 };
 
-export type BlockCatalogEntryV3 = BlockCatalogEntryV2;
+export type BlockCatalogEntryV3 = BlockCatalogEntryV2 & {
+  tier?: "A" | "B" | "C" | "D" | "E";
+};
 
 export const BLOCK_CATALOG = [
   {
@@ -521,7 +524,12 @@ export function buildBlockCatalog(
   const version = opts?.version ?? 3;
   const source =
     version === 3 ? BLOCK_CATALOG_V3 : version === 2 ? BLOCK_CATALOG_V2 : BLOCK_CATALOG;
-  return source.map((entry) => cloneCatalogEntry(entry));
+  return source.map((entry) => {
+    const cloned = cloneCatalogEntry(entry);
+    if (version !== 3) return cloned;
+    const tier = tierForBlockType(entry.type);
+    return tier ? { ...cloned, tier } : cloned;
+  });
 }
 
 /** @deprecated Use buildBlockCatalog({ version: 1 }) */

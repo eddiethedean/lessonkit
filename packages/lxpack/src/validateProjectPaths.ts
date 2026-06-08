@@ -1,6 +1,12 @@
+import { existsSync, realpathSync } from "node:fs";
 import { isAbsolute, resolve } from "node:path";
 import type { DescriptorValidationIssue } from "./validateDescriptor";
-import { assertRealPathUnderRoot, isSafeRelativeSpaPath } from "./spaPath";
+import {
+  assertRealPathUnderRoot,
+  isSafeRelativeSpaPath,
+  relativePathUnderRoot,
+  resolveComparablePath,
+} from "./spaPath";
 
 export type ProjectPathsInput = {
   spaDistDir?: string;
@@ -12,9 +18,24 @@ export type ProjectPathsInput = {
 const RESERVED_OUTPUT_SEGMENTS = new Set([".git", "node_modules", ".github"]);
 
 export function isReservedOutputPath(value: string): boolean {
-  const normalized = value.replace(/\\/g, "/").replace(/^\/+|\/+$/g, "");
+  let normalized = value.replace(/\\/g, "/");
+  while (normalized.startsWith("/")) normalized = normalized.slice(1);
+  while (normalized.endsWith("/")) normalized = normalized.slice(0, -1);
   const segments = normalized.split("/").filter(Boolean);
   return segments.some((segment) => RESERVED_OUTPUT_SEGMENTS.has(segment));
+}
+
+export function isReservedResolvedOutputPath(projectRoot: string, resolved: string): boolean {
+  const rootResolved = resolveComparablePath(projectRoot);
+  const targetResolved = resolveComparablePath(resolved);
+  try {
+    const rootReal = existsSync(rootResolved) ? realpathSync(rootResolved) : rootResolved;
+    const targetReal = existsSync(targetResolved) ? realpathSync(targetResolved) : targetResolved;
+    const rel = relativePathUnderRoot(rootReal, targetReal);
+    return isReservedOutputPath(rel);
+  } catch {
+    return isReservedOutputPath(resolved);
+  }
 }
 
 function validatePathField(
@@ -57,7 +78,9 @@ export function validateProjectPaths(
   const root = resolve(projectRoot);
 
   if (paths.spaDistDir?.trim()) {
-    validatePathField(paths.spaDistDir.trim(), "paths.spaDistDir", root, issues);
+    validatePathField(paths.spaDistDir.trim(), "paths.spaDistDir", root, issues, {
+      rejectReserved: true,
+    });
   }
   if (paths.lxpackOutDir?.trim()) {
     validatePathField(paths.lxpackOutDir.trim(), "paths.lxpackOutDir", root, issues, {
@@ -88,7 +111,7 @@ export function resolveSafePackageOutputOverride(
   if (isAbsolute(trimmed)) {
     const resolved = resolve(trimmed);
     assertRealPathUnderRoot(root, resolved);
-    if (isReservedOutputPath(trimmed)) {
+    if (isReservedOutputPath(trimmed) || isReservedResolvedOutputPath(root, resolved)) {
       throw new Error(`unsafe output path: ${override} targets a reserved directory`);
     }
     return resolved;
@@ -96,10 +119,10 @@ export function resolveSafePackageOutputOverride(
   if (!isSafeRelativeSpaPath(trimmed)) {
     throw new Error(`unsafe output path: ${override}`);
   }
-  if (isReservedOutputPath(trimmed)) {
-    throw new Error(`unsafe output path: ${override} targets a reserved directory`);
-  }
   const resolved = resolve(root, trimmed);
   assertRealPathUnderRoot(root, resolved);
+  if (isReservedOutputPath(trimmed) || isReservedResolvedOutputPath(root, resolved)) {
+    throw new Error(`unsafe output path: ${override} targets a reserved directory`);
+  }
   return resolved;
 }

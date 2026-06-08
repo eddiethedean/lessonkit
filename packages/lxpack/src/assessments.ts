@@ -1,5 +1,8 @@
 import type { AssessmentDescriptor, LessonkitCourseDescriptor, McqAssessmentDescriptor } from "./types";
 
+/** Default passing threshold (1.0 = 100%) when descriptor omits passingScore — matches React SPA default. */
+const DEFAULT_SHELL_PASSING_SCORE = 1;
+
 export type LxpackInjectedAssessment = {
   id: string;
   title?: string;
@@ -34,7 +37,11 @@ function decodeShellEntities(text: string): string {
 
 function containsUnsafeShellMarkup(text: string): boolean {
   const decoded = decodeShellEntities(text);
-  return /<\/script/i.test(decoded) || /<!--/.test(decoded) || /</.test(decoded);
+  return (
+    /<\/script/i.test(decoded) ||
+    /<!--/.test(decoded) ||
+    /<[a-zA-Z!/]/.test(decoded)
+  );
 }
 
 function sanitizeShellField(text: string): string | null {
@@ -57,6 +64,7 @@ function mcqToLxpack(assessment: McqAssessmentDescriptor): LxpackInjectedAssessm
   const prompt = sanitizeShellField(assessment.question);
   if (!checkId || !prompt) return null;
 
+  const normalizedAnswer = assessment.answer.trim();
   const choices = assessment.choices.map((text, index) => {
     const sanitizedText = sanitizeShellField(text);
     if (!sanitizedText) return null;
@@ -64,7 +72,7 @@ function mcqToLxpack(assessment: McqAssessmentDescriptor): LxpackInjectedAssessm
     return {
       id,
       text: sanitizedText,
-      correct: text === assessment.answer,
+      correct: text.trim() === normalizedAnswer,
     };
   });
 
@@ -72,7 +80,7 @@ function mcqToLxpack(assessment: McqAssessmentDescriptor): LxpackInjectedAssessm
 
   return {
     id: checkId,
-    passingScore: assessment.passingScore ?? 1,
+    passingScore: assessment.passingScore ?? DEFAULT_SHELL_PASSING_SCORE,
     questions: [
       {
         id: "q1",

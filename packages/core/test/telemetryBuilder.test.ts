@@ -192,6 +192,90 @@ describe("buildTelemetryEvent", () => {
     ).toBe("image_slider_changed");
   });
 
+  it("builds 1.6.x block and GameMap telemetry events", () => {
+    expect(
+      buildTelemetryEvent({
+        name: "image_juxtaposition_changed",
+        courseId: "c",
+        lessonId: "l1",
+        data: { blockId: "jux-1", position: 50 },
+      }).name,
+    ).toBe("image_juxtaposition_changed");
+    expect(
+      buildTelemetryEvent({
+        name: "timeline_event_viewed",
+        courseId: "c",
+        data: { blockId: "tl-1", eventId: "e1" },
+      }).name,
+    ).toBe("timeline_event_viewed");
+    expect(
+      buildTelemetryEvent({
+        name: "image_sequence_changed",
+        courseId: "c",
+        lessonId: "l1",
+        data: { blockId: "seq-1", frameIndex: 1 },
+      }).name,
+    ).toBe("image_sequence_changed");
+    expect(
+      buildTelemetryEvent({
+        name: "audio_recording_started",
+        courseId: "c",
+        data: { blockId: "rec-1" },
+      }).name,
+    ).toBe("audio_recording_started");
+    expect(
+      buildTelemetryEvent({
+        name: "audio_recording_completed",
+        courseId: "c",
+        lessonId: "l1",
+        data: { blockId: "rec-1" },
+      }).name,
+    ).toBe("audio_recording_completed");
+    expect(
+      buildTelemetryEvent({
+        name: "qr_content_revealed",
+        courseId: "c",
+        data: { blockId: "qr-1" },
+      }).name,
+    ).toBe("qr_content_revealed");
+    expect(
+      buildTelemetryEvent({
+        name: "advent_door_opened",
+        courseId: "c",
+        lessonId: "l1",
+        data: { blockId: "adv-1", doorId: "d1", day: 1 },
+      }).name,
+    ).toBe("advent_door_opened");
+    expect(
+      buildTelemetryEvent({
+        name: "map_stage_viewed",
+        courseId: "c",
+        lessonId: "l1",
+        data: { blockId: "map-1", stageId: "lobby", stageIndex: 0 },
+      }).name,
+    ).toBe("map_stage_viewed");
+    expect(() =>
+      buildTelemetryEvent({
+        name: "map_stage_viewed",
+        courseId: "c",
+        data: { blockId: "map-1", stageId: "lobby", stageIndex: 0 },
+      }),
+    ).toThrow(/lessonId/);
+    expect(
+      buildTelemetryEvent({
+        name: "map_exit_selected",
+        courseId: "c",
+        lessonId: "l1",
+        data: {
+          blockId: "map-1",
+          fromStageId: "lobby",
+          toStageId: "desk",
+          label: "Desk",
+        },
+      }).name,
+    ).toBe("map_exit_selected");
+  });
+
   it("assessment_answered requires active lessonId", () => {
     expect(() =>
       buildTelemetryEvent({

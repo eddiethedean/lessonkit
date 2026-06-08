@@ -28,10 +28,18 @@ export function parseAssessmentDescriptor(raw: unknown): import("../types").Asse
   };
   const kind = raw.kind;
   if (kind === "trueFalse") {
+    let answer: boolean | undefined;
+    if (typeof raw.answer === "boolean") {
+      answer = raw.answer;
+    } else if (raw.answer === "true") {
+      answer = true;
+    } else if (raw.answer === "false") {
+      answer = false;
+    }
     return {
       kind: "trueFalse",
       ...base,
-      answer: typeof raw.answer === "boolean" ? raw.answer : raw.answer === "true",
+      answer: answer as boolean,
     };
   }
   if (kind === "fillInBlanks") {

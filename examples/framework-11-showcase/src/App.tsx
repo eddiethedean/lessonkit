@@ -2,6 +2,7 @@ import React from "react";
 import type { TelemetryEvent } from "@lessonkit/core";
 import type { ThemeMode } from "@lessonkit/react";
 import type { XAPIStatement } from "@lessonkit/xapi";
+import { initialShowcaseThemeMode } from "../../_shared/showcase/initialThemeMode";
 import { ShowcaseShell } from "../../_shared/showcase/ShowcaseShell";
 import { allowConsoleTelemetryForDocsDemo } from "../../_shared/docsDemoConfig";
 import { SHOWCASE_META } from "./constants";
@@ -28,7 +29,7 @@ function lessonContent(step: number) {
 
 export default function App() {
   const [step, setStep] = React.useState(0);
-  const [themeMode, setThemeMode] = React.useState<ThemeMode>("dark");
+  const [themeMode, setThemeMode] = React.useState<ThemeMode>(initialShowcaseThemeMode);
 
   const courseConfig = React.useMemo(
     () => ({

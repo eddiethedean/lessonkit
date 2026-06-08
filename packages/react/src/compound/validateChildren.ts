@@ -19,6 +19,8 @@ const COMPOUND_CONTAINER_TYPES = new Set<CompoundParentType>([
   "AssessmentSequence",
   "BranchingScenario",
   "BranchNode",
+  "GameMap",
+  "MapStage",
 ]);
 
 function warnOrThrow(msg: string, strict?: boolean): void {

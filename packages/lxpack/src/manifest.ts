@@ -130,10 +130,7 @@ export function parseLessonkitManifest(
         path: `paths.${key}`,
         message: "path must be relative without '..' segments or absolute prefixes",
       });
-    } else if (
-      (key === "lxpackOutDir" || key === "outputBaseDir") &&
-      isReservedOutputPath(value)
-    ) {
+    } else if (isReservedOutputPath(value)) {
       issues.push({
         path: `paths.${key}`,
         message: "path must not target reserved directories (.git, node_modules, .github)",

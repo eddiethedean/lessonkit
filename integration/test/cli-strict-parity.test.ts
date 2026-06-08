@@ -3,7 +3,12 @@ import { join } from "node:path";
 import { rm } from "node:fs/promises";
 import { afterEach, beforeAll, describe, expect, it } from "vitest";
 import { assertScormZip, assertStandaloneDir } from "./helpers/assertArtifacts.js";
-import { GOLDEN_DIR, BRANCHING_SCENARIO_DIR } from "./helpers/paths.js";
+import {
+  BRANCHING_SCENARIO_DIR,
+  GOLDEN_DIR,
+  requireCliOutputDir,
+  requireCliOutputPath,
+} from "./helpers/paths.js";
 import {
   copyMinimalFixture,
   createTempDir,
@@ -15,6 +20,8 @@ import { ensurePackagesBuilt, runCliJson } from "./helpers/runCli.js";
 
 type PackageJson = {
   ok: boolean;
+  outputPath?: string;
+  outputDir?: string;
   issues?: Array<{ path?: string; message: string; severity?: string }>;
 };
 
@@ -74,10 +81,7 @@ describe("branching-scenario packaging targets", () => {
     );
     expect(result.exitCode).toBe(0);
     expect(json.ok).toBe(true);
-    const outDir =
-      json.outputDir ??
-      join(BRANCHING_SCENARIO_DIR, ".lxpack/course/.lxpack/out/standalone");
-    assertStandaloneDir(outDir);
+    assertStandaloneDir(requireCliOutputDir(json));
   });
 
   it("packages as SCORM 2004", () => {
@@ -87,9 +91,6 @@ describe("branching-scenario packaging targets", () => {
     );
     expect(result.exitCode).toBe(0);
     expect(json.ok).toBe(true);
-    const zipPath =
-      json.outputPath ??
-      join(BRANCHING_SCENARIO_DIR, ".lxpack/course/.lxpack/out/course-scorm2004.zip");
-    assertScormZip(zipPath);
+    assertScormZip(requireCliOutputPath(json));
   });
 });

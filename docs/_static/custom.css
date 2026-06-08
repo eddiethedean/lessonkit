@@ -45,7 +45,7 @@ html[data-theme="dark"] .lk-hero-title {
 }
 
 /* Hide duplicate page title above hero (Furo renders the H1 separately) */
-article.bd-article > h1:first-of-type {
+article[role="main"] > section > h1:first-of-type {
   display: none;
 }
 
@@ -167,7 +167,12 @@ button.copybtn {
   border-radius: 0.375rem;
 }
 
-/* Sidebar — app icon + wordmark in logo.svg */
+/* Sidebar — Furo swaps .only-light / .only-dark logos via light_logo + dark_logo */
+.sidebar-logo-container {
+  display: flex;
+  align-items: center;
+}
+
 .sidebar-logo {
   max-width: min(100%, 11.5rem);
   height: auto;
@@ -212,4 +217,23 @@ html[data-theme="dark"] .lk-demo-frame {
 .lk-demo-links {
   margin: 0 0 2rem;
   font-size: 0.9375rem;
+}
+
+/* Per-component demos (shorter than full-course embeds) */
+.lk-component-demo-frame {
+  min-height: 420px;
+  height: min(70vh, 720px);
+}
+
+/* Component page tab panels */
+.sd-tab-set .lk-demo-frame {
+  margin-top: 0.5rem;
+}
+
+.sd-tab-set .lk-demo-links {
+  margin-bottom: 0.5rem;
+}
+
+.sd-tab-set > .sd-tab-content {
+  padding-top: 0.75rem;
 }

@@ -23,6 +23,8 @@ export type PackageOptions = {
   out?: string;
   json?: boolean;
   strictParity?: boolean;
+  /** Treat Vite build warnings as packaging failures. */
+  strict?: boolean;
 };
 
 export async function runPackage(opts: PackageOptions): Promise<CliJsonResult> {
@@ -99,6 +101,7 @@ export async function runPackage(opts: PackageOptions): Promise<CliJsonResult> {
     dir,
     outputBaseDir,
     strictParity: opts.strictParity,
+    strictBuild: opts.strict,
   });
 
   if (!result.ok) {

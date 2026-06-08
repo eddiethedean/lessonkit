@@ -1,0 +1,315 @@
+{
+  "true-false": {
+    "whenToUse": "Use `TrueFalse` for a **single binary claim** where learners must decide if a statement is accurate. It works well for policy attestation, myth-busting, and quick checks after a short reading.",
+    "requirements": "- Wrap in `Course` → `Lesson`.\n- Provide a stable `checkId` (matches `lessonkit.json` when packaging).",
+    "example": "```tsx\n<TrueFalse\n  checkId=\"phishing-tf\"\n  question=\"Phishing emails always use your real name in the greeting.\"\n  answer={false}\n/>\n```",
+    "seeAlso": "- [Block catalog — TrueFalse](../block-catalog.md)\n- [Quiz](quiz.md)"
+  },
+  "quiz": {
+    "whenToUse": "Use `Quiz` when learners must **pick one correct option** from a short list. Ideal for procedure checks, tool selection, and “best first step” scenarios.",
+    "requirements": "- Must be inside an active `Lesson` for quiz telemetry.\n- `choices` and `answer` must match exactly (string equality).",
+    "example": "```tsx\n<Quiz\n  checkId=\"verify-quiz\"\n  question=\"What should you verify before clicking a password-reset link?\"\n  choices={[\n    \"The sender domain and link destination\",\n    \"The email font and signature image\",\n    \"How urgent the subject line sounds\",\n  ]}\n  answer=\"The sender domain and link destination\"\n/>\n```",
+    "seeAlso": "- [Block catalog — Quiz](../block-catalog.md)\n- [TrueFalse](true-false.md)"
+  },
+  "fill-in-the-blanks": {
+    "whenToUse": "Use `FillInTheBlanks` when learners **type missing words** in a sentence — policy keywords, procedure steps, or vocabulary in context.\n\nWrap answers in `*` in the `template` string.",
+    "requirements": "- Requires `checkId` inside `Lesson`.\n- Each `*word*` in the template becomes a blank.",
+    "example": "```tsx\n<FillInTheBlanks\n  checkId=\"report-fib\"\n  template=\"Report suspicious messages to the *security* team within *one hour* using the *Report phishing* button.\"\n/>\n```",
+    "seeAlso": "- [Block catalog — FillInTheBlanks](../block-catalog.md)"
+  },
+  "mark-the-words": {
+    "whenToUse": "Use `MarkTheWords` when learners must **select specific tokens** in running text — find verbs, policy terms, or risky phrases.",
+    "requirements": "- `correctWords` must appear exactly in `text`.\n- Requires `checkId` for LMS scoring.",
+    "example": "```tsx\n<MarkTheWords\n  checkId=\"policy-mtw\"\n  text=\"Never share your password, MFA codes, or one-time recovery links with colleagues or vendors.\"\n  correctWords={[\"password\", \"MFA\", \"recovery\"]}\n/>\n```",
+    "seeAlso": "- [Block catalog — MarkTheWords](../block-catalog.md)"
+  },
+  "drag-the-words": {
+    "whenToUse": "Use `DragTheWords` when learners **drag words into inline zones** in a sentence — word banks, phrasing exercises, or approved-response drills.",
+    "requirements": "- Mark drop zones with `*zone text*` in `template`.\n- `words` includes distractors and correct options.",
+    "example": "```tsx\n<DragTheWords\n  checkId=\"action-dtw\"\n  template=\"When mail looks suspicious, use *Report phishing* instead of *forwarding* it to colleagues.\"\n  words={[\"Report phishing\", \"forwarding\", \"Reply all\", \"Archive\"]}\n/>\n```",
+    "seeAlso": "- [DragAndDrop](drag-and-drop.md)"
+  },
+  "drag-and-drop": {
+    "whenToUse": "Use `DragAndDrop` when learners **sort items into targets** — categorization, risk ranking, or channel matching.",
+    "requirements": "- Each `item` maps to a `target` via `accepts`.\n- Requires `checkId` for scoring and packaging.",
+    "example": "```tsx\n<DragAndDrop\n  checkId=\"channel-dad\"\n  items={[\n    { id: \"email\", label: \"Unknown payment link in email\" },\n    { id: \"portal\", label: \"IT self-service portal\" },\n    { id: \"phone\", label: \"Unsolicited callback number\" },\n  ]}\n  targets={[\n    { id: \"email-risk\", label: \"Verify before acting\", accepts: \"email\" },\n    { id: \"phone-risk\", label: \"Call back via known number\", accepts: \"phone\" },\n    { id: \"safe\", label: \"Approved channel\", accepts: \"portal\" },\n  ]}\n/>\n```",
+    "seeAlso": "- [Block catalog — DragAndDrop](../block-catalog.md)"
+  },
+  "summary": {
+    "whenToUse": "Use `Summary` when learners must **pick the correct statements** from a larger pool — recap exercises, “build the policy summary,” or filtering facts from distractors.\n\n**Prefer [`Quiz`](quiz.md)** for a single best answer, or [`AssessmentSequence`](assessment-sequence.md) to chain multiple scored blocks.",
+    "requirements": "- Requires `checkId` inside an active `Lesson`.\n- `statements` is the full pool; `correct` lists the valid subset (order matters for scoring).",
+    "example": "```tsx\n<Summary\n  checkId=\"summary-1\"\n  statements={[\n    \"Isolate affected accounts\",\n    \"Report to security within one hour\",\n    \"Share passwords in chat for speed\",\n    \"Preserve message headers for investigation\",\n  ]}\n  correct={[\n    \"Isolate affected accounts\",\n    \"Report to security within one hour\",\n    \"Preserve message headers for investigation\",\n  ]}\n/>\n```",
+    "seeAlso": "- [Block catalog](../block-catalog.md)\n- [framework-12-showcase example](../../examples/index.md#framework-12-showcase-examplesframework-12-showcase)"
+  },
+  "memory-game": {
+    "whenToUse": "Use `MemoryGame` for **matching pairs** — terminology drills, icon/name association, or low-stakes recall. Self-score mode is optional; it is not an LMS-scored assessment by default.",
+    "requirements": "- Provide `blockId` and an even-length `pairs` array (two cards per `id`).\n- Emits `memory_card_flipped` interactions when tracking is enabled.",
+    "example": "```tsx\n<MemoryGame\n  blockId=\"security-memory\"\n  pairs={[\n    { id: \"mfa\", label: \"MFA\" },\n    { id: \"phish\", label: \"Phishing\" },\n    { id: \"vpn\", label: \"VPN\" },\n    { id: \"soc\", label: \"SOC\" },\n  ]}\n/>\n```",
+    "seeAlso": "- [interactive-video example](../../examples/index.md) — uses `MemoryGame` alongside video blocks"
+  },
+  "video": {
+    "whenToUse": "Use `Video` for a **standalone self-hosted clip** inside a lesson — intros, demonstrations, or supplemental footage without timed overlays.\n\n**Use [`InteractiveVideo`](interactive-video.md)** when learners must complete cues at timestamps.",
+    "requirements": "- `src` must resolve under your embed/media allowlist in production.\n- Optional `poster`, `captions` (WebVTT URL), and `title` for accessibility.",
+    "example": "```tsx\n<Video blockId=\"intro-video\" src=\"/media/phishing-red-flags.mp4\" title=\"Phishing red flags briefing\" />\n```",
+    "seeAlso": "- [Migration 1.3 → 1.4](../../MIGRATION-1.3-to-1.4.md)"
+  },
+  "assessment-sequence": {
+    "whenToUse": "Use `AssessmentSequence` to **chain multiple scored blocks** in one flow — module checks, onboarding gates, or question sets where learners complete items in order.\n\nChildren must be scored assessment blocks (each with its own `checkId`). The container aggregates scores and supports compound resume.",
+    "requirements": "- Container uses `blockId`; each child uses `checkId`.\n- List every child `checkId` under `course.assessments[]` in `lessonkit.json`.",
+    "example": "```tsx\n<AssessmentSequence blockId=\"module-sequence\">\n  <TrueFalse\n    checkId=\"seq-tf\"\n    question=\"Public Wi‑Fi is safe for payroll access without a VPN.\"\n    answer={false}\n  />\n  <Quiz\n    checkId=\"seq-quiz\"\n    question=\"Best first step for a suspicious invoice?\"\n    choices={[\n      \"Pay immediately to avoid late fees\",\n      \"Verify through procurement or a known contact\",\n      \"Forward the PDF to your team chat\",\n    ]}\n    answer=\"Verify through procurement or a known contact\"\n  />\n</AssessmentSequence>\n```",
+    "seeAlso": "- [Block catalog — AssessmentSequence](../block-catalog.md)\n- [Question Set (H5P)](../guides/h5p-for-lessonkit-authors.md)"
+  },
+  "interactive-book": {
+    "whenToUse": "Use `InteractiveBook` for **multi-page reading** inside one lesson — handbooks, policy digests, or guided walkthroughs where learners move page-by-page.\n\nChildren must be [`Page`](page.md) blocks. Supports compound resume state.",
+    "requirements": "- Set stable `blockId` on the book and each `Page` when `persistCompoundState` is enabled.\n- Mirror nested `checkId` values in `course.assessments[]`.",
+    "example": "```tsx\n<InteractiveBook blockId=\"safety-book\" title=\"Security handbook\">\n  <Page blockId=\"book-intro\" title=\"Reporting\">\n    <Text>Use the Report phishing action - do not forward suspicious messages.</Text>\n  </Page>\n  <Page blockId=\"book-devices\" title=\"Devices\">\n    <Text>Lock your screen when leaving your desk.</Text>\n  </Page>\n  <Page blockId=\"book-check\" title=\"Knowledge check\">\n    <TrueFalse checkId=\"book-tf\" question=\"Forwarding suspicious mail is better than Report phishing.\" answer={false} />\n  </Page>\n</InteractiveBook>\n```",
+    "seeAlso": "- [interactive-book example](../../examples/index.md#interactive-book-examplesinteractive-book)\n- [Page](page.md)"
+  },
+  "slide-deck": {
+    "whenToUse": "Use `SlideDeck` for **presentation-style lessons** — onboarding briefings, policy overviews, or slide-by-slide narratives with optional checks.\n\nChildren must be [`Slide`](slide.md) blocks. Keyboard navigation and session resume are handled by the deck.",
+    "requirements": "- Set stable `blockId` on the deck and each slide when persistence is enabled.\n- Add nested assessment `checkId` values to `course.assessments[]`.",
+    "example": "```tsx\n<SlideDeck blockId=\"onboarding-deck\" title=\"Phishing red flags\" showDeckScore>\n  <Slide blockId=\"deck-welcome\" title=\"Welcome\">\n    <Heading level={2}>Spot the red flags</Heading>\n    <Text>Sender impersonation, urgency tactics, and safe reporting.</Text>\n  </Slide>\n  <Slide blockId=\"deck-check\" title=\"Check\">\n    <TrueFalse checkId=\"deck-tf\" question=\"Urgent language alone proves an email is malicious.\" answer={false} />\n  </Slide>\n</SlideDeck>\n```",
+    "seeAlso": "- [slide-deck example](../../examples/index.md#slide-deck-examplesslide-deck)\n- [Slide](slide.md)"
+  },
+  "branching-scenario": {
+    "whenToUse": "Use `BranchingScenario` for **decision-tree narratives** — customer calls, compliance paths, or soft-skill branching where choices change what learners see next.\n\nCompose [`BranchNode`](branch-node.md) and [`BranchChoice`](branch-choice.md) children. Optional path scoring via `showPathScore`.",
+    "requirements": "- `startNodeId` must match a `BranchNode`.\n- Validate the graph with `validateBranchGraph()` before shipping.\n- Add `course.assessments[]` only when nodes embed scored blocks.",
+    "example": "```tsx\n<BranchingScenario blockId=\"call-paths\" title=\"Suspicious charge call\" startNodeId=\"opening\" showPathScore>\n  <BranchNode nodeId=\"opening\">\n    <Text>A customer reports a duplicate charge after clicking a shipping email link.</Text>\n    <BranchChoice label=\"Acknowledge concern and verify account\" targetNodeId=\"empathy\" />\n    <BranchChoice label=\"Quote the no-refund policy first\" targetNodeId=\"policy\" />\n  </BranchNode>\n  <BranchNode nodeId=\"empathy\" terminal>\n    <Text>You secured the account and escalated to fraud review.</Text>\n  </BranchNode>\n</BranchingScenario>\n```",
+    "seeAlso": "- [Core — branching](../core.md#branching-scenario-meta)\n- [BranchNode](branch-node.md)"
+  },
+  "scenario": {
+    "whenToUse": "Use `Scenario` for **narrative framing** — inbox simulations, dialogue setup, or situational context before a decision. It is a semantic content container, not a scored assessment.\n\nSet `blockId` when you want stable block URNs on manual `interaction` events via `useTracking()`.",
+    "example": "```tsx\n<Scenario blockId=\"inbox-scenario\">\n  <p>\n    You receive an email from <strong>payroll-notify@hr-portal-support.net</strong> asking\n    you to confirm direct deposit details before end of day.\n  </p>\n  <p>What is your first move?</p>\n</Scenario>\n```",
+    "seeAlso": "- [Block catalog — Scenario](../block-catalog.md)\n- [Quiz](quiz.md) — pair with a scored follow-up"
+  },
+  "reflection": {
+    "whenToUse": "Use `Reflection` for **open-ended learner responses** — exit tickets, journaling prompts, or qualitative takeaways. Not auto-scored; emits interaction telemetry when tracking is enabled.",
+    "example": "```tsx\n<Reflection\n  blockId=\"lesson-reflection\"\n  prompt=\"Describe one habit you will change after this module and how you will remind yourself.\"\n  hint=\"Example: I will hover links and verify sender domains before clicking.\"\n/>\n```",
+    "seeAlso": "- [Questionnaire](questionnaire.md) — multi-field surveys\n- [Essay](essay.md) — scored long-form text"
+  },
+  "accordion": {
+    "whenToUse": "Use `Accordion` for **expand/collapse reference sections** — policy FAQs, glossary groupings, or optional deep dives without leaving the page.",
+    "example": "```tsx\n<Accordion\n  blockId=\"policy-accordion\"\n  sections={[\n    {\n      id: \"reporting\",\n      title: \"Reporting phishing\",\n      content: <Text>Use Report phishing in your mail client.</Text>,\n    },\n    {\n      id: \"devices\",\n      title: \"Devices and access\",\n      content: <Text>Lock your screen and never approve MFA you did not initiate.</Text>,\n    },\n  ]}\n/>\n```",
+    "seeAlso": "- [InformationWall](information-wall.md) — searchable panel library"
+  },
+  "interactive-video": {
+    "whenToUse": "Use `InteractiveVideo` when **video playback and learner actions are synchronized** — pause for checks, surface reminders at timestamps, or gate progress until cues complete.\n\nChildren must be `TimedCue` blocks. Cues appear as an **H5P-style overlay** (dimmed video + centered interaction card) while playback is paused.\n\nImport `@lessonkit/themes/base.css` (included in the example shell CSS) for overlay styling.",
+    "requirements": "- Wrap scored cues with `mustComplete` when they should block progress.\n- Enable `showVideoScore` for aggregate feedback across cue assessments.\n- Supports compound resume (playback position + completed cues).",
+    "example": "```tsx\n<InteractiveVideo blockId=\"safety-video\" title=\"Warehouse safety briefing\" src=\"/media/sample-briefing.mp4\" showVideoScore>\n  <TimedCue atSeconds={3} label=\"PPE check\" mustComplete>\n    <TrueFalse checkId=\"iv-tf\" question=\"PPE is required on the warehouse floor.\" answer={true} />\n  </TimedCue>\n  <TimedCue atSeconds={6} label=\"Reporting\">\n    <Text>Report spills and blocked aisles immediately.</Text>\n  </TimedCue>\n  <TimedCue atSeconds={8} label=\"Quick quiz\" mustComplete>\n    <TrueFalse checkId=\"iv-tf-2\" question=\"Tailgating through secure doors is acceptable.\" answer={false} />\n  </TimedCue>\n</InteractiveVideo>\n```",
+    "seeAlso": "- [interactive-video example](../../examples/index.md)\n- [Block catalog — InteractiveVideo](../block-catalog.md)"
+  },
+  "embed": {
+    "whenToUse": "Use `Embed` for **sandboxed third-party content** — external tools, legacy pages, or partner widgets that must stay in an iframe.\n\nConfigure `config.embed.allowedHosts` in production so only approved origins load.",
+    "requirements": "- Always set a descriptive `title` for screen readers.\n- Optional `allow` sandbox tokens and `aspectRatio` for layout.",
+    "example": "```tsx\n<Text>Allowlist embed hosts in production course config.</Text>\n<Embed blockId=\"policy-embed\" src=\"https://approved.example.com/widget\" title=\"Policy lookup\" />\n```",
+    "seeAlso": "- [Production checklist](../../guides/react-developers/production-checklist.md)"
+  },
+  "chart": {
+    "whenToUse": "Use `Chart` to visualize **simple metrics** — incident counts, survey breakdowns, or category comparisons. Supports `bar` and `pie`; empty data falls back gracefully.",
+    "example": "```tsx\n<Chart\n  blockId=\"incidents-chart\"\n  type=\"bar\"\n  title=\"Reported incidents — Q1\"\n  data={[\n    { label: \"Phishing\", value: 42 },\n    { label: \"Malware\", value: 11 },\n    { label: \"Lost device\", value: 4 },\n  ]}\n/>\n```",
+    "seeAlso": "- [Block catalog — Chart](../block-catalog.md)"
+  },
+  "table": {
+    "whenToUse": "Use `Table` for **structured reference data** — rosters, comparison matrices, or lookup tables. Renders a semantic HTML table with optional `caption`.",
+    "example": "```tsx\n<Table\n  blockId=\"escalation-table\"\n  caption=\"Security escalation contacts\"\n  headers={[\"Role\", \"Contact\", \"When to use\"]}\n  rows={[\n    [\"SOC analyst\", \"soc@company.example\", \"Active phishing or malware\"],\n    [\"Privacy office\", \"privacy@company.example\", \"Data exposure suspected\"],\n  ]}\n/>\n```",
+    "seeAlso": "- [Block catalog — Table](../block-catalog.md)"
+  },
+  "timeline": {
+    "whenToUse": "Use `Timeline` for **chronological narratives** — product history, policy evolution, or incident timelines. Each event has `date`, `title`, and `body`; optional media per event.",
+    "example": "```tsx\n<Timeline\n  blockId=\"playbook-timeline\"\n  events={[\n    { id: \"t1\", date: \"2024-03-15\", title: \"Tabletop exercise\", body: \"Gaps in invoice-fraud verification.\" },\n    { id: \"t2\", date: \"2024-06-01\", title: \"Report phishing rollout\", body: \"One-click reporting in mail clients.\" },\n  ]}\n/>\n```",
+    "seeAlso": "- [Block catalog — Timeline](../block-catalog.md)"
+  },
+  "flashcards": {
+    "whenToUse": "Use `Flashcards` for **term ↔ definition** study — flip cards one at a time. Optional `selfScore` for learner-rated confidence (not LMS-scored).",
+    "example": "```tsx\n<Flashcards\n  blockId=\"security-flashcards\"\n  cards={[\n    { front: \"Phishing\", back: \"Fraudulent messages designed to steal credentials.\" },\n    { front: \"MFA\", back: \"Multi-factor authentication.\" },\n    { front: \"SOC\", back: \"Security operations center for active incidents.\" },\n  ]}\n/>\n```",
+    "seeAlso": "- [DialogCards](dialog-cards.md) — sequential dialog-style cards"
+  },
+  "dialog-cards": {
+    "whenToUse": "Use `DialogCards` for **phrasebook-style** content — common questions and approved responses, studied one card at a time with prev/next navigation.",
+    "example": "```tsx\n<DialogCards\n  blockId=\"phrase-cards\"\n  cards={[\n    {\n      front: \"A colleague asks for your MFA code.\",\n      back: \"Never share MFA codes. Walk them to the help desk instead.\",\n    },\n    { front: \"How do I report phishing?\", back: \"Use Report message — do not forward.\" },\n  ]}\n/>\n```",
+    "seeAlso": "- [Flashcards](flashcards.md)"
+  },
+  "questionnaire": {
+    "whenToUse": "Use `Questionnaire` for **multi-field surveys** — exit tickets, needs analysis, or qualitative feedback with several text/textarea fields.\n\nEmits `questionnaire_submitted` when tracking is enabled; not auto-scored.",
+    "example": "```tsx\n<Questionnaire\n  blockId=\"exit-survey\"\n  fields={[\n    { id: \"role\", label: \"Your role\", type: \"text\" },\n    { id: \"confidence\", label: \"Confidence spotting phishing (1–5)\", type: \"text\" },\n    { id: \"feedback\", label: \"What was most useful?\", type: \"textarea\" },\n  ]}\n/>\n```",
+    "seeAlso": "- [Reflection](reflection.md) — single open prompt"
+  },
+  "essay": {
+    "whenToUse": "Use `Essay` for **long-form written responses** that you score manually or treat as completion-only. Set `minLength` to require a minimum answer size before submit.",
+    "requirements": "- Requires `checkId` inside `Lesson`.\n- Typically completion-scored unless you integrate custom review workflows.",
+    "example": "```tsx\n<Essay\n  checkId=\"policy-essay\"\n  question=\"A vendor emails an urgent bank-detail change. Describe your verification steps before approving.\"\n  minLength={40}\n/>\n```",
+    "seeAlso": "- [Block catalog — Essay](../block-catalog.md)"
+  },
+  "combination-lock": {
+    "whenToUse": "Use `CombinationLock` for **numeric code entry** puzzles — vault codes, PIN verification drills, or gamified access challenges.",
+    "requirements": "- `combination` is a string of digits; UI renders one wheel per digit.\n- Requires `checkId` for assessment telemetry and packaging.",
+    "example": "```tsx\n<CombinationLock checkId=\"vault-lock\" combination=\"1234\" label=\"Enter demo vault code (training only)\" />\n```",
+    "seeAlso": "- [Block catalog](../block-catalog.md)"
+  },
+  "crossword": {
+    "whenToUse": "Use `Crossword` for **grid-based vocabulary** challenges. Define `entries` with clues, answers, grid positions, and `across`/`down` direction.",
+    "requirements": "- `rows` and `cols` bound the grid.\n- Entries must fit without conflicting letters.",
+    "example": "```tsx\n<Crossword\n  checkId=\"security-crossword\"\n  rows={4}\n  cols={3}\n  entries={[\n    { id: \"a1\", clue: \"Two-step login, for short (3 letters)\", answer: \"MFA\", row: 1, col: 0, direction: \"across\" },\n    { id: \"d1\", clue: \"How apps talk to servers, for short (3 letters)\", answer: \"API\", row: 1, col: 2, direction: \"down\" },\n  ]}\n/>\n```",
+    "seeAlso": "- [WordSearch](word-search.md)"
+  },
+  "word-search": {
+    "whenToUse": "Use `WordSearch` for **hidden-word discovery** in a letter grid. Words are placed horizontally; learners select letters to match targets.",
+    "requirements": "- `words` are uppercased internally; keep lengths ≤ `size` (default 10).\n- Keyboard-first selection patterns documented in block catalog a11y notes.",
+    "example": "```tsx\n<WordSearch checkId=\"policy-ws\" words={[\"PHISH\", \"MFA\", \"VPN\"]} size={8} />\n```",
+    "seeAlso": "- [Crossword](crossword.md)"
+  },
+  "game-map": {
+    "whenToUse": "Use `GameMap` for **spatial exploration** — office tours, process maps, or branching worlds anchored on a background image.\n\nCompose `MapStage` nodes with `MapExit` links; terminal stages may include assessments (demo uses `TrueFalse` at the desk).",
+    "requirements": "- `startStageId` must match a `MapStage`.\n- `backgroundSrc` should be a safe relative or HTTPS URL.\n- Enable `showMapScore` when stages contain scored children.",
+    "example": "```tsx\n<GameMap blockId=\"office-map\" title=\"Office security tour\" backgroundSrc=\"/map.svg\" startStageId=\"lobby\" showMapScore>\n  <MapStage stageId=\"lobby\" x={25} y={55} label=\"Lobby\">\n    <Text>Badges must be visible in secure areas.</Text>\n    <MapExit label=\"Visit workstation\" targetStageId=\"desk\" />\n  </MapStage>\n  <MapStage stageId=\"desk\" x={65} y={35} label=\"Workstation\">\n    <TrueFalse checkId=\"badge-tf\" question=\"Lock your screen when you leave your desk.\" answer={true} />\n  </MapStage>\n</GameMap>\n```",
+    "seeAlso": "- [Block catalog — GameMap](../block-catalog.md)"
+  },
+  "image-hotspots": {
+    "whenToUse": "Use `ImageHotspots` when learners **explore regions of an image** — floor plans, equipment diagrams, or UI callouts. Each hotspot opens associated content.",
+    "requirements": "- `x` and `y` are percentages (0–100) from the top-left of the image.\n- Provide meaningful `label` text for buttons.",
+    "example": "```tsx\n<ImageHotspots\n  blockId=\"floor-hotspots\"\n  src=\"/floor-plan.svg\"\n  alt=\"Office floor plan\"\n  hotspots={[\n    { id: \"exit\", label: \"Emergency exit\", x: 80, y: 20, content: <Text>Keep aisles clear.</Text> },\n    { id: \"desk\", label: \"Workstation\", x: 40, y: 50, content: <Text>Lock your screen when away.</Text> },\n  ]}\n/>\n```",
+    "seeAlso": "- [FindHotspot](../block-catalog.md) — scored hotspot assessments"
+  },
+  "image-juxtaposition": {
+    "whenToUse": "Use `ImageJuxtaposition` for **before/after** or **A/B image comparison** with a draggable slider reveal.",
+    "requirements": "- Provide `beforeSrc`, `afterSrc`, and alt text for both images.",
+    "example": "```tsx\n<ImageJuxtaposition\n  blockId=\"workspace-jux\"\n  beforeSrc=\"/desk-cluttered.jpg\"\n  afterSrc=\"/desk-clean.jpg\"\n  beforeAlt=\"Cluttered desk with visible notes\"\n  afterAlt=\"Clean desk with locked screen\"\n/>\n```",
+    "seeAlso": "- [Block catalog](../block-catalog.md)"
+  },
+  "qr-content": {
+    "whenToUse": "Use `QrContent` for **scan-to-reveal** bonus material — optional modules, job aids, or Easter-egg content unlocked after displaying a QR code.",
+    "requirements": "- `payload` becomes the encoded QR target (URL or text).\n- Hidden content appears after the learner activates reveal.",
+    "example": "```tsx\n<QrContent\n  blockId=\"bonus-qr\"\n  title=\"Scan for security checklist\"\n  payload=\"https://intranet.example.com/security-checklist\"\n  hiddenTitle=\"Checklist unlocked\"\n  hiddenBody=\"Optional deep dive: password managers and travel VPN.\"\n/>\n```",
+    "seeAlso": "- [Block catalog](../block-catalog.md)"
+  },
+  "text-and-heading": {
+    "whenToUse": "Use `Text` and `Heading` for **basic lesson copy** inside compounds or lessons — paragraphs (`Text`) and section titles (`Heading` level 1–3).\n\nThese are building blocks inside `Slide`, `Page`, `Scenario`, and other containers rather than standalone lesson types.",
+    "requirements": "- Optional `blockId` for block-level telemetry URNs.\n- Prefer a single `h1` from `Course`; use `Heading level={2}` or `3` inside lessons.",
+    "example": "```tsx\n<Heading level={2} blockId=\"section-title\">Reporting suspicious mail</Heading>\n<Text blockId=\"section-body\">\n  Use Report phishing in your mail client. Do not forward the message to colleagues.\n</Text>\n```",
+    "seeAlso": "- [SlideDeck](slide-deck.md)\n- [InteractiveBook](interactive-book.md)"
+  },
+  "course-structure": {
+    "whenToUse": "Every course is built from **`Course` → `Lesson` → blocks**. Use this shell for all lessons.\n\n- **`Course`** — wraps `LessonkitProvider`, course title, and `courseId`.\n- **`Lesson`** — sets the active lesson and emits lesson lifecycle telemetry.\n- **`ProgressTracker`** — optional chrome that shows completion progress.\n\nIn production SPAs, mount **one active `Lesson` at a time** (route or step state). The demo shows the minimal happy path with a `Quiz` inside the lesson.",
+    "requirements": "- `courseId`, `lessonId`, and assessment `checkId` values must be stable for packaging.\n- Pass `config` on `Course` for telemetry, xAPI, and LMS bridge (disabled in docs demos).",
+    "example": "```tsx\n<Course title=\"Security fundamentals\" courseId=\"sec-fundamentals\" config={courseConfig}>\n  <ProgressTracker />\n  <Lesson title=\"Phishing basics\" lessonId=\"phishing-lesson\">\n    <Scenario blockId=\"intro\">\n      <Text>Mount one active Lesson at a time inside Course.</Text>\n    </Scenario>\n    <Quiz\n      checkId=\"structure-quiz\"\n      question=\"Where should scored checks live?\"\n      choices={[\"Inside a Lesson, under Course\", \"Outside Course\"]}\n      answer=\"Inside a Lesson, under Course\"\n    />\n  </Lesson>\n</Course>\n```",
+    "seeAlso": "- [Components and hooks guide](../../guides/react-developers/components-and-hooks.md)\n- [Identity reference](../identity.md)\n- [`KnowledgeCheck`](quiz.md) is an alias of `Quiz`"
+  },
+  "page": {
+    "whenToUse": "Use `Page` as a **child of `InteractiveBook`** — one chapter or section in a paginated handbook. Pages can contain any allowed content blocks and assessments.\n\nDo not mount `Page` directly under `Lesson`; always wrap with [`InteractiveBook`](interactive-book.md).",
+    "requirements": "- Each `Page` needs `blockId` and `title`.\n- Book navigation and resume state are handled by the parent compound.",
+    "example": "```tsx\n<InteractiveBook blockId=\"policy-digest\" title=\"Policy digest\">\n  <Page blockId=\"reporting\" title=\"Reporting\">\n    <Text>Report incidents within one hour.</Text>\n    <TrueFalse checkId=\"page-tf\" question=\"Forwarding suspicious mail counts as reporting.\" answer={false} />\n  </Page>\n</InteractiveBook>\n```",
+    "seeAlso": "- [InteractiveBook](interactive-book.md)"
+  },
+  "slide": {
+    "whenToUse": "Use `Slide` as a **child of `SlideDeck`** — one screen in a presentation-style lesson. Combine with `Heading`, `Text`, assessments, or content blocks.\n\nDo not mount `Slide` directly under `Lesson`.",
+    "requirements": "- Each `Slide` needs `blockId` and `title`.\n- Keyboard navigation is provided by the parent deck.",
+    "example": "```tsx\n<SlideDeck blockId=\"briefing\" title=\"Security briefing\">\n  <Slide blockId=\"context\" title=\"Context\">\n    <Text>Attackers impersonate payroll and shipping during busy seasons.</Text>\n  </Slide>\n  <Slide blockId=\"check\" title=\"Check\">\n    <TrueFalse checkId=\"slide-tf\" question=\"A familiar display name guarantees legitimacy.\" answer={false} />\n  </Slide>\n</SlideDeck>\n```",
+    "seeAlso": "- [SlideDeck](slide-deck.md)"
+  },
+  "timed-cue": {
+    "whenToUse": "Use `TimedCue` as a **child of `InteractiveVideo`** to surface content or assessments at a timestamp. Set `mustComplete` on scored cues that should block video progress.\n\nThe demo shows a required `TrueFalse` at 3s and an informational `Text` cue at 8s.",
+    "requirements": "- `atSeconds` is the trigger time.\n- Cue children are usually assessments or short content blocks.",
+    "example": "```tsx\n<InteractiveVideo blockId=\"access-briefing\" title=\"Facility access\" src=\"/media/sample-briefing.mp4\">\n  <TimedCue atSeconds={3} label=\"Tailgating\" mustComplete>\n    <TrueFalse checkId=\"cue-tf\" question=\"Tailgating through secure doors is allowed.\" answer={false} />\n  </TimedCue>\n  <TimedCue atSeconds={8} label=\"Badges\">\n    <Text>Badges must be visible in secure areas.</Text>\n  </TimedCue>\n  <TimedCue atSeconds={9} label=\"Reporting\" mustComplete>\n    <TrueFalse checkId=\"cue-tf-2\" question=\"Report lost badges to security the same day.\" answer={true} />\n  </TimedCue>\n</InteractiveVideo>\n```",
+    "seeAlso": "- [InteractiveVideo](interactive-video.md)"
+  },
+  "image": {
+    "whenToUse": "Use `Image` for **illustrations, diagrams, or photos** with required alt text. Prefer relative or HTTPS URLs allowed by your media policy.",
+    "example": "```tsx\n<Text blockId=\"caption\">Labeled floor plans help learners locate exits and restricted zones.</Text>\n<Image blockId=\"floor-image\" src=\"/floor-plan.svg\" alt=\"Office floor plan with exits marked\" />\n```",
+    "seeAlso": "- [ImageHotspots](image-hotspots.md) — clickable regions on an image"
+  },
+  "image-pairing": {
+    "whenToUse": "Use `ImagePairing` for **memory-style image matching** — learners flip and pair cards that share the same `id`.",
+    "requirements": "- Each `pairs` entry needs unique `id`, `label`, and `imageSrc`.\n- Requires `checkId` for LMS scoring.",
+    "example": "```tsx\n<ImagePairing\n  checkId=\"ppe-pairing\"\n  pairs={[\n    { id: \"helmet\", label: \"Hard hat\", imageSrc: \"/helmet.png\" },\n    { id: \"vest\", label: \"High-visibility vest\", imageSrc: \"/vest.png\" },\n  ]}\n/>\n```",
+    "seeAlso": "- [MemoryGame](memory-game.md) — text labels without images"
+  },
+  "image-sequencing": {
+    "whenToUse": "Use `ImageSequencing` when learners must **order images correctly** — process steps, timeline photos, or procedure screenshots.",
+    "requirements": "- `correctOrder` is an array of image `id` values in the target sequence.",
+    "example": "```tsx\n<ImageSequencing\n  checkId=\"report-flow\"\n  images={[\n    { id: \"step-1\", src: \"/step-1.png\", alt: \"Do not click further links\" },\n    { id: \"step-2\", src: \"/step-2.png\", alt: \"Report via mail client\" },\n  ]}\n  correctOrder={[\"step-1\", \"step-2\"]}\n/>\n```",
+    "seeAlso": "- [ImageSequence](image-sequence.md) — non-scored frame scrubber"
+  },
+  "arithmetic-quiz": {
+    "whenToUse": "Use `ArithmeticQuiz` for **numeric drill** — quick mental math checks with optional `timeLimitSeconds`.",
+    "example": "```tsx\n<ArithmeticQuiz\n  checkId=\"shift-handoff\"\n  problems={[\n    { question: \"Phishing reports: 3 new + 2 escalated = ?\", answer: \"5\" },\n    { question: \"Open tickets after closing 4 of 9 = ?\", answer: \"5\" },\n  ]}\n/>\n```",
+    "seeAlso": "- [Quiz](quiz.md) — non-numeric multiple choice"
+  },
+  "find-hotspot": {
+    "whenToUse": "Use `FindHotspot` when learners must **pick one correct region** on an image — locate a single hazard, control, or UI element.",
+    "requirements": "- `targets` use percentage `x`/`y` positions.\n- `correctTargetId` must match one target `id`.",
+    "example": "```tsx\n<FindHotspot\n  checkId=\"egress-check\"\n  src=\"/floor-plan.svg\"\n  alt=\"Floor plan\"\n  targets={[\n    { id: \"hazard\", label: \"Blocked aisle\", x: 45, y: 60 },\n    { id: \"exit\", label: \"Clear exit\", x: 80, y: 20 },\n  ]}\n  correctTargetId=\"hazard\"\n/>\n```",
+    "seeAlso": "- [FindMultipleHotspots](find-multiple-hotspots.md)\n- [ImageHotspots](image-hotspots.md) — non-scored exploration"
+  },
+  "find-multiple-hotspots": {
+    "whenToUse": "Use `FindMultipleHotspots` when learners must **identify every correct region** (and avoid decoys) before checking answers.",
+    "requirements": "- `correctTargetIds` lists all required targets.\n- Selecting a decoy fails the attempt even if enough correct targets were chosen.",
+    "example": "```tsx\n<FindMultipleHotspots\n  checkId=\"hazard-sweep\"\n  src=\"/floor-plan.svg\"\n  alt=\"Floor plan\"\n  targets={[\n    { id: \"cable\", label: \"Cable trip hazard\", x: 30, y: 70 },\n    { id: \"spill\", label: \"Wet floor\", x: 60, y: 40 },\n    { id: \"clear\", label: \"Clear walkway\", x: 20, y: 20 },\n  ]}\n  correctTargetIds={[\"cable\", \"spill\"]}\n/>\n```",
+    "seeAlso": "- [FindHotspot](find-hotspot.md)"
+  },
+  "information-wall": {
+    "whenToUse": "Use `InformationWall` for **searchable reference libraries** — policy indexes, FAQ walls, or knowledge bases with many short panels.",
+    "example": "```tsx\n<InformationWall\n  blockId=\"policy-wall\"\n  panels={[\n    { id: \"phish\", title: \"Phishing\", body: \"Report via Report message.\" },\n    { id: \"mfa\", title: \"MFA\", body: \"Approve only prompts you initiated.\" },\n    { id: \"travel\", title: \"Travel\", body: \"Use corporate VPN on hotel Wi‑Fi.\" },\n  ]}\n/>\n```",
+    "seeAlso": "- [Accordion](accordion.md) — collapsible sections without search"
+  },
+  "parallax-slideshow": {
+    "whenToUse": "Use `ParallaxSlideshow` for **storytelling slides** with title, body, and optional background imagery. Respects `prefers-reduced-motion`.",
+    "example": "```tsx\n<ParallaxSlideshow\n  blockId=\"program-story\"\n  slides={[\n    { title: \"Baseline training\", body: \"Annual phishing modules for all staff.\" },\n    { title: \"Simulations\", body: \"Quarterly drills with coaching.\" },\n  ]}\n/>\n```",
+    "seeAlso": "- [SlideDeck](slide-deck.md) — structured deck with assessments"
+  },
+  "image-slider": {
+    "whenToUse": "Use `ImageSlider` for **photo galleries** — before/after sets, product shots, or exhibit walkthroughs with prev/next controls.",
+    "example": "```tsx\n<ImageSlider\n  blockId=\"desk-compare\"\n  slides={[\n    { src: \"/desk-before.jpg\", alt: \"Cluttered desk\", caption: \"Before — violations\" },\n    { src: \"/desk-after.jpg\", alt: \"Clean desk\", caption: \"After — compliant\" },\n  ]}\n/>\n```",
+    "seeAlso": "- [ImageSequence](image-sequence.md) — scrubber without prev/next chrome"
+  },
+  "image-sequence": {
+    "whenToUse": "Use `ImageSequence` for **step-by-step visuals** controlled by a slider — assembly instructions, frame-by-frame diagrams.\n\nNot scored; use [`ImageSequencing`](image-sequencing.md) when order must be assessed.",
+    "example": "```tsx\n<ImageSequence\n  blockId=\"incident-steps\"\n  frames={[\n    { src: \"/contain.png\", alt: \"Contain\", label: \"Contain\" },\n    { src: \"/report.png\", alt: \"Report\", label: \"Report\" },\n    { src: \"/document.png\", alt: \"Document\", label: \"Document\" },\n  ]}\n/>\n```",
+    "seeAlso": "- [ImageSequencing](image-sequencing.md)"
+  },
+  "collage": {
+    "whenToUse": "Use `Collage` for **multi-image grids** with optional captions — mood boards, team photos, or panel comparisons.",
+    "example": "```tsx\n<Collage\n  blockId=\"ops-overview\"\n  columns={2}\n  cells={[\n    { id: \"map\", src: \"/assembly-map.svg\", alt: \"Assembly points\", caption: \"Assembly points\" },\n    { id: \"team\", src: \"/wardens.jpg\", alt: \"Floor wardens\", caption: \"Floor wardens\" },\n  ]}\n/>\n```",
+    "seeAlso": "- [Image](image.md)"
+  },
+  "audio-recorder": {
+    "whenToUse": "Use `AudioRecorder` for **learner-recorded responses** — pronunciation practice, verbal commitments, or role-play reflection.\n\nRequires browser `MediaRecorder` support and explicit consent via `consentLabel`.",
+    "requirements": "- Learners must check consent before recording.\n- Set `maxDurationSeconds` to cap clip length.",
+    "example": "```tsx\n<AudioRecorder\n  blockId=\"escalation-script\"\n  consentLabel=\"I consent to record audio for this practice exercise only.\"\n  maxDurationSeconds={45}\n/>\n```",
+    "seeAlso": "- [Essay](essay.md) — typed long-form responses"
+  },
+  "advent-calendar": {
+    "whenToUse": "Use `AdventCalendar` for **date-gated daily content** — December security tips, onboarding drips, or unlock-by-day campaigns.\n\nOptional `unlockFrom` ISO date controls which doors open.",
+    "example": "```tsx\n<AdventCalendar\n  blockId=\"december-tips\"\n  doors={[\n    { id: \"d1\", day: 1, label: \"1\", content: <Text>Verify sender domains.</Text> },\n    { id: \"d2\", day: 2, label: \"2\", content: <Text>Lock your screen when away.</Text> },\n    { id: \"d3\", day: 3, label: \"3\", content: <Text>Use MFA on every work account.</Text> },\n  ]}\n/>\n```",
+    "seeAlso": "- [Block catalog](../block-catalog.md)"
+  },
+  "branch-node": {
+    "whenToUse": "Use `BranchNode` **only inside [`BranchingScenario`](branching-scenario.md)**. Each node is a step in the graph: narrative content, optional `BranchChoice` children, and an optional `terminal` flag for end states.\n\nThe parent hides inactive nodes; you author all nodes as children of the scenario.",
+    "requirements": "- `nodeId` must be unique within the scenario.\n- `startNodeId` on the parent must match an existing node.\n- Terminal nodes often hold assessments or completion copy.",
+    "example": "```tsx\n<BranchingScenario blockId=\"card-dispute\" title=\"Card dispute call\" startNodeId=\"start\" showPathScore>\n  <BranchNode nodeId=\"start\" title=\"Opening\">\n    <Text>Caller reports a duplicate charge after a shipping notification link.</Text>\n    <BranchChoice label=\"Listen and verify identity\" targetNodeId=\"verify\" />\n  </BranchNode>\n  <BranchNode nodeId=\"verify\" title=\"Verify\" terminal>\n    <Text>Identity confirmed and fraud ticket opened.</Text>\n  </BranchNode>\n</BranchingScenario>\n```",
+    "seeAlso": "- [BranchChoice](branch-choice.md)\n- [BranchingScenario](branching-scenario.md)"
+  },
+  "branch-choice": {
+    "whenToUse": "Use `BranchChoice` **inside `BranchNode`** to offer **labeled navigation** to another `nodeId`. Optional `scoreWeight` contributes to `showPathScore` totals on the parent scenario.",
+    "requirements": "- `targetNodeId` must reference another `BranchNode` in the same scenario.\n- Choices render as radio-style buttons; only the active node accepts input.",
+    "example": "```tsx\n<BranchNode nodeId=\"fork\">\n  <Text>Finance flagged a duplicate wire with end-of-day pressure.</Text>\n  <BranchChoice label=\"Escalate and hold payment\" targetNodeId=\"supervisor\" scoreWeight={1} />\n  <BranchChoice label=\"Approve to avoid delays\" targetNodeId=\"approve\" />\n</BranchNode>\n```",
+    "seeAlso": "- [BranchNode](branch-node.md)\n- [BranchingScenario](branching-scenario.md)"
+  },
+  "map-stage": {
+    "whenToUse": "Use `MapStage` **only inside [`GameMap`](game-map.md)**. Each stage is content shown when the learner visits a point on the background image (`x`/`y` percentages position the marker).",
+    "requirements": "- `stageId` must be unique within the map.\n- `startStageId` on the parent must match a stage.\n- Children may include `MapExit`, content blocks, and assessments.",
+    "example": "```tsx\n<GameMap blockId=\"zones\" title=\"Building zones\" backgroundSrc=\"/map.svg\" startStageId=\"lobby\">\n  <MapStage stageId=\"lobby\" x={30} y={55} label=\"Lobby\">\n    <Text>Reception verifies visitors before secure areas.</Text>\n    <MapExit label=\"Enter work floor\" targetStageId=\"floor\" />\n  </MapStage>\n  <MapStage stageId=\"floor\" x={70} y={40} label=\"Work floor\">\n    <TrueFalse checkId=\"stage-tf\" question=\"Tailgating is acceptable when you recognize someone.\" answer={false} />\n  </MapStage>\n</GameMap>\n```",
+    "seeAlso": "- [MapExit](map-exit.md)\n- [GameMap](game-map.md)"
+  },
+  "map-exit": {
+    "whenToUse": "Use `MapExit` **inside `MapStage`** to link to another `stageId` on the map — the spatial equivalent of `BranchChoice`.",
+    "requirements": "- `targetStageId` must reference another `MapStage` in the same `GameMap`.\n- Optional `scoreWeight` when `showMapScore` is enabled on the parent.",
+    "example": "```tsx\n<MapStage stageId=\"hub\" x={50} y={50} label=\"Central hub\">\n  <MapExit label=\"Visit lab (PPE required)\" targetStageId=\"lab\" scoreWeight={1} />\n  <MapExit label=\"Visit open office\" targetStageId=\"office\" />\n</MapStage>\n```",
+    "seeAlso": "- [MapStage](map-stage.md)\n- [GameMap](game-map.md)"
+  },
+  "knowledge-check": {
+    "whenToUse": "`KnowledgeCheck` is a **deprecated alias** of [`Quiz`](quiz.md) with identical behavior and telemetry. Use **`Quiz` in new code**; keep this name only when maintaining legacy courses or manifests that already import `KnowledgeCheck`.",
+    "requirements": "Same as `Quiz`: requires `checkId`, `question`, `choices`, and `answer` inside an active `Lesson`.",
+    "example": "```tsx\n// Prefer Quiz in new projects:\nimport { Quiz } from \"@lessonkit/react\";\n\n// Legacy alias (still supported):\n<KnowledgeCheck\n  checkId=\"kc-demo\"\n  question=\"Which channel is approved for password resets?\"\n  choices={[\n    \"Self-service portal linked from the intranet\",\n    \"Reply to the email that prompted the reset\",\n  ]}\n  answer=\"Self-service portal linked from the intranet\"\n/>\n```",
+    "seeAlso": "- [Quiz](quiz.md)\n- [Block catalog](../block-catalog.md)"
+  }
+}

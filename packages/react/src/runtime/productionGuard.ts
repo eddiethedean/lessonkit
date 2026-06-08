@@ -148,6 +148,15 @@ export function assertProductionCourseConfig(
       `[lessonkit] Production build missing observability hooks. Wire all ${hookCount} config.observability callbacks before go-live.`,
     );
   }
+
+  if (
+    config.lxpack?.bridge === "auto" &&
+    (!config.lxpack.allowedParentOrigins || config.lxpack.allowedParentOrigins.length === 0)
+  ) {
+    throw new Error(
+      "[lessonkit] Production build uses lxpack bridge auto but allowedParentOrigins is missing. See production checklist.",
+    );
+  }
 }
 
 export { isProductionEnvironment, shouldEnforceProductionGuard };

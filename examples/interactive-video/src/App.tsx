@@ -7,17 +7,16 @@ import {
   Lesson,
   MemoryGame,
   Text,
-  ThemeProvider,
   TimedCue,
   TrueFalse,
   Video,
 } from "@lessonkit/react";
+import { ExampleThemeShell } from "../../_shared/ExampleThemeShell";
 
 const COURSE_ID = "interactive-video-demo";
 
-/** Sample open-licensed clip (Big Buck Bunny trailer). Replace for production courses. */
-const SAMPLE_VIDEO =
-  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4";
+/** Sample clip served from public/ (Big Buck Bunny 360p, ~10s). Replace for production courses. */
+const SAMPLE_VIDEO = "/media/sample-briefing.mp4";
 
 export default function App() {
   const config = useMemo(
@@ -26,7 +25,7 @@ export default function App() {
   );
 
   return (
-    <ThemeProvider mode="light">
+    <ExampleThemeShell>
       <Course title="Safety briefing" courseId={COURSE_ID} config={config}>
         <Lesson title="Interactive video" lessonId="video-lesson">
           <InteractiveVideo
@@ -71,6 +70,6 @@ export default function App() {
           />
         </Lesson>
       </Course>
-    </ThemeProvider>
+    </ExampleThemeShell>
   );
 }

@@ -1,6 +1,21 @@
 # Migrating from LessonKit 1.x to 2.0
 
-LessonKit **2.0** will remove deprecated APIs that still work in **1.5.x** with development warnings. Plan upgrades before pinning `@lessonkit/*@2`.
+LessonKit **2.0** will remove deprecated APIs that still work in **1.6.x** with development warnings. Plan upgrades before pinning `@lessonkit/*@2`.
+
+## Runtime v1 sunset
+
+`runtimeVersion: "v1"` on `LessonkitConfig` is **deprecated** as of framework 1.4.0 and will be **removed in LessonKit 2.0**.
+
+### What changes in v2 (default since 1.0)
+
+- Headless `createLessonkitRuntime()` coordinates lifecycle (`setActiveLesson`, `completeLesson`, `completeCourse`) and plugin registration.
+- `LessonkitProvider` uses the v2 runtime internally unless you opt into v1.
+
+### Action for course authors
+
+1. **Remove** `runtimeVersion: "v1"` from `courseConfig` / `LessonkitProvider` config.
+2. Use `Course` + `config` props (or `LessonkitProvider`) — do not depend on v1-only telemetry batching quirks.
+3. Wire production [observability hooks](guides/react-developers/production-checklist.md) (`onLxpackBridgeMiss`, `onTelemetrySinkError`, etc.).
 
 ## Removal checklist
 
@@ -17,7 +32,8 @@ LessonKit **2.0** will remove deprecated APIs that still work in **1.5.x** with 
 | `LessonkitPlugin` combined type | `defineTelemetryPlugin`, `defineAssessmentPlugin`, `defineLifecyclePlugin` | |
 | `buildBlockCatalogV1()` | `buildBlockCatalog({ version: 1 })` | |
 | `LessonkitTheme` type | `LessonkitThemeV1` from `@lessonkit/themes` | |
-| `McqAssessmentDescriptor` | `McqAssessmentProps` from `@lessonkit/core` | |
+| `McqAssessmentDescriptor` (lxpack / legacy) | `McqAssessmentProps` from `@lessonkit/core` | Use in React `Quiz` props; in `lessonkit.json` use `assessments[]` with `choices` + `answer` (optional `kind: "mcq"`) |
+| `KnowledgeCheck` component | `Quiz` | Alias removed in 2.0 |
 | `AssessmentSequenceProvider` | `CompoundProvider` | |
 | `resolveViteBin()` (CLI internals) | `resolveViteJs()` + `process.execPath` | |
 | `course.spaDistDir` in `lessonkit.json` | `paths.spaDistDir` | |

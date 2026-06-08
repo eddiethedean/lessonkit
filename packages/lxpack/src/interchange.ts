@@ -55,6 +55,16 @@ export function resolveSpaLessons(descriptor: LessonkitCourseDescriptor): SpaLes
   }));
 }
 
+/**
+ * Convert a `lessonkit.json` course descriptor to portable interchange JSON for `.lkcourse`.
+ *
+ * @example
+ * ```ts
+ * import { descriptorToInterchange } from "@lessonkit/lxpack";
+ *
+ * const interchange = descriptorToInterchange(manifest.course);
+ * ```
+ */
 export function descriptorToInterchange(
   descriptor: LessonkitCourseDescriptor,
 ): LessonkitInterchangeV1 {

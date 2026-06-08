@@ -1,11 +1,10 @@
-import { join } from "node:path";
 import { beforeAll, describe, expect, it } from "vitest";
 import {
   assertScormZip,
   assertStandaloneDir,
   assertZipExists,
 } from "./helpers/assertArtifacts.js";
-import { GOLDEN_DIR } from "./helpers/paths.js";
+import { GOLDEN_DIR, requireCliOutputDir, requireCliOutputPath } from "./helpers/paths.js";
 import { ensureGoldenBuilt } from "./helpers/tempProject.js";
 import { ensurePackagesBuilt, runCliJson } from "./helpers/runCli.js";
 
@@ -36,15 +35,11 @@ describe("CLI package targets (golden example)", () => {
       expect(json.target).toBe(target);
 
       if (target === "standalone") {
-        const dir =
-          json.outputDir ?? join(GOLDEN_DIR, ".lxpack/course/.lxpack/out/standalone");
-        assertStandaloneDir(dir);
+        assertStandaloneDir(requireCliOutputDir(json));
         return;
       }
 
-      const zipPath =
-        json.outputPath ??
-        join(GOLDEN_DIR, `.lxpack/course/.lxpack/out/course-${target}.zip`);
+      const zipPath = requireCliOutputPath(json);
       assertZipExists(zipPath);
       if (target === "scorm12" || target === "scorm2004") {
         assertScormZip(zipPath);

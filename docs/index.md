@@ -58,8 +58,8 @@ LessonKit courses are React apps. If you want to learn React before the develope
 
 ```{raw} html
 <div class="lk-callout">
-  <strong>Node.js:</strong> <strong>{{ node_minimum }}</strong> minimum for dev, build, and <code>lessonkit package</code>.
-  Use <strong>{{ node_recommended }}</strong> for the CLI scaffold (Vite 8), monorepo CI, and Playwright e2e.
+  <strong>Node.js:</strong> Use <strong>{{ node_new_projects }}</strong> for all new projects (<code>lessonkit init</code>, Vite 8).
+  Node {{ node_minimum }} may work for packaging-only agents on an existing course — not supported for scaffold.
 </div>
 ```
 
@@ -67,8 +67,8 @@ LessonKit courses are React apps. If you want to learn React before the develope
 
 | Task | Node.js |
 | --- | --- |
-| **`npx @lessonkit/cli init`** (Vite 8 scaffold) | **{{ node_recommended }}** recommended |
-| Dev, build, package in an existing course | **{{ node_minimum }}** minimum |
+| **`npx @lessonkit/cli init`** (Vite 8 scaffold) | **{{ node_new_projects }}** required |
+| Dev, build, package in an existing course | **{{ node_new_projects }}** recommended; {{ node_minimum }} minimum (packaging-only legacy) |
 | Monorepo CI and Playwright e2e | **{{ node_recommended }}** (CI runs Node 20 only) |
 
 See [Prerequisites](guides/prerequisites.md) for details.
@@ -134,8 +134,10 @@ guides/h5p-for-lessonkit-authors
 
 guides/react-developers/index
 guides/react-developers/getting-started-in-5-minutes
+guides/react-developers/lms-go-live
 guides/react-developers/first-lms-export
 guides/react-developers/ship-to-lms
+guides/react-developers/troubleshooting
 guides/react-developers/quickstart
 guides/react-developers/block-cookbook
 guides/react-developers/project-structure
@@ -150,6 +152,7 @@ guides/react-developers/performance
 guides/react-developers/plugin-cookbook
 guides/react-developers/contributing-to-the-monorepo
 guides/react-developers/adding-a-framework-block
+guides/plugin-marketplace-research
 ```
 
 ```{toctree}
@@ -158,8 +161,10 @@ guides/react-developers/adding-a-framework-block
 
 reference/glossary
 reference/manifest
+reference/interchange
 reference/api
 reference/cli
+reference/cli-errors
 reference/core
 reference/packaging
 reference/lms-compatibility
@@ -169,6 +174,7 @@ reference/xapi
 reference/theming
 reference/accessibility
 reference/block-catalog
+reference/components/index
 reference/storybook-gallery
 reference/plugins
 reference/lxpack-bridge

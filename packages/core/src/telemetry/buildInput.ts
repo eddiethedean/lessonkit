@@ -18,6 +18,14 @@ import type {
   QuestionnaireSubmittedData,
   BranchNodeViewedData,
   BranchSelectedData,
+  ImageJuxtapositionChangedData,
+  TimelineEventViewedData,
+  ImageSequenceChangedData,
+  AudioRecordingData,
+  QrContentRevealedData,
+  AdventDoorOpenedData,
+  MapStageViewedData,
+  MapExitSelectedData,
   QuizAnsweredData,
   QuizCompletedData,
   TelemetryUser,
@@ -150,4 +158,49 @@ export type BuildTelemetryEventInput =
       name: "branch_selected";
       lessonId?: LessonId;
       data: BranchSelectedData;
+    })
+  | (BuildTelemetryEventContext & {
+      name: "image_juxtaposition_changed";
+      lessonId?: LessonId;
+      data: ImageJuxtapositionChangedData;
+    })
+  | (BuildTelemetryEventContext & {
+      name: "timeline_event_viewed";
+      lessonId?: LessonId;
+      data: TimelineEventViewedData;
+    })
+  | (BuildTelemetryEventContext & {
+      name: "image_sequence_changed";
+      lessonId?: LessonId;
+      data: ImageSequenceChangedData;
+    })
+  | (BuildTelemetryEventContext & {
+      name: "audio_recording_started";
+      lessonId?: LessonId;
+      data: AudioRecordingData;
+    })
+  | (BuildTelemetryEventContext & {
+      name: "audio_recording_completed";
+      lessonId?: LessonId;
+      data: AudioRecordingData;
+    })
+  | (BuildTelemetryEventContext & {
+      name: "qr_content_revealed";
+      lessonId?: LessonId;
+      data: QrContentRevealedData;
+    })
+  | (BuildTelemetryEventContext & {
+      name: "advent_door_opened";
+      lessonId?: LessonId;
+      data: AdventDoorOpenedData;
+    })
+  | (BuildTelemetryEventContext & {
+      name: "map_stage_viewed";
+      lessonId?: LessonId;
+      data: MapStageViewedData;
+    })
+  | (BuildTelemetryEventContext & {
+      name: "map_exit_selected";
+      lessonId?: LessonId;
+      data: MapExitSelectedData;
     });

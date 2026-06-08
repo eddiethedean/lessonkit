@@ -18,7 +18,10 @@ import {
 } from "./packaging/validateInputs";
 import { promoteStagingToOutDir } from "./packaging/promote";
 import { buildStagingPackage, ensureOutDirParent } from "./packaging/staging";
-import { findPackagingErrorIssues } from "./packaging/issueSeverity";
+import {
+  findPackagingErrorIssues,
+  findPackagingWarningIssues,
+} from "./packaging/issueSeverity";
 import { validateReactManifestParity } from "./validateReactParity";
 
 export type { ExportTarget } from "@lxpack/api";
@@ -48,6 +51,8 @@ export type PackageLessonkitCourseOptions = WriteLxpackProjectOptions & {
   outputBaseDir?: string;
   /** Treat React parity warnings as packaging errors. */
   strictParity?: boolean;
+  /** Treat LXPack build warnings as packaging errors. */
+  strictBuild?: boolean;
 };
 
 export type PackageLessonkitCourseResult =
@@ -99,6 +104,21 @@ export { buildStagingPackage, ensureOutDirParent } from "./packaging/staging";
 /**
  * Package a built SPA into SCORM, xAPI, cmi5, or standalone LMS artifacts.
  * Prefer `lessonkit package --target …` in course projects; call directly for custom pipelines.
+ *
+ * @example
+ * ```ts
+ * import { packageLessonkitCourse } from "@lessonkit/lxpack";
+ *
+ * const result = await packageLessonkitCourse({
+ *   descriptor: manifest.course,
+ *   outDir: ".lxpack/course",
+ *   spaDistDir: "dist",
+ *   projectRoot: process.cwd(),
+ *   target: "scorm12",
+ *   strictBuild: true,
+ * });
+ * if (!result.ok) console.error(result.issues);
+ * ```
  */
 export async function packageLessonkitCourse(
   options: PackageLessonkitCourseOptions,
@@ -157,14 +177,29 @@ export async function packageLessonkitCourse(
     };
   }
 
-  const staged = await buildStagingPackage({
-    ...writeOpts,
-    descriptor,
-    target,
-    output,
-    dir,
-    outputBaseDir,
-  });
+  let staged;
+  try {
+    staged = await buildStagingPackage({
+      ...writeOpts,
+      descriptor,
+      target,
+      output,
+      dir,
+      outputBaseDir,
+    });
+  } catch (err) {
+    return {
+      ok: false,
+      courseDir: outDir,
+      target,
+      issues: [
+        {
+          path: "staging",
+          message: err instanceof Error ? err.message : String(err),
+        },
+      ],
+    };
+  }
 
   if (!staged.ok) {
     await fsp.rm(staged.stagingDir, { recursive: true, force: true }).catch(/* v8 ignore next */ () => undefined);
@@ -217,6 +252,23 @@ export async function packageLessonkitCourse(
       validation: { ok: false, manifest: build.manifest, issues: build.issues },
       build,
       issues: artifactIssues,
+    };
+  }
+
+  const buildWarningIssues = findPackagingWarningIssues(build.issues);
+  if (options.strictBuild && buildWarningIssues.length > 0) {
+    await fsp.rm(stagingDir, { recursive: true, force: true }).catch(/* v8 ignore next */ () => undefined);
+    return {
+      ok: false,
+      courseDir: outDir,
+      target,
+      validation: { ok: false, manifest: build.manifest, issues: build.issues },
+      build,
+      issues: buildWarningIssues.map((i) => ({
+        path: i.path ?? "build",
+        message: i.message ?? "build warning",
+        severity: i.severity,
+      })),
     };
   }
 

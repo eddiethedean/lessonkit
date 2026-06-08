@@ -32,6 +32,8 @@ export function emitTelemetryWithPlugins(opts: {
   xapi: XAPIClient | null;
   event: TelemetryEvent;
   pluginCtx: LessonkitPluginContext;
+  /** When true, skip runTelemetry (event already processed by headless runtime). */
+  skipPluginPass?: boolean;
   lxpackBridge?: LxpackBridgeMode;
   allowedParentOrigins?: string[];
   extraSinks?: import("@lessonkit/core").TelemetryPipelineSink[];
@@ -39,12 +41,14 @@ export function emitTelemetryWithPlugins(opts: {
   onLxpackBridgeError?: import("./observability").LessonkitObservabilityConfig["onLxpackBridgeError"];
   onXapiMappingError?: import("./observability").LessonkitObservabilityConfig["onXapiMappingError"];
   onXapiTransportError?: import("./observability").LessonkitObservabilityConfig["onXapiTransportError"];
-}): void {
-  const next = opts.pluginHost
-    ? opts.pluginHost.runTelemetry(opts.event, opts.pluginCtx)
-    : opts.event;
+}): void | Promise<void> {
+  const next = opts.skipPluginPass
+    ? opts.event
+    : opts.pluginHost
+      ? opts.pluginHost.runTelemetry(opts.event, opts.pluginCtx)
+      : opts.event;
   if (next === null) return;
-  emitTelemetry(opts.tracking, opts.xapi, next, {
+  return emitTelemetry(opts.tracking, opts.xapi, next, {
     lxpackBridge: opts.lxpackBridge ?? "auto",
     allowedParentOrigins: opts.allowedParentOrigins,
     extraSinks: opts.extraSinks,

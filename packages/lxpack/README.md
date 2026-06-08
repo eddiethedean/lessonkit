@@ -50,6 +50,20 @@ Prefer the CLI: `lessonkit package --target scorm12` reads `lessonkit.json` and 
 | `single-spa` | One Vite SPA for the whole course (CLI default) |
 | `per-lesson-spa` | One dist per lesson (advanced; see packaging reference) |
 
+## Portable interchange (1.6.0)
+
+Export a `.lkcourse` archive for team handoff (not LMS upload):
+
+```typescript
+import { exportLkcourse, validateLkcourse, importLkcourse } from "@lessonkit/lxpack";
+
+await exportLkcourse({ projectRoot, manifest, includeBlockTree: true });
+validateLkcourse("course.lkcourse");
+await importLkcourse({ archivePath: "course.lkcourse", targetDir: "./restored" });
+```
+
+Schemas: `@lessonkit/lxpack/lkcourse-format.v1.json`, `@lessonkit/lxpack/block-tree.v1.json`. See [Portable interchange](https://lessonkit.readthedocs.io/en/latest/reference/interchange.html).
+
 ## Browser bridge
 
 When embedded in an LXPack iframe, `@lessonkit/react` forwards completion events to `window.parent.lxpackBridge.v1`:

@@ -59,6 +59,8 @@ export function createXAPIClient(opts?: {
   maxHeadFailures?: number;
   onQueueDepth?: (size: number) => void;
   onQueueCap?: () => void;
+  /** Called when dead-letter storage drops older entries beyond the cap (200). */
+  onDeadLetterTruncated?: (droppedCount: number) => void;
   onHeadSkipped?: (statement: XAPIStatement, err: unknown) => void;
   /** Called when transport fails after retries (statement is re-queued). */
   onTransportError?: (err: unknown) => void;
@@ -76,10 +78,14 @@ export function createXAPIClient(opts?: {
       onDepth: opts?.onQueueDepth,
       onCap: opts?.onQueueCap ?? defaultQueueCapHandler,
       onOverflow: (statement) => {
-        persistDeadLetterStatement(statement);
+        persistDeadLetterStatement(statement, {
+          onTruncated: opts?.onDeadLetterTruncated,
+        });
       },
       onHeadSkipped: (statement, err) => {
-        persistDeadLetterStatement(statement);
+        persistDeadLetterStatement(statement, {
+          onTruncated: opts?.onDeadLetterTruncated,
+        });
         (opts?.onHeadSkipped ?? defaultHeadSkippedHandler)(statement, err);
       },
     });
@@ -182,6 +188,7 @@ export function createXAPIClient(opts?: {
         return;
       }
 
+      queue.removeById(normalized.id);
       inflightStatements.set(normalized.id, normalized);
       inflightPayload.set(normalized.id, normalized);
       const flight = Promise.resolve()

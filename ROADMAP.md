@@ -24,8 +24,8 @@ Packaging and LMS delivery lean on **LXPack** via `@lessonkit/lxpack` (see 0.6.x
 
 ## Status
 
-- **Framework:** **1.5.0** — `BranchingScenario` + `Embed` + `Chart` (see [1.5.x](#15x--branchingscenario))
-- **Focus (now):** **1.6.x** — portable interchange (`.lkcourse`) + block registry CLI ([1.6.x](#16x--portable-interchange))
+- **Framework:** **1.6.0** — portable interchange (`.lkcourse`) + block registry CLI + content-wave blocks (see [1.6.x](#16x--portable-interchange-and-content-waves))
+- **Focus (now):** **1.6.x** — Tier F / 1.7.x planning (content waves through **1.6.0** shipped; see [H5P-aligned capability backlog](#h5p-aligned-capability-backlog))
 
 ## Guiding principles
 
@@ -199,6 +199,19 @@ See [`docs/IDENTITY.md`](docs/reference/identity.md) and [`docs/TELEMETRY.md`](d
 
 ---
 
+### 0.8.0+ — Plugin architecture
+
+**Shipped (v1):** static plugins on `LessonkitProvider` (`config.plugins`).
+
+- Kinds: `analytics`, `lms`, `assessment`, `interaction`, `ai`
+- Hooks: `setup` / `dispose`, `onTelemetry`, `wrapTrackingSink`, `onTelemetryBatch`, `scoreAssessment`, `interactionBlocks` metadata
+- Docs: [`docs/reference/plugins.md`](docs/reference/plugins.md), [plugin cookbook](docs/guides/react-developers/plugin-cookbook.md)
+- Example: `examples/_shared/plugins/consoleAnalyticsPlugin.ts`
+
+**Future:** dynamic loading, LMS connector presets, AI integrations, marketplace.
+
+---
+
 ### 0.9.x — Conformance harness (export parity + gate hardening)
 
 #### Goals
@@ -217,19 +230,6 @@ See [`docs/IDENTITY.md`](docs/reference/identity.md) and [`docs/TELEMETRY.md`](d
   - export parity guide for authors (`docs/guides/react-developers/export-parity.md` or equivalent) — what is guaranteed across React/Vite vs LMS targets
   - conformance matrix documented (what is tested, how to run locally, CI expectations)
   - contributor docs for Playwright e2e and packaging smoke tests
-
----
-
-### 0.8.0+ — Plugin architecture
-
-**Shipped (v1):** static plugins on `LessonkitProvider` (`config.plugins`).
-
-- Kinds: `analytics`, `lms`, `assessment`, `interaction`, `ai`
-- Hooks: `setup` / `dispose`, `onTelemetry`, `wrapTrackingSink`, `onTelemetryBatch`, `scoreAssessment`, `interactionBlocks` metadata
-- Docs: [`docs/reference/plugins.md`](docs/reference/plugins.md), [plugin cookbook](docs/guides/react-developers/plugin-cookbook.md)
-- Example: `examples/_shared/plugins/consoleAnalyticsPlugin.ts`
-
-**Future:** dynamic loading, LMS connector presets, AI integrations, marketplace.
 
 ---
 
@@ -497,7 +497,7 @@ Ship only if 1.5.0 core is stable; each item completes the [H5P documentation ch
 - **Visual graph editor** or canvas authoring UI — React/JSX remains source of truth
 - **H5P platform interop** — out of scope; native `BranchingScenario` ships in **1.5.x**
 - **Nested `BranchingScenario`** inside another compound — defer until nesting policy is explicit
-- **`GameMap`** spatial branching — **1.7.x**
+- **`GameMap`** spatial branching — **1.6.x**
 - **Adaptive / ML routing** — authors declare static graphs only
 - **Concurrent multi-active nodes** — one active node at a time in 1.5.0
 - **Full H5P Branching Scenario parity on day one** — document incremental allowlist expansion (e.g. nested compounds inside nodes later)
@@ -518,37 +518,47 @@ Ship only if 1.5.0 core is stable; each item completes the [H5P documentation ch
 
 ---
 
-### 1.6.x — Portable interchange
+### 1.6.x — Portable interchange and content waves
 
-**Status:** **In progress** (next framework minor after 1.5.0).
+**Status:** **1.6.x shipped** (portable interchange + content wave blocks + `GameMap`).
 
 #### Goals
 
 - Ship a **portable course interchange** (`.lkcourse`) so teams can archive, share, and tool against LessonKit courses without treating LMS packaging artifacts as the source of truth.
 - Expose the **block catalog as a first-class registry** (`lessonkit blocks list`) for AI assistants, codegen, and future palette UIs.
 - Document the **manifest layers** so authors understand root `lessonkit.json` vs LXPack interchange vs `.lkcourse`.
+- Continue the **H5P-aligned content backlog** (Tier C–E blocks, `GameMap`, puzzles/games) as demand-driven **1.6.x** minors.
 
 **Explicit non-goal:** any **H5P platform interop** — no `.h5p` import/merge, no H5P Hub, no H5P `semantics.json` transport, no H5P runtime embedding. LessonKit implements H5P-*aligned* interaction patterns as native React blocks ([capability map](docs/project/h5p-capability-map.md)). Authors coming from H5P **rebuild** in React—not by ingesting H5P packages.
 
-#### Deliverables — 1.6.0
+#### Deliverables — 1.6.0 (shipped)
 
-- [ ] **Interchange spec** — `docs/reference/interchange.md`; `@lessonkit/lxpack/block-tree.v1.json` + `lkcourse-format.v1.json`
-- [ ] **`.lkcourse` export** — `lessonkit export` producing zip with `manifest.json`, `interchange.json`, `dist/`, optional `block-tree.json`
-- [ ] **`@lessonkit/lxpack`** — `exportLkcourse()`, `validateLkcourse()`, `importLkcourse()` (round-trip tests)
-- [ ] **Block registry CLI** — `lessonkit blocks list` (reads `block-catalog.v3.json`)
-- [ ] **Integration test** — export from golden example → validate → manifest parity on import
-- [ ] **Docs** — update [manifest reference](docs/MANIFEST.md); `MIGRATION-1.5-to-1.6.md`
+- [x] **Interchange spec** — `docs/reference/interchange.md`; `@lessonkit/lxpack/block-tree.v1.json` + `lkcourse-format.v1.json`
+- [x] **`.lkcourse` export** — `lessonkit export` producing zip with `manifest.json`, `interchange.json`, `dist/`, optional `block-tree.json`
+- [x] **`@lessonkit/lxpack`** — `exportLkcourse()`, `validateLkcourse()`, `importLkcourse()` (round-trip tests)
+- [x] **Block registry CLI** — `lessonkit blocks list` (reads `block-catalog.v3.json`)
+- [x] **Integration test** — export from golden example → validate → manifest parity on import
+- [x] **Docs** — update [manifest reference](docs/reference/manifest.md); [MIGRATION-1.5-to-1.6](docs/MIGRATION-1.5-to-1.6.md)
+
+#### Deliverables — 1.6.x minors (content waves)
+
+Ship by demand; each block completes the [H5P documentation checklist](#h5p-documentation-checklist-per-block):
+
+- [x] **Tier C–E blocks** — `Table`, `ImageJuxtaposition`, `Timeline`, `ImageSequence`, `Collage`, `AudioRecorder`, `CombinationLock`, `QrContent`, `Crossword`, `WordSearch`, `AdventCalendar` (phased **1.6.1–1.6.5**)
+- [x] **`GameMap`** (P2) — spatial compound branching (**1.6.0**)
+- [x] **Plugin marketplace** — research / presets building on **0.8.0+** plugin host ([plugin marketplace research](docs/guides/plugin-marketplace-research.md))
 
 #### Out of scope for 1.6.x
 
 - **H5P platform interop** — `.h5p` packages, H5P Hub, H5P `semantics.json`, runtime embedding, or bidirectional H5P export
-- **Visual block editor** — **1.6.x+** / tooling research
-- **New scored block types** — content waves remain **1.7.x+** (not required for interchange milestone)
+- **Visual block editor** — tooling research (later)
+- **`VirtualTour` (360)** — **1.8.x** (asset pipeline; was planned as 1.9.x)
 
 #### Success criteria
 
 - `lessonkit export` produces a valid `.lkcourse` with round-trip `lessonkit.json` parity.
 - `lessonkit blocks list --json` enumerates all v3 catalog entries with `h5pMachineName` where mapped (traceability only—not import).
+- New **1.6.x** blocks ship with catalog JSON, Storybook, capability map ✅, and export parity where scored.
 
 ---
 
@@ -604,7 +614,7 @@ Ship only if 1.5.0 core is stable; each item completes the [H5P documentation ch
 | Progress / completion | ✅ `ProgressTracker`, hooks | H5P scores per activity; we aggregate at course level |
 | Theming | ✅ `@lessonkit/themes` | `--lk-*` vs H5P per-library CSS |
 | xAPI + LMS export | ✅ `@lessonkit/xapi`, `@lessonkit/lxpack` | SCORM/xAPI/cmi5 via packaging, not `.h5p` |
-| Content-type discovery | ⬜ | Block registry + docs (see Tier F) |
+| Content-type discovery | ✅ | Block registry + `lessonkit blocks list` (1.6.0) |
 
 ### Tier A — Compound experiences (highest leverage)
 
@@ -615,11 +625,11 @@ These are H5P's "course builders." Each becomes a **framework container** with a
 | P0 | **Interactive Book** | `InteractiveBook` | **1.2.x** ✅ | Page layout, resume state, sub-block catalog |
 | P0 | **Course Presentation** | `SlideDeck` | **1.3.x** ✅ | Slide schema, per-slide block allowlist, keyboard slide nav |
 | P0 | **Interactive Video** | `InteractiveVideo` | **1.4.0** ✅ | Video block, `TimedCue`, timed overlays, Tier B/C/D blocks |
-| P0 | **Branching Scenario** | `BranchingScenario` + `BranchNode` + `BranchChoice` | **1.5.0** | Graph navigation, visited-path scoring, `branch_*` telemetry |
+| P0 | **Branching Scenario** | `BranchingScenario` + `BranchNode` + `BranchChoice` | **1.5.0** ✅ | Graph navigation, visited-path scoring, `branch_*` telemetry |
 | P1 | **Question Set (Quiz)** | `AssessmentSequence` | **1.1.x** ✅ | Question-type contract (below) |
 | P1 | **Column** → **Page** | `Page` | **1.2.x** ✅ | Unified semantics with Interactive Book chapters |
-| P2 | **Game Map** | `GameMap` | **1.7.x** | Spatial layout, optional non-scored stages |
-| P2 | **Virtual Tour (360)** | `VirtualTour` | **1.9.x** | 360 asset pipeline, hotspot model |
+| P2 | **Game Map** | `GameMap` | **1.6.0** ✅ | Spatial layout, optional non-scored stages |
+| P2 | **Virtual Tour (360)** | `VirtualTour` | **1.8.x** | 360 asset pipeline, hotspot model |
 | P3 | **Documentation Tool** | `DocumentationTool` | **2.x** | Cornell notes, exportable learner artifacts |
 | P3 | **Interactive Canvas / Structure Strip** | `StructureStrip`, `WritingCanvas` | **2.x** | Writing pedagogy; lower than core LMS parity |
 
@@ -662,13 +672,13 @@ Extend beyond MCQ via a formal **assessment contract** (H5P's `H5P.Question` pat
 | P1 | **Image Hotspots** | `ImageHotspots` ✅ | Regions + popovers; keyboard reachable hotspots |
 | P1 | **Find the Hotspot** / **Find Multiple Hotspots** | `FindHotspot`, `FindMultipleHotspots` ✅ | Scored discovery tasks |
 | P1 | **Image Slider** | `ImageSlider` ✅ | Carousel primitive |
-| P2 | **Image Juxtaposition** | `ImageJuxtaposition` | Before/after slider |
-| P2 | **Agamotto (Image Blender)** | `ImageSequence` | Progressive image sequence |
-| P2 | **Collage** | `Collage` | Multi-image layout block |
+| P2 | **Image Juxtaposition** | `ImageJuxtaposition` ✅ | Before/after slider |
+| P2 | **Agamotto (Image Blender)** | `ImageSequence` ✅ | Progressive image sequence |
+| P2 | **Collage** | `Collage` ✅ | Multi-image layout block |
 | P2 | **Image Pairing** / **Image Sequencing** | `ImagePairing`, `ImageSequencing` | Memory/order games; ships **1.4.0** ✅ |
 | P2 | **Memory Game** | `MemoryGame` | Card flip; focus management; ships **1.4.0** ✅ |
-| P3 | **Iframe Embedder** | `Embed` (restricted) | Sandboxed, responsive; opt-in for security |
-| P3 | **Chart** | `Chart` | Bar/pie; accessible data table fallback |
+| P3 | **Iframe Embedder** | `Embed` (restricted) ✅ | Sandboxed, responsive; opt-in for security |
+| P3 | **Chart** | `Chart` ✅ | Bar/pie; accessible data table fallback |
 
 ### Tier D — Text, cards, and informational content
 
@@ -677,12 +687,12 @@ Extend beyond MCQ via a formal **assessment contract** (H5P's `H5P.Question` pat
 | P1 | **Accordion** | `Accordion` ✅ | Nest policy (no accordion-in-accordion) |
 | P1 | **Dialog Cards** | `DialogCards` ✅ | Flip cards; reduced-motion safe |
 | P1 | **Flashcards** | `Flashcards` ✅ | Study mode; optional self-score |
-| P2 | **Timeline** | `Timeline` | Events + media; fragile as sub-content in H5P—test resize |
-| P2 | **Table** | `Table` | Rich text table |
+| P2 | **Timeline** | `Timeline` ✅ | Events + media; fragile as sub-content in H5P—test resize |
+| P2 | **Table** | `Table` ✅ | Rich text table |
 | P2 | **Information Wall** | `InformationWall` | Searchable panels; ships **1.4.0** ✅ |
 | P3 | **Exportable Text Area / Cornell** | `CornellNotes`, `ExportableNotes` | Learner export (PDF/text) |
 | P3 | **Personality Quiz** | `PersonalityQuiz` | Outcome buckets; community pattern, lower priority |
-| P1 | **Audio Recorder** | `AudioRecorder` | Learner recording; consent + storage policy |
+| P1 | **Audio Recorder** | `AudioRecorder` ✅ | Learner recording; consent + storage policy |
 | P2 | **Slideshow (parallax)** | `ParallaxSlideshow` | Presentation variant; respect `prefers-reduced-motion`; ships **1.4.0** ✅ |
 
 **Primitives (H5P sub-content):** `Text`, `Heading`, `Image`, and media blocks with shared semantics for compounds.
@@ -693,11 +703,11 @@ Lower priority unless a customer/LMS parity request surfaces; still catalog for 
 
 | H5P content type | LessonKit target | Priority |
 |------------------|------------------|----------|
-| Crossword | `Crossword` | P3 |
-| Find the Words | `WordSearch` | P3 (keyboard a11y hard—H5P often excludes from compounds) |
-| Combination Lock | `CombinationLock` | P3 |
-| KewAr Code / QR | `QrContent` | P3 |
-| Advent Calendar | `AdventCalendar` | P3 |
+| Crossword | `Crossword` ✅ | P3 (1.6.x) |
+| Find the Words | `WordSearch` ✅ | P3 (1.6.x; keyboard a11y hard—excluded from compound allowlists) |
+| Combination Lock | `CombinationLock` ✅ | P3 (1.6.x) |
+| KewAr Code / QR | `QrContent` ✅ | P3 (1.6.x) |
+| Advent Calendar | `AdventCalendar` ✅ | P3 (1.6.x) |
 | Agora World (AR) | `AugmentedReality` | P4 / research |
 
 ### Tier F — LessonKit platform (H5P analogues for reference only)
@@ -714,7 +724,7 @@ LessonKit ships its **own** platform surfaces (block registry, `.lkcourse`, LMS 
 | Compound sub-content allowlists | Per-parent `allowedChildTypes` in catalog | Framework **1.2.x** ✅ |
 | Resume / attempt state | `getCurrentState` on assessments + compounds; session storage v2 | Framework **1.2.x** ✅ |
 | H5P OER Hub | **Example template gallery** (LessonKit examples repo; not H5P content) | Examples + docs **1.x** |
-| Community libraries | Plugin `interactionBlocks` + marketplace | Framework **2.x** |
+| Community libraries | Plugin `interactionBlocks` + marketplace (runtime) | Framework **2.x** (1.6.x: [preset packs](docs/guides/plugin-marketplace-research.md) only) |
 | LTI / embed | LMS packaging (SCORM/xAPI/cmi5); standalone embed snippet in docs | Docs + lxpack **1.x** |
 | Mobile apps | **`@lessonkit/react-native`** | Framework **2.x** |
 | Per-widget CSS | Global `--lk-*` tokens via `@lessonkit/themes` | Ongoing |
@@ -743,7 +753,7 @@ When implementing backlog items, follow H5P's constraints **in React form**:
 | 4 | Add **H5P equivalent** admonition or table row on the block's doc touchpoints | At minimum: block catalog; [components guide](docs/guides/react-developers/components-and-hooks.md) table if public API; [H5P authors guide](docs/guides/h5p-for-lessonkit-authors.md) "Available today" or "Planned" table when status changes |
 | 5 | Storybook story titled with **H5P name in subtitle** (e.g. "FillInTheBlanks — H5P Fill in the Blanks") | `packages/react/stories/` |
 | 6 | If scored: example `lessonkit.json` `assessments[]` entry + export parity note | Golden example or [packaging guide](docs/reference/packaging.md) callout when first of kind |
-| 7 | `h5pAlias` / `h5pMachineName` in **block-catalog JSON** entry | `block-catalog.v2.json` + `buildBlockCatalog()` |
+| 7 | `h5pAlias` / `h5pMachineName` in **block-catalog JSON** entry | `block-catalog.v3.json` + `buildBlockCatalog()` |
 
 **Ongoing pages (already live—keep links accurate):** [docs index](docs/index.md) H5P tip, [H5P authors guide](docs/guides/h5p-for-lessonkit-authors.md), [capability map](docs/project/h5p-capability-map.md).
 
@@ -758,8 +768,9 @@ Framework 1.3.x   SlideDeck (Course Presentation) + H5P docs
 Framework 1.4.0   InteractiveVideo + Video + TimedCue + Tier B/C/D blocks + golden example
 Framework 1.5.0   BranchingScenario + Embed + Chart + branch telemetry + golden example
 Framework 1.5.x   _(stretch items shipped in 1.5.0)_
-Framework 1.6.0   `.lkcourse` export + interchange spec + `lessonkit blocks list`
-Framework 1.7.x+  Tier C–E blocks by demand; plugin marketplace; H5P doc checklist each
+Framework 1.6.0   `.lkcourse` export + interchange spec + `lessonkit blocks list` — **shipped**
+Framework 1.6.x   `.lkcourse` + content waves + `GameMap` — **shipped** (1.6.0)
+Framework 1.8.x+  Virtual Tour (360) and spatial media pipelines
 Framework 2.x     @lessonkit/react-native (iOS/Android) + shared core/xapi contracts
 ```
 

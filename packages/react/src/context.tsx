@@ -82,6 +82,8 @@ export type LessonkitConfig = {
     restrictPopupsInProduction?: boolean;
     /** Hostnames allowed to bypass the production private-network media/embed blocklist. */
     allowedHosts?: string[];
+    /** Apply private-network blocklist in non-production builds (recommended for LMS staging). */
+    strictHosts?: boolean;
   };
   /**
    * Non-production preview options. `allowConsoleTelemetry` skips production guard
@@ -126,6 +128,16 @@ export const LessonkitContext = createContext<LessonkitRuntime | null>(null);
 /**
  * Root runtime provider for telemetry, xAPI, progress, and LMS bridge forwarding.
  * Prefer wrapping with {@link Course} unless you need a custom layout.
+ *
+ * @example
+ * ```tsx
+ * import { LessonkitProvider } from "@lessonkit/react";
+ * import { courseConfig } from "./courseConfig";
+ *
+ * <LessonkitProvider config={{ ...courseConfig, courseId: "my-course" }}>
+ *   {children}
+ * </LessonkitProvider>
+ * ```
  */
 export function LessonkitProvider(props: LessonkitProviderProps) {
   const runtime = useLessonkitProviderRuntime(props.config);

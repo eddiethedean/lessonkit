@@ -10,7 +10,6 @@ import {
   useCompletion,
   useLessonkit,
   useTracking,
-  type ThemeMode,
 } from "@lessonkit/react";
 import type { TelemetryEvent } from "@lessonkit/core";
 import type { XAPIStatement } from "@lessonkit/xapi";
@@ -21,6 +20,7 @@ import {
   type LessonMeta,
 } from "../../_shared/course-ui";
 import { allowConsoleTelemetryForDocsDemo } from "../../_shared/docsDemoConfig";
+import { ThemeToggle, useThemeMode } from "../../_shared/theme-ui";
 
 const COURSE_ID = "cybersecurity-awareness";
 
@@ -35,7 +35,7 @@ const LESSONS: readonly LessonMeta[] = [
 
 export default function App() {
   const [step, setStep] = React.useState(0);
-  const [themeMode, setThemeMode] = React.useState<ThemeMode>("dark");
+  const [themeMode, setThemeMode] = useThemeMode("dark");
 
   const courseConfig = React.useMemo(
     () => ({
@@ -189,24 +189,6 @@ export default function App() {
         </Course>
       </div>
     </ThemeProvider>
-  );
-}
-
-function ThemeToggle(props: { mode: ThemeMode; onChange: (mode: ThemeMode) => void }) {
-  return (
-    <div className="lms-theme-toggle" role="group" aria-label="Display theme">
-      {(["light", "dark", "system"] as const).map((m) => (
-        <button
-          key={m}
-          type="button"
-          aria-pressed={props.mode === m}
-          className={props.mode === m ? "lms-outline-active" : undefined}
-          onClick={() => props.onChange(m)}
-        >
-          {m === "system" ? "System" : m === "light" ? "Light" : "Dark"}
-        </button>
-      ))}
-    </div>
   );
 }
 

@@ -31,13 +31,20 @@ export function loadDeadLetterStatements(): XAPIStatement[] {
   }
 }
 
-export function persistDeadLetterStatement(statement: XAPIStatement): void {
+export function persistDeadLetterStatement(
+  statement: XAPIStatement,
+  opts?: { onTruncated?: (droppedCount: number) => void },
+): void {
   const storage = readStorage();
   if (!storage) return;
   try {
     const existing = loadDeadLetterStatements();
     if (existing.some((s) => s.id === statement.id)) return;
-    const next = [...existing, statement].slice(-MAX_DEAD_LETTER);
+    const combined = [...existing, statement];
+    if (combined.length > MAX_DEAD_LETTER) {
+      opts?.onTruncated?.(combined.length - MAX_DEAD_LETTER);
+    }
+    const next = combined.slice(-MAX_DEAD_LETTER);
     storage.setItem(STORAGE_KEY, JSON.stringify(next));
   } catch {
     // sessionStorage quota or private mode

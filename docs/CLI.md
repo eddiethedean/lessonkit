@@ -1,4 +1,4 @@
-# LessonKit CLI (1.5.x)
+# LessonKit CLI (1.6.x)
 
 The `@lessonkit/cli` package provides the developer workflow for LessonKit projects: scaffold, dev, build, and dual export packaging.
 
@@ -10,7 +10,7 @@ npm install -g @lessonkit/cli
 npx @lessonkit/cli init my-course
 ```
 
-**Node.js:** dev, build, and LMS packaging targets work on Node **18+** (see [Packaging reference](reference/packaging.md)).
+**Node.js:** use **20.19+** for `lessonkit init` and local dev (Vite 8). Dev, build, and LMS packaging on an existing course work on Node **18+** (see [Packaging reference](reference/packaging.md)).
 
 ## Quick start
 
@@ -154,6 +154,44 @@ lessonkit package --target scorm12 --out .lxpack/out/custom.zip
 
 Lxpack targets run `packageLessonkitCourse()` from `@lessonkit/lxpack`. Output layout matches [Packaging reference](reference/packaging.md).
 
+### `lessonkit export`
+
+Export a portable `.lkcourse` archive (author manifest + LXPack interchange + `dist/`). For team handoff and tooling — not LMS upload.
+
+```bash
+lessonkit export
+lessonkit export --out backups/my-course.lkcourse
+lessonkit export --no-build --with-block-tree
+lessonkit export --json
+```
+
+| Flag | Description |
+|------|-------------|
+| `--cwd` | Project root |
+| `--out` | Output path relative to project root (default: `{name}.lkcourse`) |
+| `--no-build` | Skip implicit Vite build; requires existing `dist/` |
+| `--with-block-tree` | Include optional `block-tree.json` (best-effort JSX scan of `src/`) |
+| `--json` | Structured JSON on stdout |
+
+See [Portable interchange](reference/interchange.md).
+
+### `lessonkit blocks list`
+
+List runtime blocks from `block-catalog.v3.json` (block registry for codegen and assistants).
+
+```bash
+lessonkit blocks list
+lessonkit blocks list --json
+lessonkit blocks list --category assessment
+lessonkit blocks list --tier B --json
+```
+
+| Flag | Description |
+|------|-------------|
+| `--json` | Emit catalog entries as JSON (`entries[]`, `count`, `schemaVersion`) |
+| `--category` | Filter by category (`container`, `assessment`, `content`, `compound`, `chrome`) |
+| `--tier` | Filter by tier (`A`, `B`, `C`, `D`, `E`) |
+
 ### `lessonkit publish`
 
 Stub — use npm and the tag-based workflow in [RELEASING](https://github.com/eddiethedean/lessonkit/blob/main/RELEASING.md).
@@ -214,6 +252,10 @@ await run(process.argv);
 ```
 
 Set `LESSONKIT_CMD_TIMEOUT_MS` to override subprocess timeouts for `dev`/`build` (see package README).
+
+## Packaging error catalog
+
+Common failure messages, causes, and fixes: [CLI error catalog](reference/cli-errors.md).
 
 ## Related
 

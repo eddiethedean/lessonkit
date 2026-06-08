@@ -3,7 +3,14 @@ import { registerRuntimeTestCleanup } from "./runtime.testSetup";
 import { describe, it, expect, vi } from "vitest";
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { Course, Lesson, LessonkitProvider, Quiz, useLessonkit, useQuizState, useTracking } from "../src";
-import { defineAssessmentPlugin, defineLifecyclePlugin, defineTelemetryPlugin, type TelemetryEvent, type TelemetrySink } from "@lessonkit/core";
+import {
+  createSessionStoragePort,
+  defineAssessmentPlugin,
+  defineLifecyclePlugin,
+  defineTelemetryPlugin,
+  type TelemetryEvent,
+  type TelemetrySink,
+} from "@lessonkit/core";
 import type { XAPIStatement } from "@lessonkit/xapi";
 import * as courseStartedPipelineModule from "../src/runtime/courseStartedPipeline";
 
@@ -1073,7 +1080,7 @@ it("Quiz defaults passingScore to plugin maxScore when prop is omitted", async (
     );
   });
 
-it("Quiz uses scoreResponse for plugin numeric score pass threshold", async () => {
+it("Quiz rejects plugin numeric score when maxScore is zero", async () => {
     const events: TelemetryEvent[] = [];
     const plugin = defineAssessmentPlugin({
       id: "scorer-score",
@@ -1101,8 +1108,8 @@ it("Quiz uses scoreResponse for plugin numeric score pass threshold", async () =
     await act(async () => {
       fireEvent.click(getByLabelText("x"));
     });
-    expect(await screen.findByText("Correct")).toBeTruthy();
-    expect(events.some((e) => e.name === "quiz_completed")).toBe(true);
+    expect(screen.queryByText("Correct")).toBeNull();
+    expect(events.some((e) => e.name === "quiz_completed")).toBe(false);
   });
 
 it("Quiz does not complete when plugin score is below passing threshold", async () => {
@@ -1137,7 +1144,7 @@ it("Quiz does not complete when plugin score is below passing threshold", async 
     expect(events.some((e) => e.name === "quiz_completed")).toBe(false);
   });
 
-it("Quiz feedback follows scoreAssessment passed flag", async () => {
+it("Quiz UI shows factual correctness while plugin can still mark passed", async () => {
     const plugin = defineAssessmentPlugin({
       id: "scorer-pass",
       version: "1",
@@ -1164,7 +1171,8 @@ it("Quiz feedback follows scoreAssessment passed flag", async () => {
     await act(async () => {
       fireEvent.click(getByLabelText("wrong"));
     });
-    expect(await screen.findByText("Correct")).toBeTruthy();
+    expect(await screen.findByText("Try again")).toBeTruthy();
+    expect((getByLabelText("wrong") as HTMLInputElement).disabled).toBe(true);
   });
 
 it("onTelemetryBatch receives current courseId after courseId change", async () => {
@@ -1451,6 +1459,75 @@ it("does not emit lesson_started again when remounting a completed lesson", asyn
     const startedCount = events.filter((e) => e.name === "lesson_started").length;
     fireEvent.click(getByRole("button", { name: "remount" }));
     await waitFor(() => expect(events.filter((e) => e.name === "lesson_started").length).toBe(startedCount));
+  });
+
+  it("Quiz quiz_answered uses factual correctness not passing threshold", async () => {
+    const events: TelemetryEvent[] = [];
+    const plugin = defineAssessmentPlugin({
+      id: "partial-mcq",
+      version: "1",
+      kind: "assessment",
+      scoreAssessment: () => ({ score: 1, maxScore: 1, passed: true }),
+    });
+
+    const { getByLabelText } = render(
+      <Course
+        title="Course"
+        courseId="course-1"
+        config={{
+          tracking: {
+            sink: (e: TelemetryEvent) => {
+              events.push(e);
+            },
+          },
+          plugins: [plugin],
+        }}
+      >
+        <Lesson title="Lesson" lessonId="lesson-1">
+          <Quiz checkId="check-1" question="Q" choices={["A", "B"]} answer="B" />
+        </Lesson>
+      </Course>,
+    );
+
+    fireEvent.click(getByLabelText("A"));
+
+    await waitFor(() => {
+      const answered = events.find((e) => e.name === "quiz_answered");
+      expect(answered?.data).toMatchObject({ choice: "A", correct: false });
+    });
+  });
+
+  it("warns via onStoragePortChangeIgnored when storage changes in production", () => {
+    const onStoragePortChangeIgnored = vi.fn();
+    const storageA = createSessionStoragePort();
+    const storageB = createSessionStoragePort();
+    const prevEnv = process.env.NODE_ENV;
+    process.env.NODE_ENV = "production";
+
+    function StorageSwapHarness() {
+      const [storage, setStorage] = useState(storageA);
+      return (
+        <>
+          <button type="button" onClick={() => setStorage(storageB)}>
+            swap
+          </button>
+          <LessonkitProvider
+            config={{
+              courseId: "course-1",
+              storage,
+              observability: { onStoragePortChangeIgnored },
+            }}
+          >
+            <span>child</span>
+          </LessonkitProvider>
+        </>
+      );
+    }
+
+    const { getByRole } = render(<StorageSwapHarness />);
+    fireEvent.click(getByRole("button", { name: "swap" }));
+    expect(onStoragePortChangeIgnored).toHaveBeenCalledTimes(1);
+    process.env.NODE_ENV = prevEnv;
   });
 });
 

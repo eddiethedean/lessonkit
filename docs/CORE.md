@@ -1,4 +1,4 @@
-# `@lessonkit/core` reference (1.5.x)
+# `@lessonkit/core` reference (1.6.x)
 
 Headless runtime, telemetry pipeline, plugins, identity, and session helpers shared across LessonKit packages.
 
@@ -72,7 +72,7 @@ For local debugging only, a per-event `sink` or `console.log` is fine; productio
 
 ### Catalog
 
-- `TELEMETRY_EVENT_CATALOG`, `buildTelemetryCatalog()`, `telemetryCatalogVersion` (default **v3** in 1.2+)
+- `TELEMETRY_EVENT_CATALOG`, `buildTelemetryCatalog()` / `buildTelemetryCatalogV3()`, `telemetryCatalogVersion` (v1) and `telemetryCatalogV3Version` (v3, default runtime catalog in 1.2+)
 - JSON: `@lessonkit/core/telemetry-catalog.v3.json` (v1/v2 files retained for older generators)
 
 See [Telemetry reference](reference/telemetry.md).

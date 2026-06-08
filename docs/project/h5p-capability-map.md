@@ -11,8 +11,9 @@ Traceability matrix for adopting [H5P](https://h5p.org/content-types-and-applica
 **Not in scope:** H5P Hub, `.h5p` import/merge, H5P `semantics.json` transport, H5P Core, or iframe runtimes. Rebuild activities in React using this map.
 
 **Roadmap:** [ROADMAP.md — H5P-aligned backlog](roadmap.md#h5p-aligned-capability-backlog)  
-**Runtime catalog (today):** [Block catalog](../reference/block-catalog.md) (`blockCatalogVersion = 3` — default since framework 1.2; 1.5 adds `BranchingScenario`, `Embed`, `Chart`)  
-**Catalog expansion (shipped 1.1.0):** framework **1.1.x** (`blockCatalogVersion = 2`)
+**Runtime catalog (today):** [Block catalog](../reference/block-catalog.md) (`blockCatalogV3Version = 3` — default since framework 1.2; 1.5 adds `BranchingScenario`, `Embed`, `Chart`; 1.6.x adds content-wave blocks including `Table`, `Timeline`, `Crossword`, `GameMap`)  
+**Live demos:** [Component pages](../reference/components/index.md) — embedded React demos with when-to-use guidance (generated index below).
+**Catalog expansion (shipped 1.1.0):** framework **1.1.x** (`blockCatalogV2Version = 2`)
 
 ## Status legend
 
@@ -98,17 +99,17 @@ H5P **machine names** follow common library ids (e.g. `H5P.MultiChoice`). Displa
 | `H5P.InteractiveVideo` | Interactive Video | `InteractiveVideo` | A | P0 | ✅ | 1.4.0 |
 | `H5P.BranchingScenario` | Branching Scenario | `BranchingScenario` | A | P0 | ✅ | 1.5.0 |
 | `H5P.Column` | Column / Page | `Page` | A | P1 | ✅ | 1.2.x |
-| `H5P.GameMap` | Game Map | `GameMap` | A | P2 | ⬜ | 1.7.x |
-| `H5P.ThreeSixty` | Virtual Tour (360) | `VirtualTour` | A | P2 | ⬜ | 1.9.x |
+| `H5P.GameMap` | Game Map | `GameMap` | A | P2 | ✅ | 1.6.x |
+| `H5P.ThreeSixty` | Virtual Tour (360) | `VirtualTour` | A | P2 | ⬜ | 1.8.x |
 | `H5P.DocumentationTool` | Documentation Tool | `DocumentationTool` | A | P3 | ⬜ | 2.x |
 | `H5P.StructureStrip` | Interactive Structure Strip | `StructureStrip` | A | P3 | ⬜ | 2.x |
 | `H5P.ImageHotspots` | Image Hotspots | `ImageHotspots` | C | P1 | ✅ | 1.2.x |
 | `H5P.ImageHotspotQuestion` | Find the Hotspot | `FindHotspot` | C | P1 | ✅ | 1.2.x |
 | `H5P.ImageMultipleHotspotQuestion` | Find Multiple Hotspots | `FindMultipleHotspots` | C | P1 | ✅ | 1.2.x |
 | `H5P.ImageSlider` | Image Slider | `ImageSlider` | C | P1 | ✅ | 1.2.x |
-| `H5P.ImageJuxtaposition` | Image Juxtaposition | `ImageJuxtaposition` | C | P2 | ⬜ | 1.3.x |
-| `H5P.Agamotto` | Agamotto (Image Blender) | `ImageSequence` | C | P2 | ⬜ | 1.3.x |
-| `H5P.Collage` | Collage | `Collage` | C | P2 | ⬜ | 1.3.x |
+| `H5P.ImageJuxtaposition` | Image Juxtaposition | `ImageJuxtaposition` | C | P2 | ✅ | 1.6.0 |
+| `H5P.Agamotto` | Agamotto (Image Blender) | `ImageSequence` | C | P2 | ✅ | 1.6.0 |
+| `H5P.Collage` | Collage | `Collage` | C | P2 | ✅ | 1.6.0 |
 | `H5P.ImagePair` | Image Pairing | `ImagePairing` | C | P2 | ✅ | 1.4.0 |
 | `H5P.ImageSequencing` | Image Sequencing | `ImageSequencing` | C | P2 | ✅ | 1.4.0 |
 | `H5P.MemoryGame` | Memory Game | `MemoryGame` | C | P2 | ✅ | 1.4.0 |
@@ -117,18 +118,18 @@ H5P **machine names** follow common library ids (e.g. `H5P.MultiChoice`). Displa
 | `H5P.Accordion` | Accordion | `Accordion` | D | P1 | ✅ | 1.2.x |
 | `H5P.Dialogcards` | Dialog Cards | `DialogCards` | D | P1 | ✅ | 1.2.x |
 | `H5P.Flashcards` | Flashcards | `Flashcards` | D | P1 | ✅ | 1.2.x |
-| `H5P.Timeline` | Timeline | `Timeline` | D | P2 | ⬜ | 1.3.x |
-| `H5P.Table` | Table | `Table` | D | P2 | ⬜ | 1.2.x |
+| `H5P.Timeline` | Timeline | `Timeline` | D | P2 | ✅ | 1.6.0 |
+| `H5P.Table` | Table | `Table` | D | P2 | ✅ | 1.6.0 |
 | `H5P.InformationWall` | Information Wall | `InformationWall` | D | P2 | ✅ | 1.4.0 |
-| `H5P.AudioRecorder` | Audio Recorder | `AudioRecorder` | D | P1 | ⬜ | 1.2.x |
+| `H5P.AudioRecorder` | Audio Recorder | `AudioRecorder` | D | P1 | ✅ | 1.6.0 |
 | `H5P.ImpressivePresentation` | Slideshow (parallax) | `ParallaxSlideshow` | D | P2 | ✅ | 1.4.0 |
 | `H5P.ExportableTextArea` | Exportable Text Area | `ExportableNotes` | D | P3 | ⬜ | 2.x |
 | `H5P.PersonalityQuiz` | Personality Quiz | `PersonalityQuiz` | D | P3 | ⬜ | 2.x |
-| `H5P.Crossword` | Crossword | `Crossword` | E | P3 | ⬜ | 1.6.x |
-| `H5P.FindTheWords` | Find the Words | `WordSearch` | E | P3 | ⬜ | 1.6.x |
-| `H5P.CombinationLock` | Combination Lock | `CombinationLock` | E | P3 | ⬜ | 1.6.x |
-| `H5P.KewArCode` | KewAr Code | `QrContent` | E | P3 | ⬜ | 1.6.x |
-| `H5P.AdventCalendar` | Advent Calendar | `AdventCalendar` | E | P3 | ⬜ | 1.7.x |
+| `H5P.Crossword` | Crossword | `Crossword` | E | P3 | ✅ | 1.6.0 |
+| `H5P.FindTheWords` | Find the Words | `WordSearch` | E | P3 | ✅ | 1.6.0 |
+| `H5P.CombinationLock` | Combination Lock | `CombinationLock` | E | P3 | ✅ | 1.6.0 |
+| `H5P.KewArCode` | KewAr Code | `QrContent` | E | P3 | ✅ | 1.6.0 |
+| `H5P.AdventCalendar` | Advent Calendar | `AdventCalendar` | E | P3 | ✅ | 1.6.0 |
 | `H5P.AgoraWorld` | Agora World | `AugmentedReality` | E | P4 | ⬜ | research |
 | — | Course / lesson shell | `Course`, `Lesson` | — | — | ✅ | 1.0 |
 | — | Progress UI | `ProgressTracker` | — | — | ✅ | 1.0 |
@@ -139,8 +140,8 @@ H5P **machine names** follow common library ids (e.g. `H5P.MultiChoice`). Displa
 
 | H5P analogue (not integrated) | LessonKit approach | Status | Milestone |
 | --- | --- | --- | --- |
-| Content Type Hub | Block registry + `lessonkit blocks list` | ⬜ | CLI 1.6.x |
-| `.h5p` transport | `.lkcourse` portable zip | ⬜ | 1.6.0 |
+| Content Type Hub | Block registry + `lessonkit blocks list` | ✅ | CLI 1.6.0 |
+| `.h5p` transport | `.lkcourse` portable zip | ✅ | 1.6.0 |
 | `.h5p` import / Hub | — | 🚫 | Out of scope |
 | H5P `semantics.json` editor | — | 🚫 | Out of scope (future inspector uses LessonKit block catalog only) |
 | Question type contract | `Assessment` interface | ✅ | 1.1.x |
@@ -148,6 +149,9 @@ H5P **machine names** follow common library ids (e.g. `H5P.MultiChoice`). Displa
 | Resume state | `getCurrentState` / session v2 | ✅ | 1.2.x |
 | OER Hub reuse | Template gallery | ⬜ | 1.x |
 | Per-library CSS | Global `--lk-*` tokens | ✅ | 0.4.x / themes |
+
+```{include} ../_generated/h5p-component-pages.md
+```
 
 ---
 

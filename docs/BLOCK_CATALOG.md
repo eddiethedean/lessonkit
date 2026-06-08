@@ -22,7 +22,7 @@ The block catalog describes every **framework-owned** learning primitive in `@le
 
 | Artifact | Path |
 | --- | --- |
-| **Version** | `blockCatalogVersion = 3` (default for `buildBlockCatalog()`) |
+| **Version** | `blockCatalogV3Version = 3` (default for `buildBlockCatalog()`; legacy v1 export: `blockCatalogVersion = 1`) |
 | **JSON** | `@lessonkit/react/block-catalog.v3.json` (must match `buildBlockCatalog()` in tests) |
 | **JSON Schema** | `@lessonkit/react/block-contract.v3.json` |
 | **Programmatic API** | `buildBlockCatalog()`, `getBlockCatalogEntry(type)`, `BLOCK_CATALOG` |
@@ -238,6 +238,27 @@ Import `@lessonkit/react/block-catalog.v3.json` or pin `{ version: 2 }` until ge
 
 ---
 
+## Catalog v3 additions (framework 1.6.0)
+
+| Block | Role | Notes |
+| --- | --- | --- |
+| `Table` | Content | Accessible data table with optional caption |
+| `ImageJuxtaposition` | Content | Before/after image slider |
+| `Timeline` | Content | Event list with focus tracking |
+| `ImageSequence` | Content | Stepped image frames |
+| `Collage` | Content | Multi-image layout |
+| `AudioRecorder` | Content | Browser audio capture |
+| `CombinationLock` | Assessment | Digit entry; `checkId` required |
+| `QrContent` | Content | QR payload with hidden reveal |
+| `Crossword` | Assessment | Grid fill assessment |
+| `WordSearch` | Assessment | Letter grid word find |
+| `AdventCalendar` | Content | Door-based reveal calendar |
+| `GameMap` | Compound | Stage graph with `MapStage` / `MapExit` children |
+
+Import `@lessonkit/react/block-catalog.v3.json` or `buildBlockCatalog({ version: 3 })` (default). Use `{ version: 1 }` only for legacy generators.
+
+---
+
 ## Generated prop reference (catalog v3)
 
 Full prop tables for blocks beyond the v1 manual section above (auto-generated from `block-catalog.v3.json`):
@@ -249,6 +270,12 @@ Full prop tables for blocks beyond the v1 manual section above (auto-generated f
 Regenerate after catalog changes: `node docs/scripts/generate-block-props-doc.mjs`.
 
 ---
+
+## Component pages (live demos)
+
+Focused **Read the Docs** pages render the real component, explain when to use it, and show copy-paste examples: **[Component pages](components/index.md)** (55 pages — full catalog coverage).
+
+Generated prop tables below link to the matching component page when one exists. Storybook remains useful for visual state matrices.
 
 ## Storybook examples
 
@@ -283,7 +310,7 @@ For blocks without a dedicated story yet, see [framework-12-showcase](https://gi
 
 ## Generator checklist
 
-1. Import `@lessonkit/react/block-catalog.v1.json` and reject unknown block types.
+1. Import `@lessonkit/react/block-catalog.v3.json` (or `buildBlockCatalog({ version: 3 })`) and reject unknown block types.
 2. Validate required props and IDs per entry (`requiredIds`, `props`).
 3. Keep `courseId` and every `checkId` in sync with `lessonkit.json`. For `single-spa` layouts, manifest `lessons[].id` lists LMS shell lesson(s) only; additional in-app `lessonId`s may exist only in React (see [Identity](identity.md#single-spa-manifest-vs-in-app-steps)).
 4. Nest blocks per `parentConstraints` (Quiz inside Lesson, etc.).

@@ -80,13 +80,17 @@ function createMemoryBackedSessionStorage(
     }
   };
 
+  const bypassCacheForKey = (key: string): boolean =>
+    key === "lessonkit:sessionId" || key.startsWith("lessonkit:course_started");
+
   return {
     getItem: (key) => {
       if (tombstones.has(key)) return null;
-      if (memory.has(key)) return memory.get(key)!;
+      if (!bypassCacheForKey(key) && memory.has(key)) return memory.get(key)!;
       try {
         const value = session.getItem(key);
         if (value !== null) memory.set(key, value);
+        else if (bypassCacheForKey(key)) memory.delete(key);
         return value;
       } catch {
         return memory.get(key) ?? null;
@@ -94,12 +98,15 @@ function createMemoryBackedSessionStorage(
     },
     setItem: (key, value) => {
       tombstones.delete(key);
-      memory.set(key, value);
       try {
         session.setItem(key, value);
+        memory.set(key, value);
         return true;
       } catch {
         warnPersistFailure();
+        if (!bypassCacheForKey(key)) {
+          memory.set(key, value);
+        }
         return false;
       }
     },

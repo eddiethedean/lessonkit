@@ -2,10 +2,12 @@ import React from "react";
 import type { TelemetryEvent } from "@lessonkit/core";
 import type { ThemeMode } from "@lessonkit/react";
 import type { XAPIStatement } from "@lessonkit/xapi";
+import { initialShowcaseThemeMode } from "../../_shared/showcase/initialThemeMode";
 import { ShowcaseShell } from "../../_shared/showcase/ShowcaseShell";
 import { allowConsoleTelemetryForDocsDemo } from "../../_shared/docsDemoConfig";
 import { SHOWCASE_META } from "./constants";
 import { CertificationLesson } from "./lessons/CertificationLesson";
+import { ContentWaveLesson } from "./lessons/ContentWaveLesson";
 import { HandbookLesson } from "./lessons/HandbookLesson";
 import { OrientationLesson } from "./lessons/OrientationLesson";
 import { PlatformTourLesson } from "./lessons/PlatformTourLesson";
@@ -21,6 +23,8 @@ function lessonContent(step: number) {
       return <HandbookLesson />;
     case "certification":
       return <CertificationLesson />;
+    case "content-wave":
+      return <ContentWaveLesson />;
     default:
       return null;
   }
@@ -28,7 +32,7 @@ function lessonContent(step: number) {
 
 export default function App() {
   const [step, setStep] = React.useState(0);
-  const [themeMode, setThemeMode] = React.useState<ThemeMode>("dark");
+  const [themeMode, setThemeMode] = React.useState<ThemeMode>(initialShowcaseThemeMode);
 
   const courseConfig = React.useMemo(
     () => ({

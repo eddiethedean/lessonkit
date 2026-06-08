@@ -1,6 +1,8 @@
 # Block cookbook
 
-Minimal **React + `lessonkit.json`** pairs for common assessment blocks. Full contracts: [Block catalog](../../reference/block-catalog.md) · [Storybook](https://eddiethedean.github.io/lessonkit/storybook/).
+Minimal **React + `lessonkit.json`** pairs for common assessment blocks.
+
+**Prefer component pages** for live demos and when-to-use guidance: [Component pages](../../reference/components/index.md) (each assessment page includes a **Packaging** section). Full contracts: [Block catalog](../../reference/block-catalog.md) · [Storybook](https://eddiethedean.github.io/lessonkit/storybook/).
 
 Every assessment must live inside `<Lesson>` and use stable IDs aligned with the manifest.
 
@@ -134,7 +136,7 @@ Wrap answers in `*` in the template string.
 ## AssessmentSequence
 
 ```tsx
-<AssessmentSequence checkId="seq-1">
+<AssessmentSequence blockId="seq-1">
   <TrueFalse checkId="seq-tf" question="Ready?" answer={true} />
   <Quiz checkId="seq-quiz" question="Pick one" choices={["A", "B"]} answer="B" />
 </AssessmentSequence>

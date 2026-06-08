@@ -41,7 +41,17 @@ export function resolveSessionId(storage: StoragePort, provided?: string): strin
     }
   }
   const existing = storage.getItem(SESSION_STORAGE_KEY);
-  if (existing) return existing;
+  if (existing) {
+    const trimmedExisting = existing.trim();
+    const validatedExisting = validateId(trimmedExisting);
+    if (validatedExisting.ok) return validatedExisting.id;
+    storage.removeItem?.(SESSION_STORAGE_KEY);
+    if (isDevEnvironment()) {
+      console.warn(
+        `[lessonkit] Invalid stored sessionId "${existing}"; generating a new id.`,
+      );
+    }
+  }
   const volatile = volatileSessionIds.get(storage);
   if (volatile) return volatile;
   const id = createSessionId();

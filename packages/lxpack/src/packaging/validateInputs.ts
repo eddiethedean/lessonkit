@@ -7,6 +7,10 @@ import {
   relativePathUnderRoot,
   resolveComparablePath,
 } from "../spaPath";
+import {
+  isReservedOutputPath,
+  isReservedResolvedOutputPath,
+} from "../validateProjectPaths";
 import type { PackageLessonkitCourseOptions } from "../packageCourse";
 
 export type PackageValidationIssue = { path?: string; message: string; severity?: string };
@@ -46,6 +50,23 @@ export function validatePackageInputs(
         {
           path: "outDir",
           message: /* v8 ignore next */ err instanceof Error ? err.message : String(err),
+        },
+      ],
+    };
+  }
+
+  if (
+    isReservedOutputPath(outDir) ||
+    isReservedResolvedOutputPath(projectRoot, outDir)
+  ) {
+    return {
+      ok: false,
+      courseDir: outDir,
+      target,
+      issues: [
+        {
+          path: "outDir",
+          message: "outDir must not target reserved directories (.git, node_modules, .github)",
         },
       ],
     };
@@ -104,6 +125,23 @@ export function validatePackageInputs(
         ],
       };
     }
+    if (
+      isReservedOutputPath(outputBaseDir) ||
+      isReservedResolvedOutputPath(projectRoot, resolvedOutputBase)
+    ) {
+      return {
+        ok: false,
+        courseDir: outDir,
+        target,
+        issues: [
+          {
+            path: "outputBaseDir",
+            message:
+              "outputBaseDir must not target reserved directories (.git, node_modules, .github)",
+          },
+        ],
+      };
+    }
   }
 
   if (output) {
@@ -119,6 +157,38 @@ export function validatePackageInputs(
           {
             path: "output",
             message: /* v8 ignore next */ err instanceof Error ? err.message : String(err),
+          },
+        ],
+      };
+    }
+    const outputRel = isAbsolute(output) ? output : output;
+    if (
+      isReservedOutputPath(outputRel) ||
+      isReservedResolvedOutputPath(projectRoot, resolvedOutput)
+    ) {
+      return {
+        ok: false,
+        courseDir: outDir,
+        target,
+        issues: [
+          {
+            path: "output",
+            message: "output must not target reserved directories (.git, node_modules, .github)",
+          },
+        ],
+      };
+    }
+    try {
+      relativePathUnderRoot(outDir, resolvedOutput);
+    } catch {
+      return {
+        ok: false,
+        courseDir: outDir,
+        target,
+        issues: [
+          {
+            path: "output",
+            message: "output must resolve inside outDir",
           },
         ],
       };

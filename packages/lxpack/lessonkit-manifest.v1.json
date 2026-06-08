@@ -5,15 +5,18 @@
   "description": "Root lessonkit.json project manifest (schemaVersion 1)",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schemaVersion", "name", "course", "paths"],
+  "required": ["schemaVersion", "name", "course"],
   "properties": {
-    "schemaVersion": { "const": 1 },
+    "schemaVersion": {
+      "description": "Must be 1. String \"1\" is coerced to number 1 at parse time.",
+      "oneOf": [{ "const": 1 }, { "type": "string", "const": "1" }]
+    },
     "name": { "type": "string", "minLength": 1 },
     "course": { "$ref": "#/$defs/LessonkitCourseDescriptor" },
     "paths": {
       "type": "object",
+      "description": "Optional. Omitted keys default to spaDistDir=dist, lxpackOutDir=.lxpack/course, outputBaseDir=.lxpack/out.",
       "additionalProperties": false,
-      "required": ["spaDistDir", "lxpackOutDir", "outputBaseDir"],
       "properties": {
         "spaDistDir": { "type": "string", "minLength": 1 },
         "lxpackOutDir": { "type": "string", "minLength": 1 },

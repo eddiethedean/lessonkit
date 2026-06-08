@@ -1,11 +1,11 @@
-# Telemetry & xAPI (1.5.x)
+# Telemetry & xAPI (1.6.x)
 
 LessonKit emits versioned telemetry events from `@lessonkit/react` and maps them to xAPI via `@lessonkit/xapi`.
 
 ## Event catalog
 
-- **Version:** `telemetryCatalogVersion = 3` (exported from `@lessonkit/core`; default in framework 1.2+)
-- **JSON:** `@lessonkit/core/telemetry-catalog.v3.json` (must match `buildTelemetryCatalog({ version: 3 })` in tests)
+- **Version:** `telemetryCatalogV3Version = 3` (exported from `@lessonkit/core`; v1 catalog uses `telemetryCatalogVersion = 1`)
+- **JSON:** `@lessonkit/core/telemetry-catalog.v3.json` (must match `buildTelemetryCatalogV3()` in tests)
 - **Types:** discriminated `TelemetryEvent` with required `courseId` on every event
 
 | Event | When | Key `data` fields |
@@ -29,6 +29,18 @@ LessonKit emits versioned telemetry events from `@lessonkit/react` and maps them
 | `questionnaire_submitted` | `Questionnaire` submit (1.4+) | `blockId`, `fieldCount` |
 | `branch_node_viewed` | `BranchingScenario` node activation (1.5+) | `blockId`, `nodeId`, `nodeIndex`, `nodeTitle?` |
 | `branch_selected` | `BranchChoice` selection (1.5+) | `blockId`, `fromNodeId`, `toNodeId`, `label`, `scoreWeight?` |
+| `hotspot_opened` | `ImageHotspots` panel open (1.2+) | `blockId`, `hotspotId` |
+| `accordion_section_toggled` | `Accordion` expand/collapse (1.2+) | `blockId`, `sectionId`, `expanded` |
+| `flashcard_flipped` | `Flashcards` / `DialogCards` flip (1.2+) | `blockId`, `cardIndex` |
+| `image_slider_changed` | `ImageSlider` position change (1.2+) | `blockId`, `position` |
+| `compound_page_viewed` | Compound navigation (1.2+) | `blockId`, page index, parent type |
+| `image_juxtaposition_changed` | `ImageJuxtaposition` divider (1.6+) | `blockId`, `position` |
+| `timeline_event_viewed` | `Timeline` event focus (1.6+) | `blockId`, `eventId` |
+| `image_sequence_changed` | `ImageSequence` frame change (1.6+) | `blockId`, `frameIndex` |
+| `audio_recording_started` / `audio_recording_completed` | `AudioRecorder` (1.6+) | `blockId` |
+| `qr_content_revealed` | `QrContent` reveal (1.6+) | `blockId` |
+| `advent_door_opened` | `AdventCalendar` door (1.6+) | `blockId`, `doorId`, `day` |
+| `map_stage_viewed` / `map_exit_selected` | `GameMap` navigation (1.6+) | `blockId`, `stageId` / `exitId` |
 
 Session fields on all events: `sessionId`, optional `attemptId`, optional `user`.
 
