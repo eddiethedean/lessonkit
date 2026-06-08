@@ -21,7 +21,7 @@ Provide `correctWords` as an array of strings that must be selected. The demo us
 ::::{tab-set}
 
 :::{tab-item} Live demo
-:sync-group: component-mark-the-words
+:sync: component-mark-the-words
 
 ```{raw} html
 <iframe
@@ -37,7 +37,7 @@ Provide `correctWords` as an array of strings that must be selected. The demo us
 :::
 
 :::{tab-item} React
-:sync-group: component-mark-the-words
+:sync: component-mark-the-words
 
 ```tsx
 <MarkTheWords
@@ -49,7 +49,7 @@ Provide `correctWords` as an array of strings that must be selected. The demo us
 :::
 
 :::{tab-item} AI prompt
-:sync-group: component-mark-the-words
+:sync: component-mark-the-words
 
 Copy into Cursor, Copilot, or ChatGPT after the [vibe coding starter context](../../guides/vibe-coding/prompting-and-workflows.md#starter-context-block):
 
@@ -83,7 +83,7 @@ Workflow tips: https://lessonkit.readthedocs.io/en/latest/guides/vibe-coding/pro
 :::
 
 :::{tab-item} Manifest
-:sync-group: component-mark-the-words
+:sync: component-mark-the-words
 
 Add under `course.assessments[]`:
 

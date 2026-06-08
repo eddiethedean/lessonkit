@@ -24,7 +24,7 @@ In production SPAs, mount **one active `Lesson` at a time** (route or step state
 ::::{tab-set}
 
 :::{tab-item} Live demo
-:sync-group: component-course-structure
+:sync: component-course-structure
 
 ```{raw} html
 <iframe
@@ -40,7 +40,7 @@ In production SPAs, mount **one active `Lesson` at a time** (route or step state
 :::
 
 :::{tab-item} React
-:sync-group: component-course-structure
+:sync: component-course-structure
 
 ```tsx
 <Course title="Security fundamentals" courseId="sec-fundamentals" config={courseConfig}>
@@ -61,7 +61,7 @@ In production SPAs, mount **one active `Lesson` at a time** (route or step state
 :::
 
 :::{tab-item} AI prompt
-:sync-group: component-course-structure
+:sync: component-course-structure
 
 Copy into Cursor, Copilot, or ChatGPT after the [vibe coding starter context](../../guides/vibe-coding/prompting-and-workflows.md#starter-context-block):
 

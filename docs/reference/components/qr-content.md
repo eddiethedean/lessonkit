@@ -24,7 +24,7 @@ Use `QrContent` for **scan-to-reveal** bonus material — optional modules, job 
 ::::{tab-set}
 
 :::{tab-item} Live demo
-:sync-group: component-qr-content
+:sync: component-qr-content
 
 ```{raw} html
 <iframe
@@ -40,7 +40,7 @@ Use `QrContent` for **scan-to-reveal** bonus material — optional modules, job 
 :::
 
 :::{tab-item} React
-:sync-group: component-qr-content
+:sync: component-qr-content
 
 ```tsx
 <QrContent
@@ -54,7 +54,7 @@ Use `QrContent` for **scan-to-reveal** bonus material — optional modules, job 
 :::
 
 :::{tab-item} AI prompt
-:sync-group: component-qr-content
+:sync: component-qr-content
 
 Copy into Cursor, Copilot, or ChatGPT after the [vibe coding starter context](../../guides/vibe-coding/prompting-and-workflows.md#starter-context-block):
 

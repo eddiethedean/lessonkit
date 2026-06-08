@@ -17,7 +17,7 @@ Set `blockId` when you want stable block URNs on manual `interaction` events via
 ::::{tab-set}
 
 :::{tab-item} Live demo
-:sync-group: component-scenario
+:sync: component-scenario
 
 ```{raw} html
 <iframe
@@ -33,7 +33,7 @@ Set `blockId` when you want stable block URNs on manual `interaction` events via
 :::
 
 :::{tab-item} React
-:sync-group: component-scenario
+:sync: component-scenario
 
 ```tsx
 <Scenario blockId="inbox-scenario">
@@ -47,7 +47,7 @@ Set `blockId` when you want stable block URNs on manual `interaction` events via
 :::
 
 :::{tab-item} AI prompt
-:sync-group: component-scenario
+:sync: component-scenario
 
 Copy into Cursor, Copilot, or ChatGPT after the [vibe coding starter context](../../guides/vibe-coding/prompting-and-workflows.md#starter-context-block):
 

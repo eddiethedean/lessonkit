@@ -26,7 +26,7 @@ The demo shows a required `TrueFalse` at 3s and an informational `Text` cue at 8
 ::::{tab-set}
 
 :::{tab-item} Live demo
-:sync-group: component-timed-cue
+:sync: component-timed-cue
 
 ```{raw} html
 <iframe
@@ -42,7 +42,7 @@ The demo shows a required `TrueFalse` at 3s and an informational `Text` cue at 8
 :::
 
 :::{tab-item} React
-:sync-group: component-timed-cue
+:sync: component-timed-cue
 
 ```tsx
 <InteractiveVideo blockId="access-briefing" title="Facility access" src="/media/sample-briefing.mp4">
@@ -60,7 +60,7 @@ The demo shows a required `TrueFalse` at 3s and an informational `Text` cue at 8
 :::
 
 :::{tab-item} AI prompt
-:sync-group: component-timed-cue
+:sync: component-timed-cue
 
 Copy into Cursor, Copilot, or ChatGPT after the [vibe coding starter context](../../guides/vibe-coding/prompting-and-workflows.md#starter-context-block):
 
@@ -97,7 +97,7 @@ Workflow tips: https://lessonkit.readthedocs.io/en/latest/guides/vibe-coding/pro
 :::
 
 :::{tab-item} Packaging
-:sync-group: component-timed-cue
+:sync: component-timed-cue
 
 `TimedCue` is a child of [`InteractiveVideo`](interactive-video.md) — no manifest row for the cue wrapper.
 

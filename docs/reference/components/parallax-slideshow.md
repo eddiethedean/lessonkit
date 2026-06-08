@@ -19,7 +19,7 @@ Use `ParallaxSlideshow` for **storytelling slides** with title, body, and option
 ::::{tab-set}
 
 :::{tab-item} Live demo
-:sync-group: component-parallax-slideshow
+:sync: component-parallax-slideshow
 
 ```{raw} html
 <iframe
@@ -35,7 +35,7 @@ Use `ParallaxSlideshow` for **storytelling slides** with title, body, and option
 :::
 
 :::{tab-item} React
-:sync-group: component-parallax-slideshow
+:sync: component-parallax-slideshow
 
 ```tsx
 <ParallaxSlideshow
@@ -49,7 +49,7 @@ Use `ParallaxSlideshow` for **storytelling slides** with title, body, and option
 :::
 
 :::{tab-item} AI prompt
-:sync-group: component-parallax-slideshow
+:sync: component-parallax-slideshow
 
 Copy into Cursor, Copilot, or ChatGPT after the [vibe coding starter context](../../guides/vibe-coding/prompting-and-workflows.md#starter-context-block):
 

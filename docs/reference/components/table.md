@@ -19,7 +19,7 @@ Use `Table` for **structured reference data** — rosters, comparison matrices, 
 ::::{tab-set}
 
 :::{tab-item} Live demo
-:sync-group: component-table
+:sync: component-table
 
 ```{raw} html
 <iframe
@@ -35,7 +35,7 @@ Use `Table` for **structured reference data** — rosters, comparison matrices, 
 :::
 
 :::{tab-item} React
-:sync-group: component-table
+:sync: component-table
 
 ```tsx
 <Table
@@ -51,7 +51,7 @@ Use `Table` for **structured reference data** — rosters, comparison matrices, 
 :::
 
 :::{tab-item} AI prompt
-:sync-group: component-table
+:sync: component-table
 
 Copy into Cursor, Copilot, or ChatGPT after the [vibe coding starter context](../../guides/vibe-coding/prompting-and-workflows.md#starter-context-block):
 

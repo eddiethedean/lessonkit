@@ -21,7 +21,7 @@ Not scored; use [`ImageSequencing`](image-sequencing.md) when order must be asse
 ::::{tab-set}
 
 :::{tab-item} Live demo
-:sync-group: component-image-sequence
+:sync: component-image-sequence
 
 ```{raw} html
 <iframe
@@ -37,7 +37,7 @@ Not scored; use [`ImageSequencing`](image-sequencing.md) when order must be asse
 :::
 
 :::{tab-item} React
-:sync-group: component-image-sequence
+:sync: component-image-sequence
 
 ```tsx
 <ImageSequence
@@ -52,7 +52,7 @@ Not scored; use [`ImageSequencing`](image-sequencing.md) when order must be asse
 :::
 
 :::{tab-item} AI prompt
-:sync-group: component-image-sequence
+:sync: component-image-sequence
 
 Copy into Cursor, Copilot, or ChatGPT after the [vibe coding starter context](../../guides/vibe-coding/prompting-and-workflows.md#starter-context-block):
 

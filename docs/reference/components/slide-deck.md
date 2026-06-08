@@ -23,7 +23,7 @@ The demo uses `Heading`, `Text`, and `TrueFalse` across two slides.
 ::::{tab-set}
 
 :::{tab-item} Live demo
-:sync-group: component-slide-deck
+:sync: component-slide-deck
 
 ```{raw} html
 <iframe
@@ -39,7 +39,7 @@ The demo uses `Heading`, `Text`, and `TrueFalse` across two slides.
 :::
 
 :::{tab-item} React
-:sync-group: component-slide-deck
+:sync: component-slide-deck
 
 ```tsx
 <SlideDeck blockId="onboarding-deck" title="Phishing red flags" showDeckScore>
@@ -55,7 +55,7 @@ The demo uses `Heading`, `Text`, and `TrueFalse` across two slides.
 :::
 
 :::{tab-item} AI prompt
-:sync-group: component-slide-deck
+:sync: component-slide-deck
 
 Copy into Cursor, Copilot, or ChatGPT after the [vibe coding starter context](../../guides/vibe-coding/prompting-and-workflows.md#starter-context-block):
 
@@ -90,7 +90,7 @@ Workflow tips: https://lessonkit.readthedocs.io/en/latest/guides/vibe-coding/pro
 :::
 
 :::{tab-item} Packaging
-:sync-group: component-slide-deck
+:sync: component-slide-deck
 
 No `lessonkit.json` row for `SlideDeck` — compose slides in React.
 

@@ -21,7 +21,7 @@ Emits `questionnaire_submitted` when tracking is enabled; not auto-scored.
 ::::{tab-set}
 
 :::{tab-item} Live demo
-:sync-group: component-questionnaire
+:sync: component-questionnaire
 
 ```{raw} html
 <iframe
@@ -37,7 +37,7 @@ Emits `questionnaire_submitted` when tracking is enabled; not auto-scored.
 :::
 
 :::{tab-item} React
-:sync-group: component-questionnaire
+:sync: component-questionnaire
 
 ```tsx
 <Questionnaire
@@ -52,7 +52,7 @@ Emits `questionnaire_submitted` when tracking is enabled; not auto-scored.
 :::
 
 :::{tab-item} AI prompt
-:sync-group: component-questionnaire
+:sync: component-questionnaire
 
 Copy into Cursor, Copilot, or ChatGPT after the [vibe coding starter context](../../guides/vibe-coding/prompting-and-workflows.md#starter-context-block):
 

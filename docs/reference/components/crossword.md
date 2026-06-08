@@ -24,7 +24,7 @@ Use `Crossword` for **grid-based vocabulary** challenges. Define `entries` with 
 ::::{tab-set}
 
 :::{tab-item} Live demo
-:sync-group: component-crossword
+:sync: component-crossword
 
 ```{raw} html
 <iframe
@@ -40,7 +40,7 @@ Use `Crossword` for **grid-based vocabulary** challenges. Define `entries` with 
 :::
 
 :::{tab-item} React
-:sync-group: component-crossword
+:sync: component-crossword
 
 ```tsx
 <Crossword
@@ -56,7 +56,7 @@ Use `Crossword` for **grid-based vocabulary** challenges. Define `entries` with 
 :::
 
 :::{tab-item} AI prompt
-:sync-group: component-crossword
+:sync: component-crossword
 
 Copy into Cursor, Copilot, or ChatGPT after the [vibe coding starter context](../../guides/vibe-coding/prompting-and-workflows.md#starter-context-block):
 
@@ -93,7 +93,7 @@ Workflow tips: https://lessonkit.readthedocs.io/en/latest/guides/vibe-coding/pro
 :::
 
 :::{tab-item} Manifest
-:sync-group: component-crossword
+:sync: component-crossword
 
 Add under `course.assessments[]`:
 

@@ -24,7 +24,7 @@ Use `MemoryGame` for **matching pairs** — terminology drills, icon/name associ
 ::::{tab-set}
 
 :::{tab-item} Live demo
-:sync-group: component-memory-game
+:sync: component-memory-game
 
 ```{raw} html
 <iframe
@@ -40,7 +40,7 @@ Use `MemoryGame` for **matching pairs** — terminology drills, icon/name associ
 :::
 
 :::{tab-item} React
-:sync-group: component-memory-game
+:sync: component-memory-game
 
 ```tsx
 <MemoryGame
@@ -56,7 +56,7 @@ Use `MemoryGame` for **matching pairs** — terminology drills, icon/name associ
 :::
 
 :::{tab-item} AI prompt
-:sync-group: component-memory-game
+:sync: component-memory-game
 
 Copy into Cursor, Copilot, or ChatGPT after the [vibe coding starter context](../../guides/vibe-coding/prompting-and-workflows.md#starter-context-block):
 

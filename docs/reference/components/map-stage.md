@@ -25,7 +25,7 @@ Use `MapStage` **only inside [`GameMap`](game-map.md)**. Each stage is content s
 ::::{tab-set}
 
 :::{tab-item} Live demo
-:sync-group: component-map-stage
+:sync: component-map-stage
 
 ```{raw} html
 <iframe
@@ -41,7 +41,7 @@ Use `MapStage` **only inside [`GameMap`](game-map.md)**. Each stage is content s
 :::
 
 :::{tab-item} React
-:sync-group: component-map-stage
+:sync: component-map-stage
 
 ```tsx
 <GameMap blockId="zones" title="Building zones" backgroundSrc="/map.svg" startStageId="lobby">
@@ -57,7 +57,7 @@ Use `MapStage` **only inside [`GameMap`](game-map.md)**. Each stage is content s
 :::
 
 :::{tab-item} AI prompt
-:sync-group: component-map-stage
+:sync: component-map-stage
 
 Copy into Cursor, Copilot, or ChatGPT after the [vibe coding starter context](../../guides/vibe-coding/prompting-and-workflows.md#starter-context-block):
 
@@ -92,7 +92,7 @@ Workflow tips: https://lessonkit.readthedocs.io/en/latest/guides/vibe-coding/pro
 :::
 
 :::{tab-item} Packaging
-:sync-group: component-map-stage
+:sync: component-map-stage
 
 `MapStage` is a child of [`GameMap`](game-map.md) — no manifest row for the stage itself.
 

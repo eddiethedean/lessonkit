@@ -24,7 +24,7 @@ Use `FindHotspot` when learners must **pick one correct region** on an image —
 ::::{tab-set}
 
 :::{tab-item} Live demo
-:sync-group: component-find-hotspot
+:sync: component-find-hotspot
 
 ```{raw} html
 <iframe
@@ -40,7 +40,7 @@ Use `FindHotspot` when learners must **pick one correct region** on an image —
 :::
 
 :::{tab-item} React
-:sync-group: component-find-hotspot
+:sync: component-find-hotspot
 
 ```tsx
 <FindHotspot
@@ -57,7 +57,7 @@ Use `FindHotspot` when learners must **pick one correct region** on an image —
 :::
 
 :::{tab-item} AI prompt
-:sync-group: component-find-hotspot
+:sync: component-find-hotspot
 
 Copy into Cursor, Copilot, or ChatGPT after the [vibe coding starter context](../../guides/vibe-coding/prompting-and-workflows.md#starter-context-block):
 
@@ -98,7 +98,7 @@ Workflow tips: https://lessonkit.readthedocs.io/en/latest/guides/vibe-coding/pro
 :::
 
 :::{tab-item} Manifest
-:sync-group: component-find-hotspot
+:sync: component-find-hotspot
 
 Add under `course.assessments[]`:
 

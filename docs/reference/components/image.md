@@ -19,7 +19,7 @@ Use `Image` for **illustrations, diagrams, or photos** with required alt text. P
 ::::{tab-set}
 
 :::{tab-item} Live demo
-:sync-group: component-image
+:sync: component-image
 
 ```{raw} html
 <iframe
@@ -35,7 +35,7 @@ Use `Image` for **illustrations, diagrams, or photos** with required alt text. P
 :::
 
 :::{tab-item} React
-:sync-group: component-image
+:sync: component-image
 
 ```tsx
 <Text blockId="caption">Labeled floor plans help learners locate exits and restricted zones.</Text>
@@ -44,7 +44,7 @@ Use `Image` for **illustrations, diagrams, or photos** with required alt text. P
 :::
 
 :::{tab-item} AI prompt
-:sync-group: component-image
+:sync: component-image
 
 Copy into Cursor, Copilot, or ChatGPT after the [vibe coding starter context](../../guides/vibe-coding/prompting-and-workflows.md#starter-context-block):
 

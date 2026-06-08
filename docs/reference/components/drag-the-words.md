@@ -21,7 +21,7 @@ Mark drop zones with `*` in `template`. Include distractors in `words` that are 
 ::::{tab-set}
 
 :::{tab-item} Live demo
-:sync-group: component-drag-the-words
+:sync: component-drag-the-words
 
 ```{raw} html
 <iframe
@@ -37,7 +37,7 @@ Mark drop zones with `*` in `template`. Include distractors in `words` that are 
 :::
 
 :::{tab-item} React
-:sync-group: component-drag-the-words
+:sync: component-drag-the-words
 
 ```tsx
 <DragTheWords
@@ -49,7 +49,7 @@ Mark drop zones with `*` in `template`. Include distractors in `words` that are 
 :::
 
 :::{tab-item} AI prompt
-:sync-group: component-drag-the-words
+:sync: component-drag-the-words
 
 Copy into Cursor, Copilot, or ChatGPT after the [vibe coding starter context](../../guides/vibe-coding/prompting-and-workflows.md#starter-context-block):
 
@@ -83,7 +83,7 @@ Workflow tips: https://lessonkit.readthedocs.io/en/latest/guides/vibe-coding/pro
 :::
 
 :::{tab-item} Manifest
-:sync-group: component-drag-the-words
+:sync: component-drag-the-words
 
 Add under `course.assessments[]`:
 

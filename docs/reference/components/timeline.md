@@ -19,7 +19,7 @@ Use `Timeline` for **chronological narratives** — product history, policy evol
 ::::{tab-set}
 
 :::{tab-item} Live demo
-:sync-group: component-timeline
+:sync: component-timeline
 
 ```{raw} html
 <iframe
@@ -35,7 +35,7 @@ Use `Timeline` for **chronological narratives** — product history, policy evol
 :::
 
 :::{tab-item} React
-:sync-group: component-timeline
+:sync: component-timeline
 
 ```tsx
 <Timeline
@@ -49,7 +49,7 @@ Use `Timeline` for **chronological narratives** — product history, policy evol
 :::
 
 :::{tab-item} AI prompt
-:sync-group: component-timeline
+:sync: component-timeline
 
 Copy into Cursor, Copilot, or ChatGPT after the [vibe coding starter context](../../guides/vibe-coding/prompting-and-workflows.md#starter-context-block):
 

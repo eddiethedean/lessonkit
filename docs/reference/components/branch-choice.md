@@ -24,7 +24,7 @@ Use `BranchChoice` **inside `BranchNode`** to offer **labeled navigation** to an
 ::::{tab-set}
 
 :::{tab-item} Live demo
-:sync-group: component-branch-choice
+:sync: component-branch-choice
 
 ```{raw} html
 <iframe
@@ -40,7 +40,7 @@ Use `BranchChoice` **inside `BranchNode`** to offer **labeled navigation** to an
 :::
 
 :::{tab-item} React
-:sync-group: component-branch-choice
+:sync: component-branch-choice
 
 ```tsx
 <BranchNode nodeId="fork">
@@ -52,7 +52,7 @@ Use `BranchChoice` **inside `BranchNode`** to offer **labeled navigation** to an
 :::
 
 :::{tab-item} AI prompt
-:sync-group: component-branch-choice
+:sync: component-branch-choice
 
 Copy into Cursor, Copilot, or ChatGPT after the [vibe coding starter context](../../guides/vibe-coding/prompting-and-workflows.md#starter-context-block):
 
@@ -83,7 +83,7 @@ Workflow tips: https://lessonkit.readthedocs.io/en/latest/guides/vibe-coding/pro
 :::
 
 :::{tab-item} Packaging
-:sync-group: component-branch-choice
+:sync: component-branch-choice
 
 `BranchChoice` links [`BranchNode`](branch-node.md) steps — no manifest entry.
 

@@ -23,7 +23,7 @@ Often paired inside [`SlideDeck`](slide-deck.md) slides or [`Page`](../block-cat
 ::::{tab-set}
 
 :::{tab-item} Live demo
-:sync-group: component-accordion
+:sync: component-accordion
 
 ```{raw} html
 <iframe
@@ -39,7 +39,7 @@ Often paired inside [`SlideDeck`](slide-deck.md) slides or [`Page`](../block-cat
 :::
 
 :::{tab-item} React
-:sync-group: component-accordion
+:sync: component-accordion
 
 ```tsx
 <Accordion
@@ -61,7 +61,7 @@ Often paired inside [`SlideDeck`](slide-deck.md) slides or [`Page`](../block-cat
 :::
 
 :::{tab-item} AI prompt
-:sync-group: component-accordion
+:sync: component-accordion
 
 Copy into Cursor, Copilot, or ChatGPT after the [vibe coding starter context](../../guides/vibe-coding/prompting-and-workflows.md#starter-context-block):
 

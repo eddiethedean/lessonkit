@@ -21,7 +21,7 @@ Optional `unlockFrom` ISO date controls which doors open.
 ::::{tab-set}
 
 :::{tab-item} Live demo
-:sync-group: component-advent-calendar
+:sync: component-advent-calendar
 
 ```{raw} html
 <iframe
@@ -37,7 +37,7 @@ Optional `unlockFrom` ISO date controls which doors open.
 :::
 
 :::{tab-item} React
-:sync-group: component-advent-calendar
+:sync: component-advent-calendar
 
 ```tsx
 <AdventCalendar
@@ -52,7 +52,7 @@ Optional `unlockFrom` ISO date controls which doors open.
 :::
 
 :::{tab-item} AI prompt
-:sync-group: component-advent-calendar
+:sync: component-advent-calendar
 
 Copy into Cursor, Copilot, or ChatGPT after the [vibe coding starter context](../../guides/vibe-coding/prompting-and-workflows.md#starter-context-block):
 

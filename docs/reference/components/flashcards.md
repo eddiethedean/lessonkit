@@ -19,7 +19,7 @@ Use `Flashcards` for **term ↔ definition** study — flip cards one at a time.
 ::::{tab-set}
 
 :::{tab-item} Live demo
-:sync-group: component-flashcards
+:sync: component-flashcards
 
 ```{raw} html
 <iframe
@@ -35,7 +35,7 @@ Use `Flashcards` for **term ↔ definition** study — flip cards one at a time.
 :::
 
 :::{tab-item} React
-:sync-group: component-flashcards
+:sync: component-flashcards
 
 ```tsx
 <Flashcards
@@ -50,7 +50,7 @@ Use `Flashcards` for **term ↔ definition** study — flip cards one at a time.
 :::
 
 :::{tab-item} AI prompt
-:sync-group: component-flashcards
+:sync: component-flashcards
 
 Copy into Cursor, Copilot, or ChatGPT after the [vibe coding starter context](../../guides/vibe-coding/prompting-and-workflows.md#starter-context-block):
 

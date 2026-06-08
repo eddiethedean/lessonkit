@@ -19,7 +19,7 @@ Use `InformationWall` for **searchable reference libraries** — policy indexes,
 ::::{tab-set}
 
 :::{tab-item} Live demo
-:sync-group: component-information-wall
+:sync: component-information-wall
 
 ```{raw} html
 <iframe
@@ -35,7 +35,7 @@ Use `InformationWall` for **searchable reference libraries** — policy indexes,
 :::
 
 :::{tab-item} React
-:sync-group: component-information-wall
+:sync: component-information-wall
 
 ```tsx
 <InformationWall
@@ -50,7 +50,7 @@ Use `InformationWall` for **searchable reference libraries** — policy indexes,
 :::
 
 :::{tab-item} AI prompt
-:sync-group: component-information-wall
+:sync: component-information-wall
 
 Copy into Cursor, Copilot, or ChatGPT after the [vibe coding starter context](../../guides/vibe-coding/prompting-and-workflows.md#starter-context-block):
 

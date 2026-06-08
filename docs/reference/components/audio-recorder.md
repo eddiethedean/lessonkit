@@ -26,7 +26,7 @@ Requires browser `MediaRecorder` support and explicit consent via `consentLabel`
 ::::{tab-set}
 
 :::{tab-item} Live demo
-:sync-group: component-audio-recorder
+:sync: component-audio-recorder
 
 ```{raw} html
 <iframe
@@ -42,7 +42,7 @@ Requires browser `MediaRecorder` support and explicit consent via `consentLabel`
 :::
 
 :::{tab-item} React
-:sync-group: component-audio-recorder
+:sync: component-audio-recorder
 
 ```tsx
 <AudioRecorder
@@ -54,7 +54,7 @@ Requires browser `MediaRecorder` support and explicit consent via `consentLabel`
 :::
 
 :::{tab-item} AI prompt
-:sync-group: component-audio-recorder
+:sync: component-audio-recorder
 
 Copy into Cursor, Copilot, or ChatGPT after the [vibe coding starter context](../../guides/vibe-coding/prompting-and-workflows.md#starter-context-block):
 

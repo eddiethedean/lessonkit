@@ -27,7 +27,7 @@ Compose `MapStage` nodes with `MapExit` links; terminal stages may include asses
 ::::{tab-set}
 
 :::{tab-item} Live demo
-:sync-group: component-game-map
+:sync: component-game-map
 
 ```{raw} html
 <iframe
@@ -43,7 +43,7 @@ Compose `MapStage` nodes with `MapExit` links; terminal stages may include asses
 :::
 
 :::{tab-item} React
-:sync-group: component-game-map
+:sync: component-game-map
 
 ```tsx
 <GameMap blockId="office-map" title="Office security tour" backgroundSrc="/map.svg" startStageId="lobby" showMapScore>
@@ -59,7 +59,7 @@ Compose `MapStage` nodes with `MapExit` links; terminal stages may include asses
 :::
 
 :::{tab-item} AI prompt
-:sync-group: component-game-map
+:sync: component-game-map
 
 Copy into Cursor, Copilot, or ChatGPT after the [vibe coding starter context](../../guides/vibe-coding/prompting-and-workflows.md#starter-context-block):
 
@@ -94,7 +94,7 @@ Workflow tips: https://lessonkit.readthedocs.io/en/latest/guides/vibe-coding/pro
 :::
 
 :::{tab-item} Packaging
-:sync-group: component-game-map
+:sync: component-game-map
 
 No manifest row for `GameMap` — author [`MapStage`](map-stage.md) and [`MapExit`](map-exit.md) children in React.
 

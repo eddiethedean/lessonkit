@@ -27,7 +27,7 @@ Set `startNodeId` to the entry node. Use `showPathScore` when terminal nodes con
 ::::{tab-set}
 
 :::{tab-item} Live demo
-:sync-group: component-branching-scenario
+:sync: component-branching-scenario
 
 ```{raw} html
 <iframe
@@ -43,7 +43,7 @@ Set `startNodeId` to the entry node. Use `showPathScore` when terminal nodes con
 :::
 
 :::{tab-item} React
-:sync-group: component-branching-scenario
+:sync: component-branching-scenario
 
 ```tsx
 <BranchingScenario blockId="call-paths" title="Suspicious charge call" startNodeId="opening" showPathScore>
@@ -60,7 +60,7 @@ Set `startNodeId` to the entry node. Use `showPathScore` when terminal nodes con
 :::
 
 :::{tab-item} AI prompt
-:sync-group: component-branching-scenario
+:sync: component-branching-scenario
 
 Copy into Cursor, Copilot, or ChatGPT after the [vibe coding starter context](../../guides/vibe-coding/prompting-and-workflows.md#starter-context-block):
 
@@ -97,7 +97,7 @@ Workflow tips: https://lessonkit.readthedocs.io/en/latest/guides/vibe-coding/pro
 :::
 
 :::{tab-item} Packaging
-:sync-group: component-branching-scenario
+:sync: component-branching-scenario
 
 No manifest row for `BranchingScenario` unless nodes contain scored blocks.
 

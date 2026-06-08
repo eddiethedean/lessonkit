@@ -23,7 +23,7 @@ Same as `Quiz`: requires `checkId`, `question`, `choices`, and `answer` inside a
 ::::{tab-set}
 
 :::{tab-item} Live demo
-:sync-group: component-knowledge-check
+:sync: component-knowledge-check
 
 ```{raw} html
 <iframe
@@ -39,7 +39,7 @@ Same as `Quiz`: requires `checkId`, `question`, `choices`, and `answer` inside a
 :::
 
 :::{tab-item} React
-:sync-group: component-knowledge-check
+:sync: component-knowledge-check
 
 ```tsx
 // Prefer Quiz in new projects:
@@ -59,7 +59,7 @@ import { Quiz } from "@lessonkit/react";
 :::
 
 :::{tab-item} AI prompt
-:sync-group: component-knowledge-check
+:sync: component-knowledge-check
 
 Copy into Cursor, Copilot, or ChatGPT after the [vibe coding starter context](../../guides/vibe-coding/prompting-and-workflows.md#starter-context-block):
 
@@ -103,7 +103,7 @@ Workflow tips: https://lessonkit.readthedocs.io/en/latest/guides/vibe-coding/pro
 :::
 
 :::{tab-item} Manifest
-:sync-group: component-knowledge-check
+:sync: component-knowledge-check
 
 Same manifest shape as `Quiz`. Prefer importing `Quiz` in new React code.
 

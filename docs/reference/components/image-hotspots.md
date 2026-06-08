@@ -24,7 +24,7 @@ Use `ImageHotspots` when learners **explore regions of an image** — floor plan
 ::::{tab-set}
 
 :::{tab-item} Live demo
-:sync-group: component-image-hotspots
+:sync: component-image-hotspots
 
 ```{raw} html
 <iframe
@@ -40,7 +40,7 @@ Use `ImageHotspots` when learners **explore regions of an image** — floor plan
 :::
 
 :::{tab-item} React
-:sync-group: component-image-hotspots
+:sync: component-image-hotspots
 
 ```tsx
 <ImageHotspots
@@ -56,7 +56,7 @@ Use `ImageHotspots` when learners **explore regions of an image** — floor plan
 :::
 
 :::{tab-item} AI prompt
-:sync-group: component-image-hotspots
+:sync: component-image-hotspots
 
 Copy into Cursor, Copilot, or ChatGPT after the [vibe coding starter context](../../guides/vibe-coding/prompting-and-workflows.md#starter-context-block):
 

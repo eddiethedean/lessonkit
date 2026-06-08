@@ -24,7 +24,7 @@ Use `CombinationLock` for **numeric code entry** puzzles — vault codes, PIN ve
 ::::{tab-set}
 
 :::{tab-item} Live demo
-:sync-group: component-combination-lock
+:sync: component-combination-lock
 
 ```{raw} html
 <iframe
@@ -40,7 +40,7 @@ Use `CombinationLock` for **numeric code entry** puzzles — vault codes, PIN ve
 :::
 
 :::{tab-item} React
-:sync-group: component-combination-lock
+:sync: component-combination-lock
 
 ```tsx
 <CombinationLock checkId="vault-lock" combination="1234" label="Enter demo vault code (training only)" />
@@ -48,7 +48,7 @@ Use `CombinationLock` for **numeric code entry** puzzles — vault codes, PIN ve
 :::
 
 :::{tab-item} AI prompt
-:sync-group: component-combination-lock
+:sync: component-combination-lock
 
 Copy into Cursor, Copilot, or ChatGPT after the [vibe coding starter context](../../guides/vibe-coding/prompting-and-workflows.md#starter-context-block):
 
@@ -78,7 +78,7 @@ Workflow tips: https://lessonkit.readthedocs.io/en/latest/guides/vibe-coding/pro
 :::
 
 :::{tab-item} Manifest
-:sync-group: component-combination-lock
+:sync: component-combination-lock
 
 Add under `course.assessments[]`:
 

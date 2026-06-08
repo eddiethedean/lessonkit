@@ -26,7 +26,7 @@ Use `Video` for a **standalone self-hosted clip** inside a lesson — intros, de
 ::::{tab-set}
 
 :::{tab-item} Live demo
-:sync-group: component-video
+:sync: component-video
 
 ```{raw} html
 <iframe
@@ -42,7 +42,7 @@ Use `Video` for a **standalone self-hosted clip** inside a lesson — intros, de
 :::
 
 :::{tab-item} React
-:sync-group: component-video
+:sync: component-video
 
 ```tsx
 <Video blockId="intro-video" src="/media/phishing-red-flags.mp4" title="Phishing red flags briefing" />
@@ -50,7 +50,7 @@ Use `Video` for a **standalone self-hosted clip** inside a lesson — intros, de
 :::
 
 :::{tab-item} AI prompt
-:sync-group: component-video
+:sync: component-video
 
 Copy into Cursor, Copilot, or ChatGPT after the [vibe coding starter context](../../guides/vibe-coding/prompting-and-workflows.md#starter-context-block):
 

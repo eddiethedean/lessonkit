@@ -26,7 +26,7 @@ Do not mount `Page` directly under `Lesson`; always wrap with [`InteractiveBook`
 ::::{tab-set}
 
 :::{tab-item} Live demo
-:sync-group: component-page
+:sync: component-page
 
 ```{raw} html
 <iframe
@@ -42,7 +42,7 @@ Do not mount `Page` directly under `Lesson`; always wrap with [`InteractiveBook`
 :::
 
 :::{tab-item} React
-:sync-group: component-page
+:sync: component-page
 
 ```tsx
 <InteractiveBook blockId="policy-digest" title="Policy digest">
@@ -55,7 +55,7 @@ Do not mount `Page` directly under `Lesson`; always wrap with [`InteractiveBook`
 :::
 
 :::{tab-item} AI prompt
-:sync-group: component-page
+:sync: component-page
 
 Copy into Cursor, Copilot, or ChatGPT after the [vibe coding starter context](../../guides/vibe-coding/prompting-and-workflows.md#starter-context-block):
 
@@ -88,7 +88,7 @@ Workflow tips: https://lessonkit.readthedocs.io/en/latest/guides/vibe-coding/pro
 :::
 
 :::{tab-item} Packaging
-:sync-group: component-page
+:sync: component-page
 
 `Page` has no manifest entry — it is a child of [`InteractiveBook`](interactive-book.md).
 

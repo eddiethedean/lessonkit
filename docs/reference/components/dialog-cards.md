@@ -19,7 +19,7 @@ Use `DialogCards` for **phrasebook-style** content — common questions and appr
 ::::{tab-set}
 
 :::{tab-item} Live demo
-:sync-group: component-dialog-cards
+:sync: component-dialog-cards
 
 ```{raw} html
 <iframe
@@ -35,7 +35,7 @@ Use `DialogCards` for **phrasebook-style** content — common questions and appr
 :::
 
 :::{tab-item} React
-:sync-group: component-dialog-cards
+:sync: component-dialog-cards
 
 ```tsx
 <DialogCards
@@ -52,7 +52,7 @@ Use `DialogCards` for **phrasebook-style** content — common questions and appr
 :::
 
 :::{tab-item} AI prompt
-:sync-group: component-dialog-cards
+:sync: component-dialog-cards
 
 Copy into Cursor, Copilot, or ChatGPT after the [vibe coding starter context](../../guides/vibe-coding/prompting-and-workflows.md#starter-context-block):
 

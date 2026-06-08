@@ -19,7 +19,7 @@ Use `Collage` for **multi-image grids** with optional captions — mood boards, 
 ::::{tab-set}
 
 :::{tab-item} Live demo
-:sync-group: component-collage
+:sync: component-collage
 
 ```{raw} html
 <iframe
@@ -35,7 +35,7 @@ Use `Collage` for **multi-image grids** with optional captions — mood boards, 
 :::
 
 :::{tab-item} React
-:sync-group: component-collage
+:sync: component-collage
 
 ```tsx
 <Collage
@@ -50,7 +50,7 @@ Use `Collage` for **multi-image grids** with optional captions — mood boards, 
 :::
 
 :::{tab-item} AI prompt
-:sync-group: component-collage
+:sync: component-collage
 
 Copy into Cursor, Copilot, or ChatGPT after the [vibe coding starter context](../../guides/vibe-coding/prompting-and-workflows.md#starter-context-block):
 

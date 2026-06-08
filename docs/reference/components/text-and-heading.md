@@ -20,7 +20,7 @@ These are building blocks inside `Slide`, `Page`, `Scenario`, and other containe
 ::::{tab-set}
 
 :::{tab-item} Live demo
-:sync-group: component-text-and-heading
+:sync: component-text-and-heading
 
 ```{raw} html
 <iframe
@@ -36,7 +36,7 @@ These are building blocks inside `Slide`, `Page`, `Scenario`, and other containe
 :::
 
 :::{tab-item} React
-:sync-group: component-text-and-heading
+:sync: component-text-and-heading
 
 ```tsx
 <Heading level={2} blockId="section-title">Reporting suspicious mail</Heading>
@@ -47,7 +47,7 @@ These are building blocks inside `Slide`, `Page`, `Scenario`, and other containe
 :::
 
 :::{tab-item} AI prompt
-:sync-group: component-text-and-heading
+:sync: component-text-and-heading
 
 Copy into Cursor, Copilot, or ChatGPT after the [vibe coding starter context](../../guides/vibe-coding/prompting-and-workflows.md#starter-context-block):
 

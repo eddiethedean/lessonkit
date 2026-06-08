@@ -23,7 +23,7 @@ Use `ImageJuxtaposition` for **before/after** or **A/B image comparison** with a
 ::::{tab-set}
 
 :::{tab-item} Live demo
-:sync-group: component-image-juxtaposition
+:sync: component-image-juxtaposition
 
 ```{raw} html
 <iframe
@@ -39,7 +39,7 @@ Use `ImageJuxtaposition` for **before/after** or **A/B image comparison** with a
 :::
 
 :::{tab-item} React
-:sync-group: component-image-juxtaposition
+:sync: component-image-juxtaposition
 
 ```tsx
 <ImageJuxtaposition
@@ -53,7 +53,7 @@ Use `ImageJuxtaposition` for **before/after** or **A/B image comparison** with a
 :::
 
 :::{tab-item} AI prompt
-:sync-group: component-image-juxtaposition
+:sync: component-image-juxtaposition
 
 Copy into Cursor, Copilot, or ChatGPT after the [vibe coding starter context](../../guides/vibe-coding/prompting-and-workflows.md#starter-context-block):
 

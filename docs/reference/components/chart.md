@@ -19,7 +19,7 @@ Use `Chart` to visualize **simple metrics** — incident counts, survey breakdow
 ::::{tab-set}
 
 :::{tab-item} Live demo
-:sync-group: component-chart
+:sync: component-chart
 
 ```{raw} html
 <iframe
@@ -35,7 +35,7 @@ Use `Chart` to visualize **simple metrics** — incident counts, survey breakdow
 :::
 
 :::{tab-item} React
-:sync-group: component-chart
+:sync: component-chart
 
 ```tsx
 <Chart
@@ -52,7 +52,7 @@ Use `Chart` to visualize **simple metrics** — incident counts, survey breakdow
 :::
 
 :::{tab-item} AI prompt
-:sync-group: component-chart
+:sync: component-chart
 
 Copy into Cursor, Copilot, or ChatGPT after the [vibe coding starter context](../../guides/vibe-coding/prompting-and-workflows.md#starter-context-block):
 

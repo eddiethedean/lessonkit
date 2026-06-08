@@ -23,7 +23,7 @@ Supports compound resume state so learners can continue where they left off.
 ::::{tab-set}
 
 :::{tab-item} Live demo
-:sync-group: component-interactive-book
+:sync: component-interactive-book
 
 ```{raw} html
 <iframe
@@ -39,12 +39,12 @@ Supports compound resume state so learners can continue where they left off.
 :::
 
 :::{tab-item} React
-:sync-group: component-interactive-book
+:sync: component-interactive-book
 
 ```tsx
 <InteractiveBook blockId="safety-book" title="Security handbook">
   <Page blockId="book-intro" title="Reporting">
-    <Text>Use the Report phishing action — do not forward suspicious messages.</Text>
+    <Text>Use the Report phishing action - do not forward suspicious messages.</Text>
   </Page>
   <Page blockId="book-devices" title="Devices">
     <Text>Lock your screen when leaving your desk.</Text>
@@ -57,7 +57,7 @@ Supports compound resume state so learners can continue where they left off.
 :::
 
 :::{tab-item} AI prompt
-:sync-group: component-interactive-book
+:sync: component-interactive-book
 
 Copy into Cursor, Copilot, or ChatGPT after the [vibe coding starter context](../../guides/vibe-coding/prompting-and-workflows.md#starter-context-block):
 
@@ -68,7 +68,7 @@ Add a InteractiveBook block (H5P-style: Interactive Book) like this example insi
 
 <InteractiveBook blockId="safety-book" title="Security handbook">
   <Page blockId="book-intro" title="Reporting">
-    <Text>Use the Report phishing action — do not forward suspicious messages.</Text>
+    <Text>Use the Report phishing action - do not forward suspicious messages.</Text>
   </Page>
   <Page blockId="book-devices" title="Devices">
     <Text>Lock your screen when leaving your desk.</Text>
@@ -94,7 +94,7 @@ Workflow tips: https://lessonkit.readthedocs.io/en/latest/guides/vibe-coding/pro
 :::
 
 :::{tab-item} Packaging
-:sync-group: component-interactive-book
+:sync: component-interactive-book
 
 Compound blocks are authored in React — there is no `lessonkit.json` row for `InteractiveBook` itself.
 

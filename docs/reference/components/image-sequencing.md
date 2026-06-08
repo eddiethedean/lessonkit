@@ -23,7 +23,7 @@ Use `ImageSequencing` when learners must **order images correctly** — process 
 ::::{tab-set}
 
 :::{tab-item} Live demo
-:sync-group: component-image-sequencing
+:sync: component-image-sequencing
 
 ```{raw} html
 <iframe
@@ -39,7 +39,7 @@ Use `ImageSequencing` when learners must **order images correctly** — process 
 :::
 
 :::{tab-item} React
-:sync-group: component-image-sequencing
+:sync: component-image-sequencing
 
 ```tsx
 <ImageSequencing
@@ -54,7 +54,7 @@ Use `ImageSequencing` when learners must **order images correctly** — process 
 :::
 
 :::{tab-item} AI prompt
-:sync-group: component-image-sequencing
+:sync: component-image-sequencing
 
 Copy into Cursor, Copilot, or ChatGPT after the [vibe coding starter context](../../guides/vibe-coding/prompting-and-workflows.md#starter-context-block):
 
@@ -91,7 +91,7 @@ Workflow tips: https://lessonkit.readthedocs.io/en/latest/guides/vibe-coding/pro
 :::
 
 :::{tab-item} Manifest
-:sync-group: component-image-sequencing
+:sync: component-image-sequencing
 
 Add under `course.assessments[]`:
 

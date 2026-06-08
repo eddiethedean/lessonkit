@@ -26,7 +26,7 @@ Configure `config.embed.allowedHosts` in production so only approved origins loa
 ::::{tab-set}
 
 :::{tab-item} Live demo
-:sync-group: component-embed
+:sync: component-embed
 
 ```{raw} html
 <iframe
@@ -42,7 +42,7 @@ Configure `config.embed.allowedHosts` in production so only approved origins loa
 :::
 
 :::{tab-item} React
-:sync-group: component-embed
+:sync: component-embed
 
 ```tsx
 <Text>Allowlist embed hosts in production course config.</Text>
@@ -51,7 +51,7 @@ Configure `config.embed.allowedHosts` in production so only approved origins loa
 :::
 
 :::{tab-item} AI prompt
-:sync-group: component-embed
+:sync: component-embed
 
 Copy into Cursor, Copilot, or ChatGPT after the [vibe coding starter context](../../guides/vibe-coding/prompting-and-workflows.md#starter-context-block):
 

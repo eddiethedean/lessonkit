@@ -26,7 +26,7 @@ Do not mount `Slide` directly under `Lesson`.
 ::::{tab-set}
 
 :::{tab-item} Live demo
-:sync-group: component-slide
+:sync: component-slide
 
 ```{raw} html
 <iframe
@@ -42,7 +42,7 @@ Do not mount `Slide` directly under `Lesson`.
 :::
 
 :::{tab-item} React
-:sync-group: component-slide
+:sync: component-slide
 
 ```tsx
 <SlideDeck blockId="briefing" title="Security briefing">
@@ -57,7 +57,7 @@ Do not mount `Slide` directly under `Lesson`.
 :::
 
 :::{tab-item} AI prompt
-:sync-group: component-slide
+:sync: component-slide
 
 Copy into Cursor, Copilot, or ChatGPT after the [vibe coding starter context](../../guides/vibe-coding/prompting-and-workflows.md#starter-context-block):
 
@@ -91,7 +91,7 @@ Workflow tips: https://lessonkit.readthedocs.io/en/latest/guides/vibe-coding/pro
 :::
 
 :::{tab-item} Packaging
-:sync-group: component-slide
+:sync: component-slide
 
 `Slide` is a [`SlideDeck`](slide-deck.md) child — no manifest row for the slide itself.
 

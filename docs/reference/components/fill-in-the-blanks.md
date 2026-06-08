@@ -23,7 +23,7 @@ Wrap correct answers in `*` in the `template` string. LessonKit derives blank sp
 ::::{tab-set}
 
 :::{tab-item} Live demo
-:sync-group: component-fill-in-the-blanks
+:sync: component-fill-in-the-blanks
 
 ```{raw} html
 <iframe
@@ -39,7 +39,7 @@ Wrap correct answers in `*` in the `template` string. LessonKit derives blank sp
 :::
 
 :::{tab-item} React
-:sync-group: component-fill-in-the-blanks
+:sync: component-fill-in-the-blanks
 
 ```tsx
 <FillInTheBlanks
@@ -50,7 +50,7 @@ Wrap correct answers in `*` in the `template` string. LessonKit derives blank sp
 :::
 
 :::{tab-item} AI prompt
-:sync-group: component-fill-in-the-blanks
+:sync: component-fill-in-the-blanks
 
 Copy into Cursor, Copilot, or ChatGPT after the [vibe coding starter context](../../guides/vibe-coding/prompting-and-workflows.md#starter-context-block):
 
@@ -87,7 +87,7 @@ Workflow tips: https://lessonkit.readthedocs.io/en/latest/guides/vibe-coding/pro
 :::
 
 :::{tab-item} Manifest
-:sync-group: component-fill-in-the-blanks
+:sync: component-fill-in-the-blanks
 
 Use `template` with `*` blanks in React; manifest can list explicit `blanks` for packaging.
 

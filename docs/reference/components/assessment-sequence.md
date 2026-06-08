@@ -23,7 +23,7 @@ The demo combines `TrueFalse` and `Quiz` to show how mixed types work in one flo
 ::::{tab-set}
 
 :::{tab-item} Live demo
-:sync-group: component-assessment-sequence
+:sync: component-assessment-sequence
 
 ```{raw} html
 <iframe
@@ -39,7 +39,7 @@ The demo combines `TrueFalse` and `Quiz` to show how mixed types work in one flo
 :::
 
 :::{tab-item} React
-:sync-group: component-assessment-sequence
+:sync: component-assessment-sequence
 
 ```tsx
 <AssessmentSequence blockId="module-sequence">
@@ -63,7 +63,7 @@ The demo combines `TrueFalse` and `Quiz` to show how mixed types work in one flo
 :::
 
 :::{tab-item} AI prompt
-:sync-group: component-assessment-sequence
+:sync: component-assessment-sequence
 
 Copy into Cursor, Copilot, or ChatGPT after the [vibe coding starter context](../../guides/vibe-coding/prompting-and-workflows.md#starter-context-block):
 
@@ -118,7 +118,7 @@ Workflow tips: https://lessonkit.readthedocs.io/en/latest/guides/vibe-coding/pro
 :::
 
 :::{tab-item} Manifest
-:sync-group: component-assessment-sequence
+:sync: component-assessment-sequence
 
 The sequence container uses **`blockId`**, not `checkId`. Set a stable `blockId` when `config.session.persistCompoundState` is true so learners resume the active step.
 

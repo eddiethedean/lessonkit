@@ -24,7 +24,7 @@ Use `WordSearch` for **hidden-word discovery** in a letter grid. Words are place
 ::::{tab-set}
 
 :::{tab-item} Live demo
-:sync-group: component-word-search
+:sync: component-word-search
 
 ```{raw} html
 <iframe
@@ -40,7 +40,7 @@ Use `WordSearch` for **hidden-word discovery** in a letter grid. Words are place
 :::
 
 :::{tab-item} React
-:sync-group: component-word-search
+:sync: component-word-search
 
 ```tsx
 <WordSearch checkId="policy-ws" words={["PHISH", "MFA", "VPN"]} size={8} />
@@ -48,7 +48,7 @@ Use `WordSearch` for **hidden-word discovery** in a letter grid. Words are place
 :::
 
 :::{tab-item} AI prompt
-:sync-group: component-word-search
+:sync: component-word-search
 
 Copy into Cursor, Copilot, or ChatGPT after the [vibe coding starter context](../../guides/vibe-coding/prompting-and-workflows.md#starter-context-block):
 
@@ -78,7 +78,7 @@ Workflow tips: https://lessonkit.readthedocs.io/en/latest/guides/vibe-coding/pro
 :::
 
 :::{tab-item} Manifest
-:sync-group: component-word-search
+:sync: component-word-search
 
 Add under `course.assessments[]`:
 

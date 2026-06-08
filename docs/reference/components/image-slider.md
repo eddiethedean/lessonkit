@@ -19,7 +19,7 @@ Use `ImageSlider` for **photo galleries** — before/after sets, product shots, 
 ::::{tab-set}
 
 :::{tab-item} Live demo
-:sync-group: component-image-slider
+:sync: component-image-slider
 
 ```{raw} html
 <iframe
@@ -35,7 +35,7 @@ Use `ImageSlider` for **photo galleries** — before/after sets, product shots, 
 :::
 
 :::{tab-item} React
-:sync-group: component-image-slider
+:sync: component-image-slider
 
 ```tsx
 <ImageSlider
@@ -49,7 +49,7 @@ Use `ImageSlider` for **photo galleries** — before/after sets, product shots, 
 :::
 
 :::{tab-item} AI prompt
-:sync-group: component-image-slider
+:sync: component-image-slider
 
 Copy into Cursor, Copilot, or ChatGPT after the [vibe coding starter context](../../guides/vibe-coding/prompting-and-workflows.md#starter-context-block):
 

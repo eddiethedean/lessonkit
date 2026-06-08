@@ -24,7 +24,7 @@ Use `Essay` for **long-form written responses** that you score manually or treat
 ::::{tab-set}
 
 :::{tab-item} Live demo
-:sync-group: component-essay
+:sync: component-essay
 
 ```{raw} html
 <iframe
@@ -40,7 +40,7 @@ Use `Essay` for **long-form written responses** that you score manually or treat
 :::
 
 :::{tab-item} React
-:sync-group: component-essay
+:sync: component-essay
 
 ```tsx
 <Essay
@@ -52,7 +52,7 @@ Use `Essay` for **long-form written responses** that you score manually or treat
 :::
 
 :::{tab-item} AI prompt
-:sync-group: component-essay
+:sync: component-essay
 
 Copy into Cursor, Copilot, or ChatGPT after the [vibe coding starter context](../../guides/vibe-coding/prompting-and-workflows.md#starter-context-block):
 
@@ -85,7 +85,7 @@ Workflow tips: https://lessonkit.readthedocs.io/en/latest/guides/vibe-coding/pro
 :::
 
 :::{tab-item} Manifest
-:sync-group: component-essay
+:sync: component-essay
 
 Essay blocks are typically completion-scored; include `checkId` for telemetry and export parity.
 

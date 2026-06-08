@@ -32,7 +32,7 @@ Use `Quiz` when learners must **pick one correct option** from a short list. Ide
 ::::{tab-set}
 
 :::{tab-item} Live demo
-:sync-group: component-quiz
+:sync: component-quiz
 
 ```{raw} html
 <iframe
@@ -48,7 +48,7 @@ Use `Quiz` when learners must **pick one correct option** from a short list. Ide
 :::
 
 :::{tab-item} React
-:sync-group: component-quiz
+:sync: component-quiz
 
 ```tsx
 <Quiz
@@ -65,7 +65,7 @@ Use `Quiz` when learners must **pick one correct option** from a short list. Ide
 :::
 
 :::{tab-item} AI prompt
-:sync-group: component-quiz
+:sync: component-quiz
 
 Copy into Cursor, Copilot, or ChatGPT after the [vibe coding starter context](../../guides/vibe-coding/prompting-and-workflows.md#starter-context-block):
 
@@ -105,7 +105,7 @@ Workflow tips: https://lessonkit.readthedocs.io/en/latest/guides/vibe-coding/pro
 :::
 
 :::{tab-item} Manifest
-:sync-group: component-quiz
+:sync: component-quiz
 
 Omit `kind` or set `"kind": "mcq"`. Choices and answer must match React props exactly.
 

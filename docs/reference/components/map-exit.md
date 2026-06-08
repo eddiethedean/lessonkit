@@ -24,7 +24,7 @@ Use `MapExit` **inside `MapStage`** to link to another `stageId` on the map — 
 ::::{tab-set}
 
 :::{tab-item} Live demo
-:sync-group: component-map-exit
+:sync: component-map-exit
 
 ```{raw} html
 <iframe
@@ -40,7 +40,7 @@ Use `MapExit` **inside `MapStage`** to link to another `stageId` on the map — 
 :::
 
 :::{tab-item} React
-:sync-group: component-map-exit
+:sync: component-map-exit
 
 ```tsx
 <MapStage stageId="hub" x={50} y={50} label="Central hub">
@@ -51,7 +51,7 @@ Use `MapExit` **inside `MapStage`** to link to another `stageId` on the map — 
 :::
 
 :::{tab-item} AI prompt
-:sync-group: component-map-exit
+:sync: component-map-exit
 
 Copy into Cursor, Copilot, or ChatGPT after the [vibe coding starter context](../../guides/vibe-coding/prompting-and-workflows.md#starter-context-block):
 
@@ -81,7 +81,7 @@ Workflow tips: https://lessonkit.readthedocs.io/en/latest/guides/vibe-coding/pro
 :::
 
 :::{tab-item} Packaging
-:sync-group: component-map-exit
+:sync: component-map-exit
 
 `MapExit` links [`MapStage`](map-stage.md) steps inside a [`GameMap`](game-map.md) — no manifest entry.
 

@@ -21,7 +21,7 @@ Each `items` entry needs a unique `id`. Each `targets` entry lists which item `i
 ::::{tab-set}
 
 :::{tab-item} Live demo
-:sync-group: component-drag-and-drop
+:sync: component-drag-and-drop
 
 ```{raw} html
 <iframe
@@ -37,7 +37,7 @@ Each `items` entry needs a unique `id`. Each `targets` entry lists which item `i
 :::
 
 :::{tab-item} React
-:sync-group: component-drag-and-drop
+:sync: component-drag-and-drop
 
 ```tsx
 <DragAndDrop
@@ -57,7 +57,7 @@ Each `items` entry needs a unique `id`. Each `targets` entry lists which item `i
 :::
 
 :::{tab-item} AI prompt
-:sync-group: component-drag-and-drop
+:sync: component-drag-and-drop
 
 Copy into Cursor, Copilot, or ChatGPT after the [vibe coding starter context](../../guides/vibe-coding/prompting-and-workflows.md#starter-context-block):
 
@@ -100,7 +100,7 @@ Workflow tips: https://lessonkit.readthedocs.io/en/latest/guides/vibe-coding/pro
 :::
 
 :::{tab-item} Manifest
-:sync-group: component-drag-and-drop
+:sync: component-drag-and-drop
 
 Add under `course.assessments[]`:
 

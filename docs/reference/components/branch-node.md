@@ -27,7 +27,7 @@ The parent hides inactive nodes; you author all nodes as children of the scenari
 ::::{tab-set}
 
 :::{tab-item} Live demo
-:sync-group: component-branch-node
+:sync: component-branch-node
 
 ```{raw} html
 <iframe
@@ -43,7 +43,7 @@ The parent hides inactive nodes; you author all nodes as children of the scenari
 :::
 
 :::{tab-item} React
-:sync-group: component-branch-node
+:sync: component-branch-node
 
 ```tsx
 <BranchingScenario blockId="card-dispute" title="Card dispute call" startNodeId="start" showPathScore>
@@ -59,7 +59,7 @@ The parent hides inactive nodes; you author all nodes as children of the scenari
 :::
 
 :::{tab-item} AI prompt
-:sync-group: component-branch-node
+:sync: component-branch-node
 
 Copy into Cursor, Copilot, or ChatGPT after the [vibe coding starter context](../../guides/vibe-coding/prompting-and-workflows.md#starter-context-block):
 
@@ -94,7 +94,7 @@ Workflow tips: https://lessonkit.readthedocs.io/en/latest/guides/vibe-coding/pro
 :::
 
 :::{tab-item} Packaging
-:sync-group: component-branch-node
+:sync: component-branch-node
 
 `BranchNode` is a child of [`BranchingScenario`](branching-scenario.md) — configure the graph in React, not `lessonkit.json`.
 

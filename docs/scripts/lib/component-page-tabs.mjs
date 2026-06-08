@@ -29,7 +29,7 @@ export function buildTryItSection({ slug, title, reactExample, manifest, aiPromp
   const tabs = [];
 
   tabs.push(`:::{tab-item} Live demo
-:sync-group: ${sync}
+:sync: ${sync}
 
 \`\`\`{raw} html
 ${iframeHtml(slug, title)}
@@ -38,13 +38,13 @@ ${iframeHtml(slug, title)}
 
   if (reactExample) {
     tabs.push(`:::{tab-item} React
-:sync-group: ${sync}
+:sync: ${sync}
 
 ${formatReactExample(reactExample)}
 :::`);
   } else {
     tabs.push(`:::{tab-item} React
-:sync-group: ${sync}
+:sync: ${sync}
 
 Full props and contracts: [block catalog](../block-catalog.md).
 :::`);
@@ -52,7 +52,7 @@ Full props and contracts: [block catalog](../block-catalog.md).
 
   if (aiPrompt) {
     tabs.push(`:::{tab-item} AI prompt
-:sync-group: ${sync}
+:sync: ${sync}
 
 Copy into Cursor, Copilot, or ChatGPT after the [vibe coding starter context](../../guides/vibe-coding/prompting-and-workflows.md#starter-context-block):
 
@@ -68,7 +68,7 @@ ${formatAiPrompt(aiPrompt)}
       body += `\`\`\`json\n${manifest.snippet.trim()}\n\`\`\``;
     }
     tabs.push(`:::{tab-item} ${tabLabel}
-:sync-group: ${sync}
+:sync: ${sync}
 
 ${body.trim()}
 :::`);

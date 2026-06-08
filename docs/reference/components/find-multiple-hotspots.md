@@ -24,7 +24,7 @@ Use `FindMultipleHotspots` when learners must **identify every correct region** 
 ::::{tab-set}
 
 :::{tab-item} Live demo
-:sync-group: component-find-multiple-hotspots
+:sync: component-find-multiple-hotspots
 
 ```{raw} html
 <iframe
@@ -40,7 +40,7 @@ Use `FindMultipleHotspots` when learners must **identify every correct region** 
 :::
 
 :::{tab-item} React
-:sync-group: component-find-multiple-hotspots
+:sync: component-find-multiple-hotspots
 
 ```tsx
 <FindMultipleHotspots
@@ -58,7 +58,7 @@ Use `FindMultipleHotspots` when learners must **identify every correct region** 
 :::
 
 :::{tab-item} AI prompt
-:sync-group: component-find-multiple-hotspots
+:sync: component-find-multiple-hotspots
 
 Copy into Cursor, Copilot, or ChatGPT after the [vibe coding starter context](../../guides/vibe-coding/prompting-and-workflows.md#starter-context-block):
 
@@ -100,7 +100,7 @@ Workflow tips: https://lessonkit.readthedocs.io/en/latest/guides/vibe-coding/pro
 :::
 
 :::{tab-item} Manifest
-:sync-group: component-find-multiple-hotspots
+:sync: component-find-multiple-hotspots
 
 Add under `course.assessments[]`:
 

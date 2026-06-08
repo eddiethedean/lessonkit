@@ -27,7 +27,7 @@ Children must be `TimedCue` blocks. The demo pairs a `TrueFalse` check with a `T
 ::::{tab-set}
 
 :::{tab-item} Live demo
-:sync-group: component-interactive-video
+:sync: component-interactive-video
 
 ```{raw} html
 <iframe
@@ -43,7 +43,7 @@ Children must be `TimedCue` blocks. The demo pairs a `TrueFalse` check with a `T
 :::
 
 :::{tab-item} React
-:sync-group: component-interactive-video
+:sync: component-interactive-video
 
 ```tsx
 <InteractiveVideo blockId="safety-video" title="Warehouse safety briefing" src="/media/sample-briefing.mp4" showVideoScore>
@@ -61,7 +61,7 @@ Children must be `TimedCue` blocks. The demo pairs a `TrueFalse` check with a `T
 :::
 
 :::{tab-item} AI prompt
-:sync-group: component-interactive-video
+:sync: component-interactive-video
 
 Copy into Cursor, Copilot, or ChatGPT after the [vibe coding starter context](../../guides/vibe-coding/prompting-and-workflows.md#starter-context-block):
 
@@ -98,7 +98,7 @@ Workflow tips: https://lessonkit.readthedocs.io/en/latest/guides/vibe-coding/pro
 :::
 
 :::{tab-item} Packaging
-:sync-group: component-interactive-video
+:sync: component-interactive-video
 
 No manifest row for `InteractiveVideo` — author [`TimedCue`](timed-cue.md) children in React.
 

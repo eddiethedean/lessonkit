@@ -15,7 +15,7 @@ Reflections are not auto-scored. Use `useTracking().interaction()` or custom LMS
 ::::{tab-set}
 
 :::{tab-item} Live demo
-:sync-group: component-reflection
+:sync: component-reflection
 
 ```{raw} html
 <iframe
@@ -31,7 +31,7 @@ Reflections are not auto-scored. Use `useTracking().interaction()` or custom LMS
 :::
 
 :::{tab-item} React
-:sync-group: component-reflection
+:sync: component-reflection
 
 ```tsx
 <Reflection
@@ -43,7 +43,7 @@ Reflections are not auto-scored. Use `useTracking().interaction()` or custom LMS
 :::
 
 :::{tab-item} AI prompt
-:sync-group: component-reflection
+:sync: component-reflection
 
 Copy into Cursor, Copilot, or ChatGPT after the [vibe coding starter context](../../guides/vibe-coding/prompting-and-workflows.md#starter-context-block):
 
