@@ -67,11 +67,14 @@ function normalizeDragAndDropState(
   const assignments = Object.fromEntries(targetIds.map((id) => [id, ""]));
 
   if (rawAssignments && typeof rawAssignments === "object") {
+    const claimed = new Set<string>();
     for (const targetId of targetIds) {
       const value = (rawAssignments as Record<string, unknown>)[targetId];
-      if (typeof value === "string" && (value === "" || itemIds.has(value))) {
-        assignments[targetId] = value;
+      if (typeof value !== "string" || value === "" || !itemIds.has(value) || claimed.has(value)) {
+        continue;
       }
+      assignments[targetId] = value;
+      claimed.add(value);
     }
   }
 

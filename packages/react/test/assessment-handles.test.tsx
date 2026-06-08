@@ -555,7 +555,7 @@ describe("AssessmentHandle (imperative API)", () => {
         checked: false,
       });
     });
-    expect(screen.queryByTestId("drag-item-a")).toBeNull();
+    expect(screen.getAllByTestId("drag-item-a")).toHaveLength(1);
     expect(screen.getByTestId("drag-item-b")).toBeTruthy();
     expect(ref.current!.getCurrentState!().pool).toEqual(["b"]);
   });
