@@ -10,7 +10,7 @@ build:
     - npm ci
     - bash docs/scripts/build-docs-demos.sh
     - bash docs/scripts/build-component-demos.sh
-    - npx playwright install chromium
+    - npx playwright install --with-deps chromium
     - bash docs/scripts/verify-doc-demos.sh
     - bash docs/scripts/verify-component-demos.sh
     - npm run docs:api

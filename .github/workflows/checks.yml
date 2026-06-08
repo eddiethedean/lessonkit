@@ -85,7 +85,7 @@ jobs:
         run: bash docs/scripts/build-component-demos.sh
 
       - name: Install Playwright browsers
-        run: npx playwright install chromium
+        run: npx playwright install --with-deps chromium
         working-directory: e2e
 
       - name: Verify doc demo bundles render
