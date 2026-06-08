@@ -2,7 +2,7 @@
 
 /* ── Landing hero ───────────────────────────────────────────── */
 .lk-hero {
-  margin: -0.5rem 0 2.5rem;
+  margin: 0 0 2.5rem;
   padding: 2.75rem 2rem 2.5rem;
   border-radius: 1.25rem;
   border: 1px solid var(--color-background-border);
@@ -11,42 +11,41 @@
     radial-gradient(ellipse 80% 60% at 0% 100%, rgba(124, 58, 237, 0.1), transparent 50%),
     var(--color-background-secondary);
   position: relative;
-  overflow: hidden;
+  isolation: isolate;
 }
 
 .lk-hero::before {
   content: "";
   position: absolute;
   inset: 0;
+  border-radius: inherit;
   background: linear-gradient(135deg, transparent 40%, rgba(37, 99, 235, 0.04) 100%);
   pointer-events: none;
+  z-index: 0;
 }
 
 .lk-hero > * {
   position: relative;
+  z-index: 1;
 }
 
 .lk-hero-title {
   font-size: clamp(2rem, 4vw, 2.75rem);
   font-weight: 800;
   letter-spacing: -0.03em;
-  line-height: 1.15;
+  line-height: 1.25;
   margin: 0 0 0.75rem;
-  background: linear-gradient(120deg, var(--color-foreground-primary) 0%, var(--color-brand-primary) 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+  padding-block: 0.125em;
+  color: var(--color-foreground-primary);
+  text-wrap: balance;
+}
+
+article[role="main"] .lk-hero > h1.lk-hero-title {
+  margin-top: 0;
 }
 
 html[data-theme="dark"] .lk-hero-title {
-  background: linear-gradient(120deg, #f8fafc 0%, #60a5fa 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-}
-
-/* Hide duplicate page title above hero (Furo renders the H1 separately) */
-article[role="main"] > section > h1:first-of-type {
-  display: none;
+  color: #f8fafc;
 }
 
 .lk-hero .lk-lead {
@@ -62,7 +61,7 @@ article[role="main"] > section > h1:first-of-type {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
-  margin-bottom: 0.25rem;
+  margin-bottom: 1rem;
 }
 
 .lk-badge {
