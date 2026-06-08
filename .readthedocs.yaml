@@ -44,9 +44,8 @@ build:
     - fonts-tlwg-loma-otf
     - fonts-freefont-ttf
   jobs:
-    post_checkout:
-      - npm ci
     post_install:
+      - npm ci
       - bash docs/scripts/build-docs-demos.sh
       - bash docs/scripts/build-component-demos.sh
       - cd e2e && npx playwright install chromium

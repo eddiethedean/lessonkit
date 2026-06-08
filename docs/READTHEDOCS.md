@@ -46,7 +46,7 @@ Compiled demos are produced by `docs/scripts/build-docs-demos.sh` (Node 18+ at r
 
 The Makefile and `.readthedocs.yaml` run that script before Sphinx.
 
-Doc demo bundles are smoke-tested with Playwright before Sphinx builds. Read the Docs has no sudo, so [`.readthedocs.yaml`](../.readthedocs.yaml) uses `build.jobs` with `apt_packages` for Chromium system libraries and `npx playwright install chromium` (not `--with-deps`). GitHub Actions docs CI may use `--with-deps` because runners have root.
+Doc demo bundles are smoke-tested with Playwright before Sphinx builds. Read the Docs has no sudo, so [`.readthedocs.yaml`](../.readthedocs.yaml) uses `build.jobs` with `apt_packages` for Chromium system libraries and `npx playwright install chromium` (not `--with-deps`). Node/npm commands run in `post_install` (after RTD installs `build.tools.nodejs`). GitHub Actions docs CI may use `--with-deps` because runners have root.
 
 ## Custom domain (optional)
 
