@@ -672,10 +672,12 @@ describe("@lessonkit/xapi", () => {
   it("drops oldest statements when queue exceeds maxSize and calls onCap", () => {
     const caps: number[] = [];
     const depths: number[] = [];
+    const overflowed: string[] = [];
     const queue = createInMemoryXAPIQueue({
       maxSize: 2,
       onCap: () => caps.push(1),
       onDepth: (n) => depths.push(n),
+      onOverflow: (statement) => overflowed.push(statement.id),
     });
     const stmt = (id: string): XAPIStatement => ({
       id,
@@ -688,6 +690,7 @@ describe("@lessonkit/xapi", () => {
     queue.enqueue(stmt("3"));
     expect(queue.size()).toBe(2);
     expect(caps).toHaveLength(1);
+    expect(overflowed).toEqual(["1"]);
     expect(depths.at(-1)).toBe(2);
   });
 

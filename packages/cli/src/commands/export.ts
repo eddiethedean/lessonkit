@@ -1,5 +1,5 @@
 import { existsSync } from "node:fs";
-import { resolve } from "node:path";
+import { relative, resolve } from "node:path";
 import { exportLkcourse, resolveSafePackageOutputOverride } from "@lessonkit/lxpack";
 import { runBuild } from "./dev.js";
 import type { CliJsonResult } from "../lib/errors.js";
@@ -51,8 +51,8 @@ export async function runExport(opts: ExportOptions): Promise<CliJsonResult> {
     });
   }
 
-  resolveExportOutput(project.root, opts.out, project.name);
-  const outRelative = opts.out ?? `${project.name}.lkcourse`;
+  const resolvedOut = resolveExportOutput(project.root, opts.out, project.name);
+  const outRelative = relative(project.root, resolvedOut).replace(/\\/g, "/");
 
   const result = await exportLkcourse({
     projectRoot: project.root,

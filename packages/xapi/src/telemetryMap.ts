@@ -141,6 +141,7 @@ const TELEMETRY_XAPI_MAPPERS = {
   lesson_completed: (event, ctx) => {
     if (event.name !== "lesson_completed") return null;
     const lessonId = event.lessonId;
+    if (!lessonId) return null;
     const data = event.data;
     const result: XAPIResult = {};
     if (typeof data?.durationMs === "number") {

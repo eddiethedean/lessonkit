@@ -213,6 +213,17 @@ describe("lkcourse", () => {
     expect(isSafeZipEntryPath("dist/index.html")).toBe(true);
     expect(isSafeZipEntryPath("/absolute")).toBe(false);
     expect(isSafeZipEntryPath("dist/\0evil")).toBe(false);
+    expect(isSafeZipEntryPath("dist/../lessonkit.json")).toBe(false);
+  });
+
+  it("readZip rejects normalized traversal paths in dist prefix", async () => {
+    const root = await mkdtemp(join(tmpdir(), "lk-zip-traverse-"));
+    tempDirs.push(root);
+    const archive = join(root, "traverse.lkcourse");
+    const zipped = zipSync({ "dist/../lessonkit.json": strToU8("tampered") });
+    await writeFile(archive, zipped);
+    const result = readZip(archive);
+    expect(result.ok).toBe(false);
   });
 
   it("validateLkcourse fails on missing manifest.json", async () => {

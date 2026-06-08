@@ -292,6 +292,8 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
 
     let bootstrapSent = false;
     let bootstrapAlreadyStarted = false;
+    let bootstrapSessionId: string | undefined;
+    let bootstrapCourseId: CourseId | undefined;
 
     if (next) {
       const sessionId = sessionIdRef.current;
@@ -326,6 +328,8 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
               xapiBootstrapQueuedRef.current = true;
               xapiBootstrapInFlightRef.current = true;
               bootstrapSent = true;
+              bootstrapSessionId = sessionId;
+              bootstrapCourseId = cid;
             }
           }
         } catch (err) {
@@ -348,13 +352,13 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
       /* v8 ignore stop */
       try {
         await next?.flush();
-        if (bootstrapSent && !cancelled) {
+        if (bootstrapSent && !cancelled && bootstrapSessionId && bootstrapCourseId) {
           xapiBootstrapSendRef.current = true;
           xapiBootstrapInFlightRef.current = false;
           if (!bootstrapAlreadyStarted) {
-            markCourseStarted(providerStorage, sessionIdRef.current, courseIdRef.current);
+            markCourseStarted(providerStorage, bootstrapSessionId, bootstrapCourseId);
           }
-          markCourseStartedXapiSent(providerStorage, sessionIdRef.current, courseIdRef.current);
+          markCourseStartedXapiSent(providerStorage, bootstrapSessionId, bootstrapCourseId);
           xapiCourseStartedSentOnClientRef.current = true;
         }
       } catch {
@@ -549,9 +553,31 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
 
   const emitLifecycleEvent: TelemetryEmitFn = useCallback(
     (event) => {
-      emitWithBridge(trackingRef.current, event);
+      return registerTelemetryFlight(
+        pendingTelemetryFlightsRef.current,
+        emitTelemetryWithPlugins({
+          pluginHost: pluginHostRef.current,
+          tracking: trackingRef.current,
+          xapi: xapiRef.current,
+          event,
+          skipPluginPass: true,
+          pluginCtx: buildPluginContext({
+            courseId: courseIdRef.current,
+            sessionId: sessionIdRef.current,
+            attemptId: attemptIdRef.current,
+            user: userRef.current,
+          }),
+          lxpackBridge: lxpackBridgeModeRef.current,
+          allowedParentOrigins: allowedParentOriginsRef.current,
+          onLxpackBridgeMiss,
+          onLxpackBridgeError,
+          extraSinks: extraSinksRef.current,
+          onXapiMappingError: observabilityRef.current?.onXapiMappingError,
+          onXapiTransportError: observabilityRef.current?.onXapiTransportError,
+        }),
+      );
     },
-    [emitWithBridge],
+    [onLxpackBridgeMiss, onLxpackBridgeError],
   );
 
   const track = useCallback(

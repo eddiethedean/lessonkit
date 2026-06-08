@@ -40,6 +40,27 @@ describe("runtime plugins", () => {
     expect(sink).not.toHaveBeenCalled();
   });
 
+  it("emitTelemetryWithPlugins skipPluginPass bypasses plugin filtering", () => {
+    const sink = vi.fn();
+    const host = createReactPluginHost([
+      defineTelemetryPlugin({
+        id: "drop",
+        version: "1",
+        kind: "analytics",
+        onTelemetry: () => null,
+      }),
+    ]);
+    emitTelemetryWithPlugins({
+      pluginHost: host,
+      tracking: createTrackingClient({ sink, batch: { enabled: false } }),
+      xapi: null,
+      event: baseEvent,
+      skipPluginPass: true,
+      pluginCtx: buildPluginContext({ courseId: "course-1", sessionId: "s1" }),
+    });
+    expect(sink).toHaveBeenCalledTimes(1);
+  });
+
   it("batchSink wrapper uses deliverTelemetryBatch without dropping buffered events", async () => {
     const batches: TelemetryEvent[][] = [];
     let passCount = 0;

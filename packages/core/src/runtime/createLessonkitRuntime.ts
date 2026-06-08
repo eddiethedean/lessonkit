@@ -225,6 +225,10 @@ export function createLessonkitRuntime(
       const sessionKeyAfter = JSON.stringify({ sessionId, attemptId, user });
       if (next.courseId !== undefined && next.courseId !== previousCourseId) {
         progress = createProgressController();
+        if (!configSnapshot.deferPluginSetup) {
+          pluginHost?.disposeAll();
+          pluginHost?.setupAll(getPluginCtx());
+        }
       }
       if (next.plugins !== undefined && next.plugins !== configSnapshot.plugins) {
         pluginHost?.disposeAll();
@@ -300,15 +304,17 @@ export function createLessonkitRuntime(
       configSnapshot.courseId = nextCourseId;
       courseId = nextCourseId;
       progress = createProgressController();
-      pluginHost?.disposeAll();
       if (!configSnapshot.deferPluginSetup) {
+        pluginHost?.disposeAll();
         pluginHost?.setupAll(getPluginCtx());
       }
     },
     dispose() {
       if (disposed) return;
       disposed = true;
-      pluginHost?.disposeAll();
+      if (!configSnapshot.deferPluginSetup) {
+        pluginHost?.disposeAll();
+      }
     },
   };
 }

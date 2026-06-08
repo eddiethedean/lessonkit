@@ -1,5 +1,5 @@
 import { slugifyId } from "@lessonkit/core";
-import { cp, mkdir, readdir, readFile, rename, rm, writeFile } from "node:fs/promises";
+import { cp, mkdir, readdir, readFile, rename, rm, stat, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { randomUUID } from "node:crypto";
 import { basename, dirname, join, resolve } from "node:path";
@@ -108,10 +108,28 @@ async function applyTemplateSubstitutions(projectDir: string, projectName: strin
   await writeFile(appPath, appSource, "utf8");
 }
 
+async function backupConflictingFiles(
+  stagingDir: string,
+  projectDir: string,
+): Promise<Map<string, Buffer>> {
+  const backups = new Map<string, Buffer>();
+  const stagingEntries = await readdir(stagingDir, { withFileTypes: true });
+  for (const entry of stagingEntries) {
+    const destPath = join(projectDir, entry.name);
+    if (!existsSync(destPath)) continue;
+    const destStat = await stat(destPath);
+    if (destStat.isFile()) {
+      backups.set(entry.name, await readFile(destPath));
+    }
+  }
+  return backups;
+}
+
 async function rollbackPromotedFiles(
   projectDir: string,
   stagingDir: string,
   preExisting: Set<string>,
+  backups: Map<string, Buffer>,
 ): Promise<void> {
   let stagingEntries;
   try {
@@ -122,6 +140,11 @@ async function rollbackPromotedFiles(
   for (const entry of stagingEntries) {
     if (preExisting.has(entry.name)) continue;
     await rm(join(projectDir, entry.name), { recursive: true, force: true }).catch(
+      /* v8 ignore next */ () => undefined,
+    );
+  }
+  for (const [name, content] of backups) {
+    await writeFile(join(projectDir, name), content).catch(
       /* v8 ignore next */ () => undefined,
     );
   }
@@ -152,6 +175,7 @@ export const __testInitHelpers = {
   copyTemplate,
   promoteStagingToProjectDir,
   rollbackPromotedFiles,
+  backupConflictingFiles,
 };
 
 export async function runInit(opts: InitOptions, logger: CliLogger): Promise<CliJsonResult> {
@@ -228,10 +252,11 @@ export async function runInit(opts: InitOptions, logger: CliLogger): Promise<Cli
 
     if (opts.here) {
       const preExisting = new Set(await readdir(projectDir));
+      const backups = await backupConflictingFiles(stagingDir, projectDir);
       try {
         await __testInitHelpers.promoteStagingToProjectDir(stagingDir, projectDir);
       } catch (promoteErr) {
-        await rollbackPromotedFiles(projectDir, stagingDir, preExisting);
+        await rollbackPromotedFiles(projectDir, stagingDir, preExisting, backups);
         throw promoteErr;
       }
       await rm(stagingDir, { recursive: true, force: true });

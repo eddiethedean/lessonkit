@@ -6,12 +6,20 @@ import type { LkcourseValidationIssue } from "./types";
 
 export const MAX_LKCOURSE_UNCOMPRESSED_BYTES = 256 * 1024 * 1024;
 
+/** Slash-normalize then reject paths that collapse via `.` or `..` segments. */
+export function canonicalZipEntryPath(entryPath: string): string | null {
+  const slashNormalized = entryPath.replace(/\\/g, "/");
+  const canonical = normalize(slashNormalized).replace(/\\/g, "/");
+  if (canonical !== slashNormalized) return null;
+  return canonical;
+}
+
 export function isSafeZipEntryPath(entryPath: string): boolean {
-  const normalized = normalize(entryPath).replace(/\\/g, "/");
-  if (!normalized.length || normalized.startsWith("/") || normalized.includes("\0")) {
+  const canonical = canonicalZipEntryPath(entryPath);
+  if (!canonical?.length || canonical.startsWith("/") || canonical.includes("\0")) {
     return false;
   }
-  const segments = normalized.split("/").filter((s) => s.length > 0);
+  const segments = canonical.split("/").filter((s) => s.length > 0);
   if (segments.some((s) => s === "..")) return false;
   return segments.length > 0;
 }
@@ -56,9 +64,13 @@ export function readZip(archivePath: string): ReadZipResult {
   let totalUncompressed = 0;
 
   for (const [path, data] of Object.entries(unzipped)) {
-    const normalized = path.replace(/\\/g, "/");
-    if (!isSafeZipEntryPath(normalized)) {
-      issues.push({ path: normalized, message: "unsafe zip entry path" });
+    const canonical = canonicalZipEntryPath(path);
+    if (!canonical || !isSafeZipEntryPath(canonical)) {
+      issues.push({ path, message: "unsafe zip entry path" });
+      continue;
+    }
+    if (entries.has(canonical)) {
+      issues.push({ path: canonical, message: "duplicate zip entry path" });
       continue;
     }
     totalUncompressed += data.byteLength;
@@ -73,7 +85,7 @@ export function readZip(archivePath: string): ReadZipResult {
         ],
       };
     }
-    entries.set(normalized, data);
+    entries.set(canonical, data);
   }
 
   if (issues.length) return { ok: false, issues };
@@ -93,7 +105,7 @@ export async function collectDistEntries(
       const abs = join(absDir, entry.name);
       const rel = relPrefix ? `${relPrefix}/${entry.name}` : entry.name;
       const zipPath = `${spaDistRelative}/${rel}`.replace(/\\/g, "/");
-      if (!isSafeRelativeSpaPath(zipPath) && !zipPath.startsWith(`${spaDistRelative}/`)) {
+      if (!isSafeRelativeSpaPath(zipPath)) {
         throw new Error(`unsafe dist path: ${zipPath}`);
       }
       const stat = await lstat(abs);

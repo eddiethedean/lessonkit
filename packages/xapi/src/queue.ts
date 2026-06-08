@@ -89,16 +89,20 @@ export function createInMemoryXAPIQueue(opts?: InMemoryXAPIQueueOptions): XAPIQu
       if (buffer.length >= maxSize) {
         if (headInFlight) {
           if (buffer.length > 1) {
+            const evicted = buffer[1]!;
             buffer.splice(1, 1);
             opts?.onCap?.();
+            opts?.onOverflow?.(evicted);
           } else {
             opts?.onCap?.();
             opts?.onOverflow?.(normalized);
             return;
           }
         } else {
+          const evicted = buffer[0]!;
           buffer.shift();
           opts?.onCap?.();
+          opts?.onOverflow?.(evicted);
         }
       }
       buffer.push(normalized);

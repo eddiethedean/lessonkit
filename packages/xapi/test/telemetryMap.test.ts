@@ -121,6 +121,17 @@ describe("telemetryEventToXAPIStatement", () => {
     ).toBeNull();
   });
 
+  it("returns null for lesson_completed without lessonId", () => {
+    expect(
+      telemetryEventToXAPIStatement({
+        name: "lesson_completed",
+        courseId: base.courseId,
+        sessionId: base.sessionId,
+        timestamp: base.timestamp,
+      } as TelemetryEvent),
+    ).toBeNull();
+  });
+
   it("maps lesson_completed with duration and score", () => {
     const stmt = telemetryEventToXAPIStatement({
       name: "lesson_completed",

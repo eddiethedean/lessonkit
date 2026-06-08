@@ -1,9 +1,61 @@
-import { mkdir, writeFile } from "node:fs/promises";
+import { cp, mkdir, mkdtemp, readdir, rm, writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { assertRealPathUnderRoot } from "../spaPath";
+import type { LessonkitManifest } from "../manifest";
 import { validateLkcourse } from "./validate";
 import { isSafeZipEntryPath, readZip } from "./zip";
 import type { ImportLkcourseOptions, ImportLkcourseResult } from "./types";
+
+async function writeImportTree(
+  stagingDir: string,
+  manifest: LessonkitManifest,
+  entries: Map<string, Uint8Array>,
+  spaDistDir: string,
+): Promise<number> {
+  let fileCount = 0;
+
+  await writeFile(
+    join(stagingDir, "lessonkit.json"),
+    `${JSON.stringify(manifest, null, 2)}\n`,
+    "utf8",
+  );
+  fileCount += 1;
+
+  for (const [entryPath, data] of entries) {
+    const normalized = entryPath.replace(/\\/g, "/");
+    if (!normalized.startsWith(`${spaDistDir}/`)) continue;
+
+    const relativeUnderSpa = normalized.slice(spaDistDir.length + 1);
+
+    const outPath = join(stagingDir, spaDistDir, relativeUnderSpa);
+    const resolvedOut = resolve(outPath);
+    assertRealPathUnderRoot(stagingDir, resolvedOut);
+
+    if (!isSafeZipEntryPath(join(spaDistDir, relativeUnderSpa))) {
+      throw new Error(`unsafe extraction path: ${entryPath}`);
+    }
+
+    await mkdir(dirname(resolvedOut), { recursive: true });
+    await writeFile(resolvedOut, data);
+    fileCount += 1;
+  }
+
+  return fileCount;
+}
+
+async function promoteImportStaging(stagingDir: string, targetDir: string): Promise<void> {
+  const entries = await readdir(stagingDir, { withFileTypes: true });
+  for (const entry of entries) {
+    const srcPath = join(stagingDir, entry.name);
+    const destPath = join(targetDir, entry.name);
+    if (entry.isDirectory()) {
+      await cp(srcPath, destPath, { recursive: true, force: true });
+    } else if (entry.isFile()) {
+      await mkdir(dirname(destPath), { recursive: true });
+      await cp(srcPath, destPath);
+    }
+  }
+}
 
 export async function importLkcourse(
   options: ImportLkcourseOptions,
@@ -36,38 +88,25 @@ export async function importLkcourse(
   const read = readZip(archivePath);
   if (!read.ok) return read;
 
-  let fileCount = 0;
-
+  let stagingDir: string | undefined;
   try {
-    await writeFile(
-      join(targetDir, "lessonkit.json"),
-      `${JSON.stringify(manifest, null, 2)}\n`,
-      "utf8",
-    );
-    fileCount += 1;
+    stagingDir = await mkdtemp(join(targetDir, ".lkcourse-import-"));
+    const fileCount = await writeImportTree(stagingDir, manifest, read.entries, spaDistDir);
+    await promoteImportStaging(stagingDir, targetDir);
+    await rm(stagingDir, { recursive: true, force: true });
+    stagingDir = undefined;
 
-    for (const [entryPath, data] of read.entries) {
-      const normalized = entryPath.replace(/\\/g, "/");
-      if (!normalized.startsWith(`${spaDistDir}/`)) continue;
-
-      const relativeUnderSpa = normalized.slice(spaDistDir.length + 1);
-
-      const outPath = join(targetDir, spaDistDir, relativeUnderSpa);
-      const resolvedOut = resolve(outPath);
-      assertRealPathUnderRoot(targetDir, resolvedOut);
-
-      if (!isSafeZipEntryPath(join(spaDistDir, relativeUnderSpa))) {
-        return {
-          ok: false,
-          issues: [{ path: entryPath, message: "unsafe extraction path" }],
-        };
-      }
-
-      await mkdir(dirname(resolvedOut), { recursive: true });
-      await writeFile(resolvedOut, data);
-      fileCount += 1;
-    }
+    return {
+      ok: true,
+      targetDir,
+      manifest,
+      interchange,
+      fileCount,
+    };
   } catch (err) {
+    if (stagingDir) {
+      await rm(stagingDir, { recursive: true, force: true }).catch(() => undefined);
+    }
     return {
       ok: false,
       issues: [
@@ -78,12 +117,4 @@ export async function importLkcourse(
       ],
     };
   }
-
-  return {
-    ok: true,
-    targetDir,
-    manifest,
-    interchange,
-    fileCount,
-  };
 }

@@ -1,4 +1,5 @@
 import { parseLessonkitManifest } from "../manifest";
+import { isSafeZipEntryPath } from "./zip";
 import type { LkcourseEnvelopeV1, LkcourseValidationIssue } from "./types";
 
 export type ParseEnvelopeResult =
@@ -51,7 +52,12 @@ export function parseLkcourseEnvelope(raw: unknown, label = "manifest.json"): Pa
       if (typeof entry !== "string" || !entry.trim()) {
         issues.push({ path: `entries[${i}]`, message: "must be a non-empty string" });
       } else {
-        entries.push(entry.trim());
+        const trimmed = entry.trim();
+        if (!isSafeZipEntryPath(trimmed)) {
+          issues.push({ path: `entries[${i}]`, message: "must be a safe relative path" });
+        } else {
+          entries.push(trimmed);
+        }
       }
     }
   }
