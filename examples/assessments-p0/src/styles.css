@@ -1,6 +1,11 @@
+html,
 body {
-  font-family: system-ui, sans-serif;
-  margin: 1rem;
+  min-height: 100%;
+  margin: 0;
+  padding: 1rem;
+  background: var(--lk-color-background, #ffffff);
+  color: var(--lk-color-foreground, #111827);
+  font-family: var(--lk-font-family, system-ui, sans-serif);
 }
 
 .lk-visually-hidden {

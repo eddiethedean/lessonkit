@@ -118,4 +118,4 @@ Export embeds the full author manifest in the envelope. Import writes it back ve
 - [Manifest reference](reference/manifest.md)
 - [Packaging reference](reference/packaging.md)
 - [CLI reference](reference/cli.md)
-- [Migration 1.5 → 1.6](MIGRATION-1.5-to-1.6.md)
+- [Migration 1.5 → 1.6](../MIGRATION-1.5-to-1.6)

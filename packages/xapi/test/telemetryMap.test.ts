@@ -474,6 +474,81 @@ describe("telemetryEventToXAPIStatement", () => {
     expect(branchSelected?.verb).toBe("http://adlnet.gov/expapi/verbs/experienced");
   });
 
+  it("maps 1.6.x content and GameMap telemetry events", () => {
+    const blockEvents = [
+      "image_juxtaposition_changed",
+      "timeline_event_viewed",
+      "image_sequence_changed",
+      "audio_recording_started",
+      "qr_content_revealed",
+      "advent_door_opened",
+    ] as const;
+
+    for (const name of blockEvents) {
+      const stmt = telemetryEventToXAPIStatement({
+        name,
+        ...base,
+        data: { blockId: "block-16" },
+      } as TelemetryEvent);
+      expect(stmt?.verb).toBe("http://adlnet.gov/expapi/verbs/experienced");
+      expect(stmt?.object.id).toContain(":block:block-16");
+    }
+
+    const audioCompleted = telemetryEventToXAPIStatement({
+      name: "audio_recording_completed",
+      ...base,
+      data: { blockId: "rec-1", durationMs: 1200 },
+    } as TelemetryEvent);
+    expect(audioCompleted?.verb).toBe("http://adlnet.gov/expapi/verbs/completed");
+    expect(
+      telemetryEventToXAPIStatement({
+        name: "audio_recording_completed",
+        courseId: base.courseId,
+        timestamp: base.timestamp,
+        data: { durationMs: 1200 },
+      } as unknown as TelemetryEvent),
+    ).toBeNull();
+
+    const mapStage = telemetryEventToXAPIStatement({
+      name: "map_stage_viewed",
+      ...base,
+      data: { blockId: "map-1", stageId: "lobby" },
+    } as TelemetryEvent);
+    expect(mapStage?.object.id).toContain(":node:lobby");
+    expect(
+      telemetryEventToXAPIStatement({
+        name: "map_stage_viewed",
+        ...base,
+        data: { blockId: "map-1" },
+      } as TelemetryEvent),
+    ).toBeNull();
+
+    const mapExit = telemetryEventToXAPIStatement({
+      name: "map_exit_selected",
+      ...base,
+      data: { blockId: "map-1", fromStageId: "lobby", toStageId: "vault" },
+    } as TelemetryEvent);
+    expect(mapExit?.object.id).toContain(":node:vault");
+    expect(
+      telemetryEventToXAPIStatement({
+        name: "map_exit_selected",
+        courseId: base.courseId,
+        timestamp: base.timestamp,
+        data: { blockId: "map-1", toStageId: "vault" },
+      } as TelemetryEvent),
+    ).toBeNull();
+  });
+
+  it("keeps non-URL embed sources unchanged when sanitizing", () => {
+    const embed = telemetryEventToXAPIStatement({
+      name: "interaction",
+      ...base,
+      data: { kind: "embed_viewed", blockId: "embed-relative", src: "/local/embed.html" },
+    });
+    const ext = embed?.context?.extensions as Record<string, unknown> | undefined;
+    expect(ext?.["https://lessonkit.dev/xapi/embedSrc"]).toBe("/local/embed.html");
+  });
+
   it("maps branch_selected with NaN scoreWeight as experienced", () => {
     const branchSelected = telemetryEventToXAPIStatement({
       name: "branch_selected",

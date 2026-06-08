@@ -51,6 +51,7 @@
   border-radius: 0.5rem;
   border: 1px solid color-mix(in srgb, var(--showcase-accent) 35%, var(--lk-color-border));
   background: color-mix(in srgb, var(--showcase-accent) 8%, var(--lk-color-panel));
+  color: var(--lk-color-foreground);
   font-size: 0.875rem;
   line-height: 1.5;
 }
@@ -79,6 +80,7 @@
   border-radius: 0.5rem;
   background: color-mix(in srgb, var(--showcase-accent) 8%, var(--lk-color-panel));
   border: 1px solid var(--lk-color-border);
+  color: var(--lk-color-foreground);
   font-size: 0.9rem;
 }
 

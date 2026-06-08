@@ -5,7 +5,7 @@ import type { LkcourseValidationIssue, ValidateLkcourseResult } from "./types";
 
 export function validateLkcourseArchiveEntries(
   entries: Map<string, Uint8Array>,
-  archiveLabel: string,
+  _archiveLabel: string,
 ): ValidateLkcourseResult {
   const issues: LkcourseValidationIssue[] = [];
 

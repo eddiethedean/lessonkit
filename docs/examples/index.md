@@ -26,9 +26,9 @@ From the repo root, run `bash docs/scripts/build-docs-demos.sh` before `make htm
 | [data-privacy](#data-privacy-essentials-examplesdata-privacy) | Yes | `lessonkit-example-data-privacy` | 1.x | Compliance-themed course |
 | [customer-service](#customer-de-escalation-examplescustomer-service) | Yes | `lessonkit-example-customer-service` | 1.5 branching | Support + branching scenario |
 | [lxpack-golden](#workplace-safety-briefing-exampleslxpack-golden) | Yes | `lessonkit-example-lxpack-golden` | Packaging | SCORM/xAPI export reference |
-| [slide-deck](#slide-deck-examplesslide-deck) | No | `lessonkit-example-slide-deck` | 1.3 | `SlideDeck` compound |
-| [interactive-book](#interactive-book-examplesinteractive-book) | No | `lessonkit-example-interactive-book` | 1.2 | `InteractiveBook` compound |
-| [assessments-p0](#assessment-showcase-examplesassessments-p0) | No | `lessonkit-example-assessments-p0` | 1.1 | Minimal assessment sample |
+| [interactive-book](#interactive-book-examplesinteractive-book) | Yes | `lessonkit-example-interactive-book` | 1.2 | `InteractiveBook` compound |
+| [slide-deck](#slide-deck-examplesslide-deck) | Yes | `lessonkit-example-slide-deck` | 1.3 | `SlideDeck` compound |
+| [assessments-p0](#assessment-showcase-examplesassessments-p0) | Yes | `lessonkit-example-assessments-p0` | 1.1 | Minimal assessment sample |
 | interactive-video | No (GitHub) | `lessonkit-example-interactive-video` | 1.4 | `InteractiveVideo` compound |
 | branching-scenario | No (GitHub) | `lessonkit-example-branching-scenario` | 1.5 | `BranchingScenario` graph |
 
@@ -140,31 +140,52 @@ Warehouse new-hire briefing in the compact field theme: PPE sign-off, photo haza
 
 ## Interactive book (`examples/interactive-book`)
 
-Compound `Page` and `InteractiveBook` patterns (framework 1.2). Source-only on this site—run locally from the monorepo.
+Compound `Page` and `InteractiveBook` patterns (framework 1.2): multi-page handbook with accordion content and an in-book `TrueFalse` check.
 
 ```{raw} html
+<iframe
+  class="lk-demo-frame"
+  src="../_static/demos/interactive-book/index.html"
+  title="Interactive book demo"
+  loading="lazy"
+></iframe>
 <p class="lk-demo-links">
-  <a href="https://github.com/eddiethedean/lessonkit/tree/main/examples/interactive-book">Source on GitHub</a>
+  <a href="../_static/demos/interactive-book/index.html" target="_blank" rel="noopener noreferrer">Open in full tab</a>
+  · <a href="https://github.com/eddiethedean/lessonkit/tree/main/examples/interactive-book">Source on GitHub</a>
 </p>
 ```
 
 ## Slide deck (`examples/slide-deck`)
 
-**Recommended starting point for 1.3.** Compound `Slide` and `SlideDeck` (H5P Course Presentation): keyboard navigation, deck scoring, and session resume. Source-only on this site—run locally from the monorepo.
+**Recommended starting point for 1.3.** Compound `Slide` and `SlideDeck` (H5P Course Presentation): keyboard navigation, deck scoring, and session resume.
 
 ```{raw} html
+<iframe
+  class="lk-demo-frame"
+  src="../_static/demos/slide-deck/index.html"
+  title="Slide deck demo"
+  loading="lazy"
+></iframe>
 <p class="lk-demo-links">
-  <a href="https://github.com/eddiethedean/lessonkit/tree/main/examples/slide-deck">Source on GitHub</a>
+  <a href="../_static/demos/slide-deck/index.html" target="_blank" rel="noopener noreferrer">Open in full tab</a>
+  · <a href="https://github.com/eddiethedean/lessonkit/tree/main/examples/slide-deck">Source on GitHub</a>
 </p>
 ```
 
 ## Assessment showcase (`examples/assessments-p0`)
 
-P0 blocks: `TrueFalse`, drag/drop, hotspots, fill-in-blanks, and related types. Source-only on this site.
+Minimal P0 assessment sample: `TrueFalse`, fill-in-blanks, mark-the-words, drag-the-words, and drag-and-drop inside `AssessmentSequence`.
 
 ```{raw} html
+<iframe
+  class="lk-demo-frame"
+  src="../_static/demos/assessments-p0/index.html"
+  title="Assessment showcase demo"
+  loading="lazy"
+></iframe>
 <p class="lk-demo-links">
-  <a href="https://github.com/eddiethedean/lessonkit/tree/main/examples/assessments-p0">Source on GitHub</a>
+  <a href="../_static/demos/assessments-p0/index.html" target="_blank" rel="noopener noreferrer">Open in full tab</a>
+  · <a href="https://github.com/eddiethedean/lessonkit/tree/main/examples/assessments-p0">Source on GitHub</a>
 </p>
 ```
 

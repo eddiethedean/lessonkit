@@ -1,5 +1,5 @@
 import { readFileSync, statSync } from "node:fs";
-import { dirname, join, normalize, sep } from "node:path";
+import { dirname, join, normalize } from "node:path";
 import { strFromU8, strToU8, unzipSync, zipSync } from "fflate";
 import { isSafeRelativeSpaPath } from "../spaPath";
 import type { LkcourseValidationIssue } from "./types";

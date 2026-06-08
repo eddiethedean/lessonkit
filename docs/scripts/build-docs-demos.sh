@@ -41,4 +41,13 @@ cp -R examples/framework-11-showcase/dist/. "$DEMOS_DIR/framework-11-showcase/"
 build_demo lessonkit-example-framework-12-showcase framework-12-showcase
 cp -R examples/framework-12-showcase/dist/. "$DEMOS_DIR/framework-12-showcase/"
 
+build_demo lessonkit-example-interactive-book interactive-book
+cp -R examples/interactive-book/dist/. "$DEMOS_DIR/interactive-book/"
+
+build_demo lessonkit-example-slide-deck slide-deck
+cp -R examples/slide-deck/dist/. "$DEMOS_DIR/slide-deck/"
+
+build_demo lessonkit-example-assessments-p0 assessments-p0
+cp -R examples/assessments-p0/dist/. "$DEMOS_DIR/assessments-p0/"
+
 echo "==> Demo bundles ready under docs/_static/demos/"

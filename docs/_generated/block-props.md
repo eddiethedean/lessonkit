@@ -583,3 +583,212 @@ Select all correct regions on an image.
 **Required IDs:** `checkId`
 
 **Telemetry:** `assessment_answered`, `assessment_completed`
+
+## Table
+
+Rich text table with caption.
+
+| Prop | Type | Required | Description |
+| --- | --- | --- | --- |
+| `blockId` | BlockId | yes | Stable block id. |
+| `caption` | string | no | Table caption. |
+| `headers` | string[] | yes | Column headers. |
+| `rows` | string[][] | yes | Table rows. |
+
+**Required IDs:** `blockId`
+
+## ImageJuxtaposition
+
+Before/after image comparison slider.
+
+| Prop | Type | Required | Description |
+| --- | --- | --- | --- |
+| `blockId` | BlockId | yes | Stable block id. |
+| `beforeSrc` | string | yes | Before image URL. |
+| `afterSrc` | string | yes | After image URL. |
+| `beforeAlt` | string | yes | Before alt text. |
+| `afterAlt` | string | yes | After alt text. |
+
+**Required IDs:** `blockId`
+
+**Telemetry:** `image_juxtaposition_changed`
+
+## Timeline
+
+Vertical timeline of events.
+
+| Prop | Type | Required | Description |
+| --- | --- | --- | --- |
+| `blockId` | BlockId | yes | Stable block id. |
+| `events` | TimelineEvent[] | yes | Timeline events. |
+
+**Required IDs:** `blockId`
+
+**Telemetry:** `timeline_event_viewed`
+
+## ImageSequence
+
+Progressive image sequence blend.
+
+| Prop | Type | Required | Description |
+| --- | --- | --- | --- |
+| `blockId` | BlockId | yes | Stable block id. |
+| `frames` | SequenceFrame[] | yes | Sequence frames. |
+
+**Required IDs:** `blockId`
+
+**Telemetry:** `image_sequence_changed`
+
+## Collage
+
+Multi-image grid collage.
+
+| Prop | Type | Required | Description |
+| --- | --- | --- | --- |
+| `blockId` | BlockId | yes | Stable block id. |
+| `columns` | number | no | Grid columns. |
+| `cells` | CollageCell[] | yes | Collage cells. |
+
+**Required IDs:** `blockId`
+
+## AudioRecorder
+
+Learner audio recording (client-only storage).
+
+| Prop | Type | Required | Description |
+| --- | --- | --- | --- |
+| `blockId` | BlockId | yes | Stable block id. |
+| `maxDurationSeconds` | number | no | Max recording length. |
+| `consentLabel` | string | no | Consent checkbox label. |
+
+**Required IDs:** `blockId`
+
+**Telemetry:** `audio_recording_started`, `audio_recording_completed`
+
+## CombinationLock
+
+Enter a digit combination to unlock.
+
+| Prop | Type | Required | Description |
+| --- | --- | --- | --- |
+| `checkId` | CheckId | yes | Stable check id. |
+| `combination` | string | yes | Correct combination. |
+| `label` | string | no | Prompt label. |
+| `enableRetry` | boolean | no | Allow retry after completion. |
+| `enableSolutionsButton` | boolean | no | Show solution control. |
+| `autoCheck` | boolean | no | Check answers automatically when possible. |
+| `passingScore` | number | no | Minimum score to pass. |
+
+**Required IDs:** `checkId`
+
+**Telemetry:** `assessment_answered`, `assessment_completed`
+
+## QrContent
+
+QR code with revealable hidden content.
+
+| Prop | Type | Required | Description |
+| --- | --- | --- | --- |
+| `blockId` | BlockId | yes | Stable block id. |
+| `payload` | string | yes | QR payload URL or text. |
+| `title` | string | no | Block title. |
+| `hiddenTitle` | string | no | Revealed title. |
+| `hiddenBody` | string | no | Revealed body. |
+
+**Required IDs:** `blockId`
+
+**Telemetry:** `qr_content_revealed`
+
+## Crossword
+
+Crossword puzzle grid.
+
+| Prop | Type | Required | Description |
+| --- | --- | --- | --- |
+| `checkId` | CheckId | yes | Stable check id. |
+| `rows` | number | yes | Grid rows. |
+| `cols` | number | yes | Grid columns. |
+| `entries` | CrosswordEntry[] | yes | Clues and answers. |
+| `enableRetry` | boolean | no | Allow retry after completion. |
+| `enableSolutionsButton` | boolean | no | Show solution control. |
+| `autoCheck` | boolean | no | Check answers automatically when possible. |
+| `passingScore` | number | no | Minimum score to pass. |
+
+**Required IDs:** `checkId`
+
+**Telemetry:** `assessment_answered`, `assessment_completed`
+
+## WordSearch
+
+Word search puzzle (page-level only; excluded from compounds).
+
+| Prop | Type | Required | Description |
+| --- | --- | --- | --- |
+| `checkId` | CheckId | yes | Stable check id. |
+| `words` | string[] | yes | Words to find. |
+| `size` | number | no | Grid size. |
+| `enableRetry` | boolean | no | Allow retry after completion. |
+| `enableSolutionsButton` | boolean | no | Show solution control. |
+| `autoCheck` | boolean | no | Check answers automatically when possible. |
+| `passingScore` | number | no | Minimum score to pass. |
+
+**Required IDs:** `checkId`
+
+**Telemetry:** `assessment_answered`, `assessment_completed`
+
+## AdventCalendar
+
+Calendar with openable doors.
+
+| Prop | Type | Required | Description |
+| --- | --- | --- | --- |
+| `blockId` | BlockId | yes | Stable block id. |
+| `doors` | AdventDoor[] | yes | Calendar doors. |
+| `unlockFrom` | string | no | ISO date to unlock doors. |
+
+**Required IDs:** `blockId`
+
+**Telemetry:** `advent_door_opened`
+
+## MapStage
+
+Spatial stage in a GameMap with content and exits.
+
+| Prop | Type | Required | Description |
+| --- | --- | --- | --- |
+| `stageId` | string | yes | Unique stage id. |
+| `x` | number | yes | X position percent on map. |
+| `y` | number | yes | Y position percent on map. |
+| `label` | string | no | Stage label. |
+| `children` | ReactNode | yes | Content and MapExit controls. |
+
+**Telemetry:** `map_stage_viewed`
+
+## MapExit
+
+Transition control linking to a target MapStage.
+
+| Prop | Type | Required | Description |
+| --- | --- | --- | --- |
+| `label` | string | yes | Exit label. |
+| `targetStageId` | string | yes | Target stage id. |
+| `scoreWeight` | number | no | Optional exit score weight. |
+
+**Telemetry:** `map_exit_selected`
+
+## GameMap
+
+Spatial map branching with scored stages.
+
+| Prop | Type | Required | Description |
+| --- | --- | --- | --- |
+| `blockId` | BlockId | yes | Stable block id. |
+| `title` | string | yes | Map title. |
+| `backgroundSrc` | string | yes | Background image URL. |
+| `startStageId` | string | yes | Entry stage id. |
+| `showMapScore` | boolean | no | Show visited-path score. |
+| `children` | MapStage[] | yes | Map stages. |
+
+**Required IDs:** `blockId`
+
+**Telemetry:** `map_stage_viewed`, `map_exit_selected`

@@ -38,15 +38,39 @@ describe("@lessonkit/cli program", () => {
     expect(program.description()).toBe("LessonKit CLI");
   });
 
+  it("blocks list prints TSV without --json", async () => {
+    const consoleLog = vi.spyOn(console, "log").mockImplementation(() => {});
+    await run(["node", "lessonkit", "blocks", "list"], { log: () => {}, error: () => {} });
+    expect(consoleLog).toHaveBeenCalledWith(expect.stringContaining("type\tcategory\th5pMachineName"));
+    expect(consoleLog).toHaveBeenCalledWith(expect.stringContaining("TrueFalse"));
+    consoleLog.mockRestore();
+  });
+
+  it("blocks list --category filters entries", async () => {
+    const consoleLog = vi.spyOn(console, "log").mockImplementation(() => {});
+    await run(
+      ["node", "lessonkit", "blocks", "list", "--json", "--category", "assessment"],
+      { log: () => {}, error: () => {} },
+    );
+    const payload = JSON.parse(consoleLog.mock.calls[0]![0] as string) as {
+      count: number;
+      entries: Array<{ category?: string }>;
+    };
+    expect(payload.count).toBeGreaterThan(0);
+    expect(payload.entries.every((e) => e.category === "assessment")).toBe(true);
+    consoleLog.mockRestore();
+  });
+
   it("blocks list --json includes TrueFalse with h5pMachineName", async () => {
     const consoleLog = vi.spyOn(console, "log").mockImplementation(() => {});
     await run(["node", "lessonkit", "blocks", "list", "--json"], { log: () => {}, error: () => {} });
     const payload = JSON.parse(consoleLog.mock.calls[0]![0] as string) as {
       ok: boolean;
+      count: number;
       entries: Array<{ type: string; h5pMachineName?: string }>;
     };
     expect(payload.ok).toBe(true);
-    expect(payload.count).toBe(43);
+    expect(payload.count).toBe(57);
     const trueFalse = payload.entries.find((e) => e.type === "TrueFalse");
     expect(trueFalse?.h5pMachineName).toBe("H5P.TrueFalse");
     consoleLog.mockRestore();

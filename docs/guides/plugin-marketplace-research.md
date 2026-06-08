@@ -1,6 +1,6 @@
 # Plugin marketplace research (1.6.x)
 
-LessonKit **1.6.x** documents preset plugin packs only. A runtime marketplace (dynamic install, version pinning, signing) remains **2.x** scope per [ROADMAP](../ROADMAP.md).
+LessonKit **1.6.x** documents preset plugin packs only. A runtime marketplace (dynamic install, version pinning, signing) remains **2.x** scope per [ROADMAP](../project/roadmap.md).
 
 ## Current plugin model (0.8.0+)
 

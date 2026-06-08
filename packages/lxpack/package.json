@@ -1,6 +1,6 @@
 {
   "name": "@lessonkit/lxpack",
-  "version": "1.6.6",
+  "version": "1.6.0",
   "private": false,
   "description": "LXPack export adapter for LessonKit courses (SCORM, standalone, xAPI, cmi5).",
   "license": "Apache-2.0",
@@ -59,8 +59,8 @@
     "lint": "eslint --max-warnings 0 \"src/**/*.{ts,tsx}\" \"test/**/*.{ts,tsx}\""
   },
   "dependencies": {
-    "@lessonkit/core": "1.6.6",
-    "@lessonkit/themes": "1.6.6",
+    "@lessonkit/core": "1.6.0",
+    "@lessonkit/themes": "1.6.0",
     "@lxpack/api": "0.6.4",
     "@lxpack/spa-bridge": "0.6.4",
     "@lxpack/tracking-schema": "0.6.4",
@@ -68,7 +68,7 @@
     "fflate": "^0.8.3"
   },
   "devDependencies": {
-    "@lessonkit/react": "1.6.6",
+    "@lessonkit/react": "1.6.0",
     "@types/node": "^25.9.2",
     "tsup": "^8.5.0",
     "typescript": "^6.0.3",

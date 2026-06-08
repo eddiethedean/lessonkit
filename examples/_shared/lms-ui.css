@@ -1,12 +1,28 @@
 /* Modern LMS shell — inspired by SaaS course UIs (sidebar progress, card lessons, microlearning chips). */
 
+html,
+body {
+  min-height: 100%;
+  background: var(--lk-color-background, #ffffff);
+  color: var(--lk-color-foreground, #111827);
+}
+
+html[data-lk-theme="dark"] {
+  color-scheme: dark;
+}
+
+html[data-lk-theme="light"] {
+  color-scheme: light;
+}
+
 .lms-app {
   --lms-radius: 12px;
   --lms-radius-sm: 8px;
   --lms-shadow: 0 1px 2px rgba(0, 0, 0, 0.06), 0 4px 16px rgba(0, 0, 0, 0.06);
   --lms-sidebar-w: 272px;
   min-height: 100vh;
-  color: var(--lk-color-foreground);
+  background: var(--lk-color-background, #ffffff);
+  color: var(--lk-color-foreground, #111827);
 }
 
 .lms-app * {

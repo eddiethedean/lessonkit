@@ -6,7 +6,6 @@ import { useCompoundPersistence } from "../compound/useCompoundPersistence";
 import {
   applyExitScoreUpdate,
   createInitialMapMeta,
-  GM_META_KEY,
   mergeMapMetaIntoState,
   readGameMapMeta,
   sanitizeMapMeta,

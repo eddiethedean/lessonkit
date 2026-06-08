@@ -538,7 +538,7 @@ Ship only if 1.5.0 core is stable; each item completes the [H5P documentation ch
 - [x] **`@lessonkit/lxpack`** — `exportLkcourse()`, `validateLkcourse()`, `importLkcourse()` (round-trip tests)
 - [x] **Block registry CLI** — `lessonkit blocks list` (reads `block-catalog.v3.json`)
 - [x] **Integration test** — export from golden example → validate → manifest parity on import
-- [x] **Docs** — update [manifest reference](docs/MANIFEST.md); `MIGRATION-1.5-to-1.6.md`
+- [x] **Docs** — update [manifest reference](docs/reference/manifest.md); [MIGRATION-1.5-to-1.6](docs/MIGRATION-1.5-to-1.6.md)
 
 #### Deliverables — 1.6.x minors (content waves)
 

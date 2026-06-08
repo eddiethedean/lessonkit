@@ -556,7 +556,7 @@ describe("coverage-full CLI", () => {
         { log: () => {}, error: () => {} },
       );
       expect(result.ok).toBe(true);
-      if (!result.ok) throw new Error("expected init success");
+      if (!result.ok || result.command !== "init") throw new Error("expected init success");
       const appSource = await readFile(join(result.projectRoot, "src", "App.tsx"), "utf8");
       expect(appSource).toContain("\\\\");
       expect(appSource).toContain("\\{");
@@ -570,7 +570,7 @@ describe("coverage-full CLI", () => {
         { log: () => {}, error: () => {} },
       );
       expect(result.ok).toBe(true);
-      if (!result.ok) throw new Error("expected init success");
+      if (!result.ok || result.command !== "init") throw new Error("expected init success");
       const appSource = await readFile(join(result.projectRoot, "src", "App.tsx"), "utf8");
       expect(appSource).toContain("\\n");
     });

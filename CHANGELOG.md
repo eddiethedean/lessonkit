@@ -28,7 +28,7 @@ Framework **1.6.x** — portable `.lkcourse` interchange, block registry CLI, an
 - **`.lkcourse` archive** — `lessonkit export` produces zip with `manifest.json` (envelope), `interchange.json`, `dist/`, optional `block-tree.json`
 - **`@lessonkit/lxpack`** — `exportLkcourse()`, `validateLkcourse()`, `importLkcourse()`, `extractBlockTree()`; schemas `lkcourse-format.v1.json`, `block-tree.v1.json`; `fflate` zip helpers with zip-slip guards
 - **CLI** — `lessonkit blocks list` (`--json`, `--category`, `--tier`) over `block-catalog.v3.json`
-- **Docs** — [INTERCHANGE.md](docs/INTERCHANGE.md), [MIGRATION-1.5-to-1.6.md](docs/MIGRATION-1.5-to-1.6.md); manifest layers in [MANIFEST.md](docs/MANIFEST.md)
+- **Docs** — [interchange reference](docs/reference/interchange.md), [MIGRATION-1.5-to-1.6](docs/MIGRATION-1.5-to-1.6.md); manifest layers in [manifest reference](docs/reference/manifest.md)
 - **Integration test** — `lxpack-golden` export → validate → import round-trip with `lessonkit.json` parity
 
 ## [1.5.0] - 2026-06-06

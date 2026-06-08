@@ -41,6 +41,21 @@ describe("runExport", () => {
     });
   });
 
+  it("rejects unsafe --out paths", async () => {
+    const root = await mkdtemp(join(tmpdir(), "lk-export-cli-"));
+    tempDirs.push(root);
+    await writeFile(join(root, "lessonkit.json"), JSON.stringify(manifest));
+    await writeFile(join(root, "package.json"), JSON.stringify({ name: "export-cli-test" }));
+    await mkdir(join(root, "dist"), { recursive: true });
+    await writeFile(join(root, "dist", "index.html"), "<!doctype html><html></html>\n");
+
+    await expect(
+      runExport({ cwd: root, noBuild: true, out: "../escape.lkcourse" }),
+    ).rejects.toMatchObject({
+      message: expect.stringContaining("unsafe output path"),
+    });
+  });
+
   it("exports when dist exists", async () => {
     const root = await mkdtemp(join(tmpdir(), "lk-export-cli-"));
     tempDirs.push(root);

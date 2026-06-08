@@ -150,6 +150,7 @@ guides/react-developers/performance
 guides/react-developers/plugin-cookbook
 guides/react-developers/contributing-to-the-monorepo
 guides/react-developers/adding-a-framework-block
+guides/plugin-marketplace-research
 ```
 
 ```{toctree}
