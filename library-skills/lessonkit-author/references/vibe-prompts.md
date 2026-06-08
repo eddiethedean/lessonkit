@@ -3,7 +3,7 @@
 Paste once per chat session:
 
 ```text
-Project: LessonKit 1.5.x (Vite 8 + React 19).
+Project: LessonKit 1.6.x (Vite 8 + React 19).
 Manifest: lessonkit.json (schemaVersion 1).
 Main UI: src/App.tsx; production config: src/courseConfig.ts.
 Block catalog: @lessonkit/react/block-catalog.v3.json (only use listed block types).

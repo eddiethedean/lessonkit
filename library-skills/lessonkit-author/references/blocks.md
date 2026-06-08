@@ -1,6 +1,6 @@
 # React blocks
 
-Use only block types listed in `@lessonkit/react/block-catalog.v3.json`. `buildBlockCatalog()` defaults to catalog v3 (framework 1.5.x).
+Use only block types listed in `@lessonkit/react/block-catalog.v3.json`. `buildBlockCatalog()` defaults to catalog v3 (framework 1.6.x).
 
 ## Layout pattern
 
