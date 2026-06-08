@@ -1,4 +1,4 @@
-import { mkdir, mkdtemp, readFile, rm, symlink, writeFile } from "node:fs/promises";
+import { access, mkdir, mkdtemp, readFile, rm, symlink, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { zipSync, strToU8 } from "fflate";
@@ -553,6 +553,77 @@ export function Nested() {
     spy.mockRestore();
   });
 
+  it("backupImportArtifacts returns undefined when target has no import artifacts", async () => {
+    const targetDir = await mkdtemp(join(tmpdir(), "lk-backup-empty-"));
+    tempDirs.push(targetDir);
+
+    const { backupImportArtifacts } = await import("../src/lkcourse/import");
+    expect(await backupImportArtifacts(targetDir)).toBeUndefined();
+  });
+
+  it("backupImportArtifacts backs up lessonkit.json when dist is absent", async () => {
+    const targetDir = await mkdtemp(join(tmpdir(), "lk-backup-manifest-only-"));
+    tempDirs.push(targetDir);
+    await writeFile(join(targetDir, "lessonkit.json"), '{"only":"manifest"}\n');
+
+    const { backupImportArtifacts } = await import("../src/lkcourse/import");
+    const backupDir = await backupImportArtifacts(targetDir);
+    expect(backupDir).toBeTruthy();
+    if (!backupDir) return;
+
+    await expect(access(join(targetDir, "lessonkit.json"))).rejects.toThrow();
+    expect(await readFile(join(backupDir, "lessonkit.json"), "utf8")).toContain("only");
+  });
+
+  it("restoreImportBackup replaces existing destination artifacts", async () => {
+    const targetDir = await mkdtemp(join(tmpdir(), "lk-restore-replace-"));
+    const backupDir = await mkdtemp(join(tmpdir(), "lk-restore-backup-"));
+    tempDirs.push(targetDir, backupDir);
+
+    await writeFile(join(backupDir, "lessonkit.json"), '{"restored":true}\n');
+    await mkdir(join(backupDir, "dist"), { recursive: true });
+    await writeFile(join(backupDir, "dist", "index.html"), "restored\n");
+
+    await writeFile(join(targetDir, "lessonkit.json"), '{"old":true}\n');
+    await mkdir(join(targetDir, "dist"), { recursive: true });
+    await writeFile(join(targetDir, "dist", "index.html"), "old\n");
+
+    const { restoreImportBackup } = await import("../src/lkcourse/import");
+    await restoreImportBackup(targetDir, backupDir);
+
+    expect(await readFile(join(targetDir, "lessonkit.json"), "utf8")).toContain("restored");
+    expect(await readFile(join(targetDir, "dist", "index.html"), "utf8")).toBe("restored\n");
+  });
+
+  it("restoreImportBackup skips missing backup artifacts", async () => {
+    const targetDir = await mkdtemp(join(tmpdir(), "lk-restore-partial-"));
+    const backupDir = await mkdtemp(join(tmpdir(), "lk-restore-partial-backup-"));
+    tempDirs.push(targetDir, backupDir);
+
+    await writeFile(join(backupDir, "lessonkit.json"), '{"restored":true}\n');
+    await writeFile(join(targetDir, "lessonkit.json"), '{"old":true}\n');
+
+    const { restoreImportBackup } = await import("../src/lkcourse/import");
+    await restoreImportBackup(targetDir, backupDir);
+
+    expect(await readFile(join(targetDir, "lessonkit.json"), "utf8")).toContain("restored");
+  });
+
+  it("renameOrCopy falls back to copy when rename crosses devices", async () => {
+    const fromDir = await mkdtemp(join(tmpdir(), "lk-rename-from-"));
+    const toDir = join(tmpdir(), `lk-rename-to-${Date.now()}`);
+    tempDirs.push(fromDir, toDir);
+    await writeFile(join(fromDir, "payload.txt"), "payload\n");
+
+    const { renameOrCopy } = await import("../src/lkcourse/import");
+    await renameOrCopy(fromDir, toDir, {
+      renameFn: vi.fn().mockRejectedValue(
+        Object.assign(new Error("cross-device rename"), { code: "EXDEV" }),
+      ),
+    });
+    expect(await readFile(join(toDir, "payload.txt"), "utf8")).toBe("payload\n");
+  });
+
   it("backupImportArtifacts and restoreImportBackup round-trip target files", async () => {
     const targetDir = await mkdtemp(join(tmpdir(), "lk-backup-roundtrip-"));
     tempDirs.push(targetDir);
@@ -583,6 +654,96 @@ export function Nested() {
     const restored = JSON.parse(await readFile(join(targetDir, "lessonkit.json"), "utf8"));
     expect(restored.course.title).toBe("Original Title");
     expect(await readFile(join(targetDir, "dist", "index.html"), "utf8")).toContain("original");
+  });
+
+  it("importLkcourse restores target artifacts when promote fails", async () => {
+    const root = await mkdtemp(join(tmpdir(), "lk-export-promote-fail-"));
+    tempDirs.push(root);
+    await writeMinimalProject(root);
+
+    const manifestParsed = parseLessonkitManifest(minimalManifest);
+    expect(manifestParsed.ok).toBe(true);
+    if (!manifestParsed.ok) return;
+
+    const exported = await exportLkcourse({
+      projectRoot: root,
+      manifest: manifestParsed.manifest,
+    });
+    expect(exported.ok).toBe(true);
+    if (!exported.ok) return;
+
+    const importDir = await mkdtemp(join(tmpdir(), "lk-import-promote-fail-"));
+    tempDirs.push(importDir);
+
+    const originalManifest = {
+      ...minimalManifest,
+      name: "original-project",
+      course: { ...minimalManifest.course, title: "Original Title" },
+    };
+    await writeFile(join(importDir, "lessonkit.json"), `${JSON.stringify(originalManifest, null, 2)}\n`);
+    await mkdir(join(importDir, "dist"), { recursive: true });
+    await writeFile(
+      join(importDir, "dist", "index.html"),
+      "<!doctype html><html><body>original</body></html>\n",
+    );
+
+    const importModule = await import("../src/lkcourse/import");
+    importModule.__setPromoteImportStagingForTests(async () => {
+      throw new Error("simulated promote failure");
+    });
+
+    try {
+      const result = await importLkcourse({
+        archivePath: exported.archivePath,
+        targetDir: importDir,
+      });
+      expect(result.ok).toBe(false);
+      expect(result.ok === false && result.issues[0]?.message).toContain("simulated promote failure");
+
+      const restored = JSON.parse(await readFile(join(importDir, "lessonkit.json"), "utf8"));
+      expect(restored.course.title).toBe("Original Title");
+      expect(await readFile(join(importDir, "dist", "index.html"), "utf8")).toContain("original");
+    } finally {
+      importModule.__setPromoteImportStagingForTests(null);
+    }
+  });
+
+  it("importLkcourse replaces existing project files on success", async () => {
+    const root = await mkdtemp(join(tmpdir(), "lk-export-overwrite-"));
+    tempDirs.push(root);
+    await writeMinimalProject(root);
+
+    const manifestParsed = parseLessonkitManifest(minimalManifest);
+    expect(manifestParsed.ok).toBe(true);
+    if (!manifestParsed.ok) return;
+
+    const exported = await exportLkcourse({
+      projectRoot: root,
+      manifest: manifestParsed.manifest,
+    });
+    expect(exported.ok).toBe(true);
+    if (!exported.ok) return;
+
+    const importDir = await mkdtemp(join(tmpdir(), "lk-import-overwrite-"));
+    tempDirs.push(importDir);
+
+    await writeFile(
+      join(importDir, "lessonkit.json"),
+      `${JSON.stringify({ ...minimalManifest, name: "old-project" }, null, 2)}\n`,
+    );
+    await mkdir(join(importDir, "dist"), { recursive: true });
+    await writeFile(join(importDir, "dist", "index.html"), "old\n");
+
+    const imported = await importLkcourse({
+      archivePath: exported.archivePath,
+      targetDir: importDir,
+    });
+    expect(imported.ok).toBe(true);
+    if (!imported.ok) return;
+
+    const restored = JSON.parse(await readFile(join(importDir, "lessonkit.json"), "utf8"));
+    expect(restored.name).toBe("lkcourse-test");
+    expect(await readFile(join(importDir, "dist", "index.html"), "utf8")).toContain("<!doctype html>");
   });
 
   it("extractBlockTree handles unclosed tags and text-only inner content", async () => {

@@ -17,9 +17,14 @@ async function pathExists(path: string): Promise<boolean> {
   }
 }
 
-async function renameOrCopy(from: string, to: string): Promise<void> {
+async function renameOrCopy(
+  from: string,
+  to: string,
+  opts?: { renameFn?: typeof rename },
+): Promise<void> {
+  const renameFn = opts?.renameFn ?? rename;
   try {
-    await rename(from, to);
+    await renameFn(from, to);
   } catch (err) {
     const code = err && typeof err === "object" && "code" in err ? String((err as NodeJS.ErrnoException).code) : "";
     if (code !== "EXDEV") throw err;
@@ -66,6 +71,9 @@ async function writeImportTree(
 }
 
 /** @internal Exported for unit tests. */
+export { renameOrCopy };
+
+/** @internal Exported for unit tests. */
 export async function backupImportArtifacts(targetDir: string): Promise<string | undefined> {
   const existing: string[] = [];
   for (const name of IMPORT_ARTIFACTS) {
@@ -107,6 +115,14 @@ async function promoteImportStaging(stagingDir: string, targetDir: string): Prom
       await cp(srcPath, destPath);
     }
   }
+}
+
+type PromoteImportStagingFn = typeof promoteImportStaging;
+let promoteImportStagingImpl: PromoteImportStagingFn = promoteImportStaging;
+
+/** @internal Reset or override promote for unit tests. */
+export function __setPromoteImportStagingForTests(fn: PromoteImportStagingFn | null): void {
+  promoteImportStagingImpl = fn ?? promoteImportStaging;
 }
 
 /**
@@ -160,7 +176,7 @@ export async function importLkcourse(
     const fileCount = await writeImportTree(stagingDir, manifest, read.entries, spaDistDir);
     backupDir = await backupImportArtifacts(targetDir);
     try {
-      await promoteImportStaging(stagingDir, targetDir);
+      await promoteImportStagingImpl(stagingDir, targetDir);
     } catch (promoteError) {
       if (backupDir) {
         await restoreImportBackup(targetDir, backupDir);
