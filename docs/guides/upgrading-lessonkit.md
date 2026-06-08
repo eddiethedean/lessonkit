@@ -24,7 +24,7 @@ Older jumps (linked from the table below and the [detailed migration pages](#det
 | 1.0.x | 1.1.x | [MIGRATION-1.0-to-1.1](../MIGRATION-1.0-to-1.1.md) |
 | 0.9.x | 1.0.x | [MIGRATION-0.x-to-1.0](../MIGRATION-0.x-to-1.0.md) |
 
-**Planned:** [MIGRATION-1.x-to-2.0](../MIGRATION-1.x-to-2.0.md) — deprecation removal checklist for LessonKit 2.0 (preview; not yet released). Includes [runtime v1 sunset](../MIGRATION-1.x-to-2.0.md#runtime-v1).
+**Planned:** [MIGRATION-1.x-to-2.0](../MIGRATION-1.x-to-2.0.md) — deprecation removal checklist for LessonKit 2.0 (preview; not yet released). Includes [runtime v1 sunset](../MIGRATION-v1-runtime.md).
 
 Historical release checklists: [Release history](../project/release-history.md).
 

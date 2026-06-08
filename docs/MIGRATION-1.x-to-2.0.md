@@ -2,7 +2,6 @@
 
 LessonKit **2.0** will remove deprecated APIs that still work in **1.6.x** with development warnings. Plan upgrades before pinning `@lessonkit/*@2`.
 
-(runtime-v1)=
 ## Runtime v1 sunset
 
 `runtimeVersion: "v1"` on `LessonkitConfig` is **deprecated** as of framework 1.4.0 and will be **removed in LessonKit 2.0**.
