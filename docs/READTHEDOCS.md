@@ -46,7 +46,7 @@ Compiled demos are produced by `docs/scripts/build-docs-demos.sh` (Node 18+ at r
 
 The Makefile and `.readthedocs.yaml` run that script before Sphinx.
 
-Doc demo bundles are smoke-tested with Playwright before Sphinx builds. Read the Docs has no sudo, so [`.readthedocs.yaml`](../.readthedocs.yaml) uses `build.jobs` with `apt_packages` for Chromium system libraries and `npx playwright install chromium` (not `--with-deps`). Node/npm commands run in `post_install` (after RTD installs `build.tools.nodejs`). GitHub Actions docs CI may use `--with-deps` because runners have root.
+Embedded demo bundles are **smoke-tested with Playwright in GitHub Actions only** (`.github/workflows/checks.yml`, `docs` job — runs on pull requests, pushes to `main`, and release tags). Read the Docs builds the static bundles but does not run Playwright.
 
 ## Custom domain (optional)
 
@@ -54,7 +54,7 @@ In the RTD project → **Admin** → **Domains**, add e.g. `docs.lessonkit.dev` 
 
 ## CI
 
-GitHub Actions runs `sphinx-build -W` on every push to `main` and on pull requests (see `.github/workflows/checks.yml`, `docs` job).
+GitHub Actions runs the full docs pipeline (demo builds, Playwright smoke tests, Sphinx `-W`) on pull requests, pushes to `main`, and release tags — see `.github/workflows/checks.yml`, `docs` job. Read the Docs publishes the built site without Playwright.
 
 ## Editing guides
 

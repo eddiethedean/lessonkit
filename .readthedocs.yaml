@@ -8,49 +8,11 @@ build:
   tools:
     python: "3.12"
     nodejs: "20"
-  # RTD has no sudo; Playwright system libs must be installed via apt (not install-deps).
-  apt_packages:
-    - libasound2
-    - libatk-bridge2.0-0
-    - libatk1.0-0
-    - libatspi2.0-0
-    - libcairo2
-    - libcups2
-    - libdbus-1-3
-    - libdrm2
-    - libgbm1
-    - libglib2.0-0
-    - libnspr4
-    - libnss3
-    - libpango-1.0-0
-    - libwayland-client0
-    - libx11-6
-    - libxcb1
-    - libxcomposite1
-    - libxdamage1
-    - libxext6
-    - libxfixes3
-    - libxkbcommon0
-    - libxrandr2
-    - fonts-noto-color-emoji
-    - fonts-unifont
-    - libfontconfig1
-    - libfreetype6
-    - xfonts-cyrillic
-    - xfonts-scalable
-    - fonts-liberation
-    - fonts-ipafont-gothic
-    - fonts-wqy-zenhei
-    - fonts-tlwg-loma-otf
-    - fonts-freefont-ttf
   jobs:
     post_install:
       - npm ci
       - bash docs/scripts/build-docs-demos.sh
       - bash docs/scripts/build-component-demos.sh
-      - cd e2e && npx playwright install chromium
-      - bash docs/scripts/verify-doc-demos.sh
-      - bash docs/scripts/verify-component-demos.sh
       - npm run docs:api
       - bash docs/scripts/verify-release-version.sh
       - bash docs/scripts/verify-doc-includes.sh
