@@ -131,6 +131,7 @@ async function rollbackPromotedFiles(
   preExisting: Set<string>,
   backups: Map<string, Buffer>,
 ): Promise<void> {
+  const failures: string[] = [];
   let stagingEntries;
   try {
     stagingEntries = await readdir(stagingDir, { withFileTypes: true });
@@ -139,14 +140,26 @@ async function rollbackPromotedFiles(
   }
   for (const entry of stagingEntries) {
     if (preExisting.has(entry.name)) continue;
-    await rm(join(projectDir, entry.name), { recursive: true, force: true }).catch(
-      /* v8 ignore next */ () => undefined,
-    );
+    try {
+      await rm(join(projectDir, entry.name), { recursive: true, force: true });
+    } catch (err) {
+      failures.push(
+        `remove ${entry.name}: ${err instanceof Error ? err.message : String(err)}`,
+      );
+    }
   }
   for (const [name, content] of backups) {
-    await writeFile(join(projectDir, name), content).catch(
-      /* v8 ignore next */ () => undefined,
-    );
+    try {
+      await writeFile(join(projectDir, name), content);
+    } catch (err) {
+      failures.push(`restore ${name}: ${err instanceof Error ? err.message : String(err)}`);
+    }
+  }
+  if (failures.length > 0) {
+    throw new CliError(`Init rollback failed: ${failures.join("; ")}`, {
+      code: "RUNTIME",
+      exitCode: EXIT_INVALID_PROJECT,
+    });
   }
 }
 
@@ -213,10 +226,13 @@ export async function runInit(opts: InitOptions, logger: CliLogger): Promise<Cli
   }
 
   if (opts.here && !(await isDirEmptyOrDotfilesOnly(projectDir)) && !opts.force) {
-    throw new CliError(`Directory is not empty: ${projectDir}. Use --force to initialize anyway.`, {
-      code: "INVALID_PROJECT",
-      exitCode: EXIT_INVALID_PROJECT,
-    });
+    throw new CliError(
+      `Directory is not empty: ${projectDir}. Use --here --force only when the directory is empty or contains dotfiles only (e.g. .git).`,
+      {
+        code: "INVALID_PROJECT",
+        exitCode: EXIT_INVALID_PROJECT,
+      },
+    );
   }
 
   if (opts.here && opts.force && !(await isDirEmptyOrDotfilesOnly(projectDir))) {
@@ -256,7 +272,18 @@ export async function runInit(opts: InitOptions, logger: CliLogger): Promise<Cli
       try {
         await __testInitHelpers.promoteStagingToProjectDir(stagingDir, projectDir);
       } catch (promoteErr) {
-        await rollbackPromotedFiles(projectDir, stagingDir, preExisting, backups);
+        try {
+          await rollbackPromotedFiles(projectDir, stagingDir, preExisting, backups);
+        } catch (rollbackErr) {
+          const promoteMessage =
+            promoteErr instanceof Error ? promoteErr.message : String(promoteErr);
+          const rollbackMessage =
+            rollbackErr instanceof Error ? rollbackErr.message : String(rollbackErr);
+          throw new CliError(`${promoteMessage}; ${rollbackMessage}`, {
+            code: "RUNTIME",
+            exitCode: EXIT_INVALID_PROJECT,
+          });
+        }
         throw promoteErr;
       }
       await rm(stagingDir, { recursive: true, force: true });

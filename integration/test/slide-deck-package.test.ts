@@ -1,7 +1,6 @@
-import { join } from "node:path";
 import { beforeAll, describe, expect, it } from "vitest";
 import { assertScormZip, assertZipExists } from "./helpers/assertArtifacts.js";
-import { SLIDE_DECK_DIR } from "./helpers/paths.js";
+import { SLIDE_DECK_DIR, requireCliOutputPath } from "./helpers/paths.js";
 import { ensureSlideDeckBuilt } from "./helpers/tempProject.js";
 import { ensurePackagesBuilt, runCliJson } from "./helpers/runCli.js";
 
@@ -27,9 +26,7 @@ describe("slide-deck package (1.3.0)", () => {
     expect(json.ok).toBe(true);
     expect(json.target).toBe("scorm12");
 
-    const zipPath =
-      json.outputPath ??
-      join(SLIDE_DECK_DIR, ".lxpack/course/.lxpack/out/course-scorm12.zip");
+    const zipPath = requireCliOutputPath(json);
     assertZipExists(zipPath);
     assertScormZip(zipPath);
   });

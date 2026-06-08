@@ -96,7 +96,7 @@ describe("ports", () => {
     expect(storage.getItem("seeded")).toBe("v2");
   });
 
-  it("createSessionStoragePort ignores storage errors but keeps in-memory dedupe", () => {
+  it("createSessionStoragePort keeps in-memory values for generic keys when sessionStorage fails", () => {
     vi.stubGlobal("sessionStorage", {
       getItem: () => {
         throw new Error("blocked");
@@ -114,6 +114,22 @@ describe("ports", () => {
     expect(storage.getItem("k")).toBe("v");
     storage.removeItem?.("k");
     expect(storage.getItem("k")).toBeNull();
+  });
+
+  it("does not cache course_started marks in memory when sessionStorage setItem fails", () => {
+    vi.stubGlobal("sessionStorage", {
+      getItem: () => null,
+      setItem: () => {
+        throw new Error("quota");
+      },
+      removeItem: () => {
+        throw new Error("quota");
+      },
+    });
+    const storage = createSessionStoragePort();
+    const key = "lessonkit:course_started:session-1:course-1";
+    expect(storage.setItem(key, "1")).toBe(false);
+    expect(storage.getItem(key)).toBeNull();
   });
 
   it("warns once in development when sessionStorage persistence fails", () => {

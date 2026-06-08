@@ -225,6 +225,8 @@ jobs:
 
       - name: E2E tests
         run: npm run test:e2e
+        env:
+          E2E_FORCE_REBUILD: "1"
 
   security-audit:
     name: Security (npm audit)

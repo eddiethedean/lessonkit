@@ -1,11 +1,12 @@
-import { rm } from "node:fs/promises";
 import { join } from "node:path";
+import { rm } from "node:fs/promises";
 import { afterEach, beforeAll, describe, expect, it } from "vitest";
 import {
   assertScormZip,
   assertStandaloneDir,
   assertViteDist,
 } from "./helpers/assertArtifacts.js";
+import { requireCliOutputDir, requireCliOutputPath } from "./helpers/paths.js";
 import { createTempDir, prepareInitProject, prepareMinimalProject } from "./helpers/tempProject.js";
 import { ensurePackagesBuilt, runCliJson } from "./helpers/runCli.js";
 
@@ -39,9 +40,7 @@ describe("CLI init → build → package", () => {
     );
     expect(scorm.result.exitCode).toBe(0);
     expect(scorm.json.ok).toBe(true);
-    const scormZip =
-      scorm.json.outputPath ??
-      join(projectDir, ".lxpack/course/.lxpack/out/course-scorm12.zip");
+    const scormZip = requireCliOutputPath(scorm.json);
     assertScormZip(scormZip);
 
     const standalone = runCliJson<PackageJson>(
@@ -50,9 +49,7 @@ describe("CLI init → build → package", () => {
     );
     expect(standalone.result.exitCode).toBe(0);
     expect(standalone.json.ok).toBe(true);
-    const standaloneDir =
-      standalone.json.outputDir ??
-      join(projectDir, ".lxpack/course/.lxpack/out/standalone");
+    const standaloneDir = requireCliOutputDir(standalone.json);
     assertStandaloneDir(standaloneDir);
 
     assertScormZip(scormZip);

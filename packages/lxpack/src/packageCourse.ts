@@ -18,7 +18,10 @@ import {
 } from "./packaging/validateInputs";
 import { promoteStagingToOutDir } from "./packaging/promote";
 import { buildStagingPackage, ensureOutDirParent } from "./packaging/staging";
-import { findPackagingErrorIssues } from "./packaging/issueSeverity";
+import {
+  findPackagingErrorIssues,
+  findPackagingWarningIssues,
+} from "./packaging/issueSeverity";
 import { validateReactManifestParity } from "./validateReactParity";
 
 export type { ExportTarget } from "@lxpack/api";
@@ -48,6 +51,8 @@ export type PackageLessonkitCourseOptions = WriteLxpackProjectOptions & {
   outputBaseDir?: string;
   /** Treat React parity warnings as packaging errors. */
   strictParity?: boolean;
+  /** Treat LXPack build warnings as packaging errors. */
+  strictBuild?: boolean;
 };
 
 export type PackageLessonkitCourseResult =
@@ -157,14 +162,29 @@ export async function packageLessonkitCourse(
     };
   }
 
-  const staged = await buildStagingPackage({
-    ...writeOpts,
-    descriptor,
-    target,
-    output,
-    dir,
-    outputBaseDir,
-  });
+  let staged;
+  try {
+    staged = await buildStagingPackage({
+      ...writeOpts,
+      descriptor,
+      target,
+      output,
+      dir,
+      outputBaseDir,
+    });
+  } catch (err) {
+    return {
+      ok: false,
+      courseDir: outDir,
+      target,
+      issues: [
+        {
+          path: "staging",
+          message: err instanceof Error ? err.message : String(err),
+        },
+      ],
+    };
+  }
 
   if (!staged.ok) {
     await fsp.rm(staged.stagingDir, { recursive: true, force: true }).catch(/* v8 ignore next */ () => undefined);
@@ -217,6 +237,23 @@ export async function packageLessonkitCourse(
       validation: { ok: false, manifest: build.manifest, issues: build.issues },
       build,
       issues: artifactIssues,
+    };
+  }
+
+  const buildWarningIssues = findPackagingWarningIssues(build.issues);
+  if (options.strictBuild && buildWarningIssues.length > 0) {
+    await fsp.rm(stagingDir, { recursive: true, force: true }).catch(/* v8 ignore next */ () => undefined);
+    return {
+      ok: false,
+      courseDir: outDir,
+      target,
+      validation: { ok: false, manifest: build.manifest, issues: build.issues },
+      build,
+      issues: buildWarningIssues.map((i) => ({
+        path: i.path ?? "build",
+        message: i.message ?? "build warning",
+        severity: i.severity,
+      })),
     };
   }
 

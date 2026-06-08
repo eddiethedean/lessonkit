@@ -110,8 +110,9 @@ export function createProgram(baseLogger: CliLogger = console): Command {
     .option("--no-build", "Skip implicit Vite build for LMS targets")
     .option("--out <path>", "Override output artifact path")
     .option("--strict-parity", "Treat React ID parity warnings as packaging errors")
+    .option("--strict", "Treat Vite build warnings as packaging failures")
     .option("--json", "Emit structured JSON result")
-    .action(async (opts: { target: string; cwd?: string; build?: boolean; out?: string; json?: boolean; strictParity?: boolean }) => {
+    .action(async (opts: { target: string; cwd?: string; build?: boolean; out?: string; json?: boolean; strictParity?: boolean; strict?: boolean }) => {
       const logger = createLogger({ json: opts.json });
       await handleCommand(
         async () => {
@@ -122,6 +123,7 @@ export function createProgram(baseLogger: CliLogger = console): Command {
             out: opts.out,
             json: opts.json,
             strictParity: opts.strictParity,
+            strict: opts.strict,
           });
           if (!opts.json && result.ok && result.command === "package") {
             if (result.target === "react-vite") {

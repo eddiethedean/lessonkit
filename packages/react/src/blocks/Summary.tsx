@@ -116,9 +116,9 @@ function SummaryInner(
           );
           if (wasChecked) {
             setPassed(nextPassedThreshold);
-            completedRef.current = nextPassedThreshold;
+            completedRef.current = nextPassedThreshold || props.enableRetry === false;
             if (
-              nextPassedThreshold &&
+              (nextPassedThreshold || props.enableRetry === false) &&
               !telemetryReplayedRef.current &&
               shouldReplayResumeTelemetry(config)
             ) {

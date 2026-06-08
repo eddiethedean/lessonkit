@@ -6,6 +6,20 @@ All notable changes to the LessonKit monorepo are documented here.
 
 ## Unreleased
 
+### Fixed
+
+- **LMS scoring** — `normalizeScore` no longer mis-scales `{ score: 2, maxScore: 1 }`; `notifyLxpackAssessment` normalizes raw points; SCORM shell default passing score aligned with SPA bridge (0.7)
+- **Packaging paths** — `spaDistDir` and packaging `outDir` reject reserved directories (`.git`, `node_modules`, `.github`); descriptor `spaDistDir` validated at parse time; `output` must resolve inside `outDir`
+- **Packaging pipeline** — `writeLxpackProject` no longer blocks SPA-only assessment kinds; `packageLessonkitCourse` returns structured errors on staging failures; build warnings surface via `validation.ok`; promote lock timeout increased
+- **CLI** — `lessonkit build` rejects symlinked `dist`; init rollback surfaces failures; `lessonkit dev` strips passthrough `--outDir`
+- **Core runtime** — stable auto-resolved session IDs; explicit learner session swaps re-emit `course_started`; telemetry batch re-queues full batch on partial sink failure; course-started dedupe uses tracking mark; compound resume clamps `activePageIndex` when `pageCount` provided
+- **React assessments** — Fill/Drag blocks require Check before Next in compounds; plugin scoring wired; `scoreFromCustom` fails closed on `maxScore <= 0`; duplicate `checkId` rejected in compounds; `config.embed.strictHosts` option; storage port cannot change after mount
+- **Subtle audit (2nd pass)** — MCQ shell injection marks trimmed answers correct; `packageLessonkitCourse` `validation.ok` aligned on warning builds; `writeLxpackProject` rejects non-injectable assessments; `fillInBlanks` rejects invalid blank entries; empty `tracking.xapi: {}` no longer forces `activityIri`; telemetry `track()` dedupes during in-flight flush; course-started marks not cached when durable `setItem` fails; block catalog v3 `tier` field restores `lessonkit blocks list --tier`; assessment feedback/telemetry parity across Fill/Drag/DnD/FindMultipleHotspots/Quiz/Summary resume paths; SCORM e2e requires LMS store status; CI e2e forces artifact rebuild
+- **Scoring parity (follow-up)** — LMS shell and bridge default `passingScore` is **1.0** (100%) when omitted, matching React SPA; bridge routes invalid `assessment_completed` scores through `onBridgeMiss`; Quiz UI/telemetry use factual answer correctness separate from plugin pass threshold
+- **Observability** — `onCompoundDuplicateCheckId` and `onStoragePortChangeIgnored` hooks; compound score contract documented
+- **CLI** — `lessonkit package --strict` exposes lxpack `strictBuild`; SPA-only assessment packaging errors include actionable hints
+- **Tests & CI** — framework-12 e2e smoke; assessments-p0 FillInTheBlanks compound gating e2e; xAPI/cmi5 lesson completion assertions; golden axe-core a11y gate; `blockTiers.ts` canonical tier source
+
 ## [1.6.6] - 2026-06-07
 
 Framework **1.6.x** content waves and `GameMap` compound. All seven `@lessonkit/*` packages ship at **1.6.6**. Additive release.

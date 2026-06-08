@@ -6,8 +6,10 @@ import { AssessmentLessonGuard } from "../assessment/AssessmentLessonGuard";
 import { buildAssessmentHandle } from "../assessment/internal/buildAssessmentHandle";
 import { readBooleanStateField } from "../assessment/internal/resumeState";
 import { useAssessmentHandleRegistration } from "../assessment/internal/useAssessmentHandleRegistration";
+import { usePluginScoring } from "../assessment/internal/usePluginScoring";
 import { meetsPassingThreshold } from "../assessment/scoring";
 import { useAssessmentState } from "../assessment/useAssessmentState";
+import { useLessonkit } from "../hooks";
 import { normalizeComponentId } from "../runtime/validateComponentId";
 
 export type DragItem = { id: string; label: string };
@@ -107,6 +109,9 @@ function DragAndDropInner(
 ) {
   const checkId = useMemo(() => normalizeComponentId(props.checkId, "checkId"), [props.checkId]);
   const assessment = useAssessmentState(props.enclosingLessonId);
+  const { config } = useLessonkit();
+  const { scoreResponse } = usePluginScoring(checkId, props.enclosingLessonId);
+  const itemIds = useMemo(() => new Set(props.items.map((i) => i.id)), [props.items]);
   const [assignments, setAssignments] = useState<Record<string, string>>(() =>
     Object.fromEntries(props.targets.map((t) => [t.id, ""])),
   );
@@ -120,9 +125,11 @@ function DragAndDropInner(
   const completedRef = useRef(false);
   const dragDroppedRef = useRef(false);
   const draggingItemIdRef = useRef<string | null>(null);
+  const telemetryReplayedRef = useRef(false);
 
   const reset = () => {
     completedRef.current = false;
+    telemetryReplayedRef.current = false;
     setPassed(false);
     setChecked(false);
     setAssignments(Object.fromEntries(props.targets.map((t) => [t.id, ""])));
@@ -146,12 +153,43 @@ function DragAndDropInner(
   const maxScore = props.targets.length || 1;
   const passedThreshold = meetsPassingThreshold(score, maxScore, props.passingScore);
 
+  const replayTelemetry = (
+    nextAssignments: Record<string, string>,
+    nextPassed: boolean,
+    nextChecked: boolean,
+    nextScore: number,
+    nextMaxScore: number,
+  ) => {
+    if (telemetryReplayedRef.current || (!nextChecked && !nextPassed)) return;
+    telemetryReplayedRef.current = true;
+    const nextPassedThreshold = meetsPassingThreshold(
+      nextScore,
+      nextMaxScore,
+      props.passingScore,
+    );
+    assessment.answer({
+      checkId,
+      interactionType: INTERACTION,
+      response: nextAssignments,
+      correct: nextPassedThreshold,
+    });
+    if (nextPassedThreshold || props.enableRetry === false) {
+      assessment.complete({
+        checkId,
+        interactionType: INTERACTION,
+        score: nextScore,
+        maxScore: nextMaxScore,
+        passingScore: props.passingScore ?? nextMaxScore,
+      });
+    }
+  };
+
   const handle = useMemo(() => {
     return buildAssessmentHandle({
       checkId,
       getScore: () => score,
       getMaxScore: () => maxScore,
-      getAnswerGiven: () => hasTargets && allFilled,
+      getAnswerGiven: () => checked,
       resetTask: reset,
       showSolutions: () => {},
       getXAPIData: () => ({
@@ -176,12 +214,29 @@ function DragAndDropInner(
           setPassed(value);
           completedRef.current = value;
         });
-        readBooleanStateField(state, "checked", setChecked);
+        let nextChecked = checked;
+        readBooleanStateField(state, "checked", (value) => {
+          nextChecked = value;
+          setChecked(value);
+        });
         const item = state.keyboardItem;
         if (item === null || typeof item === "string") setKeyboardItem(item ?? null);
+        let nextScore = 0;
+        props.targets.forEach((t) => {
+          if (normalized.assignments[t.id] === t.accepts) nextScore += 1;
+        });
+        if (config.tracking?.replayResumeEvents === true) {
+          replayTelemetry(
+            normalized.assignments,
+            passed,
+            nextChecked,
+            nextScore,
+            props.targets.length || 1,
+          );
+        }
       },
     });
-  }, [allFilled, assignments, checkId, checked, hasTargets, keyboardItem, maxScore, passed, passedThreshold, pool, props.targets, score]);
+  }, [assignments, checkId, checked, config.tracking?.replayResumeEvents, keyboardItem, maxScore, passed, passedThreshold, pool, props.items, props.targets, score]);
 
   useAssessmentHandleRegistration(checkId, handle, ref);
 
@@ -189,6 +244,7 @@ function DragAndDropInner(
     props.targets.find((target) => assignments[target.id] === itemId)?.id;
 
   const place = (targetId: string, itemId: string) => {
+    if (!itemIds.has(itemId)) return;
     if (passed && !props.enableRetry) return;
     setChecked(false);
     const sourceTargetId = findTargetForItem(itemId);
@@ -285,21 +341,22 @@ function DragAndDropInner(
   const check = () => {
     if (!allFilled) return;
     setChecked(true);
+    const scored = scoreResponse(assignments, passedThreshold, maxScore, props.passingScore);
     assessment.answer({
       checkId,
       interactionType: INTERACTION,
       response: assignments,
-      correct: passedThreshold,
+      correct: scored.passed,
     });
-    if ((passedThreshold || props.enableRetry === false) && !completedRef.current) {
+    if ((scored.passed || props.enableRetry === false) && !completedRef.current) {
       completedRef.current = true;
-      if (passedThreshold) setPassed(true);
+      if (scored.passed) setPassed(true);
       assessment.complete({
         checkId,
         interactionType: INTERACTION,
-        score,
-        maxScore,
-        passingScore: props.passingScore ?? maxScore,
+        score: scored.score,
+        maxScore: scored.maxScore,
+        passingScore: props.passingScore ?? scored.maxScore,
       });
     }
   };
@@ -327,7 +384,7 @@ function DragAndDropInner(
         onDrop={(event) => {
           event.preventDefault();
           const id = event.dataTransfer.getData("text/plain");
-          if (id) {
+          if (id && itemIds.has(id)) {
             commitDrop();
             returnToPool(id);
           }
@@ -394,7 +451,7 @@ function DragAndDropInner(
                 onDrop={(event) => {
                   event.preventDefault();
                   const id = event.dataTransfer.getData("text/plain");
-                  if (id) {
+                  if (id && itemIds.has(id)) {
                     commitDrop();
                     place(target.id, id);
                   }
@@ -444,7 +501,7 @@ function DragAndDropInner(
       </button>
       {checked ? (
         <p role="status" aria-live="polite">
-          {passedThreshold ? "Correct" : "Try again"}
+          {passed ? "Correct" : "Try again"}
         </p>
       ) : null}
     </section>

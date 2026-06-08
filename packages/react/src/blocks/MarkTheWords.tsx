@@ -70,7 +70,7 @@ function MarkTheWordsInner(
         checkId,
         getScore: () => score,
         getMaxScore: () => maxScore || 1,
-        getAnswerGiven: () => marked.size > 0,
+        getAnswerGiven: () => submitted,
         resetTask: reset,
         showSolutions: () => setShowSolutions(true),
         getXAPIData: () => ({

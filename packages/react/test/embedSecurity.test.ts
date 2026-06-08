@@ -60,3 +60,29 @@ describe("resolveMediaSrc production scheme policy", () => {
     ).toBe("https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4");
   });
 });
+
+describe("embed strictHosts", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    vi.unstubAllGlobals();
+    vi.resetModules();
+  });
+
+  it("blocks loopback hosts in non-production when strictHosts is true", async () => {
+    vi.stubEnv("NODE_ENV", "development");
+    mockPageUrl("https://lessonkit.example/course/index.html");
+    const { resolveMediaSrc } = await import("../src/blocks/embedSecurity");
+    expect(
+      resolveMediaSrc("http://127.0.0.1:8765/media/video.mp4", { strictHosts: true }),
+    ).toBeNull();
+  });
+
+  it("allows loopback hosts in non-production when strictHosts is false", async () => {
+    vi.stubEnv("NODE_ENV", "development");
+    mockPageUrl("https://lessonkit.example/course/index.html");
+    const { resolveMediaSrc } = await import("../src/blocks/embedSecurity");
+    expect(
+      resolveMediaSrc("http://127.0.0.1:8765/media/video.mp4", { strictHosts: false }),
+    ).toBe("http://127.0.0.1:8765/media/video.mp4");
+  });
+});

@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { findPackagingErrorIssues, isPackagingErrorIssue } from "../src/packaging/issueSeverity";
+import {
+  findPackagingErrorIssues,
+  findPackagingWarningIssues,
+  isPackagingErrorIssue,
+  isPackagingWarningIssue,
+} from "../src/packaging/issueSeverity";
 
 describe("issueSeverity", () => {
   it("treats error and fatal as packaging errors", () => {
@@ -28,5 +33,22 @@ describe("issueSeverity", () => {
 
   it("returns empty array for undefined input", () => {
     expect(findPackagingErrorIssues(undefined)).toEqual([]);
+  });
+
+  it("treats warning severity as packaging warnings", () => {
+    expect(isPackagingWarningIssue({ severity: "warning" })).toBe(true);
+    expect(isPackagingWarningIssue({ severity: "WARNING" })).toBe(true);
+    expect(isPackagingWarningIssue({ severity: "error" })).toBe(false);
+    expect(isPackagingWarningIssue({})).toBe(false);
+  });
+
+  it("findPackagingWarningIssues filters mixed lists", () => {
+    const issues = [
+      { severity: "warning", message: "a" },
+      { severity: "error", message: "b" },
+      { severity: "info", message: "c" },
+    ];
+    expect(findPackagingWarningIssues(issues)).toEqual([{ severity: "warning", message: "a" }]);
+    expect(findPackagingWarningIssues(undefined)).toEqual([]);
   });
 });

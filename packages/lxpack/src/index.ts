@@ -58,6 +58,7 @@ export {
   type ValidatePackageInputsResult,
 } from "./packaging/validateInputs";
 
+export { assertSpaDistContentsSafe } from "./spaDistValidation";
 export { promoteStagingToOutDir } from "./packaging/promote";
 export {
   buildStagingPackage,

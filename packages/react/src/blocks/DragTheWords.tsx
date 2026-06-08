@@ -6,6 +6,7 @@ import { parseStarDelimitedTemplate } from "../assessment/internal/parseStarDeli
 import { buildAssessmentHandle } from "../assessment/internal/buildAssessmentHandle";
 import { readBooleanStateField } from "../assessment/internal/resumeState";
 import { useAssessmentHandleRegistration } from "../assessment/internal/useAssessmentHandleRegistration";
+import { usePluginScoring } from "../assessment/internal/usePluginScoring";
 import { meetsPassingThreshold } from "../assessment/scoring";
 import { useAssessmentState } from "../assessment/useAssessmentState";
 import { useLessonkit } from "../hooks";
@@ -24,6 +25,46 @@ function parseZones(template: string): { parts: string[]; answers: string[] } {
   return { parts, answers: values };
 }
 
+function normalizeDragTheWordsState(
+  rawZones: unknown,
+  rawPool: unknown,
+  words: string[],
+  zoneIds: string[],
+): { zones: Record<string, string>; pool: string[] } {
+  const wordSet = new Set(words);
+  const zones = Object.fromEntries(zoneIds.map((id) => [id, ""]));
+  const claimed = new Set<string>();
+
+  if (rawZones && typeof rawZones === "object") {
+    for (const zoneId of zoneIds) {
+      const value = (rawZones as Record<string, unknown>)[zoneId];
+      if (typeof value === "string" && value !== "" && wordSet.has(value) && !claimed.has(value)) {
+        zones[zoneId] = value;
+        claimed.add(value);
+      }
+    }
+  }
+
+  const pool: string[] = [];
+  const seen = new Set<string>();
+  if (Array.isArray(rawPool)) {
+    for (const word of rawPool) {
+      if (typeof word === "string" && wordSet.has(word) && !claimed.has(word) && !seen.has(word)) {
+        pool.push(word);
+        seen.add(word);
+      }
+    }
+  }
+  for (const word of words) {
+    if (!claimed.has(word) && !seen.has(word)) {
+      pool.push(word);
+      seen.add(word);
+    }
+  }
+
+  return { zones, pool };
+}
+
 function DragTheWordsInner(
   props: DragTheWordsProps & { enclosingLessonId: LessonId },
   ref: React.Ref<AssessmentHandle>,
@@ -31,6 +72,7 @@ function DragTheWordsInner(
   const checkId = useMemo(() => normalizeComponentId(props.checkId, "checkId"), [props.checkId]);
   const assessment = useAssessmentState(props.enclosingLessonId);
   const { config } = useLessonkit();
+  const { scoreResponse } = usePluginScoring(checkId, props.enclosingLessonId);
   const { parts, answers } = useMemo(() => parseZones(props.template), [props.template]);
   const [zones, setZones] = useState<Record<string, string>>(() =>
     Object.fromEntries(answers.map((_, i) => [`zone-${i}`, ""])),
@@ -107,7 +149,7 @@ function DragTheWordsInner(
         checkId,
         getScore: () => score,
         getMaxScore: () => maxScore || 1,
-        getAnswerGiven: () => allFilled,
+        getAnswerGiven: () => submitted,
         resetTask: reset,
         showSolutions: () => {},
         getXAPIData: () => ({
@@ -120,13 +162,11 @@ function DragTheWordsInner(
         }),
         getCurrentState: () => ({ zones, pool, passed, keyboardWord, submitted }),
         resume: (state) => {
-          const rawZones = state.zones;
-          let nextZones = zones;
-          if (rawZones && typeof rawZones === "object") {
-            nextZones = { ...(rawZones as Record<string, string>) };
-            setZones(nextZones);
-          }
-          if (Array.isArray(state.pool)) setPool([...(state.pool as string[])]);
+          const zoneIds = answers.map((_, i) => `zone-${i}`);
+          const normalized = normalizeDragTheWordsState(state.zones, state.pool, props.words, zoneIds);
+          const nextZones = normalized.zones;
+          setZones(nextZones);
+          setPool(normalized.pool);
           let nextPassed = passed;
           let nextSubmitted = submitted;
           readBooleanStateField(state, "passed", (value) => {
@@ -165,6 +205,7 @@ function DragTheWordsInner(
       if (prev) next.push(prev);
       return next;
     });
+    setSubmitted(false);
     setKeyboardWord(null);
   };
 
@@ -187,27 +228,30 @@ function DragTheWordsInner(
     }
     if (!allFilled) return;
     if (passed && !props.enableRetry) return;
-    const snapshot = JSON.stringify(zones);
-    if (checkSnapshotRef.current === snapshot) return;
-    checkSnapshotRef.current = snapshot;
+    if (props.autoCheck) {
+      const snapshot = JSON.stringify(zones);
+      if (checkSnapshotRef.current === snapshot) return;
+      checkSnapshotRef.current = snapshot;
+    }
+    const scored = scoreResponse(zones, passedThreshold, maxScore || 1, props.passingScore);
     answeredRef.current = true;
     setSubmitted(true);
     assessment.answer({
-        checkId,
-        interactionType: INTERACTION,
-        question: props.template,
-        response: zones,
-        correct: passedThreshold,
-      });
-    if ((passedThreshold || props.enableRetry === false) && !completedRef.current) {
+      checkId,
+      interactionType: INTERACTION,
+      question: props.template,
+      response: zones,
+      correct: scored.passed,
+    });
+    if ((scored.passed || props.enableRetry === false) && !completedRef.current) {
       completedRef.current = true;
-      if (passedThreshold) setPassed(true);
+      if (scored.passed) setPassed(true);
       assessment.complete({
         checkId,
         interactionType: INTERACTION,
-        score,
-        maxScore,
-        passingScore: props.passingScore ?? maxScore,
+        score: scored.score,
+        maxScore: scored.maxScore,
+        passingScore: props.passingScore ?? scored.maxScore,
       });
     }
   };
@@ -284,7 +328,7 @@ function DragTheWordsInner(
       ) : null}
       {submitted ? (
         <p role="status" aria-live="polite">
-          {passed || passedThreshold ? "Correct" : "Try again"}
+          {passed ? "Correct" : "Try again"}
         </p>
       ) : null}
       {props.enableRetry && passed ? (

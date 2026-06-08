@@ -106,7 +106,7 @@ function ArithmeticQuizInner(
         checkId,
         getScore: () => score,
         getMaxScore: () => maxScore,
-        getAnswerGiven: () => allFilled,
+        getAnswerGiven: () => checked,
         resetTask: reset,
         showSolutions: () => {},
         getXAPIData: () => ({

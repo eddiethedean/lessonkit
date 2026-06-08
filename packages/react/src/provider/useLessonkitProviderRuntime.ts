@@ -123,6 +123,17 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
   if (!providerStorageRef.current) {
     providerStorageRef.current = normalizedConfig.storage ?? createSessionStoragePort();
     providerStoragesForTests.add(providerStorageRef.current);
+  } else if (
+    normalizedConfig.storage &&
+    normalizedConfig.storage !== providerStorageRef.current
+  ) {
+    const g = globalThis as typeof globalThis & { process?: { env?: { NODE_ENV?: string } } };
+    if (typeof g.process !== "undefined" && g.process.env?.NODE_ENV !== "production") {
+      throw new Error(
+        "[lessonkit] config.storage cannot change after LessonkitProvider mount; remount the provider instead.",
+      );
+    }
+    normalizedConfig.observability?.onStoragePortChangeIgnored?.();
   }
   const providerStorage = providerStorageRef.current;
 

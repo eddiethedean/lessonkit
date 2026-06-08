@@ -2,6 +2,7 @@ import { validateId } from "@lessonkit/core";
 import { validateTheme, type ThemePresetName } from "@lessonkit/themes";
 import type { LessonkitCourseDescriptor, SpaLayout } from "../types";
 import { isSafeRelativeSpaPath } from "../spaPath";
+import { isReservedOutputPath } from "../validateProjectPaths";
 import { themeToLxpackRuntime } from "../theme";
 import type { ValidationIssue } from "../validationIssue";
 import { validateAssessmentEntry } from "./validateAssessments";
@@ -72,6 +73,22 @@ export function validateCourseDescriptor(input: LessonkitCourseDescriptor): Vali
       issues.push({
         path: "tracking.completion.threshold",
         message: "threshold must be a finite number between 0 and 1",
+      });
+    }
+  }
+
+  const descriptorSpaDistDir = input.spaDistDir?.trim();
+  if (descriptorSpaDistDir) {
+    if (!isSafeRelativeSpaPath(descriptorSpaDistDir)) {
+      issues.push({
+        path: "spaDistDir",
+        message:
+          "spaDistDir must be a relative path without '..' segments or absolute prefixes",
+      });
+    } else if (isReservedOutputPath(descriptorSpaDistDir)) {
+      issues.push({
+        path: "spaDistDir",
+        message: "spaDistDir must not target reserved directories (.git, node_modules, .github)",
       });
     }
   }

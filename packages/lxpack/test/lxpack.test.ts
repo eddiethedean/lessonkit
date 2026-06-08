@@ -74,15 +74,25 @@ describe("validateDescriptor", () => {
           checkId: "fib-1",
           question: "Fill",
           template: "Type *here*",
-          blanks: [
-            null,
-            { id: "b1", answer: "here" },
-            { answer: "missing-id" },
-          ],
+          blanks: [{ id: "b1", answer: "here" }],
         },
       ],
     });
     expect(fib.ok).toBe(true);
+
+    const fibInvalid = validateDescriptor({
+      ...baseDescriptor,
+      assessments: [
+        {
+          kind: "fillInBlanks",
+          checkId: "fib-bad",
+          question: "Fill",
+          template: "Type *here*",
+          blanks: [null, { answer: "missing-id" }],
+        },
+      ],
+    });
+    expect(fibInvalid.ok).toBe(false);
 
     const falseTf = validateDescriptor({
       ...baseDescriptor,
@@ -271,6 +281,27 @@ describe("assessments", () => {
     expect(lx!.id).toBe("email-first-step");
     expect(lx!.questions[0]?.choices.some((c) => c.correct)).toBe(true);
     expect(extractAssessments(baseDescriptor)).toHaveLength(1);
+  });
+
+  it("defaults shell passingScore to 1 when descriptor omits passingScore", () => {
+    const lx = assessmentDescriptorToLxpack({
+      checkId: "default-pass",
+      question: "Q?",
+      choices: ["A", "B"],
+      answer: "A",
+    });
+    expect(lx!.passingScore).toBe(1);
+  });
+
+  it("marks trimmed MCQ answer as correct when choices have surrounding whitespace", () => {
+    const lx = assessmentDescriptorToLxpack({
+      checkId: "trim-mcq",
+      question: "Verify?",
+      choices: [" Verify sender ", "Ignore"],
+      answer: "Verify sender",
+    });
+    expect(lx).not.toBeNull();
+    expect(lx!.questions[0]?.choices.find((c) => c.correct)?.text).toBe(" Verify sender ");
   });
 
   it("escapes safe assessment text for SCORM interchange", () => {
@@ -653,6 +684,14 @@ describe("validateDescriptor edge cases", () => {
     }
   });
 
+  it("validateDescriptorForTarget allows empty tracking.xapi object on scorm12", () => {
+    const result = validateDescriptorForTarget(
+      { ...baseDescriptor, tracking: { xapi: {} } },
+      "scorm12",
+    );
+    expect(result.ok).toBe(true);
+  });
+
   it("validateDescriptorForTarget rejects non-injectable assessments for LMS targets", () => {
     const descriptor = {
       ...baseDescriptor,
@@ -675,6 +714,34 @@ describe("validateDescriptor edge cases", () => {
 });
 
 describe("writeLxpackProject with assessments", () => {
+  it("rejects non-injectable assessments at write time", async () => {
+    const root = await makeTempDir();
+    const dist = join(root, "dist");
+    await mkdir(dist, { recursive: true });
+    const { writeFile } = await import("node:fs/promises");
+    await writeFile(join(dist, "index.html"), "ok", "utf-8");
+
+    await expect(
+      writeLxpackProject({
+        descriptor: {
+          ...baseDescriptor,
+          assessments: [
+            {
+              kind: "fillInBlanks",
+              checkId: "fib-write",
+              question: "Fill",
+              template: "Type *here*",
+              blanks: [{ id: "b1", answer: "here" }],
+            },
+          ],
+        },
+        outDir: join(root, "reject-fib"),
+        spaDistDir: dist,
+        projectRoot: root,
+      }),
+    ).rejects.toThrow(/not injected into LMS shell quizzes/);
+  });
+
   it("writes assessment yaml and course.yaml entries", async () => {
     const root = await makeTempDir();
     const dist = join(root, "dist");

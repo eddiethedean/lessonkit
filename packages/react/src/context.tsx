@@ -82,6 +82,8 @@ export type LessonkitConfig = {
     restrictPopupsInProduction?: boolean;
     /** Hostnames allowed to bypass the production private-network media/embed blocklist. */
     allowedHosts?: string[];
+    /** Apply private-network blocklist in non-production builds (recommended for LMS staging). */
+    strictHosts?: boolean;
   };
   /**
    * Non-production preview options. `allowConsoleTelemetry` skips production guard

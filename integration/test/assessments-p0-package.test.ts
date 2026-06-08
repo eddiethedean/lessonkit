@@ -1,7 +1,6 @@
-import { join } from "node:path";
 import { beforeAll, describe, expect, it } from "vitest";
 import { assertScormZip, assertZipExists } from "./helpers/assertArtifacts.js";
-import { ASSESSMENTS_P0_DIR } from "./helpers/paths.js";
+import { ASSESSMENTS_P0_DIR, requireCliOutputPath } from "./helpers/paths.js";
 import { ensureAssessmentsP0Built } from "./helpers/tempProject.js";
 import { ensurePackagesBuilt, runCliJson } from "./helpers/runCli.js";
 
@@ -27,9 +26,7 @@ describe("assessments-p0 package (1.1.0)", () => {
     expect(json.ok).toBe(true);
     expect(json.target).toBe("scorm12");
 
-    const zipPath =
-      json.outputPath ??
-      join(ASSESSMENTS_P0_DIR, ".lxpack/course/.lxpack/out/course-scorm12.zip");
+    const zipPath = requireCliOutputPath(json);
     assertZipExists(zipPath);
     assertScormZip(zipPath);
   });

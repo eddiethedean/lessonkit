@@ -16,7 +16,7 @@ function appendActivityIriIssues(
   descriptor: LessonkitCourseDescriptor,
   target: ExportTarget,
 ): void {
-  const hasXapiTracking = Boolean(descriptor.tracking?.xapi);
+  const hasXapiTracking = Boolean(descriptor.tracking?.xapi?.activityIri?.trim());
   const requiresForTarget = target === "xapi" || target === "cmi5";
   if (!hasXapiTracking && !requiresForTarget) return;
 

@@ -75,11 +75,34 @@ export const ASSESSMENT_VALIDATORS: Record<AssessmentKind, AssessmentValidator> 
         message: "template must include at least one blank wrapped in asterisks for fillInBlanks",
       });
     }
-    const explicitBlanks =
-      assessment.blanks
-        ?.map((b) => ({ id: b.id?.trim() ?? "", answer: b.answer?.trim() ?? "" }))
-        .filter((b) => b.id.length > 0 && b.answer.length > 0) ?? [];
-    if (assessment.blanks !== undefined && explicitBlanks.length === 0) {
+    const explicitBlanks: Array<{ id: string; answer: string }> = [];
+    if (assessment.blanks !== undefined) {
+      for (let i = 0; i < assessment.blanks.length; i++) {
+        const blank = assessment.blanks[i];
+        if (!blank || typeof blank !== "object") {
+          issues.push({
+            path: `${path}.blanks[${i}]`,
+            message: "blank entry must be an object with non-empty id and answer",
+          });
+          continue;
+        }
+        const id = blank.id?.trim() ?? "";
+        const answer = blank.answer?.trim() ?? "";
+        if (!id || !answer) {
+          issues.push({
+            path: `${path}.blanks[${i}]`,
+            message: "blank entry must include non-empty id and answer",
+          });
+          continue;
+        }
+        explicitBlanks.push({ id, answer });
+      }
+    }
+    if (
+      assessment.blanks !== undefined &&
+      explicitBlanks.length === 0 &&
+      !issues.some((issue) => issue.path?.startsWith(`${path}.blanks`))
+    ) {
       issues.push({
         path: `${path}.blanks`,
         message: "blanks must include at least one entry with non-empty id and answer",

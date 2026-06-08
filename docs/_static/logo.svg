@@ -11,10 +11,9 @@
   <text
     x="52"
     y="31"
-    fill="#0F172A"
     font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif"
     font-size="20"
     font-weight="600"
     letter-spacing="-0.04em"
-  >LessonKit</text>
+  ><tspan fill="#0F172A">Lesson</tspan><tspan fill="#2563EB">Kit</tspan></text>
 </svg>

@@ -25,7 +25,7 @@ export function isReservedOutputPath(value: string): boolean {
   return segments.some((segment) => RESERVED_OUTPUT_SEGMENTS.has(segment));
 }
 
-function isReservedResolvedOutputPath(projectRoot: string, resolved: string): boolean {
+export function isReservedResolvedOutputPath(projectRoot: string, resolved: string): boolean {
   const rootResolved = resolveComparablePath(projectRoot);
   const targetResolved = resolveComparablePath(resolved);
   try {
@@ -78,7 +78,9 @@ export function validateProjectPaths(
   const root = resolve(projectRoot);
 
   if (paths.spaDistDir?.trim()) {
-    validatePathField(paths.spaDistDir.trim(), "paths.spaDistDir", root, issues);
+    validatePathField(paths.spaDistDir.trim(), "paths.spaDistDir", root, issues, {
+      rejectReserved: true,
+    });
   }
   if (paths.lxpackOutDir?.trim()) {
     validatePathField(paths.lxpackOutDir.trim(), "paths.lxpackOutDir", root, issues, {

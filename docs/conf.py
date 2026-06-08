@@ -69,9 +69,10 @@ html_static_path = ["_static"]
 html_css_files = ["custom.css"]
 html_favicon = "_static/favicon.svg"
 html_title = "LessonKit"
-html_logo = "_static/logo.svg"
 
 html_theme_options = {
+    "light_logo": "logo.svg",
+    "dark_logo": "logo-dark.svg",
     "source_repository": "https://github.com/eddiethedean/lessonkit/",
     "source_branch": "main",
     "source_directory": "docs/",

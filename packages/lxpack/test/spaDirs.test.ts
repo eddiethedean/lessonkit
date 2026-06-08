@@ -162,6 +162,70 @@ describe("resolveSpaDirs", () => {
     ).rejects.toThrow(/index\.html.*lesson "a"/);
   });
 
+  it("resolves single-spa using descriptor.spaDistDir when option is omitted", async () => {
+    const root = await mkdtemp(join(tmpdir(), "lk-spa-"));
+    tempDirs.push(root);
+    const dist = join(root, "build");
+    await mkdir(dist, { recursive: true });
+    await writeFile(join(dist, "index.html"), "<html></html>", "utf8");
+
+    const dirs = await resolveSpaDirs({
+      descriptor: {
+        courseId: "c",
+        title: "T",
+        layout: "single-spa",
+        spaDistDir: "build",
+        lessons: [{ id: "intro", title: "Intro" }],
+        assessments: [],
+      },
+      projectRoot: root,
+    });
+
+    expect(dirs.intro).toBe(dist);
+  });
+
+  it("resolves single-spa without projectRoot using absolute spaDistDir", async () => {
+    const root = await mkdtemp(join(tmpdir(), "lk-spa-"));
+    tempDirs.push(root);
+    const dist = join(root, "dist");
+    await mkdir(dist, { recursive: true });
+    await writeFile(join(dist, "index.html"), "<html></html>", "utf8");
+
+    const dirs = await resolveSpaDirs({
+      descriptor: {
+        courseId: "c",
+        title: "T",
+        layout: "single-spa",
+        lessons: [{ id: "main", title: "Main" }],
+        assessments: [],
+      },
+      spaDistDir: dist,
+    });
+
+    expect(dirs.main).toBe(dist);
+  });
+
+  it("resolves per-lesson-spa without projectRoot using absolute lessonSpaDirs", async () => {
+    const root = await mkdtemp(join(tmpdir(), "lk-spa-"));
+    tempDirs.push(root);
+    const lessonA = join(root, "dist-a");
+    await mkdir(lessonA, { recursive: true });
+    await writeFile(join(lessonA, "index.html"), "<html></html>", "utf8");
+
+    const dirs = await resolveSpaDirs({
+      descriptor: {
+        courseId: "c",
+        title: "T",
+        layout: "per-lesson-spa",
+        lessons: [{ id: "a", title: "A" }],
+        assessments: [],
+      },
+      lessonSpaDirs: { a: lessonA },
+    });
+
+    expect(dirs.a).toBe(lessonA);
+  });
+
   it("rejects per-lesson-spa paths that escape projectRoot", async () => {
     const root = await mkdtemp(join(tmpdir(), "lk-spa-"));
     tempDirs.push(root);

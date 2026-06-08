@@ -36,7 +36,7 @@ export function buildLessonkitUrn(parts: LessonkitUrnParts): LessonkitUrn {
     urn += `:block:${blockId}`;
   }
   if (parts.nodeId !== undefined) {
-    const nodeId = assertValidId(parts.nodeId, "blockId");
+    const nodeId = assertValidId(parts.nodeId, "nodeId");
     if (parts.blockId === undefined) {
       throw new Error("buildLessonkitUrn: nodeId requires blockId");
     }

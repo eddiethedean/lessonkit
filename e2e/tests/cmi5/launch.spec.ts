@@ -25,5 +25,9 @@ test.describe("golden cmi5 package", () => {
     });
     await completePackagedAssessments(page);
     await expect(page.getByRole("button", { name: /safety-check.*✓/ })).toBeVisible();
+    await expect(page.getByRole("button", { name: /ppe-acknowledgment.*✓/ })).toBeVisible();
+    await expect(page.getByRole("button", { name: /site orientation.*✓/i })).toBeVisible({
+      timeout: 15_000,
+    });
   });
 });

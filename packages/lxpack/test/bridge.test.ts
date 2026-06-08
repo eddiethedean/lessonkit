@@ -35,6 +35,7 @@ describe("@lessonkit/lxpack/bridge", () => {
   it("normalizeAssessmentScore treats values already on 0–1 scale when maxScore is 1", () => {
     expect(normalizeAssessmentScore({ score: 1, maxScore: 1 })).toBe(1);
     expect(normalizeAssessmentScore({ score: 0.5 })).toBe(0.5);
+    expect(normalizeAssessmentScore({ score: 2, maxScore: 1 })).toBe(1);
   });
 
   it("normalizeAssessmentScore treats percentage raw scores without maxScore", () => {
@@ -51,9 +52,14 @@ describe("@lessonkit/lxpack/bridge", () => {
     expect(normalizeAssessmentScore({ maxScore: 2 })).toBeNull();
   });
 
-  it("normalizeAssessmentPassingScore uses LXPack default when omitted", () => {
-    expect(normalizeAssessmentPassingScore()).toBe(0.7);
+  it("normalizeAssessmentPassingScore uses 100% default when omitted", () => {
+    expect(normalizeAssessmentPassingScore()).toBe(1);
     expect(normalizeAssessmentPassingScore({ passingScore: 0.8 })).toBe(0.8);
+  });
+
+  it("normalizeAssessmentScore requires maxScore for multi-point raw scores", () => {
+    expect(normalizeAssessmentScore({ score: 2 })).toBe(0.02);
+    expect(normalizeAssessmentScore({ score: 2, maxScore: 4 })).toBe(0.5);
   });
 
   it("normalizeAssessmentPassingScore scales raw threshold by maxScore", () => {
@@ -134,8 +140,37 @@ describe("@lessonkit/lxpack/bridge", () => {
         id: "tf-1",
         score: 1,
         maxScore: 1,
-        passingScore: 0.7,
+        passingScore: 1,
       });
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it("calls onBridgeMiss when assessment_completed score cannot be normalized", () => {
+    const onBridgeMiss = vi.fn();
+    const submitAssessment = vi.fn();
+    vi.stubGlobal("window", {
+      parent: { lxpackBridge: { v1: { submitAssessment } } },
+    });
+
+    const event: TelemetryEvent = {
+      name: "assessment_completed",
+      courseId: "c",
+      lessonId: "l1",
+      sessionId: "s",
+      timestamp: "2026-01-01T00:00:00.000Z",
+      data: {
+        checkId: "tf-1",
+        interactionType: "trueFalse",
+        maxScore: 1,
+      },
+    };
+
+    try {
+      forwardTelemetryToBridge(event, "auto", undefined, { onBridgeMiss });
+      expect(submitAssessment).not.toHaveBeenCalled();
+      expect(onBridgeMiss).toHaveBeenCalledWith(event);
     } finally {
       vi.unstubAllGlobals();
     }
@@ -248,7 +283,7 @@ describe("@lessonkit/lxpack/bridge", () => {
     }
   });
 
-  it("resolveParentOrigin falls back to document.referrer", () => {
+  it("resolveParentOrigin returns null for cross-origin parent without referrer trust", () => {
     vi.stubGlobal("document", { referrer: "https://lms.example/course/launch" });
     vi.stubGlobal("window", {
       parent: {
@@ -259,9 +294,8 @@ describe("@lessonkit/lxpack/bridge", () => {
     });
 
     try {
-      expect(resolveParentOrigin()).toBe("https://lms.example");
-      expect(isParentOriginAllowed(["https://lms.example"])).toBe(true);
-      expect(isParentOriginAllowed(["https://other.example"])).toBe(false);
+      expect(resolveParentOrigin()).toBeNull();
+      expect(isParentOriginAllowed(["https://lms.example"])).toBe(false);
     } finally {
       vi.unstubAllGlobals();
     }

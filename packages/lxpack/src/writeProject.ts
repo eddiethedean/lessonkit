@@ -5,9 +5,8 @@ import { resolveSpaDirs } from "./spaDirs";
 import { assertSpaDistContentsSafe } from "./spaDistValidation";
 import type { LessonkitCourseDescriptor } from "./types";
 import { assertRealPathUnderRoot } from "./spaPath";
-import { validateDescriptor } from "./validateDescriptor";
 import { validateInjectableAssessments } from "./descriptor/validateInjectableAssessments";
-
+import { validateDescriptor } from "./validateDescriptor";
 export type WriteLxpackProjectOptions = {
   descriptor: LessonkitCourseDescriptor;
   /** LXPack project output directory (created if missing). */
@@ -45,9 +44,12 @@ export async function writeLxpackProject(
   }
 
   const descriptor = validation.descriptor;
+
   const injectableIssues = validateInjectableAssessments(descriptor);
   if (injectableIssues.length > 0) {
-    throw new Error(injectableIssues.map((i) => `${i.path}: ${i.message}`).join("; "));
+    throw new Error(
+      injectableIssues.map((i) => `${i.path ?? "assessments"}: ${i.message}`).join("; "),
+    );
   }
 
   const outDir = resolve(options.outDir);

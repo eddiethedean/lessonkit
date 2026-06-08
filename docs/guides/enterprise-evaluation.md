@@ -14,7 +14,7 @@ One-page summary for security, compliance, and platform teams evaluating LessonK
 - Author in **React + TypeScript**; manifest **`lessonkit.json`** for packaging validation.
 - Runtime: browser SPA with optional telemetry, xAPI, and LMS bridge.
 - Packaging: **Node.js 20.19+** for new projects; **Node 18+** on legacy packaging-only agents; **LXPack** produces LMS artifacts.
-- **1.6.x additions:** portable `.lkcourse` interchange (`lessonkit export` / `import`), block registry CLI (`lessonkit blocks list`).
+- **1.6.x additions:** portable `.lkcourse` interchange (`lessonkit export`; import via `@lessonkit/lxpack` API), block registry CLI (`lessonkit blocks list`).
 
 Diagram and package boundaries: [Architecture overview](architecture-overview.md). Export formats and LMS staging requirements: [LMS compatibility](../reference/lms-compatibility.md). Interchange: [Portable interchange](../reference/interchange.md).
 
@@ -44,7 +44,7 @@ Diagram and package boundaries: [Architecture overview](architecture-overview.md
 | SCORM 1.2 / 2004 | Playwright launch specs + `@lxpack/conformance` |
 | xAPI / cmi5 | Conformance + launch tests |
 | Standalone | Golden example + e2e |
-| `.lkcourse` interchange | `lessonkit export` / `import` + lxpack validation tests |
+| `.lkcourse` interchange | `lessonkit export` + `importLkcourse()` (lxpack) + validation tests |
 
 Details: [LMS compatibility](../reference/lms-compatibility.md) · [Export parity](react-developers/export-parity.md) · [LMS Go-Live](react-developers/lms-go-live.md).
 

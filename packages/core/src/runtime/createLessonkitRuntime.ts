@@ -77,6 +77,11 @@ function resolvePluginHost(plugins: HeadlessLessonkitPlugins): PluginHost | null
   return null;
 }
 
+function pluginListFingerprint(plugins: HeadlessLessonkitPlugins): string | null {
+  if (!plugins || !Array.isArray(plugins)) return null;
+  return plugins.map((p) => `${p.id}\0${p.version ?? ""}`).join("\n");
+}
+
 function warnRuntimeV1Deprecated(): void {
   const g = globalThis as typeof globalThis & { process?: { env?: { NODE_ENV?: string } } };
   if (typeof g.process !== "undefined" && g.process.env?.NODE_ENV === "production") return;
@@ -100,13 +105,20 @@ export function createLessonkitRuntime(
 
   const configSnapshot: HeadlessLessonkitConfig = { ...config };
 
+  const hasExplicitSessionId = Boolean(configSnapshot.session?.sessionId?.trim());
+  let autoSessionId: string | undefined;
   let sessionId = resolveSessionId(storage, configSnapshot.session?.sessionId);
+  if (!hasExplicitSessionId) {
+    autoSessionId = sessionId;
+  }
   let attemptId = configSnapshot.session?.attemptId;
   let user = configSnapshot.session?.user;
   let courseId = configSnapshot.courseId;
+  let configuredSessionId = configSnapshot.session?.sessionId;
 
   let progress = createProgressController();
   let pluginHost = resolvePluginHost(configSnapshot.plugins);
+  let pluginFingerprint = pluginListFingerprint(configSnapshot.plugins);
   let disposed = false;
 
   const getPluginCtx = () =>
@@ -122,13 +134,6 @@ export function createLessonkitRuntime(
   }
 
   const getSession = () => ({ sessionId, attemptId, user });
-
-  const syncSessionFromConfig = (next: HeadlessLessonkitConfig) => {
-    sessionId = resolveSessionId(storage, next.session?.sessionId);
-    attemptId = next.session?.attemptId;
-    user = next.session?.user;
-    courseId = next.courseId;
-  };
 
   const applyPluginsToEvent = (event: TelemetryEvent): TelemetryEvent | null => {
     if (!pluginHost) return event;
@@ -162,8 +167,6 @@ export function createLessonkitRuntime(
     const event = buildAndApply(name, data, lessonId);
     if (event) emitFn(event);
   };
-
-  syncSessionFromConfig(configSnapshot);
 
   const track = <N extends TelemetryEventName>(
     name: N,
@@ -218,10 +221,33 @@ export function createLessonkitRuntime(
       if (next.autoCompleteOnLessonSwitch !== undefined) {
         configSnapshot.autoCompleteOnLessonSwitch = next.autoCompleteOnLessonSwitch;
       }
-      if (next.session !== undefined) {
-        configSnapshot.session = { ...configSnapshot.session, ...next.session };
+      if (next.courseId !== undefined) {
+        courseId = next.courseId;
       }
-      syncSessionFromConfig(configSnapshot);
+      if (next.session !== undefined) {
+        const previousSessionId = sessionId;
+        configSnapshot.session = { ...configSnapshot.session, ...next.session };
+        const explicitSessionId = configSnapshot.session?.sessionId?.trim();
+        if (explicitSessionId) {
+          sessionId = resolveSessionId(storage, explicitSessionId);
+          autoSessionId = undefined;
+        } else {
+          sessionId = autoSessionId ?? resolveSessionId(storage, undefined);
+          if (!autoSessionId) autoSessionId = sessionId;
+        }
+        attemptId = configSnapshot.session?.attemptId;
+        user = configSnapshot.session?.user;
+        if (previousSessionId !== sessionId) {
+          const prevExplicit = configuredSessionId?.trim();
+          const nextExplicit = configSnapshot.session?.sessionId?.trim();
+          const isExplicitLearnerSwap =
+            Boolean(prevExplicit) && Boolean(nextExplicit) && prevExplicit !== nextExplicit;
+          if (!isExplicitLearnerSwap) {
+            migrateCourseStartedMark(storage, previousSessionId, sessionId, courseId);
+          }
+        }
+        configuredSessionId = configSnapshot.session?.sessionId;
+      }
       const sessionKeyAfter = JSON.stringify({ sessionId, attemptId, user });
       if (next.courseId !== undefined && next.courseId !== previousCourseId) {
         progress = createProgressController();
@@ -230,12 +256,19 @@ export function createLessonkitRuntime(
           pluginHost?.setupAll(getPluginCtx());
         }
       }
-      if (next.plugins !== undefined && next.plugins !== configSnapshot.plugins) {
-        pluginHost?.disposeAll();
-        configSnapshot.plugins = next.plugins;
-        pluginHost = resolvePluginHost(configSnapshot.plugins);
-        if (!configSnapshot.deferPluginSetup) {
-          pluginHost?.setupAll(getPluginCtx());
+      if (next.plugins !== undefined) {
+        const nextFingerprint = pluginListFingerprint(next.plugins);
+        const pluginsChanged =
+          next.plugins !== configSnapshot.plugins ||
+          (nextFingerprint !== null && nextFingerprint !== pluginFingerprint);
+        if (pluginsChanged) {
+          pluginHost?.disposeAll();
+          configSnapshot.plugins = next.plugins;
+          pluginFingerprint = nextFingerprint;
+          pluginHost = resolvePluginHost(configSnapshot.plugins);
+          if (!configSnapshot.deferPluginSetup) {
+            pluginHost?.setupAll(getPluginCtx());
+          }
         }
       } else if (
         next.session !== undefined &&

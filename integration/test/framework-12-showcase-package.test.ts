@@ -1,7 +1,6 @@
-import { join } from "node:path";
 import { beforeAll, describe, expect, it } from "vitest";
 import { assertScormZip, assertZipExists } from "./helpers/assertArtifacts.js";
-import { FRAMEWORK_12_SHOWCASE_DIR } from "./helpers/paths.js";
+import { FRAMEWORK_12_SHOWCASE_DIR, requireCliOutputPath } from "./helpers/paths.js";
 import { ensureFramework12ShowcaseBuilt } from "./helpers/tempProject.js";
 import { ensurePackagesBuilt, runCliJson } from "./helpers/runCli.js";
 
@@ -27,9 +26,7 @@ describe("framework-12-showcase package (1.6.x)", () => {
     expect(json.ok).toBe(true);
     expect(json.target).toBe("scorm12");
 
-    const zipPath =
-      json.outputPath ??
-      join(FRAMEWORK_12_SHOWCASE_DIR, ".lxpack/course/.lxpack/out/course-scorm12.zip");
+    const zipPath = requireCliOutputPath(json);
     assertZipExists(zipPath);
     assertScormZip(zipPath);
   });

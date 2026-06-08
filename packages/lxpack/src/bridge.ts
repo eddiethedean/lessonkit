@@ -13,7 +13,8 @@ export {
   supportedBridgeVersions,
 } from "@lxpack/spa-bridge";
 
-const DEFAULT_BRIDGE_PASSING_SCORE = 0.7;
+/** 100% required when telemetry omits passingScore — matches React SPA default (maxScore). */
+const DEFAULT_BRIDGE_PASSING_SCORE = 1;
 
 function clamp01(value: number): number {
   return Math.min(1, Math.max(0, value));
@@ -26,7 +27,7 @@ function clamp01(value: number): number {
 export function normalizeScore(raw: { score?: number; maxScore?: number }): number | null {
   const { score, maxScore } = raw;
   if (typeof score !== "number" || !Number.isFinite(score)) return null;
-  if (typeof maxScore === "number" && maxScore > 1) {
+  if (typeof maxScore === "number" && maxScore > 0) {
     return clamp01(score / maxScore);
   }
   if (score > 1 && score <= 100) {
@@ -46,6 +47,9 @@ export function normalizePassingThreshold(raw?: {
   }
   if (typeof maxScore === "number" && maxScore > 1) {
     return clamp01(passingScore / maxScore);
+  }
+  if (typeof maxScore === "number" && maxScore <= 1) {
+    return clamp01(passingScore);
   }
   if (passingScore > 1 && passingScore <= 100) {
     return clamp01(passingScore / 100);
@@ -96,7 +100,7 @@ export function normalizeAssessmentScore(opts: {
 
 /**
  * Scale a raw passing threshold to 0–1 for the LXPack parent bridge.
- * Default 0.7 when omitted.
+ * Default 1.0 (100%) when omitted — matches React SPA default.
  */
 export function normalizeAssessmentPassingScore(opts?: {
   passingScore?: number;
@@ -124,13 +128,8 @@ export function resolveParentOrigin(parentWindow?: Window): string | null {
   try {
     return parent.location.origin;
   } catch {
-    const referrer = typeof document !== "undefined" ? document.referrer : "";
-    if (!referrer) return null;
-    try {
-      return new URL(referrer).origin;
-    } catch {
-      return null;
-    }
+    // Cross-origin parent: do not trust document.referrer for allowlist matching.
+    return null;
   }
 }
 
@@ -257,13 +256,17 @@ function dispatchBridgeActionInner(
 function forwardAssessmentCompletedToBridge(
   bridge: LxpackBridgeV1,
   event: TelemetryEvent & { name: "assessment_completed" },
+  onBridgeMiss?: (event: TelemetryEvent) => void,
 ): void {
   const data = event.data;
   const scaled = normalizeAssessmentScore({
     score: data.score,
     maxScore: data.maxScore,
   });
-  if (scaled === null) return;
+  if (scaled === null) {
+    onBridgeMiss?.(event);
+    return;
+  }
   bridge.submitAssessment?.({
     id: data.checkId,
     score: scaled,
@@ -277,6 +280,8 @@ function forwardAssessmentCompletedToBridge(
 
 export type ForwardTelemetryToBridgeOptions = {
   onBridgeError?: (err: unknown) => void;
+  /** Called when assessment_completed cannot be forwarded (e.g. missing/invalid score). */
+  onBridgeMiss?: (event: TelemetryEvent) => void;
   allowedParentOrigins?: string[];
 };
 
@@ -294,7 +299,7 @@ export function forwardTelemetryToBridge(
   if (!bridge) return;
   try {
     if (event.name === "assessment_completed") {
-      forwardAssessmentCompletedToBridge(bridge, event);
+      forwardAssessmentCompletedToBridge(bridge, event, opts?.onBridgeMiss);
       return;
     }
     const answeredTrack = answeredTelemetryToBridgeTrackEvent(event);
@@ -349,7 +354,7 @@ export function notifyLxpackCourseComplete(opts?: BridgeAccessOptions): boolean 
 
 /**
  * Submit assessment results to the parent LXPack bridge.
- * `score` must already be on a 0–1 scale (use `normalizeAssessmentScore` for raw points).
+ * Raw point scores are normalized to 0–1 before submission.
  */
 export function notifyLxpackAssessment(
   payload: LxpackBridgeSubmitAssessmentPayload & { id: CheckId },
@@ -357,8 +362,20 @@ export function notifyLxpackAssessment(
 ): boolean {
   const bridge = getBridge(undefined, opts);
   if (!bridge?.submitAssessment) return false;
+  const scaled = normalizeAssessmentScore({
+    score: payload.score,
+    maxScore: payload.maxScore,
+  });
+  if (scaled === null) return false;
   try {
-    bridge.submitAssessment(payload);
+    bridge.submitAssessment({
+      ...payload,
+      score: scaled,
+      passingScore: normalizeAssessmentPassingScore({
+        passingScore: payload.passingScore,
+        maxScore: payload.maxScore,
+      }),
+    });
     return true;
   } catch (err) {
     handleBridgeError(err, opts?.onBridgeError);

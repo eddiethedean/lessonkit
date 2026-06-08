@@ -229,7 +229,7 @@ describe("@lessonkit/core", () => {
     expect(sink).not.toHaveBeenCalled();
   });
 
-  it("re-queues only undelivered events when per-event sink fails mid-batch", async () => {
+  it("re-queues entire batch when per-event sink fails mid-batch", async () => {
     const sink = vi
       .fn<(event: TelemetryEvent) => Promise<void>>(async () => {})
       .mockResolvedValueOnce(undefined)
@@ -258,11 +258,12 @@ describe("@lessonkit/core", () => {
     expect(secondFlush).toBe(true);
     await new Promise((r) => setTimeout(r, 0));
 
-    expect(sink).toHaveBeenCalledTimes(4);
-    expect(sink.mock.calls[3]?.[0]?.timestamp).toBe("t3");
+    expect(sink).toHaveBeenCalledTimes(6);
+    expect(sink.mock.calls[5]?.[0]?.timestamp).toBe("t3");
     const redelivered = sink.mock.calls.map((call) => call[0]?.timestamp);
-    expect(redelivered.filter((t) => t === "t1")).toHaveLength(1);
-    expect(redelivered.filter((t) => t === "t2")).toHaveLength(1);
+    expect(redelivered.filter((t) => t === "t1")).toHaveLength(2);
+    expect(redelivered.filter((t) => t === "t2")).toHaveLength(2);
+    expect(redelivered.filter((t) => t === "t3")).toHaveLength(2);
   });
 
   it("flush resolves true when sink delivers successfully", async () => {
@@ -508,6 +509,38 @@ describe("@lessonkit/core", () => {
     resolveFlush();
     await client.flush?.();
     expect(batchSink).toHaveBeenCalledTimes(1);
+  });
+
+  it("track dedupes by id while track flush is in-flight", async () => {
+    let resolveFlush!: () => void;
+    const batchSink = vi.fn<TelemetryBatchSink>(
+      () =>
+        new Promise<void>((resolve) => {
+          resolveFlush = resolve;
+        }),
+    );
+    const client = createTrackingClient({
+      batchSink,
+      batch: { enabled: true, flushIntervalMs: 0, maxBatchSize: 1 },
+    });
+
+    const event = {
+      ...interactionEvent("inflight-track"),
+      name: "lesson_started",
+      sessionId: "session-1",
+      courseId: "course-1",
+      lessonId: "lesson-1",
+      id: "session-1:course-1:lesson-1:lesson_started",
+    } as TelemetryEvent;
+
+    expect(client.track(event)).toBe(true);
+    await new Promise((r) => setTimeout(r, 0));
+    expect(client.track(event)).toBe(true);
+
+    resolveFlush();
+    await client.flush?.();
+    expect(batchSink).toHaveBeenCalledTimes(1);
+    expect((batchSink.mock.calls[0]?.[0] as TelemetryEvent[]).length).toBe(1);
   });
 
   it("deliver does not double-enqueue when flush fails and deliver is retried", async () => {

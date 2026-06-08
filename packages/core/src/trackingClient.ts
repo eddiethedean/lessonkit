@@ -96,6 +96,10 @@ export function createTrackingClient(opts?: {
     /* v8 ignore stop */
 
     const events = buffer.splice(0, buffer.length);
+    for (const event of events) {
+      const key = eventDedupKey(event);
+      if (key) pendingDeliverIds.add(key);
+    }
     let succeeded = false;
 
     return Promise.resolve()
@@ -107,7 +111,7 @@ export function createTrackingClient(opts?: {
             try {
               await sink?.(events[i]!);
             } catch {
-              buffer.unshift(...events.slice(i));
+              buffer.unshift(...events);
               return;
             }
           }

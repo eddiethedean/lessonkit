@@ -26,7 +26,10 @@ function QuizInner(
   const { config } = useLessonkit();
   const { scoreResponse } = usePluginScoring(checkId, enclosingLessonId);
   const [selected, setSelected] = useState<string | null>(null);
-  const [selectionCorrect, setSelectionCorrect] = useState<boolean | null>(null);
+  /** Keyed answer match (factual correctness). */
+  const [answerCorrect, setAnswerCorrect] = useState<boolean | null>(null);
+  /** Passing threshold met (may differ from answerCorrect when a scoring plugin applies). */
+  const [selectionPassed, setSelectionPassed] = useState<boolean | null>(null);
   const [quizPassed, setQuizPassed] = useState(false);
   const [completedScore, setCompletedScore] = useState<number | null>(null);
   const [completedMaxScore, setCompletedMaxScore] = useState<number | null>(null);
@@ -40,7 +43,8 @@ function QuizInner(
     telemetryReplayedRef.current = false;
     setQuizPassed(false);
     setSelected(null);
-    setSelectionCorrect(null);
+    setAnswerCorrect(null);
+    setSelectionPassed(null);
     setCompletedScore(null);
     setCompletedMaxScore(null);
   }, [checkId, props.answer, props.question, choicesKey]);
@@ -52,7 +56,7 @@ function QuizInner(
     if (quizPassed) {
       return { score: completedScore ?? maxScore, maxScore };
     }
-    if (selected !== null && selectionCorrect) {
+    if (selected !== null && selectionPassed) {
       return { score: completedMaxScore ?? maxScore, maxScore };
     }
     return { score: 0, maxScore };
@@ -65,22 +69,22 @@ function QuizInner(
     nextScore: number,
     nextMaxScore: number,
   ) => {
-    if (!nextPassed || telemetryReplayedRef.current) return;
+    if (telemetryReplayedRef.current || nextSelected === null) return;
     telemetryReplayedRef.current = true;
-    if (nextSelected !== null) {
-      quiz.answer({
+    quiz.answer({
+      checkId,
+      question: props.question,
+      choice: nextSelected,
+      correct: nextCorrect ?? false,
+    });
+    if (nextPassed || props.enableRetry === false) {
+      quiz.complete({
         checkId,
-        question: props.question,
-        choice: nextSelected,
-        correct: nextCorrect ?? false,
+        score: nextScore,
+        maxScore: nextMaxScore,
+        passingScore: props.passingScore ?? nextMaxScore,
       });
     }
-    quiz.complete({
-      checkId,
-      score: nextScore,
-      maxScore: nextMaxScore,
-      passingScore: props.passingScore ?? nextMaxScore,
-    });
   };
 
   const handle = useMemo(
@@ -95,7 +99,8 @@ function QuizInner(
           telemetryReplayedRef.current = false;
           setQuizPassed(false);
           setSelected(null);
-          setSelectionCorrect(null);
+          setAnswerCorrect(null);
+          setSelectionPassed(null);
           setCompletedScore(null);
           setCompletedMaxScore(null);
         },
@@ -106,14 +111,16 @@ function QuizInner(
             checkId,
             interactionType: "mcq" as const,
             response: selected ?? undefined,
-            correct: selectionCorrect ?? undefined,
+            correct: answerCorrect ?? undefined,
             score,
             maxScore,
           };
         },
         getCurrentState: () => ({
           selected,
-          selectionCorrect,
+          answerCorrect,
+          selectionPassed,
+          selectionCorrect: selectionPassed,
           quizPassed,
           completedScore,
           completedMaxScore,
@@ -121,25 +128,39 @@ function QuizInner(
         resume: (state) => {
           const nextSelected = readStringField(state, "selected");
           if (typeof nextSelected === "string" || nextSelected === null) setSelected(nextSelected);
-          const nextCorrect = readBooleanField(state, "selectionCorrect");
-          if (nextCorrect === true || nextCorrect === false || nextCorrect === null) {
-            setSelectionCorrect(nextCorrect);
+          const nextAnswerCorrect = readBooleanField(state, "answerCorrect");
+          if (nextAnswerCorrect === true || nextAnswerCorrect === false || nextAnswerCorrect === null) {
+            setAnswerCorrect(nextAnswerCorrect);
+          }
+          const nextSelectionPassed =
+            readBooleanField(state, "selectionPassed") ??
+            readBooleanField(state, "selectionCorrect");
+          if (
+            nextSelectionPassed === true ||
+            nextSelectionPassed === false ||
+            nextSelectionPassed === null
+          ) {
+            setSelectionPassed(nextSelectionPassed);
           }
           const nextCompletedScore = readNumberField(state, "completedScore");
           if (typeof nextCompletedScore === "number") setCompletedScore(nextCompletedScore);
           const nextCompletedMaxScore = readNumberField(state, "completedMaxScore");
           if (typeof nextCompletedMaxScore === "number") setCompletedMaxScore(nextCompletedMaxScore);
-          const nextPassed = readBooleanField(state, "quizPassed");
-          if (nextPassed === true || nextPassed === false) {
-            setQuizPassed(nextPassed);
-            completedRef.current = nextPassed;
-            if (nextPassed && config.tracking?.replayResumeEvents === true) {
+          const nextQuizPassed = readBooleanField(state, "quizPassed");
+          if (nextQuizPassed === true || nextQuizPassed === false) {
+            setQuizPassed(nextQuizPassed);
+            completedRef.current =
+              nextQuizPassed ||
+              (nextSelected !== null &&
+                props.enableRetry === false &&
+                (nextCompletedScore !== undefined || nextCompletedMaxScore !== undefined));
+            if (config.tracking?.replayResumeEvents === true && nextSelected != null) {
               const maxScore = nextCompletedMaxScore ?? 1;
-              const score = nextCompletedScore ?? (nextPassed ? maxScore : 0);
+              const score = nextCompletedScore ?? (nextQuizPassed ? maxScore : 0);
               replayTelemetry(
                 nextSelected ?? null,
-                nextCorrect ?? null,
-                nextPassed,
+                nextAnswerCorrect ?? nextSelectionPassed ?? null,
+                nextQuizPassed,
                 score,
                 maxScore,
               );
@@ -157,7 +178,8 @@ function QuizInner(
       quiz,
       quizPassed,
       selected,
-      selectionCorrect,
+      answerCorrect,
+      selectionPassed,
     ],
   );
 
@@ -176,18 +198,19 @@ function QuizInner(
               value={c}
               checked={selected === c}
               disabled={passed && !props.enableRetry}
-              aria-invalid={selected === c && selectionCorrect === false ? true : undefined}
+              aria-invalid={selected === c && answerCorrect === false ? true : undefined}
               onChange={() => {
                 if (passed && !props.enableRetry) return;
                 setSelected(c);
                 const defaultCorrect = c === props.answer;
                 const scored = scoreResponse(c, defaultCorrect, 1, props.passingScore);
-                setSelectionCorrect(scored.passed);
+                setAnswerCorrect(defaultCorrect);
+                setSelectionPassed(scored.passed);
                 quiz.answer({
                   checkId,
                   question: props.question,
                   choice: c,
-                  correct: scored.passed,
+                  correct: defaultCorrect,
                 });
                 if (scored.passed && !completedRef.current) {
                   completedRef.current = true;
@@ -217,9 +240,9 @@ function QuizInner(
           </label>
         ))}
       </fieldset>
-      {selected && selectionCorrect !== null ? (
+      {selected && answerCorrect !== null ? (
         <p role="status" aria-live="polite">
-          {selectionCorrect ? "Correct" : "Try again"}
+          {answerCorrect ? "Correct" : "Try again"}
         </p>
       ) : null}
       {props.enableRetry && passed ? (
@@ -231,7 +254,8 @@ function QuizInner(
             telemetryReplayedRef.current = false;
             setQuizPassed(false);
             setSelected(null);
-            setSelectionCorrect(null);
+            setAnswerCorrect(null);
+          setSelectionPassed(null);
             setCompletedScore(null);
             setCompletedMaxScore(null);
           }}

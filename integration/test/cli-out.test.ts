@@ -1,8 +1,8 @@
 import { existsSync } from "node:fs";
-import { join } from "node:path";
 import { rm } from "node:fs/promises";
 import { afterEach, beforeAll, describe, expect, it } from "vitest";
 import { assertScormZip } from "./helpers/assertArtifacts.js";
+import { requireCliOutputPath } from "./helpers/paths.js";
 import {
   copyMinimalFixture,
   createTempDir,
@@ -44,7 +44,7 @@ describe("CLI --out integration", () => {
 
     expect(result.exitCode).toBe(0);
     expect(json.ok).toBe(true);
-    const zipPath = json.outputPath ?? join(projectDir, ".lxpack/course", outRel);
+    const zipPath = requireCliOutputPath(json);
     expect(existsSync(zipPath)).toBe(true);
     assertScormZip(zipPath);
   });

@@ -45,7 +45,7 @@ html[data-theme="dark"] .lk-hero-title {
 }
 
 /* Hide duplicate page title above hero (Furo renders the H1 separately) */
-article.bd-article > h1:first-of-type {
+article[role="main"] > section > h1:first-of-type {
   display: none;
 }
 
@@ -167,20 +167,15 @@ button.copybtn {
   border-radius: 0.375rem;
 }
 
-/* Sidebar — app icon + wordmark in logo.svg (logo-dark.svg in dark theme) */
+/* Sidebar — Furo swaps .only-light / .only-dark logos via light_logo + dark_logo */
+.sidebar-logo-container {
+  display: flex;
+  align-items: center;
+}
+
 .sidebar-logo {
   max-width: min(100%, 11.5rem);
   height: auto;
-}
-
-html[data-theme="dark"] .sidebar-logo {
-  content: url("logo-dark.svg");
-}
-
-@media (prefers-color-scheme: dark) {
-  html:not([data-theme="light"]) .sidebar-logo {
-    content: url("logo-dark.svg");
-  }
 }
 
 .sidebar-tree .reference {

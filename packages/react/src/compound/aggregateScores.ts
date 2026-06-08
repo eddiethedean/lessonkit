@@ -1,6 +1,12 @@
 import type { AssessmentHandle } from "@lessonkit/core";
 import type { RegisteredAssessmentHandle } from "./CompoundProvider";
 
+/**
+ * Compound scoring contract:
+ * - `getScore` / `getMaxScore` aggregate **all** registered handles (every page).
+ * - `getAnswerGiven` with `answerPageIndex` checks only the **active** page for gating.
+ */
+
 function finiteScore(value: number): number {
   return Number.isFinite(value) ? value : 0;
 }

@@ -61,6 +61,24 @@ describe("@lessonkit/cli program", () => {
     consoleLog.mockRestore();
   });
 
+  it("blocks list --tier B returns assessment blocks", async () => {
+    const consoleLog = vi.spyOn(console, "log").mockImplementation(() => {});
+    await run(["node", "lessonkit", "blocks", "list", "--json", "--tier", "B"], {
+      log: () => {},
+      error: () => {},
+    });
+    const payload = JSON.parse(consoleLog.mock.calls[0]![0] as string) as {
+      ok: boolean;
+      count: number;
+      entries: Array<{ type: string; tier?: string }>;
+    };
+    expect(payload.ok).toBe(true);
+    expect(payload.count).toBeGreaterThan(0);
+    expect(payload.entries.every((e) => e.tier === "B")).toBe(true);
+    expect(payload.entries.some((e) => e.type === "TrueFalse")).toBe(true);
+    consoleLog.mockRestore();
+  });
+
   it("blocks list --json includes TrueFalse with h5pMachineName", async () => {
     const consoleLog = vi.spyOn(console, "log").mockImplementation(() => {});
     await run(["node", "lessonkit", "blocks", "list", "--json"], { log: () => {}, error: () => {} });
@@ -83,6 +101,42 @@ describe("@lessonkit/cli program", () => {
       expect.stringContaining("lessonkit publish is not implemented"),
     );
     expect(log).toHaveBeenCalledWith(expect.stringContaining("RELEASING.md"));
+  });
+
+  it("export logs human-readable success without --json", async () => {
+    const root = await mkdtemp(join(tmpdir(), "lk-cli-export-"));
+    const manifest = {
+      schemaVersion: 1 as const,
+      name: "export-cli-test",
+      course: {
+        courseId: "export-cli-test",
+        title: "Export CLI Test",
+        layout: "single-spa" as const,
+        lessons: [{ id: "lesson-1", title: "Lesson one" }],
+        theme: { preset: "default" as const },
+      },
+      paths: {
+        spaDistDir: "dist",
+        lxpackOutDir: ".lxpack/course",
+        outputBaseDir: ".lxpack/out",
+      },
+    };
+    await writeFile(join(root, "lessonkit.json"), JSON.stringify(manifest));
+    await writeFile(join(root, "package.json"), JSON.stringify({ name: "export-cli-test" }));
+    await mkdir(join(root, "dist", "assets"), { recursive: true });
+    await writeFile(join(root, "dist", "index.html"), "<!doctype html><html></html>\n");
+    await writeFile(join(root, "dist", "assets", "app.js"), "console.log('ok');\n");
+
+    const consoleLog = vi.spyOn(console, "log").mockImplementation(() => {});
+    await run(
+      ["node", "lessonkit", "export", "--no-build", "--cwd", root],
+      { log: () => {}, error: () => {} },
+    );
+    expect(consoleLog).toHaveBeenCalledWith(
+      expect.stringMatching(/Exported \.lkcourse → .+ \(\d+ files\)/),
+    );
+    consoleLog.mockRestore();
+    await rm(root, { recursive: true, force: true });
   });
 
   it("package requires --target", async () => {

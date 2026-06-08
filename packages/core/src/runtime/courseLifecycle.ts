@@ -4,7 +4,11 @@ import { buildTelemetryEvent } from "../telemetryBuilder";
 import type { PluginRegistry } from "../plugins/types";
 import type { ProgressController } from "../progress";
 import type { StoragePort } from "../ports";
-import { hasCourseStarted, markCourseStarted } from "../session";
+import {
+  hasCourseStarted,
+  hasCourseStartedEmittedToTracking,
+  markCourseStarted,
+} from "../session";
 
 const courseStartedEmitFlights = new Map<string, Promise<{ emitted: boolean; marked: boolean }>>();
 
@@ -39,12 +43,22 @@ export function tryEmitCourseStarted(
   const flightKey = `${ctx.sessionId}:${ctx.courseId}`;
   const marked = hasCourseStarted(ctx.storage, ctx.sessionId, ctx.courseId);
   if (alreadyEmittedToSink) {
-    if (!marked) {
-      markCourseStarted(ctx.storage, ctx.sessionId, ctx.courseId);
-    }
+    const markPersisted = marked
+      ? true
+      : markCourseStarted(ctx.storage, ctx.sessionId, ctx.courseId);
     return Promise.resolve({
       emitted: true,
-      marked: hasCourseStarted(ctx.storage, ctx.sessionId, ctx.courseId),
+      marked: markPersisted,
+    });
+  }
+
+  if (
+    marked &&
+    hasCourseStartedEmittedToTracking(ctx.storage, ctx.sessionId, ctx.courseId)
+  ) {
+    return Promise.resolve({
+      emitted: true,
+      marked: true,
     });
   }
 
@@ -56,15 +70,19 @@ export function tryEmitCourseStarted(
   const flight = Promise.resolve().then(() => {
     try {
       const emitted = deps.emitCourseStartedEvent(ctx);
-      if (emitted && !marked) {
-        markCourseStarted(ctx.storage, ctx.sessionId, ctx.courseId);
-      }
+      const markPersisted =
+        emitted && !marked
+          ? markCourseStarted(ctx.storage, ctx.sessionId, ctx.courseId)
+          : marked;
       return {
         emitted,
-        marked: hasCourseStarted(ctx.storage, ctx.sessionId, ctx.courseId),
+        marked: markPersisted,
       };
     } catch {
-      return { emitted: false, marked };
+      return {
+        emitted: false,
+        marked: hasCourseStarted(ctx.storage, ctx.sessionId, ctx.courseId),
+      };
     } finally {
       if (courseStartedEmitFlights.get(flightKey) === flight) {
         courseStartedEmitFlights.delete(flightKey);
@@ -119,7 +137,16 @@ export function completeCourseWithTelemetry(opts: {
     });
   }
   const result = opts.progress.completeCourse();
-  if (!result.didComplete) return false;
+  if (!result.didComplete) {
+    const after = opts.progress.getState();
+    if (after.activeLessonId) {
+      const lessonResult = opts.progress.completeLesson(after.activeLessonId, opts.nowMs);
+      if (lessonResult.didComplete) {
+        opts.emitLessonCompleted(after.activeLessonId, lessonResult.durationMs);
+      }
+    }
+    return false;
+  }
   opts.emitCourseCompleted();
   return true;
 }

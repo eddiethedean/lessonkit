@@ -82,4 +82,17 @@ describe("scoreFromCustom", () => {
     expect(meetsPassingThreshold(1, 4, 2)).toBe(false);
     expect(meetsPassingThreshold(4, 4)).toBe(true);
   });
+
+  it("scoreFromCustom fails closed when plugin maxScore is zero or negative", () => {
+    expect(scoreFromCustom({ score: 1, maxScore: 0 }, true)).toEqual({
+      score: 1,
+      maxScore: 1,
+      passed: true,
+    });
+    expect(scoreFromCustom({ score: 1, maxScore: -1 }, false)).toEqual({
+      score: 0,
+      maxScore: 1,
+      passed: false,
+    });
+  });
 });

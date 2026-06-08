@@ -72,6 +72,8 @@ function isPlainSerializableChildState(value: unknown): value is AssessmentResum
 
 export type ParseCompoundResumeStateOptions = {
   onDroppedChildKeys?: (keys: string[]) => void;
+  /** When set, clamps `activePageIndex` to `[0, pageCount - 1]`. */
+  pageCount?: number;
 };
 
 export function parseCompoundResumeState(
@@ -100,9 +102,14 @@ export function parseCompoundResumeState(
     typeof obj.activeChapterIndex === "number" && Number.isFinite(obj.activeChapterIndex)
       ? obj.activeChapterIndex
       : undefined;
+  const rawPageIndex = Math.max(0, Math.floor(obj.activePageIndex));
+  const activePageIndex =
+    typeof opts?.pageCount === "number" && opts.pageCount > 0
+      ? clampCompoundPageIndex(rawPageIndex, opts.pageCount)
+      : rawPageIndex;
   return {
     schemaVersion: COMPOUND_RESUME_SCHEMA_VERSION,
-    activePageIndex: Math.max(0, Math.floor(obj.activePageIndex)),
+    activePageIndex,
     ...(activeChapterIndex !== undefined ? { activeChapterIndex: Math.max(0, Math.floor(activeChapterIndex)) } : {}),
     childStates,
   };

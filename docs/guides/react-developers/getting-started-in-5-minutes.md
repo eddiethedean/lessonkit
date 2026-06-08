@@ -29,7 +29,7 @@ cd my-course
 | --- | --- |
 | `lessonkit init --here` | Scaffold in the current directory (must be empty or use `--force`) |
 | `lessonkit init my-course --skip-install` | Create files only; run `npm install` yourself after fixing Node/proxy issues |
-| `lessonkit init my-course --force` | Overwrite an existing scaffold in the target directory |
+| `lessonkit init --here --force` | Scaffold in the current directory when it is empty or dotfiles-only (e.g. `.git`) |
 
 See [CLI reference](../../reference/cli.md) for all options.
 

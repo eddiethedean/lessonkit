@@ -326,7 +326,8 @@
           "quiz_completed"
         ],
         "requiresActiveLesson": true
-      }
+      },
+      "tier": "B"
     },
     {
       "type": "ProgressTracker",
@@ -458,7 +459,8 @@
           "assessment_completed"
         ],
         "requiresActiveLesson": true
-      }
+      },
+      "tier": "B"
     },
     {
       "type": "FillInTheBlanks",
@@ -547,7 +549,8 @@
           "assessment_completed"
         ],
         "requiresActiveLesson": true
-      }
+      },
+      "tier": "B"
     },
     {
       "type": "DragAndDrop",
@@ -636,7 +639,8 @@
           "assessment_completed"
         ],
         "requiresActiveLesson": true
-      }
+      },
+      "tier": "B"
     },
     {
       "type": "DragTheWords",
@@ -725,7 +729,8 @@
           "assessment_completed"
         ],
         "requiresActiveLesson": true
-      }
+      },
+      "tier": "B"
     },
     {
       "type": "MarkTheWords",
@@ -814,7 +819,8 @@
           "assessment_completed"
         ],
         "requiresActiveLesson": true
-      }
+      },
+      "tier": "B"
     },
     {
       "type": "AssessmentSequence",
@@ -900,7 +906,8 @@
         "ArithmeticQuiz",
         "Essay"
       ],
-      "maxNestingDepth": 1
+      "maxNestingDepth": 1,
+      "tier": "A"
     },
     {
       "type": "Summary",
@@ -989,7 +996,8 @@
           "assessment_completed"
         ],
         "requiresActiveLesson": true
-      }
+      },
+      "tier": "B"
     },
     {
       "type": "ImagePairing",
@@ -1072,7 +1080,8 @@
           "assessment_completed"
         ],
         "requiresActiveLesson": true
-      }
+      },
+      "tier": "C"
     },
     {
       "type": "ImageSequencing",
@@ -1161,7 +1170,8 @@
           "assessment_completed"
         ],
         "requiresActiveLesson": true
-      }
+      },
+      "tier": "C"
     },
     {
       "type": "ArithmeticQuiz",
@@ -1250,7 +1260,8 @@
           "assessment_completed"
         ],
         "requiresActiveLesson": true
-      }
+      },
+      "tier": "B"
     },
     {
       "type": "Essay",
@@ -1339,7 +1350,8 @@
           "assessment_completed"
         ],
         "requiresActiveLesson": true
-      }
+      },
+      "tier": "B"
     },
     {
       "type": "Text",
@@ -1656,7 +1668,8 @@
           "compound_page_viewed"
         ],
         "requiresActiveLesson": true
-      }
+      },
+      "tier": "A"
     },
     {
       "type": "InteractiveBook",
@@ -1716,7 +1729,8 @@
           "book_page_viewed"
         ],
         "requiresActiveLesson": true
-      }
+      },
+      "tier": "A"
     },
     {
       "type": "Slide",
@@ -1871,7 +1885,8 @@
           "slide_viewed"
         ],
         "requiresActiveLesson": true
-      }
+      },
+      "tier": "A"
     },
     {
       "type": "TimedCue",
@@ -2017,7 +2032,8 @@
           "video_segment_completed"
         ],
         "requiresActiveLesson": true
-      }
+      },
+      "tier": "A"
     },
     {
       "type": "BranchNode",
@@ -2242,7 +2258,8 @@
           "branch_selected"
         ],
         "requiresActiveLesson": true
-      }
+      },
+      "tier": "A"
     },
     {
       "type": "Embed",
@@ -2313,7 +2330,8 @@
         "emits": [
           "interaction"
         ]
-      }
+      },
+      "tier": "C"
     },
     {
       "type": "Chart",
@@ -2378,7 +2396,8 @@
         "emits": [
           "interaction"
         ]
-      }
+      },
+      "tier": "C"
     },
     {
       "type": "Questionnaire",
@@ -2432,7 +2451,8 @@
           "questionnaire_submitted"
         ],
         "requiresActiveLesson": true
-      }
+      },
+      "tier": "B"
     },
     {
       "type": "MemoryGame",
@@ -2491,7 +2511,8 @@
         "emits": [
           "memory_card_flipped"
         ]
-      }
+      },
+      "tier": "C"
     },
     {
       "type": "InformationWall",
@@ -2544,7 +2565,8 @@
         "emits": [
           "information_wall_search"
         ]
-      }
+      },
+      "tier": "D"
     },
     {
       "type": "ParallaxSlideshow",
@@ -2597,7 +2619,8 @@
         "emits": [
           "parallax_slide_viewed"
         ]
-      }
+      },
+      "tier": "D"
     },
     {
       "type": "Accordion",
@@ -2650,7 +2673,8 @@
         "emits": [
           "accordion_section_toggled"
         ]
-      }
+      },
+      "tier": "D"
     },
     {
       "type": "DialogCards",
@@ -2701,7 +2725,8 @@
       },
       "telemetry": {
         "emits": []
-      }
+      },
+      "tier": "D"
     },
     {
       "type": "Flashcards",
@@ -2760,7 +2785,8 @@
         "emits": [
           "flashcard_flipped"
         ]
-      }
+      },
+      "tier": "D"
     },
     {
       "type": "ImageHotspots",
@@ -2825,7 +2851,8 @@
         "emits": [
           "hotspot_opened"
         ]
-      }
+      },
+      "tier": "C"
     },
     {
       "type": "ImageSlider",
@@ -2878,7 +2905,8 @@
         "emits": [
           "image_slider_changed"
         ]
-      }
+      },
+      "tier": "C"
     },
     {
       "type": "FindHotspot",
@@ -2979,7 +3007,8 @@
           "assessment_completed"
         ],
         "requiresActiveLesson": true
-      }
+      },
+      "tier": "C"
     },
     {
       "type": "FindMultipleHotspots",
@@ -3080,7 +3109,8 @@
           "assessment_completed"
         ],
         "requiresActiveLesson": true
-      }
+      },
+      "tier": "C"
     },
     {
       "type": "Table",
@@ -3143,7 +3173,8 @@
       },
       "telemetry": {
         "emits": []
-      }
+      },
+      "tier": "D"
     },
     {
       "type": "ImageJuxtaposition",
@@ -3214,7 +3245,8 @@
         "emits": [
           "image_juxtaposition_changed"
         ]
-      }
+      },
+      "tier": "C"
     },
     {
       "type": "Timeline",
@@ -3267,7 +3299,8 @@
         "emits": [
           "timeline_event_viewed"
         ]
-      }
+      },
+      "tier": "D"
     },
     {
       "type": "ImageSequence",
@@ -3320,7 +3353,8 @@
         "emits": [
           "image_sequence_changed"
         ]
-      }
+      },
+      "tier": "C"
     },
     {
       "type": "Collage",
@@ -3377,7 +3411,8 @@
       },
       "telemetry": {
         "emits": []
-      }
+      },
+      "tier": "C"
     },
     {
       "type": "AudioRecorder",
@@ -3437,7 +3472,8 @@
           "audio_recording_started",
           "audio_recording_completed"
         ]
-      }
+      },
+      "tier": "D"
     },
     {
       "type": "CombinationLock",
@@ -3526,7 +3562,8 @@
           "assessment_completed"
         ],
         "requiresActiveLesson": true
-      }
+      },
+      "tier": "E"
     },
     {
       "type": "QrContent",
@@ -3597,7 +3634,8 @@
         "emits": [
           "qr_content_revealed"
         ]
-      }
+      },
+      "tier": "E"
     },
     {
       "type": "Crossword",
@@ -3692,7 +3730,8 @@
           "assessment_completed"
         ],
         "requiresActiveLesson": true
-      }
+      },
+      "tier": "E"
     },
     {
       "type": "WordSearch",
@@ -3770,7 +3809,8 @@
           "assessment_completed"
         ],
         "requiresActiveLesson": true
-      }
+      },
+      "tier": "E"
     },
     {
       "type": "AdventCalendar",
@@ -3829,7 +3869,8 @@
         "emits": [
           "advent_door_opened"
         ]
-      }
+      },
+      "tier": "E"
     },
     {
       "type": "MapStage",
@@ -4054,7 +4095,8 @@
           "map_exit_selected"
         ],
         "requiresActiveLesson": true
-      }
+      },
+      "tier": "A"
     }
   ]
 }

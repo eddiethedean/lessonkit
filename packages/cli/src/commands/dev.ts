@@ -1,5 +1,7 @@
 import { existsSync } from "node:fs";
-import { join } from "node:path";
+import { mkdir } from "node:fs/promises";
+import { dirname, join } from "node:path";
+import { assertSpaDistContentsSafe } from "@lessonkit/lxpack";
 import type { CliJsonResult } from "../lib/errors.js";
 import { CliError, EXIT_INVALID_PROJECT } from "../lib/errors.js";
 import { runCommand } from "../lib/exec.js";
@@ -9,7 +11,11 @@ import {
   readPackageJson,
   resolveViteJs,
 } from "../lib/project.js";
-import { resolveDistDir, resolveViteBuildArgv } from "../lib/paths.js";
+import {
+  resolveDistDir,
+  resolveViteBuildArgv,
+  stripOutDirFromViteArgs,
+} from "../lib/paths.js";
 
 export type DevBuildOptions = {
   cwd?: string;
@@ -23,7 +29,8 @@ export async function runDev(opts: DevBuildOptions): Promise<CliJsonResult> {
   assertViteProject(pkg, project.root);
   const viteJs = resolveViteJs(project.root);
 
-  await runCommand(process.execPath, [viteJs, ...(opts.viteArgs ?? [])], {
+  const devArgs = stripOutDirFromViteArgs(opts.viteArgs ?? []);
+  await runCommand(process.execPath, [viteJs, ...devArgs], {
     cwd: project.root,
     timeoutMs: 0,
   });
@@ -37,12 +44,17 @@ export async function runBuild(opts: DevBuildOptions): Promise<CliJsonResult> {
   assertViteProject(pkg, project.root);
   const viteJs = resolveViteJs(project.root);
 
+  const distDir = resolveDistDir(project);
+  await mkdir(dirname(distDir), { recursive: true });
+  if (existsSync(distDir)) {
+    await assertSpaDistContentsSafe({ main: distDir }, project.root);
+  }
+
   const buildArgs = resolveViteBuildArgv(project, opts.viteArgs);
   await runCommand(process.execPath, [viteJs, ...buildArgs], {
     cwd: project.root,
   });
 
-  const distDir = resolveDistDir(project);
   const indexHtml = join(distDir, "index.html");
   if (!existsSync(indexHtml)) {
     throw new CliError(

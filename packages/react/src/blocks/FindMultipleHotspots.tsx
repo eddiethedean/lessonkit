@@ -173,13 +173,12 @@ function FindMultipleHotspotsInner(
 
   const submit = () => {
     if (selected.size === 0 || checked) return;
-    const correctAtSubmit = isFactuallyCorrect(selected);
     setChecked(true);
     assessment.answer({
       checkId,
       interactionType: INTERACTION,
       response: [...selected],
-      correct: correctAtSubmit,
+      correct: passedThreshold,
     });
     if (passedThreshold) {
       assessment.complete({

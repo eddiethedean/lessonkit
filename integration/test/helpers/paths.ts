@@ -27,3 +27,17 @@ export function packageDir(name: string): string {
   const dir = name.replace("@lessonkit/", "");
   return join(REPO_ROOT, "packages", dir);
 }
+
+export function requireCliOutputPath(json: { outputPath?: string }): string {
+  if (!json.outputPath) {
+    throw new Error("CLI JSON missing required outputPath");
+  }
+  return json.outputPath;
+}
+
+export function requireCliOutputDir(json: { outputDir?: string }): string {
+  if (!json.outputDir) {
+    throw new Error("CLI JSON missing required outputDir");
+  }
+  return json.outputDir;
+}

@@ -29,10 +29,12 @@ export type MediaSrcOptions = {
    * URLs to bypass production scheme and host blocklists.
    */
   trustSameOriginMedia?: boolean;
+  /** Apply private-network blocklist regardless of production build mode. */
+  strictHosts?: boolean;
 };
 
 export type MediaConfig = {
-  embed?: { allowedHosts?: readonly string[] };
+  embed?: { allowedHosts?: readonly string[]; strictHosts?: boolean };
   preview?: { allowConsoleTelemetry?: boolean };
 };
 
@@ -40,6 +42,7 @@ export function buildMediaOptions(config: MediaConfig): MediaSrcOptions {
   return {
     allowedHosts: config.embed?.allowedHosts,
     trustSameOriginMedia: config.preview?.allowConsoleTelemetry === true,
+    strictHosts: config.embed?.strictHosts === true,
   };
 }
 
@@ -123,7 +126,11 @@ function isRfc1918Host(hostname: string): boolean {
 }
 
 /** Returns true for loopback, RFC1918, link-local, and cloud metadata hostnames. */
-export function isBlockedHost(hostname: string, allowedHosts?: readonly string[]): boolean {
+export function isBlockedHost(
+  hostname: string,
+  allowedHosts?: readonly string[],
+  strictHosts?: boolean,
+): boolean {
   const normalized = normalizeHostname(hostname);
   const canonical = canonicalHostnameForBlocklist(hostname);
   if (
@@ -136,7 +143,7 @@ export function isBlockedHost(hostname: string, allowedHosts?: readonly string[]
   ) {
     return false;
   }
-  if (!isProductionEmbedBuild()) return false;
+  if (!isProductionEmbedBuild() && !strictHosts) return false;
   return (
     isLoopbackHost(canonical) ||
     isLinkLocalOrMetadataHost(canonical) ||
@@ -177,7 +184,7 @@ function resolveAllowedUrl(
         url.origin === window.location.origin;
       if (!sameOriginHttp) return null;
     }
-    if (isBlockedHost(url.hostname, options?.allowedHosts)) {
+    if (isBlockedHost(url.hostname, options?.allowedHosts, options?.strictHosts)) {
       const sameOriginBlockedHost =
         typeof window !== "undefined" && url.origin === window.location.origin;
       if (!sameOriginBlockedHost) return null;
