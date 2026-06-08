@@ -93,23 +93,23 @@ function CombinationLockInner(
   const check = () => {
     setSubmitted(true);
     const ok = digits.join("") === props.combination;
-    if (ok) {
-      setPassed(true);
-      completedRef.current = true;
-    }
     assessment.answer({
       checkId,
       interactionType: INTERACTION,
       response: digits.join(""),
       correct: ok,
     });
-    assessment.complete({
-      checkId,
-      interactionType: INTERACTION,
-      score: ok ? 1 : 0,
-      maxScore: 1,
-      passingScore: props.passingScore ?? 1,
-    });
+    if ((ok || props.enableRetry === false) && !completedRef.current) {
+      completedRef.current = true;
+      if (ok) setPassed(true);
+      assessment.complete({
+        checkId,
+        interactionType: INTERACTION,
+        score: ok ? 1 : 0,
+        maxScore: 1,
+        passingScore: props.passingScore ?? 1,
+      });
+    }
   };
 
   return (

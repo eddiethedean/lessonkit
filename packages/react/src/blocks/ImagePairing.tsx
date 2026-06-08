@@ -1,3 +1,4 @@
+import { visuallyHiddenStyle } from "@lessonkit/accessibility";
 import React, { forwardRef, useEffect, useMemo, useRef, useState } from "react";
 import type { AssessmentBaseProps, AssessmentHandle, AssessmentInteractionType } from "@lessonkit/core";
 import type { LessonId } from "@lessonkit/core";
@@ -329,7 +330,7 @@ function ImagePairingInner(
                   ) : (
                     <span aria-hidden="true">!</span>
                   )}
-                  <span className="lk-visually-hidden">{card.label}</span>
+                  <span style={visuallyHiddenStyle}>{card.label}</span>
                 </>
               ) : (
                 "?"

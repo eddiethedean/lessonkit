@@ -89,6 +89,12 @@ describe("validateDescriptor", () => {
       assessments: [{ kind: "trueFalse", checkId: "tf-f", question: "No?", answer: false }],
     });
     expect(falseTf.ok).toBe(true);
+
+    const falseStringTf = validateDescriptor({
+      ...baseDescriptor,
+      assessments: [{ kind: "trueFalse", checkId: "tf-false-str", question: "No?", answer: "false" }],
+    });
+    expect(falseStringTf.ok).toBe(true);
   });
 
   it("accepts findHotspot and findMultipleHotspots assessment kinds", () => {

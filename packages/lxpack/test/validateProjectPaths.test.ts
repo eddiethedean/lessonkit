@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { mkdtemp, rm } from "node:fs/promises";
+import { mkdir, mkdtemp, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import {
@@ -60,5 +60,23 @@ describe("resolveSafePackageOutputOverride", () => {
     dir = await mkdtemp(join(tmpdir(), "lk-paths-"));
     expect(() => resolveSafePackageOutputOverride(dir, "../outside.zip")).toThrow(/unsafe/);
     await rm(dir, { recursive: true, force: true });
+  });
+
+  it("rejects symlink alias that resolves into a reserved directory", async () => {
+    dir = await mkdtemp(join(tmpdir(), "lk-paths-symlink-"));
+    try {
+      await mkdir(join(dir, "node_modules"), { recursive: true });
+      await writeFile(join(dir, "node_modules", "out.zip"), "");
+      await symlink(join(dir, "node_modules", "out.zip"), join(dir, "nm-link.zip"));
+      expect(() => resolveSafePackageOutputOverride(dir, "nm-link.zip")).toThrow(
+        /reserved directory/,
+      );
+      const absolute = resolve(dir, "nm-link.zip");
+      expect(() => resolveSafePackageOutputOverride(dir, absolute)).toThrow(
+        /reserved directory/,
+      );
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
   });
 });

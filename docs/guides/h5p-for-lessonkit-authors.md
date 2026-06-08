@@ -24,7 +24,7 @@ Use the **[H5P capability map](../project/h5p-capability-map.md)** for the full 
 | **Drag and Drop** | `DragAndDrop` | Keyboard pick-target mode; SPA + bridge scoring |
 | **Drag the Words** | `DragTheWords` | Inline drop zones; SPA + bridge scoring |
 | **Mark the Words** | `MarkTheWords` | Selectable tokens; SPA + bridge scoring |
-| **Question Set** | `AssessmentSequence` | Aggregates child assessments by `checkId` |
+| **Question Set** | `AssessmentSequence` | Aggregates child assessments; children use `checkId` |
 | **Interactive Book** | `InteractiveBook` + `Page` | Compound navigation + session resume |
 | **Course Presentation** | `SlideDeck` + `Slide` | Slide navigation + keyboard controls + session resume |
 | **Interactive Video** | `InteractiveVideo` + `TimedCue` | Timeline cues; pause on interaction; session resume |

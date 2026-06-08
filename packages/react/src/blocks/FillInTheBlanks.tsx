@@ -1,3 +1,4 @@
+import { visuallyHiddenStyle } from "@lessonkit/accessibility";
 import React, { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { AssessmentBaseProps, AssessmentHandle, AssessmentInteractionType } from "@lessonkit/core";
 import type { LessonId } from "@lessonkit/core";
@@ -133,7 +134,7 @@ function FillInTheBlanksInner(
       response: nextValues,
       correct: nextPassedThreshold,
     });
-    if (nextPassed || nextPassedThreshold) {
+    if (nextPassedThreshold || props.enableRetry === false) {
       assessment.complete({
         checkId,
         interactionType: INTERACTION,
@@ -267,7 +268,7 @@ function FillInTheBlanksInner(
           if (!blank) return <React.Fragment key={i}>{part}</React.Fragment>;
           return (
             <label key={blank.id} style={{ margin: "0 0.25em" }}>
-              <span className="lk-visually-hidden">Blank {blank.id}</span>
+              <span style={visuallyHiddenStyle}>Blank {blank.id}</span>
               <input
                 type="text"
                 data-testid={`blank-${blank.id}`}

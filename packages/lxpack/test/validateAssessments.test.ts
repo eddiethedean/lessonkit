@@ -125,6 +125,16 @@ describe("validateAssessmentEntry", () => {
     expect(issues.some((i) => i.path === "assessments[0].answer")).toBe(true);
   });
 
+  it("rejects omitted answer for trueFalse", () => {
+    checkIds.clear();
+    const issues = collect({
+      kind: "trueFalse",
+      checkId: "tf-missing",
+      question: "Agree?",
+    } as Parameters<typeof collect>[0]);
+    expect(issues.some((i) => i.path === "assessments[0].answer")).toBe(true);
+  });
+
   it("rejects duplicate checkId", () => {
     checkIds.clear();
     checkIds.add("dup-check");

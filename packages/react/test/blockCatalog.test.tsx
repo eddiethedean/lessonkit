@@ -6,6 +6,7 @@ import catalogV3Json from "../block-catalog.v3.json";
 import contractJson from "../block-contract.v1.json";
 import identityContractJson from "@lessonkit/core/identity-contract.v1.json";
 import telemetryCatalogJson from "@lessonkit/core/telemetry-catalog.v1.json";
+import telemetryCatalogV2Json from "@lessonkit/core/telemetry-catalog.v2.json";
 import telemetryCatalogV3Json from "@lessonkit/core/telemetry-catalog.v3.json";
 import {
   BLOCK_CATALOG,
@@ -79,6 +80,20 @@ const EXPORTED_BLOCK_TYPES_V3 = [
   "BranchChoice",
   "Embed",
   "Chart",
+  "Table",
+  "ImageJuxtaposition",
+  "Timeline",
+  "ImageSequence",
+  "Collage",
+  "AudioRecorder",
+  "CombinationLock",
+  "QrContent",
+  "Crossword",
+  "WordSearch",
+  "AdventCalendar",
+  "GameMap",
+  "MapStage",
+  "MapExit",
 ] as const;
 
 describe("@lessonkit/react block catalog", () => {
@@ -136,6 +151,9 @@ describe("@lessonkit/react block catalog", () => {
     const telemetryNames = new Set(
       (telemetryCatalogJson as { entries: { name: string }[] }).entries.map((e) => e.name),
     );
+    for (const entry of (telemetryCatalogV2Json as { entries: { name: string }[] }).entries) {
+      telemetryNames.add(entry.name);
+    }
     for (const entry of (telemetryCatalogV3Json as { entries: { name: string }[] }).entries) {
       telemetryNames.add(entry.name);
     }

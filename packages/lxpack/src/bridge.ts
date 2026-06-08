@@ -1,8 +1,6 @@
 import type { CheckId, LessonId, LmsBridgeMode, TelemetryEvent } from "@lessonkit/core";
 import {
   getLxpackBridge as getLxpackBridgeFromParent,
-  normalizePassingThreshold,
-  normalizeScore,
   type LxpackBridgeSubmitAssessmentPayload,
   type LxpackBridgeV1,
 } from "@lxpack/spa-bridge";
@@ -12,10 +10,48 @@ export {
   createLxpackBridgeHost,
   DEFAULT_BRIDGE_PASSING_SCORE,
   LXPACK_BRIDGE_VERSIONS,
-  normalizePassingThreshold,
-  normalizeScore,
   supportedBridgeVersions,
 } from "@lxpack/spa-bridge";
+
+const DEFAULT_BRIDGE_PASSING_SCORE = 0.7;
+
+function clamp01(value: number): number {
+  return Math.min(1, Math.max(0, value));
+}
+
+/**
+ * Scale a raw quiz score to 0–1 for the LXPack parent bridge.
+ * When `maxScore > 1`, always treats `score` as raw points (fixes partial-credit 1/N cases).
+ */
+export function normalizeScore(raw: { score?: number; maxScore?: number }): number | null {
+  const { score, maxScore } = raw;
+  if (typeof score !== "number" || !Number.isFinite(score)) return null;
+  if (typeof maxScore === "number" && maxScore > 1) {
+    return clamp01(score / maxScore);
+  }
+  if (score > 1 && score <= 100) {
+    return clamp01(score / 100);
+  }
+  return clamp01(score);
+}
+
+/** Scale a raw passing threshold to 0–1 for the LXPack parent bridge. */
+export function normalizePassingThreshold(raw?: {
+  passingScore?: number;
+  maxScore?: number;
+}): number {
+  const { passingScore, maxScore } = raw ?? {};
+  if (typeof passingScore !== "number" || !Number.isFinite(passingScore)) {
+    return DEFAULT_BRIDGE_PASSING_SCORE;
+  }
+  if (typeof maxScore === "number" && maxScore > 1) {
+    return clamp01(passingScore / maxScore);
+  }
+  if (passingScore > 1 && passingScore <= 100) {
+    return clamp01(passingScore / 100);
+  }
+  return clamp01(passingScore);
+}
 
 export type {
   LessonkitBridgeAction,
@@ -60,7 +96,7 @@ export function normalizeAssessmentScore(opts: {
 
 /**
  * Scale a raw passing threshold to 0–1 for the LXPack parent bridge.
- * Delegates to `@lxpack/spa-bridge` (default 0.7 when omitted).
+ * Default 0.7 when omitted.
  */
 export function normalizeAssessmentPassingScore(opts?: {
   passingScore?: number;

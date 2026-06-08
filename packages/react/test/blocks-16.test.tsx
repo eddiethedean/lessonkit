@@ -1,6 +1,6 @@
 import React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import {
   AdventCalendar,
   CombinationLock,
@@ -87,6 +87,31 @@ describe("1.6.x block components", () => {
     fireEvent.change(screen.getByTestId("lock-digit-1"), { target: { value: "2" } });
     fireEvent.click(screen.getByTestId("lock-check"));
     expect(screen.getByTestId("combination-lock")).toBeDefined();
+  });
+
+  it("CombinationLock emits assessment_completed only once on repeated checks", async () => {
+    const events: { name: string }[] = [];
+    render(
+      <Course
+        title="Blocks 1.6"
+        courseId="blocks-16"
+        config={{
+          xapi: { enabled: false },
+          tracking: { sink: (e) => { events.push(e); } },
+        }}
+      >
+        <Lesson title="L1" lessonId="lesson-16">
+          <CombinationLock checkId="lock-dup" combination="42" />
+        </Lesson>
+      </Course>,
+    );
+    fireEvent.change(screen.getByTestId("lock-digit-0"), { target: { value: "4" } });
+    fireEvent.change(screen.getByTestId("lock-digit-1"), { target: { value: "2" } });
+    fireEvent.click(screen.getByTestId("lock-check"));
+    fireEvent.click(screen.getByTestId("lock-check"));
+    await waitFor(() => {
+      expect(events.filter((e) => e.name === "assessment_completed")).toHaveLength(1);
+    });
   });
 
   it("QrContent reveals hidden content", () => {

@@ -39,7 +39,13 @@ export function tryEmitCourseStarted(
   const flightKey = `${ctx.sessionId}:${ctx.courseId}`;
   const marked = hasCourseStarted(ctx.storage, ctx.sessionId, ctx.courseId);
   if (alreadyEmittedToSink) {
-    return Promise.resolve({ emitted: true, marked });
+    if (!marked) {
+      markCourseStarted(ctx.storage, ctx.sessionId, ctx.courseId);
+    }
+    return Promise.resolve({
+      emitted: true,
+      marked: hasCourseStarted(ctx.storage, ctx.sessionId, ctx.courseId),
+    });
   }
 
   const existing = courseStartedEmitFlights.get(flightKey);

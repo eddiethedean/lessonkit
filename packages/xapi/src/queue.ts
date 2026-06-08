@@ -120,7 +120,9 @@ export function createInMemoryXAPIQueue(opts?: InMemoryXAPIQueueOptions): XAPIQu
       return flushInFlight;
     },
     flushOnExit: (exitTransport: XAPIExitTransport) => {
+      const skipId = headInFlightId;
       for (const statement of buffer) {
+        if (statement.id === skipId) continue;
         try {
           exitTransport(statement);
         } catch {

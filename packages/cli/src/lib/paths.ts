@@ -24,7 +24,12 @@ export function resolvePackageOutput(
   if (override) {
     try {
       const resolved = resolveSafePackageOutputOverride(project.root, override);
-      return { output: resolved, dir: target === "standalone", outputBaseDir };
+      const isZipOutput = override.trim().toLowerCase().endsWith(".zip");
+      return {
+        output: resolved,
+        dir: target === "standalone" && !isZipOutput,
+        outputBaseDir,
+      };
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       throw new CliError(message, { code: "INVALID_PROJECT", exitCode: EXIT_INVALID_PROJECT });

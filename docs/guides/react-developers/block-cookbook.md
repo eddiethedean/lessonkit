@@ -134,7 +134,7 @@ Wrap answers in `*` in the template string.
 ## AssessmentSequence
 
 ```tsx
-<AssessmentSequence checkId="seq-1">
+<AssessmentSequence blockId="seq-1">
   <TrueFalse checkId="seq-tf" question="Ready?" answer={true} />
   <Quiz checkId="seq-quiz" question="Pick one" choices={["A", "B"]} answer="B" />
 </AssessmentSequence>

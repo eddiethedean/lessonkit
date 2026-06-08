@@ -90,7 +90,7 @@ function DragTheWordsInner(
       response: nextZones,
       correct: nextPassedThreshold,
     });
-    if (nextPassed || nextPassedThreshold) {
+    if (nextPassedThreshold || props.enableRetry === false) {
       assessment.complete({
         checkId,
         interactionType: INTERACTION,
@@ -186,7 +186,7 @@ function DragTheWordsInner(
       return;
     }
     if (!allFilled) return;
-    if (passed) return;
+    if (passed && !props.enableRetry) return;
     const snapshot = JSON.stringify(zones);
     if (checkSnapshotRef.current === snapshot) return;
     checkSnapshotRef.current = snapshot;
@@ -286,6 +286,11 @@ function DragTheWordsInner(
         <p role="status" aria-live="polite">
           {passed || passedThreshold ? "Correct" : "Try again"}
         </p>
+      ) : null}
+      {props.enableRetry && passed ? (
+        <button type="button" onClick={reset}>
+          Try again
+        </button>
       ) : null}
     </section>
   );

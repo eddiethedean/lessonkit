@@ -26,13 +26,24 @@ describe("@lessonkit/lxpack/bridge", () => {
     expect(normalizeAssessmentScore({ score: 2, maxScore: 2 })).toBe(1);
   });
 
-  it("normalizeAssessmentScore treats values already on 0–1 scale as-is", () => {
-    expect(normalizeAssessmentScore({ score: 1, maxScore: 2 })).toBe(1);
-    expect(normalizeAssessmentScore({ score: 0.5, maxScore: 2 })).toBe(0.5);
+  it("normalizeAssessmentScore scales partial raw points when maxScore > 1", () => {
+    expect(normalizeAssessmentScore({ score: 1, maxScore: 2 })).toBe(0.5);
+    expect(normalizeAssessmentScore({ score: 1, maxScore: 4 })).toBe(0.25);
+    expect(normalizeAssessmentScore({ score: 0.5, maxScore: 2 })).toBe(0.25);
+  });
+
+  it("normalizeAssessmentScore treats values already on 0–1 scale when maxScore is 1", () => {
+    expect(normalizeAssessmentScore({ score: 1, maxScore: 1 })).toBe(1);
+    expect(normalizeAssessmentScore({ score: 0.5 })).toBe(0.5);
+  });
+
+  it("normalizeAssessmentScore treats percentage raw scores without maxScore", () => {
+    expect(normalizeAssessmentScore({ score: 75 })).toBe(0.75);
   });
 
   it("normalizeAssessmentScore clamps to 1", () => {
     expect(normalizeAssessmentScore({ score: 3, maxScore: 2 })).toBe(1);
+    expect(normalizeAssessmentScore({ score: 150 })).toBe(1);
   });
 
   it("normalizeAssessmentScore returns null when score is missing", () => {
@@ -47,11 +58,16 @@ describe("@lessonkit/lxpack/bridge", () => {
 
   it("normalizeAssessmentPassingScore scales raw threshold by maxScore", () => {
     expect(normalizeAssessmentPassingScore({ passingScore: 2, maxScore: 4 })).toBe(0.5);
+    expect(normalizeAssessmentPassingScore({ passingScore: 1, maxScore: 4 })).toBe(0.25);
     expect(normalizeAssessmentPassingScore({ passingScore: 1, maxScore: 1 })).toBe(1);
   });
 
   it("normalizeAssessmentPassingScore clamps to 1", () => {
     expect(normalizeAssessmentPassingScore({ passingScore: 3, maxScore: 2 })).toBe(1);
+  });
+
+  it("normalizeAssessmentPassingScore treats percentage thresholds without maxScore", () => {
+    expect(normalizeAssessmentPassingScore({ passingScore: 80 })).toBe(0.8);
   });
 
   it("dispatchBridgeAction swallows host bridge throws", () => {

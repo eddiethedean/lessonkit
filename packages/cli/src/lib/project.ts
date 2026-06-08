@@ -20,11 +20,15 @@ export type PackageJson = {
   devDependencies?: Record<string, string>;
 };
 
+function isSchemaVersionOne(value: unknown): boolean {
+  return value === 1 || value === "1";
+}
+
 function isProjectManifest(configPath: string): boolean {
   try {
     const raw = JSON.parse(readFileSync(configPath, "utf8")) as Record<string, unknown>;
     return (
-      raw.schemaVersion === 1 &&
+      isSchemaVersionOne(raw.schemaVersion) &&
       typeof raw.name === "string" &&
       raw.course !== null &&
       typeof raw.course === "object" &&

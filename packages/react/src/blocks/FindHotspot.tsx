@@ -62,11 +62,11 @@ function FindHotspotInner(
       response: nextSelected,
       correct: nextCorrect,
     });
-    if (nextCorrect) {
+    if (nextCorrect || props.enableRetry === false) {
       assessment.complete({
         checkId,
         interactionType: INTERACTION,
-        score: 1,
+        score: nextCorrect ? 1 : 0,
         maxScore: 1,
         passingScore: props.passingScore ?? 1,
       });

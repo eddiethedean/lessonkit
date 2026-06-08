@@ -148,23 +148,23 @@ function WordSearchInner(
   const check = () => {
     setSubmitted(true);
     const ok = found.size === maxScore && maxScore > 0;
-    if (ok) {
-      setPassed(true);
-      completedRef.current = true;
-    }
     assessment.answer({
       checkId,
       interactionType: INTERACTION,
       response: [...found],
       correct: ok,
     });
-    assessment.complete({
-      checkId,
-      interactionType: INTERACTION,
-      score,
-      maxScore,
-      passingScore: props.passingScore ?? maxScore,
-    });
+    if ((ok || props.enableRetry === false) && !completedRef.current) {
+      completedRef.current = true;
+      if (ok) setPassed(true);
+      assessment.complete({
+        checkId,
+        interactionType: INTERACTION,
+        score,
+        maxScore,
+        passingScore: props.passingScore ?? maxScore,
+      });
+    }
   };
 
   return (

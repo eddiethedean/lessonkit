@@ -55,7 +55,7 @@ Canonical block list, props, and contracts: [Block catalog reference](../../refe
 | `DragTheWords` | `checkId`, `template`, `words` | Inline drag targets; `interactionType: dragTheWords` |
 | `DragAndDrop` | `checkId`, `items[]`, `targets[]` | Drag items to targets; keyboard alternative |
 | `MarkTheWords` | `checkId`, `text`, `correctWords` | Select correct word tokens in running text |
-| `AssessmentSequence` | `checkId`, children with `checkId` | Question-set container; aggregates child handles |
+| `AssessmentSequence` | `blockId?`, children with `checkId` | Question-set container; aggregates child handles |
 | `SlideDeck` | `blockId`, `title`, `Slide` children | Course Presentation; keyboard slide nav; `CompoundHandle` |
 | `Slide` | `blockId`, optional `title` | Single slide row inside `SlideDeck` |
 | `InteractiveVideo` | `blockId`, `title`, `src`, `TimedCue` children | Interactive Video; pause on cue; `CompoundHandle` |
@@ -83,8 +83,8 @@ These blocks ship in `@lessonkit/react` and appear in the [block catalog](../../
 | `ImageSequencing` | `checkId`, `images[]` | Order images correctly |
 | `ArithmeticQuiz` | `checkId`, `problems[]` | Numeric drill assessment |
 | `Essay` | `checkId`, `prompt` | Long-form text (manual scoring) |
-| `Questionnaire` | `checkId`, `fields[]` | Multi-field form |
-| `MemoryGame` | `checkId`, `pairs[]` | Card-matching game |
+| `Questionnaire` | `blockId`, `fields[]` | Multi-field form |
+| `MemoryGame` | `blockId`, `pairs[]` | Card-matching game |
 | `InformationWall` | `blockId`, `panels[]` | Searchable panel grid |
 | `ParallaxSlideshow` | `blockId`, `slides[]` | Parallax image slideshow |
 | `Accordion` | `blockId`, `sections[]` | Expandable sections |

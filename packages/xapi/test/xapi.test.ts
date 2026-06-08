@@ -249,11 +249,12 @@ describe("@lessonkit/xapi", () => {
     queue.flushOnExit((s) => {
       exitCalls.push(s);
     });
-    expect(exitCalls.map((s) => s.id)).toEqual(["head", "tail"]);
+    expect(exitCalls.map((s) => s.id)).toEqual(["tail"]);
 
     release();
     await flushPromise;
-    expect(exitCalls.map((s) => s.id)).toEqual(["head", "tail"]);
+    expect(exitCalls.map((s) => s.id)).toEqual(["tail"]);
+    expect(transport).toHaveBeenCalledTimes(1);
   });
 
   it("delivers a replacement payload after an in-flight statement with the same id succeeds", async () => {
@@ -330,6 +331,30 @@ describe("@lessonkit/xapi", () => {
     await new Promise((r) => setTimeout(r, 0));
 
     expect(client.queueSize()).toBe(1);
+  });
+
+  it("does not duplicate delivery when send follows transport failure re-queue", async () => {
+    let calls = 0;
+    const transport = vi.fn(async () => {
+      calls += 1;
+      if (calls === 1) {
+        throw new Error("network");
+      }
+    });
+    const client = createXAPIClient({ transport, courseId });
+    const statement: XAPIStatement = {
+      id: "requeue-1",
+      timestamp: "t",
+      verb: "http://adlnet.gov/expapi/verbs/experienced",
+      object: { id: "o" },
+    };
+
+    client.send(statement);
+    await new Promise((r) => setTimeout(r, 20));
+    expect(client.queueSize()).toBe(1);
+    client.send(statement);
+    await client.flush();
+    expect(transport).toHaveBeenCalledTimes(2);
   });
 
   it("auto-generates statement ids and dedupes empty-id sends on transport failure", async () => {

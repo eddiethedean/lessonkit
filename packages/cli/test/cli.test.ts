@@ -228,6 +228,28 @@ describe("resolvePackageOutput", () => {
     expect(output).toBe(".lxpack/out/standalone");
     expect(dir).toBe(true);
   });
+
+  it("treats standalone --out override ending in .zip as a file target", () => {
+    const project = {
+      root: "/proj",
+      schemaVersion: 1 as const,
+      name: "demo",
+      course: {
+        courseId: "demo",
+        title: "Demo",
+        layout: "single-spa" as const,
+        lessons: [{ id: "l1", title: "L1" }],
+      },
+      paths: {
+        spaDistDir: "dist",
+        lxpackOutDir: ".lxpack/course",
+        outputBaseDir: ".lxpack/out",
+      },
+    };
+    const { output, dir } = resolvePackageOutput(project, "standalone", "artifacts/course.zip");
+    expect(output).toBe("/proj/artifacts/course.zip");
+    expect(dir).toBe(false);
+  });
 });
 
 describe("loadLessonkitJson", () => {
@@ -411,6 +433,25 @@ describe("findProjectRoot", () => {
     );
 
     expect(findProjectRoot(nested)).toBe(dir);
+  });
+
+  it("accepts lessonkit.json with string schemaVersion", async () => {
+    await writeFile(
+      join(dir, "lessonkit.json"),
+      JSON.stringify({
+        schemaVersion: "1",
+        name: "demo",
+        course: {
+          courseId: "demo",
+          title: "Demo",
+          layout: "single-spa",
+          lessons: [{ id: "l1", title: "L1" }],
+        },
+      }),
+      "utf8",
+    );
+
+    expect(findProjectRoot(dir)).toBe(dir);
   });
 
   it("skips lxpack interchange lessonkit.json without schemaVersion", async () => {

@@ -188,6 +188,7 @@ export function createXAPIClient(opts?: {
         return;
       }
 
+      queue.removeById(normalized.id);
       inflightStatements.set(normalized.id, normalized);
       inflightPayload.set(normalized.id, normalized);
       const flight = Promise.resolve()

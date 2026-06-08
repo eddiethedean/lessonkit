@@ -297,6 +297,30 @@ describe("AssessmentHandle (imperative API)", () => {
     expect(ref.current?.getScore()).toBe(2);
   });
 
+  it("Summary resume does not mark passed without check", () => {
+    const ref = createRef<AssessmentHandle>();
+    render(
+      wrap(
+        <Summary
+          ref={ref}
+          checkId="summary-resume"
+          statements={["First", "Second", "Noise"]}
+          correct={["First", "Second"]}
+        />,
+      ),
+    );
+    act(() => {
+      ref.current?.resume?.({
+        selectedIndices: [0, 1],
+        passed: false,
+        checked: false,
+      });
+    });
+    expect(ref.current?.getScore()).toBe(2);
+    expect((screen.getByTestId("summary-check") as HTMLButtonElement).disabled).toBe(false);
+    expect(screen.queryByTestId("summary-feedback")).toBeNull();
+  });
+
   it("Quiz allows retry after a correct answer when enableRetry is true", () => {
     render(
       wrap(

@@ -1,6 +1,12 @@
+import { existsSync, realpathSync } from "node:fs";
 import { isAbsolute, resolve } from "node:path";
 import type { DescriptorValidationIssue } from "./validateDescriptor";
-import { assertRealPathUnderRoot, isSafeRelativeSpaPath } from "./spaPath";
+import {
+  assertRealPathUnderRoot,
+  isSafeRelativeSpaPath,
+  relativePathUnderRoot,
+  resolveComparablePath,
+} from "./spaPath";
 
 export type ProjectPathsInput = {
   spaDistDir?: string;
@@ -17,6 +23,19 @@ export function isReservedOutputPath(value: string): boolean {
   while (normalized.endsWith("/")) normalized = normalized.slice(0, -1);
   const segments = normalized.split("/").filter(Boolean);
   return segments.some((segment) => RESERVED_OUTPUT_SEGMENTS.has(segment));
+}
+
+function isReservedResolvedOutputPath(projectRoot: string, resolved: string): boolean {
+  const rootResolved = resolveComparablePath(projectRoot);
+  const targetResolved = resolveComparablePath(resolved);
+  try {
+    const rootReal = existsSync(rootResolved) ? realpathSync(rootResolved) : rootResolved;
+    const targetReal = existsSync(targetResolved) ? realpathSync(targetResolved) : targetResolved;
+    const rel = relativePathUnderRoot(rootReal, targetReal);
+    return isReservedOutputPath(rel);
+  } catch {
+    return isReservedOutputPath(resolved);
+  }
 }
 
 function validatePathField(
@@ -90,7 +109,7 @@ export function resolveSafePackageOutputOverride(
   if (isAbsolute(trimmed)) {
     const resolved = resolve(trimmed);
     assertRealPathUnderRoot(root, resolved);
-    if (isReservedOutputPath(trimmed)) {
+    if (isReservedOutputPath(trimmed) || isReservedResolvedOutputPath(root, resolved)) {
       throw new Error(`unsafe output path: ${override} targets a reserved directory`);
     }
     return resolved;
@@ -98,10 +117,10 @@ export function resolveSafePackageOutputOverride(
   if (!isSafeRelativeSpaPath(trimmed)) {
     throw new Error(`unsafe output path: ${override}`);
   }
-  if (isReservedOutputPath(trimmed)) {
-    throw new Error(`unsafe output path: ${override} targets a reserved directory`);
-  }
   const resolved = resolve(root, trimmed);
   assertRealPathUnderRoot(root, resolved);
+  if (isReservedOutputPath(trimmed) || isReservedResolvedOutputPath(root, resolved)) {
+    throw new Error(`unsafe output path: ${override} targets a reserved directory`);
+  }
   return resolved;
 }

@@ -67,7 +67,7 @@ describe("courseLifecycle", () => {
     expect(emit).toHaveBeenCalledTimes(1);
   });
 
-  it("tryEmitCourseStarted reports unmarked storage when alreadyEmittedToSink is true", async () => {
+  it("tryEmitCourseStarted persists mark when alreadyEmittedToSink is true but storage is unmarked", async () => {
     const storage = createNoopStorage();
     const ctx = {
       courseId: "c" as const,
@@ -78,7 +78,7 @@ describe("courseLifecycle", () => {
     };
     const result = await tryEmitCourseStarted(ctx, { emitCourseStartedEvent: () => true }, true);
     expect(result.emitted).toBe(true);
-    expect(result.marked).toBe(false);
+    expect(result.marked).toBe(true);
   });
 
   it("tryEmitCourseStarted reports marked when in-memory dedupe succeeds despite failed durable write", async () => {

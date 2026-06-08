@@ -132,23 +132,23 @@ function CrosswordInner(
   const check = () => {
     setSubmitted(true);
     const ok = score === maxScore && maxScore > 0;
-    if (ok) {
-      setPassed(true);
-      completedRef.current = true;
-    }
     assessment.answer({
       checkId,
       interactionType: INTERACTION,
       response: values,
       correct: ok,
     });
-    assessment.complete({
-      checkId,
-      interactionType: INTERACTION,
-      score,
-      maxScore,
-      passingScore: props.passingScore ?? maxScore,
-    });
+    if ((ok || props.enableRetry === false) && !completedRef.current) {
+      completedRef.current = true;
+      if (ok) setPassed(true);
+      assessment.complete({
+        checkId,
+        interactionType: INTERACTION,
+        score,
+        maxScore,
+        passingScore: props.passingScore ?? maxScore,
+      });
+    }
   };
 
   const solutionForCell = (row: number, col: number): string => {
