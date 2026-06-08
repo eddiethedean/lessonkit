@@ -147,3 +147,15 @@ export async function ensureBranchingScenarioBuilt(): Promise<void> {
     stdio: "inherit",
   });
 }
+
+export async function ensureFramework12ShowcaseBuilt(): Promise<void> {
+  const { existsSync } = await import("node:fs");
+  const distIndex = join(REPO_ROOT, "examples/framework-12-showcase/dist/index.html");
+  if (existsSync(distIndex)) return;
+
+  const { execSync } = await import("node:child_process");
+  execSync("npm run build -w lessonkit-example-framework-12-showcase", {
+    cwd: REPO_ROOT,
+    stdio: "inherit",
+  });
+}

@@ -1,7 +1,6 @@
 import type { TelemetryEvent, TrackingClient } from "@lessonkit/core";
 import {
   createTelemetryPipeline,
-  createTrackingPipelineSink,
   isLifecycleTelemetryEvent,
   type TelemetryPipeline,
 } from "@lessonkit/core";
@@ -31,7 +30,16 @@ function createLegacyPipeline(
   extraSinks: import("@lessonkit/core").TelemetryPipelineSink[] = [],
 ): TelemetryPipeline {
   return createTelemetryPipeline([
-    createTrackingPipelineSink("tracking", (event) => opts.tracking.track(event)),
+    {
+      id: "tracking",
+      async emit(event) {
+        if (isLifecycleTelemetryEvent(event.name) && opts.tracking.deliver) {
+          await opts.tracking.deliver(event);
+          return;
+        }
+        opts.tracking.track(event);
+      },
+    },
     {
       id: "xapi",
       async emit(event) {

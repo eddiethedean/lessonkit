@@ -5,7 +5,7 @@ import { parseLessonkitInterchange } from "@lxpack/validators";
 import { descriptorToInterchange } from "../interchange";
 import { assertRealPathUnderRoot } from "../spaPath";
 import { assertSpaDistContentsSafe } from "../spaDistValidation";
-import { extractBlockTree } from "./blockTree";
+import { extractBlockTree, validateBlockTreeIds } from "./blockTree";
 import { parseLkcourseEnvelope } from "./parseEnvelope";
 import {
   collectDistEntries,
@@ -87,6 +87,16 @@ export async function exportLkcourse(options: ExportLkcourseOptions): Promise<Ex
   let blockTreeJson: string | undefined;
   if (options.includeBlockTree) {
     const blockTree = extractBlockTree({ projectRoot });
+    const blockTreeIssues = validateBlockTreeIds(blockTree);
+    if (blockTreeIssues.length) {
+      return {
+        ok: false,
+        issues: blockTreeIssues.map((issue) => ({
+          path: `block-tree.${issue.path}`,
+          message: issue.message,
+        })),
+      };
+    }
     blockTreeJson = JSON.stringify(blockTree, null, 2);
     zipEntries.set("block-tree.json", utf8ToEntry(blockTreeJson));
   }

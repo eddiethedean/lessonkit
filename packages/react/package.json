@@ -1,6 +1,6 @@
 {
   "name": "@lessonkit/react",
-  "version": "1.6.0",
+  "version": "1.6.6",
   "private": false,
   "description": "React components and hooks for building learning experiences with LessonKit.",
   "license": "Apache-2.0",
@@ -70,7 +70,7 @@
     "lint": "eslint --max-warnings 0 \"src/**/*.{ts,tsx}\" \"test/**/*.{ts,tsx}\" \"stories/**/*.{ts,tsx}\""
   },
   "peerDependencies": {
-    "@lessonkit/lxpack": "1.6.0",
+    "@lessonkit/lxpack": "1.6.6",
     "react": ">=18",
     "react-dom": ">=18"
   },
@@ -80,11 +80,11 @@
     }
   },
   "dependencies": {
-    "@lessonkit/accessibility": "1.6.0",
-    "@lessonkit/core": "1.6.0",
-    "@lessonkit/lxpack": "1.6.0",
-    "@lessonkit/themes": "1.6.0",
-    "@lessonkit/xapi": "1.6.0"
+    "@lessonkit/accessibility": "1.6.6",
+    "@lessonkit/core": "1.6.6",
+    "@lessonkit/lxpack": "1.6.6",
+    "@lessonkit/themes": "1.6.6",
+    "@lessonkit/xapi": "1.6.6"
   },
   "devDependencies": {
     "@storybook/builder-vite": "10.4.2",

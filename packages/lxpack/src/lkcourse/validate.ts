@@ -1,7 +1,8 @@
 import { parseLessonkitInterchange } from "@lxpack/validators";
+import { validateBlockTreeIds } from "./blockTree";
 import { parseLkcourseEnvelope } from "./parseEnvelope";
 import { entryToUtf8, readZip } from "./zip";
-import type { LkcourseValidationIssue, ValidateLkcourseResult } from "./types";
+import type { BlockTreeV1, LkcourseValidationIssue, ValidateLkcourseResult } from "./types";
 
 export function validateLkcourseArchiveEntries(
   entries: Map<string, Uint8Array>,
@@ -93,6 +94,32 @@ export function validateLkcourseArchiveEntries(
   }
 
   if (issues.length) return { ok: false, issues };
+
+  const blockTreeData = entries.get("block-tree.json");
+  if (blockTreeData) {
+    let blockTreeRaw: unknown;
+    try {
+      blockTreeRaw = JSON.parse(entryToUtf8(blockTreeData));
+    } catch {
+      return {
+        ok: false,
+        issues: [{ path: "block-tree.json", message: "invalid JSON" }],
+      };
+    }
+    const blockTree = blockTreeRaw as BlockTreeV1;
+    if (Array.isArray(blockTree?.blocks)) {
+      const blockTreeIssues = validateBlockTreeIds(blockTree);
+      if (blockTreeIssues.length) {
+        return {
+          ok: false,
+          issues: blockTreeIssues.map((issue) => ({
+            path: `block-tree.${issue.path}`,
+            message: issue.message,
+          })),
+        };
+      }
+    }
+  }
 
   return {
     ok: true,

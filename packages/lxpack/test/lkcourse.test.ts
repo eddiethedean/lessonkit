@@ -185,6 +185,29 @@ describe("lkcourse", () => {
     expect(flat.some((b) => b.type === "Quiz" && b.checkId === "ready")).toBe(true);
   });
 
+  it("export rejects block tree with invalid ids", async () => {
+    const root = await mkdtemp(join(tmpdir(), "lk-tree-invalid-"));
+    tempDirs.push(root);
+    await writeMinimalProject(root);
+    await writeFile(
+      join(root, "src", "Bad.tsx"),
+      `<Quiz checkId="bad:id" question="?" choices={["a"]} answer="a" />`,
+    );
+
+    const manifestParsed = parseLessonkitManifest(minimalManifest);
+    expect(manifestParsed.ok).toBe(true);
+    if (!manifestParsed.ok) return;
+
+    const exported = await exportLkcourse({
+      projectRoot: root,
+      manifest: manifestParsed.manifest,
+      includeBlockTree: true,
+    });
+    expect(exported.ok).toBe(false);
+    if (exported.ok) return;
+    expect(exported.issues.some((issue) => issue.path.includes("block-tree"))).toBe(true);
+  });
+
   it("rejects zip-slip paths", () => {
     expect(isSafeZipEntryPath("../evil")).toBe(false);
     expect(isSafeZipEntryPath("dist/index.html")).toBe(true);

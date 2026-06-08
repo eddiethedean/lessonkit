@@ -15,7 +15,7 @@ Developer tooling, not a timeline authoring tool: **React + telemetry + packagin
 
 | | |
 | --- | --- |
-| **Release** | [1.6.0](https://github.com/eddiethedean/lessonkit/blob/main/CHANGELOG.md#160---2026-06-07) |
+| **Release** | [1.6.6](https://github.com/eddiethedean/lessonkit/blob/main/CHANGELOG.md#166---2026-06-07) |
 | **npm** | [`@lessonkit/*`](https://www.npmjs.com/org/lessonkit) |
 | **Docs** | [lessonkit.readthedocs.io](https://lessonkit.readthedocs.io/en/latest/) |
 | **Node.js** | **18+** minimum; **20.19+** recommended (CLI scaffold uses Vite 8; monorepo CI and e2e use Node 20) |

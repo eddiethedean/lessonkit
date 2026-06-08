@@ -24,8 +24,8 @@ Packaging and LMS delivery lean on **LXPack** via `@lessonkit/lxpack` (see 0.6.x
 
 ## Status
 
-- **Framework:** **1.6.0** — portable interchange (`.lkcourse`) + block registry CLI (see [1.6.x](#16x--portable-interchange-and-content-waves))
-- **Focus (now):** **1.6.x** — content wave blocks (Tier C–E backlog; see [H5P-aligned capability backlog](#h5p-aligned-capability-backlog))
+- **Framework:** **1.6.6** — portable interchange (`.lkcourse`) + block registry CLI + content-wave blocks (see [1.6.x](#16x--portable-interchange-and-content-waves))
+- **Focus (now):** **1.6.x** — Tier F / 1.7.x planning (content waves through **1.6.6** shipped; see [H5P-aligned capability backlog](#h5p-aligned-capability-backlog))
 
 ## Guiding principles
 
@@ -614,7 +614,7 @@ Ship by demand; each block completes the [H5P documentation checklist](#h5p-docu
 | Progress / completion | ✅ `ProgressTracker`, hooks | H5P scores per activity; we aggregate at course level |
 | Theming | ✅ `@lessonkit/themes` | `--lk-*` vs H5P per-library CSS |
 | xAPI + LMS export | ✅ `@lessonkit/xapi`, `@lessonkit/lxpack` | SCORM/xAPI/cmi5 via packaging, not `.h5p` |
-| Content-type discovery | ⬜ | Block registry + docs (see Tier F) |
+| Content-type discovery | ✅ | Block registry + `lessonkit blocks list` (1.6.0) |
 
 ### Tier A — Compound experiences (highest leverage)
 
@@ -625,10 +625,10 @@ These are H5P's "course builders." Each becomes a **framework container** with a
 | P0 | **Interactive Book** | `InteractiveBook` | **1.2.x** ✅ | Page layout, resume state, sub-block catalog |
 | P0 | **Course Presentation** | `SlideDeck` | **1.3.x** ✅ | Slide schema, per-slide block allowlist, keyboard slide nav |
 | P0 | **Interactive Video** | `InteractiveVideo` | **1.4.0** ✅ | Video block, `TimedCue`, timed overlays, Tier B/C/D blocks |
-| P0 | **Branching Scenario** | `BranchingScenario` + `BranchNode` + `BranchChoice` | **1.5.0** | Graph navigation, visited-path scoring, `branch_*` telemetry |
+| P0 | **Branching Scenario** | `BranchingScenario` + `BranchNode` + `BranchChoice` | **1.5.0** ✅ | Graph navigation, visited-path scoring, `branch_*` telemetry |
 | P1 | **Question Set (Quiz)** | `AssessmentSequence` | **1.1.x** ✅ | Question-type contract (below) |
 | P1 | **Column** → **Page** | `Page` | **1.2.x** ✅ | Unified semantics with Interactive Book chapters |
-| P2 | **Game Map** | `GameMap` | **1.6.x** | Spatial layout, optional non-scored stages |
+| P2 | **Game Map** | `GameMap` | **1.6.6** ✅ | Spatial layout, optional non-scored stages |
 | P2 | **Virtual Tour (360)** | `VirtualTour` | **1.8.x** | 360 asset pipeline, hotspot model |
 | P3 | **Documentation Tool** | `DocumentationTool` | **2.x** | Cornell notes, exportable learner artifacts |
 | P3 | **Interactive Canvas / Structure Strip** | `StructureStrip`, `WritingCanvas` | **2.x** | Writing pedagogy; lower than core LMS parity |
@@ -672,13 +672,13 @@ Extend beyond MCQ via a formal **assessment contract** (H5P's `H5P.Question` pat
 | P1 | **Image Hotspots** | `ImageHotspots` ✅ | Regions + popovers; keyboard reachable hotspots |
 | P1 | **Find the Hotspot** / **Find Multiple Hotspots** | `FindHotspot`, `FindMultipleHotspots` ✅ | Scored discovery tasks |
 | P1 | **Image Slider** | `ImageSlider` ✅ | Carousel primitive |
-| P2 | **Image Juxtaposition** | `ImageJuxtaposition` | Before/after slider |
-| P2 | **Agamotto (Image Blender)** | `ImageSequence` | Progressive image sequence |
-| P2 | **Collage** | `Collage` | Multi-image layout block |
+| P2 | **Image Juxtaposition** | `ImageJuxtaposition` ✅ | Before/after slider |
+| P2 | **Agamotto (Image Blender)** | `ImageSequence` ✅ | Progressive image sequence |
+| P2 | **Collage** | `Collage` ✅ | Multi-image layout block |
 | P2 | **Image Pairing** / **Image Sequencing** | `ImagePairing`, `ImageSequencing` | Memory/order games; ships **1.4.0** ✅ |
 | P2 | **Memory Game** | `MemoryGame` | Card flip; focus management; ships **1.4.0** ✅ |
-| P3 | **Iframe Embedder** | `Embed` (restricted) | Sandboxed, responsive; opt-in for security |
-| P3 | **Chart** | `Chart` | Bar/pie; accessible data table fallback |
+| P3 | **Iframe Embedder** | `Embed` (restricted) ✅ | Sandboxed, responsive; opt-in for security |
+| P3 | **Chart** | `Chart` ✅ | Bar/pie; accessible data table fallback |
 
 ### Tier D — Text, cards, and informational content
 
@@ -687,12 +687,12 @@ Extend beyond MCQ via a formal **assessment contract** (H5P's `H5P.Question` pat
 | P1 | **Accordion** | `Accordion` ✅ | Nest policy (no accordion-in-accordion) |
 | P1 | **Dialog Cards** | `DialogCards` ✅ | Flip cards; reduced-motion safe |
 | P1 | **Flashcards** | `Flashcards` ✅ | Study mode; optional self-score |
-| P2 | **Timeline** | `Timeline` | Events + media; fragile as sub-content in H5P—test resize |
-| P2 | **Table** | `Table` | Rich text table |
+| P2 | **Timeline** | `Timeline` ✅ | Events + media; fragile as sub-content in H5P—test resize |
+| P2 | **Table** | `Table` ✅ | Rich text table |
 | P2 | **Information Wall** | `InformationWall` | Searchable panels; ships **1.4.0** ✅ |
 | P3 | **Exportable Text Area / Cornell** | `CornellNotes`, `ExportableNotes` | Learner export (PDF/text) |
 | P3 | **Personality Quiz** | `PersonalityQuiz` | Outcome buckets; community pattern, lower priority |
-| P1 | **Audio Recorder** | `AudioRecorder` | Learner recording; consent + storage policy |
+| P1 | **Audio Recorder** | `AudioRecorder` ✅ | Learner recording; consent + storage policy |
 | P2 | **Slideshow (parallax)** | `ParallaxSlideshow` | Presentation variant; respect `prefers-reduced-motion`; ships **1.4.0** ✅ |
 
 **Primitives (H5P sub-content):** `Text`, `Heading`, `Image`, and media blocks with shared semantics for compounds.
@@ -703,11 +703,11 @@ Lower priority unless a customer/LMS parity request surfaces; still catalog for 
 
 | H5P content type | LessonKit target | Priority |
 |------------------|------------------|----------|
-| Crossword | `Crossword` | P3 |
-| Find the Words | `WordSearch` | P3 (keyboard a11y hard—H5P often excludes from compounds) |
-| Combination Lock | `CombinationLock` | P3 |
-| KewAr Code / QR | `QrContent` | P3 |
-| Advent Calendar | `AdventCalendar` | P3 |
+| Crossword | `Crossword` ✅ | P3 (1.6.x) |
+| Find the Words | `WordSearch` ✅ | P3 (1.6.x; keyboard a11y hard—excluded from compound allowlists) |
+| Combination Lock | `CombinationLock` ✅ | P3 (1.6.x) |
+| KewAr Code / QR | `QrContent` ✅ | P3 (1.6.x) |
+| Advent Calendar | `AdventCalendar` ✅ | P3 (1.6.x) |
 | Agora World (AR) | `AugmentedReality` | P4 / research |
 
 ### Tier F — LessonKit platform (H5P analogues for reference only)
@@ -753,7 +753,7 @@ When implementing backlog items, follow H5P's constraints **in React form**:
 | 4 | Add **H5P equivalent** admonition or table row on the block's doc touchpoints | At minimum: block catalog; [components guide](docs/guides/react-developers/components-and-hooks.md) table if public API; [H5P authors guide](docs/guides/h5p-for-lessonkit-authors.md) "Available today" or "Planned" table when status changes |
 | 5 | Storybook story titled with **H5P name in subtitle** (e.g. "FillInTheBlanks — H5P Fill in the Blanks") | `packages/react/stories/` |
 | 6 | If scored: example `lessonkit.json` `assessments[]` entry + export parity note | Golden example or [packaging guide](docs/reference/packaging.md) callout when first of kind |
-| 7 | `h5pAlias` / `h5pMachineName` in **block-catalog JSON** entry | `block-catalog.v2.json` + `buildBlockCatalog()` |
+| 7 | `h5pAlias` / `h5pMachineName` in **block-catalog JSON** entry | `block-catalog.v3.json` + `buildBlockCatalog()` |
 
 **Ongoing pages (already live—keep links accurate):** [docs index](docs/index.md) H5P tip, [H5P authors guide](docs/guides/h5p-for-lessonkit-authors.md), [capability map](docs/project/h5p-capability-map.md).
 

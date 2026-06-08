@@ -108,6 +108,25 @@ async function applyTemplateSubstitutions(projectDir: string, projectName: strin
   await writeFile(appPath, appSource, "utf8");
 }
 
+async function rollbackPromotedFiles(
+  projectDir: string,
+  stagingDir: string,
+  preExisting: Set<string>,
+): Promise<void> {
+  let stagingEntries;
+  try {
+    stagingEntries = await readdir(stagingDir, { withFileTypes: true });
+  } catch {
+    return;
+  }
+  for (const entry of stagingEntries) {
+    if (preExisting.has(entry.name)) continue;
+    await rm(join(projectDir, entry.name), { recursive: true, force: true }).catch(
+      /* v8 ignore next */ () => undefined,
+    );
+  }
+}
+
 async function promoteStagingToProjectDir(stagingDir: string, projectDir: string): Promise<void> {
   await mkdir(projectDir, { recursive: true });
   const entries = await readdir(stagingDir, { withFileTypes: true });
@@ -132,6 +151,7 @@ export const __testInitHelpers = {
   escapeJsxString,
   copyTemplate,
   promoteStagingToProjectDir,
+  rollbackPromotedFiles,
 };
 
 export async function runInit(opts: InitOptions, logger: CliLogger): Promise<CliJsonResult> {
@@ -207,7 +227,13 @@ export async function runInit(opts: InitOptions, logger: CliLogger): Promise<Cli
     }
 
     if (opts.here) {
-      await promoteStagingToProjectDir(stagingDir, projectDir);
+      const preExisting = new Set(await readdir(projectDir));
+      try {
+        await __testInitHelpers.promoteStagingToProjectDir(stagingDir, projectDir);
+      } catch (promoteErr) {
+        await rollbackPromotedFiles(projectDir, stagingDir, preExisting);
+        throw promoteErr;
+      }
       await rm(stagingDir, { recursive: true, force: true });
     } else {
       await rename(stagingDir, projectDir);

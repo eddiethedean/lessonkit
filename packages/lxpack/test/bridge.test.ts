@@ -264,6 +264,35 @@ describe("@lessonkit/lxpack/bridge", () => {
     }
   });
 
+  it("notifyLxpackLessonComplete swallows host bridge throws", () => {
+    const onBridgeError = vi.fn();
+    vi.stubGlobal("window", {
+      parent: {
+        location: { origin: "https://lms.example" },
+        lxpackBridge: {
+          v1: {
+            completeLesson: () => {
+              throw new Error("host bridge failure");
+            },
+          },
+        },
+      },
+      location: { origin: "https://course.example" },
+    });
+
+    try {
+      expect(
+        notifyLxpackLessonComplete("lesson-1", {
+          allowedParentOrigins: ["https://lms.example"],
+          onBridgeError,
+        }),
+      ).toBe(false);
+      expect(onBridgeError).toHaveBeenCalledWith(expect.any(Error));
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
   it("denies notify APIs in production without allowedParentOrigins regardless of mode", () => {
     const completeLesson = vi.fn();
     vi.stubEnv("NODE_ENV", "production");

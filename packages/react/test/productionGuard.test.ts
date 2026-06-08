@@ -146,4 +146,26 @@ describe("assertProductionCourseConfig", () => {
       }),
     ).toThrow(/observability hooks/);
   });
+
+  it("throws when production lxpack bridge auto omits allowedParentOrigins", () => {
+    vi.stubEnv("NODE_ENV", "production");
+    expect(() =>
+      assertProductionCourseConfig({
+        tracking: { enabled: false },
+        lxpack: { bridge: "auto" },
+        observability: fullObservability,
+      }),
+    ).toThrow(/allowedParentOrigins is missing/);
+  });
+
+  it("passes when production lxpack bridge auto includes allowedParentOrigins", () => {
+    vi.stubEnv("NODE_ENV", "production");
+    expect(() =>
+      assertProductionCourseConfig({
+        tracking: { enabled: false },
+        lxpack: { bridge: "auto", allowedParentOrigins: ["https://lms.example"] },
+        observability: fullObservability,
+      }),
+    ).not.toThrow();
+  });
 });

@@ -17,7 +17,7 @@ describe("@lessonkit/core", () => {
 
   it("createSessionId uses crypto.randomUUID when available", () => {
     vi.stubGlobal("crypto", { randomUUID: () => "uuid-1" });
-    expect(createSessionId()).toBe("uuid-1");
+    expect(createSessionId()).toBe("s-uuid1");
     vi.unstubAllGlobals();
   });
 
@@ -28,7 +28,7 @@ describe("@lessonkit/core", () => {
         return arr;
       },
     });
-    expect(createSessionId()).toBe("ab".repeat(16));
+    expect(createSessionId()).toBe(`s-${"ab".repeat(16)}`);
     vi.unstubAllGlobals();
   });
 

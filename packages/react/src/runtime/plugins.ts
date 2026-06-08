@@ -39,12 +39,12 @@ export function emitTelemetryWithPlugins(opts: {
   onLxpackBridgeError?: import("./observability").LessonkitObservabilityConfig["onLxpackBridgeError"];
   onXapiMappingError?: import("./observability").LessonkitObservabilityConfig["onXapiMappingError"];
   onXapiTransportError?: import("./observability").LessonkitObservabilityConfig["onXapiTransportError"];
-}): void {
+}): void | Promise<void> {
   const next = opts.pluginHost
     ? opts.pluginHost.runTelemetry(opts.event, opts.pluginCtx)
     : opts.event;
   if (next === null) return;
-  emitTelemetry(opts.tracking, opts.xapi, next, {
+  return emitTelemetry(opts.tracking, opts.xapi, next, {
     lxpackBridge: opts.lxpackBridge ?? "auto",
     allowedParentOrigins: opts.allowedParentOrigins,
     extraSinks: opts.extraSinks,

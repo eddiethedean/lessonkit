@@ -12,7 +12,7 @@ export type {
 } from "./types";
 
 export { parseLkcourseEnvelope } from "./parseEnvelope";
-export { extractBlockTree } from "./blockTree";
+export { extractBlockTree, validateBlockTreeIds } from "./blockTree";
 export { exportLkcourse } from "./export";
 export { validateLkcourse, validateLkcourseArchiveEntries } from "./validate";
 export { importLkcourse } from "./import";

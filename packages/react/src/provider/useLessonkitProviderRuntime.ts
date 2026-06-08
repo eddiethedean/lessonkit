@@ -56,6 +56,7 @@ import {
   createReactPluginHost,
   emitTelemetryWithPlugins,
 } from "../runtime/plugins";
+import { awaitTelemetryFlights, registerTelemetryFlight } from "../runtime/telemetryFlights";
 import { createTrackingClientFromConfig, disposeTrackingClient } from "../runtime/telemetry";
 import type { LessonkitConfig, LessonkitRuntime } from "../context";
 
@@ -168,6 +169,7 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
   const courseStartedEmittedToSinkRef = useRef(false);
   const courseStartedEmitGenerationRef = useRef(0);
   const courseStartedFlightScopeRef = useRef(createCourseStartedFlightScope());
+  const pendingTelemetryFlightsRef = useRef<Set<Promise<void>>>(new Set());
   const pendingSessionReEmitRef = useRef(false);
 
   const prevPluginsFingerprintRef = useRef(pluginsFingerprint);
@@ -516,26 +518,34 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
   ]);
 
   const emitWithBridge = useCallback((trackingClient: TrackingClient, event: TelemetryEvent) => {
-    emitTelemetryWithPlugins({
-      pluginHost: pluginHostRef.current,
-      tracking: trackingClient,
-      xapi: xapiRef.current,
-      event,
-      pluginCtx: buildPluginContext({
-        courseId: courseIdRef.current,
-        sessionId: sessionIdRef.current,
-        attemptId: attemptIdRef.current,
-        user: userRef.current,
+    return registerTelemetryFlight(
+      pendingTelemetryFlightsRef.current,
+      emitTelemetryWithPlugins({
+        pluginHost: pluginHostRef.current,
+        tracking: trackingClient,
+        xapi: xapiRef.current,
+        event,
+        pluginCtx: buildPluginContext({
+          courseId: courseIdRef.current,
+          sessionId: sessionIdRef.current,
+          attemptId: attemptIdRef.current,
+          user: userRef.current,
+        }),
+        lxpackBridge: lxpackBridgeModeRef.current,
+        allowedParentOrigins: allowedParentOriginsRef.current,
+        onLxpackBridgeMiss,
+        onLxpackBridgeError,
+        extraSinks: extraSinksRef.current,
+        onXapiMappingError: observabilityRef.current?.onXapiMappingError,
+        onXapiTransportError: observabilityRef.current?.onXapiTransportError,
       }),
-      lxpackBridge: lxpackBridgeModeRef.current,
-      allowedParentOrigins: allowedParentOriginsRef.current,
-      onLxpackBridgeMiss,
-      onLxpackBridgeError,
-      extraSinks: extraSinksRef.current,
-      onXapiMappingError: observabilityRef.current?.onXapiMappingError,
-      onXapiTransportError: observabilityRef.current?.onXapiTransportError,
-    });
+    );
   }, [onLxpackBridgeMiss, onLxpackBridgeError]);
+
+  const flushTrackingAfterPipeline = useCallback(async () => {
+    await awaitTelemetryFlights(pendingTelemetryFlightsRef.current);
+    await trackingRef.current?.flush?.();
+  }, []);
 
   const emitLifecycleEvent: TelemetryEmitFn = useCallback(
     (event) => {
@@ -611,16 +621,16 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
       if (useV2Runtime && headlessRef.current) {
         headlessRef.current.completeLesson(lessonId, emitLifecycleEvent);
         syncProgress();
-        void Promise.resolve(trackingRef.current?.flush?.());
+        void flushTrackingAfterPipeline();
         return;
       }
       const result = progressRef.current.completeLesson(lessonId, Date.now());
       if (!result.didComplete) return;
       syncProgress();
       emitLessonCompleted(lessonId, result.durationMs);
-      void Promise.resolve(trackingRef.current?.flush?.());
+      void flushTrackingAfterPipeline();
     },
-    [syncProgress, emitLessonCompleted, useV2Runtime, emitLifecycleEvent],
+    [syncProgress, emitLessonCompleted, useV2Runtime, emitLifecycleEvent, flushTrackingAfterPipeline],
   );
 
   useEffect(() => {
@@ -628,6 +638,11 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
       const client = trackingClientForUnmountRef.current;
       const xapi = xapiRef.current;
       void (async () => {
+        try {
+          await awaitTelemetryFlights(pendingTelemetryFlightsRef.current);
+        } catch {
+          // ignore
+        }
         try {
           await xapi?.flush();
         } catch {
@@ -664,7 +679,7 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
       if (useV2Runtime && headlessRef.current) {
         headlessRef.current.setActiveLesson(lessonId, emitLifecycleEvent);
         syncProgress();
-        void Promise.resolve(trackingRef.current?.flush?.());
+        void flushTrackingAfterPipeline();
         return;
       }
       const current = progressRef.current.getState();
@@ -680,7 +695,7 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
         const completed = progressRef.current.completeLesson(previous, Date.now());
         if (completed.didComplete) {
           emitLessonCompleted(previous, completed.durationMs);
-          void Promise.resolve(trackingRef.current?.flush?.());
+          void flushTrackingAfterPipeline();
         }
       }
 
@@ -688,14 +703,14 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
       syncProgress();
       track("lesson_started", { lessonId }, { lessonId });
     },
-    [track, syncProgress, emitLessonCompleted, useV2Runtime, emitLifecycleEvent],
+    [track, syncProgress, emitLessonCompleted, useV2Runtime, emitLifecycleEvent, flushTrackingAfterPipeline],
   );
 
   const completeCourse = useCallback(() => {
     if (useV2Runtime && headlessRef.current) {
       headlessRef.current.completeCourse(emitLifecycleEvent);
       syncProgress();
-      void trackingRef.current?.flush?.();
+      void flushTrackingAfterPipeline();
       return;
     }
     const current = progressRef.current.getState();
@@ -710,8 +725,8 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
     if (!result.didComplete) return;
     syncProgress();
     track("course_completed");
-    void trackingRef.current?.flush?.();
-  }, [track, syncProgress, emitLessonCompleted, useV2Runtime, emitLifecycleEvent]);
+    void flushTrackingAfterPipeline();
+  }, [track, syncProgress, emitLessonCompleted, useV2Runtime, emitLifecycleEvent, flushTrackingAfterPipeline]);
 
   const sessionUser = normalizedConfig.session?.user;
   const sessionUserKey = useMemo(

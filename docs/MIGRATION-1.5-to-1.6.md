@@ -37,10 +37,14 @@ See [Portable interchange reference](reference/interchange.md).
 
 ## Upgrade checklist
 
-1. Bump all `@lessonkit/*` packages to **1.6.0**.
+1. Bump all `@lessonkit/*` packages to **1.6.6** (or latest **1.6.x** patch).
 2. Run `npm install`.
 3. `lessonkit build` and `lessonkit package --target scorm12` (unchanged workflow).
 4. Optionally try `lessonkit export` on a golden path course.
+
+## Patch releases (1.6.0 → 1.6.6)
+
+Releases **1.6.1–1.6.6** are **additive** — no breaking API changes. They add Tier C–E content blocks (`Table`, `Timeline`, `Crossword`, `GameMap`, and others) and expand block catalog v3. Bump all `@lessonkit/*` packages to the same patch (for example **1.6.6**); no manifest or migration steps beyond `npm install` unless you adopt new blocks.
 
 ## LMS delivery unchanged
 

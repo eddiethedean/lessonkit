@@ -1,6 +1,7 @@
 import { existsSync, lstatSync, readdirSync, readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { join, relative } from "node:path";
+import { validateId } from "@lessonkit/core";
 import { assertRealPathUnderRoot } from "../spaPath";
 import type { BlockTreeNodeV1, BlockTreeV1, ExtractBlockTreeOptions } from "./types";
 
@@ -158,6 +159,40 @@ function parseJsxBlocks(source: string, blockTypes: Set<string>): BlockTreeNodeV
   }
 
   return roots.length ? roots : stack;
+}
+
+export type BlockTreeValidationIssue = {
+  path: string;
+  message: string;
+};
+
+function validateNodeIds(
+  node: BlockTreeNodeV1,
+  pathPrefix: string,
+  issues: BlockTreeValidationIssue[],
+): void {
+  for (const prop of ID_PROPS) {
+    const value = node[prop];
+    if (value === undefined) continue;
+    const validated = validateId(value, prop);
+    if (!validated.ok) {
+      issues.push({
+        path: `${pathPrefix}.${prop}`,
+        message: validated.issues[0]?.message ?? `invalid ${prop}`,
+      });
+    }
+  }
+  node.children?.forEach((child, index) => {
+    validateNodeIds(child, `${pathPrefix}.children[${index}]`, issues);
+  });
+}
+
+export function validateBlockTreeIds(tree: BlockTreeV1): BlockTreeValidationIssue[] {
+  const issues: BlockTreeValidationIssue[] = [];
+  tree.blocks.forEach((block, index) => {
+    validateNodeIds(block, `blocks[${index}]`, issues);
+  });
+  return issues;
 }
 
 export function extractBlockTree(options: ExtractBlockTreeOptions): BlockTreeV1 {

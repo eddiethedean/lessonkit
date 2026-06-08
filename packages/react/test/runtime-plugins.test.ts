@@ -6,6 +6,7 @@ import {
   createReactPluginHost,
   emitTelemetryWithPlugins,
 } from "../src/runtime/plugins";
+import { awaitTelemetryFlights, registerTelemetryFlight } from "../src/runtime/telemetryFlights";
 
 const baseEvent: TelemetryEvent = {
   name: "interaction",
@@ -75,5 +76,70 @@ describe("runtime plugins", () => {
     await tracking.flush?.();
     expect(batches).toHaveLength(1);
     expect(batches[0]).toHaveLength(1);
+  });
+
+  it("emitTelemetryWithPlugins returns awaitable pipeline for lifecycle events", async () => {
+    const order: string[] = [];
+    const tracking = createTrackingClient({
+      batchSink: async () => {
+        order.push("batch");
+      },
+    });
+    let releaseFlush!: () => void;
+    const flushGate = new Promise<void>((resolve) => {
+      releaseFlush = resolve;
+    });
+    const xapi = {
+      send: () => {
+        order.push("xapi-send");
+      },
+      flush: async () => {
+        order.push("xapi-flush-wait");
+        await flushGate;
+        order.push("xapi-flush-done");
+      },
+      queueSize: () => 0,
+      startedLesson: () => {},
+      completeLesson: () => {},
+      completeCourse: () => {},
+    };
+    const result = emitTelemetryWithPlugins({
+      pluginHost: null,
+      tracking,
+      xapi,
+      event: {
+        name: "lesson_completed",
+        courseId: "course-1",
+        sessionId: "s1",
+        lessonId: "lesson-1",
+        timestamp: "2026-01-01T00:00:00.000Z",
+        data: { lessonId: "lesson-1" },
+      },
+      pluginCtx: buildPluginContext({ courseId: "course-1", sessionId: "s1" }),
+    });
+    expect(result).toBeInstanceOf(Promise);
+    order.push("after-emit-sync");
+    releaseFlush();
+    await result;
+    expect(order).toContain("batch");
+    expect(order).toContain("xapi-send");
+    expect(order).toContain("xapi-flush-wait");
+    expect(order).toContain("xapi-flush-done");
+    expect(order.indexOf("after-emit-sync")).toBeLessThan(order.indexOf("xapi-flush-done"));
+  });
+
+  it("registerTelemetryFlight tracks pending promises until settled", async () => {
+    const flights = new Set<Promise<void>>();
+    let resolve!: () => void;
+    const pending = new Promise<void>((r) => {
+      resolve = r;
+    });
+    registerTelemetryFlight(flights, pending);
+    expect(flights.size).toBe(1);
+    resolve();
+    await pending;
+    await Promise.resolve();
+    expect(flights.size).toBe(0);
+    await awaitTelemetryFlights(flights);
   });
 });

@@ -402,6 +402,54 @@ describe("@lessonkit/react provider dispose regression", () => {
     );
   });
 
+  it("awaits in-flight lifecycle pipeline before provider unmount flush", async () => {
+    const order: string[] = [];
+    let releasePipeline!: () => void;
+    const pipelineGate = new Promise<void>((resolve) => {
+      releasePipeline = resolve;
+    });
+    const xapiClient = {
+      send: vi.fn(() => {
+        order.push("xapi-send");
+      }),
+      flush: vi.fn(async () => {
+        order.push("xapi-flush-wait");
+        await pipelineGate;
+        order.push("xapi-flush-done");
+      }),
+      queueSize: () => 0,
+      startedLesson: vi.fn(),
+      completeLesson: vi.fn(),
+      completeCourse: vi.fn(),
+    };
+    const events: TelemetryEvent[] = [];
+
+    const { unmount } = render(
+      <LessonkitProvider
+        config={{
+          courseId: "course-1",
+          tracking: { sink: (e) => { events.push(e); } },
+          xapi: { client: xapiClient },
+        }}
+      >
+        <Lesson title="Lesson" lessonId="lesson-1">
+          <div>child</div>
+        </Lesson>
+      </LessonkitProvider>,
+    );
+
+    await waitFor(() => expect(events.some((e) => e.name === "lesson_started")).toBe(true));
+    unmount();
+    await waitFor(() => expect(order).toContain("xapi-flush-wait"));
+    expect(order).not.toContain("xapi-flush-done");
+    releasePipeline();
+    await waitFor(() => expect(order).toContain("xapi-flush-done"));
+    expect(xapiClient.send).toHaveBeenCalled();
+    expect(events.filter((e) => e.name === "lesson_completed" && e.lessonId === "lesson-1")).toHaveLength(
+      1,
+    );
+  });
+
   it("migrates course_started when session.sessionId is first supplied after auto id", async () => {
     const events: TelemetryEvent[] = [];
     const sink = (e: TelemetryEvent) => void events.push(e);

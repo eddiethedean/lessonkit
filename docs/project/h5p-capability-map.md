@@ -11,8 +11,8 @@ Traceability matrix for adopting [H5P](https://h5p.org/content-types-and-applica
 **Not in scope:** H5P Hub, `.h5p` import/merge, H5P `semantics.json` transport, H5P Core, or iframe runtimes. Rebuild activities in React using this map.
 
 **Roadmap:** [ROADMAP.md — H5P-aligned backlog](roadmap.md#h5p-aligned-capability-backlog)  
-**Runtime catalog (today):** [Block catalog](../reference/block-catalog.md) (`blockCatalogVersion = 3` — default since framework 1.2; 1.5 adds `BranchingScenario`, `Embed`, `Chart`)  
-**Catalog expansion (shipped 1.1.0):** framework **1.1.x** (`blockCatalogVersion = 2`)
+**Runtime catalog (today):** [Block catalog](../reference/block-catalog.md) (`blockCatalogV3Version = 3` — default since framework 1.2; 1.5 adds `BranchingScenario`, `Embed`, `Chart`; 1.6.x adds content-wave blocks through **1.6.6**)
+**Catalog expansion (shipped 1.1.0):** framework **1.1.x** (`blockCatalogV2Version = 2`)
 
 ## Status legend
 

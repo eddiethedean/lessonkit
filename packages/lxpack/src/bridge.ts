@@ -77,6 +77,7 @@ export type BridgeAccessOptions = {
   allowedParentOrigins?: string[];
   /** LMS bridge mode; `"auto"` in production requires `allowedParentOrigins`. */
   mode?: LxpackBridgeMode;
+  onBridgeError?: (err: unknown) => void;
 };
 
 /** Resolve the parent frame origin when embedded (same-origin parent or document.referrer fallback). */
@@ -289,15 +290,25 @@ export function notifyLxpackLessonComplete(
 ): boolean {
   const bridge = getBridge(undefined, opts);
   if (!bridge?.completeLesson) return false;
-  bridge.completeLesson(lessonId);
-  return true;
+  try {
+    bridge.completeLesson(lessonId);
+    return true;
+  } catch (err) {
+    handleBridgeError(err, opts?.onBridgeError);
+    return false;
+  }
 }
 
 export function notifyLxpackCourseComplete(opts?: BridgeAccessOptions): boolean {
   const bridge = getBridge(undefined, opts);
   if (!bridge?.completeCourse) return false;
-  bridge.completeCourse();
-  return true;
+  try {
+    bridge.completeCourse();
+    return true;
+  } catch (err) {
+    handleBridgeError(err, opts?.onBridgeError);
+    return false;
+  }
 }
 
 /**
@@ -310,6 +321,11 @@ export function notifyLxpackAssessment(
 ): boolean {
   const bridge = getBridge(undefined, opts);
   if (!bridge?.submitAssessment) return false;
-  bridge.submitAssessment(payload);
-  return true;
+  try {
+    bridge.submitAssessment(payload);
+    return true;
+  } catch (err) {
+    handleBridgeError(err, opts?.onBridgeError);
+    return false;
+  }
 }

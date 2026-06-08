@@ -5,7 +5,7 @@ import { dirname, join } from "node:path";
 import { tmpdir } from "node:os";
 import { fileURLToPath } from "node:url";
 import { createProgram, run } from "../src/index.js";
-import { runInit } from "../src/commands/init.js";
+import { runInit, __testInitHelpers } from "../src/commands/init.js";
 import { formatCliError, CliError, EXIT_INVALID_PROJECT } from "../src/lib/errors.js";
 import { findProjectRoot, loadLessonkitJson } from "../src/lib/project.js";
 import { parsePackageTarget, resolvePackageOutput, resolveViteBuildArgs, resolveViteBuildArgv, stripOutDirFromViteArgs } from "../src/lib/paths.js";
@@ -515,6 +515,25 @@ describe("runInit", () => {
     await runInit({ here: true, skipInstall: true }, { log: () => {}, error: () => {} });
 
     expect(existsSync(join(here, "package.json"))).toBe(true);
+  });
+
+  it("rolls back --here project files when promote fails", async () => {
+    const here = join(parentDir, "promote-fail");
+    await mkdir(here, { recursive: true });
+    await writeFile(join(here, ".gitkeep"), "", "utf8");
+    process.chdir(here);
+
+    const promoteSpy = vi
+      .spyOn(__testInitHelpers, "promoteStagingToProjectDir")
+      .mockRejectedValueOnce(new Error("simulated promote failure"));
+
+    await expect(
+      runInit({ here: true, skipInstall: true }, { log: () => {}, error: () => {} }),
+    ).rejects.toThrow("simulated promote failure");
+
+    expect(existsSync(join(here, "package.json"))).toBe(false);
+    expect(existsSync(join(here, ".gitkeep"))).toBe(true);
+    promoteSpy.mockRestore();
   });
 
   it("rejects --force without --here", async () => {

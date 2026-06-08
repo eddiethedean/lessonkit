@@ -1,6 +1,6 @@
 # Migrating from LessonKit 1.x to 2.0
 
-LessonKit **2.0** will remove deprecated APIs that still work in **1.5.x** with development warnings. Plan upgrades before pinning `@lessonkit/*@2`.
+LessonKit **2.0** will remove deprecated APIs that still work in **1.6.x** with development warnings. Plan upgrades before pinning `@lessonkit/*@2`.
 
 ## Removal checklist
 
