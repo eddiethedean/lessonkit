@@ -64,6 +64,14 @@ html[data-theme="dark"] .lk-hero-title {
   margin-bottom: 1rem;
 }
 
+.lk-hero-kicker {
+  margin: 0 0 0.5rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--color-foreground-secondary);
+}
+
 .lk-badge {
   display: inline-flex;
   align-items: center;
