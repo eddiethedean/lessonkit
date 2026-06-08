@@ -298,6 +298,84 @@ describe("1.1.x P0 assessment blocks", () => {
     expect(screen.getByRole("status").textContent).toContain("Try again");
   });
 
+  it("DragAndDrop returns assigned items to the pool", () => {
+    render(
+      wrap(
+        <DragAndDrop
+          checkId="dad-return"
+          items={[
+            { id: "a", label: "Apple" },
+            { id: "b", label: "Banana" },
+          ]}
+          targets={[
+            { id: "t1", label: "Fruit A", accepts: "a" },
+            { id: "t2", label: "Fruit B", accepts: "b" },
+          ]}
+        />,
+      ),
+    );
+    fireEvent.click(screen.getByTestId("drag-item-a"));
+    fireEvent.click(screen.getByTestId("drop-t1"));
+    expect(screen.getByTestId("drop-t1").textContent).toContain("Apple");
+    fireEvent.click(screen.getByTestId("drag-item-a"));
+    fireEvent.click(screen.getByTestId("drag-pool"));
+    expect(screen.getByTestId("drop-t1").textContent).toContain("Drop here");
+    expect(screen.getByTestId("drag-pool").textContent).toContain("Apple");
+  });
+
+  it("DragAndDrop returns item to pool when drag ends outside a drop zone", () => {
+    render(
+      wrap(
+        <DragAndDrop
+          checkId="dad-cancel"
+          items={[
+            { id: "a", label: "Apple" },
+            { id: "b", label: "Banana" },
+          ]}
+          targets={[
+            { id: "t1", label: "Fruit A", accepts: "a" },
+            { id: "t2", label: "Fruit B", accepts: "b" },
+          ]}
+        />,
+      ),
+    );
+    fireEvent.click(screen.getByTestId("drag-item-a"));
+    fireEvent.click(screen.getByTestId("drop-t1"));
+    expect(screen.getByTestId("drop-t1").textContent).toContain("Apple");
+    const chip = screen.getByTestId("drag-item-a");
+    fireEvent.dragStart(chip, {
+      dataTransfer: { setData: () => undefined, effectAllowed: "move" },
+    });
+    expect(screen.getByTestId("drop-t1").textContent).toContain("Apple");
+    fireEvent.dragEnd(chip, { clientX: 120, clientY: 80 });
+    expect(screen.getByTestId("drag-pool").textContent).toContain("Apple");
+    expect(screen.getByTestId("drop-t1").textContent).toContain("Drop here");
+  });
+
+  it("DragAndDrop moves items between targets", () => {
+    render(
+      wrap(
+        <DragAndDrop
+          checkId="dad-move"
+          items={[
+            { id: "a", label: "Apple" },
+            { id: "b", label: "Banana" },
+          ]}
+          targets={[
+            { id: "t1", label: "Fruit A", accepts: "a" },
+            { id: "t2", label: "Fruit B", accepts: "b" },
+          ]}
+        />,
+      ),
+    );
+    fireEvent.click(screen.getByTestId("drag-item-a"));
+    fireEvent.click(screen.getByTestId("drop-t1"));
+    fireEvent.click(screen.getByTestId("drag-item-a"));
+    fireEvent.click(screen.getByTestId("drop-t2"));
+    expect(screen.getByTestId("drop-t1").textContent).toContain("Drop here");
+    expect(screen.getByTestId("drop-t2").textContent).toContain("Apple");
+  });
+
   it("FindHotspot defaults passingScore to 1 when prop is omitted", async () => {
     const events: TelemetryEvent[] = [];
     render(

@@ -349,6 +349,132 @@
   font-weight: var(--lk-font-weight-strong);
 }
 
+/* DragAndDrop — draggable chips and drop zones */
+.lk-drag-pool {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 2.25rem;
+  margin-bottom: var(--lk-space-md);
+  padding: 0.35rem 0.45rem;
+  border: 1px dashed var(--lk-color-border);
+  border-radius: var(--lk-radius-md);
+  background: var(--lk-color-panel);
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease,
+    padding 0.15s ease;
+}
+
+.lk-drag-pool--hover {
+  border-color: var(--lk-color-primary);
+  background: color-mix(in srgb, var(--lk-color-primary) 8%, var(--lk-color-panel));
+}
+
+.lk-drag-pool-placeholder {
+  padding: 0.3rem 0.55rem;
+  color: var(--lk-color-muted-foreground, #64748b);
+  font-family: var(--lk-font-family);
+  font-size: 0.8125rem;
+  line-height: 1.2;
+  white-space: nowrap;
+  transition: opacity 0.12s ease;
+}
+
+.lk-drag-item {
+  appearance: none;
+  margin: 0;
+  padding: 0.35rem 0.7rem;
+  border: 1px solid var(--lk-color-border);
+  border-radius: 999px;
+  background: var(--lk-color-background, #fff);
+  color: var(--lk-color-foreground);
+  font-family: var(--lk-font-family);
+  font-size: 0.875rem;
+  font-weight: var(--lk-font-weight-strong);
+  cursor: grab;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+}
+
+.lk-drag-item:active {
+  cursor: grabbing;
+}
+
+.lk-drag-item[aria-pressed="true"] {
+  outline: 2px solid var(--lk-color-primary);
+  outline-offset: 2px;
+}
+
+.lk-drag-item--in-flight {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.lk-drag-flyer {
+  position: fixed;
+  z-index: 9999;
+  margin: 0;
+  padding: 0.35rem 0.7rem;
+  border: 1px solid var(--lk-color-border);
+  border-radius: 999px;
+  background: var(--lk-color-background, #fff);
+  color: var(--lk-color-foreground);
+  font-family: var(--lk-font-family);
+  font-size: 0.875rem;
+  font-weight: var(--lk-font-weight-strong);
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.18);
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+}
+
+.lk-drag-item--ghost {
+  opacity: 0.6;
+  border-style: dashed;
+  cursor: default;
+  pointer-events: none;
+  box-shadow: none;
+}
+
+.lk-drag-target-row {
+  margin-bottom: 0.5rem;
+}
+
+.lk-drag-target {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  max-width: 100%;
+  padding: 0.1rem;
+  border: 1px dashed var(--lk-color-border);
+  border-radius: var(--lk-radius-md);
+  background: color-mix(in srgb, var(--lk-color-panel) 80%, transparent);
+  vertical-align: middle;
+  transition:
+    width 0.15s ease,
+    min-width 0.15s ease,
+    padding 0.15s ease,
+    border-color 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.lk-drag-target--hover {
+  border-color: var(--lk-color-primary);
+  background: color-mix(in srgb, var(--lk-color-primary) 8%, var(--lk-color-panel));
+}
+
+.lk-drag-target-placeholder {
+  display: inline-block;
+  padding: 0.3rem 0.55rem;
+  color: var(--lk-color-muted-foreground, #64748b);
+  font-family: var(--lk-font-family);
+  font-size: 0.8125rem;
+  line-height: 1.2;
+  white-space: nowrap;
+  transition: opacity 0.12s ease;
+}
+
 .lk-crossword-cell--correct input {
   background: #dcfce7;
   color: #166534;
