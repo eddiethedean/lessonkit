@@ -24,8 +24,8 @@ Packaging and LMS delivery lean on **LXPack** via `@lessonkit/lxpack` (see 0.6.x
 
 ## Status
 
-- **Framework:** **1.6.6** — portable interchange (`.lkcourse`) + block registry CLI + content-wave blocks (see [1.6.x](#16x--portable-interchange-and-content-waves))
-- **Focus (now):** **1.6.x** — Tier F / 1.7.x planning (content waves through **1.6.6** shipped; see [H5P-aligned capability backlog](#h5p-aligned-capability-backlog))
+- **Framework:** **1.6.0** — portable interchange (`.lkcourse`) + block registry CLI + content-wave blocks (see [1.6.x](#16x--portable-interchange-and-content-waves))
+- **Focus (now):** **1.6.x** — Tier F / 1.7.x planning (content waves through **1.6.0** shipped; see [H5P-aligned capability backlog](#h5p-aligned-capability-backlog))
 
 ## Guiding principles
 
@@ -545,7 +545,7 @@ Ship only if 1.5.0 core is stable; each item completes the [H5P documentation ch
 Ship by demand; each block completes the [H5P documentation checklist](#h5p-documentation-checklist-per-block):
 
 - [x] **Tier C–E blocks** — `Table`, `ImageJuxtaposition`, `Timeline`, `ImageSequence`, `Collage`, `AudioRecorder`, `CombinationLock`, `QrContent`, `Crossword`, `WordSearch`, `AdventCalendar` (phased **1.6.1–1.6.5**)
-- [x] **`GameMap`** (P2) — spatial compound branching (**1.6.6**)
+- [x] **`GameMap`** (P2) — spatial compound branching (**1.6.0**)
 - [x] **Plugin marketplace** — research / presets building on **0.8.0+** plugin host ([plugin marketplace research](docs/guides/plugin-marketplace-research.md))
 
 #### Out of scope for 1.6.x
@@ -628,7 +628,7 @@ These are H5P's "course builders." Each becomes a **framework container** with a
 | P0 | **Branching Scenario** | `BranchingScenario` + `BranchNode` + `BranchChoice` | **1.5.0** ✅ | Graph navigation, visited-path scoring, `branch_*` telemetry |
 | P1 | **Question Set (Quiz)** | `AssessmentSequence` | **1.1.x** ✅ | Question-type contract (below) |
 | P1 | **Column** → **Page** | `Page` | **1.2.x** ✅ | Unified semantics with Interactive Book chapters |
-| P2 | **Game Map** | `GameMap` | **1.6.6** ✅ | Spatial layout, optional non-scored stages |
+| P2 | **Game Map** | `GameMap` | **1.6.0** ✅ | Spatial layout, optional non-scored stages |
 | P2 | **Virtual Tour (360)** | `VirtualTour` | **1.8.x** | 360 asset pipeline, hotspot model |
 | P3 | **Documentation Tool** | `DocumentationTool` | **2.x** | Cornell notes, exportable learner artifacts |
 | P3 | **Interactive Canvas / Structure Strip** | `StructureStrip`, `WritingCanvas` | **2.x** | Writing pedagogy; lower than core LMS parity |
@@ -769,7 +769,7 @@ Framework 1.4.0   InteractiveVideo + Video + TimedCue + Tier B/C/D blocks + gold
 Framework 1.5.0   BranchingScenario + Embed + Chart + branch telemetry + golden example
 Framework 1.5.x   _(stretch items shipped in 1.5.0)_
 Framework 1.6.0   `.lkcourse` export + interchange spec + `lessonkit blocks list` — **shipped**
-Framework 1.6.x   `.lkcourse` + content waves + `GameMap` — **shipped** (1.6.0–1.6.6)
+Framework 1.6.x   `.lkcourse` + content waves + `GameMap` — **shipped** (1.6.0)
 Framework 1.8.x+  Virtual Tour (360) and spatial media pipelines
 Framework 2.x     @lessonkit/react-native (iOS/Android) + shared core/xapi contracts
 ```

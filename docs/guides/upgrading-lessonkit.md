@@ -5,7 +5,7 @@ Pick the migration guide for your **current** version. After upgrading, run `les
 :::{admonition} Pin aligned versions
 :class: important
 
-Bump all `@lessonkit/*` packages to the same semver (for example **1.6.6**). Mismatched workspace versions cause subtle runtime bugs.
+Bump all `@lessonkit/*` packages to the same semver (for example **1.6.0**). Mismatched workspace versions cause subtle runtime bugs.
 :::
 
 ## Migration guides

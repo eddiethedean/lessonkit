@@ -53,7 +53,7 @@ Use the **[H5P capability map](../project/h5p-capability-map.md)** for the full 
 | Course shell | [`Course`](../reference/components/course-structure.md), [`Lesson`](../reference/components/course-structure.md) | One SPA vs one H5P activity per embed |
 | Progress | [`ProgressTracker`](../reference/components/course-structure.md) | Course-level progress, not per-iframe |
 | Content text / heading / image | [`Text`](../reference/components/text-and-heading.md), [`Heading`](../reference/components/text-and-heading.md), [`Image`](../reference/components/image.md) | Framework content primitives |
-| **Game Map** | [`GameMap`](../reference/components/game-map.md) + [`MapStage`](../reference/components/map-stage.md) + [`MapExit`](../reference/components/map-exit.md) | Spatial compound navigation; optional non-scored stages (**1.6.6**) |
+| **Game Map** | [`GameMap`](../reference/components/game-map.md) + [`MapStage`](../reference/components/map-stage.md) + [`MapExit`](../reference/components/map-exit.md) | Spatial compound navigation; optional non-scored stages (**1.6.0**) |
 | **Table** | [`Table`](../reference/components/table.md) | Accessible data table (**1.6.x**) |
 | **Crossword** / **Word search** | [`Crossword`](../reference/components/crossword.md), [`WordSearch`](../reference/components/word-search.md) | Puzzle blocks (**1.6.x**) |
 

@@ -1,6 +1,6 @@
 {
   "name": "@lessonkit/lxpack",
-  "version": "1.6.6",
+  "version": "1.6.0",
   "private": false,
   "description": "LXPack export adapter for LessonKit courses (SCORM, standalone, xAPI, cmi5).",
   "license": "Apache-2.0",

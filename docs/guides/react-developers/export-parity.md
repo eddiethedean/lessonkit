@@ -1,6 +1,6 @@
 # Export parity (React / Vite vs LMS)
 
-LessonKit **1.6.x** extends the **0.9.x conformance harness** with Vitest CLI integration tests and Playwright launch coverage for SCORM 2004, xAPI, and cmi5. Last verified against release **1.6.6**.
+LessonKit **1.6.x** extends the **0.9.x conformance harness** with Vitest CLI integration tests and Playwright launch coverage for SCORM 2004, xAPI, and cmi5. Last verified against release **1.6.0**.
 
 ## Surfaces
 

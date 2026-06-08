@@ -6,7 +6,7 @@ description: >-
   @lessonkit/* deps or fixing breaking changes after a release bump.
 license: Apache-2.0
 metadata:
-  lessonkit-version: "1.6.6"
+  lessonkit-version: "1.6.0"
 ---
 
 # LessonKit version migrations

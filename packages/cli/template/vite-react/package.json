@@ -16,16 +16,16 @@
     "test:coverage": "vitest run --coverage --passWithNoTests=false"
   },
   "dependencies": {
-    "@lessonkit/core": "^1.6.6",
-    "@lessonkit/react": "^1.6.6",
-    "@lessonkit/themes": "^1.6.6",
-    "@lessonkit/xapi": "^1.6.6",
+    "@lessonkit/core": "^1.6.0",
+    "@lessonkit/react": "^1.6.0",
+    "@lessonkit/themes": "^1.6.0",
+    "@lessonkit/xapi": "^1.6.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7"
   },
   "devDependencies": {
-    "@lessonkit/cli": "^1.6.6",
-    "@lessonkit/lxpack": "^1.6.6",
+    "@lessonkit/cli": "^1.6.0",
+    "@lessonkit/lxpack": "^1.6.0",
     "@testing-library/react": "^16.3.0",
     "@testing-library/dom": "^10.4.1",
     "@types/react": "^19.2.17",
