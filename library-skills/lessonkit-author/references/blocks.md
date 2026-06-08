@@ -36,11 +36,17 @@ export default function App() {
 
 ## Compound blocks
 
-`Page`, `InteractiveBook`, `Slide`, `SlideDeck`, `TimedCue`, `InteractiveVideo`, `BranchingScenario`, `BranchNode`, `BranchChoice`
+`Page`, `InteractiveBook`, `Slide`, `SlideDeck`, `TimedCue`, `InteractiveVideo`, `BranchingScenario`, `BranchNode`, `BranchChoice`, `GameMap`, `MapStage`, `MapExit`
 
 ## Content blocks (1.5+)
 
 `Embed`, `Chart`, `Text`, `Heading`, `Image`, `Video`, `Accordion`, `DialogCards`, `Flashcards`, `MemoryGame`, `InformationWall`, `ParallaxSlideshow`, `ImageSlider`
+
+## Content waves (1.6.x)
+
+`Table`, `Timeline`, `ImageJuxtaposition`, `ImageSequence`, `Collage`, `AudioRecorder`, `CombinationLock`, `QrContent`, `Crossword`, `WordSearch`, `AdventCalendar`
+
+**Compound nesting:** `WordSearch` is page-level only — excluded from compound allowlists (`InteractiveBook`, `SlideDeck`, `GameMap` stages, etc.). Use it directly inside `<Lesson>` or `<Page>`, not nested in compounds.
 
 ## Hooks
 

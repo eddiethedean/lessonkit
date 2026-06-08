@@ -553,6 +553,38 @@ export function Nested() {
     spy.mockRestore();
   });
 
+  it("backupImportArtifacts and restoreImportBackup round-trip target files", async () => {
+    const targetDir = await mkdtemp(join(tmpdir(), "lk-backup-roundtrip-"));
+    tempDirs.push(targetDir);
+
+    const originalManifest = {
+      ...minimalManifest,
+      name: "original-project",
+      course: { ...minimalManifest.course, title: "Original Title" },
+    };
+    await writeFile(join(targetDir, "lessonkit.json"), `${JSON.stringify(originalManifest, null, 2)}\n`);
+    await mkdir(join(targetDir, "dist"), { recursive: true });
+    await writeFile(
+      join(targetDir, "dist", "index.html"),
+      "<!doctype html><html><body>original</body></html>\n",
+    );
+
+    const { backupImportArtifacts, restoreImportBackup } = await import("../src/lkcourse/import");
+    const backupDir = await backupImportArtifacts(targetDir);
+    expect(backupDir).toBeTruthy();
+    if (!backupDir) return;
+
+    await writeFile(join(targetDir, "lessonkit.json"), '{"schemaVersion":1,"corrupted":true}\n');
+    await mkdir(join(targetDir, "dist"), { recursive: true });
+    await writeFile(join(targetDir, "dist", "index.html"), "corrupted\n");
+
+    await restoreImportBackup(targetDir, backupDir);
+
+    const restored = JSON.parse(await readFile(join(targetDir, "lessonkit.json"), "utf8"));
+    expect(restored.course.title).toBe("Original Title");
+    expect(await readFile(join(targetDir, "dist", "index.html"), "utf8")).toContain("original");
+  });
+
   it("extractBlockTree handles unclosed tags and text-only inner content", async () => {
     const root = await mkdtemp(join(tmpdir(), "lk-unclosed-"));
     tempDirs.push(root);

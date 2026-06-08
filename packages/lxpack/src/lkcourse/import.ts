@@ -1,10 +1,32 @@
-import { cp, mkdir, mkdtemp, readdir, rm, writeFile } from "node:fs/promises";
+import { access, cp, mkdir, mkdtemp, readdir, rename, rm, writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { assertRealPathUnderRoot } from "../spaPath";
 import type { LessonkitManifest } from "../manifest";
 import { validateLkcourse } from "./validate";
 import { isSafeZipEntryPath, readZip } from "./zip";
 import type { ImportLkcourseOptions, ImportLkcourseResult } from "./types";
+
+const IMPORT_ARTIFACTS = ["lessonkit.json", "dist"] as const;
+
+async function pathExists(path: string): Promise<boolean> {
+  try {
+    await access(path);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function renameOrCopy(from: string, to: string): Promise<void> {
+  try {
+    await rename(from, to);
+  } catch (err) {
+    const code = err && typeof err === "object" && "code" in err ? String((err as NodeJS.ErrnoException).code) : "";
+    if (code !== "EXDEV") throw err;
+    await cp(from, to, { recursive: true });
+    await rm(from, { recursive: true, force: true });
+  }
+}
 
 async function writeImportTree(
   stagingDir: string,
@@ -43,6 +65,36 @@ async function writeImportTree(
   return fileCount;
 }
 
+/** @internal Exported for unit tests. */
+export async function backupImportArtifacts(targetDir: string): Promise<string | undefined> {
+  const existing: string[] = [];
+  for (const name of IMPORT_ARTIFACTS) {
+    if (await pathExists(join(targetDir, name))) {
+      existing.push(name);
+    }
+  }
+  if (!existing.length) return undefined;
+
+  const backupDir = await mkdtemp(join(targetDir, ".lkcourse-backup-"));
+  for (const name of existing) {
+    await renameOrCopy(join(targetDir, name), join(backupDir, name));
+  }
+  return backupDir;
+}
+
+/** @internal Exported for unit tests. */
+export async function restoreImportBackup(targetDir: string, backupDir: string): Promise<void> {
+  for (const name of IMPORT_ARTIFACTS) {
+    const backupPath = join(backupDir, name);
+    if (!(await pathExists(backupPath))) continue;
+    const destPath = join(targetDir, name);
+    if (await pathExists(destPath)) {
+      await rm(destPath, { recursive: true, force: true });
+    }
+    await renameOrCopy(backupPath, destPath);
+  }
+}
+
 async function promoteImportStaging(stagingDir: string, targetDir: string): Promise<void> {
   const entries = await readdir(stagingDir, { withFileTypes: true });
   for (const entry of entries) {
@@ -66,7 +118,7 @@ async function promoteImportStaging(stagingDir: string, targetDir: string): Prom
  *
  * const result = await importLkcourse({
  *   archivePath: "handoff.lkcourse",
- *   projectRoot: "/path/to/dest",
+ *   targetDir: "/path/to/dest",
  * });
  * ```
  */
@@ -102,10 +154,23 @@ export async function importLkcourse(
   if (!read.ok) return read;
 
   let stagingDir: string | undefined;
+  let backupDir: string | undefined;
   try {
     stagingDir = await mkdtemp(join(targetDir, ".lkcourse-import-"));
     const fileCount = await writeImportTree(stagingDir, manifest, read.entries, spaDistDir);
-    await promoteImportStaging(stagingDir, targetDir);
+    backupDir = await backupImportArtifacts(targetDir);
+    try {
+      await promoteImportStaging(stagingDir, targetDir);
+    } catch (promoteError) {
+      if (backupDir) {
+        await restoreImportBackup(targetDir, backupDir);
+      }
+      throw promoteError;
+    }
+    if (backupDir) {
+      await rm(backupDir, { recursive: true, force: true }).catch(() => undefined);
+      backupDir = undefined;
+    }
     await rm(stagingDir, { recursive: true, force: true });
     stagingDir = undefined;
 
@@ -117,6 +182,10 @@ export async function importLkcourse(
       fileCount,
     };
   } catch (err) {
+    if (backupDir) {
+      await restoreImportBackup(targetDir, backupDir).catch(() => undefined);
+      await rm(backupDir, { recursive: true, force: true }).catch(() => undefined);
+    }
     if (stagingDir) {
       await rm(stagingDir, { recursive: true, force: true }).catch(() => undefined);
     }

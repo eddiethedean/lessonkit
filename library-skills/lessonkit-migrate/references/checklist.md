@@ -1,6 +1,6 @@
-# Migration checklist
+# Migration checklist (0.9.x → 1.0.x)
 
-- [ ] All `@lessonkit/*` at `^1.1.0` (or pin `^1.0.2` until you adopt 1.1 assessment blocks)
+- [ ] All `@lessonkit/*` at `^1.0.0` (pin aligned semver across react, core, cli, xapi, lxpack, themes, accessibility)
 - [ ] Replace `buildTrackEvent` → `buildTelemetryEvent`
 - [ ] Replace `defineLessonkitPlugin` → `define*Plugin` + `createPluginRegistry`
 - [ ] Remove `setLxpackBridgeMode`; use `config.lxpack.bridge`

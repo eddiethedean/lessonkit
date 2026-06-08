@@ -23,6 +23,26 @@ Pick the guide that matches your **from** version. Run `lessonkit build` and fix
 | 1.0.x | https://lessonkit.readthedocs.io/en/latest/MIGRATION-1.0-to-1.1.html |
 | 0.9.x | https://lessonkit.readthedocs.io/en/latest/MIGRATION-0.x-to-1.0.html |
 
+## 1.5.x → 1.6.0 (additive)
+
+**Dependency pins (example):**
+
+```json
+"@lessonkit/react": "^1.6.0",
+"@lessonkit/core": "^1.6.0",
+"@lessonkit/cli": "^1.6.0"
+```
+
+**New commands (opt-in):** `lessonkit export` (`.lkcourse` archive), `lessonkit blocks list` (catalog v3 inventory).
+
+**Programmatic interchange:** `exportLkcourse`, `importLkcourse`, `validateLkcourse` from `@lessonkit/lxpack`.
+
+**Import note:** `.lkcourse` restores `lessonkit.json` + `dist/` only — React `src/` is not bundled; keep source in git.
+
+**New blocks (opt-in):** content-wave blocks (`Table`, `Timeline`, `Crossword`, `WordSearch`, etc.) and `GameMap` compound — see `block-catalog.v3.json`.
+
+Full checklist: `references/checklist-1.5-to-1.6.md` · Human guide: https://lessonkit.readthedocs.io/en/latest/MIGRATION-1.5-to-1.6.html
+
 ## 1.4.x → 1.5.0 (additive)
 
 **Dependency pins (example):**
@@ -46,9 +66,9 @@ Full checklist: `references/checklist-1.4-to-1.5.md` (if present) · [golden exa
 **Dependency pins (example):**
 
 ```json
-"@lessonkit/react": "^1.5.0",
-"@lessonkit/core": "^1.5.0",
-"@lessonkit/cli": "^1.5.0"
+"@lessonkit/react": "^1.0.0",
+"@lessonkit/core": "^1.0.0",
+"@lessonkit/cli": "^1.0.0"
 ```
 
 ### Breaking API removals
