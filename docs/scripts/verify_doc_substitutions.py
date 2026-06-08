@@ -7,12 +7,20 @@ are checked automatically — no hard-coded list to maintain in CI.
 from __future__ import annotations
 
 import importlib.util
+import os
 import sys
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[2]
 DOCS = REPO / "docs"
-BUILD = DOCS / "_build" / "html"
+
+
+def _html_build_dir() -> Path:
+    if custom := os.environ.get("DOCS_HTML_DIR"):
+        return Path(custom)
+    if rtd := os.environ.get("READTHEDOCS_OUTPUT"):
+        return Path(rtd) / "html"
+    return DOCS / "_build" / "html"
 
 
 def _load_conf() -> object:
@@ -27,8 +35,9 @@ def _load_conf() -> object:
 
 
 def main() -> int:
-    if not BUILD.is_dir():
-        print(f"Missing docs build output: {BUILD}", file=sys.stderr)
+    build = _html_build_dir()
+    if not build.is_dir():
+        print(f"Missing docs build output: {build}", file=sys.stderr)
         print("Run: sphinx-build -W -b html docs docs/_build/html", file=sys.stderr)
         return 1
 
@@ -37,7 +46,7 @@ def main() -> int:
     release: str = conf.release  # type: ignore[attr-defined]
 
     failed = False
-    html_files = sorted(BUILD.rglob("*.html"))
+    html_files = sorted(build.rglob("*.html"))
 
     for key in substitutions:
         token = f"{{{{ {key} }}}}"
@@ -49,14 +58,14 @@ def main() -> int:
             print(f"UNEXPANDED substitution token {token!r} in {rel}")
             failed = True
 
-    index = BUILD / "index.html"
+    index = build / "index.html"
     if index.is_file():
         hero_needle = f"v{release}"
         index_text = index.read_text(encoding="utf-8", errors="replace")
         if hero_needle not in index_text:
             print(
                 f"MISSING docs home hero release badge: expected {hero_needle!r} "
-                "in docs/_build/html/index.html"
+                f"in {index.relative_to(REPO)}"
             )
             failed = True
         if "v{{ release }}" in index_text or "v{{release}}" in index_text:
