@@ -271,6 +271,12 @@ Regenerate after catalog changes: `node docs/scripts/generate-block-props-doc.mj
 
 ---
 
+## Component pages (live demos)
+
+Focused **Read the Docs** pages render the real component, explain when to use it, and show copy-paste examples: **[Component pages](reference/components/index.md)** (55 pages — full catalog coverage).
+
+Generated prop tables below link to the matching component page when one exists. Storybook remains useful for visual state matrices.
+
 ## Storybook examples
 
 Visual states and props for shipped blocks live in the monorepo Storybook gallery:

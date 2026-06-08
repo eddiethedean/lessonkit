@@ -31,6 +31,7 @@ export function MapExit(props: MapExitProps) {
     <button
       type="button"
       role="radio"
+      className="lk-button lk-map-exit"
       aria-checked={false}
       aria-labelledby={groupId}
       data-testid={`map-exit-${props.targetStageId}`}

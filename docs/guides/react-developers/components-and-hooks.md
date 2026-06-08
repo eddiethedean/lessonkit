@@ -3,7 +3,7 @@
 :::{admonition} Guides vs reference
 :class: note
 
-**Guides** (this page) explain how to use components in a course. **Reference** docs hold contracts and machine-readable schemas: [Block catalog](../../reference/block-catalog.md) (includes [generated prop tables](../../reference/block-catalog.md#generated-prop-reference-catalog-v3)), and [TypeDoc signatures](../../reference/api.md). Start here for workflows; open reference when implementing or validating props.
+**Guides** (this page) explain how to use components in a course. **Reference** docs hold contracts and machine-readable schemas: [Block catalog](../../reference/block-catalog.md) (includes [generated prop tables](../../reference/block-catalog.md#generated-prop-reference-catalog-v3)), [Component pages](../../reference/components/index.md) (live demos + when to use each block), and [TypeDoc signatures](../../reference/api.md). Start here for workflows; open reference when implementing or validating props.
 :::
 
 :::{admonition} H5P equivalents

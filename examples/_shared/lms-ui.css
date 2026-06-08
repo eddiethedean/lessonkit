@@ -1,4 +1,5 @@
 /* Modern LMS shell — inspired by SaaS course UIs (sidebar progress, card lessons, microlearning chips). */
+@import "@lessonkit/themes/base.css";
 
 html,
 body {
@@ -498,6 +499,23 @@ html[data-lk-theme="light"] {
 .lms-theme-toggle button[aria-pressed="true"] {
   border-color: var(--lk-color-primary);
   background: color-mix(in srgb, var(--lk-color-primary) 15%, transparent);
+}
+
+/* Block-focused examples (interactive-book, slide-deck, …) */
+.lk-example-shell {
+  min-height: 100vh;
+  background: var(--lk-color-background, #ffffff);
+  color: var(--lk-color-foreground, #111827);
+}
+
+.lk-example-theme-bar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 0.75rem;
+}
+
+.lk-example-theme-bar .lms-theme-toggle {
+  margin-top: 0;
 }
 
 /* Quiz from LessonKit */

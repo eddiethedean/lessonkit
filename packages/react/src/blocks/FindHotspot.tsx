@@ -9,7 +9,7 @@ import { useAssessmentState } from "../assessment/useAssessmentState";
 import { useLessonkit } from "../hooks";
 import { setLessonkitBlockType } from "../compound/blockType";
 import { normalizeComponentId } from "../runtime/validateComponentId";
-import { resolveMediaSrc } from "./embedSecurity";
+import { buildMediaOptions, resolveMediaSrc } from "./embedSecurity";
 
 export type HotspotTarget = {
   id: string;
@@ -33,7 +33,7 @@ function FindHotspotInner(
 ) {
   const checkId = useMemo(() => normalizeComponentId(props.checkId, "checkId"), [props.checkId]);
   const { config } = useLessonkit();
-  const resolvedSrc = resolveMediaSrc(props.src, { allowedHosts: config.embed?.allowedHosts });
+  const resolvedSrc = resolveMediaSrc(props.src, buildMediaOptions(config));
   const [selected, setSelected] = useState<string | null>(null);
   const [checked, setChecked] = useState(false);
   const telemetryReplayedRef = useRef(false);

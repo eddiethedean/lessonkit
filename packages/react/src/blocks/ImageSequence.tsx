@@ -4,7 +4,7 @@ import { setLessonkitBlockType } from "../compound/blockType";
 import { useLessonkit } from "../hooks";
 import { useEnclosingLessonId } from "../lessonContext";
 import { normalizeComponentId } from "../runtime/validateComponentId";
-import { resolveMediaSrc } from "./embedSecurity";
+import { buildMediaOptions, resolveMediaSrc } from "./embedSecurity";
 
 export type SequenceFrame = {
   src: string;
@@ -38,7 +38,7 @@ export function ImageSequence(props: ImageSequenceProps) {
   const reducedMotion = usePrefersReducedMotion();
   const { track, config } = useLessonkit();
   const lessonId = useEnclosingLessonId();
-  const mediaOptions = { allowedHosts: config.embed?.allowedHosts };
+  const mediaOptions = buildMediaOptions(config);
   const frame = props.frames[index];
   const resolvedSrc = frame ? resolveMediaSrc(frame.src, mediaOptions) : null;
 

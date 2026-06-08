@@ -1,0 +1,28 @@
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background: var(--lk-color-background, #f8fafc);
+  color: var(--lk-color-foreground, #111827);
+}
+
+#root {
+  padding: 1rem;
+  box-sizing: border-box;
+}
+
+.lk-component-demo-missing {
+  padding: 2rem;
+  color: #64748b;
+  text-align: center;
+}
+
+.lk-demo-intro {
+  margin: 0 0 1.25rem;
+  padding: 0.875rem 1rem;
+  border-left: 3px solid var(--lk-color-primary, #2563eb);
+  border-radius: 0 0.5rem 0.5rem 0;
+  background: var(--lk-color-panel, rgba(15, 23, 42, 0.04));
+  color: var(--lk-color-foreground, #111827);
+  font-size: 0.9375rem;
+  line-height: 1.55;
+}

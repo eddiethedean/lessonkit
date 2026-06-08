@@ -24,7 +24,24 @@ const DEFAULT_SANDBOX = "allow-scripts";
 export type MediaSrcOptions = {
   /** Hostnames allowed to bypass the production private-network blocklist. */
   allowedHosts?: readonly string[];
+  /**
+   * Docs/preview only (`preview.allowConsoleTelemetry`). Allows same-origin media
+   * URLs to bypass production scheme and host blocklists.
+   */
+  trustSameOriginMedia?: boolean;
 };
+
+export type MediaConfig = {
+  embed?: { allowedHosts?: readonly string[] };
+  preview?: { allowConsoleTelemetry?: boolean };
+};
+
+export function buildMediaOptions(config: MediaConfig): MediaSrcOptions {
+  return {
+    allowedHosts: config.embed?.allowedHosts,
+    trustSameOriginMedia: config.preview?.allowConsoleTelemetry === true,
+  };
+}
 
 function isProductionEmbedBuild(): boolean {
   try {
@@ -134,12 +151,37 @@ function resolveAllowedUrl(
 ): string | null {
   const trimmed = src.trim();
   if (!trimmed) return null;
+  const lower = trimmed.toLowerCase();
+  if (lower.startsWith("data:image/")) {
+    return trimmed;
+  }
   try {
     const base =
       typeof window !== "undefined" ? window.location.href : "https://example.com/";
     const url = new URL(trimmed, base);
-    if (!allowedEmbedSchemes().has(url.protocol)) return null;
-    if (isBlockedHost(url.hostname, options?.allowedHosts)) return null;
+    if (
+      options?.trustSameOriginMedia &&
+      typeof window !== "undefined" &&
+      url.origin === window.location.origin &&
+      url.protocol !== "javascript:" &&
+      url.protocol !== "data:"
+    ) {
+      url.username = "";
+      url.password = "";
+      return url.href;
+    }
+    if (!allowedEmbedSchemes().has(url.protocol)) {
+      const sameOriginHttp =
+        url.protocol === "http:" &&
+        typeof window !== "undefined" &&
+        url.origin === window.location.origin;
+      if (!sameOriginHttp) return null;
+    }
+    if (isBlockedHost(url.hostname, options?.allowedHosts)) {
+      const sameOriginBlockedHost =
+        typeof window !== "undefined" && url.origin === window.location.origin;
+      if (!sameOriginBlockedHost) return null;
+    }
     if (typeof window !== "undefined") {
       const pageOrigin = window.location.origin;
       const isAbsolute = /^[a-zA-Z][a-zA-Z\d+\-.]*:/.test(trimmed) || trimmed.startsWith("//");

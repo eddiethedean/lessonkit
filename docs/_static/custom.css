@@ -223,3 +223,22 @@ html[data-theme="dark"] .lk-demo-frame {
   margin: 0 0 2rem;
   font-size: 0.9375rem;
 }
+
+/* Per-component demos (shorter than full-course embeds) */
+.lk-component-demo-frame {
+  min-height: 420px;
+  height: min(70vh, 720px);
+}
+
+/* Component page tab panels */
+.sd-tab-set .lk-demo-frame {
+  margin-top: 0.5rem;
+}
+
+.sd-tab-set .lk-demo-links {
+  margin-bottom: 0.5rem;
+}
+
+.sd-tab-set > .sd-tab-content {
+  padding-top: 0.75rem;
+}

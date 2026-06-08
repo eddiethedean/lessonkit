@@ -909,9 +909,14 @@ describe("InteractiveVideo", () => {
         </InteractiveVideo>,
       ),
     );
+    const stage = screen.getByTestId("interactive-video-stage");
+    const overlay = screen.getByTestId("interactive-video-overlay");
     const video = screen.getByTestId("interactive-video-player") as HTMLVideoElement;
+    expect(stage.contains(video)).toBe(true);
+    expect(stage.contains(overlay)).toBe(true);
     Object.defineProperty(video, "currentTime", { value: 1.5, writable: true });
     fireEvent.timeUpdate(video);
+    expect(overlay.className).toContain("lk-interactive-video-overlay--active");
     expect(screen.getByTestId("timed-cue-0")).toBeTruthy();
     expect(screen.getByTestId("cue-continue")).toBeTruthy();
   });

@@ -12,47 +12,47 @@ LessonKit is **React-first**, not a plugin inside your LMS’s content bank. You
 
 ## Find your H5P content type
 
-Use the **[H5P capability map](../project/h5p-capability-map.md)** for the full table (machine name, display name, LessonKit id, roadmap status).
+Use the **[H5P capability map](../project/h5p-capability-map.md)** for the full table (machine name, display name, LessonKit id, roadmap status). Shipped blocks link to **[component pages](../reference/components/index.md)** with live demos.
 
 ### Available today (framework 1.5.0)
 
 | H5P name | LessonKit | Notes |
 | --- | --- | --- |
-| **Multiple Choice** (`H5P.MultiChoice`) | `Quiz` / `KnowledgeCheck` | Set `checkId`; mirror in `lessonkit.json` `assessments[]` |
-| **True/False** | `TrueFalse` | `kind: "trueFalse"` in manifest; LXPack packages as 2-choice MCQ |
-| **Fill in the Blanks** | `FillInTheBlanks` | SPA scoring + `assessment_completed` bridge |
-| **Drag and Drop** | `DragAndDrop` | Keyboard pick-target mode; SPA + bridge scoring |
-| **Drag the Words** | `DragTheWords` | Inline drop zones; SPA + bridge scoring |
-| **Mark the Words** | `MarkTheWords` | Selectable tokens; SPA + bridge scoring |
-| **Question Set** | `AssessmentSequence` | Aggregates child assessments; children use `checkId` |
-| **Interactive Book** | `InteractiveBook` + `Page` | Compound navigation + session resume |
-| **Course Presentation** | `SlideDeck` + `Slide` | Slide navigation + keyboard controls + session resume |
-| **Interactive Video** | `InteractiveVideo` + `TimedCue` | Timeline cues; pause on interaction; session resume |
-| **Branching Scenario** | `BranchingScenario` + `BranchNode` + `BranchChoice` | Graph navigation; visited-path scoring; session resume |
-| **Summary** | `Summary` | Statement-bank construct task |
-| **Image Pairing** | `ImagePairing` | Match image pairs |
-| **Image Sequencing** | `ImageSequencing` | Order images |
-| **Arithmetic Quiz** | `ArithmeticQuiz` | Timed math prompts |
-| **Essay** | `Essay` | Open text; plugin grading |
-| **Questionnaire** | `Questionnaire` | Unscored survey |
-| **Memory Game** | `MemoryGame` | Card flip pairs |
-| **Information Wall** | `InformationWall` | Searchable panels |
-| **Slideshow (parallax)** | `ParallaxSlideshow` | Parallax slides with reduced-motion fallback |
-| **Video** (self-hosted) | `Video` | Native `<video>` on slides and pages |
-| **Iframe Embedder** | `Embed` | Sandboxed iframe; opt-in `allow` sandbox tokens |
-| **Chart** | `Chart` | Bar/pie with accessible data table |
-| **Accordion** | `Accordion` | Expand/collapse sections |
-| **Dialog Cards** | `DialogCards` | Flip-card dialog |
-| **Flashcards** | `Flashcards` | Card deck |
-| **Image Hotspots** | `ImageHotspots` | Clickable regions on an image |
-| **Image Slider** | `ImageSlider` | Slide carousel |
-| **Find the Hotspot** | `FindHotspot` | Scored hotspot selection |
-| **Find Multiple Hotspots** | `FindMultipleHotspots` | Multi-select hotspots |
-| **Scenario** (narrative regions) | `Scenario` | Optional `blockId` for telemetry URNs |
-| Open response / reflection | `Reflection` | Not auto-scored (like many H5P text tasks) |
-| Course shell | `Course`, `Lesson` | One SPA vs one H5P activity per embed |
-| Progress | `ProgressTracker` | Course-level progress, not per-iframe |
-| Content text / heading / image | `Text`, `Heading`, `Image` | Framework content primitives |
+| **Multiple Choice** (`H5P.MultiChoice`) | [`Quiz`](../reference/components/quiz.md) / [`KnowledgeCheck`](../reference/components/knowledge-check.md) | Set `checkId`; mirror in `lessonkit.json` `assessments[]` |
+| **True/False** | [`TrueFalse`](../reference/components/true-false.md) | `kind: "trueFalse"` in manifest; LXPack packages as 2-choice MCQ |
+| **Fill in the Blanks** | [`FillInTheBlanks`](../reference/components/fill-in-the-blanks.md) | SPA scoring + `assessment_completed` bridge |
+| **Drag and Drop** | [`DragAndDrop`](../reference/components/drag-and-drop.md) | Keyboard pick-target mode; SPA + bridge scoring |
+| **Drag the Words** | [`DragTheWords`](../reference/components/drag-the-words.md) | Inline drop zones; SPA + bridge scoring |
+| **Mark the Words** | [`MarkTheWords`](../reference/components/mark-the-words.md) | Selectable tokens; SPA + bridge scoring |
+| **Question Set** | [`AssessmentSequence`](../reference/components/assessment-sequence.md) | Aggregates child assessments; children use `checkId` |
+| **Interactive Book** | [`InteractiveBook`](../reference/components/interactive-book.md) + [`Page`](../reference/components/page.md) | Compound navigation + session resume (`blockId` only) |
+| **Course Presentation** | [`SlideDeck`](../reference/components/slide-deck.md) + [`Slide`](../reference/components/slide.md) | Slide navigation + keyboard controls + session resume |
+| **Interactive Video** | [`InteractiveVideo`](../reference/components/interactive-video.md) + [`TimedCue`](../reference/components/timed-cue.md) | Timeline cues; pause on interaction; session resume |
+| **Branching Scenario** | [`BranchingScenario`](../reference/components/branching-scenario.md) + [`BranchNode`](../reference/components/branch-node.md) + [`BranchChoice`](../reference/components/branch-choice.md) | Graph navigation; visited-path scoring; session resume |
+| **Summary** | [`Summary`](../reference/components/summary.md) | Statement-bank construct task |
+| **Image Pairing** | [`ImagePairing`](../reference/components/image-pairing.md) | Match image pairs |
+| **Image Sequencing** | [`ImageSequencing`](../reference/components/image-sequencing.md) | Order images |
+| **Arithmetic Quiz** | [`ArithmeticQuiz`](../reference/components/arithmetic-quiz.md) | Timed math prompts |
+| **Essay** | [`Essay`](../reference/components/essay.md) | Open text; plugin grading |
+| **Questionnaire** | [`Questionnaire`](../reference/components/questionnaire.md) | Unscored survey |
+| **Memory Game** | [`MemoryGame`](../reference/components/memory-game.md) | Card flip pairs |
+| **Information Wall** | [`InformationWall`](../reference/components/information-wall.md) | Searchable panels |
+| **Slideshow (parallax)** | [`ParallaxSlideshow`](../reference/components/parallax-slideshow.md) | Parallax slides with reduced-motion fallback |
+| **Video** (self-hosted) | [`Video`](../reference/components/video.md) | Native `<video>` on slides and pages |
+| **Iframe Embedder** | [`Embed`](../reference/components/embed.md) | Sandboxed iframe; opt-in `allow` sandbox tokens |
+| **Chart** | [`Chart`](../reference/components/chart.md) | Bar/pie with accessible data table |
+| **Accordion** | [`Accordion`](../reference/components/accordion.md) | Expand/collapse sections |
+| **Dialog Cards** | [`DialogCards`](../reference/components/dialog-cards.md) | Flip-card dialog |
+| **Flashcards** | [`Flashcards`](../reference/components/flashcards.md) | Card deck |
+| **Image Hotspots** | [`ImageHotspots`](../reference/components/image-hotspots.md) | Clickable regions on an image |
+| **Image Slider** | [`ImageSlider`](../reference/components/image-slider.md) | Slide carousel |
+| **Find the Hotspot** | [`FindHotspot`](../reference/components/find-hotspot.md) | Scored hotspot selection |
+| **Find Multiple Hotspots** | [`FindMultipleHotspots`](../reference/components/find-multiple-hotspots.md) | Multi-select hotspots |
+| **Scenario** (narrative regions) | [`Scenario`](../reference/components/scenario.md) | Optional `blockId` for telemetry URNs |
+| Open response / reflection | [`Reflection`](../reference/components/reflection.md) | Not auto-scored (like many H5P text tasks) |
+| Course shell | [`Course`](../reference/components/course-structure.md), [`Lesson`](../reference/components/course-structure.md) | One SPA vs one H5P activity per embed |
+| Progress | [`ProgressTracker`](../reference/components/course-structure.md) | Course-level progress, not per-iframe |
+| Content text / heading / image | [`Text`](../reference/components/text-and-heading.md), [`Heading`](../reference/components/text-and-heading.md), [`Image`](../reference/components/image.md) | Framework content primitives |
 
 ### Planned (roadmap / capability map)
 

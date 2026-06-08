@@ -11,7 +11,8 @@ Traceability matrix for adopting [H5P](https://h5p.org/content-types-and-applica
 **Not in scope:** H5P Hub, `.h5p` import/merge, H5P `semantics.json` transport, H5P Core, or iframe runtimes. Rebuild activities in React using this map.
 
 **Roadmap:** [ROADMAP.md — H5P-aligned backlog](roadmap.md#h5p-aligned-capability-backlog)  
-**Runtime catalog (today):** [Block catalog](../reference/block-catalog.md) (`blockCatalogV3Version = 3` — default since framework 1.2; 1.5 adds `BranchingScenario`, `Embed`, `Chart`; 1.6.x adds content-wave blocks including `Table`, `Timeline`, `Crossword`, `GameMap`)
+**Runtime catalog (today):** [Block catalog](../reference/block-catalog.md) (`blockCatalogV3Version = 3` — default since framework 1.2; 1.5 adds `BranchingScenario`, `Embed`, `Chart`; 1.6.x adds content-wave blocks including `Table`, `Timeline`, `Crossword`, `GameMap`)  
+**Live demos:** [Component pages](../reference/components/index.md) — embedded React demos with when-to-use guidance (generated index below).
 **Catalog expansion (shipped 1.1.0):** framework **1.1.x** (`blockCatalogV2Version = 2`)
 
 ## Status legend
@@ -148,6 +149,9 @@ H5P **machine names** follow common library ids (e.g. `H5P.MultiChoice`). Displa
 | Resume state | `getCurrentState` / session v2 | ✅ | 1.2.x |
 | OER Hub reuse | Template gallery | ⬜ | 1.x |
 | Per-library CSS | Global `--lk-*` tokens | ✅ | 0.4.x / themes |
+
+```{include} ../_generated/h5p-component-pages.md
+```
 
 ---
 

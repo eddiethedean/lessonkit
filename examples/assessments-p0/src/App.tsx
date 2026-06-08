@@ -7,9 +7,9 @@ import {
   FillInTheBlanks,
   Lesson,
   MarkTheWords,
-  ThemeProvider,
   TrueFalse,
 } from "@lessonkit/react";
+import { ExampleThemeShell } from "../../_shared/ExampleThemeShell";
 
 const COURSE_ID = "assessments-p0-demo";
 
@@ -20,7 +20,7 @@ export default function App() {
   );
 
   return (
-    <ThemeProvider mode="light">
+    <ExampleThemeShell>
       <Course title="Assessment blocks (1.1.0)" courseId={COURSE_ID} config={config}>
         <Lesson title="P0 interactions" lessonId="p0-lesson">
           <AssessmentSequence blockId="p0-assessment-sequence">
@@ -57,6 +57,6 @@ export default function App() {
           </AssessmentSequence>
         </Lesson>
       </Course>
-    </ThemeProvider>
+    </ExampleThemeShell>
   );
 }

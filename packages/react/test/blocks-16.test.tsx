@@ -145,6 +145,44 @@ describe("1.6.x block components", () => {
     expect(screen.getByTestId("crossword-cell-0-0")).toBeDefined();
   });
 
+  it("Crossword shows feedback when checked", () => {
+    render(
+      wrap(
+        <Crossword
+          checkId="cw-2"
+          rows={1}
+          cols={2}
+          entries={[{ id: "a1", clue: "Greeting", answer: "HI", row: 0, col: 0, direction: "across" }]}
+        />,
+      ),
+    );
+    fireEvent.change(screen.getByTestId("crossword-cell-0-0"), { target: { value: "H" } });
+    fireEvent.change(screen.getByTestId("crossword-cell-0-1"), { target: { value: "I" } });
+    fireEvent.click(screen.getByTestId("crossword-check"));
+    expect(screen.getByTestId("crossword-feedback").textContent).toContain("Correct");
+  });
+
+  it("Crossword clear wrong letters keeps correct cells", () => {
+    render(
+      wrap(
+        <Crossword
+          checkId="cw-3"
+          rows={1}
+          cols={2}
+          entries={[{ id: "a1", clue: "Greeting", answer: "HI", row: 0, col: 0, direction: "across" }]}
+        />,
+      ),
+    );
+    fireEvent.change(screen.getByTestId("crossword-cell-0-0"), { target: { value: "H" } });
+    fireEvent.change(screen.getByTestId("crossword-cell-0-1"), { target: { value: "X" } });
+    fireEvent.click(screen.getByTestId("crossword-check"));
+    expect(screen.getByTestId("crossword-clear-wrong")).toBeDefined();
+    fireEvent.click(screen.getByTestId("crossword-clear-wrong"));
+    expect((screen.getByTestId("crossword-cell-0-0") as HTMLInputElement).value).toBe("H");
+    expect((screen.getByTestId("crossword-cell-0-1") as HTMLInputElement).value).toBe("");
+    expect(screen.queryByTestId("crossword-feedback")).toBeNull();
+  });
+
   it("WordSearch renders letter grid", () => {
     vi.spyOn(Math, "random").mockReturnValue(0.1);
     render(wrap(<WordSearch checkId="ws-1" words={["CAT"]} size={5} />));
@@ -185,6 +223,10 @@ describe("1.6.x block components", () => {
     );
     expect(screen.getByTestId("map-stage-lobby")).toBeDefined();
     fireEvent.click(screen.getByTestId("map-exit-desk"));
+    expect(screen.getByTestId("map-stage-desk")).toBeDefined();
+    fireEvent.click(screen.getByTestId("map-marker-lobby"));
+    expect(screen.getByTestId("map-stage-lobby")).toBeDefined();
+    fireEvent.click(screen.getByTestId("map-marker-desk"));
     expect(screen.getByTestId("map-stage-desk")).toBeDefined();
   });
 });

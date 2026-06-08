@@ -18,6 +18,7 @@ import type { TelemetryEvent } from "@lessonkit/core";
 import type { XAPIStatement } from "@lessonkit/xapi";
 import { CourseTopbar, LessonIntro, SidebarLessons, type LessonMeta } from "../../_shared/course-ui";
 import { allowConsoleTelemetryForDocsDemo } from "../../_shared/docsDemoConfig";
+import { ThemeToggle, useThemeMode } from "../../_shared/theme-ui";
 
 const COURSE_ID = "customer-de-escalation";
 
@@ -31,6 +32,7 @@ const LESSONS: readonly LessonMeta[] = [
 
 export default function App() {
   const [step, setStep] = React.useState(0);
+  const [themeMode, setThemeMode] = useThemeMode();
 
   const courseConfig = React.useMemo(
     () => ({
@@ -45,7 +47,7 @@ export default function App() {
   const current = LESSONS[step]!;
 
   return (
-    <ThemeProvider mode="light" preset="brand">
+    <ThemeProvider mode={themeMode} preset="brand">
       <div className="lms-app lms-theme-support">
         <Course title="Customer Care: De-escalation" courseId={COURSE_ID} config={courseConfig}>
           <CourseTopbar
@@ -63,18 +65,21 @@ export default function App() {
               setStep={setStep}
               title="Practice path"
               footer={
-                <div className="lms-sidebar-footer">
-                  <button type="button" onClick={() => setStep(Math.max(0, step - 1))} disabled={step === 0}>
-                    Back
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setStep(Math.min(last, step + 1))}
-                    disabled={step === last}
-                  >
-                    Continue
-                  </button>
-                </div>
+                <>
+                  <div className="lms-sidebar-footer">
+                    <button type="button" onClick={() => setStep(Math.max(0, step - 1))} disabled={step === 0}>
+                      Back
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setStep(Math.min(last, step + 1))}
+                      disabled={step === last}
+                    >
+                      Continue
+                    </button>
+                  </div>
+                  <ThemeToggle mode={themeMode} onChange={setThemeMode} />
+                </>
               }
             />
 

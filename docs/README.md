@@ -9,6 +9,7 @@ Sphinx site published at **[lessonkit.readthedocs.io](https://lessonkit.readthed
 | React developers | [React guides](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/index.html) |
 | Evaluators | [Architecture](https://lessonkit.readthedocs.io/en/latest/guides/architecture-overview.html) · [Enterprise evaluation](https://lessonkit.readthedocs.io/en/latest/guides/enterprise-evaluation.html) |
 | Runnable course demos | [Examples](https://lessonkit.readthedocs.io/en/latest/examples/index.html) |
+| Per-component live demos | [Component pages](https://lessonkit.readthedocs.io/en/latest/reference/components/index.html) |
 
 ## Build locally
 
@@ -22,9 +23,17 @@ node docs/scripts/generate-block-props-doc.mjs   # after block-catalog JSON chan
 bash docs/scripts/verify-doc-includes.sh
 pip install -r docs/requirements.txt
 bash docs/scripts/build-docs-demos.sh   # optional: embed example course bundles
+bash docs/scripts/build-component-demos.sh   # optional: per-component demo bundles
 sphinx-build -W -b html docs docs/_build/html
 npm run docs:verify   # after sphinx-build: includes + substitution tokens in HTML
 bash docs/scripts/verify-doc-demos.sh   # after build-docs-demos.sh: Playwright smoke test
+bash docs/scripts/verify-component-demos.sh   # after build-component-demos.sh
+node docs/scripts/generate-component-pages-index.mjs   # refresh hub picker table
+node docs/scripts/sync-component-try-it-tabs.mjs   # Live demo | React | AI prompt | Manifest tabs
+node docs/scripts/generate-component-ai-prompts.mjs   # optional: refresh ai-prompts.json for review
+node docs/scripts/generate-h5p-component-page-index.mjs   # H5P map → component page links
+node docs/scripts/sync-component-toctree.mjs   # refresh hidden toctree
+node docs/scripts/scaffold-component-pages.mjs   # new pages from page-copy.json
 sphinx-build -b linkcheck docs docs/_build/linkcheck   # optional: external link audit
 ```
 
@@ -69,6 +78,6 @@ Edit the **canonical markdown at `docs/` root**, not the thin wrapper pages unde
 | `../../CHANGELOG.md` | `project/changelog.md` |
 | `../../SECURITY.md` | `project/security.md` |
 
-Standalone pages (edit directly): `guides/*`, `examples/index.md`, `reference/api.md`, `reference/lms-compatibility.md`, `reference/glossary.md`, `reference/xapi.md`.
+Standalone pages (edit directly): `guides/*`, `examples/index.md`, `reference/components/*`, `reference/api.md`, `reference/lms-compatibility.md`, `reference/glossary.md`, `reference/xapi.md`.
 
 After editing included files, run the full build command above to catch broken links and missing includes.

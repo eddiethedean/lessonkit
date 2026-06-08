@@ -9,7 +9,8 @@
     "templates/*",
     "e2e",
     "e2e/fixtures/*",
-    "integration"
+    "integration",
+    "docs/component-demos"
   ],
   "overrides": {
     "@types/react": "^19.2.17",
@@ -38,6 +39,8 @@
     "docs:api": "bash docs/scripts/build-api-docs.sh",
     "docs:verify": "bash docs/scripts/verify-doc-includes.sh && python3 docs/scripts/verify_doc_substitutions.py",
     "docs:verify-demos": "bash docs/scripts/verify-doc-demos.sh",
+    "docs:component-demos": "bash docs/scripts/build-component-demos.sh",
+    "docs:verify-component-demos": "bash docs/scripts/verify-component-demos.sh",
     "changeset": "changeset",
     "version-packages": "changeset version",
     "release": "changeset publish"

@@ -74,10 +74,29 @@ export function filterMapStageContent(children: React.ReactNode): React.ReactNod
 }
 
 export function stageHasExits(stage: React.ReactElement<MapStageProps>): boolean {
-  let found = false;
+  return extractMapExitsFromStage(stage).length > 0;
+}
+
+export type MapStageExit = {
+  targetStageId: string;
+  label: string;
+  scoreWeight?: number;
+};
+
+export function extractMapExitsFromStage(
+  stage: React.ReactElement<MapStageProps>,
+): MapStageExit[] {
+  const exits: MapStageExit[] = [];
   React.Children.forEach(stage.props.children, (child) => {
     if (!React.isValidElement(child)) return;
-    if (getLessonkitBlockType(child.type) === "MapExit") found = true;
+    if (getLessonkitBlockType(child.type) !== "MapExit") return;
+    const props = child.props as { targetStageId?: string; label?: string; scoreWeight?: number };
+    if (typeof props.targetStageId !== "string" || typeof props.label !== "string") return;
+    exits.push({
+      targetStageId: normalizeComponentId(props.targetStageId, "blockId"),
+      label: props.label,
+      scoreWeight: props.scoreWeight,
+    });
   });
-  return found;
+  return exits;
 }

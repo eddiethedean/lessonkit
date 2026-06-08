@@ -1,7 +1,7 @@
 import type { BlockId } from "@lessonkit/core";
 import { setLessonkitBlockType } from "../compound/blockType";
 import { useLessonkit } from "../hooks";
-import { resolveMediaSrc } from "./embedSecurity";
+import { buildMediaOptions, resolveMediaSrc } from "./embedSecurity";
 
 export type ImageProps = {
   blockId?: BlockId;
@@ -11,9 +11,7 @@ export type ImageProps = {
 
 export function Image(props: ImageProps) {
   const { config } = useLessonkit();
-  const resolvedSrc = resolveMediaSrc(props.src, {
-    allowedHosts: config.embed?.allowedHosts,
-  });
+  const resolvedSrc = resolveMediaSrc(props.src, buildMediaOptions(config));
 
   if (!resolvedSrc) {
     return (

@@ -81,12 +81,18 @@ jobs:
       - name: Build example bundles for docs
         run: bash docs/scripts/build-docs-demos.sh
 
+      - name: Build component demo bundles for docs
+        run: bash docs/scripts/build-component-demos.sh
+
       - name: Install Playwright browsers
         run: npx playwright install chromium
         working-directory: e2e
 
       - name: Verify doc demo bundles render
         run: bash docs/scripts/verify-doc-demos.sh
+
+      - name: Verify component demo bundles render
+        run: bash docs/scripts/verify-component-demos.sh
 
       - name: Generate API docs (TypeDoc)
         run: npm run docs:api
@@ -99,6 +105,9 @@ jobs:
 
       - name: Generate block prop reference
         run: node docs/scripts/generate-block-props-doc.mjs
+
+      - name: Generate H5P component page index
+        run: node docs/scripts/generate-h5p-component-page-index.mjs
 
       - name: Setup Python
         uses: actions/setup-python@v6

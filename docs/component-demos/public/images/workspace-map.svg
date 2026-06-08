@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="360" viewBox="0 0 640 360" role="img" aria-label="Office floor plan">
+  <rect width="640" height="360" fill="#e8eef4"/>
+  <rect x="8" y="8" width="624" height="344" fill="#f8fafc" stroke="#94a3b8" stroke-width="2" rx="8"/>
+  <!-- corridors -->
+  <rect x="280" y="24" width="80" height="312" fill="#e2e8f0"/>
+  <rect x="24" y="160" width="592" height="48" fill="#e2e8f0"/>
+  <!-- rooms -->
+  <rect x="32" y="32" width="232" height="116" fill="#dbeafe" stroke="#64748b" stroke-width="1.5" rx="6"/>
+  <text x="48" y="58" fill="#1e3a8a" font-family="system-ui,sans-serif" font-size="14" font-weight="600">Lobby</text>
+  <rect x="32" y="220" width="232" height="116" fill="#dcfce7" stroke="#64748b" stroke-width="1.5" rx="6"/>
+  <text x="48" y="246" fill="#166534" font-family="system-ui,sans-serif" font-size="14" font-weight="600">Lab</text>
+  <rect x="376" y="32" width="232" height="116" fill="#fef3c7" stroke="#64748b" stroke-width="1.5" rx="6"/>
+  <text x="392" y="58" fill="#92400e" font-family="system-ui,sans-serif" font-size="14" font-weight="600">Open office</text>
+  <rect x="376" y="220" width="232" height="116" fill="#fce7f3" stroke="#64748b" stroke-width="1.5" rx="6"/>
+  <text x="392" y="246" fill="#9d174d" font-family="system-ui,sans-serif" font-size="14" font-weight="600">Server room</text>
+  <!-- exits -->
+  <rect x="296" y="8" width="48" height="16" fill="#fca5a5" rx="3"/>
+  <text x="304" y="20" fill="#7f1d1d" font-family="system-ui,sans-serif" font-size="10">Exit</text>
+  <rect x="296" y="336" width="48" height="16" fill="#fca5a5" rx="3"/>
+  <text x="304" y="348" fill="#7f1d1d" font-family="system-ui,sans-serif" font-size="10">Exit</text>
+</svg>

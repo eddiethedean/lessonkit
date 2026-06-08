@@ -173,6 +173,7 @@ reference/xapi
 reference/theming
 reference/accessibility
 reference/block-catalog
+reference/components/index
 reference/storybook-gallery
 reference/plugins
 reference/lxpack-bridge

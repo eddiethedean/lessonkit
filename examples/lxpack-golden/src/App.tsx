@@ -11,6 +11,7 @@ import {
   useTracking,
 } from "@lessonkit/react";
 import { CourseTopbar, LessonIntro, SidebarLessons, type LessonMeta } from "../../_shared/course-ui";
+import { ThemeToggle, useThemeMode } from "../../_shared/theme-ui";
 
 const COURSE_ID = "workplace-safety-briefing";
 
@@ -26,11 +27,12 @@ const STEPS: readonly LessonMeta[] = [
 
 export default function App() {
   const [step, setStep] = React.useState(0);
+  const [themeMode, setThemeMode] = useThemeMode();
   const last = STEPS.length - 1;
   const current = STEPS[step]!;
 
   return (
-    <ThemeProvider preset="brand" mode="light">
+    <ThemeProvider preset="brand" mode={themeMode}>
       <div className="lms-app lms-theme-field">
         <Course title="Workplace Safety: Warehouse Briefing" courseId={COURSE_ID} config={{ tracking: { enabled: false }, xapi: { enabled: false } }}>
           <CourseTopbar
@@ -53,19 +55,22 @@ export default function App() {
               setStep={setStep}
               title="Onboarding steps"
               footer={
-                <div className="lms-sidebar-footer">
-                  <button type="button" onClick={() => setStep(Math.max(0, step - 1))} disabled={step === 0}>
-                    Back
-                  </button>
-                  <button
-                    type="button"
-                    data-testid="course-continue"
-                    onClick={() => setStep(Math.min(last, step + 1))}
-                    disabled={step === last}
-                  >
-                    Continue
-                  </button>
-                </div>
+                <>
+                  <div className="lms-sidebar-footer">
+                    <button type="button" onClick={() => setStep(Math.max(0, step - 1))} disabled={step === 0}>
+                      Back
+                    </button>
+                    <button
+                      type="button"
+                      data-testid="course-continue"
+                      onClick={() => setStep(Math.min(last, step + 1))}
+                      disabled={step === last}
+                    >
+                      Continue
+                    </button>
+                  </div>
+                  <ThemeToggle mode={themeMode} onChange={setThemeMode} />
+                </>
               }
             />
 

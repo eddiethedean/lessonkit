@@ -7,9 +7,9 @@ import {
   Lesson,
   Scenario,
   Text,
-  ThemeProvider,
   TrueFalse,
 } from "@lessonkit/react";
+import { ExampleThemeShell } from "../../_shared/ExampleThemeShell";
 
 const COURSE_ID = "branching-scenario-demo";
 
@@ -20,7 +20,7 @@ export default function App() {
   );
 
   return (
-    <ThemeProvider mode="light">
+    <ExampleThemeShell>
       <Course title="Resolution paths" courseId={COURSE_ID} config={config}>
         <Lesson title="Branching scenario" lessonId="branch-lesson">
           <BranchingScenario
@@ -49,6 +49,6 @@ export default function App() {
           </BranchingScenario>
         </Lesson>
       </Course>
-    </ThemeProvider>
+    </ExampleThemeShell>
   );
 }

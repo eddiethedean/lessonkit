@@ -3,7 +3,7 @@ import type { BlockId } from "@lessonkit/core";
 import { setLessonkitBlockType } from "../compound/blockType";
 import { useLessonkit } from "../hooks";
 import { normalizeComponentId } from "../runtime/validateComponentId";
-import { resolveMediaSrc } from "./embedSecurity";
+import { buildMediaOptions, resolveMediaSrc } from "./embedSecurity";
 
 export type CollageCell = {
   id: string;
@@ -24,7 +24,7 @@ export function Collage(props: CollageProps) {
     [props.blockId],
   );
   const { config } = useLessonkit();
-  const mediaOptions = { allowedHosts: config.embed?.allowedHosts };
+  const mediaOptions = buildMediaOptions(config);
   const columns = props.columns ?? 2;
 
   return (

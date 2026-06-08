@@ -6,9 +6,9 @@ import {
   Lesson,
   Page,
   Text,
-  ThemeProvider,
   TrueFalse,
 } from "@lessonkit/react";
+import { ExampleThemeShell } from "../../_shared/ExampleThemeShell";
 
 const COURSE_ID = "interactive-book-demo";
 
@@ -19,7 +19,7 @@ export default function App() {
   );
 
   return (
-    <ThemeProvider mode="light">
+    <ExampleThemeShell>
       <Course title="Warehouse safety handbook" courseId={COURSE_ID} config={config}>
         <Lesson title="Handbook" lessonId="book-lesson">
           <InteractiveBook blockId="safety-book" title="Safety handbook" showBookScore>
@@ -46,6 +46,6 @@ export default function App() {
           </InteractiveBook>
         </Lesson>
       </Course>
-    </ThemeProvider>
+    </ExampleThemeShell>
   );
 }

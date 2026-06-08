@@ -1,29 +1,8 @@
-import {
-  Course,
-  Lesson,
-  ProgressTracker,
-  ThemeProvider,
-  type ThemeMode,
-} from "@lessonkit/react";
+import { Course, Lesson, ProgressTracker, ThemeProvider } from "@lessonkit/react";
 import { CourseTopbar, LessonIntro, SidebarLessons } from "../course-ui";
+import { ThemeToggle } from "../theme-ui";
 import { BlockLegend } from "./BlockLegend";
 import type { ShowcaseShellProps } from "./types";
-
-function ThemeToggle(props: {
-  mode: ThemeMode;
-  onChange: (mode: ThemeMode) => void;
-}) {
-  return (
-    <div className="showcase-theme-toggle" role="group" aria-label="Theme mode">
-      <button type="button" aria-pressed={props.mode === "light"} onClick={() => props.onChange("light")}>
-        Light
-      </button>
-      <button type="button" aria-pressed={props.mode === "dark"} onClick={() => props.onChange("dark")}>
-        Dark
-      </button>
-    </div>
-  );
-}
 
 export function ShowcaseShell(props: ShowcaseShellProps) {
   const { meta, step, setStep, themeMode, setThemeMode, children } = props;

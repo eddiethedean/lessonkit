@@ -4,7 +4,7 @@ import { setLessonkitBlockType } from "../compound/blockType";
 import { useLessonkit } from "../hooks";
 import { useEnclosingLessonId } from "../lessonContext";
 import { normalizeComponentId } from "../runtime/validateComponentId";
-import { resolveMediaSrc } from "./embedSecurity";
+import { buildMediaOptions, resolveMediaSrc } from "./embedSecurity";
 
 export type ImageJuxtapositionProps = {
   blockId: BlockId;
@@ -23,7 +23,7 @@ export function ImageJuxtaposition(props: ImageJuxtapositionProps) {
   const [position, setPosition] = useState(50);
   const { track, config } = useLessonkit();
   const lessonId = useEnclosingLessonId();
-  const mediaOptions = { allowedHosts: config.embed?.allowedHosts };
+  const mediaOptions = buildMediaOptions(config);
   const beforeSrc = resolveMediaSrc(props.beforeSrc, mediaOptions);
   const afterSrc = resolveMediaSrc(props.afterSrc, mediaOptions);
 

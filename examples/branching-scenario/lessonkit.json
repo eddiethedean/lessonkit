@@ -16,7 +16,7 @@
         "passingScore": 1
       }
     ],
-    "theme": { "preset": "default" },
+    "theme": { "preset": "brand" },
     "tracking": { "completion": { "threshold": 1 } }
   },
   "paths": {

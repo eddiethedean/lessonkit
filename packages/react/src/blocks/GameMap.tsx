@@ -18,6 +18,7 @@ import { GameMapProvider } from "../compound/useGameMap";
 import {
   buildStageIndexMap,
   buildStageLabels,
+  extractMapExitsFromStage,
   stageHasExits,
   validateMapGraphAtMount,
 } from "../compound/validateMapGraph";
@@ -26,7 +27,7 @@ import { getLessonkitBlockType, setLessonkitBlockType } from "../compound/blockT
 import { useLessonkit } from "../hooks";
 import { useEnclosingLessonId } from "../lessonContext";
 import { isDevEnvironment, normalizeComponentId } from "../runtime/validateComponentId";
-import { resolveMediaSrc } from "./embedSecurity";
+import { buildMediaOptions, resolveMediaSrc } from "./embedSecurity";
 import type { MapStageProps } from "./MapStage";
 
 export type GameMapProps = {
@@ -58,9 +59,7 @@ const GameMapInner = forwardRef<
   const { config, track, storage } = useLessonkit();
   const lessonId = useEnclosingLessonId();
   const ctx = useCompoundRegistry();
-  const resolvedBackground = resolveMediaSrc(props.backgroundSrc, {
-    allowedHosts: config.embed?.allowedHosts,
-  });
+  const resolvedBackground = resolveMediaSrc(props.backgroundSrc, buildMediaOptions(config));
 
   const stageIndexMap = useMemo(() => buildStageIndexMap(stages), [stages]);
   const stageLabels = useMemo(() => buildStageLabels(stages), [stages]);
@@ -147,6 +146,14 @@ const GameMapInner = forwardRef<
   });
 
   const activeStage = stages[activeIndex];
+  const activeExits = useMemo(
+    () => (activeStage ? extractMapExitsFromStage(activeStage) : []),
+    [activeStage],
+  );
+  const reachableStageIds = useMemo(
+    () => new Set(activeExits.map((exit) => exit.targetStageId)),
+    [activeExits],
+  );
   const isTerminal =
     Boolean(activeStage && !stageHasExits(activeStage)) && meta.activeStageId !== startStageId;
 
@@ -241,36 +248,57 @@ const GameMapInner = forwardRef<
             Score: {pathScore} / {pathMaxScore}
           </p>
         ) : null}
-        <div
-          data-testid="game-map-canvas"
-          style={{ position: "relative", maxWidth: "100%", aspectRatio: "16 / 9" }}
-        >
+        <div className="lk-game-map-canvas" data-testid="game-map-canvas">
           {resolvedBackground ? (
             <img
+              className="lk-game-map-background"
               src={resolvedBackground}
               alt={props.backgroundAlt ?? props.title}
-              style={{ width: "100%", height: "100%", objectFit: "cover" }}
             />
-          ) : null}
+          ) : (
+            <p role="alert" className="lk-game-map-blocked" data-testid="game-map-blocked">
+              This map image URL is not allowed.
+            </p>
+          )}
           {stages.map((stage) => {
             const stageId = normalizeComponentId(stage.props.stageId, "blockId");
             const visited = meta.visitedStageIds.includes(stageId);
             const active = meta.activeStageId === stageId;
+            const reachable = reachableStageIds.has(stageId);
+            const exitLink = activeExits.find((exit) => exit.targetStageId === stageId);
+            const canActivate = visited || reachable;
             return (
               <button
                 key={stageId}
                 type="button"
+                className={[
+                  "lk-game-map-marker",
+                  active ? "lk-game-map-marker--active" : "",
+                  visited ? "lk-game-map-marker--visited" : "",
+                  reachable && !visited ? "lk-game-map-marker--reachable" : "",
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
+                style={{ left: `${stage.props.x}%`, top: `${stage.props.y}%` }}
                 aria-current={active ? "true" : undefined}
-                disabled={!visited}
+                aria-label={
+                  exitLink
+                    ? `${stage.props.label ?? stageId} — ${exitLink.label}`
+                    : (stage.props.label ?? stageId)
+                }
+                disabled={!canActivate}
                 data-testid={`map-marker-${stageId}`}
-                style={{
-                  position: "absolute",
-                  left: `${stage.props.x}%`,
-                  top: `${stage.props.y}%`,
-                  transform: "translate(-50%, -50%)",
-                }}
                 onClick={() => {
-                  if (!visited) return;
+                  if (!canActivate) return;
+                  if (reachable && !visited && exitLink) {
+                    navigateToStage({
+                      fromStageId: meta.activeStageId,
+                      toStageId: stageId,
+                      label: exitLink.label,
+                      scoreWeight: exitLink.scoreWeight,
+                    });
+                    return;
+                  }
                   setMeta((prev) => {
                     const next = sanitizeMapMeta(
                       { ...prev, activeStageId: stageId },
@@ -287,7 +315,7 @@ const GameMapInner = forwardRef<
             );
           })}
         </div>
-        <div data-testid="game-map-active-stage">
+        <div className="lk-game-map-active-stage" data-testid="game-map-active-stage">
           {stages.map((stage, i) => {
             const content = React.Children.map(stage.props.children, (child) => {
               if (!React.isValidElement(child)) return child;

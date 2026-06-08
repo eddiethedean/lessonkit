@@ -8,6 +8,7 @@ Interactive visual reference for `@lessonkit/react` components—states, keyboar
 
 | Need | Use |
 | --- | --- |
+| Live component + when to use it (Read the Docs) | [Component pages](components/index.md) |
 | Visual states and keyboard behavior | **Storybook** (this page) |
 | Props contract and manifest mapping | [Block catalog](block-catalog.md) |
 | Copy-paste React + JSON pairs | [Block cookbook](../guides/react-developers/block-cookbook.md) |
