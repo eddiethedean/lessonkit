@@ -98,17 +98,17 @@ H5P **machine names** follow common library ids (e.g. `H5P.MultiChoice`). Displa
 | `H5P.InteractiveVideo` | Interactive Video | `InteractiveVideo` | A | P0 | ✅ | 1.4.0 |
 | `H5P.BranchingScenario` | Branching Scenario | `BranchingScenario` | A | P0 | ✅ | 1.5.0 |
 | `H5P.Column` | Column / Page | `Page` | A | P1 | ✅ | 1.2.x |
-| `H5P.GameMap` | Game Map | `GameMap` | A | P2 | ⬜ | 1.7.x |
-| `H5P.ThreeSixty` | Virtual Tour (360) | `VirtualTour` | A | P2 | ⬜ | 1.9.x |
+| `H5P.GameMap` | Game Map | `GameMap` | A | P2 | ✅ | 1.6.6 |
+| `H5P.ThreeSixty` | Virtual Tour (360) | `VirtualTour` | A | P2 | ⬜ | 1.8.x |
 | `H5P.DocumentationTool` | Documentation Tool | `DocumentationTool` | A | P3 | ⬜ | 2.x |
 | `H5P.StructureStrip` | Interactive Structure Strip | `StructureStrip` | A | P3 | ⬜ | 2.x |
 | `H5P.ImageHotspots` | Image Hotspots | `ImageHotspots` | C | P1 | ✅ | 1.2.x |
 | `H5P.ImageHotspotQuestion` | Find the Hotspot | `FindHotspot` | C | P1 | ✅ | 1.2.x |
 | `H5P.ImageMultipleHotspotQuestion` | Find Multiple Hotspots | `FindMultipleHotspots` | C | P1 | ✅ | 1.2.x |
 | `H5P.ImageSlider` | Image Slider | `ImageSlider` | C | P1 | ✅ | 1.2.x |
-| `H5P.ImageJuxtaposition` | Image Juxtaposition | `ImageJuxtaposition` | C | P2 | ⬜ | 1.3.x |
-| `H5P.Agamotto` | Agamotto (Image Blender) | `ImageSequence` | C | P2 | ⬜ | 1.3.x |
-| `H5P.Collage` | Collage | `Collage` | C | P2 | ⬜ | 1.3.x |
+| `H5P.ImageJuxtaposition` | Image Juxtaposition | `ImageJuxtaposition` | C | P2 | ✅ | 1.6.1 |
+| `H5P.Agamotto` | Agamotto (Image Blender) | `ImageSequence` | C | P2 | ✅ | 1.6.2 |
+| `H5P.Collage` | Collage | `Collage` | C | P2 | ✅ | 1.6.2 |
 | `H5P.ImagePair` | Image Pairing | `ImagePairing` | C | P2 | ✅ | 1.4.0 |
 | `H5P.ImageSequencing` | Image Sequencing | `ImageSequencing` | C | P2 | ✅ | 1.4.0 |
 | `H5P.MemoryGame` | Memory Game | `MemoryGame` | C | P2 | ✅ | 1.4.0 |
@@ -117,18 +117,18 @@ H5P **machine names** follow common library ids (e.g. `H5P.MultiChoice`). Displa
 | `H5P.Accordion` | Accordion | `Accordion` | D | P1 | ✅ | 1.2.x |
 | `H5P.Dialogcards` | Dialog Cards | `DialogCards` | D | P1 | ✅ | 1.2.x |
 | `H5P.Flashcards` | Flashcards | `Flashcards` | D | P1 | ✅ | 1.2.x |
-| `H5P.Timeline` | Timeline | `Timeline` | D | P2 | ⬜ | 1.3.x |
-| `H5P.Table` | Table | `Table` | D | P2 | ⬜ | 1.2.x |
+| `H5P.Timeline` | Timeline | `Timeline` | D | P2 | ✅ | 1.6.1 |
+| `H5P.Table` | Table | `Table` | D | P2 | ✅ | 1.6.1 |
 | `H5P.InformationWall` | Information Wall | `InformationWall` | D | P2 | ✅ | 1.4.0 |
-| `H5P.AudioRecorder` | Audio Recorder | `AudioRecorder` | D | P1 | ⬜ | 1.2.x |
+| `H5P.AudioRecorder` | Audio Recorder | `AudioRecorder` | D | P1 | ✅ | 1.6.2 |
 | `H5P.ImpressivePresentation` | Slideshow (parallax) | `ParallaxSlideshow` | D | P2 | ✅ | 1.4.0 |
 | `H5P.ExportableTextArea` | Exportable Text Area | `ExportableNotes` | D | P3 | ⬜ | 2.x |
 | `H5P.PersonalityQuiz` | Personality Quiz | `PersonalityQuiz` | D | P3 | ⬜ | 2.x |
-| `H5P.Crossword` | Crossword | `Crossword` | E | P3 | ⬜ | 1.6.x |
-| `H5P.FindTheWords` | Find the Words | `WordSearch` | E | P3 | ⬜ | 1.6.x |
-| `H5P.CombinationLock` | Combination Lock | `CombinationLock` | E | P3 | ⬜ | 1.6.x |
-| `H5P.KewArCode` | KewAr Code | `QrContent` | E | P3 | ⬜ | 1.6.x |
-| `H5P.AdventCalendar` | Advent Calendar | `AdventCalendar` | E | P3 | ⬜ | 1.7.x |
+| `H5P.Crossword` | Crossword | `Crossword` | E | P3 | ✅ | 1.6.4 |
+| `H5P.FindTheWords` | Find the Words | `WordSearch` | E | P3 | ✅ | 1.6.4 |
+| `H5P.CombinationLock` | Combination Lock | `CombinationLock` | E | P3 | ✅ | 1.6.3 |
+| `H5P.KewArCode` | KewAr Code | `QrContent` | E | P3 | ✅ | 1.6.3 |
+| `H5P.AdventCalendar` | Advent Calendar | `AdventCalendar` | E | P3 | ✅ | 1.6.5 |
 | `H5P.AgoraWorld` | Agora World | `AugmentedReality` | E | P4 | ⬜ | research |
 | — | Course / lesson shell | `Course`, `Lesson` | — | — | ✅ | 1.0 |
 | — | Progress UI | `ProgressTracker` | — | — | ✅ | 1.0 |
@@ -139,8 +139,8 @@ H5P **machine names** follow common library ids (e.g. `H5P.MultiChoice`). Displa
 
 | H5P analogue (not integrated) | LessonKit approach | Status | Milestone |
 | --- | --- | --- | --- |
-| Content Type Hub | Block registry + `lessonkit blocks list` | ⬜ | CLI 1.6.x |
-| `.h5p` transport | `.lkcourse` portable zip | ⬜ | 1.6.0 |
+| Content Type Hub | Block registry + `lessonkit blocks list` | ✅ | CLI 1.6.0 |
+| `.h5p` transport | `.lkcourse` portable zip | ✅ | 1.6.0 |
 | `.h5p` import / Hub | — | 🚫 | Out of scope |
 | H5P `semantics.json` editor | — | 🚫 | Out of scope (future inspector uses LessonKit block catalog only) |
 | Question type contract | `Assessment` interface | ✅ | 1.1.x |

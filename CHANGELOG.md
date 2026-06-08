@@ -6,6 +6,31 @@ All notable changes to the LessonKit monorepo are documented here.
 
 ## Unreleased
 
+## [1.6.6] - 2026-06-07
+
+Framework **1.6.x** content waves and `GameMap` compound. All seven `@lessonkit/*` packages ship at **1.6.6**. Additive release.
+
+### Added
+
+- **Tier C/D blocks (1.6.1–1.6.2)** — `Table`, `ImageJuxtaposition`, `Timeline`, `ImageSequence`, `Collage`, `AudioRecorder`
+- **Tier E puzzles (1.6.3–1.6.5)** — `CombinationLock`, `QrContent`, `Crossword`, `WordSearch`, `AdventCalendar`
+- **`GameMap` compound (1.6.6)** — `MapStage`, `MapExit`; spatial map UI; `map_stage_viewed`, `map_exit_selected` telemetry
+- **Block catalog v3** — 14 new entries; `WordSearch` page-level only (excluded from compound allowlists)
+- **Docs** — [plugin marketplace research](docs/guides/plugin-marketplace-research.md); capability map ✅ for all 1.6.x blocks
+- **Example** — `framework-12-showcase` content-wave lesson; `presetAnalyticsPack` plugin preset
+
+## [1.6.0] - 2026-06-07
+
+Framework **1.6.x** — portable `.lkcourse` interchange, block registry CLI, and `@lessonkit/lxpack` export/import APIs. All seven `@lessonkit/*` packages ship at **1.6.0**. Additive release (no breaking API changes).
+
+### Added
+
+- **`.lkcourse` archive** — `lessonkit export` produces zip with `manifest.json` (envelope), `interchange.json`, `dist/`, optional `block-tree.json`
+- **`@lessonkit/lxpack`** — `exportLkcourse()`, `validateLkcourse()`, `importLkcourse()`, `extractBlockTree()`; schemas `lkcourse-format.v1.json`, `block-tree.v1.json`; `fflate` zip helpers with zip-slip guards
+- **CLI** — `lessonkit blocks list` (`--json`, `--category`, `--tier`) over `block-catalog.v3.json`
+- **Docs** — [INTERCHANGE.md](docs/INTERCHANGE.md), [MIGRATION-1.5-to-1.6.md](docs/MIGRATION-1.5-to-1.6.md); manifest layers in [MANIFEST.md](docs/MANIFEST.md)
+- **Integration test** — `lxpack-golden` export → validate → import round-trip with `lessonkit.json` parity
+
 ## [1.5.0] - 2026-06-06
 
 Framework **1.5.x** — `BranchingScenario` graph compound, `Embed` and `Chart` content blocks, branch telemetry, and `useBranchingScenario()`. All seven `@lessonkit/*` packages ship at **1.5.0**.

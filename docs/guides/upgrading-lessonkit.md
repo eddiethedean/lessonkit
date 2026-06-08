@@ -10,12 +10,13 @@ Bump all `@lessonkit/*` packages to the same semver (for example **1.5.0**). Mis
 
 ## Migration guides
 
-**Latest:** [MIGRATION-1.4-to-1.5](../MIGRATION-1.4-to-1.5.md) (current npm line **1.5.x**).
+**Latest:** [MIGRATION-1.5-to-1.6](../MIGRATION-1.5-to-1.6.md) (current npm line **1.6.x**).
 
 Older jumps (linked from the table below and the [detailed migration pages](#detailed-migration-pages) section):
 
 | From | To | Guide |
 | --- | --- | --- |
+| 1.5.x | 1.6.x | [MIGRATION-1.5-to-1.6](../MIGRATION-1.5-to-1.6.md) — `.lkcourse` export, `lessonkit blocks list` |
 | 1.4.x | 1.5.x | [MIGRATION-1.4-to-1.5](../MIGRATION-1.4-to-1.5.md) — `BranchingScenario`, `Embed`, `Chart`, branch resume |
 | 1.3.x | 1.4.x | [MIGRATION-1.3-to-1.4](../MIGRATION-1.3-to-1.4.md) — `InteractiveVideo`, Tier B/C/D blocks, production guard |
 | 1.2.x | 1.3.x | [MIGRATION-1.2-to-1.3](../MIGRATION-1.2-to-1.3.md) — `SlideDeck`, transport helpers |
@@ -51,6 +52,7 @@ If you used `npx @lessonkit/cli init` recently on the latest CLI, you likely do 
 :maxdepth: 1
 
 ../MIGRATION-1.x-to-2.0
+../MIGRATION-1.5-to-1.6
 ../MIGRATION-1.4-to-1.5
 ../MIGRATION-1.3-to-1.4
 ../MIGRATION-1.2-to-1.3

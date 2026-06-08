@@ -64,6 +64,7 @@ Edit the **canonical markdown at `docs/` root**, not the thin wrapper pages unde
 | `docs/PLUGINS.md` | `reference/plugins.md` |
 | `docs/LXPACK_BRIDGE.md` | `reference/lxpack-bridge.md` |
 | `docs/MANIFEST.md` | `reference/manifest.md` |
+| `docs/INTERCHANGE.md` | `reference/interchange.md` |
 | `../../CHANGELOG.md` | `project/changelog.md` |
 | `../../SECURITY.md` | `project/security.md` |
 

@@ -268,6 +268,50 @@ const TELEMETRY_XAPI_MAPPERS = {
       ctx.timestamp,
     );
   },
+  image_juxtaposition_changed: experiencedBlockMapper,
+  timeline_event_viewed: experiencedBlockMapper,
+  image_sequence_changed: experiencedBlockMapper,
+  audio_recording_started: experiencedBlockMapper,
+  audio_recording_completed: (event, ctx) => {
+    if (event.name !== "audio_recording_completed") return null;
+    const lessonId = event.lessonId;
+    const blockId = event.data.blockId;
+    if (!blockId) return null;
+    return statementFor(
+      event,
+      buildLessonkitUrn({ courseId: ctx.courseId, lessonId, blockId }),
+      XAPIVerbs.completed,
+      ctx.timestamp,
+    );
+  },
+  qr_content_revealed: experiencedBlockMapper,
+  advent_door_opened: experiencedBlockMapper,
+  map_stage_viewed: (event, ctx) => {
+    if (event.name !== "map_stage_viewed") return null;
+    const lessonId = event.lessonId;
+    const blockId = event.data.blockId;
+    const stageId = event.data.stageId;
+    if (!lessonId || !blockId || !stageId) return null;
+    return statementFor(
+      event,
+      buildLessonkitUrn({ courseId: ctx.courseId, lessonId, blockId, nodeId: stageId }),
+      XAPIVerbs.experienced,
+      ctx.timestamp,
+    );
+  },
+  map_exit_selected: (event, ctx) => {
+    if (event.name !== "map_exit_selected") return null;
+    const lessonId = event.lessonId;
+    const blockId = event.data.blockId;
+    const toStageId = event.data.toStageId;
+    if (!lessonId || !blockId || !toStageId) return null;
+    return statementFor(
+      event,
+      buildLessonkitUrn({ courseId: ctx.courseId, lessonId, blockId, nodeId: toStageId }),
+      XAPIVerbs.experienced,
+      ctx.timestamp,
+    );
+  },
 } as const satisfies Record<TelemetryEvent["name"], EventMapper>;
 
 /**

@@ -56,7 +56,7 @@ Use the **[H5P capability map](../project/h5p-capability-map.md)** for the full 
 
 ### Planned (roadmap / capability map)
 
-See the [capability map](../project/h5p-capability-map.md) for Tier A–E blocks not yet shipped (e.g. `GameMap`, `SortParagraphs`).
+See the [capability map](../project/h5p-capability-map.md) for Tier A–E blocks not yet shipped (e.g. `SortParagraphs`, `VirtualTour`). `GameMap` and Tier C–E puzzle blocks shipped in **1.6.x**.
 
 :::{admonition} Renamed on purpose
 :class: important

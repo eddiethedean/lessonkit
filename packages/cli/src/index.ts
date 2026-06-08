@@ -3,6 +3,8 @@ import { Command } from "commander";
 import { runInit } from "./commands/init.js";
 import { runBuild, runDev } from "./commands/dev.js";
 import { runPackage } from "./commands/package.js";
+import { runExport } from "./commands/export.js";
+import { runBlocksList } from "./commands/blocks.js";
 import { formatCliError, type CliJsonResult } from "./lib/errors.js";
 import type { CliLogger } from "./lib/logger.js";
 import { createLogger } from "./lib/logger.js";
@@ -130,6 +132,61 @@ export function createProgram(baseLogger: CliLogger = console): Command {
                 `Packaged ${result.target}${dest ? ` → ${dest}` : ""} (${result.fileCount} files)`,
               );
             }
+          }
+          return result;
+        },
+        logger,
+        Boolean(opts.json),
+      );
+    });
+
+  addCwdAndJson(
+    program
+      .command("export")
+      .description("Export a portable .lkcourse archive (manifest + interchange + dist)")
+      .option("--out <path>", "Output .lkcourse path (relative to project root)")
+      .option("--no-build", "Skip implicit Vite build")
+      .option("--with-block-tree", "Include optional block-tree.json from src scan"),
+  ).action(async (opts: { cwd?: string; out?: string; build?: boolean; withBlockTree?: boolean; json?: boolean }) => {
+    const logger = createLogger({ json: opts.json });
+    await handleCommand(
+      async () => {
+        const result = await runExport({
+          cwd: opts.cwd,
+          out: opts.out,
+          noBuild: opts.build === false,
+          withBlockTree: opts.withBlockTree,
+          json: opts.json,
+        });
+        if (!opts.json && result.ok && result.command === "export") {
+          logger.log(`Exported .lkcourse → ${result.archivePath} (${result.fileCount} files)`);
+        }
+        return result;
+      },
+      logger,
+      Boolean(opts.json),
+    );
+  });
+
+  program
+    .command("blocks")
+    .description("Block registry commands")
+    .command("list")
+    .description("List runtime blocks from block-catalog.v3.json")
+    .option("--json", "Emit structured JSON result")
+    .option("--category <category>", "Filter by category (container, assessment, content, compound)")
+    .option("--tier <tier>", "Filter by tier (A, B, C, D, E)")
+    .action(async (opts: { json?: boolean; category?: string; tier?: string }) => {
+      const logger = createLogger({ json: opts.json });
+      await handleCommand(
+        async () => {
+          const result = await runBlocksList({
+            json: opts.json,
+            category: opts.category,
+            tier: opts.tier,
+          });
+          if (!opts.json && result.ok && "text" in result && typeof result.text === "string") {
+            logger.log(result.text);
           }
           return result;
         },

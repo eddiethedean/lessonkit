@@ -6,6 +6,7 @@ import { ShowcaseShell } from "../../_shared/showcase/ShowcaseShell";
 import { allowConsoleTelemetryForDocsDemo } from "../../_shared/docsDemoConfig";
 import { SHOWCASE_META } from "./constants";
 import { CertificationLesson } from "./lessons/CertificationLesson";
+import { ContentWaveLesson } from "./lessons/ContentWaveLesson";
 import { HandbookLesson } from "./lessons/HandbookLesson";
 import { OrientationLesson } from "./lessons/OrientationLesson";
 import { PlatformTourLesson } from "./lessons/PlatformTourLesson";
@@ -21,6 +22,8 @@ function lessonContent(step: number) {
       return <HandbookLesson />;
     case "certification":
       return <CertificationLesson />;
+    case "content-wave":
+      return <ContentWaveLesson />;
     default:
       return null;
   }

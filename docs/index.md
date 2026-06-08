@@ -158,6 +158,7 @@ guides/react-developers/adding-a-framework-block
 
 reference/glossary
 reference/manifest
+reference/interchange
 reference/api
 reference/cli
 reference/core

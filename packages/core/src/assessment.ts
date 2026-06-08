@@ -16,7 +16,10 @@ export type AssessmentInteractionType =
   | "imageSequencing"
   | "essay"
   | "arithmeticQuiz"
-  | "memoryGame";
+  | "memoryGame"
+  | "combinationLock"
+  | "crossword"
+  | "wordSearch";
 
 /** Serializable resume blob for a single assessment block. */
 export type AssessmentResumeState = Record<string, unknown>;

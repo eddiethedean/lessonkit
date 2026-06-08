@@ -249,6 +249,146 @@
       ],
       "xapiVerb": "http://adlnet.gov/expapi/verbs/answered",
       "urnPattern": "urn:lessonkit:course:{courseId}:lesson:{lessonId}:block:{blockId}:node:{toNodeId}"
+    },
+    {
+      "name": "image_juxtaposition_changed",
+      "description": "Learner adjusted the before/after divider",
+      "requiredFields": [
+        "courseId",
+        "sessionId",
+        "timestamp"
+      ],
+      "dataFields": [
+        "blockId",
+        "position"
+      ],
+      "xapiVerb": "http://adlnet.gov/expapi/verbs/interacted",
+      "urnPattern": "urn:lessonkit:course:{courseId}:lesson:{lessonId}:block:{blockId}"
+    },
+    {
+      "name": "timeline_event_viewed",
+      "description": "Learner focused a timeline event",
+      "requiredFields": [
+        "courseId",
+        "sessionId",
+        "timestamp"
+      ],
+      "dataFields": [
+        "blockId",
+        "eventId"
+      ],
+      "xapiVerb": "http://adlnet.gov/expapi/verbs/experienced",
+      "urnPattern": "urn:lessonkit:course:{courseId}:lesson:{lessonId}:block:{blockId}"
+    },
+    {
+      "name": "image_sequence_changed",
+      "description": "Learner changed the image sequence frame",
+      "requiredFields": [
+        "courseId",
+        "sessionId",
+        "timestamp"
+      ],
+      "dataFields": [
+        "blockId",
+        "frameIndex"
+      ],
+      "xapiVerb": "http://adlnet.gov/expapi/verbs/interacted",
+      "urnPattern": "urn:lessonkit:course:{courseId}:lesson:{lessonId}:block:{blockId}"
+    },
+    {
+      "name": "audio_recording_started",
+      "description": "Learner started an audio recording",
+      "requiredFields": [
+        "courseId",
+        "sessionId",
+        "timestamp"
+      ],
+      "dataFields": [
+        "blockId"
+      ],
+      "xapiVerb": "http://adlnet.gov/expapi/verbs/interacted",
+      "urnPattern": "urn:lessonkit:course:{courseId}:lesson:{lessonId}:block:{blockId}"
+    },
+    {
+      "name": "audio_recording_completed",
+      "description": "Learner completed an audio recording",
+      "requiredFields": [
+        "courseId",
+        "sessionId",
+        "timestamp"
+      ],
+      "dataFields": [
+        "blockId"
+      ],
+      "xapiVerb": "http://adlnet.gov/expapi/verbs/completed",
+      "urnPattern": "urn:lessonkit:course:{courseId}:lesson:{lessonId}:block:{blockId}"
+    },
+    {
+      "name": "qr_content_revealed",
+      "description": "Learner revealed QR hidden content",
+      "requiredFields": [
+        "courseId",
+        "sessionId",
+        "timestamp"
+      ],
+      "dataFields": [
+        "blockId"
+      ],
+      "xapiVerb": "http://adlnet.gov/expapi/verbs/experienced",
+      "urnPattern": "urn:lessonkit:course:{courseId}:lesson:{lessonId}:block:{blockId}"
+    },
+    {
+      "name": "advent_door_opened",
+      "description": "Learner opened an advent calendar door",
+      "requiredFields": [
+        "courseId",
+        "sessionId",
+        "timestamp"
+      ],
+      "dataFields": [
+        "blockId",
+        "doorId",
+        "day"
+      ],
+      "xapiVerb": "http://adlnet.gov/expapi/verbs/interacted",
+      "urnPattern": "urn:lessonkit:course:{courseId}:lesson:{lessonId}:block:{blockId}"
+    },
+    {
+      "name": "map_stage_viewed",
+      "description": "Learner viewed a stage in a GameMap",
+      "requiredFields": [
+        "courseId",
+        "lessonId",
+        "sessionId",
+        "timestamp"
+      ],
+      "dataFields": [
+        "blockId",
+        "stageId",
+        "stageIndex",
+        "stageLabel"
+      ],
+      "xapiVerb": "http://adlnet.gov/expapi/verbs/experienced",
+      "urnPattern": "urn:lessonkit:course:{courseId}:lesson:{lessonId}:block:{blockId}:stage:{stageId}"
+    },
+    {
+      "name": "map_exit_selected",
+      "description": "Learner selected a map exit in a GameMap",
+      "requiredFields": [
+        "courseId",
+        "lessonId",
+        "sessionId",
+        "timestamp"
+      ],
+      "dataFields": [
+        "blockId",
+        "fromStageId",
+        "toStageId",
+        "label",
+        "scoreWeight"
+      ],
+      "xapiVerb": "http://adlnet.gov/expapi/verbs/answered",
+      "urnPattern": "urn:lessonkit:course:{courseId}:lesson:{lessonId}:block:{blockId}:stage:{toStageId}"
     }
   ]
 }

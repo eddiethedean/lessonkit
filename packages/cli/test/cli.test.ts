@@ -38,6 +38,20 @@ describe("@lessonkit/cli program", () => {
     expect(program.description()).toBe("LessonKit CLI");
   });
 
+  it("blocks list --json includes TrueFalse with h5pMachineName", async () => {
+    const consoleLog = vi.spyOn(console, "log").mockImplementation(() => {});
+    await run(["node", "lessonkit", "blocks", "list", "--json"], { log: () => {}, error: () => {} });
+    const payload = JSON.parse(consoleLog.mock.calls[0]![0] as string) as {
+      ok: boolean;
+      entries: Array<{ type: string; h5pMachineName?: string }>;
+    };
+    expect(payload.ok).toBe(true);
+    expect(payload.count).toBe(43);
+    const trueFalse = payload.entries.find((e) => e.type === "TrueFalse");
+    expect(trueFalse?.h5pMachineName).toBe("H5P.TrueFalse");
+    consoleLog.mockRestore();
+  });
+
   it("publish remains a stub", async () => {
     const log = vi.fn();
     await run(["node", "lessonkit", "publish"], { log, error: () => {} });

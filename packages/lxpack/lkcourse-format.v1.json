@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lessonkit.dev/schemas/lkcourse-format.v1.json",
+  "title": "LkcourseEnvelopeV1",
+  "description": "Portable .lkcourse archive envelope (manifest.json at zip root)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["format", "schemaVersion", "lessonkitVersion", "exportedAt", "sourceManifest", "entries"],
+  "properties": {
+    "format": { "const": "lkcourse" },
+    "schemaVersion": { "const": 1 },
+    "lessonkitVersion": { "type": "string", "minLength": 1 },
+    "exportedAt": { "type": "string", "minLength": 1 },
+    "sourceManifest": { "$ref": "https://lessonkit.dev/schemas/lessonkit-manifest.v1.json" },
+    "entries": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 }
+    }
+  }
+}

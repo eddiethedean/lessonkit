@@ -1,4 +1,4 @@
-# lessonkit.json manifest reference (1.5.x)
+# lessonkit.json manifest reference (1.6.x)
 
 Every LessonKit course includes a root **`lessonkit.json`** manifest (`schemaVersion: 1`). The CLI discovers it by walking up from `--cwd`. Packaging validates the manifest against your React props and Vite build output.
 
@@ -126,14 +126,20 @@ See [Keep React IDs in sync](../guides/react-developers/quickstart.md#keep-react
 | Missing `activityIri` for xAPI/cmi5 | Set `course.tracking.xapi.activityIri` before `lessonkit package --target xapi` or `cmi5`. |
 | `dist/` not found | Run `lessonkit build` first; confirm `paths.spaDistDir` matches Vite `outDir`. |
 
-## Two `lessonkit.json` files
+## Three manifest layers
 
-- **Project root** (`schemaVersion: 1`) — author manifest; this reference describes that file.
-- **Under `.lxpack/course/`** — LXPack interchange generated during packaging. Do not hand-edit; fix the root manifest and rebuild.
+| Layer | File | When |
+| --- | --- | --- |
+| **Author manifest** | Root `lessonkit.json` | You edit this; CLI discovers it (`schemaVersion: 1`). This reference describes that file. |
+| **LXPack interchange** | `.lxpack/course/lessonkit.json` | Generated during `lessonkit package`. Do not hand-edit; fix the root manifest and rebuild. |
+| **Portable archive** | `.lkcourse` → `manifest.json` + `interchange.json` | Created by `lessonkit export` for archival and team handoff (not LMS upload). |
+
+See [Portable interchange](reference/interchange.md) for `.lkcourse` layout and import scope.
 
 ## See also
 
 - [CLI reference](reference/cli.md) — commands and flags
 - [Packaging reference](reference/packaging.md) — targets and programmatic API
 - [Project structure](../guides/react-developers/project-structure.md) — generated folder layout
+- [Portable interchange](reference/interchange.md) — `.lkcourse` archive
 - [Glossary — lessonkit.json](reference/glossary.md)
