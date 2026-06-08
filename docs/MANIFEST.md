@@ -41,10 +41,12 @@ Every LessonKit course includes a root **`lessonkit.json`** manifest (`schemaVer
 
 | Field | Required | Description |
 | --- | --- | --- |
-| `schemaVersion` | Yes | Must be `1`. Other values are rejected by `lessonkit package`. |
+| `schemaVersion` | Yes | Must be `1` (number) or `"1"` (string — coerced to `1` at parse time). Other values are rejected. |
 | `name` | Yes | Project slug (directory name from `lessonkit init`). |
 | `course` | Yes | [`LessonkitCourseDescriptor`](#course-object) — packaging descriptor and LMS metadata. |
 | `paths` | No | Build and output directories (defaults below). |
+
+When `paths` is omitted, the CLI uses `spaDistDir: "dist"`, `lxpackOutDir: ".lxpack/course"`, and `outputBaseDir: ".lxpack/out"`. Partial `paths` objects merge with those defaults. Machine-readable schema: `@lessonkit/lxpack/lessonkit-manifest.v1.json`.
 
 ## `course` object
 

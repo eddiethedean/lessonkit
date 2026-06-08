@@ -1,4 +1,4 @@
-# `@lessonkit/core` reference (1.5.x)
+# `@lessonkit/core` reference (1.6.x)
 
 Headless runtime, telemetry pipeline, plugins, identity, and session helpers shared across LessonKit packages.
 

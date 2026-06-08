@@ -10,7 +10,7 @@ npm install -g @lessonkit/cli
 npx @lessonkit/cli init my-course
 ```
 
-**Node.js:** dev, build, and LMS packaging targets work on Node **18+** (see [Packaging reference](reference/packaging.md)).
+**Node.js:** use **20.19+** for `lessonkit init` and local dev (Vite 8). Dev, build, and LMS packaging on an existing course work on Node **18+** (see [Packaging reference](reference/packaging.md)).
 
 ## Quick start
 
@@ -252,6 +252,10 @@ await run(process.argv);
 ```
 
 Set `LESSONKIT_CMD_TIMEOUT_MS` to override subprocess timeouts for `dev`/`build` (see package README).
+
+## Packaging error catalog
+
+Common failure messages, causes, and fixes: [CLI error catalog](reference/cli-errors.md).
 
 ## Related
 

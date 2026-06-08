@@ -11,7 +11,7 @@ Traceability matrix for adopting [H5P](https://h5p.org/content-types-and-applica
 **Not in scope:** H5P Hub, `.h5p` import/merge, H5P `semantics.json` transport, H5P Core, or iframe runtimes. Rebuild activities in React using this map.
 
 **Roadmap:** [ROADMAP.md — H5P-aligned backlog](roadmap.md#h5p-aligned-capability-backlog)  
-**Runtime catalog (today):** [Block catalog](../reference/block-catalog.md) (`blockCatalogV3Version = 3` — default since framework 1.2; 1.5 adds `BranchingScenario`, `Embed`, `Chart`; 1.6.x adds content-wave blocks through **1.6.6**)
+**Runtime catalog (today):** [Block catalog](../reference/block-catalog.md) (`blockCatalogV3Version = 3` — default since framework 1.2; 1.5 adds `BranchingScenario`, `Embed`, `Chart`; 1.6.x adds content-wave blocks including `Table`, `Timeline`, `Crossword`, `GameMap`)
 **Catalog expansion (shipped 1.1.0):** framework **1.1.x** (`blockCatalogV2Version = 2`)
 
 ## Status legend
@@ -98,7 +98,7 @@ H5P **machine names** follow common library ids (e.g. `H5P.MultiChoice`). Displa
 | `H5P.InteractiveVideo` | Interactive Video | `InteractiveVideo` | A | P0 | ✅ | 1.4.0 |
 | `H5P.BranchingScenario` | Branching Scenario | `BranchingScenario` | A | P0 | ✅ | 1.5.0 |
 | `H5P.Column` | Column / Page | `Page` | A | P1 | ✅ | 1.2.x |
-| `H5P.GameMap` | Game Map | `GameMap` | A | P2 | ✅ | 1.6.6 |
+| `H5P.GameMap` | Game Map | `GameMap` | A | P2 | ✅ | 1.6.x |
 | `H5P.ThreeSixty` | Virtual Tour (360) | `VirtualTour` | A | P2 | ⬜ | 1.8.x |
 | `H5P.DocumentationTool` | Documentation Tool | `DocumentationTool` | A | P3 | ⬜ | 2.x |
 | `H5P.StructureStrip` | Interactive Structure Strip | `StructureStrip` | A | P3 | ⬜ | 2.x |

@@ -108,6 +108,18 @@ See the [production checklist](../guides/react-developers/production-checklist.m
 
 Export from `@lessonkit/react`: `BranchingScenario`, `BranchNode`, `BranchChoice`, `Embed`, `Chart`, `useBranchingScenario`. See [Block catalog — 1.5](block-catalog.md#catalog-v3-additions-framework-150) and [Migration 1.4 → 1.5](../MIGRATION-1.4-to-1.5.md).
 
+### Framework 1.6 blocks
+
+Export from `@lessonkit/react` / `@lessonkit/react/blocks` (catalog v3, framework **1.6.0+**):
+
+| Block | Role |
+| --- | --- |
+| `Table`, `Timeline`, `ImageJuxtaposition`, `ImageSequence`, `Collage`, `AudioRecorder`, `QrContent`, `AdventCalendar` | Content |
+| `CombinationLock`, `Crossword`, `WordSearch` | Assessment (`checkId` required) |
+| `GameMap`, `MapStage`, `MapExit` | Compound (spatial map; `blockId` on container) |
+
+Full prop contracts: [Block catalog — 1.6.0](block-catalog.md#catalog-v3-additions-framework-160) · [generated prop tables](block-catalog.md#generated-prop-reference-catalog-v3). Discover blocks from CLI: `lessonkit blocks list --json`.
+
 ## Machine-readable contracts
 
 | Artifact | Package path |

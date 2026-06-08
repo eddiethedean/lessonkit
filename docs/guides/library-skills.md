@@ -11,7 +11,7 @@ Source: [`library-skills/`](https://github.com/eddiethedean/lessonkit/tree/main/
 | **lessonkit-author** | Editing `App.tsx`, `lessonkit.json`, React blocks; `lessonkit dev` / `build` |
 | **lessonkit-packaging** | LMS export — `lessonkit package --target …` |
 | **lessonkit-telemetry** | Tracking, xAPI, plugins, LXPack bridge |
-| **lessonkit-migrate** | Upgrading `@lessonkit/*` — [Upgrade guide](upgrading-lessonkit.md) and migration docs (0.9.x through 1.5.x) |
+| **lessonkit-migrate** | Upgrading `@lessonkit/*` — [Upgrade guide](upgrading-lessonkit.md) and migration docs (0.9.x through 1.6.x) |
 
 ## Install
 
@@ -53,7 +53,7 @@ Re-run after `git pull` to refresh skills.
 
 ## Requirements
 
-- Node.js **20.19+ recommended** for `npx @lessonkit/cli init` (Vite 8); Node **18+** minimum for dev, build, and `lessonkit package` in an existing course
+- Node.js **20.19+** for `npx @lessonkit/cli init` (Vite 8); Node **18+** minimum for packaging-only legacy agents on an existing course
 - `@lessonkit/cli` on `PATH` or via `npx @lessonkit/cli`
 - An agent product that discovers `SKILL.md` files
 

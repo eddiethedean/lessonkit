@@ -54,6 +54,7 @@ Edit the **canonical markdown at `docs/` root**, not the thin wrapper pages unde
 | Edit this file | Wrapper (do not duplicate) |
 | --- | --- |
 | `docs/CLI.md` | `reference/cli.md` |
+| `docs/CLI_ERRORS.md` | `reference/cli-errors.md` |
 | `docs/PACKAGING.md` | `reference/packaging.md` |
 | `docs/IDENTITY.md` | `reference/identity.md` |
 | `docs/TELEMETRY.md` | `reference/telemetry.md` |

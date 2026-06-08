@@ -91,6 +91,9 @@ jobs:
       - name: Generate API docs (TypeDoc)
         run: npm run docs:api
 
+      - name: Verify release version sync
+        run: bash docs/scripts/verify-release-version.sh
+
       - name: Verify doc include wrappers
         run: bash docs/scripts/verify-doc-includes.sh
 

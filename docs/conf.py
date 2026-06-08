@@ -18,6 +18,7 @@ release = "1.6.0"
 myst_substitutions = {
     "release": release,
     "scorm_zip_path": ".lxpack/course/.lxpack/out/course-scorm12.zip",
+    "node_new_projects": "20.19+",
     "node_recommended": "20.19+",
     "node_minimum": "18+",
 }
@@ -52,6 +53,7 @@ exclude_patterns = [
     "LXPACK_BRIDGE.md",
     "LXPACK_UPGRADES_FOR_LESSONKIT.md",
     "LXPACK_UPGRADE_PLAN_FOR_MAINTAINERS.md",
+    "CLI_ERRORS.md",
     "H5P_CATALOG_CROSSWALK.md",
     "_generated",
 ]

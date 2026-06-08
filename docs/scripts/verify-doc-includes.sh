@@ -31,6 +31,7 @@ check_no_wrapper_h1() {
 failed=0
 for pair in \
   "reference/cli.md:CLI.md" \
+  "reference/cli-errors.md:CLI_ERRORS.md" \
   "reference/packaging.md:PACKAGING.md" \
   "reference/lxpack-bridge.md:LXPACK_BRIDGE.md" \
   "reference/core.md:CORE.md" \

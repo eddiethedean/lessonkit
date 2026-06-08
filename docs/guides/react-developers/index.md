@@ -20,7 +20,7 @@ LessonKit courses are **React apps** (usually **Vite + TypeScript**). You do not
 2. **React** — [react.dev Learn](https://react.dev/learn) (official tutorial)
 3. **TypeScript** (basics) — [TypeScript Handbook](https://www.typescriptlang.org/docs/handbook/intro.html)
 4. **Vite** (how `lessonkit dev` works) — [Vite Getting Started](https://vite.dev/guide/)
-5. **LessonKit (new project)** — [Getting started in 5 minutes](getting-started-in-5-minutes.md) → [First LMS export](first-lms-export.md) → [Ship to LMS checklist](ship-to-lms.md) → [Production checklist](production-checklist.md)
+5. **LessonKit (new project)** — [Getting started in 5 minutes](getting-started-in-5-minutes.md) → [LMS Go-Live](lms-go-live.md) → [Production checklist](production-checklist.md)
 6. **LessonKit (existing Vite app only)** — [Quickstart — add to an existing Vite app](quickstart.md)
 :::
 
