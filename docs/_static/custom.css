@@ -29,6 +29,11 @@
   z-index: 1;
 }
 
+/* Furo renders the Markdown H1 above the hero; the hero shows the visible kicker + headline. */
+article.bd-article > h1:first-of-type {
+  display: none;
+}
+
 .lk-hero-title {
   font-size: clamp(2rem, 4vw, 2.75rem);
   font-weight: 800;
@@ -38,10 +43,6 @@
   padding-block: 0.125em;
   color: var(--color-foreground-primary);
   text-wrap: balance;
-}
-
-article[role="main"] .lk-hero > h1.lk-hero-title {
-  margin-top: 0;
 }
 
 html[data-theme="dark"] .lk-hero-title {
