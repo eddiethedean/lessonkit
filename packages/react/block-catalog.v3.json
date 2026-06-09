@@ -3347,8 +3347,8 @@
       "a11y": {
         "element": "section",
         "ariaLabel": "Image slider",
-        "keyboard": "Previous/next slide.",
-        "notes": "Carousel."
+        "keyboard": "Arrow keys, swipe/drag, or Previous/Next buttons.",
+        "notes": "Focusable section; horizontal drag advances slides."
       },
       "theming": {
         "surface": "global-inherit",

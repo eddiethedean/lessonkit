@@ -257,7 +257,7 @@
     "seeAlso": "- [SlideDeck](slide-deck.md) — structured deck with assessments"
   },
   "image-slider": {
-    "whenToUse": "Use `ImageSlider` for **photo galleries** — before/after sets, product shots, or exhibit walkthroughs with prev/next controls.",
+    "whenToUse": "Use `ImageSlider` for **photo galleries** — before/after sets, product shots, or exhibit walkthroughs. Swipe, drag, arrow keys, or Previous/Next buttons change slides.",
     "example": "```tsx\n<ImageSlider\n  blockId=\"desk-compare\"\n  slides={[\n    { src: \"/desk-before.jpg\", alt: \"Cluttered desk\", caption: \"Before — violations\" },\n    { src: \"/desk-after.jpg\", alt: \"Clean desk\", caption: \"After — compliant\" },\n  ]}\n/>\n```",
     "seeAlso": "- [ImageSequence](image-sequence.md) — scrubber without prev/next chrome"
   },

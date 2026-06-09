@@ -502,6 +502,25 @@ describe("Tier B/C/D block components", () => {
     expect(screen.getByAltText("Slide 2")).toBeDefined();
   });
 
+  it("ImageSlider advances on horizontal swipe drag", () => {
+    render(
+      wrap(
+        <ImageSlider
+          blockId="slider-1"
+          slides={[
+            { src: "/1.png", alt: "Slide 1" },
+            { src: "/2.png", alt: "Slide 2" },
+          ]}
+        />,
+      ),
+    );
+    const viewport = screen.getByTestId("image-slider-viewport");
+    expect(screen.getByAltText("Slide 1")).toBeDefined();
+    fireEvent.pointerDown(viewport, { pointerId: 1, clientX: 200 });
+    fireEvent.pointerUp(viewport, { pointerId: 1, clientX: 100 });
+    expect(screen.getByAltText("Slide 2")).toBeDefined();
+  });
+
   it("InformationWall filters panels by search query", () => {
     render(
       wrap(
