@@ -226,6 +226,8 @@ Open text response; manual or plugin grading.
 
 Order paragraphs into the correct sequence.
 
+**Component page:** [SortParagraphs demo](components/sort-paragraphs.md) (live embed + when to use)
+
 | Prop | Type | Required | Description |
 | --- | --- | --- | --- |
 | `checkId` | CheckId | yes | Stable check id. |
@@ -244,6 +246,8 @@ Order paragraphs into the correct sequence.
 
 Reveal or score a hidden answer.
 
+**Component page:** [GuessTheAnswer demo](components/guess-the-answer.md) (live embed + when to use)
+
 | Prop | Type | Required | Description |
 | --- | --- | --- | --- |
 | `checkId` | CheckId | no | Required when scored (default). |
@@ -260,6 +264,8 @@ Reveal or score a hidden answer.
 ## MultimediaChoice
 
 Multiple choice with image or audio options.
+
+**Component page:** [MultimediaChoice demo](components/multimedia-choice.md) (live embed + when to use)
 
 | Prop | Type | Required | Description |
 | --- | --- | --- | --- |
@@ -279,6 +285,8 @@ Multiple choice with image or audio options.
 ## SingleChoiceSet
 
 Sequential MCQ slides with aggregated scoring.
+
+**Component page:** [SingleChoiceSet demo](components/single-choice-set.md) (live embed + when to use)
 
 | Prop | Type | Required | Description |
 | --- | --- | --- | --- |
