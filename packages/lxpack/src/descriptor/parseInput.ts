@@ -77,13 +77,45 @@ export function parseAssessmentDescriptor(raw: unknown): import("../types").Asse
         : [],
     };
   }
+  if (kind === "sortParagraphs") {
+    return {
+      kind: "sortParagraphs",
+      ...base,
+      paragraphs: Array.isArray(raw.paragraphs)
+        ? raw.paragraphs.filter((p): p is string => typeof p === "string")
+        : [],
+      correctOrder: Array.isArray(raw.correctOrder)
+        ? raw.correctOrder.filter((n): n is number => typeof n === "number" && Number.isFinite(n))
+        : [],
+    };
+  }
+  if (kind === "guessTheAnswer") {
+    return {
+      kind: "guessTheAnswer",
+      ...base,
+      answer: typeof raw.answer === "string" ? raw.answer : "",
+    };
+  }
+  if (kind === "multimediaChoice") {
+    return {
+      kind: "multimediaChoice",
+      ...base,
+      choices: Array.isArray(raw.choices)
+        ? raw.choices.filter((c): c is string => typeof c === "string")
+        : [],
+      answer: typeof raw.answer === "string" ? raw.answer : "",
+    };
+  }
   if (
     typeof kind === "string" &&
     kind !== "mcq" &&
     kind !== "trueFalse" &&
     kind !== "fillInBlanks" &&
     kind !== "findHotspot" &&
-    kind !== "findMultipleHotspots"
+    kind !== "findMultipleHotspots" &&
+    kind !== "sortParagraphs" &&
+    kind !== "guessTheAnswer" &&
+    kind !== "multimediaChoice"
   ) {
     return {
       kind,
@@ -99,6 +131,22 @@ export function parseAssessmentDescriptor(raw: unknown): import("../types").Asse
       ? raw.choices.filter((c): c is string => typeof c === "string")
       : [],
     answer: typeof raw.answer === "string" ? raw.answer : "",
+    answers: Array.isArray(raw.answers)
+      ? raw.answers.filter((a): a is string => typeof a === "string")
+      : undefined,
+    shuffleChoices: typeof raw.shuffleChoices === "boolean" ? raw.shuffleChoices : undefined,
+    shuffleSeed:
+      typeof raw.shuffleSeed === "string" || typeof raw.shuffleSeed === "number"
+        ? raw.shuffleSeed
+        : undefined,
+    choiceFeedback:
+      raw.choiceFeedback && typeof raw.choiceFeedback === "object" && !Array.isArray(raw.choiceFeedback)
+        ? Object.fromEntries(
+            Object.entries(raw.choiceFeedback as Record<string, unknown>).filter(
+              (entry): entry is [string, string] => typeof entry[1] === "string",
+            ),
+          )
+        : undefined,
   };
 }
 

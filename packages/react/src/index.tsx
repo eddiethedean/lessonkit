@@ -62,6 +62,10 @@ export {
   GameMap,
   MapStage,
   MapExit,
+  SortParagraphs,
+  GuessTheAnswer,
+  MultimediaChoice,
+  SingleChoiceSet,
 } from "./blocks";
 
 export type {
@@ -148,6 +152,11 @@ export type {
   GameMapProps,
   MapStageProps,
   MapExitProps,
+  SortParagraphsProps,
+  GuessTheAnswerProps,
+  MultimediaChoiceProps,
+  MultimediaChoiceOption,
+  SingleChoiceSetProps,
 } from "./blocks";
 
 export type {

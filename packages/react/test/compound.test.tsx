@@ -26,6 +26,7 @@ import {
   BranchNode,
   BranchChoice,
   Scenario,
+  SingleChoiceSet,
 } from "../src";
 
 const COURSE_ID = "compound-course";
@@ -1363,5 +1364,50 @@ describe("BranchingScenario", () => {
     );
     expect(onCompoundDuplicateCheckId).toHaveBeenCalledWith({ checkId: "dup-id" });
     process.env.NODE_ENV = prevEnv;
+  });
+});
+
+describe("SingleChoiceSet compound handle", () => {
+  afterEach(() => {
+    cleanup();
+    sessionStorage.clear();
+  });
+
+  it("aggregates Quiz scores across steps", () => {
+    const ref = createRef<CompoundHandle>();
+    render(
+      wrap(
+        <SingleChoiceSet ref={ref} blockId="scs-score" showSetScore>
+          <Quiz checkId="scs-a" question="A?" choices={["A", "B"]} answer="A" />
+          <Quiz checkId="scs-b" question="B?" choices={["C", "D"]} answer="D" />
+        </SingleChoiceSet>,
+      ),
+    );
+    fireEvent.click(screen.getByLabelText("A"));
+    fireEvent.click(screen.getByTestId("single-choice-set-next"));
+    fireEvent.click(screen.getByLabelText("D"));
+    expect(ref.current?.getScore()).toBe(2);
+    expect(screen.getByTestId("single-choice-set-score").textContent).toContain("Score: 2");
+  });
+
+  it("restores active step from sessionStorage when persistCompoundState is true", () => {
+    const storage = createSessionStoragePort();
+    saveCompoundState(
+      storage,
+      COURSE_ID,
+      "scs-persist",
+      createCompoundResumeState({ activePageIndex: 1 }),
+    );
+
+    render(
+      wrap(
+        <SingleChoiceSet blockId="scs-persist">
+          <Quiz checkId="scs-p1" question="One?" choices={["A", "B"]} answer="A" />
+          <Quiz checkId="scs-p2" question="Two?" choices={["C", "D"]} answer="D" />
+        </SingleChoiceSet>,
+        true,
+      ),
+    );
+    expect(screen.getByText("Question 2 of 2")).toBeTruthy();
   });
 });

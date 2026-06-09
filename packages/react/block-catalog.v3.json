@@ -94,6 +94,7 @@
         "TimedCue",
         "InteractiveVideo",
         "AssessmentSequence",
+        "SingleChoiceSet",
         "BranchingScenario",
         "BranchNode",
         "GameMap",
@@ -148,6 +149,7 @@
         "TimedCue",
         "InteractiveVideo",
         "AssessmentSequence",
+        "SingleChoiceSet",
         "BranchingScenario",
         "BranchNode",
         "GameMap",
@@ -226,6 +228,7 @@
         "TimedCue",
         "InteractiveVideo",
         "AssessmentSequence",
+        "SingleChoiceSet",
         "BranchingScenario",
         "BranchNode",
         "GameMap",
@@ -283,6 +286,30 @@
           "description": "Correct choice value (must match one choice)."
         },
         {
+          "name": "answers",
+          "type": "string[]",
+          "required": false,
+          "description": "When length > 1, enables multi-select checkbox mode."
+        },
+        {
+          "name": "shuffleChoices",
+          "type": "boolean",
+          "required": false,
+          "description": "Randomize choice order in the SPA."
+        },
+        {
+          "name": "shuffleSeed",
+          "type": "string | number",
+          "required": false,
+          "description": "Stable shuffle seed (defaults to checkId)."
+        },
+        {
+          "name": "choiceFeedback",
+          "type": "Record<string, string>",
+          "required": false,
+          "description": "Per-choice feedback announced on selection."
+        },
+        {
           "name": "passingScore",
           "type": "number",
           "required": false,
@@ -301,6 +328,7 @@
         "TimedCue",
         "InteractiveVideo",
         "AssessmentSequence",
+        "SingleChoiceSet",
         "BranchingScenario",
         "BranchNode",
         "GameMap",
@@ -309,8 +337,8 @@
       "a11y": {
         "element": "section",
         "ariaLabel": "Quiz",
-        "keyboard": "Radio group navigable with arrow keys; one choice per question.",
-        "liveRegions": "role='status' aria-live='polite' for Correct / Try again feedback.",
+        "keyboard": "Radio group (single-select) or checkbox group (multi-select); Check required for multi-select.",
+        "liveRegions": "role='status' aria-live='polite' for Correct / Try again and per-choice feedback.",
         "notes": "Fieldset with visually hidden legend. KnowledgeCheck is an alias that renders Quiz with identical behavior."
       },
       "theming": {
@@ -352,6 +380,7 @@
         "TimedCue",
         "InteractiveVideo",
         "AssessmentSequence",
+        "SingleChoiceSet",
         "BranchingScenario",
         "BranchNode",
         "GameMap",
@@ -434,6 +463,7 @@
         "SlideDeck",
         "TimedCue",
         "InteractiveVideo",
+        "SingleChoiceSet",
         "BranchingScenario",
         "BranchNode",
         "GameMap",
@@ -525,6 +555,7 @@
         "SlideDeck",
         "TimedCue",
         "InteractiveVideo",
+        "SingleChoiceSet",
         "BranchingScenario",
         "BranchNode",
         "GameMap",
@@ -615,6 +646,7 @@
         "SlideDeck",
         "TimedCue",
         "InteractiveVideo",
+        "SingleChoiceSet",
         "BranchingScenario",
         "BranchNode",
         "GameMap",
@@ -705,6 +737,7 @@
         "SlideDeck",
         "TimedCue",
         "InteractiveVideo",
+        "SingleChoiceSet",
         "BranchingScenario",
         "BranchNode",
         "GameMap",
@@ -795,6 +828,7 @@
         "SlideDeck",
         "TimedCue",
         "InteractiveVideo",
+        "SingleChoiceSet",
         "BranchingScenario",
         "BranchNode",
         "GameMap",
@@ -870,6 +904,7 @@
         "TimedCue",
         "InteractiveVideo",
         "AssessmentSequence",
+        "SingleChoiceSet",
         "BranchingScenario",
         "BranchNode",
         "GameMap",
@@ -904,7 +939,10 @@
         "ImagePairing",
         "ImageSequencing",
         "ArithmeticQuiz",
-        "Essay"
+        "Essay",
+        "SortParagraphs",
+        "GuessTheAnswer",
+        "MultimediaChoice"
       ],
       "maxNestingDepth": 1,
       "tier": "A"
@@ -972,6 +1010,7 @@
         "Slide",
         "SlideDeck",
         "InteractiveVideo",
+        "SingleChoiceSet",
         "BranchingScenario",
         "BranchNode",
         "GameMap",
@@ -1056,6 +1095,7 @@
         "Slide",
         "SlideDeck",
         "InteractiveVideo",
+        "SingleChoiceSet",
         "BranchingScenario",
         "BranchNode",
         "GameMap",
@@ -1146,6 +1186,7 @@
         "Slide",
         "SlideDeck",
         "InteractiveVideo",
+        "SingleChoiceSet",
         "BranchingScenario",
         "BranchNode",
         "GameMap",
@@ -1236,6 +1277,7 @@
         "Slide",
         "SlideDeck",
         "InteractiveVideo",
+        "SingleChoiceSet",
         "BranchingScenario",
         "BranchNode",
         "GameMap",
@@ -1326,6 +1368,7 @@
         "Slide",
         "SlideDeck",
         "InteractiveVideo",
+        "SingleChoiceSet",
         "BranchingScenario",
         "BranchNode",
         "GameMap",
@@ -1352,6 +1395,384 @@
         "requiresActiveLesson": true
       },
       "tier": "B"
+    },
+    {
+      "type": "SortParagraphs",
+      "category": "assessment",
+      "assessmentContract": true,
+      "h5pMachineName": "H5P.SortParagraphs",
+      "h5pAlias": "Sort the Paragraphs",
+      "description": "Order paragraphs into the correct sequence.",
+      "props": [
+        {
+          "name": "checkId",
+          "type": "CheckId",
+          "required": true,
+          "description": "Stable check id."
+        },
+        {
+          "name": "paragraphs",
+          "type": "string[]",
+          "required": true,
+          "description": "Paragraph texts."
+        },
+        {
+          "name": "correctOrder",
+          "type": "number[]",
+          "required": true,
+          "description": "Correct index order."
+        },
+        {
+          "name": "enableRetry",
+          "type": "boolean",
+          "required": false,
+          "description": "Allow retry after completion."
+        },
+        {
+          "name": "enableSolutionsButton",
+          "type": "boolean",
+          "required": false,
+          "description": "Show solution control."
+        },
+        {
+          "name": "autoCheck",
+          "type": "boolean",
+          "required": false,
+          "description": "Check answers automatically when possible."
+        },
+        {
+          "name": "passingScore",
+          "type": "number",
+          "required": false,
+          "description": "Minimum score to pass."
+        }
+      ],
+      "requiredIds": [
+        "checkId"
+      ],
+      "parentConstraints": [
+        "Lesson",
+        "AssessmentSequence",
+        "Page",
+        "InteractiveBook",
+        "Slide",
+        "SlideDeck",
+        "TimedCue",
+        "InteractiveVideo",
+        "SingleChoiceSet",
+        "BranchingScenario",
+        "BranchNode",
+        "GameMap",
+        "MapStage"
+      ],
+      "a11y": {
+        "element": "section",
+        "ariaLabel": "Sort the Paragraphs",
+        "keyboard": "Reorder with up/down buttons.",
+        "liveRegions": "aria-live order announcements.",
+        "notes": "H5P Sort the Paragraphs equivalent."
+      },
+      "theming": {
+        "surface": "global-inherit",
+        "dataAttributes": [
+          "data-lk-check-id"
+        ],
+        "stylingNotes": "Uses data-lk-check-id."
+      },
+      "telemetry": {
+        "emits": [
+          "assessment_answered",
+          "assessment_completed"
+        ],
+        "requiresActiveLesson": true
+      },
+      "tier": "B"
+    },
+    {
+      "type": "GuessTheAnswer",
+      "category": "assessment",
+      "assessmentContract": true,
+      "h5pMachineName": "H5P.GuessTheAnswer",
+      "h5pAlias": "Guess the Answer",
+      "description": "Reveal or score a hidden answer.",
+      "props": [
+        {
+          "name": "checkId",
+          "type": "CheckId",
+          "required": false,
+          "description": "Required when scored (default)."
+        },
+        {
+          "name": "prompt",
+          "type": "string",
+          "required": true,
+          "description": "Prompt text."
+        },
+        {
+          "name": "answer",
+          "type": "string",
+          "required": true,
+          "description": "Hidden answer."
+        },
+        {
+          "name": "scored",
+          "type": "boolean",
+          "required": false,
+          "description": "Score learner guess (default true)."
+        },
+        {
+          "name": "enableRetry",
+          "type": "boolean",
+          "required": false,
+          "description": "Allow retry after completion."
+        },
+        {
+          "name": "enableSolutionsButton",
+          "type": "boolean",
+          "required": false,
+          "description": "Show solution control."
+        },
+        {
+          "name": "autoCheck",
+          "type": "boolean",
+          "required": false,
+          "description": "Check answers automatically when possible."
+        },
+        {
+          "name": "passingScore",
+          "type": "number",
+          "required": false,
+          "description": "Minimum score to pass."
+        }
+      ],
+      "requiredIds": [],
+      "optionalIds": [
+        "checkId"
+      ],
+      "parentConstraints": [
+        "Lesson",
+        "AssessmentSequence",
+        "Page",
+        "InteractiveBook",
+        "Slide",
+        "SlideDeck",
+        "TimedCue",
+        "InteractiveVideo",
+        "SingleChoiceSet",
+        "BranchingScenario",
+        "BranchNode",
+        "GameMap",
+        "MapStage"
+      ],
+      "a11y": {
+        "element": "section",
+        "ariaLabel": "Guess the Answer",
+        "keyboard": "Text input and Check/Reveal controls.",
+        "notes": "H5P Guess the Answer equivalent."
+      },
+      "theming": {
+        "surface": "global-inherit",
+        "dataAttributes": [
+          "data-lk-check-id"
+        ],
+        "stylingNotes": "Uses data-lk-check-id when scored."
+      },
+      "telemetry": {
+        "emits": [
+          "assessment_answered",
+          "assessment_completed"
+        ],
+        "requiresActiveLesson": true
+      },
+      "tier": "B"
+    },
+    {
+      "type": "MultimediaChoice",
+      "category": "assessment",
+      "assessmentContract": true,
+      "h5pMachineName": "H5P.ImageMultipleHotspotQuestion",
+      "h5pAlias": "Multimedia Choice",
+      "description": "Multiple choice with image or audio options.",
+      "props": [
+        {
+          "name": "checkId",
+          "type": "CheckId",
+          "required": true,
+          "description": "Stable check id."
+        },
+        {
+          "name": "question",
+          "type": "string",
+          "required": true,
+          "description": "Question text."
+        },
+        {
+          "name": "choices",
+          "type": "MultimediaChoiceOption[]",
+          "required": true,
+          "description": "Media choices."
+        },
+        {
+          "name": "answer",
+          "type": "string",
+          "required": true,
+          "description": "Correct choice label."
+        },
+        {
+          "name": "enableRetry",
+          "type": "boolean",
+          "required": false,
+          "description": "Allow retry after completion."
+        },
+        {
+          "name": "enableSolutionsButton",
+          "type": "boolean",
+          "required": false,
+          "description": "Show solution control."
+        },
+        {
+          "name": "autoCheck",
+          "type": "boolean",
+          "required": false,
+          "description": "Check answers automatically when possible."
+        },
+        {
+          "name": "passingScore",
+          "type": "number",
+          "required": false,
+          "description": "Minimum score to pass."
+        }
+      ],
+      "requiredIds": [
+        "checkId"
+      ],
+      "parentConstraints": [
+        "Lesson",
+        "AssessmentSequence",
+        "Page",
+        "InteractiveBook",
+        "Slide",
+        "SlideDeck",
+        "TimedCue",
+        "InteractiveVideo",
+        "SingleChoiceSet",
+        "BranchingScenario",
+        "BranchNode",
+        "GameMap",
+        "MapStage"
+      ],
+      "a11y": {
+        "element": "section",
+        "ariaLabel": "Multimedia Choice",
+        "keyboard": "Radio group with labeled media options.",
+        "notes": "Requires altText for every choice."
+      },
+      "theming": {
+        "surface": "global-inherit",
+        "dataAttributes": [
+          "data-lk-check-id"
+        ],
+        "stylingNotes": "Uses data-lk-check-id."
+      },
+      "telemetry": {
+        "emits": [
+          "assessment_answered",
+          "assessment_completed"
+        ],
+        "requiresActiveLesson": true
+      },
+      "tier": "B"
+    },
+    {
+      "type": "SingleChoiceSet",
+      "category": "container",
+      "h5pMachineName": "H5P.SingleChoiceSet",
+      "h5pAlias": "Single Choice Set",
+      "description": "Sequential MCQ slides with aggregated scoring.",
+      "props": [
+        {
+          "name": "blockId",
+          "type": "BlockId",
+          "required": false,
+          "description": "Stable block id."
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "required": false,
+          "description": "Set title."
+        },
+        {
+          "name": "showSetScore",
+          "type": "boolean",
+          "required": false,
+          "description": "Show aggregated score."
+        },
+        {
+          "name": "children",
+          "type": "ReactNode",
+          "required": true,
+          "description": "Quiz or KnowledgeCheck steps."
+        },
+        {
+          "name": "enableRetry",
+          "type": "boolean",
+          "required": false,
+          "description": "Allow retry after completion."
+        },
+        {
+          "name": "enableSolutionsButton",
+          "type": "boolean",
+          "required": false,
+          "description": "Show solution control."
+        },
+        {
+          "name": "autoCheck",
+          "type": "boolean",
+          "required": false,
+          "description": "Check answers automatically when possible."
+        }
+      ],
+      "requiredIds": [],
+      "optionalIds": [
+        "blockId"
+      ],
+      "parentConstraints": [
+        "Lesson",
+        "Page",
+        "InteractiveBook",
+        "Slide",
+        "SlideDeck",
+        "TimedCue",
+        "InteractiveVideo",
+        "AssessmentSequence",
+        "SingleChoiceSet",
+        "BranchingScenario",
+        "BranchNode",
+        "GameMap",
+        "MapStage"
+      ],
+      "a11y": {
+        "element": "section",
+        "ariaLabel": "Single choice set",
+        "keyboard": "Previous/Next between MCQ steps.",
+        "notes": "H5P Single Choice Set equivalent."
+      },
+      "theming": {
+        "surface": "global-inherit",
+        "stylingNotes": "Container for Quiz steps."
+      },
+      "telemetry": {
+        "emits": [],
+        "manualTracking": "Child Quiz blocks emit assessment_* events."
+      },
+      "compoundContract": true,
+      "allowedChildTypes": [
+        "Quiz",
+        "KnowledgeCheck"
+      ],
+      "maxNestingDepth": 1,
+      "tier": "A"
     },
     {
       "type": "Text",
@@ -1381,6 +1802,7 @@
         "TimedCue",
         "InteractiveVideo",
         "AssessmentSequence",
+        "SingleChoiceSet",
         "BranchingScenario",
         "BranchNode",
         "GameMap",
@@ -1434,6 +1856,7 @@
         "TimedCue",
         "InteractiveVideo",
         "AssessmentSequence",
+        "SingleChoiceSet",
         "BranchingScenario",
         "BranchNode",
         "GameMap",
@@ -1487,6 +1910,7 @@
         "TimedCue",
         "InteractiveVideo",
         "AssessmentSequence",
+        "SingleChoiceSet",
         "BranchingScenario",
         "BranchNode",
         "GameMap",
@@ -1554,6 +1978,7 @@
         "TimedCue",
         "InteractiveVideo",
         "AssessmentSequence",
+        "SingleChoiceSet",
         "BranchingScenario",
         "BranchNode",
         "GameMap",
@@ -1622,7 +2047,10 @@
         "QrContent",
         "Crossword",
         "AdventCalendar",
-        "ProgressTracker"
+        "ProgressTracker",
+        "SortParagraphs",
+        "GuessTheAnswer",
+        "MultimediaChoice"
       ],
       "maxNestingDepth": 1,
       "props": [
@@ -1780,7 +2208,10 @@
         "CombinationLock",
         "QrContent",
         "Crossword",
-        "AdventCalendar"
+        "AdventCalendar",
+        "SortParagraphs",
+        "GuessTheAnswer",
+        "MultimediaChoice"
       ],
       "maxNestingDepth": 1,
       "props": [
@@ -1908,7 +2339,9 @@
         "MemoryGame",
         "Questionnaire",
         "Essay",
-        "ArithmeticQuiz"
+        "ArithmeticQuiz",
+        "MultimediaChoice",
+        "GuessTheAnswer"
       ],
       "maxNestingDepth": 1,
       "props": [
@@ -2084,7 +2517,10 @@
         "QrContent",
         "Crossword",
         "AdventCalendar",
-        "BranchChoice"
+        "BranchChoice",
+        "SortParagraphs",
+        "GuessTheAnswer",
+        "MultimediaChoice"
       ],
       "maxNestingDepth": 1,
       "props": [
@@ -2311,6 +2747,7 @@
         "TimedCue",
         "InteractiveVideo",
         "AssessmentSequence",
+        "SingleChoiceSet",
         "BranchingScenario",
         "BranchNode",
         "GameMap",
@@ -2377,6 +2814,7 @@
         "TimedCue",
         "InteractiveVideo",
         "AssessmentSequence",
+        "SingleChoiceSet",
         "BranchingScenario",
         "BranchNode",
         "GameMap",
@@ -2431,6 +2869,7 @@
         "TimedCue",
         "InteractiveVideo",
         "AssessmentSequence",
+        "SingleChoiceSet",
         "BranchingScenario",
         "BranchNode",
         "GameMap",
@@ -2492,6 +2931,7 @@
         "TimedCue",
         "InteractiveVideo",
         "AssessmentSequence",
+        "SingleChoiceSet",
         "BranchingScenario",
         "BranchNode",
         "GameMap",
@@ -2546,6 +2986,7 @@
         "TimedCue",
         "InteractiveVideo",
         "AssessmentSequence",
+        "SingleChoiceSet",
         "BranchingScenario",
         "BranchNode",
         "GameMap",
@@ -2600,6 +3041,7 @@
         "TimedCue",
         "InteractiveVideo",
         "AssessmentSequence",
+        "SingleChoiceSet",
         "BranchingScenario",
         "BranchNode",
         "GameMap",
@@ -2654,6 +3096,7 @@
         "TimedCue",
         "InteractiveVideo",
         "AssessmentSequence",
+        "SingleChoiceSet",
         "BranchingScenario",
         "BranchNode",
         "GameMap",
@@ -2708,6 +3151,7 @@
         "TimedCue",
         "InteractiveVideo",
         "AssessmentSequence",
+        "SingleChoiceSet",
         "BranchingScenario",
         "BranchNode",
         "GameMap",
@@ -2766,6 +3210,7 @@
         "TimedCue",
         "InteractiveVideo",
         "AssessmentSequence",
+        "SingleChoiceSet",
         "BranchingScenario",
         "BranchNode",
         "GameMap",
@@ -2832,6 +3277,7 @@
         "TimedCue",
         "InteractiveVideo",
         "AssessmentSequence",
+        "SingleChoiceSet",
         "BranchingScenario",
         "BranchNode",
         "GameMap",
@@ -2886,6 +3332,7 @@
         "TimedCue",
         "InteractiveVideo",
         "AssessmentSequence",
+        "SingleChoiceSet",
         "BranchingScenario",
         "BranchNode",
         "GameMap",
@@ -2983,6 +3430,7 @@
         "TimedCue",
         "InteractiveVideo",
         "AssessmentSequence",
+        "SingleChoiceSet",
         "BranchingScenario",
         "BranchNode",
         "GameMap",
@@ -3085,6 +3533,7 @@
         "TimedCue",
         "InteractiveVideo",
         "AssessmentSequence",
+        "SingleChoiceSet",
         "BranchingScenario",
         "BranchNode",
         "GameMap",
@@ -3156,6 +3605,7 @@
         "TimedCue",
         "InteractiveVideo",
         "AssessmentSequence",
+        "SingleChoiceSet",
         "BranchingScenario",
         "BranchNode",
         "GameMap",
@@ -3226,6 +3676,7 @@
         "TimedCue",
         "InteractiveVideo",
         "AssessmentSequence",
+        "SingleChoiceSet",
         "BranchingScenario",
         "BranchNode",
         "GameMap",
@@ -3280,6 +3731,7 @@
         "TimedCue",
         "InteractiveVideo",
         "AssessmentSequence",
+        "SingleChoiceSet",
         "BranchingScenario",
         "BranchNode",
         "GameMap",
@@ -3334,6 +3786,7 @@
         "TimedCue",
         "InteractiveVideo",
         "AssessmentSequence",
+        "SingleChoiceSet",
         "BranchingScenario",
         "BranchNode",
         "GameMap",
@@ -3394,6 +3847,7 @@
         "TimedCue",
         "InteractiveVideo",
         "AssessmentSequence",
+        "SingleChoiceSet",
         "BranchingScenario",
         "BranchNode",
         "GameMap",
@@ -3452,6 +3906,7 @@
         "TimedCue",
         "InteractiveVideo",
         "AssessmentSequence",
+        "SingleChoiceSet",
         "BranchingScenario",
         "BranchNode",
         "GameMap",
@@ -3538,6 +3993,7 @@
         "TimedCue",
         "InteractiveVideo",
         "AssessmentSequence",
+        "SingleChoiceSet",
         "BranchingScenario",
         "BranchNode",
         "GameMap",
@@ -3615,6 +4071,7 @@
         "TimedCue",
         "InteractiveVideo",
         "AssessmentSequence",
+        "SingleChoiceSet",
         "BranchingScenario",
         "BranchNode",
         "GameMap",
@@ -3706,6 +4163,7 @@
         "TimedCue",
         "InteractiveVideo",
         "AssessmentSequence",
+        "SingleChoiceSet",
         "BranchingScenario",
         "BranchNode",
         "GameMap",
@@ -3850,6 +4308,7 @@
         "TimedCue",
         "InteractiveVideo",
         "AssessmentSequence",
+        "SingleChoiceSet",
         "BranchingScenario",
         "BranchNode",
         "GameMap",
@@ -3921,7 +4380,10 @@
         "QrContent",
         "Crossword",
         "AdventCalendar",
-        "MapExit"
+        "MapExit",
+        "SortParagraphs",
+        "GuessTheAnswer",
+        "MultimediaChoice"
       ],
       "maxNestingDepth": 1,
       "props": [

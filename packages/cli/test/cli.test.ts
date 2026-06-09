@@ -88,7 +88,7 @@ describe("@lessonkit/cli program", () => {
       entries: Array<{ type: string; h5pMachineName?: string }>;
     };
     expect(payload.ok).toBe(true);
-    expect(payload.count).toBe(57);
+    expect(payload.count).toBe(61);
     const trueFalse = payload.entries.find((e) => e.type === "TrueFalse");
     expect(trueFalse?.h5pMachineName).toBe("H5P.TrueFalse");
     consoleLog.mockRestore();

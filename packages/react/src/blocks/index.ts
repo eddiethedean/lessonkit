@@ -49,3 +49,7 @@ export { AdventCalendar, type AdventCalendarProps, type AdventDoor } from "./Adv
 export { GameMap, type GameMapProps } from "./GameMap";
 export { MapStage, type MapStageProps } from "./MapStage";
 export { MapExit, type MapExitProps } from "./MapExit";
+export { SortParagraphs, type SortParagraphsProps } from "./SortParagraphs";
+export { GuessTheAnswer, type GuessTheAnswerProps } from "./GuessTheAnswer";
+export { MultimediaChoice, type MultimediaChoiceProps, type MultimediaChoiceOption } from "./MultimediaChoice";
+export { SingleChoiceSet, type SingleChoiceSetProps } from "./SingleChoiceSet";

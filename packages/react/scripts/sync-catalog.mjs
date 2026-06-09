@@ -4,6 +4,10 @@ import { fileURLToPath } from "node:url";
 import { buildBlockCatalog } from "../dist/index.js";
 
 const root = dirname(fileURLToPath(import.meta.url));
-const out = join(root, "..", "block-catalog.v3.json");
-const entries = buildBlockCatalog({ version: 3 });
-writeFileSync(out, `${JSON.stringify({ schemaVersion: 3, entries }, null, 2)}\n`);
+const pkgRoot = join(root, "..");
+
+for (const version of [1, 3]) {
+  const out = join(pkgRoot, `block-catalog.v${version}.json`);
+  const entries = buildBlockCatalog({ version });
+  writeFileSync(out, `${JSON.stringify({ schemaVersion: version, entries }, null, 2)}\n`);
+}

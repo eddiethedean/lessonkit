@@ -4,6 +4,25 @@ All notable changes to the LessonKit monorepo are documented here.
 
 - [`@lessonkit/*`](https://www.npmjs.com/org/lessonkit) — core platform (tag `v*.*.*`)
 
+## [1.7.0] - 2026-06-08
+
+Framework **1.7.x** — four Tier B P1 assessment blocks plus Quiz multi-select/shuffle/feedback variants. All seven `@lessonkit/*` packages ship at **1.7.0**. Additive release (no breaking API changes).
+
+### Added
+
+- **`SortParagraphs`** — reorder paragraphs with keyboard Up/Down; `interactionType: "sortParagraphs"`; SPA-only LXPack descriptor
+- **`GuessTheAnswer`** — scored text guess or unscored reveal-only mode; `interactionType: "guessTheAnswer"`
+- **`MultimediaChoice`** — MCQ with image/audio choices; requires `altText` on every option; injectable via MCQ shell (`kind: "multimediaChoice"`)
+- **`SingleChoiceSet`** — sequential MCQ compound (`Quiz` / `KnowledgeCheck` children only); aggregated `CompoundHandle` scoring
+- **`Quiz` / `KnowledgeCheck` variants** — `answers` multi-select, `shuffleChoices` / `shuffleSeed`, `choiceFeedback`; shared `McqAssessmentProps` in `@lessonkit/core`
+- **`@lessonkit/core`** — `sortParagraphs` and `guessTheAnswer` interaction types; MCQ scoring helpers (`scoreMcqSelection`, `shuffleChoiceIndices`); `SINGLE_CHOICE_SET_ALLOWED_CHILD_TYPES`; compound allowlist updates
+- **`@lessonkit/lxpack`** — descriptor kinds `sortParagraphs`, `guessTheAnswer`, `multimediaChoice`; MCQ `answers` descriptor validation; multi-select MCQ is SPA-only for LMS shell until LXPack multi-correct support; manifest schema `$defs`
+- **Block catalog v3** — four Tier B entries with H5P machine names
+- **Storybook** — stories for all four blocks plus Quiz variant stories (multi-select, shuffle, feedback)
+- **Golden example** — `examples/assessments-p0` extended with 1.7.0 blocks
+- **Tests** — unit, compound, lxpack, integration SCORM, e2e smoke; Playwright `assessments-p0-scorm12` project
+- **Docs** — [MIGRATION-1.6-to-1.7](docs/MIGRATION-1.6-to-1.7.md); capability map ✅ for four blocks; authors guide updates
+
 ## [1.6.0] - 2026-06-08
 
 Framework **1.6.x** — portable `.lkcourse` interchange, block registry CLI, Tier C–E content blocks, `GameMap` compound, and release-stabilization fixes across LMS scoring, packaging, telemetry, and assessments. All seven `@lessonkit/*` packages ship at **1.6.0**. Additive release (no breaking API changes).

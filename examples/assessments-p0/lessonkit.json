@@ -3,7 +3,7 @@
   "name": "assessments-p0",
   "course": {
     "courseId": "assessments-p0-demo",
-    "title": "Assessment blocks (1.1.0)",
+    "title": "Assessment blocks (1.7.0)",
     "layout": "single-spa",
     "spaLessonId": "p0-lesson",
     "lessons": [{ "id": "p0-lesson", "title": "P0 interactions" }],
@@ -13,6 +13,28 @@
         "checkId": "phishing-tf",
         "question": "Phishing emails are always easy to spot.",
         "answer": false,
+        "passingScore": 1
+      },
+      {
+        "kind": "multimediaChoice",
+        "checkId": "channel-mm",
+        "question": "Which icon represents the approved IT channel?",
+        "choices": ["Service portal", "Unknown email"],
+        "answer": "Service portal",
+        "passingScore": 1
+      },
+      {
+        "checkId": "scs-report",
+        "question": "Should you forward suspicious mail?",
+        "choices": ["Yes", "No"],
+        "answer": "No",
+        "passingScore": 1
+      },
+      {
+        "checkId": "scs-portal",
+        "question": "Use the IT portal for access requests?",
+        "choices": ["Yes", "No"],
+        "answer": "Yes",
         "passingScore": 1
       }
     ],

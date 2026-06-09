@@ -14,6 +14,9 @@ import {
   Quiz,
   Summary,
   TrueFalse,
+  SortParagraphs,
+  GuessTheAnswer,
+  MultimediaChoice,
 } from "../src";
 
 const config = { xapi: { enabled: false } } as const;
@@ -571,5 +574,62 @@ describe("AssessmentHandle (imperative API)", () => {
     });
     expect(ref.current!.getCurrentState!().submitted).toBe(false);
     expect(screen.queryByTestId("essay-submitted")).toBeNull();
+  });
+
+  it("SortParagraphs exposes handle with sortParagraphs interactionType", () => {
+    const ref = createRef<AssessmentHandle>();
+    render(
+      wrap(
+        <SortParagraphs
+          ref={ref}
+          checkId="sort-handle"
+          paragraphs={["One", "Two"]}
+          correctOrder={[0, 1]}
+        />,
+      ),
+    );
+    fireEvent.click(screen.getByTestId("sort-paragraphs-check"));
+    expect(ref.current?.getXAPIData()?.interactionType).toBe("sortParagraphs");
+    expect(ref.current?.getAnswerGiven()).toBe(true);
+  });
+
+  it("GuessTheAnswer resume restores guess and checked state", () => {
+    const ref = createRef<AssessmentHandle>();
+    render(
+      wrap(
+        <GuessTheAnswer
+          ref={ref}
+          checkId="guess-handle"
+          prompt="Two plus two?"
+          answer="four"
+        />,
+      ),
+    );
+    act(() => {
+      ref.current?.resume?.({ guess: "four", checked: true, passed: true, revealed: true });
+    });
+    expect(ref.current?.getScore()).toBe(1);
+    expect(ref.current?.getXAPIData()?.interactionType).toBe("guessTheAnswer");
+  });
+
+  it("MultimediaChoice getScore reflects selected answer", () => {
+    const ref = createRef<AssessmentHandle>();
+    render(
+      wrap(
+        <MultimediaChoice
+          ref={ref}
+          checkId="mm-handle"
+          question="Pick"
+          choices={[
+            { label: "Yes", mediaUrl: "/y.png", mediaKind: "image", altText: "Yes" },
+            { label: "No", mediaUrl: "/n.png", mediaKind: "image", altText: "No" },
+          ]}
+          answer="Yes"
+        />,
+      ),
+    );
+    fireEvent.click(screen.getByLabelText("Yes"));
+    expect(ref.current?.getScore()).toBe(1);
+    expect(ref.current?.getXAPIData()?.interactionType).toBe("mcq");
   });
 });

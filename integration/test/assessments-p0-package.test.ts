@@ -10,13 +10,13 @@ type PackageJson = {
   outputPath?: string;
 };
 
-describe("assessments-p0 package (1.1.0)", () => {
+describe("assessments-p0 package (1.7.0)", () => {
   beforeAll(async () => {
     ensurePackagesBuilt();
     await ensureAssessmentsP0Built();
   });
 
-  it("packages as SCORM 1.2 with trueFalse assessment", () => {
+  it("packages as SCORM 1.2 with trueFalse and multimediaChoice assessments", () => {
     const { result, json } = runCliJson<PackageJson>(
       ["package", "--target", "scorm12", "--no-build"],
       { cwd: ASSESSMENTS_P0_DIR },

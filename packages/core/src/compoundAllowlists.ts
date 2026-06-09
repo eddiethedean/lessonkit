@@ -1,5 +1,12 @@
 /** Canonical compound child allowlists (H5P sub-content curation). */
 
+/** Tier B P1 assessments shipped in framework 1.7.0. */
+export const ASSESSMENT_17_CHILD_TYPES = [
+  "SortParagraphs",
+  "GuessTheAnswer",
+  "MultimediaChoice",
+] as const;
+
 const PAGE_AND_SLIDE_14_BLOCKS = [
   "Video",
   "Summary",
@@ -56,6 +63,7 @@ export const PAGE_ALLOWED_CHILD_TYPES = [
   "Crossword",
   "AdventCalendar",
   "ProgressTracker",
+  ...ASSESSMENT_17_CHILD_TYPES,
 ] as const;
 
 /** Branch node content (Page-like minus ProgressTracker). */
@@ -102,6 +110,7 @@ export const BRANCH_NODE_ALLOWED_CHILD_TYPES = [
   "Crossword",
   "AdventCalendar",
   "BranchChoice",
+  ...ASSESSMENT_17_CHILD_TYPES,
 ] as const;
 
 export const BRANCHING_SCENARIO_ALLOWED_CHILD_TYPES = ["BranchNode"] as const;
@@ -152,6 +161,7 @@ export const MAP_STAGE_ALLOWED_CHILD_TYPES = [
   "Crossword",
   "AdventCalendar",
   "MapExit",
+  ...ASSESSMENT_17_CHILD_TYPES,
 ] as const;
 
 export const INTERACTIVE_BOOK_ALLOWED_CHILD_TYPES = ["Page"] as const;
@@ -199,6 +209,7 @@ export const SLIDE_ALLOWED_CHILD_TYPES = [
   "QrContent",
   "Crossword",
   "AdventCalendar",
+  ...ASSESSMENT_17_CHILD_TYPES,
 ] as const;
 
 export const SLIDE_DECK_ALLOWED_CHILD_TYPES = ["Slide"] as const;
@@ -217,6 +228,8 @@ export const TIMED_CUE_ALLOWED_CHILD_TYPES = [
   "Questionnaire",
   "Essay",
   "ArithmeticQuiz",
+  "MultimediaChoice",
+  "GuessTheAnswer",
 ] as const;
 
 export const INTERACTIVE_VIDEO_ALLOWED_CHILD_TYPES = ["TimedCue"] as const;
@@ -236,7 +249,10 @@ export const ASSESSMENT_SEQUENCE_ALLOWED_CHILD_TYPES = [
   "ImageSequencing",
   "ArithmeticQuiz",
   "Essay",
+  ...ASSESSMENT_17_CHILD_TYPES,
 ] as const;
+
+export const SINGLE_CHOICE_SET_ALLOWED_CHILD_TYPES = ["Quiz", "KnowledgeCheck"] as const;
 
 export type CompoundParentType =
   | "Page"
@@ -249,7 +265,8 @@ export type CompoundParentType =
   | "BranchingScenario"
   | "BranchNode"
   | "GameMap"
-  | "MapStage";
+  | "MapStage"
+  | "SingleChoiceSet";
 
 const ALLOWLISTS: Record<CompoundParentType, readonly string[]> = {
   Page: PAGE_ALLOWED_CHILD_TYPES,
@@ -263,6 +280,7 @@ const ALLOWLISTS: Record<CompoundParentType, readonly string[]> = {
   BranchNode: BRANCH_NODE_ALLOWED_CHILD_TYPES,
   GameMap: GAME_MAP_ALLOWED_CHILD_TYPES,
   MapStage: MAP_STAGE_ALLOWED_CHILD_TYPES,
+  SingleChoiceSet: SINGLE_CHOICE_SET_ALLOWED_CHILD_TYPES,
 };
 
 export const COMPOUND_MAX_NESTING_DEPTH: Record<CompoundParentType, number> = {
@@ -277,6 +295,7 @@ export const COMPOUND_MAX_NESTING_DEPTH: Record<CompoundParentType, number> = {
   BranchNode: 1,
   GameMap: 2,
   MapStage: 1,
+  SingleChoiceSet: 1,
 };
 
 export function getAllowedChildTypes(parent: CompoundParentType): readonly string[] {

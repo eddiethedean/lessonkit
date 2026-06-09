@@ -419,6 +419,50 @@ describe("assessments", () => {
     ).toBeNull();
   });
 
+  it("returns null for sortParagraphs and guessTheAnswer (SPA scoring only)", () => {
+    expect(
+      assessmentDescriptorToLxpack({
+        kind: "sortParagraphs",
+        checkId: "sort-check",
+        question: "Order",
+        paragraphs: ["A", "B"],
+        correctOrder: [1, 0],
+      }),
+    ).toBeNull();
+    expect(
+      assessmentDescriptorToLxpack({
+        kind: "guessTheAnswer",
+        checkId: "guess-check",
+        question: "Guess",
+        answer: "Paris",
+      }),
+    ).toBeNull();
+  });
+
+  it("maps multimediaChoice to MCQ shell with choice labels", () => {
+    const lx = assessmentDescriptorToLxpack({
+      kind: "multimediaChoice",
+      checkId: "mm-check",
+      question: "Pick",
+      choices: ["Portal", "Email"],
+      answer: "Portal",
+    });
+    expect(lx).not.toBeNull();
+    expect(lx!.questions[0]?.choices.map((c) => c.text)).toEqual(["Portal", "Email"]);
+    expect(lx!.questions[0]?.choices.find((c) => c.correct)?.text).toBe("Portal");
+  });
+
+  it("does not inject multi-select mcq into LMS shell (SPA-only until lxpack multi-correct)", () => {
+    const lx = assessmentDescriptorToLxpack({
+      checkId: "multi-check",
+      question: "Select all",
+      choices: ["A", "B", "C"],
+      answer: "A",
+      answers: ["A", "C"],
+    });
+    expect(lx).toBeNull();
+  });
+
   it("assigns distinct choice ids when labels slug to the same value", () => {
     const lx = assessmentDescriptorToLxpack({
       checkId: "collision-check",

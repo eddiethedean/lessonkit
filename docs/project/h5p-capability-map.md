@@ -73,17 +73,17 @@ H5P **machine names** follow common library ids (e.g. `H5P.MultiChoice`). Displa
 
 | H5P machine name | H5P display name | LessonKit id | Tier | Priority | Status | Framework |
 | --- | --- | --- | --- | --- | --- | --- |
-| `H5P.MultiChoice` | Multiple Choice | `Quiz` / `KnowledgeCheck` | B | — | ✅ | 1.0 |
+| `H5P.MultiChoice` | Multiple Choice | `Quiz` / `KnowledgeCheck` | B | — | ✅ | 1.7.0 (multi-select, shuffle, feedback) |
 | `H5P.TrueFalse` | True/False | `TrueFalse` | B | P0 | ✅ | 1.1.x |
 | `H5P.Blanks` | Fill in the Blanks | `FillInTheBlanks` | B | P0 | ✅ | 1.1.x |
 | `H5P.DragQuestion` | Drag and Drop | `DragAndDrop` | B | P0 | ✅ | 1.1.x |
 | `H5P.DragText` | Drag the Words | `DragTheWords` | B | P0 | ✅ | 1.1.x |
 | `H5P.MarkTheWords` | Mark the Words | `MarkTheWords` | B | P0 | ✅ | 1.1.x |
-| `H5P.SingleChoiceSet` | Single Choice Set | `SingleChoiceSet` | B | P1 | ⬜ | 1.1.1+ |
+| `H5P.SingleChoiceSet` | Single Choice Set | `SingleChoiceSet` | B | P1 | ✅ | 1.7.0 |
 | `H5P.Summary` | Summary | `Summary` | B | P1 | ✅ | 1.4.0 |
-| `H5P.SortParagraphs` | Sort the Paragraphs | `SortParagraphs` | B | P1 | ⬜ | 1.1.1+ |
-| `H5P.GuessTheAnswer` | Guess the Answer | `GuessTheAnswer` | B | P1 | ⬜ | 1.1.1+ |
-| `H5P.ImageMultipleHotspotQuestion` | Multimedia Choice | `MultimediaChoice` | B | P1 | ⬜ | 1.1.1+ |
+| `H5P.SortParagraphs` | Sort the Paragraphs | `SortParagraphs` | B | P1 | ✅ | 1.7.0 |
+| `H5P.GuessTheAnswer` | Guess the Answer | `GuessTheAnswer` | B | P1 | ✅ | 1.7.0 |
+| `H5P.ImageMultipleHotspotQuestion` | Multimedia Choice | `MultimediaChoice` | B | P1 | ✅ | 1.7.0 |
 | `H5P.SpeakTheWords` | Speak the Words | `SpeakTheWords` | B | P2 | ⬜ | 1.2.x |
 | `H5P.SpeakTheWordsSet` | Speak the Words Set | `SpeakTheWordsSet` | B | P2 | ⬜ | 1.2.x |
 | `H5P.Dictation` | Dictation | `Dictation` | B | P2 | ⬜ | 1.2.x |

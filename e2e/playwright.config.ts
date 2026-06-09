@@ -54,6 +54,13 @@ export default defineConfig({
       },
     },
     {
+      name: "assessments-p0-scorm12",
+      testMatch: /assessments-p0\/scorm12.*\.spec\.ts/,
+      use: {
+        ...devices["Desktop Chrome"],
+      },
+    },
+    {
       name: "interactive-book-vite",
       testDir: "./tests/interactive-book",
       use: {

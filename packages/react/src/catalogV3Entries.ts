@@ -1,5 +1,6 @@
 import {
   ASSESSMENT_SEQUENCE_ALLOWED_CHILD_TYPES,
+  SINGLE_CHOICE_SET_ALLOWED_CHILD_TYPES,
   BRANCHING_SCENARIO_ALLOWED_CHILD_TYPES,
   BRANCH_NODE_ALLOWED_CHILD_TYPES,
   GAME_MAP_ALLOWED_CHILD_TYPES,
@@ -23,6 +24,7 @@ const COMPOUND_PARENTS = [
   "TimedCue",
   "InteractiveVideo",
   "AssessmentSequence",
+  "SingleChoiceSet",
   "BranchingScenario",
   "BranchNode",
   "GameMap",
@@ -816,6 +818,14 @@ export function buildV3CatalogFromV2(v2: BlockCatalogEntryV2[]): BlockCatalogEnt
         compoundContract: true as const,
         allowedChildTypes: [...ASSESSMENT_SEQUENCE_ALLOWED_CHILD_TYPES],
         maxNestingDepth: COMPOUND_MAX_NESTING_DEPTH.AssessmentSequence,
+      };
+    }
+    if (entry.type === "SingleChoiceSet") {
+      return {
+        ...base,
+        compoundContract: true as const,
+        allowedChildTypes: [...SINGLE_CHOICE_SET_ALLOWED_CHILD_TYPES],
+        maxNestingDepth: COMPOUND_MAX_NESTING_DEPTH.SingleChoiceSet,
       };
     }
     return base;

@@ -94,6 +94,10 @@ const EXPORTED_BLOCK_TYPES_V3 = [
   "GameMap",
   "MapStage",
   "MapExit",
+  "SortParagraphs",
+  "GuessTheAnswer",
+  "MultimediaChoice",
+  "SingleChoiceSet",
 ] as const;
 
 describe("@lessonkit/react block catalog", () => {

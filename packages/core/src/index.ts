@@ -66,6 +66,16 @@ export type {
   McqAssessmentProps,
 } from "./assessment";
 
+export {
+  isMultiSelectMcq,
+  orderChoicesByIndices,
+  resolveMcqCorrectAnswers,
+  resolveMcqShuffleSeed,
+  scoreMcqSelection,
+  shuffleChoiceIndices,
+} from "./mcqAssessment";
+export type { McqScoreResult } from "./mcqAssessment";
+
 export type { LmsBridgeMode } from "./bridgeTypes";
 
 export type {
@@ -98,6 +108,8 @@ export {
   TIMED_CUE_ALLOWED_CHILD_TYPES,
   INTERACTIVE_VIDEO_ALLOWED_CHILD_TYPES,
   ASSESSMENT_SEQUENCE_ALLOWED_CHILD_TYPES,
+  SINGLE_CHOICE_SET_ALLOWED_CHILD_TYPES,
+  ASSESSMENT_17_CHILD_TYPES,
   BRANCHING_SCENARIO_ALLOWED_CHILD_TYPES,
   BRANCH_NODE_ALLOWED_CHILD_TYPES,
   GAME_MAP_ALLOWED_CHILD_TYPES,

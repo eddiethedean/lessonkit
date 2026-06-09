@@ -146,4 +146,52 @@ describe("validateAssessmentEntry", () => {
     });
     expect(issues.some((i) => i.message === "duplicate checkId")).toBe(true);
   });
+
+  it("validates sortParagraphs correctOrder length", () => {
+    checkIds.clear();
+    const issues = collect({
+      kind: "sortParagraphs",
+      checkId: "sort-bad",
+      question: "Order",
+      paragraphs: ["A", "B"],
+      correctOrder: [0],
+    });
+    expect(issues.some((i) => i.path?.includes("correctOrder"))).toBe(true);
+  });
+
+  it("counts sortParagraphs max score from paragraphs", () => {
+    expect(
+      maxAchievableAssessmentScore({
+        kind: "sortParagraphs",
+        checkId: "sort-max",
+        question: "Order",
+        paragraphs: ["A", "B", "C"],
+        correctOrder: [2, 0, 1],
+      }),
+    ).toBe(3);
+  });
+
+  it("counts mcq multi-select max score from answers length", () => {
+    expect(
+      maxAchievableAssessmentScore({
+        checkId: "multi-max",
+        question: "Select all",
+        choices: ["A", "B", "C"],
+        answer: "A",
+        answers: ["A", "C"],
+      }),
+    ).toBe(2);
+  });
+
+  it("rejects mcq answers not in choices", () => {
+    checkIds.clear();
+    const issues = collect({
+      checkId: "multi-bad",
+      question: "Select",
+      choices: ["A", "B"],
+      answer: "A",
+      answers: ["A", "Z"],
+    });
+    expect(issues.some((i) => i.path?.includes("answers"))).toBe(true);
+  });
 });
