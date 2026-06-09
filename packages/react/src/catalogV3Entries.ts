@@ -525,7 +525,11 @@ export const v3CompoundAndContentEntries = [
     requiredIds: ["checkId"],
     parentConstraints: [...COMPOUND_PARENTS],
     a11y: { element: "section", ariaLabel: "Find the hotspot", keyboard: "Select target buttons.", notes: "Scored." },
-    theming: { surface: "global-inherit" as const, dataAttributes: ["data-lk-check-id"], stylingNotes: "Uses data-lk-check-id." },
+    theming: {
+      surface: "global-inherit" as const,
+      dataAttributes: ["data-lk-check-id"],
+      stylingNotes: "Uses data-lk-check-id; Check is pinned in .lk-find-hotspot-toolbar overlay.",
+    },
     telemetry: { emits: ["assessment_answered", "assessment_completed"], requiresActiveLesson: true },
   },
   {

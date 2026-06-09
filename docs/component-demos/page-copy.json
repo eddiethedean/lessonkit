@@ -235,7 +235,7 @@
     "seeAlso": "- [Quiz](quiz.md) — non-numeric multiple choice"
   },
   "find-hotspot": {
-    "whenToUse": "Use `FindHotspot` when learners must **pick one correct region** on an image — locate a single hazard, control, or UI element.",
+    "whenToUse": "Use `FindHotspot` when learners must **pick one correct region** on an image — locate a single hazard, control, or UI element. Check stays pinned to the image footer so it stays visible after selection.",
     "requirements": "- `targets` use percentage `x`/`y` positions.\n- `correctTargetId` must match one target `id`.",
     "example": "```tsx\n<FindHotspot\n  checkId=\"egress-check\"\n  src=\"/floor-plan.svg\"\n  alt=\"Floor plan\"\n  targets={[\n    { id: \"hazard\", label: \"Blocked aisle\", x: 45, y: 60 },\n    { id: \"exit\", label: \"Clear exit\", x: 80, y: 20 },\n  ]}\n  correctTargetId=\"hazard\"\n/>\n```",
     "seeAlso": "- [FindMultipleHotspots](find-multiple-hotspots.md)\n- [ImageHotspots](image-hotspots.md) — non-scored exploration"

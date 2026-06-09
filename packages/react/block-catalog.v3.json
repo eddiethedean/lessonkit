@@ -3453,7 +3453,7 @@
         "dataAttributes": [
           "data-lk-check-id"
         ],
-        "stylingNotes": "Uses data-lk-check-id."
+        "stylingNotes": "Uses data-lk-check-id; Check is pinned in .lk-find-hotspot-toolbar overlay."
       },
       "telemetry": {
         "emits": [
