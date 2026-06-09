@@ -19,7 +19,8 @@ export const DEMO_INTROS: Record<string, string> = {
   summary: "Build the incident-response summary by selecting only the correct policy statements.",
   "memory-game": "Match each security control with its plain-language description.",
   video: "Watch the two-minute briefing, then continue to the timed knowledge check.",
-  "interactive-video": "Pause points in the briefing verify key safety rules before you move on.",
+  "interactive-video":
+    "The parent compound: video playback plus TimedCue children that pause for checks at timestamps.",
   embed: "Sandboxed iframe for approved third-party tools. Allowlist hosts in production course config.",
   chart: "Quarterly incident categories reported to the security operations team.",
   table: "Keep these escalation contacts handy during an active incident.",
@@ -38,7 +39,8 @@ export const DEMO_INTROS: Record<string, string> = {
   "text-and-heading": "Introduce a policy section with a heading and supporting paragraph.",
   page: "Pages group related content inside an interactive book or compound lesson.",
   slide: "Each slide is a focused beat inside a deck — context, action, then a check.",
-  "timed-cue": "Timed cues pause playback until learners acknowledge policy at key moments.",
+  "timed-cue":
+    "A child block inside InteractiveVideo — each cue surfaces content or a check at a specific timestamp.",
   image: "Use labeled diagrams when text alone cannot convey layout or location.",
   "image-pairing": "Match each piece of PPE with its label before the warehouse walkthrough.",
   "image-sequencing": "Put the incident-reporting screenshots in the correct order.",

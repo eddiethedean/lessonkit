@@ -27,6 +27,7 @@ import {
   TrueFalse,
 } from "@lessonkit/react";
 import { DEMO_HERO_IMAGE, DEMO_MAP_IMAGE, SAMPLE_VIDEO } from "../constants";
+import { DemoCallout } from "../DemoCallout";
 import { DemoChrome } from "../DemoChrome";
 import { demoConfig } from "../demoConfig";
 import { demoFrame } from "../demoFrame";
@@ -114,12 +115,20 @@ export const batch3Demos: ComponentDemo[] = [
   },
   {
     slug: "timed-cue",
-    title: "TimedCue",
+    title: "TimedCue (inside InteractiveVideo)",
     render: () =>
       demoFrame(
         "timed-cue",
         "Playback gates",
-        <InteractiveVideo blockId="cue-demo-video" title="Facility access briefing" src={SAMPLE_VIDEO}>
+        <>
+          <DemoCallout relatedSlug="interactive-video" relatedLabel="Open InteractiveVideo demo">
+            <p>
+              <strong>TimedCue is a child block</strong> — it only works inside{" "}
+              <code>InteractiveVideo</code>. This page highlights cue behavior; the parent compound
+              demo shows the full interactive-video pattern.
+            </p>
+          </DemoCallout>
+          <InteractiveVideo blockId="cue-demo-video" title="Facility access briefing" src={SAMPLE_VIDEO}>
           <TimedCue atSeconds={3} label="Tailgating" mustComplete>
             <TrueFalse checkId="cue-tf" question="Tailgating through secure doors is allowed." answer={false} />
           </TimedCue>
@@ -133,7 +142,8 @@ export const batch3Demos: ComponentDemo[] = [
               answer={true}
             />
           </TimedCue>
-        </InteractiveVideo>,
+        </InteractiveVideo>
+        </>,
       ),
   },
   {
