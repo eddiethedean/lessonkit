@@ -41,6 +41,8 @@ export function ParallaxSlideshow(props: ParallaxSlideshowProps) {
   const resolvedImageSrc = slide?.imageSrc
     ? resolveMediaSrc(slide.imageSrc, mediaOptions)
     : null;
+  const parallaxMode = !reducedMotion;
+  const hasImage = Boolean(resolvedImageSrc);
 
   useEffect(() => {
     if (props.slides.length < 1) return;
@@ -62,43 +64,50 @@ export function ParallaxSlideshow(props: ParallaxSlideshowProps) {
     setIndex(next);
   };
 
+  const slideClassName = [
+    "lk-parallax-slide",
+    parallaxMode && hasImage ? "lk-parallax-slide--parallax lk-parallax-slide--has-image" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+
   return (
     <section
+      className="lk-parallax-slideshow"
       aria-label="Parallax slideshow"
       data-lk-block-id={props.blockId}
       data-testid="parallax-slideshow"
       data-reduced-motion={reducedMotion ? "true" : "false"}
     >
       <article
+        className={slideClassName}
         data-testid={`parallax-slide-${index}`}
         style={
-          reducedMotion
-            ? undefined
-            : {
-                backgroundAttachment: "fixed",
-                backgroundImage: resolvedImageSrc ? `url("${resolvedImageSrc}")` : undefined,
-                backgroundPosition: "center",
-                backgroundSize: "cover",
-                minHeight: "12rem",
-                padding: "1rem",
-              }
+          parallaxMode && hasImage
+            ? { backgroundImage: `url("${resolvedImageSrc}")` }
+            : undefined
         }
       >
+        {parallaxMode && hasImage ? (
+          <div className="lk-parallax-slide-scrim" aria-hidden="true" data-testid="parallax-slide-scrim" />
+        ) : null}
         {reducedMotion && resolvedImageSrc ? (
           <img
             src={resolvedImageSrc}
             alt=""
+            className="lk-parallax-slide-image"
             data-testid="parallax-slide-image"
-            style={{ maxWidth: "100%" }}
           />
         ) : null}
         {!reducedMotion && slide.imageSrc && !resolvedImageSrc ? (
           <p role="alert">This image URL is not allowed.</p>
         ) : null}
-        <h3 data-testid="parallax-slide-title">{slide.title}</h3>
-        <p data-testid="parallax-slide-body">{slide.body}</p>
+        <div className="lk-parallax-slide-content" data-testid="parallax-slide-content">
+          <h3 data-testid="parallax-slide-title">{slide.title}</h3>
+          <p data-testid="parallax-slide-body">{slide.body}</p>
+        </div>
       </article>
-      <nav aria-label="Slide navigation">
+      <nav className="lk-parallax-nav" aria-label="Slide navigation">
         <button
           type="button"
           data-testid="parallax-prev"
