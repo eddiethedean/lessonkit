@@ -35,7 +35,7 @@ export const DEMO_INTROS: Record<string, string> = {
   "game-map": "Tour the office and complete a check at each stop before the exit briefing.",
   "image-hotspots": "Explore the floor plan — tap each marker to review egress and workstation rules.",
   "image-juxtaposition": "Compare a compliant workspace with one that violates clean-desk policy.",
-  "qr-content": "Scan the QR code on the poster to unlock the optional deep-dive checklist.",
+  "qr-content": "Scan the QR code to open the LessonKit security policy on Read the Docs, then use Simulate scan to reveal the bonus checklist copy.",
   "text-and-heading": "Introduce a policy section with a heading and supporting paragraph.",
   page: "Pages group related content inside an interactive book or compound lesson.",
   slide: "Each slide is a focused beat inside a deck — context, action, then a check.",

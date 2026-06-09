@@ -25,7 +25,7 @@ import {
   Video,
   WordSearch,
 } from "@lessonkit/react";
-import { DEMO_HERO_IMAGE, DEMO_MAP_IMAGE, SAMPLE_VIDEO } from "../constants";
+import { DEMO_HERO_IMAGE, DEMO_MAP_IMAGE, DEMO_QR_PAYLOAD, SAMPLE_VIDEO } from "../constants";
 import { DemoCallout } from "../DemoCallout";
 import { demoFrame } from "../demoFrame";
 import type { ComponentDemo } from "../types";
@@ -436,7 +436,7 @@ export const batch2Demos: ComponentDemo[] = [
         <QrContent
           blockId="bonus-qr"
           title="Scan for security checklist"
-          payload="https://lessonkit.dev/security-checklist"
+          payload={DEMO_QR_PAYLOAD}
           hiddenTitle="Checklist unlocked"
           hiddenBody="Optional deep dive: password managers, travel VPN, and incident reporting templates."
         />,

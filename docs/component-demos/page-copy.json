@@ -179,7 +179,7 @@
   "qr-content": {
     "whenToUse": "Use `QrContent` for **scan-to-reveal** bonus material — optional modules, job aids, or Easter-egg content unlocked after displaying a QR code.",
     "requirements": "- `payload` becomes the encoded QR target (URL or text).\n- Hidden content appears after the learner activates reveal.",
-    "example": "```tsx\n<QrContent\n  blockId=\"bonus-qr\"\n  title=\"Scan for security checklist\"\n  payload=\"https://intranet.example.com/security-checklist\"\n  hiddenTitle=\"Checklist unlocked\"\n  hiddenBody=\"Optional deep dive: password managers and travel VPN.\"\n/>\n```",
+    "example": "```tsx\n<QrContent\n  blockId=\"bonus-qr\"\n  title=\"Scan for security checklist\"\n  payload=\"https://lessonkit.readthedocs.io/en/latest/project/security.html\"\n  hiddenTitle=\"Checklist unlocked\"\n  hiddenBody=\"Optional deep dive: password managers and travel VPN.\"\n/>\n```",
     "seeAlso": "- [Block catalog](../block-catalog.md)"
   },
   "text-and-heading": {
