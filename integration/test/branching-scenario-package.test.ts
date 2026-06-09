@@ -2,7 +2,7 @@ import { beforeAll, describe, expect, it } from "vitest";
 import { assertScormZip, assertZipExists } from "./helpers/assertArtifacts.js";
 import { BRANCHING_SCENARIO_DIR, requireCliOutputPath } from "./helpers/paths.js";
 import { ensureBranchingScenarioBuilt } from "./helpers/tempProject.js";
-import { ensurePackagesBuilt, runCliJson } from "./helpers/runCli.js";
+import { runCliJson } from "./helpers/runCli.js";
 
 type PackageJson = {
   ok: boolean;
@@ -12,7 +12,6 @@ type PackageJson = {
 
 describe("branching-scenario package (1.5.0)", () => {
   beforeAll(async () => {
-    ensurePackagesBuilt();
     await ensureBranchingScenarioBuilt();
   });
 

@@ -2,7 +2,7 @@ import { beforeAll, describe, expect, it } from "vitest";
 import { assertScormZip, assertZipExists } from "./helpers/assertArtifacts.js";
 import { ASSESSMENTS_P0_DIR, requireCliOutputPath } from "./helpers/paths.js";
 import { ensureAssessmentsP0Built } from "./helpers/tempProject.js";
-import { ensurePackagesBuilt, runCliJson } from "./helpers/runCli.js";
+import { runCliJson } from "./helpers/runCli.js";
 
 type PackageJson = {
   ok: boolean;
@@ -12,7 +12,6 @@ type PackageJson = {
 
 describe("assessments-p0 package (1.7.0)", () => {
   beforeAll(async () => {
-    ensurePackagesBuilt();
     await ensureAssessmentsP0Built();
   });
 

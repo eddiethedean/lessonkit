@@ -2,7 +2,7 @@ import { beforeAll, describe, expect, it } from "vitest";
 import { assertScormZip, assertZipExists } from "./helpers/assertArtifacts.js";
 import { SLIDE_DECK_DIR, requireCliOutputPath } from "./helpers/paths.js";
 import { ensureSlideDeckBuilt } from "./helpers/tempProject.js";
-import { ensurePackagesBuilt, runCliJson } from "./helpers/runCli.js";
+import { runCliJson } from "./helpers/runCli.js";
 
 type PackageJson = {
   ok: boolean;
@@ -12,7 +12,6 @@ type PackageJson = {
 
 describe("slide-deck package (1.3.0)", () => {
   beforeAll(async () => {
-    ensurePackagesBuilt();
     await ensureSlideDeckBuilt();
   });
 

@@ -9,14 +9,14 @@ import {
   requireCliOutputDir,
   requireCliOutputPath,
 } from "./helpers/paths.js";
+import { withProjectLock } from "./helpers/projectLock.js";
 import {
   copyMinimalFixture,
   createTempDir,
   ensureBranchingScenarioBuilt,
   ensureGoldenBuilt,
-  installProjectDeps,
 } from "./helpers/tempProject.js";
-import { ensurePackagesBuilt, runCliJson } from "./helpers/runCli.js";
+import { runCliJson } from "./helpers/runCli.js";
 
 type PackageJson = {
   ok: boolean;
@@ -28,29 +28,26 @@ type PackageJson = {
 describe("CLI --strict-parity", () => {
   const tempDirs: string[] = [];
 
-  beforeAll(() => {
-    ensurePackagesBuilt();
-  });
-
   afterEach(async () => {
     await Promise.all(tempDirs.splice(0).map((dir) => rm(dir, { recursive: true, force: true })));
   });
 
   it("succeeds on lxpack-golden when React IDs match the manifest", async () => {
     await ensureGoldenBuilt();
-    const { result, json } = runCliJson<PackageJson>(
-      ["package", "--target", "scorm12", "--no-build", "--strict-parity"],
-      { cwd: GOLDEN_DIR },
-    );
-    expect(result.exitCode).toBe(0);
-    expect(json.ok).toBe(true);
+    await withProjectLock(GOLDEN_DIR, () => {
+      const { result, json } = runCliJson<PackageJson>(
+        ["package", "--target", "scorm12", "--no-build", "--strict-parity"],
+        { cwd: GOLDEN_DIR },
+      );
+      expect(result.exitCode).toBe(0);
+      expect(json.ok).toBe(true);
+    });
   });
 
   it("fails when React courseId drifts from lessonkit.json with --strict-parity", async () => {
     const projectDir = await createTempDir();
     tempDirs.push(projectDir);
     await copyMinimalFixture(projectDir);
-    await installProjectDeps(projectDir);
 
     const build = runCliJson<{ ok: boolean }>(["build"], { cwd: projectDir });
     expect(build.result.exitCode).toBe(0);
@@ -70,7 +67,6 @@ describe("CLI --strict-parity", () => {
 
 describe("branching-scenario packaging targets", () => {
   beforeAll(async () => {
-    ensurePackagesBuilt();
     await ensureBranchingScenarioBuilt();
   });
 
