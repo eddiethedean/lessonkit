@@ -1,15 +1,11 @@
 import { rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import { afterEach, beforeAll, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
 import { createTempDir, copyMinimalFixture } from "./helpers/tempProject.js";
-import { ensurePackagesBuilt, runCli } from "./helpers/runCli.js";
+import { runCli } from "./helpers/runCli.js";
 
 describe("CLI failure paths", () => {
   const tempDirs: string[] = [];
-
-  beforeAll(() => {
-    ensurePackagesBuilt();
-  });
 
   afterEach(async () => {
     await Promise.all(tempDirs.splice(0).map((dir) => rm(dir, { recursive: true, force: true })));

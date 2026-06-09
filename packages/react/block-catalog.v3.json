@@ -974,6 +974,12 @@
           "description": "Correct ordered summary."
         },
         {
+          "name": "instructions",
+          "type": "string",
+          "required": false,
+          "description": "Learner-facing prompt; defaults to a multi-select instruction."
+        },
+        {
           "name": "enableRetry",
           "type": "boolean",
           "required": false,
@@ -1019,7 +1025,7 @@
       "a11y": {
         "element": "section",
         "ariaLabel": "Summary",
-        "keyboard": "Select statements in order.",
+        "keyboard": "Select statements for the summary.",
         "notes": "H5P Summary equivalent."
       },
       "theming": {

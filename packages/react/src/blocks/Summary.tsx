@@ -12,10 +12,15 @@ import { setLessonkitBlockType } from "../compound/blockType";
 import { useLessonkit } from "../hooks";
 import { normalizeComponentId, isDevEnvironment } from "../runtime/validateComponentId";
 
+export const DEFAULT_SUMMARY_INSTRUCTIONS =
+  "Select the statements that belong in the summary.";
+
 export type SummaryProps = AssessmentBaseProps & {
   statements: string[];
   /** Ordered correct summary statements. */
   correct: string[];
+  /** Learner-facing prompt; defaults to {@link DEFAULT_SUMMARY_INSTRUCTIONS}. */
+  instructions?: string;
 };
 
 const INTERACTION: AssessmentInteractionType = "summary";
@@ -198,7 +203,9 @@ function SummaryInner(
 
   return (
     <section aria-label="Summary" data-lk-check-id={checkId} data-testid="summary">
-      <p>Select statements in order to build the summary.</p>
+      <p data-testid="summary-instructions">
+        {props.instructions ?? DEFAULT_SUMMARY_INSTRUCTIONS}
+      </p>
       <ol data-testid="summary-selected">
         {selected.map((s, i) => (
           <li key={`${i}-${selectedIndices[i]}`}>{s}</li>

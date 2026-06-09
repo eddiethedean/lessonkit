@@ -236,6 +236,37 @@ describe("Tier B/C/D block components", () => {
     expect(ref.current?.getCurrentState?.().selected).toEqual(["a", "b"]);
   });
 
+  it("Summary shows default instruction text", () => {
+    render(
+      wrap(
+        <Summary
+          checkId="summary-instructions-default"
+          statements={["First", "Second"]}
+          correct={["First"]}
+        />,
+      ),
+    );
+    expect(screen.getByTestId("summary-instructions").textContent).toBe(
+      "Select the statements that belong in the summary.",
+    );
+  });
+
+  it("Summary renders custom instructions when provided", () => {
+    render(
+      wrap(
+        <Summary
+          checkId="summary-instructions-custom"
+          statements={["First", "Second"]}
+          correct={["First"]}
+          instructions="Pick the three policy steps."
+        />,
+      ),
+    );
+    expect(screen.getByTestId("summary-instructions").textContent).toBe(
+      "Pick the three policy steps.",
+    );
+  });
+
   it("Summary accepts correct statement order", () => {
     render(
       wrap(

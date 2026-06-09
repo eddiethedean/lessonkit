@@ -1,6 +1,6 @@
 import { join } from "node:path";
 import { rm } from "node:fs/promises";
-import { afterEach, beforeAll, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
 import {
   assertScormZip,
   assertStandaloneDir,
@@ -8,7 +8,7 @@ import {
 } from "./helpers/assertArtifacts.js";
 import { requireCliOutputDir, requireCliOutputPath } from "./helpers/paths.js";
 import { createTempDir, prepareInitProject, prepareMinimalProject } from "./helpers/tempProject.js";
-import { ensurePackagesBuilt, runCliJson } from "./helpers/runCli.js";
+import { runCliJson } from "./helpers/runCli.js";
 
 type PackageJson = {
   ok: boolean;
@@ -19,10 +19,6 @@ type PackageJson = {
 
 describe("CLI init → build → package", () => {
   const tempDirs: string[] = [];
-
-  beforeAll(() => {
-    ensurePackagesBuilt();
-  });
 
   afterEach(async () => {
     await Promise.all(tempDirs.splice(0).map((dir) => rm(dir, { recursive: true, force: true })));

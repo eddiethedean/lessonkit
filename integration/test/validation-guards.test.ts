@@ -1,8 +1,11 @@
 import { readFile, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import { afterEach, beforeAll, describe, expect, it } from "vitest";
-import { createTempDir, copyMinimalFixture, installProjectDeps } from "./helpers/tempProject.js";
-import { ensurePackagesBuilt, runCliJson } from "./helpers/runCli.js";
+import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
+import {
+  cloneProjectTree,
+  prepareBuiltMinimalProject,
+} from "./helpers/tempProject.js";
+import { runCliJson } from "./helpers/runCli.js";
 
 type PackageJson = {
   ok: boolean;
@@ -11,29 +14,28 @@ type PackageJson = {
 
 describe("packaging validation guards", () => {
   const tempDirs: string[] = [];
+  let sharedBuiltProject: string;
 
-  beforeAll(() => {
-    ensurePackagesBuilt();
+  beforeAll(async () => {
+    sharedBuiltProject = await prepareBuiltMinimalProject();
+  });
+
+  afterAll(async () => {
+    await rm(sharedBuiltProject, { recursive: true, force: true });
   });
 
   afterEach(async () => {
     await Promise.all(tempDirs.splice(0).map((dir) => rm(dir, { recursive: true, force: true })));
   });
 
-  async function prepareBuiltProject(): Promise<string> {
-    const projectDir = await createTempDir();
+  async function cloneBuiltProject(): Promise<string> {
+    const projectDir = await cloneProjectTree(sharedBuiltProject);
     tempDirs.push(projectDir);
-    await copyMinimalFixture(projectDir);
-    await installProjectDeps(projectDir);
-
-    const build = runCliJson<{ ok: boolean }>(["build"], { cwd: projectDir });
-    expect(build.result.exitCode).toBe(0);
-    expect(build.json.ok).toBe(true);
     return projectDir;
   }
 
   it("rejects unknown assessment kinds at package time", async () => {
-    const projectDir = await prepareBuiltProject();
+    const projectDir = await cloneBuiltProject();
     const manifestPath = join(projectDir, "lessonkit.json");
     const manifest = JSON.parse(await readFile(manifestPath, "utf8")) as {
       course: { assessments: unknown[] };
@@ -55,7 +57,7 @@ describe("packaging validation guards", () => {
   });
 
   it("rejects incomplete custom themes at package time", async () => {
-    const projectDir = await prepareBuiltProject();
+    const projectDir = await cloneBuiltProject();
     const manifestPath = join(projectDir, "lessonkit.json");
     const manifest = JSON.parse(await readFile(manifestPath, "utf8")) as {
       course: { theme: unknown };

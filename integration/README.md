@@ -9,6 +9,8 @@ npm run build:packages && npm run -w @lessonkit/cli build
 npm run test:integration
 ```
 
+The suite uses a Vitest `globalSetup` that builds packages once, pre-installs a shared minimal-course fixture under `.cache/`, and prebuilds example apps in parallel. Temp projects copy from that cache instead of running `npm install` per test. Test files run in parallel (up to 4 workers); golden-example packaging is serialized with a per-project lock.
+
 ## Coverage
 
 | File | Tests |

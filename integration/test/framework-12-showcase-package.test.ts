@@ -2,7 +2,7 @@ import { beforeAll, describe, expect, it } from "vitest";
 import { assertScormZip, assertZipExists } from "./helpers/assertArtifacts.js";
 import { FRAMEWORK_12_SHOWCASE_DIR, requireCliOutputPath } from "./helpers/paths.js";
 import { ensureFramework12ShowcaseBuilt } from "./helpers/tempProject.js";
-import { ensurePackagesBuilt, runCliJson } from "./helpers/runCli.js";
+import { runCliJson } from "./helpers/runCli.js";
 
 type PackageJson = {
   ok: boolean;
@@ -12,7 +12,6 @@ type PackageJson = {
 
 describe("framework-12-showcase package (1.6.x)", () => {
   beforeAll(async () => {
-    ensurePackagesBuilt();
     await ensureFramework12ShowcaseBuilt();
   });
 
