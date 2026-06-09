@@ -133,6 +133,7 @@ Construct a summary from a statement bank in correct order.
 | `checkId` | CheckId | yes | Stable check id. |
 | `statements` | string[] | yes | Available statements. |
 | `correct` | string[] | yes | Correct ordered summary. |
+| `instructions` | string | no | Learner-facing prompt; defaults to a multi-select instruction. |
 | `enableRetry` | boolean | no | Allow retry after completion. |
 | `enableSolutionsButton` | boolean | no | Show solution control. |
 | `autoCheck` | boolean | no | Check answers automatically when possible. |

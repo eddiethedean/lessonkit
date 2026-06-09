@@ -17,6 +17,21 @@ Use `Summary` when learners must **pick the correct statements** from a larger p
 - Requires `checkId` inside an active `Lesson`.
 - `statements` is the full pool; `correct` lists the valid subset (order matters for scoring).
 
+## Instructions
+
+By default, learners see: **Select the statements that belong in the summary.**
+
+Override with the optional `instructions` prop when you need task-specific wording:
+
+```tsx
+<Summary
+  checkId="summary-1"
+  instructions="Choose the three steps that belong in the incident-response summary."
+  statements={[/* ... */]}
+  correct={[/* ... */]}
+/>
+```
+
 <!-- try-it:start -->
 ## Try it
 
