@@ -1,4 +1,4 @@
-# Portable interchange (`.lkcourse`) (1.6.x)
+# Portable interchange (`.lkcourse`) (1.7.x)
 
 LessonKit ships three related manifest layers. This page documents the **portable archive** format introduced in **1.6.0**.
 

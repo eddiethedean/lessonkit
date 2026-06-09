@@ -1,4 +1,4 @@
-# lessonkit.json manifest reference (1.6.x)
+# lessonkit.json manifest reference (1.7.x)
 
 Every LessonKit course includes a root **`lessonkit.json`** manifest (`schemaVersion: 1`). The CLI discovers it by walking up from `--cwd`. Packaging validates the manifest against your React props and Vite build output.
 

@@ -2,11 +2,11 @@
 name: lessonkit-migrate
 description: >-
   Migrate LessonKit projects across major versions — 0.9→1.0 (telemetry, plugins),
-  1.4→1.5 (BranchingScenario), 1.5→1.6 (.lkcourse, blocks list). Use when upgrading
+  1.4→1.5 (BranchingScenario), 1.5→1.6 (.lkcourse, blocks list), 1.6→1.7 (Tier B P1 assessments). Use when upgrading
   @lessonkit/* deps or fixing breaking changes after a release bump.
 license: Apache-2.0
 metadata:
-  lessonkit-version: "1.6.0"
+  lessonkit-version: "1.7.0"
 ---
 
 # LessonKit version migrations
@@ -15,6 +15,7 @@ Pick the guide that matches your **from** version. Run `lessonkit build` and fix
 
 | From | Human guide |
 | --- | --- |
+| 1.6.x | https://lessonkit.readthedocs.io/en/latest/MIGRATION-1.6-to-1.7.html |
 | 1.5.x | https://lessonkit.readthedocs.io/en/latest/MIGRATION-1.5-to-1.6.html |
 | 1.4.x | https://lessonkit.readthedocs.io/en/latest/MIGRATION-1.4-to-1.5.html |
 | 1.3.x | https://lessonkit.readthedocs.io/en/latest/MIGRATION-1.3-to-1.4.html |
@@ -22,6 +23,22 @@ Pick the guide that matches your **from** version. Run `lessonkit build` and fix
 | 1.1.x | https://lessonkit.readthedocs.io/en/latest/MIGRATION-1.1-to-1.2.html |
 | 1.0.x | https://lessonkit.readthedocs.io/en/latest/MIGRATION-1.0-to-1.1.html |
 | 0.9.x | https://lessonkit.readthedocs.io/en/latest/MIGRATION-0.x-to-1.0.html |
+
+## 1.6.x → 1.7.0 (additive)
+
+**Dependency pins (example):**
+
+```json
+"@lessonkit/react": "^1.7.0",
+"@lessonkit/core": "^1.7.0",
+"@lessonkit/cli": "^1.7.0"
+```
+
+**New blocks (opt-in):** `SortParagraphs`, `GuessTheAnswer`, `MultimediaChoice`, `SingleChoiceSet`; Quiz multi-select/shuffle/feedback variants.
+
+**LXPack:** pins `@lxpack/*` at **0.7.0** — multi-select MCQ and `shuffleChoices` inject into LMS shell quizzes.
+
+Full checklist: `references/checklist-1.6-to-1.7.md` · Human guide: https://lessonkit.readthedocs.io/en/latest/MIGRATION-1.6-to-1.7.html
 
 ## 1.5.x → 1.6.0 (additive)
 

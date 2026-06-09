@@ -6,7 +6,7 @@ Maintainers: label suitable issues **`good first issue`** or **`help wanted`** i
 
 ## Documentation
 
-- Fix broken links or stale version labels (framework **1.6.x**, npm **@lessonkit/react**).
+- Fix broken links or stale version labels (framework **1.7.x**, npm **@lessonkit/react**).
 - Add a short “how I debugged X” note to [troubleshooting](../guides/vibe-coding/troubleshooting.md).
 - Improve [glossary](../reference/glossary.md) definitions from your onboarding experience.
 

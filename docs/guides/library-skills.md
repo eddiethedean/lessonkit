@@ -11,7 +11,7 @@ Source: [`library-skills/`](https://github.com/eddiethedean/lessonkit/tree/main/
 | **lessonkit-author** | Editing `App.tsx`, `lessonkit.json`, React blocks; `lessonkit dev` / `build` |
 | **lessonkit-packaging** | LMS export — `lessonkit package --target …` |
 | **lessonkit-telemetry** | Tracking, xAPI, plugins, LXPack bridge |
-| **lessonkit-migrate** | Upgrading `@lessonkit/*` — [Upgrade guide](upgrading-lessonkit.md) and migration docs (0.9.x through 1.6.x) |
+| **lessonkit-migrate** | Upgrading `@lessonkit/*` — [Upgrade guide](upgrading-lessonkit.md) and migration docs (0.9.x through 1.7.x) |
 
 ## Install
 

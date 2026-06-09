@@ -122,6 +122,19 @@ Export from `@lessonkit/react` / `@lessonkit/react/blocks` (catalog v3, framewor
 
 Full prop contracts: [Block catalog — 1.6.0](block-catalog.md#catalog-v3-additions-framework-160) · [generated prop tables](block-catalog.md#generated-prop-reference-catalog-v3). Discover blocks from CLI: `lessonkit blocks list --json`.
 
+### Framework 1.7 blocks
+
+Export from `@lessonkit/react` / `@lessonkit/react/blocks` (catalog v3, framework **1.7.0+**):
+
+| Block | Role |
+| --- | --- |
+| `SortParagraphs`, `GuessTheAnswer`, `MultimediaChoice` | Assessment (`checkId` required) |
+| `SingleChoiceSet` | Compound (child `Quiz` / `KnowledgeCheck` only) |
+
+**Quiz / `KnowledgeCheck` variants:** `answers`, `shuffleChoices`, `shuffleSeed`, `choiceFeedback` — see [Migration 1.6 → 1.7](../MIGRATION-1.6-to-1.7.md).
+
+Full prop contracts: [Block catalog — 1.7.0](block-catalog.md#catalog-v3-additions-framework-170) · [generated prop tables](block-catalog.md#generated-prop-reference-catalog-v3).
+
 ## Machine-readable contracts
 
 | Artifact | Package path |

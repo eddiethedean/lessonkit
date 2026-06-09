@@ -1,6 +1,6 @@
 # React blocks
 
-Use only block types listed in `@lessonkit/react/block-catalog.v3.json`. `buildBlockCatalog()` defaults to catalog v3 (framework 1.6.x).
+Use only block types listed in `@lessonkit/react/block-catalog.v3.json`. `buildBlockCatalog()` defaults to catalog v3 (framework 1.7.x).
 
 ## Layout pattern
 
@@ -41,6 +41,10 @@ export default function App() {
 ## Content blocks (1.5+)
 
 `Embed`, `Chart`, `Text`, `Heading`, `Image`, `Video`, `Accordion`, `DialogCards`, `Flashcards`, `MemoryGame`, `InformationWall`, `ParallaxSlideshow`, `ImageSlider`
+
+## Assessments (1.7.x)
+
+`SortParagraphs`, `GuessTheAnswer`, `MultimediaChoice`, `SingleChoiceSet` — Quiz supports `answers` (multi-select), `shuffleChoices`, `choiceFeedback`
 
 ## Content waves (1.6.x)
 

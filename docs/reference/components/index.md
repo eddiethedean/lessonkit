@@ -75,14 +75,14 @@ From the repo root: `bash docs/scripts/build-component-demos.sh`, then open `doc
 | [`Quiz`](quiz.md) | Assessment | Multiple Choice |
 | [`Reflection`](reflection.md) | Content | — |
 | [`Scenario`](scenario.md) | Content | — |
+| [`SingleChoiceSet`](single-choice-set.md) | Compound | Single Choice Set |
 | [`Slide`](slide.md) | Compound child | Course Presentation (slide) |
 | [`SlideDeck`](slide-deck.md) | Compound | Course Presentation |
-| [`SingleChoiceSet`](single-choice-set.md) | Compound | Single Choice Set |
 | [`SortParagraphs`](sort-paragraphs.md) | Assessment | Sort the Paragraphs |
 | [`Summary`](summary.md) | Assessment | Summary |
 | [`Table`](table.md) | Content | Table |
 | [`Text & Heading`](text-and-heading.md) | Content | — |
-| [`TimedCue`](timed-cue.md) | Compound child | Interactive Video (cue) |
+| [`TimedCue (inside InteractiveVideo)`](timed-cue.md) | Compound child | Interactive Video (cue) |
 | [`Timeline`](timeline.md) | Content | Timeline |
 | [`TrueFalse`](true-false.md) | Assessment | True/False |
 | [`Video`](video.md) | Content | Self-hosted video |
@@ -152,9 +152,9 @@ questionnaire
 quiz
 reflection
 scenario
+single-choice-set
 slide
 slide-deck
-single-choice-set
 sort-paragraphs
 summary
 table

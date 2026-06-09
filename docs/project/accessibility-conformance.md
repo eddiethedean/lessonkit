@@ -1,6 +1,6 @@
 # Accessibility conformance (interim statement)
 
-LessonKit targets **WCAG 2.1 Level AA** patterns for shipped React blocks (framework **1.6.x**, block catalog v3). This page is an **interim** statement for enterprise evaluators—not a VPAT or formal conformance report.
+LessonKit targets **WCAG 2.1 Level AA** patterns for shipped React blocks (framework **1.7.x**, block catalog v3). This page is an **interim** statement for enterprise evaluators—not a VPAT or formal conformance report.
 
 ## Current status
 
@@ -21,13 +21,17 @@ LessonKit targets **WCAG 2.1 Level AA** patterns for shipped React blocks (frame
 
 See [Accessibility reference](../reference/accessibility.md) and [Theming and accessibility](../guides/react-developers/theming-and-accessibility.md).
 
-## Per-block interim status (1.6.x catalog)
+## Per-block interim status (1.7.x catalog)
 
 Status key: **Implemented** = keyboard + labeled controls in framework code; **Partial** = known gaps or author-dependent content; **Author** = framework provides structure; author must supply accessible content.
 
 | Block | Category | Interim status | Notes |
 | --- | --- | --- | --- |
-| `Quiz` / `KnowledgeCheck` | Assessment | Implemented | Radio group semantics; retry/solutions buttons |
+| `Quiz` / `KnowledgeCheck` | Assessment | Implemented | Radio/checkbox group semantics; multi-select **Check** gate (1.7); retry/solutions buttons |
+| `SortParagraphs` | Assessment | Implemented | Reorder controls with keyboard Up/Down (1.7) |
+| `GuessTheAnswer` | Assessment | Implemented | Text input or reveal-only mode (1.7) |
+| `MultimediaChoice` | Assessment | Implemented | Labeled media choices; required `altText` (1.7) |
+| `SingleChoiceSet` | Compound | Implemented | Sequential MCQ steps; aggregated score (1.7) |
 | `TrueFalse` | Assessment | Implemented | Two-option labeled controls |
 | `FillInTheBlanks` | Assessment | Implemented | Inline inputs with labels |
 | `DragAndDrop` / `DragTheWords` | Assessment | Implemented | Keyboard alternative paths |
