@@ -11,6 +11,7 @@ import {
   TrueFalse,
 } from "@lessonkit/react";
 import { DEMO_MAP_IMAGE } from "../constants";
+import { DemoCallout } from "../DemoCallout";
 import { demoFrame } from "../demoFrame";
 import type { ComponentDemo } from "../types";
 
@@ -22,7 +23,15 @@ export const batch4Demos: ComponentDemo[] = [
       demoFrame(
         "branch-node",
         "Call opening",
-        <BranchingScenario blockId="node-demo" title="Card dispute call" startNodeId="start" showPathScore>
+        <>
+          <DemoCallout relatedSlug="branching-scenario" relatedLabel="Open BranchingScenario demo">
+            <p>
+              <strong>BranchNode is a child block</strong> — it only works inside{" "}
+              <code>BranchingScenario</code>. Only the active node is visible; the path indicator and
+              status line show where you are after each choice.
+            </p>
+          </DemoCallout>
+          <BranchingScenario blockId="node-demo" title="Card dispute call" startNodeId="start" showPathScore>
           <BranchNode nodeId="start" title="Opening">
             <Text>
               A caller says their card was charged after clicking a shipping notification. They want
@@ -43,7 +52,8 @@ export const batch4Demos: ComponentDemo[] = [
               check — add assessments on terminal paths when needed.
             </Text>
           </BranchNode>
-        </BranchingScenario>,
+        </BranchingScenario>
+        </>,
       ),
   },
   {
@@ -53,7 +63,15 @@ export const batch4Demos: ComponentDemo[] = [
       demoFrame(
         "branch-choice",
         "Escalation fork",
-        <BranchingScenario blockId="choice-demo" title="Invoice dispute" startNodeId="fork" showPathScore>
+        <>
+          <DemoCallout relatedSlug="branching-scenario" relatedLabel="Open BranchingScenario demo">
+            <p>
+              <strong>BranchChoice is a child block</strong> — it lives inside an active{" "}
+              <code>BranchNode</code>. After you pick a path, the scenario advances and the status
+              line confirms your selection.
+            </p>
+          </DemoCallout>
+          <BranchingScenario blockId="choice-demo" title="Invoice dispute" startNodeId="fork" showPathScore>
           <BranchNode nodeId="fork">
             <Scenario blockId="choice-scenario">
               <Text>
@@ -77,7 +95,8 @@ export const batch4Demos: ComponentDemo[] = [
               answer={true}
             />
           </BranchNode>
-        </BranchingScenario>,
+        </BranchingScenario>
+        </>,
       ),
   },
   {

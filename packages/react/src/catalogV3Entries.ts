@@ -267,8 +267,16 @@ export const v3CompoundAndContentEntries = [
     ],
     requiredIds: [],
     parentConstraints: ["BranchingScenario"],
-    a11y: { element: "section", ariaLabel: "Branch node", keyboard: "Branch choices are buttons.", notes: "H5P Branching Scenario node." },
-    theming: { surface: "global-inherit" as const, stylingNotes: "Node panel." },
+    a11y: {
+      element: "section",
+      ariaLabel: "Branch node",
+      keyboard: "Branch choices in radiogroup.",
+      notes: "Terminal nodes styled with completion banner from parent.",
+    },
+    theming: {
+      surface: "global-inherit" as const,
+      stylingNotes: "Uses .lk-branch-node; terminal variant .lk-branch-node--terminal.",
+    },
     telemetry: { emits: ["branch_node_viewed"], requiresActiveLesson: true },
   },
   {
@@ -285,8 +293,13 @@ export const v3CompoundAndContentEntries = [
     ],
     requiredIds: [],
     parentConstraints: ["BranchNode"],
-    a11y: { element: "button", ariaLabel: "Branch choice", keyboard: "Activate to follow branch.", notes: "Radio group pattern." },
-    theming: { surface: "global-inherit" as const, stylingNotes: "Choice button." },
+    a11y: {
+      element: "button",
+      ariaLabel: "Branch choice",
+      keyboard: "Activate to follow branch.",
+      notes: "Radio in radiogroup; parent announces navigation.",
+    },
+    theming: { surface: "global-inherit" as const, stylingNotes: "Uses .lk-button.lk-branch-choice." },
     telemetry: { emits: ["branch_selected"], requiresActiveLesson: true },
   },
   {
@@ -312,9 +325,12 @@ export const v3CompoundAndContentEntries = [
       element: "section",
       ariaLabel: "Branching scenario",
       keyboard: "Branch choices; assessments in nodes.",
-      notes: "H5P Branching Scenario equivalent.",
+      notes: "Path indicator, aria-live status, terminal banner.",
     },
-    theming: { surface: "global-inherit" as const, stylingNotes: "Scenario chrome." },
+    theming: {
+      surface: "global-inherit" as const,
+      stylingNotes: "Uses .lk-branch-path-indicator, .lk-branching-scenario-active-node.",
+    },
     telemetry: { emits: ["branch_node_viewed", "branch_selected"], requiresActiveLesson: true },
   },
   {

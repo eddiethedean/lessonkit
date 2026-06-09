@@ -6,11 +6,17 @@
 **H5P Branching Scenario (node)**
 :::
 
+:::{admonition} Parent compound
+:class: important
+
+`BranchNode` only works inside [`BranchingScenario`](branching-scenario.md). The parent hides inactive nodes and shows path progress via the built-in path indicator and status line.
+:::
+
 ## When to use
 
 Use `BranchNode` **only inside [`BranchingScenario`](branching-scenario.md)**. Each node is a step in the graph: narrative content, optional `BranchChoice` children, and an optional `terminal` flag for end states.
 
-The parent hides inactive nodes; you author all nodes as children of the scenario.
+Terminal nodes are styled distinctly and trigger the parent’s completion banner.
 
 ## Requirements
 

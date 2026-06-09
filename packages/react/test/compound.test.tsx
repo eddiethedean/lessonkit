@@ -1116,6 +1116,60 @@ describe("BranchingScenario", () => {
     expect(screen.getByText("Credit path complete.")).toBeTruthy();
   });
 
+  it("shows path indicator, navigation status, and terminal styling after a choice", () => {
+    render(
+      wrap(
+        <BranchingScenario blockId="branch-feedback" title="Resolution paths" startNodeId="offer">
+          <BranchNode nodeId="offer" title="Offer step">
+            <Scenario>
+              <p>Choose how to close the loop.</p>
+            </Scenario>
+            <BranchChoice label="Offer credit" targetNodeId="credit" />
+            <BranchChoice label="Supervisor" targetNodeId="supervisor" />
+          </BranchNode>
+          <BranchNode nodeId="credit" terminal title="Credit outcome">
+            <Text>Credit path complete.</Text>
+          </BranchNode>
+          <BranchNode nodeId="supervisor" terminal title="Supervisor outcome">
+            <Text>Supervisor path complete.</Text>
+          </BranchNode>
+        </BranchingScenario>,
+      ),
+    );
+    expect(screen.getByTestId("branch-path-indicator").querySelectorAll("li").length).toBe(1);
+    expect(screen.getByTestId("branch-nav-status").textContent).toContain("Now at Offer step");
+    fireEvent.click(screen.getByTestId("branch-choice-credit"));
+    expect(screen.getByTestId("branch-nav-status").textContent).toContain("Offer credit");
+    expect(screen.getByTestId("branch-nav-status").textContent).toContain("Credit outcome");
+    expect(screen.getByTestId("branch-path-indicator").querySelectorAll("li").length).toBe(2);
+    expect(screen.getByTestId("branch-terminal-banner")).toBeDefined();
+    expect(screen.getByTestId("branch-node-credit").classList.contains("lk-branch-node--terminal")).toBe(true);
+  });
+
+  it("shows optional path recap at terminal when showPathRecap is enabled", () => {
+    render(
+      wrap(
+        <BranchingScenario
+          blockId="branch-recap"
+          title="Resolution paths"
+          startNodeId="offer"
+          showPathRecap
+        >
+          <BranchNode nodeId="offer" title="Offer step">
+            <BranchChoice label="Offer credit" targetNodeId="credit" />
+          </BranchNode>
+          <BranchNode nodeId="credit" terminal title="Credit outcome">
+            <Text>Credit path complete.</Text>
+          </BranchNode>
+        </BranchingScenario>,
+      ),
+    );
+    fireEvent.click(screen.getByTestId("branch-choice-credit"));
+    expect(screen.getByTestId("branch-path-recap")).toBeDefined();
+    expect(screen.getByTestId("branch-path-recap").textContent).toContain("Offer step");
+    expect(screen.getByTestId("branch-path-recap").textContent).toContain("Credit outcome");
+  });
+
   it("scores only the visited branch assessments", () => {
     const ref = createRef<CompoundHandle>();
     render(

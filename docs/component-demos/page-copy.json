@@ -72,7 +72,7 @@
     "seeAlso": "- [slide-deck example](../../examples/index.md#slide-deck-examplesslide-deck)\n- [Slide](slide.md)"
   },
   "branching-scenario": {
-    "whenToUse": "Use `BranchingScenario` for **decision-tree narratives** — customer calls, compliance paths, or soft-skill branching where choices change what learners see next.\n\nCompose [`BranchNode`](branch-node.md) and [`BranchChoice`](branch-choice.md) children. Optional path scoring via `showPathScore`.",
+    "whenToUse": "Use `BranchingScenario` for **decision-tree narratives** — customer calls, compliance paths, or soft-skill branching where choices change what learners see next.\n\nCompose [`BranchNode`](branch-node.md) and [`BranchChoice`](branch-choice.md) children. Built-in path indicator and status feedback show progress; terminal nodes display a completion banner. Optional path scoring via `showPathScore`.",
     "requirements": "- `startNodeId` must match a `BranchNode`.\n- Validate the graph with `validateBranchGraph()` before shipping.\n- Add `course.assessments[]` only when nodes embed scored blocks.",
     "example": "```tsx\n<BranchingScenario blockId=\"call-paths\" title=\"Suspicious charge call\" startNodeId=\"opening\" showPathScore>\n  <BranchNode nodeId=\"opening\">\n    <Text>A customer reports a duplicate charge after clicking a shipping email link.</Text>\n    <BranchChoice label=\"Acknowledge concern and verify account\" targetNodeId=\"empathy\" />\n    <BranchChoice label=\"Quote the no-refund policy first\" targetNodeId=\"policy\" />\n  </BranchNode>\n  <BranchNode nodeId=\"empathy\" terminal>\n    <Text>You secured the account and escalated to fraud review.</Text>\n  </BranchNode>\n</BranchingScenario>\n```",
     "seeAlso": "- [Core — branching](../core.md#branching-scenario-meta)\n- [BranchNode](branch-node.md)"
@@ -283,13 +283,13 @@
     "seeAlso": "- [Block catalog](../block-catalog.md)"
   },
   "branch-node": {
-    "whenToUse": "Use `BranchNode` **only inside [`BranchingScenario`](branching-scenario.md)**. Each node is a step in the graph: narrative content, optional `BranchChoice` children, and an optional `terminal` flag for end states.\n\nThe parent hides inactive nodes; you author all nodes as children of the scenario.",
+    "whenToUse": "Use `BranchNode` **only inside [`BranchingScenario`](branching-scenario.md)**. Each node is a step in the graph: narrative content, optional `BranchChoice` children, and an optional `terminal` flag for end states.\n\nThe parent hides inactive nodes and shows a path indicator plus status line as learners advance.",
     "requirements": "- `nodeId` must be unique within the scenario.\n- `startNodeId` on the parent must match an existing node.\n- Terminal nodes often hold assessments or completion copy.",
     "example": "```tsx\n<BranchingScenario blockId=\"card-dispute\" title=\"Card dispute call\" startNodeId=\"start\" showPathScore>\n  <BranchNode nodeId=\"start\" title=\"Opening\">\n    <Text>Caller reports a duplicate charge after a shipping notification link.</Text>\n    <BranchChoice label=\"Listen and verify identity\" targetNodeId=\"verify\" />\n  </BranchNode>\n  <BranchNode nodeId=\"verify\" title=\"Verify\" terminal>\n    <Text>Identity confirmed and fraud ticket opened.</Text>\n  </BranchNode>\n</BranchingScenario>\n```",
     "seeAlso": "- [BranchChoice](branch-choice.md)\n- [BranchingScenario](branching-scenario.md)"
   },
   "branch-choice": {
-    "whenToUse": "Use `BranchChoice` **inside `BranchNode`** to offer **labeled navigation** to another `nodeId`. Optional `scoreWeight` contributes to `showPathScore` totals on the parent scenario.",
+    "whenToUse": "Use `BranchChoice` **inside `BranchNode`** to offer **labeled navigation** to another `nodeId`. After selection, the parent scenario updates the path indicator and announces the new step. Optional `scoreWeight` contributes to `showPathScore` totals.",
     "requirements": "- `targetNodeId` must reference another `BranchNode` in the same scenario.\n- Choices render as radio-style buttons; only the active node accepts input.",
     "example": "```tsx\n<BranchNode nodeId=\"fork\">\n  <Text>Finance flagged a duplicate wire with end-of-day pressure.</Text>\n  <BranchChoice label=\"Escalate and hold payment\" targetNodeId=\"supervisor\" scoreWeight={1} />\n  <BranchChoice label=\"Approve to avoid delays\" targetNodeId=\"approve\" />\n</BranchNode>\n```",
     "seeAlso": "- [BranchNode](branch-node.md)\n- [BranchingScenario](branching-scenario.md)"

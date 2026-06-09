@@ -6,9 +6,15 @@
 **H5P Branching Scenario (choice)**
 :::
 
+:::{admonition} Parent compound
+:class: important
+
+`BranchChoice` only works inside an active [`BranchNode`](branch-node.md), which must be a child of [`BranchingScenario`](branching-scenario.md).
+:::
+
 ## When to use
 
-Use `BranchChoice` **inside `BranchNode`** to offer **labeled navigation** to another `nodeId`. Optional `scoreWeight` contributes to `showPathScore` totals on the parent scenario.
+Use `BranchChoice` **inside `BranchNode`** to offer **labeled navigation** to another `nodeId`. After a choice is selected, the parent scenario advances and the status line confirms the new step. Optional `scoreWeight` contributes to `showPathScore` totals on the parent scenario.
 
 ## Requirements
 
