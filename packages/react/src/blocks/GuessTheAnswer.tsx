@@ -1,7 +1,6 @@
 import React, { forwardRef, useEffect, useId, useMemo, useRef, useState } from "react";
 import { visuallyHiddenStyle } from "@lessonkit/accessibility";
-import type { AssessmentBaseProps, AssessmentBehaviour, AssessmentHandle, AssessmentInteractionType, CheckId } from "@lessonkit/core";
-import type { LessonId } from "@lessonkit/core";
+import type { AssessmentBehaviour, AssessmentHandle, AssessmentInteractionType, CheckId, LessonId } from "@lessonkit/core";
 import { AssessmentLessonGuard } from "../assessment/AssessmentLessonGuard";
 import { buildAssessmentHandle } from "../assessment/internal/buildAssessmentHandle";
 import { readBooleanStateField, readStringField } from "../assessment/internal/resumeState";

@@ -4,7 +4,7 @@ import type { AssessmentBaseProps, AssessmentHandle } from "@lessonkit/core";
 import type { LessonId } from "@lessonkit/core";
 import { AssessmentLessonGuard } from "../assessment/AssessmentLessonGuard";
 import { buildAssessmentHandle } from "../assessment/internal/buildAssessmentHandle";
-import { readBooleanField, readBooleanStateField, readStringField } from "../assessment/internal/resumeState";
+import { readBooleanStateField, readStringField } from "../assessment/internal/resumeState";
 import { useAssessmentHandleRegistration } from "../assessment/internal/useAssessmentHandleRegistration";
 import { usePluginScoring } from "../assessment/internal/usePluginScoring";
 import { useAssessmentState } from "../assessment/useAssessmentState";

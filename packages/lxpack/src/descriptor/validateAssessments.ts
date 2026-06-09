@@ -26,7 +26,11 @@ const validateMcqLike: AssessmentValidator = (assessment, path, issues) => {
   }
   if (!assessment.answer.trim()) {
     issues.push({ path: `${path}.answer`, message: "answer is required" });
-  } else if (!isMultiSelectMcq(assessment) && trimmedChoices.length && !trimmedChoices.includes(assessment.answer.trim())) {
+  } else if (
+    !("answers" in assessment && isMultiSelectMcq({ answers: assessment.answers })) &&
+    trimmedChoices.length &&
+    !trimmedChoices.includes(assessment.answer.trim())
+  ) {
     issues.push({ path: `${path}.answer`, message: "answer must match a choice" });
   }
   if ("answers" in assessment && assessment.answers !== undefined) {

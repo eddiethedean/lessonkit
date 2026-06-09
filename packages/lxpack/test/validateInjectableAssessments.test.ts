@@ -88,4 +88,25 @@ describe("validateInjectableAssessments", () => {
     expect(issues[0]!.message).toContain("fillInBlanks");
     expect(issues[0]!.message).toContain("SPA only");
   });
+
+  it("includes multi-select MCQ SPA-only guidance", () => {
+    const issues = validateInjectableAssessments({
+      courseId: "c",
+      title: "T",
+      layout: "single-spa",
+      lessons: [{ id: "l1", title: "L" }],
+      assessments: [
+        {
+          checkId: "multi-1",
+          question: "Select all",
+          choices: ["A", "B", "C"],
+          answer: "A",
+          answers: ["A", "C"],
+        },
+      ],
+    });
+    expect(issues).toHaveLength(1);
+    expect(issues[0]!.message).toContain("multi-select MCQ");
+    expect(issues[0]!.message).toContain("checkId \"multi-1\"");
+  });
 });

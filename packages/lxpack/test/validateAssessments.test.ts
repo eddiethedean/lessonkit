@@ -194,4 +194,88 @@ describe("validateAssessmentEntry", () => {
     });
     expect(issues.some((i) => i.path?.includes("answers"))).toBe(true);
   });
+
+  it("rejects duplicate mcq answers", () => {
+    checkIds.clear();
+    const issues = collect({
+      checkId: "dup-answers",
+      question: "Select",
+      choices: ["A", "B"],
+      answer: "A",
+      answers: ["A", "A"],
+    });
+    expect(issues.some((i) => i.message.includes("unique"))).toBe(true);
+  });
+
+  it("rejects choiceFeedback keys not in choices", () => {
+    checkIds.clear();
+    const issues = collect({
+      checkId: "fb-bad",
+      question: "Pick",
+      choices: ["A", "B"],
+      answer: "A",
+      choiceFeedback: { Z: "Unknown" },
+    });
+    expect(issues.some((i) => i.path?.includes("choiceFeedback"))).toBe(true);
+  });
+
+  it("requires guessTheAnswer answer text", () => {
+    checkIds.clear();
+    const issues = collect({
+      kind: "guessTheAnswer",
+      checkId: "guess-empty",
+      question: "Guess",
+      answer: "   ",
+    });
+    expect(issues.some((i) => i.path?.includes("answer"))).toBe(true);
+  });
+
+  it("allows mcq answer label outside answers when multi-select is configured", () => {
+    checkIds.clear();
+    const issues = collect({
+      checkId: "multi-ok",
+      question: "Select",
+      choices: ["A", "B", "C"],
+      answer: "A",
+      answers: ["B", "C"],
+    });
+    expect(issues.filter((i) => i.path?.includes(".answer"))).toHaveLength(0);
+  });
+
+  it("rejects non-object choiceFeedback", () => {
+    checkIds.clear();
+    const issues = collect({
+      checkId: "fb-type",
+      question: "Pick",
+      choices: ["A"],
+      answer: "A",
+      choiceFeedback: "bad" as unknown as Record<string, string>,
+    });
+    expect(issues.some((i) => i.path?.includes("choiceFeedback"))).toBe(true);
+  });
+
+  it("rejects passingScore above multi-select achievable score", () => {
+    checkIds.clear();
+    const issues = collect({
+      checkId: "multi-pass",
+      question: "Select",
+      choices: ["A", "B", "C"],
+      answer: "A",
+      answers: ["A", "C"],
+      passingScore: 3,
+    });
+    expect(issues.some((i) => i.path?.includes("passingScore"))).toBe(true);
+  });
+
+  it("rejects non-positive passingScore", () => {
+    checkIds.clear();
+    const issues = collect({
+      checkId: "bad-pass",
+      question: "Pick",
+      choices: ["A"],
+      answer: "A",
+      passingScore: 0,
+    });
+    expect(issues.some((i) => i.message.includes("greater than 0"))).toBe(true);
+  });
 });
