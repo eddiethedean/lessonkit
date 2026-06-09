@@ -14,7 +14,7 @@ export { Slide, type SlideProps } from "./Slide";
 export { SlideDeck, type SlideDeckProps } from "./SlideDeck";
 export { TimedCue, type TimedCueProps } from "./TimedCue";
 export { InteractiveVideo, type InteractiveVideoProps } from "./InteractiveVideo";
-export { Summary, type SummaryProps } from "./Summary";
+export { Summary, DEFAULT_SUMMARY_INSTRUCTIONS, type SummaryProps } from "./Summary";
 export { ImagePairing, type ImagePairingProps, type ImagePair } from "./ImagePairing";
 export { ImageSequencing, type ImageSequencingProps, type SequencingImage } from "./ImageSequencing";
 export { ArithmeticQuiz, type ArithmeticQuizProps, type ArithmeticProblem } from "./ArithmeticQuiz";

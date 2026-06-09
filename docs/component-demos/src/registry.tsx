@@ -253,7 +253,7 @@ export const componentDemos: ComponentDemo[] = [
       demoFrame(
         "branching-scenario",
         "Customer call",
-        <BranchingScenario blockId="call-paths" title="Suspicious charge call" startNodeId="opening" showPathScore>
+        <BranchingScenario blockId="call-paths" title="Suspicious charge call" startNodeId="opening" showPathScore showPathRecap>
           <BranchNode nodeId="opening">
             <Text>
               A customer says their card was charged twice after clicking a link in a &ldquo;shipping

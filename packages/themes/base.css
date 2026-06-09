@@ -238,6 +238,82 @@
   margin: 0.35rem 0.5rem 0.35rem 0;
 }
 
+.lk-branch-nav-status {
+  margin: 0 0 var(--lk-space-sm);
+  font: inherit;
+  font-size: 0.875rem;
+  color: color-mix(in srgb, var(--lk-color-foreground) 80%, transparent);
+}
+
+.lk-branch-path-indicator {
+  margin: 0 0 var(--lk-space-md);
+}
+
+.lk-branch-path-indicator ol {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lk-space-xs) var(--lk-space-sm);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.lk-branch-path-step {
+  padding: var(--lk-space-xs) var(--lk-space-sm);
+  border: 1px solid var(--lk-color-border);
+  border-radius: var(--lk-radius-md);
+  background: var(--lk-color-panel);
+  font: inherit;
+  font-size: 0.875rem;
+}
+
+.lk-branch-path-step--current {
+  border-color: var(--lk-color-primary, #2563eb);
+  background: color-mix(in srgb, var(--lk-color-primary, #2563eb) 12%, var(--lk-color-panel));
+  font-weight: var(--lk-font-weight-strong);
+}
+
+.lk-branch-terminal-banner {
+  margin: 0 0 var(--lk-space-md);
+  padding: var(--lk-space-sm) var(--lk-space-md);
+  border: 1px solid color-mix(in srgb, var(--lk-color-success, #16a34a) 55%, var(--lk-color-border));
+  border-radius: var(--lk-radius-md);
+  background: color-mix(in srgb, var(--lk-color-success, #16a34a) 12%, var(--lk-color-panel));
+  font: inherit;
+  font-weight: var(--lk-font-weight-strong);
+}
+
+.lk-branching-scenario-active-node {
+  padding: var(--lk-space-md);
+  border: 1px solid var(--lk-color-border);
+  border-radius: var(--lk-radius-lg);
+  background: var(--lk-color-panel);
+}
+
+.lk-branch-node--terminal {
+  border-left: 4px solid var(--lk-color-success, #16a34a);
+  padding-left: var(--lk-space-md);
+}
+
+.lk-branch-node--terminal > h4::after {
+  content: " · End";
+  font-size: 0.75rem;
+  font-weight: var(--lk-font-weight-strong);
+  color: var(--lk-color-success, #16a34a);
+}
+
+.lk-branch-choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lk-space-sm);
+  margin-top: var(--lk-space-md);
+}
+
+.lk-branch-choice {
+  display: inline-flex;
+  margin: 0;
+}
+
 /* Crossword — square grid cells with block squares */
 .lk-crossword {
   --lk-crossword-cell-size: 2.25rem;

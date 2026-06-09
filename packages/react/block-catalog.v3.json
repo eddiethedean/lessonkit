@@ -2562,12 +2562,12 @@
       "a11y": {
         "element": "section",
         "ariaLabel": "Branch node",
-        "keyboard": "Branch choices are buttons.",
-        "notes": "H5P Branching Scenario node."
+        "keyboard": "Branch choices in radiogroup.",
+        "notes": "Terminal nodes styled with completion banner from parent."
       },
       "theming": {
         "surface": "global-inherit",
-        "stylingNotes": "Node panel."
+        "stylingNotes": "Uses .lk-branch-node; terminal variant .lk-branch-node--terminal."
       },
       "telemetry": {
         "emits": [
@@ -2616,11 +2616,11 @@
         "element": "button",
         "ariaLabel": "Branch choice",
         "keyboard": "Activate to follow branch.",
-        "notes": "Radio group pattern."
+        "notes": "Radio in radiogroup; parent announces navigation."
       },
       "theming": {
         "surface": "global-inherit",
-        "stylingNotes": "Choice button."
+        "stylingNotes": "Uses .lk-button.lk-branch-choice."
       },
       "telemetry": {
         "emits": [
@@ -2688,11 +2688,11 @@
         "element": "section",
         "ariaLabel": "Branching scenario",
         "keyboard": "Branch choices; assessments in nodes.",
-        "notes": "H5P Branching Scenario equivalent."
+        "notes": "Path indicator, aria-live status, terminal banner."
       },
       "theming": {
         "surface": "global-inherit",
-        "stylingNotes": "Scenario chrome."
+        "stylingNotes": "Uses .lk-branch-path-indicator, .lk-branching-scenario-active-node."
       },
       "telemetry": {
         "emits": [

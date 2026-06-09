@@ -28,6 +28,7 @@ export {
   TimedCue,
   InteractiveVideo,
   Summary,
+  DEFAULT_SUMMARY_INSTRUCTIONS,
   ImagePairing,
   ImageSequencing,
   ArithmeticQuiz,

@@ -54,8 +54,10 @@ export const DEMO_INTROS: Record<string, string> = {
   collage: "Combine site layout and team contacts in one visual panel grid.",
   "audio-recorder": "Practice the approved verbal escalation script for your region.",
   "advent-calendar": "Open one door per day during December security awareness month.",
-  "branch-node": "Each branch node holds narrative content, choices, and optional terminal checks.",
-  "branch-choice": "Choices route learners to different nodes — optional scoreWeight affects path score.",
+  "branch-node":
+    "Each step is a BranchNode inside a BranchingScenario (required parent). Only the active node is shown — watch the path indicator update when you choose a route.",
+  "branch-choice":
+    "Pick a BranchChoice to advance the scenario. The status line confirms your selection; scoreWeight affects path score when enabled.",
   "map-stage": "Stages hold the content shown when learners visit a point on the game map.",
   "map-exit": "Exits link map stages together, similar to branch choices in a spatial layout.",
   "knowledge-check":
