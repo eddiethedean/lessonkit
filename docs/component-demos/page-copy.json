@@ -141,7 +141,7 @@
     "seeAlso": "- [Block catalog — Essay](../block-catalog.md)"
   },
   "combination-lock": {
-    "whenToUse": "Use `CombinationLock` for **numeric code entry** puzzles — vault codes, PIN verification drills, or gamified access challenges.",
+    "whenToUse": "Use `CombinationLock` for **numeric code entry** puzzles — vault codes, PIN verification drills, or gamified access challenges. Digit fields start empty with placeholders; typing updates each cell visibly before Check.",
     "requirements": "- `combination` is a string of digits; UI renders one wheel per digit.\n- Requires `checkId` for assessment telemetry and packaging.",
     "example": "```tsx\n<CombinationLock checkId=\"vault-lock\" combination=\"1234\" label=\"Enter demo vault code (training only)\" />\n```",
     "seeAlso": "- [Block catalog](../block-catalog.md)"

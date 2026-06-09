@@ -671,8 +671,17 @@ export const v3CompoundAndContentEntries = [
     ],
     requiredIds: ["checkId"],
     parentConstraints: [...COMPOUND_PARENTS],
-    a11y: { element: "section", ariaLabel: "Combination lock", keyboard: "Digit inputs.", notes: "Scored." },
-    theming: { surface: "global-inherit" as const, dataAttributes: ["data-lk-check-id"], stylingNotes: "Uses data-lk-check-id." },
+    a11y: {
+      element: "section",
+      ariaLabel: "Combination lock",
+      keyboard: "Digit inputs; auto-advance on entry.",
+      notes: "Scored; select-all on focus.",
+    },
+    theming: {
+      surface: "global-inherit" as const,
+      dataAttributes: ["data-lk-check-id"],
+      stylingNotes: "Uses .lk-combination-lock-digit with focus styling.",
+    },
     telemetry: { emits: ["assessment_answered", "assessment_completed"], requiresActiveLesson: true },
   },
   {
