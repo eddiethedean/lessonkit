@@ -338,7 +338,7 @@ export const QrContentBlock: Story = {
       <Lesson title="Scan" lessonId="lesson-qr">
         <QrContent
           blockId="bonus-qr"
-          payload="https://lessonkit.dev/bonus"
+          payload="https://lessonkit.readthedocs.io/en/latest/project/security.html"
           hiddenTitle="Bonus module"
           hiddenBody="You unlocked the bonus content."
         />
