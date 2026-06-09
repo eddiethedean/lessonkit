@@ -30,7 +30,7 @@ These guides are for **instructional designers, trainers, and builders who do no
 
 You do not need to understand TypeScript, hooks, or bundlers. You **do** need to:
 
-- Install **Node.js** — see [Prerequisites — decision table](../prerequisites.md#node-js-and-npm) (**{{ node_new_projects }}** for new projects)
+- Install **Node.js** — see [Prerequisites — decision table](../prerequisites.md) (**{{ node_new_projects }}** for new projects)
 - Follow prompts carefully and paste suggested commands into a terminal
 - Review AI-generated changes before publishing
 

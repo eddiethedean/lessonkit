@@ -2,7 +2,7 @@
 
 **Start here** for every LMS upload—local preview to a working SCORM (or xAPI/cmi5) package. This is the **only canonical go-live guide**; other LMS pages are appendices that link back here.
 
-**Prerequisites:** A course from `npx @lessonkit/cli init` with `npm run dev` working. Node.js: see [Prerequisites — decision table](../prerequisites.md#node-js-and-npm).
+**Prerequisites:** A course from `npx @lessonkit/cli init` with `npm run dev` working. Node.js: see [Prerequisites — decision table](../prerequisites.md).
 
 ## Choose your path
 

@@ -18,7 +18,7 @@ A **React-first framework** for building trackable learning experiences and expo
 
 ## Which Node.js version do I need?
 
-See the [Node.js decision table](prerequisites.md#node-js-and-npm) — single source of truth for init, dev/build/package, and monorepo CI.
+See the [Node.js decision table](prerequisites.md) — single source of truth for init, dev/build/package, and monorepo CI.
 
 ## LessonKit vs H5P vs Storyline
 
@@ -43,7 +43,7 @@ Default path (relative to project root):
 
 **{{ scorm_zip_path }}**
 
-The CLI prints the resolved path. `lessonkit.json` → `paths.outputBaseDir` is **inside** `paths.lxpackOutDir`, not at the project root. See [LMS Go-Live — SCORM output layout](react-developers/lms-go-live.md#scorm-output-layout).
+The CLI prints the resolved path. `lessonkit.json` → `paths.outputBaseDir` is **inside** `paths.lxpackOutDir`, not at the project root. See [LMS Go-Live — SCORM output layout](react-developers/lms-go-live.md).
 
 ## Why does my LMS not record completion?
 

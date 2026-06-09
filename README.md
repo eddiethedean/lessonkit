@@ -18,7 +18,7 @@ Developer tooling, not a timeline authoring tool: **React + telemetry + packagin
 | **Latest stable** | [@lessonkit/react 1.7.0](https://www.npmjs.com/package/@lessonkit/react) on npm · [CHANGELOG](https://github.com/eddiethedean/lessonkit/blob/main/CHANGELOG.md) — pin all `@lessonkit/*` to the **same version** |
 | **npm** | [`@lessonkit/*`](https://www.npmjs.com/org/lessonkit) |
 | **Docs** | [lessonkit.readthedocs.io](https://lessonkit.readthedocs.io/en/latest/) |
-| **Node.js** | See [Prerequisites — Node.js decision table](https://lessonkit.readthedocs.io/en/latest/guides/prerequisites.html#node-js-and-npm) |
+| **Node.js** | See [Prerequisites — Node.js decision table](https://lessonkit.readthedocs.io/en/latest/guides/prerequisites.html) |
 
 ---
 

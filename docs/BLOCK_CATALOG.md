@@ -270,7 +270,7 @@ Import `@lessonkit/react/block-catalog.v3.json` or `buildBlockCatalog({ version:
 
 **Quiz / `KnowledgeCheck` variants (1.7.0):** `answers` (multi-select), `shuffleChoices` / `shuffleSeed`, `choiceFeedback`. With LXPack **0.7.0+**, multi-select and shuffle inject into LMS shell quizzes; feedback text remains SPA-only.
 
-See [Migration 1.6 → 1.7](MIGRATION-1.6-to-1.7.md).
+See [Migration 1.6 → 1.7](../MIGRATION-1.6-to-1.7.md).
 
 ---
 

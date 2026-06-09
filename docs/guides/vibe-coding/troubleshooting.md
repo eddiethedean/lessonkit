@@ -79,7 +79,7 @@ If packaging still fails, paste the CLI error into the chat. Full reference: [Ke
 
 ## Node version errors during package
 
-Install Node per [Prerequisites — decision table](../prerequisites.md#node-js-and-npm), then:
+Install Node per [Prerequisites — decision table](../prerequisites.md), then:
 
 ```bash
 node -v   # should be v20.19+ for init; v18+ may work for package on existing projects

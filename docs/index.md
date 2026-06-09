@@ -59,13 +59,13 @@ LessonKit courses are React apps. If you want to learn React before the develope
 
 ```{raw} html
 <div class="lk-callout">
-  <strong>Node.js:</strong> See the <a href="guides/prerequisites.html#node-js-and-npm">decision table in Prerequisites</a> — <strong>{{ node_new_projects }}</strong> for new projects; {{ node_minimum }}+ packaging-only legacy at your risk.
+  <strong>Node.js:</strong> See the <a href="guides/prerequisites.html">decision table in Prerequisites</a> — <strong>{{ node_new_projects }}</strong> for new projects; {{ node_minimum }}+ packaging-only legacy at your risk.
 </div>
 ```
 
 ## What you need
 
-See the [Node.js decision table](guides/prerequisites.md#node-js-and-npm) for version requirements by task.
+See the [Node.js decision table](guides/prerequisites.md) for version requirements by task.
 
 Release notes: [changelog](project/changelog.md) on this site · [GitHub](https://github.com/eddiethedean/lessonkit).
 

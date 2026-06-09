@@ -16,7 +16,7 @@ Project manifest (`schemaVersion: 1`) at the repo root. Describes the course for
 
 ## LessonkitConfig
 
-TypeScript shape for `config` on `Course` / `LessonkitProvider`: tracking, xAPI, `lxpack` bridge, observability hooks, session, and plugins. See [Components and hooks — LessonkitConfig](../guides/react-developers/components-and-hooks.md#lessonkitconfig-on-course-lessonkitprovider) and [API reference](api.md).
+TypeScript shape for `config` on `Course` / `LessonkitProvider`: tracking, xAPI, `lxpack` bridge, observability hooks, session, and plugins. See [Components and hooks — LessonkitConfig](../guides/react-developers/components-and-hooks.md) and [API reference](api.md).
 
 ## LessonkitProvider
 
@@ -53,7 +53,7 @@ Working directories created during packaging (descriptor staging, output zips). 
 - **`paths.lxpackOutDir`** — `.lxpack/course` (LXPack project root)
 - **`paths.outputBaseDir`** — `.lxpack/out` (resolved **inside** `lxpackOutDir`, not at the project root)
 
-Default SCORM artifact: **`.lxpack/course/.lxpack/out/course-scorm12.zip`**. The CLI prints the resolved path after `lessonkit package`. See [LMS Go-Live — SCORM output layout](../guides/react-developers/lms-go-live.md#scorm-output-layout).
+Default SCORM artifact: **`.lxpack/course/.lxpack/out/course-scorm12.zip`**. The CLI prints the resolved path after `lessonkit package`. See [LMS Go-Live — SCORM output layout](../guides/react-developers/lms-go-live.md).
 
 ## single-spa
 

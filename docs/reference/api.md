@@ -22,7 +22,7 @@ Browse generated TypeScript API docs (built with the docs site on Read the Docs)
 
 | Package | Generated reference | Narrative guide |
 | --- | --- | --- |
-| `@lessonkit/react` | [TypeDoc — react](../_static/typedoc/modules/react_dist.html) | [Components and hooks](../guides/react-developers/components-and-hooks.md) · [`LessonkitConfig`](../guides/react-developers/components-and-hooks.md#lessonkitconfig-on-course-lessonkitprovider) |
+| `@lessonkit/react` | [TypeDoc — react](../_static/typedoc/modules/react_dist.html) | [Components and hooks](../guides/react-developers/components-and-hooks.md) · [`LessonkitConfig`](../guides/react-developers/components-and-hooks.md) |
 | `@lessonkit/react/blocks` | [TypeDoc — react/blocks](../_static/typedoc/modules/react_dist_blocks-entry.html) | [Block catalog](block-catalog.md) · [Block cookbook](../guides/react-developers/block-cookbook.md) |
 | `@lessonkit/react/testing` | [TypeDoc — react/testing](../_static/typedoc/modules/react_dist_testing.html) | [Contributing](../guides/react-developers/contributing-to-the-monorepo.md) |
 | `@lessonkit/core` | [TypeDoc — core](../_static/typedoc/modules/core_dist.html) | [Core reference](core.md) |

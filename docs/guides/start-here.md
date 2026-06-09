@@ -1,6 +1,6 @@
 # Start here
 
-**Before you start:** See the [Node.js decision table](prerequisites.md#node-js-and-npm). Basic React and TypeScript help on the developer path; [vibe coding](vibe-coding/index.md) does not require studying React first.
+**Before you start:** See the [Node.js decision table](prerequisites.md). Basic React and TypeScript help on the developer path; [vibe coding](vibe-coding/index.md) does not require studying React first.
 
 Pick the path that matches how you work. Each link is a single next step—not the full documentation map.
 

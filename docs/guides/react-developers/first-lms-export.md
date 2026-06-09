@@ -8,7 +8,7 @@ This page is a **shortcut checklist** only. For the full smoke-test vs productio
 
 Export your course to SCORM (or other LMS targets) after you have a working local preview. For the fastest local start, complete [Getting started in 5 minutes](getting-started-in-5-minutes.md) first.
 
-**Prerequisites:** A project from `lessonkit init` with `npm run dev` working. Node.js: [Prerequisites — decision table](../prerequisites.md#node-js-and-npm).
+**Prerequisites:** A project from `lessonkit init` with `npm run dev` working. Node.js: [Prerequisites — decision table](../prerequisites.md).
 
 ## Checklist
 

@@ -18,7 +18,7 @@ Use the [troubleshooting decision tree](troubleshooting.md) or [FAQ](../faq.md).
 
 | Requirement | Details |
 | --- | --- |
-| Node.js | See [Prerequisites — decision table](../prerequisites.md#node-js-and-npm) |
+| Node.js | See [Prerequisites — decision table](../prerequisites.md) |
 | Project | From `npx @lessonkit/cli init` with `npm run dev` working |
 | IDs | `courseId`, `lessonId`, and every `checkId` match between React and `lessonkit.json` |
 
