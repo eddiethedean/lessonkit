@@ -809,3 +809,87 @@
     width: 100%;
   }
 }
+
+.lk-combination-lock {
+  display: flex;
+  flex-direction: column;
+  gap: var(--lk-space-sm);
+  max-width: 100%;
+}
+
+.lk-combination-lock-label {
+  margin: 0;
+  font: inherit;
+  font-weight: var(--lk-font-weight-strong);
+}
+
+.lk-combination-lock-hint {
+  margin: 0;
+  font: inherit;
+  font-size: 0.875rem;
+  color: color-mix(in srgb, var(--lk-color-foreground) 72%, transparent);
+}
+
+.lk-combination-lock-digits {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lk-space-sm);
+}
+
+.lk-combination-lock-digit {
+  width: 2.75rem;
+  height: 2.75rem;
+  padding: 0;
+  border: 1px solid var(--lk-color-border);
+  border-radius: var(--lk-radius-md);
+  background: var(--lk-color-panel);
+  color: var(--lk-color-foreground);
+  font: inherit;
+  font-size: 1.25rem;
+  font-weight: var(--lk-font-weight-strong);
+  line-height: 1;
+  text-align: center;
+}
+
+.lk-combination-lock-digit::placeholder {
+  color: color-mix(in srgb, var(--lk-color-foreground) 35%, transparent);
+}
+
+.lk-combination-lock-digit:focus {
+  outline: none;
+  border-color: var(--lk-color-primary, #2563eb);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--lk-color-primary, #2563eb) 30%, transparent);
+}
+
+.lk-combination-lock-digit:not(:placeholder-shown) {
+  border-color: color-mix(in srgb, var(--lk-color-primary, #2563eb) 55%, var(--lk-color-border));
+}
+
+.lk-combination-lock-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lk-space-sm);
+}
+
+.lk-combination-lock-actions button[data-testid="lock-check"] {
+  appearance: none;
+  border: 1px solid var(--lk-color-primary, #2563eb);
+  border-radius: var(--lk-radius-md);
+  background: var(--lk-color-primary, #2563eb);
+  color: var(--lk-color-primary-foreground, #f8fafc);
+  padding: var(--lk-space-sm) var(--lk-space-md);
+  font: inherit;
+  font-weight: var(--lk-font-weight-strong);
+  cursor: pointer;
+}
+
+.lk-combination-lock-actions button[data-testid="lock-check"]:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.lk-combination-lock-feedback {
+  margin: 0;
+  font: inherit;
+  font-weight: var(--lk-font-weight-strong);
+}

@@ -89,6 +89,20 @@ describe("1.6.x block components", () => {
     expect(screen.getByTestId("combination-lock")).toBeDefined();
   });
 
+  it("CombinationLock visibly updates digits when typing", () => {
+    render(wrap(<CombinationLock checkId="lock-1" combination="42" />));
+    const first = screen.getByTestId("lock-digit-0") as HTMLInputElement;
+    const second = screen.getByTestId("lock-digit-1") as HTMLInputElement;
+    expect(first.value).toBe("");
+    fireEvent.change(first, { target: { value: "4" } });
+    expect(first.value).toBe("4");
+    fireEvent.change(first, { target: { value: "14" } });
+    expect(first.value).toBe("4");
+    fireEvent.change(second, { target: { value: "2" } });
+    expect(second.value).toBe("2");
+    expect((screen.getByTestId("lock-check") as HTMLButtonElement).disabled).toBe(false);
+  });
+
   it("CombinationLock emits assessment_completed only once on repeated checks", async () => {
     const events: { name: string }[] = [];
     render(

@@ -4008,15 +4008,15 @@
       "a11y": {
         "element": "section",
         "ariaLabel": "Combination lock",
-        "keyboard": "Digit inputs.",
-        "notes": "Scored."
+        "keyboard": "Digit inputs; auto-advance on entry.",
+        "notes": "Scored; select-all on focus."
       },
       "theming": {
         "surface": "global-inherit",
         "dataAttributes": [
           "data-lk-check-id"
         ],
-        "stylingNotes": "Uses data-lk-check-id."
+        "stylingNotes": "Uses .lk-combination-lock-digit with focus styling."
       },
       "telemetry": {
         "emits": [

@@ -8,7 +8,7 @@
 
 ## When to use
 
-Use `CombinationLock` for **numeric code entry** puzzles — vault codes, PIN verification drills, or gamified access challenges.
+Use `CombinationLock` for **numeric code entry** puzzles — vault codes, PIN verification drills, or gamified access challenges. Each digit field starts empty with a visible placeholder; typing replaces the active cell and advances focus.
 
 ## Requirements
 
