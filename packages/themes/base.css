@@ -512,3 +512,83 @@
   color: #92400e;
   border: 1px solid #fcd34d;
 }
+
+/* Word search — square grid cells with drag selection */
+.lk-word-search {
+  --lk-word-search-cell-size: 2.25rem;
+  --lk-word-search-grid-border: #0f172a;
+}
+
+.lk-word-search-grid {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 1px;
+  margin-bottom: var(--lk-space-md);
+  border: 2px solid var(--lk-word-search-grid-border);
+  background: var(--lk-word-search-grid-border);
+  line-height: 0;
+  user-select: none;
+}
+
+.lk-word-search-row {
+  display: flex;
+  gap: 1px;
+}
+
+.lk-word-search-cell {
+  display: block;
+  width: var(--lk-word-search-cell-size);
+  height: var(--lk-word-search-cell-size);
+  flex: 0 0 var(--lk-word-search-cell-size);
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  border: none;
+  text-align: center;
+  text-transform: uppercase;
+  font-family: var(--lk-font-family);
+  font-size: 1.0625rem;
+  font-weight: var(--lk-font-weight-strong);
+  line-height: var(--lk-word-search-cell-size);
+  background: #fff;
+  color: #0f172a;
+  cursor: pointer;
+}
+
+.lk-word-search-cell:focus {
+  outline: 2px solid var(--lk-color-primary);
+  outline-offset: -2px;
+  position: relative;
+  z-index: 1;
+}
+
+.lk-word-search-cell--selecting {
+  background: #dbeafe;
+  color: #1e40af;
+  outline: 2px solid var(--lk-color-primary);
+  outline-offset: -2px;
+  position: relative;
+  z-index: 1;
+}
+
+.lk-word-search-cell--found {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.lk-word-search-bank {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lk-space-sm);
+  margin: 0 0 var(--lk-space-md);
+  padding: 0;
+  list-style: none;
+  font-family: var(--lk-font-family);
+  font-size: var(--lk-font-size-base);
+  font-weight: var(--lk-font-weight-strong);
+}
+
+.lk-word-search-bank-item--found {
+  color: var(--lk-color-muted-foreground, #64748b);
+  text-decoration: line-through;
+}

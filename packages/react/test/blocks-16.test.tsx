@@ -183,10 +183,28 @@ describe("1.6.x block components", () => {
     expect(screen.queryByTestId("crossword-feedback")).toBeNull();
   });
 
-  it("WordSearch renders letter grid", () => {
+  it("WordSearch renders aligned grid and finds a word via drag", () => {
     vi.spyOn(Math, "random").mockReturnValue(0.1);
     render(wrap(<WordSearch checkId="ws-1" words={["CAT"]} size={5} />));
-    expect(screen.getByTestId("word-search-cell-0-0")).toBeDefined();
+
+    expect(screen.getByTestId("word-search").querySelector(".lk-word-search-grid")).toBeTruthy();
+
+    const cell0 = screen.getByTestId("word-search-cell-0-0");
+    const cell1 = screen.getByTestId("word-search-cell-0-1");
+    const cell2 = screen.getByTestId("word-search-cell-0-2");
+
+    fireEvent.pointerDown(cell0, { pointerId: 1, buttons: 1 });
+    fireEvent.pointerEnter(cell1, { pointerId: 1, buttons: 1 });
+    fireEvent.pointerEnter(cell2, { pointerId: 1, buttons: 1 });
+    fireEvent.pointerUp(cell2, { pointerId: 1 });
+
+    const bankItem = screen.getByText("CAT");
+    expect(bankItem.classList.contains("lk-word-search-bank-item--found")).toBe(true);
+    expect(bankItem.getAttribute("aria-checked")).toBe("true");
+    expect(cell0.classList.contains("lk-word-search-cell--found")).toBe(true);
+    expect(cell1.classList.contains("lk-word-search-cell--found")).toBe(true);
+    expect(cell2.classList.contains("lk-word-search-cell--found")).toBe(true);
+    expect(cell0.classList.contains("lk-word-search-cell--selecting")).toBe(false);
   });
 
   it("AdventCalendar opens a door", () => {
