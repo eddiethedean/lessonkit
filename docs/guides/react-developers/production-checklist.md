@@ -1,12 +1,12 @@
 # Production checklist
 
-Use this checklist before shipping a LessonKit course to learners in an LMS, standalone site, or LRS-backed deployment.
+:::{admonition} Appendix — part of LMS Go-Live
+:class: note
 
-:::{admonition} Canonical guide
-:class: tip
-
-For the full go-live path (including smoke-test branch), see **[LMS Go-Live](lms-go-live.md)**.
+This checklist covers production guardrails in detail. For the full go-live path (including the smoke-test branch), start with **[LMS Go-Live](lms-go-live.md)** and return here for the observability matrix.
 :::
+
+Use this checklist before shipping a LessonKit course to learners in an LMS, standalone site, or LRS-backed deployment.
 
 ## Packaging target
 

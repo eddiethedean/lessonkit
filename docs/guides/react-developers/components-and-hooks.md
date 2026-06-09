@@ -133,7 +133,7 @@ Import tree-shake friendly: `import { Quiz } from "@lessonkit/react/blocks"`.
 
 ## Common optional props
 
-Full contracts: [Block catalog](../../reference/block-catalog.md) · [Storybook](https://eddiethedean.github.io/lessonkit/storybook/).
+Full contracts: [Block catalog](../../reference/block-catalog.md) · [Storybook gallery](../../reference/storybook-gallery.md) · [Storybook on GitHub Pages](https://eddiethedean.github.io/lessonkit/storybook/).
 
 | Component | Optional props | Notes |
 | --- | --- | --- |
@@ -148,6 +148,7 @@ Full contracts: [Block catalog](../../reference/block-catalog.md) · [Storybook]
 | `Chart` | `title` | Accessible data table fallback for screen readers |
 | `ThemeProvider` | `mode`, `preset`, `tokens` | `mode`: `light` \| `dark` \| `system` |
 
+(lessonkitconfig-on-course-lessonkitprovider)=
 ### `LessonkitConfig` (on `Course` / `LessonkitProvider`)
 
 | Field | Purpose |
@@ -163,7 +164,7 @@ Errors: `assertProductionCourseConfig()` throws in production when console sinks
 
 ## Storybook
 
-Browse published stories: **[Storybook on GitHub Pages](https://eddiethedean.github.io/lessonkit/storybook/)**.
+Browse published stories: **[Storybook on GitHub Pages](https://eddiethedean.github.io/lessonkit/storybook/)** · [Component gallery (Storybook)](../../reference/storybook-gallery.md) on Read the Docs.
 
 Run the gallery locally from the monorepo:
 

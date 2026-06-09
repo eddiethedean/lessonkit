@@ -1,14 +1,14 @@
 # First LMS export
 
-Export your course to SCORM (or other LMS targets) after you have a working local preview. For the fastest local start, complete [Getting started in 5 minutes](getting-started-in-5-minutes.md) first.
+:::{admonition} Appendix — read LMS Go-Live first
+:class: note
 
-:::{admonition} Canonical guide
-:class: tip
-
-For the full smoke-test vs production decision tree, start with **[LMS Go-Live](lms-go-live.md)**. This page is a focused first-export walkthrough; [Ship to LMS](ship-to-lms.md) is a one-page checklist.
+This page is a **shortcut checklist** only. For the full smoke-test vs production decision tree, SCORM path diagram, and troubleshooting links, start with **[LMS Go-Live](lms-go-live.md)**.
 :::
 
-**Prerequisites:** Node.js **20.19+**; a project from `lessonkit init` with `npm run dev` working. See [Prerequisites](../prerequisites.md).
+Export your course to SCORM (or other LMS targets) after you have a working local preview. For the fastest local start, complete [Getting started in 5 minutes](getting-started-in-5-minutes.md) first.
+
+**Prerequisites:** A project from `lessonkit init` with `npm run dev` working. Node.js: [Prerequisites — decision table](../prerequisites.md#node-js-and-npm).
 
 ## Checklist
 
@@ -97,7 +97,8 @@ Trust **`lessonkit package` stdout** if your paths differ. Override with `--out 
 
 ## Next steps
 
-- [Production checklist](production-checklist.md) — observability hooks, transport timeouts
+- **[LMS Go-Live](lms-go-live.md)** — canonical guide (return here for production branch)
+- [Production checklist](production-checklist.md) — observability hooks, transport timeouts (appendix)
 - [Deployment guide](deployment-guide.md) — SCORM vs standalone vs xAPI matrix
 - [Troubleshooting](troubleshooting.md) — packaging paths, bridge allowlist, ID parity
 - [Packaging and CLI](packaging-and-cli.md) — all `--target` values

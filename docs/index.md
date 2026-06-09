@@ -59,20 +59,13 @@ LessonKit courses are React apps. If you want to learn React before the develope
 
 ```{raw} html
 <div class="lk-callout">
-  <strong>Node.js:</strong> Use <strong>{{ node_new_projects }}</strong> for all new projects (<code>lessonkit init</code>, Vite 8).
-  Node {{ node_minimum }} may work for packaging-only agents on an existing course — not supported for scaffold.
+  <strong>Node.js:</strong> See the <a href="guides/prerequisites.html#node-js-and-npm">decision table in Prerequisites</a> — <strong>{{ node_new_projects }}</strong> for new projects; {{ node_minimum }}+ packaging-only legacy at your risk.
 </div>
 ```
 
 ## What you need
 
-| Task | Node.js |
-| --- | --- |
-| **`npx @lessonkit/cli init`** (Vite 8 scaffold) | **{{ node_new_projects }}** required |
-| Dev, build, package in an existing course | **{{ node_new_projects }}** recommended; {{ node_minimum }} minimum (packaging-only legacy) |
-| Monorepo CI and Playwright e2e | **{{ node_recommended }}** (CI runs Node 20 only) |
-
-See [Prerequisites](guides/prerequisites.md) for details.
+See the [Node.js decision table](guides/prerequisites.md#node-js-and-npm) for version requirements by task.
 
 Release notes: [changelog](project/changelog.md) on this site · [GitHub](https://github.com/eddiethedean/lessonkit).
 
@@ -85,6 +78,7 @@ Release notes: [changelog](project/changelog.md) on this site · [GitHub](https:
 
 guides/start-here
 guides/prerequisites
+guides/known-limitations
 guides/design-philosophy
 ```
 
@@ -130,15 +124,22 @@ guides/h5p-for-lessonkit-authors
 ```
 
 ```{toctree}
+:maxdepth: 1
+:caption: Build and ship
+
+guides/react-developers/lms-go-live
+guides/react-developers/production-checklist
+guides/react-developers/first-lms-export
+guides/react-developers/ship-to-lms
+guides/troubleshooting
+```
+
+```{toctree}
 :maxdepth: 2
 :caption: Guides — React developers
 
 guides/react-developers/index
 guides/react-developers/getting-started-in-5-minutes
-guides/react-developers/lms-go-live
-guides/react-developers/first-lms-export
-guides/react-developers/ship-to-lms
-guides/react-developers/troubleshooting
 guides/react-developers/quickstart
 guides/react-developers/block-cookbook
 guides/react-developers/project-structure
@@ -188,7 +189,6 @@ reference/lxpack-upgrades
 
 guides/enterprise-evaluation
 guides/architecture-overview
-guides/react-developers/production-checklist
 guides/react-developers/export-parity
 project/security
 project/accessibility-conformance

@@ -2,6 +2,12 @@
 
 Quick answers across onboarding, packaging, and adoption. Detailed runbooks: [Troubleshooting hub](troubleshooting.md).
 
+:::{admonition} LMS blank page after upload?
+:class: warning
+
+Dev preview (`npm run dev`) uses console telemetry. **`npm run build` succeeding does not mean the LMS upload will work.** Before packaging, follow **[LMS Go-Live](react-developers/lms-go-live.md)** (smoke test vs production paths).
+:::
+
 ## What is LessonKit?
 
 A **React-first framework** for building trackable learning experiences and exporting them to SCORM, xAPI, cmi5, or standalone hosting. It is **developer tooling**—not a visual timeline editor like Storyline.
@@ -12,12 +18,7 @@ A **React-first framework** for building trackable learning experiences and expo
 
 ## Which Node.js version do I need?
 
-**Node.js 20.19+ recommended** for `npx @lessonkit/cli init` (Vite 8). Node 18 may work for packaging-only workflows but is not tested in CI. See [Prerequisites](prerequisites.md).
-
-| Task | Node.js |
-| --- | --- |
-| CLI scaffold (Vite 8), monorepo CI, Playwright e2e | **20.19+** recommended |
-| Dev, build, package in an existing course | **18+** minimum |
+See the [Node.js decision table](prerequisites.md#node-js-and-npm) — single source of truth for init, dev/build/package, and monorepo CI.
 
 ## LessonKit vs H5P vs Storyline
 
@@ -42,7 +43,7 @@ Default path (relative to project root):
 
 **{{ scorm_zip_path }}**
 
-The CLI prints the resolved path. `lessonkit.json` → `paths.outputBaseDir` is **inside** `paths.lxpackOutDir`, not at the project root. See [First LMS export — where the SCORM zip lands](react-developers/first-lms-export.md#where-the-scorm-zip-lands).
+The CLI prints the resolved path. `lessonkit.json` → `paths.outputBaseDir` is **inside** `paths.lxpackOutDir`, not at the project root. See [LMS Go-Live — SCORM output layout](react-developers/lms-go-live.md#scorm-output-layout).
 
 ## Why does my LMS not record completion?
 
@@ -62,7 +63,7 @@ Development builds allow bridge forwarding without an allowlist. **Production bu
 1. **Smoke test only** — Temporarily set `tracking: { enabled: false }` and `xapi: { enabled: false }` in `courseConfig.ts`, rebuild, and repackage (not for production analytics).
 2. **Production** — Copy `.env.example` → `.env`, set `VITE_ANALYTICS_URL` and `VITE_XAPI_PROXY_URL` to backend proxies, rebuild, and repackage.
 
-See **[LMS Go-Live](react-developers/lms-go-live.md)** (smoke vs production decision tree) · [Production runtime for LMS](react-developers/first-lms-export.md#production-runtime-for-lms).
+See **[LMS Go-Live](react-developers/lms-go-live.md)** (smoke vs production decision tree) · [Production checklist](react-developers/production-checklist.md).
 
 ## Why did `npm run build` succeed but my packaged course is blank or throws?
 

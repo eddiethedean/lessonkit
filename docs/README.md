@@ -78,6 +78,6 @@ Edit the **canonical markdown at `docs/` root**, not the thin wrapper pages unde
 | `../../CHANGELOG.md` | `project/changelog.md` |
 | `../../SECURITY.md` | `project/security.md` |
 
-Standalone pages (edit directly): `guides/*`, `examples/index.md`, `reference/components/*`, `reference/api.md`, `reference/lms-compatibility.md`, `reference/glossary.md`, `reference/xapi.md`.
+Standalone pages (edit directly): `guides/*`, `examples/index.md`, `reference/components/*`, `reference/api.md`, `reference/lms-compatibility.md`, `reference/glossary.md`, `reference/xapi.md`, `guides/known-limitations.md`.
 
 After editing included files, run the full build command above to catch broken links and missing includes.

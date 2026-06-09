@@ -2,15 +2,20 @@
 
 Install these before following any LessonKit tutorial.
 
+(node-js-and-npm)=
 ## Node.js and npm
 
-| Task | Node.js |
-| --- | --- |
-| **`npx @lessonkit/cli init`** (Vite 8 scaffold) | **{{ node_new_projects }}** required |
-| `lessonkit dev`, `build`, `package` in an existing course | **{{ node_new_projects }}** recommended; {{ node_minimum }} minimum (packaging-only legacy) |
-| Monorepo CI and Playwright e2e | **{{ node_recommended }}** (CI runs Node 20 only) |
+### Node.js decision table
 
-**Use Node.js {{ node_new_projects }} for all new projects.** Node {{ node_minimum }} may work for packaging-only CI agents on an existing course but is not supported for `lessonkit init`.
+Use this table as the **single source of truth** for Node.js version requirements. Other pages link here instead of repeating version rules.
+
+| Your situation | Node.js | Supported? |
+| --- | --- | --- |
+| **New project** — `npx @lessonkit/cli init`, Vite 8 scaffold, local dev | **{{ node_new_projects }}** | **Required** |
+| **Existing course** — `lessonkit dev`, `build`, `package` only | **{{ node_new_projects }}** recommended; **{{ node_minimum }}** minimum | Packaging-only legacy CI at your risk |
+| **Monorepo contributor** — CI, Playwright e2e, docs build | **{{ node_recommended }}** | CI runs Node 20 only |
+
+**Summary:** New project → **{{ node_new_projects }}**. Existing course packaging-only on legacy CI → **{{ node_minimum }}+** at your risk (not supported for `lessonkit init`).
 
 Install [Node.js LTS](https://nodejs.org/) and npm (bundled with Node).
 
@@ -34,7 +39,7 @@ Monorepo examples use `file:../../packages/*` workspace links. Do not copy that 
 | Tool | When you need it |
 | --- | --- |
 | Git | Version control for your course repo |
-| LMS staging environment | SCORM smoke test after [First LMS export](react-developers/first-lms-export.md) |
+| LMS staging environment | SCORM smoke test after [LMS Go-Live](react-developers/lms-go-live.md) |
 | Python 3.12 + pip | Building LessonKit docs locally ([contributor docs on GitHub](https://github.com/eddiethedean/lessonkit/blob/main/docs/README.md)) |
 
 ## Next steps

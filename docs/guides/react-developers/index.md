@@ -20,7 +20,7 @@ LessonKit courses are **React apps** (usually **Vite + TypeScript**). You do not
 2. **React** — [react.dev Learn](https://react.dev/learn) (official tutorial)
 3. **TypeScript** (basics) — [TypeScript Handbook](https://www.typescriptlang.org/docs/handbook/intro.html)
 4. **Vite** (how `lessonkit dev` works) — [Vite Getting Started](https://vite.dev/guide/)
-5. **LessonKit (new project)** — [Getting started in 5 minutes](getting-started-in-5-minutes.md) → [LMS Go-Live](lms-go-live.md) → [Production checklist](production-checklist.md)
+5. **LessonKit (new project)** — [Getting started in 5 minutes](getting-started-in-5-minutes.md) → [LMS Go-Live](lms-go-live.md) → [Production checklist](production-checklist.md) (appendix)
 6. **LessonKit (existing Vite app only)** — [Quickstart — add to an existing Vite app](quickstart.md)
 :::
 
@@ -57,9 +57,9 @@ Use the [Vibe coding guides](../vibe-coding/index.md) with an AI editor and the 
 | --- | --- |
 | Coming from H5P | [../h5p-for-lessonkit-authors.md](../h5p-for-lessonkit-authors.md) |
 | Getting started (5 min) | [getting-started-in-5-minutes.md](getting-started-in-5-minutes.md) |
-| **LMS Go-Live (canonical)** | [lms-go-live.md](lms-go-live.md) |
-| First LMS export (shortcut) | [first-lms-export.md](first-lms-export.md) |
-| Ship to LMS (checklist) | [ship-to-lms.md](ship-to-lms.md) |
+| **LMS Go-Live (start here)** | [lms-go-live.md](lms-go-live.md) |
+| First LMS export (appendix) | [first-lms-export.md](first-lms-export.md) |
+| Ship to LMS (appendix checklist) | [ship-to-lms.md](ship-to-lms.md) |
 | Troubleshooting | [troubleshooting.md](troubleshooting.md) |
 | Quickstart (existing Vite app) | [quickstart.md](quickstart.md) |
 | Block cookbook | [block-cookbook.md](block-cookbook.md) |

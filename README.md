@@ -18,7 +18,7 @@ Developer tooling, not a timeline authoring tool: **React + telemetry + packagin
 | **Latest stable** | [@lessonkit/react 1.7.0](https://www.npmjs.com/package/@lessonkit/react) on npm · [CHANGELOG](https://github.com/eddiethedean/lessonkit/blob/main/CHANGELOG.md) — pin all `@lessonkit/*` to the **same version** |
 | **npm** | [`@lessonkit/*`](https://www.npmjs.com/org/lessonkit) |
 | **Docs** | [lessonkit.readthedocs.io](https://lessonkit.readthedocs.io/en/latest/) |
-| **Node.js** | **20.19+** for new projects (`lessonkit init`, Vite 8). Node 18 may work for packaging-only CI agents — not supported for scaffold. |
+| **Node.js** | See [Prerequisites — Node.js decision table](https://lessonkit.readthedocs.io/en/latest/guides/prerequisites.html#node-js-and-npm) |
 
 ---
 
@@ -32,7 +32,9 @@ Developer tooling, not a timeline authoring tool: **React + telemetry + packagin
 | **Existing React app** | `npm install @lessonkit/react` (+ CLI as devDep) → [Quickstart — add to Vite](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/quickstart.html#add-to-an-existing-vite-react-app) |
 | **Contribute** | Clone this repo → [Contributing](CONTRIBUTING.md) |
 
-**Live demos:** [Examples on Read the Docs](https://lessonkit.readthedocs.io/en/latest/examples/index.html) · **Monorepo block showcases (contributors):** [1.1](examples/framework-11-showcase) · [1.2](examples/framework-12-showcase)
+**Live demos:** [Examples on Read the Docs](https://lessonkit.readthedocs.io/en/latest/examples/index.html) (embedded bundles — no clone required).
+
+> **Warning:** Monorepo folders under [`examples/`](examples/README.md) use `file:../../packages/*` workspace links for **contributors only**. Do not copy their `package.json` dependency patterns into your own course repo.
 
 ---
 
@@ -112,6 +114,8 @@ npm run dev
 ```
 
 Open the URL Vite prints. Follow the [5-minute getting started guide](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/getting-started-in-5-minutes.html) to edit your first quiz.
+
+> **Shipping to an LMS?** Dev preview (`npm run dev`) uses console telemetry. Before `lessonkit package`, follow [LMS Go-Live](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/lms-go-live.html)—otherwise your LMS may show a blank page even when `npm run build` succeeds.
 
 When you are ready to export to an LMS, continue with [LMS Go-Live](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/lms-go-live.html).
 

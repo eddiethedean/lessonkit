@@ -101,7 +101,7 @@ lessonkit init my-course --skip-install
 |------|-------------|
 | `--here` | Initialize in the current directory instead of creating a subdirectory |
 | `--skip-install` | Skip `npm install` (CI/automation) |
-| `--force` | With `--here` only: initialize when the current directory is empty or contains dotfiles only (merges template files; does not delete existing files) |
+| `--force` | With `--here` only: initialize when the current directory is empty or contains dotfiles only (e.g. `.git`). Does not overwrite existing project files. |
 
 ### `lessonkit dev`
 

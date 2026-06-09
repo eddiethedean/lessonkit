@@ -1,8 +1,8 @@
 # LMS Go-Live
 
-Canonical path from **local preview** to a **working LMS upload**. Use this page first; the shorter [First LMS export](first-lms-export.md), [Ship to LMS checklist](ship-to-lms.md), and [Production checklist](production-checklist.md) link here for detail.
+**Start here** for every LMS upload—local preview to a working SCORM (or xAPI/cmi5) package. This is the **only canonical go-live guide**; other LMS pages are appendices that link back here.
 
-**Prerequisites:** Node.js **20.19+** for new projects; a course from `npx @lessonkit/cli init` with `npm run dev` working. See [Prerequisites](../prerequisites.md).
+**Prerequisites:** A course from `npx @lessonkit/cli init` with `npm run dev` working. Node.js: see [Prerequisites — decision table](../prerequisites.md#node-js-and-npm).
 
 ## Choose your path
 
@@ -122,10 +122,12 @@ Full matrix: [Deployment guide](deployment-guide.md) · [LRS operations](lrs-ope
 | Completion not in gradebook | Bridge allowlist + [LXPack bridge](../../reference/lxpack-bridge.md) |
 | xAPI not in LRS | [LRS operations](lrs-operations.md) · transport + `onXapiTransportError` |
 
-## Related
+## Related (appendix pages)
 
-- [First LMS export](first-lms-export.md) — step-by-step first export
-- [Ship to LMS checklist](ship-to-lms.md) — one-page checklist
-- [Production checklist](production-checklist.md) — observability, session, CI pins
+These pages repeat subsets of this guide—use them only as quick references:
+
+- [First LMS export](first-lms-export.md) — first-export checklist (appendix)
+- [Ship to LMS checklist](ship-to-lms.md) — one-page checklist (appendix)
+- [Production checklist](production-checklist.md) — observability, session, CI pins (appendix)
 - [Packaging and CLI](packaging-and-cli.md) — all `--target` values
 - [Export parity](export-parity.md) — what CI guarantees per format

@@ -11,28 +11,37 @@ LessonKit publishes **TypeScript declarations** on npm (`dist/*.d.ts`) and docum
 | Validating props, IDs, manifest fields, CLI flags | Reference pages on this site (below) + [Block catalog](block-catalog.md) |
 | TypeScript signatures only | [TypeDoc](#generated-api-typedoc) (built on Read the Docs; regenerate locally with `npm run docs:api`) |
 
-TypeDoc lists **signatures** — parameter descriptions and examples expand release over release. For behavior, prefer narrative guides first, then reference contracts.
+TypeDoc lists **signatures** — high-traffic exports include `@example` blocks in source (regenerate with `npm run docs:api`). For behavior, prefer narrative guides first, then reference contracts.
 
 **Before opening a GitHub issue for API usage:** Check [Components and hooks](../guides/react-developers/components-and-hooks.md), the relevant [component page](components/index.md), and narrative references below. TypeDoc signatures alone are not the supported learning path for runtime behavior.
 :::
 
 ## Generated API (TypeDoc)
 
-Browse generated TypeScript API docs (built with the docs site on Read the Docs):
+Browse generated TypeScript API docs (built with the docs site on Read the Docs). Each row links TypeDoc to the narrative guide to read first.
 
-| Package | Generated reference |
-| --- | --- |
-| `@lessonkit/react` | [TypeDoc — react](../_static/typedoc/modules/react_dist.html) |
-| `@lessonkit/react/blocks` | [TypeDoc — react/blocks](../_static/typedoc/modules/react_dist_blocks-entry.html) |
-| `@lessonkit/react/testing` | [TypeDoc — react/testing](../_static/typedoc/modules/react_dist_testing.html) |
-| `@lessonkit/core` | [TypeDoc — core](../_static/typedoc/modules/core_dist.html) |
-| `@lessonkit/core/testing` | [TypeDoc — core/testing](../_static/typedoc/modules/core_dist_testing.html) |
-| `@lessonkit/cli` | [TypeDoc — cli](../_static/typedoc/modules/cli_dist.html) |
-| `@lessonkit/xapi` | [TypeDoc — xapi](../_static/typedoc/modules/xapi_dist.html) |
-| `@lessonkit/lxpack` | [TypeDoc — lxpack](../_static/typedoc/modules/lxpack_dist.html) |
-| `@lessonkit/lxpack/bridge` | [TypeDoc — lxpack/bridge](../_static/typedoc/modules/lxpack_dist_bridge.html) |
-| `@lessonkit/themes` | [TypeDoc — themes](../_static/typedoc/modules/themes_dist.html) |
-| `@lessonkit/accessibility` | [TypeDoc — accessibility](../_static/typedoc/modules/accessibility_dist.html) |
+| Package | Generated reference | Narrative guide |
+| --- | --- | --- |
+| `@lessonkit/react` | [TypeDoc — react](../_static/typedoc/modules/react_dist.html) | [Components and hooks](../guides/react-developers/components-and-hooks.md) · [`LessonkitConfig`](../guides/react-developers/components-and-hooks.md#lessonkitconfig-on-course-lessonkitprovider) |
+| `@lessonkit/react/blocks` | [TypeDoc — react/blocks](../_static/typedoc/modules/react_dist_blocks-entry.html) | [Block catalog](block-catalog.md) · [Block cookbook](../guides/react-developers/block-cookbook.md) |
+| `@lessonkit/react/testing` | [TypeDoc — react/testing](../_static/typedoc/modules/react_dist_testing.html) | [Contributing](../guides/react-developers/contributing-to-the-monorepo.md) |
+| `@lessonkit/core` | [TypeDoc — core](../_static/typedoc/modules/core_dist.html) | [Core reference](core.md) |
+| `@lessonkit/core/testing` | [TypeDoc — core/testing](../_static/typedoc/modules/core_dist_testing.html) | [Contributing](../guides/react-developers/contributing-to-the-monorepo.md) |
+| `@lessonkit/cli` | [TypeDoc — cli](../_static/typedoc/modules/cli_dist.html) | [CLI reference](cli.md) · [Packaging and CLI](../guides/react-developers/packaging-and-cli.md) |
+| `@lessonkit/xapi` | [TypeDoc — xapi](../_static/typedoc/modules/xapi_dist.html) | [xAPI reference](xapi.md) · [Telemetry and xAPI](../guides/react-developers/telemetry-and-xapi.md) |
+| `@lessonkit/lxpack` | [TypeDoc — lxpack](../_static/typedoc/modules/lxpack_dist.html) | [Packaging reference](packaging.md) · [`packageLessonkitCourse`](#packaging-api) |
+| `@lessonkit/lxpack/bridge` | [TypeDoc — lxpack/bridge](../_static/typedoc/modules/lxpack_dist_bridge.html) | [LXPack bridge](lxpack-bridge.md) |
+| `@lessonkit/themes` | [TypeDoc — themes](../_static/typedoc/modules/themes_dist.html) | [Theming reference](theming.md) |
+| `@lessonkit/accessibility` | [TypeDoc — accessibility](../_static/typedoc/modules/accessibility_dist.html) | [Accessibility reference](accessibility.md) |
+
+(packaging-api)=
+### Packaging API highlights
+
+| Export | Package | Narrative |
+| --- | --- | --- |
+| `packageLessonkitCourse` | `@lessonkit/lxpack` | [Packaging reference](packaging.md) · [LMS Go-Live](../guides/react-developers/lms-go-live.md) |
+| `createXAPIClient` | `@lessonkit/xapi` | [xAPI reference](xapi.md) · [LRS operations](../guides/react-developers/lrs-operations.md) |
+| `LessonkitConfig` | `@lessonkit/react` | [Production checklist](../guides/react-developers/production-checklist.md) |
 
 Full index: [TypeDoc home](../_static/typedoc/index.html).
 

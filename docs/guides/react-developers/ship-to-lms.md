@@ -1,12 +1,12 @@
 # Ship to LMS checklist
 
-One-page checklist for taking a scaffolded LessonKit course from local preview to a working LMS upload. Complete [Getting started in 5 minutes](getting-started-in-5-minutes.md) first if you have not previewed locally yet.
+:::{admonition} Appendix — read LMS Go-Live first
+:class: note
 
-:::{admonition} Canonical guide
-:class: tip
-
-See **[LMS Go-Live](lms-go-live.md)** for the smoke-test vs production decision tree and SCORM path diagram.
+This one-page checklist is a **quick reference** only. For the decision tree, shared steps, and troubleshooting, start with **[LMS Go-Live](lms-go-live.md)**.
 :::
+
+One-page checklist for taking a scaffolded LessonKit course from local preview to a working LMS upload. Complete [Getting started in 5 minutes](getting-started-in-5-minutes.md) first if you have not previewed locally yet.
 
 :::{admonition} When something breaks
 :class: tip
@@ -18,7 +18,7 @@ Use the [troubleshooting decision tree](troubleshooting.md) or [FAQ](../faq.md).
 
 | Requirement | Details |
 | --- | --- |
-| Node.js | **20.19+** for `lessonkit init` and dev; **18+** minimum for packaging-only legacy agents |
+| Node.js | See [Prerequisites — decision table](../prerequisites.md#node-js-and-npm) |
 | Project | From `npx @lessonkit/cli init` with `npm run dev` working |
 | IDs | `courseId`, `lessonId`, and every `checkId` match between React and `lessonkit.json` |
 

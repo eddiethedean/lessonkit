@@ -44,6 +44,24 @@ function defaultHeadSkippedHandler(_statement: XAPIStatement, err: unknown): voi
 /**
  * Imperative xAPI client with in-memory queue, retry flush, and optional pagehide delivery.
  * Prefer wiring transport via `LessonkitProvider` config from `@lessonkit/react` in React apps.
+ *
+ * @example
+ * ```ts
+ * import { createXAPIClient, createFetchTransport } from "@lessonkit/xapi";
+ *
+ * const client = createXAPIClient({
+ *   courseId: "my-course",
+ *   transport: createFetchTransport({ url: "/api/xapi/statements" }),
+ *   onTransportError: (err) => console.error("LRS delivery failed", err),
+ * });
+ *
+ * await client.trackTelemetryEvent({
+ *   name: "quiz_answered",
+ *   courseId: "my-course",
+ *   lessonId: "lesson-1",
+ *   checkId: "q1",
+ * });
+ * ```
  */
 export function createXAPIClient(opts?: {
   transport?: XAPITransport;
