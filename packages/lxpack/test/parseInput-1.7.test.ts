@@ -37,16 +37,16 @@ describe("parseAssessmentDescriptor 1.7 fields", () => {
         checkId: "tf",
         question: "T?",
         answer: "true",
-      }).answer,
-    ).toBe(true);
+      }),
+    ).toMatchObject({ kind: "trueFalse", answer: true });
     expect(
       parseAssessmentDescriptor({
         kind: "trueFalse",
         checkId: "tf2",
         question: "F?",
         answer: "false",
-      }).answer,
-    ).toBe(false);
+      }),
+    ).toMatchObject({ kind: "trueFalse", answer: false });
   });
 
   it("parses guessTheAnswer and multimediaChoice kinds", () => {

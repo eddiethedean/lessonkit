@@ -6,6 +6,12 @@
 **H5P Interactive Video (cue)**
 :::
 
+:::{admonition} Parent compound
+:class: important
+
+`TimedCue` only works inside [`InteractiveVideo`](interactive-video.md). It is not a standalone video block — use [`Video`](video.md) for clips without timed overlays.
+:::
+
 ## When to use
 
 Use `TimedCue` as a **child of `InteractiveVideo`** to surface content or assessments at a timestamp. Set `mustComplete` on scored cues that should block video progress.
@@ -126,3 +132,4 @@ Workflow tips: https://lessonkit.readthedocs.io/en/latest/guides/vibe-coding/pro
 ## See also
 
 - [InteractiveVideo](interactive-video.md)
+- [InteractiveVideo live demo](../../_static/component-demos/index.html#/interactive-video)

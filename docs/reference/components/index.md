@@ -2,7 +2,7 @@
 
 Each page renders the **real `@lessonkit/react` component** in an embedded demo, explains **when to use it**, and shows copy-paste examples you can adapt into a course.
 
-**Coverage:** **55 component pages** — one for every block type in `block-catalog.v3.json`, including graph children (`BranchNode`, `BranchChoice`, `MapStage`, `MapExit`) and the [`KnowledgeCheck`](knowledge-check.md) alias of [`Quiz`](quiz.md). Multi-block guides: [Course structure](course-structure.md), [Text & Heading](text-and-heading.md).
+**Coverage:** **59 component pages** — one for every block type in `block-catalog.v3.json`, including graph children (`BranchNode`, `BranchChoice`, `MapStage`, `MapExit`) and the [`KnowledgeCheck`](knowledge-check.md) alias of [`Quiz`](quiz.md). Multi-block guides: [Course structure](course-structure.md), [Text & Heading](text-and-heading.md).
 
 **Try it tabs:** **Live demo**, **React** example, copy-paste **AI prompt** (for vibe coding), and **Manifest** / **Packaging** notes — synced from `page-copy.json` and `manifest-snippets.json`.
 
@@ -51,6 +51,7 @@ From the repo root: `bash docs/scripts/build-component-demos.sh`, then open `doc
 | [`FindMultipleHotspots`](find-multiple-hotspots.md) | Assessment | Find Multiple Hotspots |
 | [`Flashcards`](flashcards.md) | Content | Flashcards |
 | [`GameMap`](game-map.md) | Compound | Game Map |
+| [`GuessTheAnswer`](guess-the-answer.md) | Assessment | Guess the Answer |
 | [`Image`](image.md) | Content | Image |
 | [`ImageHotspots`](image-hotspots.md) | Content | Image Hotspots |
 | [`ImageJuxtaposition`](image-juxtaposition.md) | Content | Image Juxtaposition |
@@ -66,6 +67,7 @@ From the repo root: `bash docs/scripts/build-component-demos.sh`, then open `doc
 | [`MapStage`](map-stage.md) | Compound child | Game Map (stage) |
 | [`MarkTheWords`](mark-the-words.md) | Assessment | Mark the Words |
 | [`MemoryGame`](memory-game.md) | Content | Memory Game |
+| [`MultimediaChoice`](multimedia-choice.md) | Assessment | Multimedia Choice |
 | [`Page`](page.md) | Compound child | Interactive Book (page) |
 | [`ParallaxSlideshow`](parallax-slideshow.md) | Content | Parallax |
 | [`QrContent`](qr-content.md) | Content | KewAr Code |
@@ -75,6 +77,8 @@ From the repo root: `bash docs/scripts/build-component-demos.sh`, then open `doc
 | [`Scenario`](scenario.md) | Content | — |
 | [`Slide`](slide.md) | Compound child | Course Presentation (slide) |
 | [`SlideDeck`](slide-deck.md) | Compound | Course Presentation |
+| [`SingleChoiceSet`](single-choice-set.md) | Compound | Single Choice Set |
+| [`SortParagraphs`](sort-paragraphs.md) | Assessment | Sort the Paragraphs |
 | [`Summary`](summary.md) | Assessment | Summary |
 | [`Table`](table.md) | Content | Table |
 | [`Text & Heading`](text-and-heading.md) | Content | — |
@@ -124,6 +128,7 @@ find-hotspot
 find-multiple-hotspots
 flashcards
 game-map
+guess-the-answer
 image
 image-hotspots
 image-juxtaposition
@@ -139,6 +144,7 @@ map-exit
 map-stage
 mark-the-words
 memory-game
+multimedia-choice
 page
 parallax-slideshow
 qr-content
@@ -148,6 +154,8 @@ reflection
 scenario
 slide
 slide-deck
+single-choice-set
+sort-paragraphs
 summary
 table
 text-and-heading

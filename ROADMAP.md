@@ -1,6 +1,6 @@
 # LessonKit Roadmap
 
-Execution plan for the `@lessonkit/*` framework: shippable semver milestones, H5P-*aligned* block expansion (patterns only—no H5P runtime), and platform tooling. For product vision see [PLAN.md](PLAN.md); for API contracts see [SPEC.md](SPEC.md) and [Read the Docs](https://lessonkit.readthedocs.io/en/latest/).
+Execution plan for the `@lessonkit/*` framework: shippable semver milestones, H5P-*aligned* block expansion (patterns only—no H5P runtime), and platform tooling. For product vision see [PLAN.md](https://github.com/eddiethedean/lessonkit/blob/main/PLAN.md); for API contracts see [SPEC.md](https://github.com/eddiethedean/lessonkit/blob/main/SPEC.md) and [Read the Docs](https://lessonkit.readthedocs.io/en/latest/).
 
 **Audience:** maintainers and contributors. Course authors should use [lessonkit.readthedocs.io](https://lessonkit.readthedocs.io/en/latest/) instead.
 
@@ -12,10 +12,10 @@ Execution plan for the `@lessonkit/*` framework: shippable semver milestones, H5
 | --- | --- |
 | **Latest release** | **1.7.0** — all seven `@lessonkit/*` packages |
 | **Shipped themes** | React course shell, 50+ blocks, compounds, telemetry/xAPI, CLI, LMS packaging, `.lkcourse` interchange, block registry |
-| **Current focus** | **1.7.x** — Tier B P1 assessments + additive `Quiz` variants (see [1.7.x plan](#17x--tier-b-p1-assessments-planned)) |
+| **Current focus** | **1.7.x** — Tier B P1 assessments + additive `Quiz` variants (see **What's next** below) |
 | **Next majors** | **1.8.x** — `VirtualTour` (360) · **2.x** — `@lessonkit/react-native` + writing-tool compounds |
 
-Release notes: [CHANGELOG.md](CHANGELOG.md) · shipped block traceability: [`docs/project/h5p-capability-map.md`](docs/project/h5p-capability-map.md)
+Release notes: [CHANGELOG.md](https://github.com/eddiethedean/lessonkit/blob/main/CHANGELOG.md) · shipped block traceability: [`docs/project/h5p-capability-map.md`](docs/project/h5p-capability-map.md)
 
 ---
 
@@ -23,10 +23,10 @@ Release notes: [CHANGELOG.md](CHANGELOG.md) · shipped block traceability: [`doc
 
 | Document | Purpose |
 | --- | --- |
-| [PLAN.md](PLAN.md) | Product vision and positioning |
-| [SPEC.md](SPEC.md) | Historical technical spec (superseded by RTD reference for shipped API) |
-| [CHANGELOG.md](CHANGELOG.md) | What actually shipped, by version |
-| [RELEASING.md](RELEASING.md) | Changesets and npm publish |
+| [PLAN.md](https://github.com/eddiethedean/lessonkit/blob/main/PLAN.md) | Product vision and positioning |
+| [SPEC.md](https://github.com/eddiethedean/lessonkit/blob/main/SPEC.md) | Historical technical spec (superseded by RTD reference for shipped API) |
+| [CHANGELOG.md](https://github.com/eddiethedean/lessonkit/blob/main/CHANGELOG.md) | What actually shipped, by version |
+| [RELEASING.md](https://github.com/eddiethedean/lessonkit/blob/main/RELEASING.md) | Changesets and npm publish |
 | [H5P capability map](docs/project/h5p-capability-map.md) | **Canonical** H5P machine name → LessonKit block matrix |
 | [Block catalog](docs/reference/block-catalog.md) | Props, a11y, telemetry per block |
 | [LXPack upgrades](docs/reference/lxpack-upgrades.md) | Packaging interoperability |
@@ -73,7 +73,7 @@ All pre-1.0 milestones are **complete** and folded into the **1.0.0** public API
 
 ### Framework 1.x — shipped summary
 
-Detailed per-release notes live in [CHANGELOG.md](CHANGELOG.md). Migration guides: `docs/MIGRATION-*.md`.
+Detailed per-release notes live in [CHANGELOG.md](https://github.com/eddiethedean/lessonkit/blob/main/CHANGELOG.md). Migration guides: `docs/MIGRATION-*.md`.
 
 | Version | Headline | Golden examples |
 | --- | --- | --- |
@@ -89,7 +89,7 @@ Detailed per-release notes live in [CHANGELOG.md](CHANGELOG.md). Migration guide
 
 **Status:** Shipped in **1.4.0**.
 
-Compound video uses the same machinery as `SlideDeck` / `InteractiveBook` (`CompoundHandle`, session resume v2) with **time-based** `TimedCue` navigation instead of slide index. Shipped: `Video`, `TimedCue`, `InteractiveVideo`, timeline telemetry (`video_cue_reached`, `video_segment_completed`), and bundled Tier B/C/D blocks (Summary, ImagePairing, Essay, MemoryGame, …). See [MIGRATION-1.3-to-1.4.md](docs/MIGRATION-1.3-to-1.4.md) and [CHANGELOG — 1.4.0](CHANGELOG.md).
+Compound video uses the same machinery as `SlideDeck` / `InteractiveBook` (`CompoundHandle`, session resume v2) with **time-based** `TimedCue` navigation instead of slide index. Shipped: `Video`, `TimedCue`, `InteractiveVideo`, timeline telemetry (`video_cue_reached`, `video_segment_completed`), and bundled Tier B/C/D blocks (Summary, ImagePairing, Essay, MemoryGame, …). See [MIGRATION-1.3-to-1.4.md](docs/MIGRATION-1.3-to-1.4.md) and [CHANGELOG — 1.4.0](https://github.com/eddiethedean/lessonkit/blob/main/CHANGELOG.md).
 
 #### 1.5.x — BranchingScenario
 
@@ -107,11 +107,11 @@ Platform: `.lkcourse` archive (`lessonkit export`), interchange spec, `exportLkc
 
 ## What's next
 
-#### 1.7.x — Tier B P1 assessments
+### 1.7.x — Tier B P1 assessments {#17x--tier-b-p1-assessments}
 
 **Status:** Shipped in **1.7.0** — four P1 blocks plus **`Quiz` variants** (multi-select, shuffle, per-choice feedback). Tier B P1 complete.
 
-See [MIGRATION-1.6-to-1.7.md](docs/MIGRATION-1.6-to-1.7.md) and [CHANGELOG — 1.7.0](CHANGELOG.md).
+See [MIGRATION-1.6-to-1.7.md](docs/MIGRATION-1.6-to-1.7.md) and [CHANGELOG — 1.7.0](https://github.com/eddiethedean/lessonkit/blob/main/CHANGELOG.md).
 
 ---
 
@@ -302,7 +302,7 @@ A block is not **done** for H5P parity until all items are checked (copy into PR
 
 | If you are… | Start here |
 | --- | --- |
-| Shipping a release | [CHANGELOG.md](CHANGELOG.md) + [RELEASING.md](RELEASING.md); update **At a glance** and shipped summary above |
+| Shipping a release | [CHANGELOG.md](https://github.com/eddiethedean/lessonkit/blob/main/CHANGELOG.md) + [RELEASING.md](https://github.com/eddiethedean/lessonkit/blob/main/RELEASING.md); update **At a glance** and shipped summary above |
 | Adding a block | [Adding a framework block](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/adding-a-framework-block.html) + [checklist](#h5p-documentation-checklist-per-block) + capability map |
 | Planning a quarter | **What's next** + capability map planned rows |
 | Evaluating the product | [Enterprise evaluation](https://lessonkit.readthedocs.io/en/latest/guides/enterprise-evaluation.html) on Read the Docs |

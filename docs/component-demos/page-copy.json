@@ -96,7 +96,7 @@
     "whenToUse": "Use `InteractiveVideo` when **video playback and learner actions are synchronized** — pause for checks, surface reminders at timestamps, or gate progress until cues complete.\n\nChildren must be `TimedCue` blocks. Cues appear as an **H5P-style overlay** (dimmed video + centered interaction card) while playback is paused.\n\nImport `@lessonkit/themes/base.css` (included in the example shell CSS) for overlay styling.",
     "requirements": "- Wrap scored cues with `mustComplete` when they should block progress.\n- Enable `showVideoScore` for aggregate feedback across cue assessments.\n- Supports compound resume (playback position + completed cues).",
     "example": "```tsx\n<InteractiveVideo blockId=\"safety-video\" title=\"Warehouse safety briefing\" src=\"/media/sample-briefing.mp4\" showVideoScore>\n  <TimedCue atSeconds={3} label=\"PPE check\" mustComplete>\n    <TrueFalse checkId=\"iv-tf\" question=\"PPE is required on the warehouse floor.\" answer={true} />\n  </TimedCue>\n  <TimedCue atSeconds={6} label=\"Reporting\">\n    <Text>Report spills and blocked aisles immediately.</Text>\n  </TimedCue>\n  <TimedCue atSeconds={8} label=\"Quick quiz\" mustComplete>\n    <TrueFalse checkId=\"iv-tf-2\" question=\"Tailgating through secure doors is acceptable.\" answer={false} />\n  </TimedCue>\n</InteractiveVideo>\n```",
-    "seeAlso": "- [interactive-video example](../../examples/index.md)\n- [Block catalog — InteractiveVideo](../block-catalog.md)"
+    "seeAlso": "- [TimedCue](timed-cue.md)\n- [interactive-video example](../../examples/index.md)\n- [Block catalog — InteractiveVideo](../block-catalog.md)"
   },
   "embed": {
     "whenToUse": "Use `Embed` for **sandboxed third-party content** — external tools, legacy pages, or partner widgets that must stay in an iframe.\n\nConfigure `config.embed.allowedHosts` in production so only approved origins load.",
@@ -207,7 +207,7 @@
     "seeAlso": "- [SlideDeck](slide-deck.md)"
   },
   "timed-cue": {
-    "whenToUse": "Use `TimedCue` as a **child of `InteractiveVideo`** to surface content or assessments at a timestamp. Set `mustComplete` on scored cues that should block video progress.\n\nThe demo shows a required `TrueFalse` at 3s and an informational `Text` cue at 8s.",
+    "whenToUse": "**`TimedCue` only works inside [`InteractiveVideo`](interactive-video.md).** It is not a standalone video block — use [`Video`](video.md) for clips without timed overlays.\n\nUse `TimedCue` to surface content or assessments at a timestamp. Set `mustComplete` on scored cues that should block video progress.\n\nThe demo shows a required `TrueFalse` at 3s and an informational `Text` cue at 8s.",
     "requirements": "- `atSeconds` is the trigger time.\n- Cue children are usually assessments or short content blocks.",
     "example": "```tsx\n<InteractiveVideo blockId=\"access-briefing\" title=\"Facility access\" src=\"/media/sample-briefing.mp4\">\n  <TimedCue atSeconds={3} label=\"Tailgating\" mustComplete>\n    <TrueFalse checkId=\"cue-tf\" question=\"Tailgating through secure doors is allowed.\" answer={false} />\n  </TimedCue>\n  <TimedCue atSeconds={8} label=\"Badges\">\n    <Text>Badges must be visible in secure areas.</Text>\n  </TimedCue>\n  <TimedCue atSeconds={9} label=\"Reporting\" mustComplete>\n    <TrueFalse checkId=\"cue-tf-2\" question=\"Report lost badges to security the same day.\" answer={true} />\n  </TimedCue>\n</InteractiveVideo>\n```",
     "seeAlso": "- [InteractiveVideo](interactive-video.md)"

@@ -52,6 +52,7 @@ If you used `npx @lessonkit/cli init` recently on the latest CLI, you likely do 
 :hidden:
 :maxdepth: 1
 
+../MIGRATION-1.6-to-1.7
 ../MIGRATION-1.x-to-2.0
 ../MIGRATION-v1-runtime
 ../MIGRATION-1.5-to-1.6

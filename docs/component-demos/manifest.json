@@ -29,7 +29,7 @@
     { "slug": "map-exit", "blockType": "MapExit", "title": "MapExit", "category": "Compound child", "h5p": "Game Map (exit)" },
     { "slug": "page", "blockType": "Page", "title": "Page", "category": "Compound child", "h5p": "Interactive Book (page)" },
     { "slug": "slide", "blockType": "Slide", "title": "Slide", "category": "Compound child", "h5p": "Course Presentation (slide)" },
-    { "slug": "timed-cue", "blockType": "TimedCue", "title": "TimedCue", "category": "Compound child", "h5p": "Interactive Video (cue)" },
+    { "slug": "timed-cue", "blockType": "TimedCue", "title": "TimedCue (inside InteractiveVideo)", "category": "Compound child", "h5p": "Interactive Video (cue)" },
     { "slug": "course-structure", "blockType": null, "title": "Course structure", "category": "Container", "h5p": null },
     { "slug": "scenario", "blockType": "Scenario", "title": "Scenario", "category": "Content", "h5p": null },
     { "slug": "reflection", "blockType": "Reflection", "title": "Reflection", "category": "Content", "h5p": null },
