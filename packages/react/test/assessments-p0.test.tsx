@@ -433,4 +433,22 @@ describe("1.1.x P0 assessment blocks", () => {
     expect(screen.getByRole("status").textContent).toContain("Try again");
   });
 
+  it("FindHotspot keeps Check in a pinned image toolbar", () => {
+    render(
+      wrap(
+        <FindHotspot
+          checkId="hs-toolbar"
+          src="/img.png"
+          alt="Map"
+          targets={[{ id: "t1", label: "Target", x: 10, y: 10 }]}
+          correctTargetId="t1"
+        />,
+      ),
+    );
+    const toolbar = screen.getByTestId("find-hotspot-toolbar");
+    expect(toolbar.contains(screen.getByTestId("check-hotspot"))).toBe(true);
+    fireEvent.click(screen.getByTestId("target-t1"));
+    expect(toolbar.classList.contains("lk-find-hotspot-toolbar--ready")).toBe(true);
+  });
+
 });

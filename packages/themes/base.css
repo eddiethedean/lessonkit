@@ -717,3 +717,95 @@
   max-width: 100%;
   pointer-events: none;
 }
+
+.lk-find-hotspot {
+  display: inline-block;
+  max-width: 100%;
+}
+
+.lk-find-hotspot-stage {
+  position: relative;
+  display: block;
+  max-width: 100%;
+}
+
+.lk-find-hotspot-image {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+.lk-find-hotspot-target {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+  appearance: none;
+  border: 1px solid var(--lk-color-border);
+  border-radius: var(--lk-radius-md);
+  background: color-mix(in srgb, var(--lk-color-panel) 88%, transparent);
+  color: var(--lk-color-foreground);
+  padding: var(--lk-space-xs) var(--lk-space-sm);
+  font: inherit;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.lk-find-hotspot-target[aria-pressed="true"] {
+  border-color: var(--lk-color-primary, #2563eb);
+  background: color-mix(in srgb, var(--lk-color-primary, #2563eb) 18%, var(--lk-color-panel));
+  font-weight: var(--lk-font-weight-strong);
+}
+
+.lk-find-hotspot-toolbar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--lk-space-sm) var(--lk-space-md);
+  padding: var(--lk-space-sm) var(--lk-space-md);
+  background: color-mix(in srgb, var(--lk-color-panel) 94%, transparent);
+  backdrop-filter: blur(4px);
+  border-top: 1px solid var(--lk-color-border);
+}
+
+.lk-find-hotspot-toolbar button[data-testid="check-hotspot"] {
+  appearance: none;
+  border: 1px solid var(--lk-color-primary, #2563eb);
+  border-radius: var(--lk-radius-md);
+  background: var(--lk-color-primary, #2563eb);
+  color: var(--lk-color-primary-foreground, #f8fafc);
+  padding: var(--lk-space-sm) var(--lk-space-md);
+  font: inherit;
+  font-weight: var(--lk-font-weight-strong);
+  cursor: pointer;
+}
+
+.lk-find-hotspot-toolbar button[data-testid="check-hotspot"]:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.lk-find-hotspot-toolbar--ready button[data-testid="check-hotspot"]:not(:disabled) {
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--lk-color-primary, #2563eb) 35%, transparent);
+}
+
+.lk-find-hotspot-feedback {
+  margin: 0;
+  font: inherit;
+  font-weight: var(--lk-font-weight-strong);
+}
+
+@media (max-width: 480px) {
+  .lk-find-hotspot-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .lk-find-hotspot-toolbar button[data-testid="check-hotspot"] {
+    width: 100%;
+  }
+}

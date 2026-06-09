@@ -154,10 +154,15 @@ function FindHotspotInner(
   };
 
   return (
-    <section aria-label="Find the hotspot" data-lk-check-id={checkId} data-testid="find-hotspot">
-      <div style={{ position: "relative", display: "inline-block" }}>
+    <section
+      aria-label="Find the hotspot"
+      className="lk-find-hotspot"
+      data-lk-check-id={checkId}
+      data-testid="find-hotspot"
+    >
+      <div className="lk-find-hotspot-stage">
         {resolvedSrc ? (
-          <img src={resolvedSrc} alt={props.alt} style={{ maxWidth: "100%" }} />
+          <img src={resolvedSrc} alt={props.alt} className="lk-find-hotspot-image" />
         ) : (
           <p role="alert">This image URL is not allowed.</p>
         )}
@@ -165,27 +170,33 @@ function FindHotspotInner(
           <button
             key={t.id}
             type="button"
+            className="lk-find-hotspot-target"
             aria-label={t.label}
             aria-pressed={selected === t.id}
             data-testid={`target-${t.id}`}
             style={{
-              position: "absolute",
               left: `${t.x}%`,
               top: `${t.y}%`,
-              transform: "translate(-50%, -50%)",
             }}
             onClick={() => selectTarget(t.id)}
           >
             {t.label}
           </button>
         ))}
+        <div
+          className={`lk-find-hotspot-toolbar${selected ? " lk-find-hotspot-toolbar--ready" : ""}`}
+          data-testid="find-hotspot-toolbar"
+        >
+          <button type="button" data-testid="check-hotspot" disabled={!selected} onClick={submit}>
+            Check
+          </button>
+          {checked ? (
+            <p role="status" className="lk-find-hotspot-feedback">
+              {correct ? "Correct" : "Try again"}
+            </p>
+          ) : null}
+        </div>
       </div>
-      <button type="button" data-testid="check-hotspot" disabled={!selected} onClick={submit}>
-        Check
-      </button>
-      {checked ? (
-        <p role="status">{correct ? "Correct" : "Try again"}</p>
-      ) : null}
     </section>
   );
 }
