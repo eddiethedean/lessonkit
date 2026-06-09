@@ -88,7 +88,7 @@ Extended props on `Quiz` / `KnowledgeCheck` (additive — omit for 1.6.x behavio
 
 **Scoring:** `maxScore = answers.length`; score counts correct selections; pass requires meeting `passingScore` with **no incorrect** choice selected.
 
-**Packaging:** `answers` is validated in `lessonkit.json` but **multi-select MCQ is SPA-only for LMS shell exports** until LXPack supports multiple correct choices in shell quizzes (omit from `assessments[]` when packaging to SCORM). `shuffleChoices`, `shuffleSeed`, and `choiceFeedback` are also SPA-only and do not block packaging when omitted.
+**Packaging:** With **LXPack 0.7.0+**, multi-select MCQ (`answers` length > 1) and `shuffleChoices` inject into LMS shell quizzes (`selectionMode: "multiple"`). `shuffleSeed` and per-choice `choiceFeedback` text remain SPA-only (React scoring and aria-live feedback). Omit SPA-only kinds (`fillInBlanks`, `sortParagraphs`, scored `guessTheAnswer`, hotspots) from `assessments[]` when packaging SCORM/xAPI/cmi5 targets.
 
 ## Upgrade checklist
 

@@ -4,6 +4,12 @@ All notable changes to the LessonKit monorepo are documented here.
 
 - [`@lessonkit/*`](https://www.npmjs.com/org/lessonkit) — core platform (tag `v*.*.*`)
 
+## [Unreleased]
+
+### Changed
+
+- **`@lessonkit/lxpack`**: bump `@lxpack/*` dependencies to **0.7.0**; inject multi-select MCQ (`answers` length > 1) and `shuffleChoices` into LMS shell quizzes via `selectionMode: "multiple"`; map `choiceFeedback` to shell `showFeedback: "immediate"` (per-choice feedback text remains SPA-only)
+
 ## [1.7.0] - 2026-06-08
 
 Framework **1.7.x** — four Tier B P1 assessment blocks plus Quiz multi-select/shuffle/feedback variants. All seven `@lessonkit/*` packages ship at **1.7.0**. Additive release (no breaking API changes).

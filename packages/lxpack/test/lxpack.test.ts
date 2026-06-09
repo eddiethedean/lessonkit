@@ -452,15 +452,22 @@ describe("assessments", () => {
     expect(lx!.questions[0]?.choices.find((c) => c.correct)?.text).toBe("Portal");
   });
 
-  it("does not inject multi-select mcq into LMS shell (SPA-only until lxpack multi-correct)", () => {
+  it("injects multi-select mcq into LMS shell with selectionMode multiple", () => {
     const lx = assessmentDescriptorToLxpack({
       checkId: "multi-check",
       question: "Select all",
       choices: ["A", "B", "C"],
       answer: "A",
       answers: ["A", "C"],
+      shuffleChoices: true,
+      choiceFeedback: { B: "Not a hazard." },
     });
-    expect(lx).toBeNull();
+    expect(lx).not.toBeNull();
+    expect(lx!.questions[0]?.selectionMode).toBe("multiple");
+    expect(lx!.shuffleChoices).toBe(true);
+    expect(lx!.showFeedback).toBe("immediate");
+    const correct = lx!.questions[0]?.choices.filter((c) => c.correct).map((c) => c.text);
+    expect(correct).toEqual(["A", "C"]);
   });
 
   it("assigns distinct choice ids when labels slug to the same value", () => {

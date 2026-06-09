@@ -89,7 +89,7 @@ describe("validateInjectableAssessments", () => {
     expect(issues[0]!.message).toContain("SPA only");
   });
 
-  it("includes multi-select MCQ SPA-only guidance", () => {
+  it("allows injectable multi-select MCQ descriptors", () => {
     const issues = validateInjectableAssessments({
       courseId: "c",
       title: "T",
@@ -105,8 +105,6 @@ describe("validateInjectableAssessments", () => {
         },
       ],
     });
-    expect(issues).toHaveLength(1);
-    expect(issues[0]!.message).toContain("multi-select MCQ");
-    expect(issues[0]!.message).toContain("checkId \"multi-1\"");
+    expect(issues).toHaveLength(0);
   });
 });

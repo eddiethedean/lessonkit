@@ -8,9 +8,14 @@ export type LxpackInjectedAssessment = {
   id: string;
   title?: string;
   passingScore: number;
+  maxAttempts?: number;
+  shuffleChoices?: boolean;
+  showFeedback?: "never" | "immediate" | "end";
   questions: Array<{
     id: string;
     prompt: string;
+    explanation?: string;
+    selectionMode?: "single" | "multiple";
     choices: Array<{ id: string; text: string; correct?: boolean }>;
   }>;
 };
@@ -83,13 +88,21 @@ function mcqToLxpack(assessment: McqAssessmentDescriptor): LxpackInjectedAssessm
 
   if (choices.some((choice) => choice === null)) return null;
 
+  const multiSelect = isMultiSelectMcq(assessment);
+
   return {
     id: checkId,
     passingScore: assessment.passingScore ?? DEFAULT_SHELL_PASSING_SCORE,
+    shuffleChoices: assessment.shuffleChoices === true ? true : undefined,
+    showFeedback:
+      assessment.choiceFeedback && Object.keys(assessment.choiceFeedback).length > 0
+        ? "immediate"
+        : undefined,
     questions: [
       {
         id: "q1",
         prompt,
+        selectionMode: multiSelect ? "multiple" : undefined,
         choices: choices as Array<{ id: string; text: string; correct?: boolean }>,
       },
     ],
@@ -141,9 +154,6 @@ export function assessmentDescriptorToLxpack(
     "answer" in assessment &&
     typeof assessment.answer === "string"
   ) {
-    if (isMultiSelectMcq(assessment as McqAssessmentDescriptor)) {
-      return null;
-    }
     return mcqToLxpack(assessment as McqAssessmentDescriptor);
   }
   return null;

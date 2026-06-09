@@ -17,17 +17,9 @@ export function validateInjectableAssessments(
   (descriptor.assessments ?? []).forEach((assessment, index) => {
     if (assessmentDescriptorToLxpack(assessment) === null) {
       const kind = assessment.kind ?? "mcq";
-      const multiSelectHint =
-        kind === "mcq" || kind === undefined
-          ? "answers" in assessment &&
-            Array.isArray(assessment.answers) &&
-            assessment.answers.length > 1
-            ? " — multi-select MCQ scores in the SPA only until LXPack shell supports multiple correct choices; remove from lessonkit.json for LMS targets"
-            : ""
-          : "";
       const hint = spaOnlyKinds.has(kind)
         ? " — score in the SPA only; remove from lessonkit.json for LMS targets or use an injectable kind (mcq, trueFalse)"
-        : multiSelectHint;
+        : "";
       issues.push({
         path: `assessments[${index}]`,
         message: `assessment kind "${kind}" (checkId "${assessment.checkId}") is not injected into LMS shell quizzes${hint}`,

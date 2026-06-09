@@ -61,10 +61,10 @@
   "dependencies": {
     "@lessonkit/core": "1.7.0",
     "@lessonkit/themes": "1.7.0",
-    "@lxpack/api": "0.6.4",
-    "@lxpack/spa-bridge": "0.6.4",
-    "@lxpack/tracking-schema": "0.6.4",
-    "@lxpack/validators": "0.6.4",
+    "@lxpack/api": "0.7.0",
+    "@lxpack/spa-bridge": "0.7.0",
+    "@lxpack/tracking-schema": "0.7.0",
+    "@lxpack/validators": "0.7.0",
     "fflate": "^0.8.3"
   },
   "devDependencies": {

@@ -167,15 +167,15 @@ In `lessonkit.json`, add `answers` alongside `answer` (required for backward com
 
 Inside compounds (`AssessmentSequence`, `SingleChoiceSet`), **Next** stays disabled until **Check** is pressed in multi-select mode.
 
-For **SCORM / LMS shell packaging**, omit multi-select quizzes from `lessonkit.json` `assessments[]` (SPA scores them in React). Single-select MCQ descriptors are unchanged.
+With **LXPack 0.7.0+**, multi-select MCQ descriptors inject into LMS shell quizzes. Include `answers` (length > 1) in `lessonkit.json` `assessments[]` when you want native checkbox scoring in SCORM/xAPI/cmi5 exports.
 
 ## Choice shuffle and feedback (1.7.0)
 
 | Prop | Behavior | Packaging |
 | --- | --- | --- |
-| `shuffleChoices` | Randomize option order in SPA | SPA-only |
-| `shuffleSeed` | Stable order across resume (defaults to `checkId`) | SPA-only |
-| `choiceFeedback` | Map of choice label → feedback string; announced via `aria-live` | SPA-only |
+| `shuffleChoices` | Randomize option order | Injectable into LMS shell (**0.7.0+**) |
+| `shuffleSeed` | Stable order across resume in SPA (defaults to `checkId`) | SPA-only |
+| `choiceFeedback` | Map of choice label → feedback string; announced via `aria-live` in React | SPA-only text; shell gets `showFeedback: "immediate"` when set |
 
 Omit these props for identical behavior to 1.6.x single-select quizzes.
 
