@@ -701,3 +701,19 @@
   opacity: 0.55;
   cursor: not-allowed;
 }
+
+.lk-image-slider-viewport {
+  touch-action: pan-y pinch-zoom;
+  cursor: grab;
+  user-select: none;
+}
+
+.lk-image-slider-viewport:active {
+  cursor: grabbing;
+}
+
+.lk-image-slider-viewport img {
+  display: block;
+  max-width: 100%;
+  pointer-events: none;
+}

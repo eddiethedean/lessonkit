@@ -498,7 +498,12 @@ export const v3CompoundAndContentEntries = [
     ],
     requiredIds: ["blockId"],
     parentConstraints: [...COMPOUND_PARENTS],
-    a11y: { element: "section", ariaLabel: "Image slider", keyboard: "Previous/next slide.", notes: "Carousel." },
+    a11y: {
+      element: "section",
+      ariaLabel: "Image slider",
+      keyboard: "Arrow keys, swipe/drag, or Previous/Next buttons.",
+      notes: "Focusable section; horizontal drag advances slides.",
+    },
     theming: { surface: "global-inherit" as const, stylingNotes: "Slider." },
     telemetry: { emits: ["image_slider_changed"] },
   },
