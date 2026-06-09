@@ -12,6 +12,7 @@ import { setLessonkitBlockType } from "../compound/blockType";
 import { useLessonkit } from "../hooks";
 import { normalizeComponentId, isDevEnvironment } from "../runtime/validateComponentId";
 
+/** Default learner-facing prompt for {@link Summary} when `instructions` is omitted. */
 export const DEFAULT_SUMMARY_INSTRUCTIONS =
   "Select the statements that belong in the summary.";
 
