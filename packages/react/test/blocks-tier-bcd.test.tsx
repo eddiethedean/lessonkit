@@ -562,6 +562,46 @@ describe("Tier B/C/D block components", () => {
     expect(screen.getByTestId("parallax-slide-title").textContent).toContain("Slide two");
   });
 
+  it("ParallaxSlideshow renders scrim overlay when slide has a background image", () => {
+    window.matchMedia = vi.fn().mockImplementation((query: string) => ({
+      matches: false,
+      media: query,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    })) as typeof window.matchMedia;
+    render(
+      wrap(
+        <ParallaxSlideshow
+          blockId="parallax-scrim"
+          slides={[{ title: "Photo slide", body: "Caption text", imageSrc: "/hero.jpg" }]}
+        />,
+      ),
+    );
+    expect(screen.getByTestId("parallax-slide-scrim")).toBeTruthy();
+    expect(screen.getByTestId("parallax-slide-content")).toBeTruthy();
+    expect(screen.getByTestId("parallax-slide-0").className).toContain("lk-parallax-slide--has-image");
+  });
+
+  it("ParallaxSlideshow reduced-motion path omits parallax scrim", () => {
+    window.matchMedia = vi.fn().mockImplementation((query: string) => ({
+      matches: query.includes("prefers-reduced-motion"),
+      media: query,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    })) as typeof window.matchMedia;
+    render(
+      wrap(
+        <ParallaxSlideshow
+          blockId="parallax-reduced"
+          slides={[{ title: "Static slide", body: "No parallax", imageSrc: "/hero.jpg" }]}
+        />,
+      ),
+    );
+    expect(screen.queryByTestId("parallax-slide-scrim")).toBeNull();
+    expect(screen.getByTestId("parallax-slide-image")).toBeTruthy();
+    expect(screen.getByTestId("parallax-slideshow").getAttribute("data-reduced-motion")).toBe("true");
+  });
+
   it("Questionnaire submits field values", () => {
     render(
       wrap(

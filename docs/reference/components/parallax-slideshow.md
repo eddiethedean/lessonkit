@@ -10,6 +10,8 @@
 
 Use `ParallaxSlideshow` for **storytelling slides** with title, body, and optional background imagery. Respects `prefers-reduced-motion`.
 
+Slides with background images render title and body on a theme-aware scrim so text stays readable in light and dark presets.
+
 <!-- try-it:start -->
 ## Try it
 
