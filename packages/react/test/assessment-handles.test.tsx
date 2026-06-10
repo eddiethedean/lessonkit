@@ -531,6 +531,42 @@ describe("AssessmentHandle (imperative API)", () => {
     expect(dadRef.current?.getScore()).toBe(1);
   });
 
+  it("DragAndDrop resume replay uses passed from saved state", async () => {
+    const events: { name: string; data?: unknown }[] = [];
+    const ref = createRef<AssessmentHandle>();
+    render(
+      <Course
+        title="Handles"
+        courseId="handle-course"
+        config={{
+          xapi: { enabled: false },
+          tracking: { replayResumeEvents: true, sink: (e) => { events.push(e); } },
+        }}
+      >
+        <Lesson title="L1" lessonId="lesson-1">
+          <DragAndDrop
+            ref={ref}
+            checkId="dad-replay-passed"
+            items={[{ id: "x", label: "X" }]}
+            targets={[{ id: "t1", label: "T1", accepts: "x" }]}
+          />
+        </Lesson>
+      </Course>,
+    );
+    act(() => {
+      ref.current!.resume!({
+        assignments: { t1: "x" },
+        pool: [],
+        passed: true,
+        checked: false,
+      });
+    });
+    await waitFor(() => {
+      expect(events.some((e) => e.name === "assessment_answered")).toBe(true);
+      expect(events.some((e) => e.name === "assessment_completed")).toBe(true);
+    });
+  });
+
   it("DragAndDrop resume normalizes corrupt pool and assignments", () => {
     const ref = createRef<AssessmentHandle>();
     render(
