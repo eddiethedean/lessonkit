@@ -73,6 +73,24 @@ describe("emitCourseStartedToTracking", () => {
     expect(hasCourseStartedEmittedToTracking(storage, "session-1", "course-1")).toBe(false);
   });
 
+  it("does not mark dedupe when track returns false for sync client without flush", async () => {
+    const storage = createSessionStoragePort();
+    const tracking: TrackingClient = {
+      track: vi.fn(() => false),
+    };
+
+    const ok = await emitCourseStartedToTracking(
+      tracking,
+      storage,
+      "session-1",
+      "course-1",
+      event,
+    );
+
+    expect(ok).toBe(false);
+    expect(hasCourseStartedEmittedToTracking(storage, "session-1", "course-1")).toBe(false);
+  });
+
   it("dedupes concurrent tracking retries after failed deliver", async () => {
     const storage = createSessionStoragePort();
     let deliverCalls = 0;

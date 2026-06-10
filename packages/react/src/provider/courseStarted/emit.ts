@@ -93,7 +93,7 @@ async function deliverToTracking(client: TrackingClient, event: TelemetryEvent):
   if (client.deliver) {
     return client.deliver(event);
   }
-  client.track(event);
+  if (client.track(event) === false) return false;
   if (!client.flush) return true;
   const flushed = await client.flush();
   return flushed !== false;
