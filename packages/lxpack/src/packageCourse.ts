@@ -17,6 +17,7 @@ import {
   validatePackageInputs,
 } from "./packaging/validateInputs";
 import { promoteStagingToOutDir } from "./packaging/promote";
+import { relocatePackageOutput } from "./packaging/relocateOutput";
 import { buildStagingPackage, ensureOutDirParent } from "./packaging/staging";
 import {
   findPackagingErrorIssues,
@@ -272,8 +273,8 @@ export async function packageLessonkitCourse(
     };
   }
 
-  const remappedOutputPath = remapArtifactPaths(stagingRoot, outDir, staged.outputPath);
-  const remappedOutputDir = remapArtifactPaths(stagingRoot, outDir, staged.outputDir);
+  let remappedOutputPath = remapArtifactPaths(stagingRoot, outDir, staged.outputPath);
+  let remappedOutputDir = remapArtifactPaths(stagingRoot, outDir, staged.outputDir);
 
   const validation: ValidateCourseResult = {
     ok: true,
@@ -298,6 +299,33 @@ export async function packageLessonkitCourse(
       issues: [
         {
           path: "promote",
+          message: err instanceof Error ? err.message : String(err),
+        },
+      ],
+    };
+  }
+
+  try {
+    remappedOutputPath = await relocatePackageOutput(
+      remappedOutputPath,
+      staged.requestedOutputPath,
+      writeOpts.projectRoot,
+    );
+    remappedOutputDir = await relocatePackageOutput(
+      remappedOutputDir,
+      staged.requestedOutputDir,
+      writeOpts.projectRoot,
+    );
+  } catch (err) {
+    return {
+      ok: false,
+      courseDir: outDir,
+      target,
+      validation,
+      build,
+      issues: [
+        {
+          path: "output",
           message: err instanceof Error ? err.message : String(err),
         },
       ],

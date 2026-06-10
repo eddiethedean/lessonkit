@@ -178,7 +178,7 @@ export function validatePackageInputs(
         ],
       };
     }
-    if (isAbsolute(output) && !isResolvedPathUnderRoot(outDir, resolvedOutput)) {
+    if (isAbsolute(output) && !isResolvedPathUnderRoot(projectRoot, resolvedOutput)) {
       return {
         ok: false,
         courseDir: outDir,
@@ -186,7 +186,7 @@ export function validatePackageInputs(
         issues: [
           {
             path: "output",
-            message: "output must resolve inside outDir",
+            message: "output must resolve inside projectRoot",
           },
         ],
       };

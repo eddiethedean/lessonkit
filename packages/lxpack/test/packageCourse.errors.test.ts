@@ -14,6 +14,7 @@ vi.mock("@lxpack/api", () => ({
 }));
 
 import { packageLessonkitCourse } from "../src/packageCourse";
+import { validatePackageInputs } from "../src/packaging/validateInputs";
 import { writeMinimalParitySource } from "./helpers/writeMinimalParitySource";
 
 const tempDirs: string[] = [];
@@ -282,29 +283,15 @@ describe("packageLessonkitCourse errors", () => {
     }
   });
 
-  it("returns ok false when absolute output is outside outDir before staging", async () => {
+  it("accepts absolute output under projectRoot outside outDir before staging", async () => {
     const root = await makeTempDir();
-    const dist = join(root, "dist");
-    await mkdir(dist, { recursive: true });
-    await writeFile(join(dist, "index.html"), "<html></html>", "utf-8");
-    await writeMinimalParitySource(root, descriptor);
-
-    const result = await packageLessonkitCourse({
-      descriptor,
-      outDir: join(root, "course"),
-      spaDistDir: dist,
-      projectRoot: root,
+    const result = validatePackageInputs({
       target: "scorm12",
+      outDir: join(root, "course"),
+      projectRoot: root,
       output: join(root, "artifacts", "course-scorm12.zip"),
     });
-
-    expect(result.ok).toBe(false);
-    expect(packageLessonkit).not.toHaveBeenCalled();
-    if (!result.ok) {
-      expect(result.issues.some((i) => i.path === "output" && i.message === "output must resolve inside outDir")).toBe(
-        true,
-      );
-    }
+    expect(result.ok).toBe(true);
   });
 
   it("returns ok false when build outputPath is outside staging", async () => {

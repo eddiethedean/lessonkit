@@ -854,11 +854,8 @@ describe("packageLessonkitCourse", () => {
     expect(result.ok).toBe(true);
     if (result.ok) {
       expect(result.fileCount).toBeGreaterThan(0);
-      expect(result.outputPath).toContain("course-scorm12.zip");
-      expect(result.outputPath).toBe(
-        "outputPath" in result.build ? result.build.outputPath : undefined,
-      );
-      expect(result.outputPath?.startsWith(outDir)).toBe(true);
+      expect(result.outputPath).toBe(join(root, ".lxpack/out/course-scorm12.zip"));
+      expect(result.outputPath?.startsWith(root)).toBe(true);
     }
   }, 30_000);
 

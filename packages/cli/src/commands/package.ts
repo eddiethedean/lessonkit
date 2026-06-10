@@ -1,5 +1,4 @@
 import { existsSync } from "node:fs";
-import { isAbsolute } from "node:path";
 import { packageLessonkitCourse } from "@lessonkit/lxpack";
 import { runBuild } from "./dev.js";
 import type { CliJsonResult } from "../lib/errors.js";
@@ -87,17 +86,13 @@ export async function runPackage(opts: PackageOptions): Promise<CliJsonResult> {
     target,
     opts.out,
   );
-  const trimmedOut = opts.out?.trim();
-  const output =
-    trimmedOut && !isAbsolute(trimmedOut) ? trimmedOut : resolvedOutput;
-
   const result = await packageLessonkitCourse({
     descriptor: project.course,
     outDir,
     spaDistDir: distDir,
     projectRoot: project.root,
     target,
-    output,
+    output: resolvedOutput,
     dir,
     outputBaseDir,
     strictParity: opts.strictParity,

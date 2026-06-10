@@ -1,5 +1,5 @@
 import * as fsp from "node:fs/promises";
-import { dirname, join } from "node:path";
+import { dirname, isAbsolute, join, resolve } from "node:path";
 import { tmpdir } from "node:os";
 import { packageLessonkit, type BuildCourseResult, type ExportTarget } from "@lxpack/api";
 import type { LessonkitCourseDescriptor } from "../types";
@@ -24,6 +24,9 @@ export type BuildStagingPackageResult =
       build: Extract<BuildCourseResult, { ok: true }>;
       outputPath?: string;
       outputDir?: string;
+      /** Absolute project-root output path when `output` was explicitly requested. */
+      requestedOutputPath?: string;
+      requestedOutputDir?: string;
     }
   | {
       ok: false;
@@ -72,15 +75,30 @@ export async function buildStagingPackage(
     const interchange = descriptorToInterchange(descriptor);
     const outputBase = outputBaseDir ?? ".lxpack/out";
     await fsp.mkdir(join(stagingDir, outputBase), { recursive: true });
-    const defaultOutput =
-      output ?? (dir ? join(outputBase, target) : join(outputBase, `course-${target}.zip`));
+    const defaultOutput = dir ? join(outputBase, target) : join(outputBase, `course-${target}.zip`);
+
+    let packageOutput = output ?? defaultOutput;
+    let requestedOutputPath: string | undefined;
+    let requestedOutputDir: string | undefined;
+
+    if (output) {
+      const projectRoot = resolve(writeOpts.projectRoot);
+      const requested = isAbsolute(output) ? resolve(output) : resolve(projectRoot, output);
+      if (dir) {
+        requestedOutputDir = requested;
+        packageOutput = defaultOutput;
+      } else {
+        requestedOutputPath = requested;
+        packageOutput = defaultOutput;
+      }
+    }
 
     const build = await packageLessonkit({
       interchange,
       spaDirs,
       target,
       courseDir: stagingDir,
-      output: defaultOutput,
+      output: packageOutput,
       dir,
       outputBaseDir,
       outputAnchorDir: stagingDir,
@@ -107,6 +125,8 @@ export async function buildStagingPackage(
       build,
       outputPath: "outputPath" in build ? build.outputPath : undefined,
       outputDir: "outputDir" in build ? build.outputDir : undefined,
+      requestedOutputPath,
+      requestedOutputDir,
     };
   } catch (err) {
     await fsp.rm(stagingDir, { recursive: true, force: true }).catch(/* v8 ignore next */ () => undefined);

@@ -132,15 +132,48 @@ describe("runPackage integration (real lxpack validation)", () => {
     });
   });
 
-  it("rejects absolute --out under project root but outside outDir at validation", async () => {
+  it("writes relative --out at the resolved project-root path", async () => {
+    await writeValidProject(dir);
+
+    const relativeOut = "artifacts/course-scorm12.zip";
+    const expectedPath = join(dir, relativeOut);
+    const wrongNestedPath = join(dir, ".lxpack/course", relativeOut);
+
+    const result = await runPackage({
+      target: "scorm12",
+      cwd: dir,
+      noBuild: true,
+      out: relativeOut,
+      json: true,
+    });
+
+    expect(result.ok).toBe(true);
+    if (result.ok && result.command === "package" && result.target === "scorm12") {
+      expect(result.outputPath).toBe(expectedPath);
+      expect(existsSync(expectedPath)).toBe(true);
+      expect(existsSync(wrongNestedPath)).toBe(false);
+    }
+  }, 30_000);
+
+  it("writes absolute --out under project root outside outDir", async () => {
     await writeValidProject(dir);
 
     const absoluteOut = join(dir, "artifacts", "course-scorm12.zip");
-    await expect(
-      runPackage({ target: "scorm12", cwd: dir, noBuild: true, out: absoluteOut }),
-    ).rejects.toMatchObject({
-      code: "PACKAGING",
-      issues: [{ path: "output", message: "output must resolve inside outDir" }],
+    const wrongNestedPath = join(dir, ".lxpack/course", "artifacts", "course-scorm12.zip");
+
+    const result = await runPackage({
+      target: "scorm12",
+      cwd: dir,
+      noBuild: true,
+      out: absoluteOut,
+      json: true,
     });
-  });
+
+    expect(result.ok).toBe(true);
+    if (result.ok && result.command === "package" && result.target === "scorm12") {
+      expect(result.outputPath).toBe(absoluteOut);
+      expect(existsSync(absoluteOut)).toBe(true);
+      expect(existsSync(wrongNestedPath)).toBe(false);
+    }
+  }, 30_000);
 });

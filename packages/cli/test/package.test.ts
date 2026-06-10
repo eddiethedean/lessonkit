@@ -61,6 +61,31 @@ describe("runPackage", () => {
     vi.clearAllMocks();
   });
 
+  it("passes resolved project-root output for relative --out", async () => {
+    mockedPackage.mockResolvedValue({
+      ok: true,
+      courseDir: join(dir, ".lxpack/course"),
+      target: "scorm12",
+      outputPath: join(dir, "artifacts/course-scorm12.zip"),
+      fileCount: 3,
+      validation: { ok: true, issues: [], manifest: {} as never },
+      build: { ok: true, issues: [], fileCount: 3, target: "scorm12", manifest: {} as never },
+    } satisfies PackageLessonkitCourseResult);
+
+    await runPackage({
+      target: "scorm12",
+      cwd: dir,
+      noBuild: true,
+      out: "artifacts/course-scorm12.zip",
+    });
+
+    expect(mockedPackage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        output: join(dir, "artifacts/course-scorm12.zip"),
+      }),
+    );
+  });
+
   it("packages scorm12 via lxpack", async () => {
     mockedPackage.mockResolvedValue({
       ok: true,

@@ -648,7 +648,7 @@ describe("coverage-full lxpack", () => {
       expect(result.ok).toBe(false);
     });
 
-    it("rejects absolute output under projectRoot but outside outDir", async () => {
+    it("accepts absolute output under projectRoot outside outDir", async () => {
       const root = await makeTempDir("lk-val-abs-out-");
       const outDir = join(root, "course");
       const output = join(root, "artifacts", "course-scorm12.zip");
@@ -658,12 +658,7 @@ describe("coverage-full lxpack", () => {
         projectRoot: root,
         output,
       });
-      expect(result.ok).toBe(false);
-      if (!result.ok) {
-        expect(result.issues.some((i) => i.path === "output" && i.message === "output must resolve inside outDir")).toBe(
-          true,
-        );
-      }
+      expect(result.ok).toBe(true);
     });
 
     it("accepts absolute output path inside outDir", async () => {
