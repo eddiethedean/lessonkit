@@ -30,7 +30,7 @@ lessonkit package --target scorm12   # LMS artifact
 | Flag | Purpose |
 | --- | --- |
 | `--here` | Scaffold in the current directory |
-| `--force` | With `--here`: allow init when the directory is empty or contains only dotfiles (e.g. `.git`). Does not overwrite existing project files. |
+| `--force` | With `--here`: back up conflicting files to `.lessonkit-init-backup/` and overwrite (required when template files such as `.gitignore` already exist). |
 | `--skip-install` | Skip `npm install` after copying the template |
 
 ### Package targets

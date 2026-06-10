@@ -612,6 +612,42 @@ describe("runInit", () => {
     expect(existsSync(join(here, "package.json"))).toBe(true);
   });
 
+  it("rejects --here when template files would overwrite existing dotfiles", async () => {
+    const here = join(parentDir, "custom-gitignore");
+    await mkdir(here, { recursive: true });
+    await mkdir(join(here, ".git"), { recursive: true });
+    await writeFile(join(here, ".gitignore"), "custom ignores\n", "utf8");
+    process.chdir(here);
+
+    await expect(
+      runInit({ here: true, skipInstall: true }, { log: () => {}, error: () => {} }),
+    ).rejects.toMatchObject({
+      exitCode: EXIT_INVALID_PROJECT,
+      message: expect.stringContaining(".gitignore"),
+    });
+
+    expect(await readFile(join(here, ".gitignore"), "utf8")).toBe("custom ignores\n");
+    expect(existsSync(join(here, "package.json"))).toBe(false);
+  });
+
+  it("init --here --force backs up conflicting dotfiles before overwrite", async () => {
+    const here = join(parentDir, "force-gitignore");
+    await mkdir(here, { recursive: true });
+    await mkdir(join(here, ".git"), { recursive: true });
+    await writeFile(join(here, ".gitignore"), "custom ignores\n", "utf8");
+    process.chdir(here);
+    const log = vi.fn();
+
+    await runInit({ here: true, force: true, skipInstall: true }, { log, error: () => {} });
+
+    expect(existsSync(join(here, "package.json"))).toBe(true);
+    expect(await readFile(join(here, ".gitignore"), "utf8")).not.toBe("custom ignores\n");
+    expect(await readFile(join(here, ".lessonkit-init-backup", ".gitignore"), "utf8")).toBe(
+      "custom ignores\n",
+    );
+    expect(log).toHaveBeenCalledWith(expect.stringContaining(".lessonkit-init-backup"));
+  });
+
   it("rolls back --here project files when promote fails", async () => {
     const here = join(parentDir, "promote-fail");
     await mkdir(here, { recursive: true });

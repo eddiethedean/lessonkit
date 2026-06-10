@@ -10,6 +10,7 @@ import { runNpmInstall } from "../lib/exec.js";
 
 const SKIP_DIRS = new Set(["node_modules", "dist", ".lxpack", ".git", "coverage", ".nyc_output"]);
 const SKIP_FILES = new Set([".DS_Store"]);
+const INIT_BACKUP_DIR = ".lessonkit-init-backup";
 
 export type InitOptions = {
   name?: string;
@@ -125,6 +126,15 @@ async function backupConflictingFiles(
   return backups;
 }
 
+async function writeInitBackupDir(projectDir: string, backups: Map<string, Buffer>): Promise<string> {
+  const backupDir = join(projectDir, INIT_BACKUP_DIR);
+  await mkdir(backupDir, { recursive: true });
+  for (const [name, content] of backups) {
+    await writeFile(join(backupDir, name), content);
+  }
+  return backupDir;
+}
+
 async function rollbackPromotedFiles(
   projectDir: string,
   stagingDir: string,
@@ -189,6 +199,8 @@ export const __testInitHelpers = {
   promoteStagingToProjectDir,
   rollbackPromotedFiles,
   backupConflictingFiles,
+  writeInitBackupDir,
+  INIT_BACKUP_DIR,
 };
 
 export async function runInit(opts: InitOptions, logger: CliLogger): Promise<CliJsonResult> {
@@ -269,6 +281,24 @@ export async function runInit(opts: InitOptions, logger: CliLogger): Promise<Cli
     if (opts.here) {
       const preExisting = new Set(await readdir(projectDir));
       const backups = await backupConflictingFiles(stagingDir, projectDir);
+      const conflicts = [...backups.keys()].sort();
+      if (conflicts.length > 0 && !opts.force) {
+        throw new CliError(
+          `Would overwrite existing file(s): ${conflicts.join(", ")}. Re-run with --force to back them up under ${INIT_BACKUP_DIR}/ and continue.`,
+          {
+            code: "INVALID_PROJECT",
+            exitCode: EXIT_INVALID_PROJECT,
+          },
+        );
+      }
+      if (conflicts.length > 0 && opts.force && !opts.json) {
+        const backupDir = await writeInitBackupDir(projectDir, backups);
+        logger.log(
+          `Backed up ${conflicts.length} conflicting file(s) to ${backupDir}: ${conflicts.join(", ")}`,
+        );
+      } else if (conflicts.length > 0 && opts.force) {
+        await writeInitBackupDir(projectDir, backups);
+      }
       try {
         await __testInitHelpers.promoteStagingToProjectDir(stagingDir, projectDir);
       } catch (promoteErr) {
