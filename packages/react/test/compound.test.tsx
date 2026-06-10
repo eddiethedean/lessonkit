@@ -1046,6 +1046,46 @@ describe("InteractiveVideo", () => {
     expect((screen.getByTestId("timed-cue-0") as HTMLElement).hidden).toBe(true);
   });
 
+  it("does not re-fire a cue after resume-overlay completion when firedCueIndices were not saved", () => {
+    saveCompoundState(
+      createSessionStoragePort(),
+      COURSE_ID,
+      "iv-resume-refire",
+      createCompoundResumeState({
+        activePageIndex: 0,
+        childStates: {
+          [IV_META_KEY]: {
+            currentTime: 15,
+            completedCueIndices: [],
+            firedCueIndices: [],
+          },
+        },
+      }),
+    );
+
+    render(
+      wrap(
+        <InteractiveVideo blockId="iv-resume-refire" title="Briefing" src="/sample.mp4">
+          <TimedCue atSeconds={10} label="Check">
+            <Text>Pause message</Text>
+          </TimedCue>
+        </InteractiveVideo>,
+        true,
+      ),
+    );
+
+    const overlay = screen.getByTestId("interactive-video-overlay");
+    expect(overlay.className).toContain("lk-interactive-video-overlay--active");
+    fireEvent.click(screen.getByTestId("cue-continue"));
+    expect(screen.queryByTestId("cue-continue")).toBeNull();
+
+    const video = screen.getByTestId("interactive-video-player") as HTMLVideoElement;
+    Object.defineProperty(video, "currentTime", { value: 15, writable: true, configurable: true });
+    fireEvent.timeUpdate(video);
+    expect(overlay.className).not.toContain("lk-interactive-video-overlay--active");
+    expect(screen.queryByTestId("cue-continue")).toBeNull();
+  });
+
   it("uses time-sorted cue index for persisted activePageIndex when JSX order differs", () => {
     sessionStorage.setItem(
       "lessonkit:compound:compound-course:iv-sort",
