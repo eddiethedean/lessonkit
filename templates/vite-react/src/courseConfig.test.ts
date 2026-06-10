@@ -46,6 +46,11 @@ describe("createCourseConfig", () => {
     config.observability?.onXapiTransportError?.(new Error("transport"));
     config.observability?.onXapiMappingError?.(new Error("mapping"));
     config.observability?.onLxpackBridgeError?.(new Error("bridge"));
+    config.observability?.onInvalidSessionId?.({
+      invalidId: "bad:id",
+      fallbackId: "tab-1",
+      source: "provided",
+    });
 
     expect(warn).toHaveBeenCalled();
     warn.mockRestore();

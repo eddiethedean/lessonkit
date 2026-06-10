@@ -12,6 +12,20 @@ function isDevEnvironment(): boolean {
   return typeof g.process !== "undefined" && g.process.env?.NODE_ENV !== "production";
 }
 
+export type InvalidSessionIdContext = {
+  /** The invalid id that was rejected. */
+  invalidId: string;
+  /** Id actually used after fallback. */
+  fallbackId: string;
+  /** Whether the invalid id came from config or from stored tab state. */
+  source: "provided" | "stored";
+};
+
+export type ResolveSessionIdOptions = {
+  /** Invoked when an invalid session id is replaced by a tab or generated id. */
+  onInvalidSessionId?: (ctx: InvalidSessionIdContext) => void;
+};
+
 export function getTabSessionId(storage: StoragePort): string | null {
   return storage.getItem(SESSION_STORAGE_KEY);
 }
@@ -27,31 +41,7 @@ function sessionKeySegment(sessionId: string): string {
   return validated.ok ? validated.id : encodeURIComponent(sessionId);
 }
 
-export function resolveSessionId(storage: StoragePort, provided?: string): string {
-  if (provided !== undefined) {
-    const trimmed = provided.trim();
-    if (trimmed.length > 0) {
-      const validated = validateId(trimmed);
-      if (validated.ok) return validated.id;
-      if (isDevEnvironment()) {
-        console.warn(
-          `[lessonkit] Invalid sessionId "${trimmed}"; falling back to tab or generated id.`,
-        );
-      }
-    }
-  }
-  const existing = storage.getItem(SESSION_STORAGE_KEY);
-  if (existing) {
-    const trimmedExisting = existing.trim();
-    const validatedExisting = validateId(trimmedExisting);
-    if (validatedExisting.ok) return validatedExisting.id;
-    storage.removeItem?.(SESSION_STORAGE_KEY);
-    if (isDevEnvironment()) {
-      console.warn(
-        `[lessonkit] Invalid stored sessionId "${existing}"; generating a new id.`,
-      );
-    }
-  }
+function resolveGeneratedSessionId(storage: StoragePort): string {
   const volatile = volatileSessionIds.get(storage);
   if (volatile) return volatile;
   const id = createSessionId();
@@ -66,6 +56,59 @@ export function resolveSessionId(storage: StoragePort, provided?: string): strin
     return id;
   }
   return id;
+}
+
+function resolveFallbackSessionId(
+  storage: StoragePort,
+  options?: ResolveSessionIdOptions,
+): string {
+  const existing = storage.getItem(SESSION_STORAGE_KEY);
+  if (existing) {
+    const trimmedExisting = existing.trim();
+    const validatedExisting = validateId(trimmedExisting);
+    if (validatedExisting.ok) return validatedExisting.id;
+    storage.removeItem?.(SESSION_STORAGE_KEY);
+    if (isDevEnvironment()) {
+      console.warn(
+        `[lessonkit] Invalid stored sessionId "${existing}"; generating a new id.`,
+      );
+    }
+    const fallback = resolveGeneratedSessionId(storage);
+    options?.onInvalidSessionId?.({
+      invalidId: existing,
+      fallbackId: fallback,
+      source: "stored",
+    });
+    return fallback;
+  }
+  return resolveGeneratedSessionId(storage);
+}
+
+export function resolveSessionId(
+  storage: StoragePort,
+  provided?: string,
+  options?: ResolveSessionIdOptions,
+): string {
+  if (provided !== undefined) {
+    const trimmed = provided.trim();
+    if (trimmed.length > 0) {
+      const validated = validateId(trimmed);
+      if (validated.ok) return validated.id;
+      if (isDevEnvironment()) {
+        console.warn(
+          `[lessonkit] Invalid sessionId "${trimmed}"; falling back to tab or generated id.`,
+        );
+      }
+      const fallback = resolveFallbackSessionId(storage, options);
+      options?.onInvalidSessionId?.({
+        invalidId: trimmed,
+        fallbackId: fallback,
+        source: "provided",
+      });
+      return fallback;
+    }
+  }
+  return resolveFallbackSessionId(storage, options);
 }
 
 function courseStartedStorageKey(sessionId: string, courseId?: CourseId): string {

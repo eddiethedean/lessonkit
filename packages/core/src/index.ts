@@ -182,6 +182,8 @@ export {
 export type { ProgressState, ProgressController } from "./progress";
 export { createProgressController } from "./progress";
 
+export type { InvalidSessionIdContext, ResolveSessionIdOptions } from "./session";
+
 export {
   SESSION_STORAGE_KEY,
   getTabSessionId,

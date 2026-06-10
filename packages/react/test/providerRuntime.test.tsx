@@ -164,4 +164,32 @@ describe("useLessonkitProviderRuntime edge cases", () => {
       events.length = 0;
     }
   });
+
+  it("invokes onInvalidSessionId when configured sessionId fails validation", async () => {
+    const onInvalidSessionId = vi.fn();
+    vi.stubEnv("NODE_ENV", "production");
+
+    render(
+      <LessonkitProvider
+        config={{
+          courseId: "course-1",
+          session: { sessionId: "bad:id" },
+          tracking: { sink: () => undefined },
+          observability: { onInvalidSessionId },
+        }}
+      >
+        <div>child</div>
+      </LessonkitProvider>,
+    );
+
+    await waitFor(() => expect(onInvalidSessionId).toHaveBeenCalled());
+    expect(onInvalidSessionId).toHaveBeenCalledWith(
+      expect.objectContaining({
+        invalidId: "bad:id",
+        source: "provided",
+      }),
+    );
+    expect(onInvalidSessionId.mock.calls[0]?.[0]?.fallbackId).toBeTruthy();
+    expect(onInvalidSessionId.mock.calls[0]?.[0]?.fallbackId).not.toBe("bad:id");
+  });
 });

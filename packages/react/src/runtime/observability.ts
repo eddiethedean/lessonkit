@@ -1,4 +1,4 @@
-import type { TelemetryEvent, TelemetryBatchSink } from "@lessonkit/core";
+import type { InvalidSessionIdContext, TelemetryEvent, TelemetryBatchSink } from "@lessonkit/core";
 import type { InMemoryXAPIQueueOptions } from "@lessonkit/xapi";
 import { createInMemoryXAPIQueue } from "@lessonkit/xapi";
 import type { LessonkitConfig } from "../context";
@@ -35,6 +35,8 @@ export type LessonkitObservabilityConfig = {
   onCompoundDuplicateCheckId?: (ctx: { checkId: string }) => void;
   /** config.storage changed after LessonkitProvider mount (ignored in production). */
   onStoragePortChangeIgnored?: () => void;
+  /** Configured or stored session id failed validation and was replaced. */
+  onInvalidSessionId?: (ctx: InvalidSessionIdContext) => void;
 };
 
 export function createXapiQueueFromObservability(
