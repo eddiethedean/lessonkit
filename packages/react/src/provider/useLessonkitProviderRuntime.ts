@@ -383,12 +383,13 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
           markCourseStartedXapiSent(providerStorage, bootstrapSessionId, bootstrapCourseId);
           xapiCourseStartedSentOnClientRef.current = true;
         }
-      } catch {
+      } catch (err) {
+        observabilityRef.current?.onXapiTransportError?.(err);
         if (bootstrapSent && !cancelled) {
           xapiBootstrapQueuedRef.current = false;
           xapiBootstrapInFlightRef.current = false;
         }
-        // ignore — do not mark session or bootstrap skip until xAPI flush succeeds
+        // do not mark session or bootstrap skip until xAPI flush succeeds
       }
     })();
     return () => {
