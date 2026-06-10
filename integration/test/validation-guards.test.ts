@@ -93,8 +93,10 @@ describe("packaging validation guards", () => {
     expect(result.result.exitCode).not.toBe(0);
     expect(result.json.ok).toBe(false);
     const issues = result.json.issues ?? [];
-    expect(issues.some((issue) => issue.path === "output" && issue.message === "output must resolve inside outDir")).toBe(
-      true,
-    );
+    expect(
+      issues.some(
+        (issue) => issue.path === "output" && issue.message === "output must resolve inside outDir",
+      ),
+    ).toBe(true);
   });
 });
