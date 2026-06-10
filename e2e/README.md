@@ -33,6 +33,8 @@ E2E_FORCE_REBUILD=1 npm run test:e2e   # rebuild artifacts
 
 Artifacts: `e2e/.artifacts/manifest.json` (written by `global-setup.ts`).
 
+E2E cleans lxpack-golden staging dirs after each run (`global-teardown.ts`) and before rebuilding artifacts in setup (avoids `ENOTEMPTY` when re-running with `E2E_FORCE_REBUILD=1`). CLI packaging output under `.lxpack/course/` is untouched.
+
 Harness dev: `npm run build -w lessonkit-e2e-telemetry-harness && npm run preview -w lessonkit-e2e-telemetry-harness -- --port 4174`
 
 See [export parity guide](https://github.com/eddiethedean/lessonkit/blob/main/docs/guides/react-developers/export-parity.md).
