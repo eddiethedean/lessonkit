@@ -354,7 +354,22 @@ function QuizInner(
 
   const onCheckMulti = () => {
     setChecked(true);
-    applyOutcome(computeScore(), selectedMulti);
+    const outcome = computeScore();
+    const scored = scoreResponse(
+      selectedMulti,
+      outcome.exactMatch && !outcome.hasWrongSelection,
+      outcome.maxScore,
+      props.passingScore,
+    );
+    applyOutcome(
+      {
+        ...outcome,
+        score: scored.score,
+        maxScore: scored.maxScore,
+        passedThreshold: scored.passed,
+      },
+      selectedMulti,
+    );
   };
 
   return (

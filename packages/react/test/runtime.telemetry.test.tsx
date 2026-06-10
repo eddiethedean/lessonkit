@@ -1080,6 +1080,53 @@ it("Quiz defaults passingScore to plugin maxScore when prop is omitted", async (
     );
   });
 
+it("Quiz multi-select Check uses scoreAssessment plugin", async () => {
+    const events: TelemetryEvent[] = [];
+    const plugin = defineAssessmentPlugin({
+      id: "scorer-multi",
+      version: "1",
+      kind: "assessment",
+      scoreAssessment: () => ({ score: 99, maxScore: 99, passed: true }),
+    });
+
+    const { getByLabelText, getByTestId } = render(
+      <Course
+        title="Course"
+        courseId="course-1"
+        config={{
+          plugins: [plugin],
+          tracking: { sink: (e) => void events.push(e) },
+          xapi: { enabled: false },
+        }}
+      >
+        <Lesson title="Lesson" lessonId="lesson-1">
+          <Quiz
+            checkId="check-multi"
+            question="Select all risks"
+            choices={["A", "B", "C"]}
+            answer="A"
+            answers={["A", "B"]}
+          />
+        </Lesson>
+      </Course>,
+    );
+
+    fireEvent.click(getByLabelText("A"));
+    fireEvent.click(getByLabelText("B"));
+    fireEvent.click(getByTestId("quiz-check"));
+    await waitFor(() =>
+      expect(
+        events.some(
+          (e) =>
+            e.name === "quiz_completed" &&
+            e.data?.checkId === "check-multi" &&
+            e.data?.score === 99 &&
+            e.data?.maxScore === 99,
+        ),
+      ).toBe(true),
+    );
+  });
+
 it("Quiz rejects plugin numeric score when maxScore is zero", async () => {
     const events: TelemetryEvent[] = [];
     const plugin = defineAssessmentPlugin({
