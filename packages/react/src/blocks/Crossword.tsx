@@ -154,7 +154,7 @@ function CrosswordInner(
   const check = () => {
     const currentValues = valuesRef.current;
     const currentScore = scoreEntries(props.entries, currentValues);
-    const ok = currentScore === maxScore && maxScore > 0;
+    const ok = meetsPassingThreshold(currentScore, maxScore || 1, props.passingScore);
     setSubmitted(true);
     assessment.answer({
       checkId,
@@ -164,12 +164,12 @@ function CrosswordInner(
     });
     if ((ok || props.enableRetry === false) && !completedRef.current) {
       completedRef.current = true;
-      if (ok) setPassed(true);
+      setPassed(ok);
       assessment.complete({
         checkId,
         interactionType: INTERACTION,
         score: currentScore,
-        maxScore,
+        maxScore: maxScore || 1,
         passingScore: props.passingScore ?? maxScore,
       });
     }
