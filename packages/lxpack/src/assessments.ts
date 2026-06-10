@@ -102,7 +102,7 @@ function mcqToLxpack(assessment: McqAssessmentDescriptor): LxpackInjectedAssessm
       {
         id: "q1",
         prompt,
-        selectionMode: multiSelect ? "multiple" : undefined,
+        ...(multiSelect ? { selectionMode: "multiple" as const } : {}),
         choices: choices as Array<{ id: string; text: string; correct?: boolean }>,
       },
     ],
