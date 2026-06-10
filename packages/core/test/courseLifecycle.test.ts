@@ -1,14 +1,18 @@
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { createNoopStorage } from "../src/ports";
 import { createProgressController } from "../src/progress";
 import {
   buildCourseStartedTelemetryEvent,
   completeCourseWithTelemetry,
   completeLessonWithTelemetry,
+  resetCourseStartedEmitFlightForTests,
   tryEmitCourseStarted,
 } from "../src/runtime/courseLifecycle";
 
 describe("courseLifecycle", () => {
+  afterEach(() => {
+    resetCourseStartedEmitFlightForTests();
+  });
   it("buildCourseStartedTelemetryEvent includes session context", () => {
     const event = buildCourseStartedTelemetryEvent({
       courseId: "c",
@@ -81,7 +85,7 @@ describe("courseLifecycle", () => {
     expect(result.marked).toBe(true);
   });
 
-  it("tryEmitCourseStarted reports marked false when durable write fails", async () => {
+  it("tryEmitCourseStarted reports marked false but dedupes when durable write fails", async () => {
     const memory = new Map<string, string>();
     const storage = {
       getItem: (k: string) => memory.get(k) ?? null,
@@ -96,8 +100,12 @@ describe("courseLifecycle", () => {
     };
     const emit = vi.fn(() => true);
     const first = await tryEmitCourseStarted(ctx, { emitCourseStartedEvent: emit }, false);
+    const second = await tryEmitCourseStarted(ctx, { emitCourseStartedEvent: emit }, false);
     expect(first.emitted).toBe(true);
     expect(first.marked).toBe(false);
+    expect(second.emitted).toBe(true);
+    expect(second.marked).toBe(true);
+    expect(emit).toHaveBeenCalledTimes(1);
     expect(memory.size).toBe(0);
   });
 

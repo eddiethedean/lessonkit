@@ -206,6 +206,17 @@ describe("session", () => {
     markCourseStarted(storage, "s", undefined);
   });
 
+  it("remembers course_started marks in memory when durable write fails", () => {
+    const storage = {
+      getItem: () => null,
+      setItem: () => false,
+    };
+
+    expect(hasCourseStarted(storage, "s", "c1")).toBe(false);
+    expect(markCourseStarted(storage, "s", "c1")).toBe(false);
+    expect(hasCourseStarted(storage, "s", "c1")).toBe(true);
+  });
+
   it("migrateCourseStartedMark moves dedupe between session ids", () => {
     const store: Record<string, string> = {};
     const storage = {

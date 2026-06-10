@@ -89,9 +89,15 @@ function createMemoryBackedSessionStorage(
       if (!bypassCacheForKey(key) && memory.has(key)) return memory.get(key)!;
       try {
         const value = session.getItem(key);
-        if (value !== null) memory.set(key, value);
-        else if (bypassCacheForKey(key)) memory.delete(key);
-        return value;
+        if (value !== null) {
+          memory.set(key, value);
+          return value;
+        }
+        if (bypassCacheForKey(key) && memory.has(key)) {
+          return memory.get(key)!;
+        }
+        if (bypassCacheForKey(key)) memory.delete(key);
+        return null;
       } catch {
         return memory.get(key) ?? null;
       }
@@ -104,9 +110,7 @@ function createMemoryBackedSessionStorage(
         return true;
       } catch {
         warnPersistFailure();
-        if (!bypassCacheForKey(key)) {
-          memory.set(key, value);
-        }
+        memory.set(key, value);
         return false;
       }
     },
