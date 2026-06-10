@@ -1,5 +1,5 @@
-import { existsSync, realpathSync } from "node:fs";
-import { isAbsolute, join, relative, resolve, sep, win32 } from "node:path";
+import { realpathSync } from "node:fs";
+import { basename, dirname, isAbsolute, join, relative, resolve, sep, win32 } from "node:path";
 
 /** Resolve absolute paths, including Windows drive paths when running on other OSes. */
 export function resolveComparablePath(p: string): string {
@@ -37,51 +37,36 @@ export function assertResolvedPathUnderRoot(root: string, target: string): void 
   }
 }
 
-/** Walk existing path prefixes under `rootReal`, resolving symlinks at each step. */
-function resolveExistingPathUnderRoot(
-  rootReal: string,
-  rootResolved: string,
-  targetResolved: string,
-): string {
-  const rel = relative(rootResolved, targetResolved);
-  if (rel.startsWith("..") || rel.includes(`..${sep}`)) {
-    throw new Error(`unsafe path escapes project root: ${targetResolved}`);
-  }
-  const segments = rel.split(/[/\\]/).filter((s) => s.length > 0 && s !== ".");
-  let current = rootReal;
-  for (const segment of segments) {
-    const next = join(current, segment);
-    if (existsSync(next)) {
+/** Resolve symlinks on the longest existing prefix (handles macOS /var vs /private/var). */
+function resolvePhysicalPathForCheck(p: string): string {
+  const resolved = resolveComparablePath(p);
+  try {
+    return realpathSync.native(resolved);
+  } catch {
+    let probe = resolved;
+    let suffix = "";
+    while (true) {
       try {
-        current = realpathSync(next);
+        const physical = realpathSync.native(probe);
+        return suffix ? join(physical, suffix) : physical;
       } catch {
-        current = next;
+        if (probe === dirname(probe)) {
+          return resolved;
+        }
+        const segment = basename(probe);
+        suffix = suffix ? join(segment, suffix) : segment;
+        probe = dirname(probe);
       }
-    } else {
-      current = next;
     }
-    assertResolvedPathUnderRoot(rootReal, current);
   }
-  return current;
 }
 
 /** Resolve symlinks on `root` and ensure `target` stays under it (including non-existent paths). */
 export function assertRealPathUnderRoot(root: string, target: string): void {
   /* v8 ignore start */
-  const rootResolved = resolveComparablePath(root);
-  const targetResolved = resolveComparablePath(target);
-  let rootReal: string;
-  try {
-    rootReal = realpathSync(rootResolved);
-  } catch {
-    rootReal = rootResolved;
-  }
-  try {
-    const targetCheck = realpathSync(targetResolved);
-    assertResolvedPathUnderRoot(rootReal, targetCheck);
-  } catch {
-    resolveExistingPathUnderRoot(rootReal, rootResolved, targetResolved);
-  }
+  const rootPhysical = resolvePhysicalPathForCheck(root);
+  const targetPhysical = resolvePhysicalPathForCheck(target);
+  assertResolvedPathUnderRoot(rootPhysical, targetPhysical);
   /* v8 ignore stop */
 }
 

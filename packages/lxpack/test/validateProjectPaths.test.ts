@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { realpathSync } from "node:fs";
 import { mkdir, mkdtemp, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
@@ -61,6 +62,19 @@ describe("resolveSafePackageOutputOverride", () => {
     expect(() => resolveSafePackageOutputOverride(dir, "../outside.zip")).toThrow(/unsafe/);
     await rm(dir, { recursive: true, force: true });
   });
+
+  it.skipIf(process.platform !== "darwin")(
+    "accepts absolute override when root uses /private/var alias",
+    async () => {
+      dir = await mkdtemp(join(tmpdir(), "lk-paths-alias-"));
+      const rootPrivate = realpathSync(dir);
+      const outVar = join(dir, "artifacts", "out.zip");
+      expect(rootPrivate.startsWith("/private/var/")).toBe(true);
+      expect(outVar.startsWith("/var/")).toBe(true);
+      expect(resolveSafePackageOutputOverride(rootPrivate, outVar)).toBe(resolve(outVar));
+      await rm(dir, { recursive: true, force: true });
+    },
+  );
 
   it("rejects symlink alias that resolves into a reserved directory", async () => {
     dir = await mkdtemp(join(tmpdir(), "lk-paths-symlink-"));
