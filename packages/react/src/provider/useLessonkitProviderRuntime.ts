@@ -9,6 +9,7 @@ import {
 import type {
   CourseId,
   LessonId,
+  ResolveSessionIdOptions,
   StoragePort,
   TelemetryDataFor,
   TelemetryEvent,
@@ -137,8 +138,21 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
   }
   const providerStorage = providerStorageRef.current;
 
+  const observabilityRef = useRef(normalizedConfig.observability);
+  observabilityRef.current = normalizedConfig.observability;
+
+  const resolveSessionOptionsRef = useRef<ResolveSessionIdOptions>({
+    onInvalidSessionId: (ctx) => {
+      observabilityRef.current?.onInvalidSessionId?.(ctx);
+    },
+  });
+
   const sessionIdRef = useRef<string>(
-    resolveSessionId(providerStorage, normalizedConfig.session?.sessionId),
+    resolveSessionId(
+      providerStorage,
+      normalizedConfig.session?.sessionId,
+      resolveSessionOptionsRef.current,
+    ),
   );
   const [sessionId, setSessionId] = useState(() => sessionIdRef.current);
   const prevConfiguredSessionIdRef = useRef<string | undefined>(normalizedConfig.session?.sessionId);
@@ -155,9 +169,6 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
   lxpackBridgeModeRef.current = normalizedConfig.lxpack?.bridge ?? "auto";
   const allowedParentOriginsRef = useRef(normalizedConfig.lxpack?.allowedParentOrigins);
   allowedParentOriginsRef.current = normalizedConfig.lxpack?.allowedParentOrigins;
-
-  const observabilityRef = useRef(normalizedConfig.observability);
-  observabilityRef.current = normalizedConfig.observability;
 
   const onLxpackBridgeMiss = useCallback((event: TelemetryEvent) => {
     observabilityRef.current?.onLxpackBridgeMiss?.(event);
@@ -820,7 +831,11 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
     const cid = courseIdRef.current;
 
     if (nextConfigured !== undefined) {
-      const resolved = resolveSessionId(providerStorage, nextConfigured);
+      const resolved = resolveSessionId(
+        providerStorage,
+        nextConfigured,
+        resolveSessionOptionsRef.current,
+      );
       const tabId = getTabSessionId(providerStorage);
       const isExplicitLearnerSwap =
         prevConfigured !== undefined && prevConfigured !== nextConfigured;
@@ -836,7 +851,11 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
       setSessionId(resolved);
     /* v8 ignore start -- initial mount has no configured session id to migrate from */
     } else if (prevConfigured) {
-      const nextAuto = resolveSessionId(providerStorage, undefined);
+      const nextAuto = resolveSessionId(
+        providerStorage,
+        undefined,
+        resolveSessionOptionsRef.current,
+      );
       migrateCourseStartedMark(providerStorage, prevConfigured, nextAuto, cid);
       sessionIdRef.current = nextAuto;
       setSessionId(nextAuto);

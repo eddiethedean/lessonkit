@@ -86,6 +86,59 @@ describe("session", () => {
     expect(resolveSessionId(storage, "bad:id")).toBe("tab-valid");
   });
 
+  it("resolveSessionId invokes onInvalidSessionId in production for invalid provided id", () => {
+    const onInvalidSessionId = vi.fn();
+    vi.stubEnv("NODE_ENV", "production");
+    const store: Record<string, string> = { [SESSION_STORAGE_KEY]: "tab-valid" };
+    const storage = {
+      getItem: (k: string) => store[k] ?? null,
+      setItem: (k: string, v: string) => {
+        store[k] = v;
+        return true;
+      },
+    };
+
+    try {
+      const resolved = resolveSessionId(storage, "bad:id", { onInvalidSessionId });
+      expect(resolved).toBe("tab-valid");
+      expect(onInvalidSessionId).toHaveBeenCalledWith({
+        invalidId: "bad:id",
+        fallbackId: "tab-valid",
+        source: "provided",
+      });
+    } finally {
+      vi.unstubAllEnvs();
+    }
+  });
+
+  it("resolveSessionId invokes onInvalidSessionId in production for invalid stored id", () => {
+    const onInvalidSessionId = vi.fn();
+    vi.stubEnv("NODE_ENV", "production");
+    const store: Record<string, string> = { [SESSION_STORAGE_KEY]: "bad:id" };
+    const storage = {
+      getItem: (k: string) => store[k] ?? null,
+      setItem: (k: string, v: string) => {
+        store[k] = v;
+        return true;
+      },
+      removeItem: (k: string) => {
+        delete store[k];
+      },
+    };
+
+    try {
+      const resolved = resolveSessionId(storage, undefined, { onInvalidSessionId });
+      expect(resolved).toMatch(/^s-/);
+      expect(onInvalidSessionId).toHaveBeenCalledWith({
+        invalidId: "bad:id",
+        fallbackId: resolved,
+        source: "stored",
+      });
+    } finally {
+      vi.unstubAllEnvs();
+    }
+  });
+
   it("resolveSessionId regenerates invalid stored tab session id", () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
     vi.stubEnv("NODE_ENV", "development");

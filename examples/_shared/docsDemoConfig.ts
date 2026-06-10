@@ -8,6 +8,7 @@ const docsDemoObservability: NonNullable<LessonkitConfig["observability"]> = {
   onLxpackBridgeMiss: () => undefined,
   onXapiTransportError: () => undefined,
   onXapiMappingError: () => undefined,
+  onInvalidSessionId: () => undefined,
 };
 
 function isDocsDemoBundle(): boolean {
