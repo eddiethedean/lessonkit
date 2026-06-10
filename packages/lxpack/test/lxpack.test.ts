@@ -470,6 +470,17 @@ describe("assessments", () => {
     expect(correct).toEqual(["A", "C"]);
   });
 
+  it("omits selectionMode key for single-select mcq (strict interchange validation)", () => {
+    const lx = assessmentDescriptorToLxpack({
+      checkId: "single-check",
+      question: "Pick one",
+      choices: ["No", "Yes"],
+      answer: "Yes",
+    });
+    expect(lx).not.toBeNull();
+    expect(Object.prototype.hasOwnProperty.call(lx!.questions[0] ?? {}, "selectionMode")).toBe(false);
+  });
+
   it("assigns distinct choice ids when labels slug to the same value", () => {
     const lx = assessmentDescriptorToLxpack({
       checkId: "collision-check",

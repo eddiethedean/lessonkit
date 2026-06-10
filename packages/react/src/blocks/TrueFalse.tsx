@@ -32,6 +32,7 @@ function TrueFalseInner(
   const { config } = useLessonkit();
   const { scoreResponse } = usePluginScoring(checkId, enclosingLessonId);
   const [selected, setSelected] = useState<boolean | null>(null);
+  const [answerCorrect, setAnswerCorrect] = useState<boolean | null>(null);
   const [selectionCorrect, setSelectionCorrect] = useState<boolean | null>(null);
   const [showSolutions, setShowSolutions] = useState(false);
   const [passed, setPassed] = useState(false);
@@ -46,6 +47,7 @@ function TrueFalseInner(
     telemetryReplayedRef.current = false;
     setPassed(false);
     setSelected(null);
+    setAnswerCorrect(null);
     setSelectionCorrect(null);
     setShowSolutions(false);
     setCompletedScore(null);
@@ -109,13 +111,14 @@ function TrueFalseInner(
             checkId,
             interactionType: INTERACTION,
             response: selected ?? undefined,
-            correct: selectionCorrect ?? undefined,
+            correct: answerCorrect ?? undefined,
             score,
             maxScore,
           };
         },
         getCurrentState: () => ({
           selected,
+          answerCorrect,
           selectionCorrect,
           passed,
           showSolutions,
@@ -126,6 +129,10 @@ function TrueFalseInner(
           const nextSelected = readBooleanField(state, "selected");
           if (nextSelected === true || nextSelected === false || nextSelected === null) {
             setSelected(nextSelected);
+          }
+          const nextAnswerCorrect = readBooleanField(state, "answerCorrect");
+          if (nextAnswerCorrect === true || nextAnswerCorrect === false || nextAnswerCorrect === null) {
+            setAnswerCorrect(nextAnswerCorrect);
           }
           const nextCorrect = readBooleanField(state, "selectionCorrect");
           if (nextCorrect === true || nextCorrect === false || nextCorrect === null) {
@@ -143,7 +150,12 @@ function TrueFalseInner(
               const maxScore = nextCompletedMaxScore ?? completedMaxScore ?? 1;
               const score = nextCompletedScore ?? completedScore ?? maxScore;
               if (config.tracking?.replayResumeEvents === true) {
-                replayTelemetry(nextSelected ?? null, nextCorrect ?? null, nextPassed, score, maxScore);
+                const replayCorrect =
+                  nextAnswerCorrect ??
+                  (nextSelected === true || nextSelected === false
+                    ? nextSelected === props.answer
+                    : null);
+                replayTelemetry(nextSelected ?? null, replayCorrect, nextPassed, score, maxScore);
               }
             }
           }
@@ -151,11 +163,13 @@ function TrueFalseInner(
         },
       }),
     [
+      answerCorrect,
       assessment,
       checkId,
       completedMaxScore,
       completedScore,
       passed,
+      props.answer,
       props.passingScore,
       props.question,
       selected,
@@ -172,13 +186,14 @@ function TrueFalseInner(
     setSelected(value);
     const correct = value === props.answer;
     const scored = scoreResponse(value, correct, 1, props.passingScore);
+    setAnswerCorrect(correct);
     setSelectionCorrect(scored.passed);
     assessment.answer({
       checkId,
       interactionType: INTERACTION,
       question: props.question,
       response: value,
-      correct: scored.passed,
+      correct,
     });
     if (scored.passed && !completedRef.current) {
       completedRef.current = true;

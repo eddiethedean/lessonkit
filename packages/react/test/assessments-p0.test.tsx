@@ -71,6 +71,36 @@ describe("1.1.x P0 assessment blocks", () => {
     expect(screen.getByRole("status").textContent).toContain("Correct");
   });
 
+  it("TrueFalse assessment_answered uses factual correctness with plugin override", async () => {
+    const events: TelemetryEvent[] = [];
+    const plugin = defineAssessmentPlugin({
+      id: "tf-scorer",
+      version: "1",
+      kind: "assessment",
+      scoreAssessment: () => ({ passed: true, score: 1, maxScore: 1 }),
+    });
+    render(
+      <Course
+        title="Assessments"
+        courseId="assessments-p0"
+        config={{
+          xapi: { enabled: false },
+          tracking: { sink: (e) => void events.push(e) },
+          plugins: [plugin],
+        }}
+      >
+        <Lesson title="L1" lessonId="lesson-1">
+          <TrueFalse checkId="tf-plugin-telemetry" question="Sky is blue?" answer={true} />
+        </Lesson>
+      </Course>,
+    );
+    fireEvent.click(screen.getByLabelText("False"));
+    await waitFor(() => {
+      const answered = events.find((e) => e.name === "assessment_answered");
+      expect(answered?.data).toMatchObject({ response: false, correct: false });
+    });
+  });
+
   it("MarkTheWords marks correct tokens", () => {
     render(
       wrap(

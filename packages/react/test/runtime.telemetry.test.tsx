@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { registerRuntimeTestCleanup } from "./runtime.testSetup";
 import { describe, it, expect, vi } from "vitest";
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { Course, Lesson, LessonkitProvider, Quiz, useLessonkit, useQuizState, useTracking } from "../src";
+import { Course, Lesson, LessonkitProvider, Quiz, TrueFalse, useLessonkit, useQuizState, useTracking } from "../src";
 import {
   createSessionStoragePort,
   defineAssessmentPlugin,
@@ -1494,6 +1494,42 @@ it("does not emit lesson_started again when remounting a completed lesson", asyn
     await waitFor(() => {
       const answered = events.find((e) => e.name === "quiz_answered");
       expect(answered?.data).toMatchObject({ choice: "A", correct: false });
+    });
+  });
+
+  it("TrueFalse assessment_answered uses factual correctness not plugin pass", async () => {
+    const events: TelemetryEvent[] = [];
+    const plugin = defineAssessmentPlugin({
+      id: "tf-pass-all",
+      version: "1",
+      kind: "assessment",
+      scoreAssessment: () => ({ score: 1, maxScore: 1, passed: true }),
+    });
+
+    const { getByLabelText } = render(
+      <Course
+        title="Course"
+        courseId="course-1"
+        config={{
+          tracking: {
+            sink: (e: TelemetryEvent) => {
+              events.push(e);
+            },
+          },
+          plugins: [plugin],
+        }}
+      >
+        <Lesson title="Lesson" lessonId="lesson-1">
+          <TrueFalse checkId="check-tf" question="Sky is blue?" answer={true} />
+        </Lesson>
+      </Course>,
+    );
+
+    fireEvent.click(getByLabelText("False"));
+
+    await waitFor(() => {
+      const answered = events.find((e) => e.name === "assessment_answered");
+      expect(answered?.data).toMatchObject({ response: false, correct: false });
     });
   });
 
