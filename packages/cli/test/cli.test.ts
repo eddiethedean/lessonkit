@@ -691,6 +691,56 @@ describe("runInit", () => {
     expect(await readFile(join(here, "stray.txt"), "utf8")).toBe("keep");
   });
 
+  it("init --here --force backs up conflicting nested files such as src/App.tsx", async () => {
+    const here = join(parentDir, "existing-src");
+    await mkdir(join(here, "src"), { recursive: true });
+    await writeFile(join(here, "src", "App.tsx"), "USER ORIGINAL\n", "utf8");
+    process.chdir(here);
+    const log = vi.fn();
+
+    await runInit({ here: true, force: true, skipInstall: true }, { log, error: () => {} });
+
+    expect(existsSync(join(here, "lessonkit.json"))).toBe(true);
+    expect(await readFile(join(here, "src", "App.tsx"), "utf8")).not.toBe("USER ORIGINAL\n");
+    expect(await readFile(join(here, ".lessonkit-init-backup", "src", "App.tsx"), "utf8")).toBe(
+      "USER ORIGINAL\n",
+    );
+    expect(log).toHaveBeenCalledWith(expect.stringContaining("src/App.tsx"));
+  });
+
+  it("backupConflictingFiles includes nested paths that would be overwritten", async () => {
+    const here = join(parentDir, "backup-walk");
+    await mkdir(join(here, "src"), { recursive: true });
+    await writeFile(join(here, "src", "App.tsx"), "USER ORIGINAL\n", "utf8");
+    const stagingDir = join(here, ".staging");
+    await __testInitHelpers.copyTemplate(__testInitHelpers.getTemplateDir(), stagingDir);
+
+    const backups = await __testInitHelpers.backupConflictingFiles(stagingDir, here);
+
+    expect([...backups.keys()]).toContain("src/App.tsx");
+    expect(backups.get("src/App.tsx")?.toString("utf8")).toBe("USER ORIGINAL\n");
+    await rm(stagingDir, { recursive: true, force: true });
+  });
+
+  it("rolls back nested overwrites when promote fails", async () => {
+    const here = join(parentDir, "promote-fail-nested");
+    await mkdir(join(here, "src"), { recursive: true });
+    await writeFile(join(here, "src", "App.tsx"), "USER ORIGINAL\n", "utf8");
+    process.chdir(here);
+
+    const promoteSpy = vi
+      .spyOn(__testInitHelpers, "promoteStagingToProjectDir")
+      .mockRejectedValueOnce(new Error("simulated promote failure"));
+
+    await expect(
+      runInit({ here: true, force: true, skipInstall: true }, { log: () => {}, error: () => {} }),
+    ).rejects.toThrow("simulated promote failure");
+
+    expect(await readFile(join(here, "src", "App.tsx"), "utf8")).toBe("USER ORIGINAL\n");
+    expect(existsSync(join(here, "package.json"))).toBe(false);
+    promoteSpy.mockRestore();
+  });
+
   it("init --here --force backs up conflicting root files such as README.md", async () => {
     const here = join(parentDir, "existing-readme");
     await mkdir(here, { recursive: true });
