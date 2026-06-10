@@ -192,4 +192,36 @@ describe("useLessonkitProviderRuntime edge cases", () => {
     expect(onInvalidSessionId.mock.calls[0]?.[0]?.fallbackId).toBeTruthy();
     expect(onInvalidSessionId.mock.calls[0]?.[0]?.fallbackId).not.toBe("bad:id");
   });
+
+  it("invokes onXapiTransportError when bootstrap flush fails", async () => {
+    const onXapiTransportError = vi.fn();
+    const xapiClient = {
+      send: vi.fn(),
+      flush: vi.fn(async () => {
+        throw new Error("bootstrap flush failed");
+      }),
+      queueSize: () => 0,
+      startedLesson: vi.fn(),
+      completeLesson: vi.fn(),
+      completeCourse: vi.fn(),
+    };
+
+    render(
+      <LessonkitProvider
+        config={{
+          courseId: "course-bootstrap-flush-fail",
+          tracking: { enabled: false },
+          xapi: { client: xapiClient },
+          observability: { onXapiTransportError },
+        }}
+      >
+        <div>child</div>
+      </LessonkitProvider>,
+    );
+
+    await waitFor(() => expect(onXapiTransportError).toHaveBeenCalled());
+    expect(onXapiTransportError).toHaveBeenCalledWith(
+      expect.objectContaining({ message: "bootstrap flush failed" }),
+    );
+  });
 });
