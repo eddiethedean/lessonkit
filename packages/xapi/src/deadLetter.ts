@@ -3,6 +3,30 @@ import type { XAPIStatement } from "./types";
 const STORAGE_KEY = "lk-xapi-dead-letter";
 const MAX_DEAD_LETTER = 200;
 
+export type PersistDeadLetterOptions = {
+  onTruncated?: (droppedCount: number) => void;
+  onPersistError?: (err: unknown, ctx: { statement: XAPIStatement }) => void;
+};
+
+function isDevEnvironment(): boolean {
+  const g = globalThis as typeof globalThis & { process?: { env?: { NODE_ENV?: string } } };
+  return typeof g.process !== "undefined" && g.process.env?.NODE_ENV !== "production";
+}
+
+function reportPersistError(
+  err: unknown,
+  statement: XAPIStatement,
+  opts?: PersistDeadLetterOptions,
+): void {
+  opts?.onPersistError?.(err, { statement });
+  if (!opts?.onPersistError && isDevEnvironment()) {
+    console.warn(
+      "[lessonkit] xAPI dead-letter persist failed:",
+      err instanceof Error ? err.message : err,
+    );
+  }
+}
+
 function readStorage(): Storage | null {
   try {
     const storage = (globalThis as typeof globalThis & { sessionStorage?: Storage }).sessionStorage;
@@ -33,10 +57,13 @@ export function loadDeadLetterStatements(): XAPIStatement[] {
 
 export function persistDeadLetterStatement(
   statement: XAPIStatement,
-  opts?: { onTruncated?: (droppedCount: number) => void },
+  opts?: PersistDeadLetterOptions,
 ): void {
   const storage = readStorage();
-  if (!storage) return;
+  if (!storage) {
+    reportPersistError(new Error("sessionStorage is unavailable"), statement, opts);
+    return;
+  }
   try {
     const existing = loadDeadLetterStatements();
     if (existing.some((s) => s.id === statement.id)) return;
@@ -46,8 +73,8 @@ export function persistDeadLetterStatement(
     }
     const next = combined.slice(-MAX_DEAD_LETTER);
     storage.setItem(STORAGE_KEY, JSON.stringify(next));
-  } catch {
-    // sessionStorage quota or private mode
+  } catch (err) {
+    reportPersistError(err, statement, opts);
   }
 }
 

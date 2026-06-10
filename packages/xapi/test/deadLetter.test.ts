@@ -44,10 +44,40 @@ describe("xAPI dead-letter storage", () => {
   });
 
   it("returns empty when sessionStorage is unavailable", () => {
+    const onPersistError = vi.fn();
     vi.stubGlobal("sessionStorage", undefined);
     expect(loadDeadLetterStatements()).toEqual([]);
-    persistDeadLetterStatement(stmt);
+    persistDeadLetterStatement(stmt, { onPersistError });
     expect(loadDeadLetterStatements()).toEqual([]);
+    expect(onPersistError).toHaveBeenCalledWith(
+      expect.objectContaining({ message: "sessionStorage is unavailable" }),
+      { statement: stmt },
+    );
+  });
+
+  it("invokes onPersistError when sessionStorage.setItem throws", () => {
+    const onPersistError = vi.fn();
+    vi.spyOn(sessionStorage, "setItem").mockImplementation(() => {
+      throw new DOMException("QuotaExceededError");
+    });
+    persistDeadLetterStatement(stmt, { onPersistError });
+    expect(onPersistError).toHaveBeenCalledWith(expect.any(DOMException), { statement: stmt });
+    expect(loadDeadLetterStatements()).toEqual([]);
+  });
+
+  it("warns in dev when persist fails without onPersistError", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    vi.stubEnv("NODE_ENV", "development");
+    vi.spyOn(sessionStorage, "setItem").mockImplementation(() => {
+      throw new Error("blocked");
+    });
+    persistDeadLetterStatement(stmt);
+    expect(warn).toHaveBeenCalledWith(
+      "[lessonkit] xAPI dead-letter persist failed:",
+      "blocked",
+    );
+    warn.mockRestore();
+    vi.unstubAllEnvs();
   });
 
   it("returns empty for invalid JSON", () => {

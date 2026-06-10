@@ -79,6 +79,8 @@ export function createXAPIClient(opts?: {
   onQueueCap?: () => void;
   /** Called when dead-letter storage drops older entries beyond the cap (200). */
   onDeadLetterTruncated?: (droppedCount: number) => void;
+  /** Called when a statement cannot be persisted to sessionStorage dead-letter storage. */
+  onDeadLetterPersistError?: (err: unknown, ctx: { statement: XAPIStatement }) => void;
   onHeadSkipped?: (statement: XAPIStatement, err: unknown) => void;
   /** Called when transport fails after retries (statement is re-queued). */
   onTransportError?: (err: unknown) => void;
@@ -88,6 +90,12 @@ export function createXAPIClient(opts?: {
   const transport = opts?.transport;
   const exitTransport = opts?.exitTransport;
   const courseId = opts?.courseId;
+  const persistDeadLetter = (statement: XAPIStatement) => {
+    persistDeadLetterStatement(statement, {
+      onTruncated: opts?.onDeadLetterTruncated,
+      onPersistError: opts?.onDeadLetterPersistError,
+    });
+  };
   const queue =
     opts?.queue ??
     createInMemoryXAPIQueue({
@@ -96,14 +104,10 @@ export function createXAPIClient(opts?: {
       onDepth: opts?.onQueueDepth,
       onCap: opts?.onQueueCap ?? defaultQueueCapHandler,
       onOverflow: (statement) => {
-        persistDeadLetterStatement(statement, {
-          onTruncated: opts?.onDeadLetterTruncated,
-        });
+        persistDeadLetter(statement);
       },
       onHeadSkipped: (statement, err) => {
-        persistDeadLetterStatement(statement, {
-          onTruncated: opts?.onDeadLetterTruncated,
-        });
+        persistDeadLetter(statement);
         (opts?.onHeadSkipped ?? defaultHeadSkippedHandler)(statement, err);
       },
     });
@@ -150,7 +154,7 @@ export function createXAPIClient(opts?: {
           () => markExitDelivered(statement),
           () => {
             exitHandoffIds.delete(statement.id);
-            persistDeadLetterStatement(statement);
+            persistDeadLetter(statement);
           },
         );
       } else {
@@ -158,7 +162,7 @@ export function createXAPIClient(opts?: {
       }
     } catch {
       exitHandoffIds.delete(statement.id);
-      persistDeadLetterStatement(statement);
+      persistDeadLetter(statement);
     }
   };
 
