@@ -1,5 +1,5 @@
 import type { InvalidSessionIdContext, TelemetryEvent, TelemetryBatchSink } from "@lessonkit/core";
-import type { InMemoryXAPIQueueOptions } from "@lessonkit/xapi";
+import type { InMemoryXAPIQueueOptions, XAPIStatement } from "@lessonkit/xapi";
 import { createInMemoryXAPIQueue } from "@lessonkit/xapi";
 import type { LessonkitConfig } from "../context";
 
@@ -20,6 +20,8 @@ export type LessonkitObservabilityConfig = {
   onXapiTransportError?: (err: unknown) => void;
   /** Telemetry → xAPI mapping failure (statement skipped). */
   onXapiMappingError?: (err: unknown) => void;
+  /** sessionStorage dead-letter persist failed (quota, private mode, blocked storage). */
+  onXapiDeadLetterPersistError?: (err: unknown, ctx: { statement: XAPIStatement }) => void;
   /** Compound child resume incomplete after hydration retries. */
   onCompoundHydrationPartial?: (ctx: {
     compoundId: string;

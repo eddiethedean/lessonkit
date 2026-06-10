@@ -29,6 +29,7 @@ export function createXapiClientFromConfig(
     queue,
     onTransportError: observability?.onXapiTransportError,
     onMappingError: observability?.onXapiMappingError,
+    onDeadLetterPersistError: observability?.onXapiDeadLetterPersistError,
   });
 }
 

@@ -34,6 +34,8 @@ function createObservability(): NonNullable<LessonkitConfig["observability"]> {
     onLxpackBridgeError: (err) => report("lxpack-bridge-error", { err }),
     onXapiTransportError: (err) => report("xapi-transport", { err }),
     onXapiMappingError: (err) => report("xapi-mapping", { err }),
+    onXapiDeadLetterPersistError: (err, ctx) =>
+      report("xapi-dead-letter-persist", { err, statementId: ctx.statement.id }),
     onInvalidSessionId: (ctx) => report("invalid-session-id", ctx),
   };
 }

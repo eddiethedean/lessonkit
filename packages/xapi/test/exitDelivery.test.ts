@@ -54,6 +54,25 @@ describe("xAPI exit delivery (C-1)", () => {
     expect(loadDeadLetterStatements().map((s) => s.id)).toContain("exit-stmt-1");
   });
 
+  it("reports dead-letter persist failures via onDeadLetterPersistError", async () => {
+    vi.spyOn(sessionStorage, "setItem").mockImplementation(() => {
+      throw new Error("quota");
+    });
+    const onDeadLetterPersistError = vi.fn();
+    const client = createXAPIClient({
+      courseId: "course-1",
+      exitTransport: () => Promise.reject(new Error("keepalive-failed")),
+      onDeadLetterPersistError,
+    });
+    client.send(stmt);
+    client.flushOnExit?.();
+    await new Promise((r) => setTimeout(r, 0));
+    expect(onDeadLetterPersistError).toHaveBeenCalledWith(
+      expect.objectContaining({ message: "quota" }),
+      { statement: expect.objectContaining({ id: "exit-stmt-1" }) },
+    );
+  });
+
   it("re-queues dead-letter statements on next client init", () => {
     sessionStorage.setItem("lk-xapi-dead-letter", JSON.stringify([stmt]));
     const client = createXAPIClient({ courseId: "course-1" });
