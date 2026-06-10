@@ -1,6 +1,6 @@
 import type { InvalidSessionIdContext, TelemetryEvent, TelemetryBatchSink } from "@lessonkit/core";
 import type { InMemoryXAPIQueueOptions, XAPIStatement } from "@lessonkit/xapi";
-import { createInMemoryXAPIQueue } from "@lessonkit/xapi";
+import { createInMemoryXAPIQueue, persistDeadLetterStatement } from "@lessonkit/xapi";
 import type { LessonkitConfig } from "../context";
 
 export type LessonkitObservabilityConfig = {
@@ -44,9 +44,16 @@ export type LessonkitObservabilityConfig = {
 export function createXapiQueueFromObservability(
   getObservability?: () => LessonkitObservabilityConfig | undefined,
 ): ReturnType<typeof createInMemoryXAPIQueue> {
+  const persistDeadLetter = (statement: XAPIStatement) => {
+    persistDeadLetterStatement(statement, {
+      onPersistError: getObservability?.()?.onXapiDeadLetterPersistError,
+    });
+  };
   const opts: InMemoryXAPIQueueOptions = {
     onDepth: (size) => getObservability?.()?.onXapiQueueDepth?.(size),
     onCap: () => getObservability?.()?.onXapiQueueCap?.(),
+    onOverflow: persistDeadLetter,
+    onHeadSkipped: (statement) => persistDeadLetter(statement),
   };
   return createInMemoryXAPIQueue(opts);
 }
