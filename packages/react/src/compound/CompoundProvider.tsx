@@ -8,8 +8,6 @@ import {
 } from "./CompoundHydrationBridge";
 import { useCompoundPageIndex } from "./CompoundPageIndexContext";
 import { LessonkitContext } from "../context";
-import { isDevEnvironment } from "../runtime/validateComponentId";
-
 export type RegisteredAssessmentHandle = {
   handle: AssessmentHandle;
   pageIndex?: number;
@@ -46,10 +44,7 @@ export function CompoundProvider({
     if (prev && prev.handle !== handle) {
       const message = `[lessonkit] duplicate checkId "${checkId}" registered in the same compound container.`;
       onCompoundDuplicateCheckId?.({ checkId });
-      if (isDevEnvironment()) {
-        throw new Error(message);
-      }
-      return () => {};
+      throw new Error(message);
     }
     registryRef.current.set(checkId, { handle, pageIndex });
     if (prev?.handle !== handle || prev?.pageIndex !== pageIndex) {
