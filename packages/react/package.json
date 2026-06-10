@@ -59,8 +59,8 @@
     "block-contract.v3.json"
   ],
   "scripts": {
-    "build": "tsup src/index.tsx src/testing.ts src/blocks-entry.ts --format esm,cjs --dts --external react --external react-dom --external @lessonkit/accessibility --external @lessonkit/lxpack --external @lessonkit/themes",
-    "dev": "tsup src/index.tsx src/testing.ts src/blocks-entry.ts --format esm,cjs --dts --watch --external react --external react-dom --external @lessonkit/accessibility --external @lessonkit/lxpack --external @lessonkit/themes",
+    "build": "tsup src/index.tsx src/testing.ts src/blocks-entry.ts --format esm,cjs --dts --tsconfig tsconfig.build.json --external react --external react-dom --external @lessonkit/accessibility --external @lessonkit/lxpack --external @lessonkit/themes",
+    "dev": "tsup src/index.tsx src/testing.ts src/blocks-entry.ts --format esm,cjs --dts --watch --tsconfig tsconfig.build.json --external react --external react-dom --external @lessonkit/accessibility --external @lessonkit/lxpack --external @lessonkit/themes",
     "storybook": "storybook dev -c .storybook -p 6006 --disable-telemetry",
     "build-storybook": "storybook build -c .storybook --disable-telemetry",
     "prepublishOnly": "npm run build",
