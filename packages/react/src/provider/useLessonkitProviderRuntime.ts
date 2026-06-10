@@ -365,8 +365,11 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
       if (prev) {
         try {
           await prev.flush();
-        } catch {
-          // Swallow flush errors so a broken previous transport doesn't block the next one.
+        } catch (err) {
+          observabilityRef.current?.onXapiTransportError?.(err);
+          if (courseChanged) {
+            prev.abandonUndelivered?.();
+          }
         }
       }
       /* v8 ignore start -- xAPI layout cleanup cancels in-flight flush before it settles */

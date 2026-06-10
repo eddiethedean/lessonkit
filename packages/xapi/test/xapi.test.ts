@@ -566,6 +566,44 @@ describe("@lessonkit/xapi", () => {
     expect(client.queueSize()).toBeGreaterThan(0);
   });
 
+  it("abandonUndelivered persists queued statements to dead-letter storage", async () => {
+    vi.stubGlobal(
+      "sessionStorage",
+      (() => {
+        const store = new Map<string, string>();
+        return {
+          get length() {
+            return store.size;
+          },
+          clear: () => store.clear(),
+          getItem: (key: string) => store.get(key) ?? null,
+          key: (index: number) => [...store.keys()][index] ?? null,
+          removeItem: (key: string) => store.delete(key),
+          setItem: (key: string, value: string) => store.set(key, value),
+        } as Storage;
+      })(),
+    );
+    const { loadDeadLetterStatements, resetXAPIDeadLetterForTests } = await import("../src");
+    resetXAPIDeadLetterForTests();
+
+    const transport = vi.fn(async () => {
+      throw new Error("network");
+    });
+    const client = createXAPIClient({
+      transport,
+      courseId,
+      queue: createInMemoryXAPIQueue(),
+    });
+    client.startedLesson({ lessonId: "lesson-1" });
+    await new Promise((r) => setTimeout(r, 0));
+    expect(client.queueSize()).toBeGreaterThan(0);
+
+    client.abandonUndelivered?.();
+
+    expect(client.queueSize()).toBe(0);
+    expect(loadDeadLetterStatements().length).toBeGreaterThan(0);
+  });
+
   it("skips poison-pill head after repeated failures", async () => {
     const onHeadSkipped = vi.fn();
     const queue = createInMemoryXAPIQueue({ maxHeadFailures: 2, onHeadSkipped });
