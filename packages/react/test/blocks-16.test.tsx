@@ -178,6 +178,62 @@ describe("1.6.x block components", () => {
     expect(screen.getByTestId("crossword-feedback").textContent).toContain("Correct");
   });
 
+  it("Crossword Check honors passingScore below word count", async () => {
+    const events: TelemetryEvent[] = [];
+    const ref = createRef<AssessmentHandle>();
+    const entries = [
+      { id: "w1", clue: "Greeting", answer: "HI", row: 0, col: 0, direction: "across" as const },
+      { id: "w2", clue: "Assent", answer: "OK", row: 1, col: 0, direction: "across" as const },
+      { id: "w3", clue: "Move", answer: "GO", row: 2, col: 0, direction: "across" as const },
+      { id: "w4", clue: "Direction", answer: "UP", row: 3, col: 0, direction: "across" as const },
+      { id: "w5", clue: "Negative", answer: "NO", row: 4, col: 0, direction: "across" as const },
+    ];
+    render(
+      <Course
+        title="Blocks 1.6"
+        courseId="blocks-16-crossword-partial"
+        config={{
+          xapi: { enabled: false },
+          tracking: { sink: (e) => void events.push(e) },
+        }}
+      >
+        <Lesson title="L1" lessonId="lesson-crossword-partial">
+          <Crossword
+            ref={ref}
+            checkId="cw-partial"
+            rows={5}
+            cols={2}
+            entries={entries}
+            passingScore={3}
+          />
+        </Lesson>
+      </Course>,
+    );
+
+    fireEvent.change(screen.getByTestId("crossword-cell-0-0"), { target: { value: "H" } });
+    fireEvent.change(screen.getByTestId("crossword-cell-0-1"), { target: { value: "I" } });
+    fireEvent.change(screen.getByTestId("crossword-cell-1-0"), { target: { value: "O" } });
+    fireEvent.change(screen.getByTestId("crossword-cell-1-1"), { target: { value: "K" } });
+    fireEvent.change(screen.getByTestId("crossword-cell-2-0"), { target: { value: "G" } });
+    fireEvent.change(screen.getByTestId("crossword-cell-2-1"), { target: { value: "O" } });
+
+    expect(ref.current?.getScore()).toBe(3);
+    expect(ref.current?.getMaxScore()).toBe(5);
+    expect(ref.current?.getXAPIData()?.correct).toBe(true);
+
+    fireEvent.click(screen.getByTestId("crossword-check"));
+
+    await waitFor(() => {
+      expect(
+        events.some((e) => e.name === "assessment_answered" && e.data?.correct === true),
+      ).toBe(true);
+      const completed = events.find((e) => e.name === "assessment_completed");
+      expect(completed?.data?.score).toBe(3);
+      expect(completed?.data?.maxScore).toBe(5);
+    });
+    expect(screen.getByTestId("crossword-feedback").textContent).toContain("Correct");
+  });
+
   it("Crossword clear wrong letters keeps correct cells", () => {
     render(
       wrap(
