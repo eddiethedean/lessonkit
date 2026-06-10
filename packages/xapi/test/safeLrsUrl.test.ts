@@ -34,6 +34,13 @@ describe("assertSafeLrsUrl", () => {
     expect(() => assertSafeLrsUrl("/api/xapi/statements")).not.toThrow();
   });
 
+  it("rejects protocol-relative URLs", () => {
+    expect(() => assertSafeLrsUrl("//evil.com/xapi")).toThrow(/protocol-relative URLs are not allowed/);
+    expect(() => assertSafeLrsUrl("//evil.com/xapi/statements")).toThrow(
+      /protocol-relative URLs are not allowed/,
+    );
+  });
+
   it("rejects path traversal in relative URLs", () => {
     expect(() => assertSafeLrsUrl("/api/../secret")).toThrow(/path traversal/);
     expect(() => assertSafeLrsUrl("/api/%2e%2e/admin")).toThrow(/path traversal/);
@@ -66,5 +73,14 @@ describe("createFetchTransport URL guard", () => {
     expect(() =>
       createFetchBatchSink({ url: "http://169.254.169.254/", retries: 0, timeoutMs: 0 }),
     ).toThrow(/private or metadata host/);
+  });
+
+  it("rejects protocol-relative URLs at construction", () => {
+    expect(() =>
+      createFetchTransport({ url: "//evil.com/xapi", retries: 0, timeoutMs: 0 }),
+    ).toThrow(/protocol-relative URLs are not allowed/);
+    expect(() =>
+      createFetchBatchSink({ url: "//evil.com/xapi", retries: 0, timeoutMs: 0 }),
+    ).toThrow(/protocol-relative URLs are not allowed/);
   });
 });
