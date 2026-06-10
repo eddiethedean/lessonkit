@@ -178,7 +178,7 @@ export function validatePackageInputs(
         ],
       };
     }
-    if (!isResolvedPathUnderRoot(outDir, resolvedOutput)) {
+    if (isAbsolute(output) && !isResolvedPathUnderRoot(outDir, resolvedOutput)) {
       return {
         ok: false,
         courseDir: outDir,

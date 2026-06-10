@@ -679,6 +679,18 @@ describe("coverage-full lxpack", () => {
       expect(result.ok).toBe(true);
     });
 
+    it("accepts relative output under projectRoot outside outDir", async () => {
+      const root = await makeTempDir("lk-val-rel-out-");
+      const result = validatePackageInputs({
+        target: "scorm12",
+        outDir: join(root, ".lxpack", "course"),
+        projectRoot: root,
+        output: ".lxpack/out/course-scorm12.zip",
+        outputBaseDir: ".lxpack/out",
+      });
+      expect(result.ok).toBe(true);
+    });
+
     it("rejects outputBaseDir outside projectRoot", async () => {
       const root = await makeTempDir("lk-val-in-");
       const result = validatePackageInputs({

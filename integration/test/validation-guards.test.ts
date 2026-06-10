@@ -80,4 +80,21 @@ describe("packaging validation guards", () => {
     expect(issues.length).toBeGreaterThan(0);
     expect(issues.some((issue) => (issue.path ?? "").includes("theme"))).toBe(true);
   });
+
+  it("rejects absolute --out under project root but outside outDir at validation", async () => {
+    const projectDir = await cloneBuiltProject();
+    const absoluteOut = join(projectDir, "artifacts", "course-scorm12.zip");
+
+    const result = runCliJson<PackageJson>(
+      ["package", "--target", "scorm12", "--no-build", "--out", absoluteOut],
+      { cwd: projectDir },
+    );
+
+    expect(result.result.exitCode).not.toBe(0);
+    expect(result.json.ok).toBe(false);
+    const issues = result.json.issues ?? [];
+    expect(issues.some((issue) => issue.path === "output" && issue.message === "output must resolve inside outDir")).toBe(
+      true,
+    );
+  });
 });
