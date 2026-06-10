@@ -282,6 +282,31 @@ describe("packageLessonkitCourse errors", () => {
     }
   });
 
+  it("returns ok false when absolute output is outside outDir before staging", async () => {
+    const root = await makeTempDir();
+    const dist = join(root, "dist");
+    await mkdir(dist, { recursive: true });
+    await writeFile(join(dist, "index.html"), "<html></html>", "utf-8");
+    await writeMinimalParitySource(root, descriptor);
+
+    const result = await packageLessonkitCourse({
+      descriptor,
+      outDir: join(root, "course"),
+      spaDistDir: dist,
+      projectRoot: root,
+      target: "scorm12",
+      output: join(root, "artifacts", "course-scorm12.zip"),
+    });
+
+    expect(result.ok).toBe(false);
+    expect(packageLessonkit).not.toHaveBeenCalled();
+    if (!result.ok) {
+      expect(result.issues.some((i) => i.path === "output" && i.message === "output must resolve inside outDir")).toBe(
+        true,
+      );
+    }
+  });
+
   it("returns ok false when build outputPath is outside staging", async () => {
     packageLessonkit.mockResolvedValueOnce({
       ok: true,

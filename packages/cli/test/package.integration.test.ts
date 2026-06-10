@@ -131,4 +131,16 @@ describe("runPackage integration (real lxpack validation)", () => {
       message: expect.stringContaining("--target is required"),
     });
   });
+
+  it("rejects absolute --out under project root but outside outDir at validation", async () => {
+    await writeValidProject(dir);
+
+    const absoluteOut = join(dir, "artifacts", "course-scorm12.zip");
+    await expect(
+      runPackage({ target: "scorm12", cwd: dir, noBuild: true, out: absoluteOut }),
+    ).rejects.toMatchObject({
+      code: "PACKAGING",
+      issues: [{ path: "output", message: "output must resolve inside outDir" }],
+    });
+  });
 });
