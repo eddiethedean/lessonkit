@@ -210,7 +210,9 @@ function DragAndDropInner(
         );
         setAssignments(normalized.assignments);
         setPool(normalized.pool);
+        let nextPassed = passed;
         readBooleanStateField(state, "passed", (value) => {
+          nextPassed = value;
           setPassed(value);
           completedRef.current = value;
         });
@@ -228,7 +230,7 @@ function DragAndDropInner(
         if (config.tracking?.replayResumeEvents === true) {
           replayTelemetry(
             normalized.assignments,
-            passed,
+            nextPassed,
             nextChecked,
             nextScore,
             props.targets.length || 1,
