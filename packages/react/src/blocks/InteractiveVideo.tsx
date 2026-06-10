@@ -185,6 +185,7 @@ const InteractiveVideoInner = forwardRef<
     const cue = sortedCues[visibleIndex];
     if (!cue || completedCues.has(visibleIndex)) return;
 
+    firedCuesRef.current.add(visibleIndex);
     setOverlayActive(true);
     video.pause();
     const at = cue.props.atSeconds ?? 0;
@@ -254,7 +255,7 @@ const InteractiveVideoInner = forwardRef<
     }
 
     for (let i = 0; i < sortedCues.length; i++) {
-      if (firedCuesRef.current.has(i)) continue;
+      if (firedCuesRef.current.has(i) || completedCuesRef.current.has(i)) continue;
       const at = sortedCues[i]?.props.atSeconds ?? 0;
       if (t >= at) {
         activateCue(i);
