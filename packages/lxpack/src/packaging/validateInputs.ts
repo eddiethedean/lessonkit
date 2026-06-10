@@ -178,19 +178,6 @@ export function validatePackageInputs(
         ],
       };
     }
-    if (isAbsolute(output) && !isResolvedPathUnderRoot(projectRoot, resolvedOutput)) {
-      return {
-        ok: false,
-        courseDir: outDir,
-        target,
-        issues: [
-          {
-            path: "output",
-            message: "output must resolve inside projectRoot",
-          },
-        ],
-      };
-    }
   }
 
   return { ok: true, outDir, projectRoot };

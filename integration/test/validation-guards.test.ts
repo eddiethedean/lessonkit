@@ -1,3 +1,4 @@
+import { existsSync } from "node:fs";
 import { readFile, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
@@ -9,6 +10,7 @@ import { runCliJson } from "./helpers/runCli.js";
 
 type PackageJson = {
   ok: boolean;
+  outputPath?: string;
   issues?: Array<{ path?: string; message: string }>;
 };
 
@@ -81,7 +83,7 @@ describe("packaging validation guards", () => {
     expect(issues.some((issue) => (issue.path ?? "").includes("theme"))).toBe(true);
   });
 
-  it("rejects absolute --out under project root but outside outDir at validation", async () => {
+  it("writes absolute --out under project root outside outDir", async () => {
     const projectDir = await cloneBuiltProject();
     const absoluteOut = join(projectDir, "artifacts", "course-scorm12.zip");
 
@@ -90,13 +92,9 @@ describe("packaging validation guards", () => {
       { cwd: projectDir },
     );
 
-    expect(result.result.exitCode).not.toBe(0);
-    expect(result.json.ok).toBe(false);
-    const issues = result.json.issues ?? [];
-    expect(
-      issues.some(
-        (issue) => issue.path === "output" && issue.message === "output must resolve inside outDir",
-      ),
-    ).toBe(true);
+    expect(result.result.exitCode).toBe(0);
+    expect(result.json.ok).toBe(true);
+    expect(result.json.outputPath).toBe(absoluteOut);
+    expect(existsSync(absoluteOut)).toBe(true);
   });
 });

@@ -81,10 +81,11 @@ export async function runPackage(opts: PackageOptions): Promise<CliJsonResult> {
   }
 
   const outDir = resolveLxpackOutDir(project);
+  const trimmedOut = opts.out?.trim();
   const { output: resolvedOutput, dir, outputBaseDir } = resolvePackageOutput(
     project,
     target,
-    opts.out,
+    trimmedOut,
   );
   const result = await packageLessonkitCourse({
     descriptor: project.course,
@@ -92,7 +93,7 @@ export async function runPackage(opts: PackageOptions): Promise<CliJsonResult> {
     spaDistDir: distDir,
     projectRoot: project.root,
     target,
-    output: resolvedOutput,
+    output: trimmedOut ? resolvedOutput : undefined,
     dir,
     outputBaseDir,
     strictParity: opts.strictParity,

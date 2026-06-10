@@ -100,7 +100,7 @@ describe("runPackage", () => {
     const result = await runPackage({ target: "scorm12", cwd: dir, noBuild: true, json: true });
     expect(result.ok).toBe(true);
     expect(mockedPackage).toHaveBeenCalledWith(
-      expect.objectContaining({ target: "scorm12", output: ".lxpack/out/course-scorm12.zip" }),
+      expect.objectContaining({ target: "scorm12", output: undefined }),
     );
   });
 
