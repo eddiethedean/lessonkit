@@ -83,6 +83,28 @@ describe("createLessonkitRuntime", () => {
     expect(names).toEqual(["course_started"]);
   });
 
+  it("track emits a validated lesson_started event through the pipeline", () => {
+    const events: import("../src").TelemetryEvent[] = [];
+    const runtime = createLessonkitRuntime({
+      courseId: "course-1",
+      session: { sessionId: "s-1" },
+    });
+    runtime.track(
+      "lesson_started",
+      { lessonId: "lesson-1" },
+      (event) => events.push(event),
+      "lesson-1",
+    );
+    expect(events).toHaveLength(1);
+    expect(events[0]).toMatchObject({
+      name: "lesson_started",
+      courseId: "course-1",
+      sessionId: "s-1",
+      lessonId: "lesson-1",
+    });
+    expect(events[0]!.timestamp).toMatch(/^\d{4}-\d{2}-\d{2}T/);
+  });
+
   it("track skips invalid events", () => {
     const runtime = createLessonkitRuntime({ courseId: "c" });
     const emitted: unknown[] = [];
@@ -372,5 +394,37 @@ describe("createLessonkitRuntime", () => {
     createLessonkitRuntime({ courseId: "c", runtimeVersion: "v1" });
     expect(spy).toHaveBeenCalledWith(expect.stringContaining('runtimeVersion "v1"'));
     spy.mockRestore();
+  });
+
+  it("skips completion emits when prior lesson already completed", () => {
+    const events: string[] = [];
+    const emit = (event: { name: string }) => events.push(event.name);
+    const runtime = createLessonkitRuntime({ courseId: "c" });
+    runtime.setActiveLesson("l1", emit);
+    runtime.completeLesson("l1", emit);
+    runtime.setActiveLesson("l1", emit);
+    runtime.setActiveLesson("l2", emit);
+    expect(events.filter((e) => e === "lesson_completed")).toHaveLength(1);
+  });
+
+  it("completeCourse skips active lesson emit when already completed", () => {
+    const events: string[] = [];
+    const emit = (event: { name: string }) => events.push(event.name);
+    const runtime = createLessonkitRuntime({ courseId: "c" });
+    runtime.setActiveLesson("l1", emit);
+    runtime.completeLesson("l1", emit);
+    runtime.setActiveLesson("l1", emit);
+    runtime.completeCourse(emit);
+    expect(events.filter((e) => e === "lesson_completed")).toHaveLength(1);
+    expect(events.filter((e) => e === "course_completed")).toHaveLength(1);
+    expect(runtime.getProgressState().activeLessonId).toBeUndefined();
+  });
+
+  it("skips lesson_time_on_task when duration is unknown", () => {
+    const events: string[] = [];
+    const emit = (event: { name: string }) => events.push(event.name);
+    const runtime = createLessonkitRuntime({ courseId: "c" });
+    runtime.completeLesson("orphan", emit);
+    expect(events).toEqual(["lesson_completed"]);
   });
 });

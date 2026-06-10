@@ -133,6 +133,47 @@ describe("createTelemetryPipeline", () => {
     expect(isLifecycleTelemetryEvent("interaction")).toBe(false);
   });
 
+  it("warns on non-Error sink failures in development but stays silent in production", () => {
+    const event = {
+      name: "course_started" as const,
+      timestamp: "t",
+      courseId: "c" as const,
+      sessionId: "s",
+    };
+
+    vi.stubEnv("NODE_ENV", "development");
+    const devWarn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const devPipeline = createTelemetryPipeline([
+      {
+        id: "fail",
+        emit: () => {
+          throw "string-failure";
+        },
+      },
+    ]);
+    devPipeline.emit(event);
+    expect(devWarn).toHaveBeenCalledWith(
+      expect.stringContaining('telemetry sink "fail" failed'),
+      "string-failure",
+    );
+    devWarn.mockRestore();
+
+    vi.stubEnv("NODE_ENV", "production");
+    const prodWarn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const prodPipeline = createTelemetryPipeline([
+      {
+        id: "fail",
+        emit: () => {
+          throw "string-failure";
+        },
+      },
+    ]);
+    expect(() => prodPipeline.emit(event)).not.toThrow();
+    expect(prodWarn).not.toHaveBeenCalled();
+    prodWarn.mockRestore();
+    vi.unstubAllEnvs();
+  });
+
   it("awaits async sinks in registration order", async () => {
     const order: string[] = [];
     const pipeline = createTelemetryPipeline([

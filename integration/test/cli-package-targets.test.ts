@@ -1,7 +1,9 @@
 import { beforeAll, describe, expect, it } from "vitest";
 import {
+  assertCmi5Zip,
   assertScormZip,
   assertStandaloneDir,
+  assertXapiZip,
   assertZipExists,
 } from "./helpers/assertArtifacts.js";
 import { GOLDEN_DIR, requireCliOutputDir, requireCliOutputPath } from "./helpers/paths.js";
@@ -44,6 +46,10 @@ describe("CLI package targets (golden example)", () => {
         assertZipExists(zipPath);
         if (target === "scorm12" || target === "scorm2004") {
           assertScormZip(zipPath);
+        } else if (target === "xapi") {
+          assertXapiZip(zipPath);
+        } else if (target === "cmi5") {
+          assertCmi5Zip(zipPath);
         }
       });
     });

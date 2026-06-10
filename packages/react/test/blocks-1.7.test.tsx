@@ -1,6 +1,6 @@
 import React, { createRef } from "react";
 import { afterEach, describe, expect, it } from "vitest";
-import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import type { AssessmentHandle } from "@lessonkit/core";
 import {
   Course,
@@ -42,8 +42,9 @@ describe("1.7.0 Tier B P1 assessment blocks", () => {
         />,
       ),
     );
-    fireEvent.click(screen.getByTestId("sort-paragraphs-check"));
-    expect(screen.getByTestId("sort-paragraphs-feedback").textContent).toContain("Correct");
+    const section = screen.getByRole("region", { name: "Sort the Paragraphs" });
+    fireEvent.click(within(section).getByRole("button", { name: "Check" }));
+    expect(within(section).getByText("Correct")).toBeTruthy();
     expect(ref.current?.getScore()).toBe(3);
     expect(ref.current?.getXAPIData()?.interactionType).toBe("sortParagraphs");
   });
@@ -60,7 +61,8 @@ describe("1.7.0 Tier B P1 assessment blocks", () => {
         />,
       ),
     );
-    fireEvent.click(screen.getByTestId("sort-down-0"));
+    const section = screen.getByRole("region", { name: "Sort the Paragraphs" });
+    fireEvent.click(within(section).getByRole("button", { name: /Move paragraph 1 down/i }));
     act(() => {
       ref.current?.resume?.({ order: [1, 0], checked: true, passed: true });
     });
@@ -79,9 +81,12 @@ describe("1.7.0 Tier B P1 assessment blocks", () => {
         />,
       ),
     );
-    fireEvent.change(screen.getByTestId("guess-input"), { target: { value: "  paris  " } });
-    fireEvent.click(screen.getByTestId("guess-check"));
-    expect(screen.getByTestId("guess-feedback").textContent).toContain("Correct");
+    const section = screen.getByRole("region", { name: "Guess the Answer" });
+    fireEvent.change(within(section).getByLabelText(/your guess/i), {
+      target: { value: "  paris  " },
+    });
+    fireEvent.click(within(section).getByRole("button", { name: "Check" }));
+    expect(within(section).getByText("Correct")).toBeTruthy();
     expect(ref.current?.getXAPIData()?.interactionType).toBe("guessTheAnswer");
   });
 
@@ -91,8 +96,9 @@ describe("1.7.0 Tier B P1 assessment blocks", () => {
         <GuessTheAnswer scored={false} prompt="Reveal demo" answer="Hidden answer" />,
       ),
     );
-    fireEvent.click(screen.getByTestId("guess-reveal-unscored"));
-    expect(screen.getByTestId("guess-answer-reveal-unscored").textContent).toContain("Hidden answer");
+    const section = screen.getByRole("region", { name: "Guess the Answer" });
+    fireEvent.click(within(section).getByRole("button", { name: "Reveal answer" }));
+    expect(within(section).getByText(/Hidden answer/)).toBeTruthy();
   });
 
   it("MultimediaChoice selects correct media option", () => {
@@ -121,8 +127,9 @@ describe("1.7.0 Tier B P1 assessment blocks", () => {
         />,
       ),
     );
-    fireEvent.click(screen.getByLabelText("Portal"));
-    expect(screen.getByTestId("multimedia-choice-feedback").textContent).toContain("Correct");
+    const section = screen.getByRole("region", { name: "Multimedia Choice" });
+    fireEvent.click(within(section).getByLabelText("Portal"));
+    expect(within(section).getByText("Correct")).toBeTruthy();
     expect(ref.current?.getXAPIData()?.interactionType).toBe("mcq");
   });
 
@@ -135,7 +142,8 @@ describe("1.7.0 Tier B P1 assessment blocks", () => {
         </SingleChoiceSet>,
       ),
     );
-    const next = screen.getByTestId("single-choice-set-next") as HTMLButtonElement;
+    const nav = screen.getByRole("navigation", { name: "Single choice set navigation" });
+    const next = within(nav).getByRole("button", { name: "Next" }) as HTMLButtonElement;
     expect(next.disabled).toBe(true);
     fireEvent.click(screen.getByLabelText("A"));
     expect(next.disabled).toBe(false);

@@ -28,15 +28,16 @@ describe("@lessonkit/xapi", () => {
     });
   });
 
-  it("calls onTransportError when transport fails", async () => {
+  it("calls onTransportError with the transport error when delivery fails", async () => {
     const onTransportError = vi.fn();
     const transport = vi.fn(async () => {
       throw new Error("network");
     });
     const client = createXAPIClient({ transport, courseId, onTransportError });
     client.startedLesson({ lessonId: "lesson-1" });
-    await new Promise((r) => setTimeout(r, 0));
-    expect(onTransportError).toHaveBeenCalled();
+    await vi.waitFor(() => expect(onTransportError).toHaveBeenCalledTimes(1));
+    expect(onTransportError).toHaveBeenCalledWith(expect.any(Error));
+    expect(onTransportError.mock.calls[0]![0]).toMatchObject({ message: "network" });
   });
 
   it("queues when transport fails and flushes later", async () => {
@@ -378,8 +379,9 @@ describe("@lessonkit/xapi", () => {
     expect(client.queueSize()).toBe(1);
   });
 
-  it("emit() does not throw when mapper fails", async () => {
+  it("calls onMappingError and does not throw when mapper fails", async () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const onMappingError = vi.fn();
     vi.stubEnv("NODE_ENV", "development");
     const mapModule = await import("../src/telemetryMap");
     const mapSpy = vi
@@ -388,11 +390,14 @@ describe("@lessonkit/xapi", () => {
         throw new Error("bad mapping");
       });
     const transport = vi.fn(async () => {});
-    const client = createXAPIClient({ courseId, transport });
+    const client = createXAPIClient({ courseId, transport, onMappingError });
 
     try {
       expect(() => client.startedLesson({ lessonId: "lesson-1" })).not.toThrow();
       await Promise.resolve();
+      expect(onMappingError).toHaveBeenCalledTimes(1);
+      expect(onMappingError).toHaveBeenCalledWith(expect.any(Error));
+      expect(onMappingError.mock.calls[0]![0]).toMatchObject({ message: "bad mapping" });
       expect(warn).toHaveBeenCalledWith("[lessonkit] xAPI mapping skipped:", "bad mapping");
       expect(transport).not.toHaveBeenCalled();
     } finally {

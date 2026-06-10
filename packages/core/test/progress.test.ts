@@ -41,6 +41,20 @@ describe("createProgressController", () => {
     expect(progress.getState().courseCompleted).toBe(true);
   });
 
+  it("clears activeLessonId when completing the active lesson", () => {
+    const progress = createProgressController();
+    progress.setActiveLesson("l1", 100);
+    progress.completeLesson("l1", 200);
+    expect(progress.getState().activeLessonId).toBeUndefined();
+  });
+
+  it("omits durationMs when the lesson was never activated", () => {
+    const progress = createProgressController();
+    const result = progress.completeLesson("l1", 100);
+    expect(result.didComplete).toBe(true);
+    expect(result.durationMs).toBeUndefined();
+  });
+
   it("warns in dev when completing a lesson that was never activated", () => {
     vi.stubEnv("NODE_ENV", "development");
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});

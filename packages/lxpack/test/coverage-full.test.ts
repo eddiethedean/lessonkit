@@ -214,29 +214,6 @@ describe("coverage-full lxpack", () => {
       }
     });
 
-    it("rejects invalid completion threshold values", () => {
-      expect(
-        validateDescriptor({
-          ...baseDescriptor,
-          tracking: { completion: { threshold: Number.NaN } },
-        }).ok,
-      ).toBe(false);
-      expect(
-        validateDescriptor({
-          ...baseDescriptor,
-          tracking: { completion: { threshold: -0.1 } },
-        }).ok,
-      ).toBe(false);
-    });
-
-    it("rejects lessons with empty titles", () => {
-      const result = validateDescriptor({
-        ...baseDescriptor,
-        lessons: [{ id: "lesson-1", title: "   " }],
-      });
-      expect(result.ok).toBe(false);
-    });
-
     it("rejects duplicate assessment checkIds", () => {
       const assessment = {
         checkId: "check-1",

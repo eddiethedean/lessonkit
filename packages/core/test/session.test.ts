@@ -6,6 +6,8 @@ import {
   hasCourseStartedEmittedToTracking,
   markCourseStarted,
   markCourseStartedEmittedToTracking,
+  hasCourseStartedXapiSent,
+  markCourseStartedXapiSent,
   hasCourseStartedPipelineDelivered,
   markCourseStartedPipelineDelivered,
   migrateCourseStartedMark,
@@ -299,6 +301,51 @@ describe("session", () => {
     expect(hasCourseStartedPipelineDelivered(storage, "s", "c1")).toBe(false);
     markCourseStartedPipelineDelivered(storage, "s", "c1");
     expect(hasCourseStartedPipelineDelivered(storage, "s", "c1")).toBe(true);
+  });
+
+  it("markCourseStartedXapiSent refuses to persist without courseId", () => {
+    const setItem = vi.fn(() => true);
+    const storage = {
+      getItem: () => null,
+      setItem,
+      removeItem: () => {},
+    };
+    expect(markCourseStartedXapiSent(storage, "s", undefined)).toBe(false);
+    expect(setItem).not.toHaveBeenCalled();
+    expect(hasCourseStartedXapiSent(storage, "s", "c1")).toBe(false);
+  });
+
+  it("pipeline delivery helpers refuse to persist without courseId", () => {
+    const setItem = vi.fn(() => true);
+    const storage = {
+      getItem: () => null,
+      setItem,
+      removeItem: () => {},
+    };
+    expect(hasCourseStartedPipelineDelivered(storage, "s", undefined)).toBe(false);
+    markCourseStartedPipelineDelivered(storage, "s", undefined);
+    expect(setItem).not.toHaveBeenCalled();
+    expect(hasCourseStartedPipelineDelivered(storage, "s", "c1")).toBe(false);
+  });
+
+  it("migrateCourseStartedMark moves only tracking dedupe when session mark is absent", () => {
+    const store: Record<string, string> = {};
+    const storage = {
+      getItem: (k: string) => store[k] ?? null,
+      setItem: (k: string, v: string) => {
+        store[k] = v;
+        return true;
+      },
+      removeItem: (k: string) => {
+        delete store[k];
+      },
+    };
+    markCourseStartedEmittedToTracking(storage, "old", "c1");
+    migrateCourseStartedMark(storage, "old", "new", "c1");
+    expect(hasCourseStartedEmittedToTracking(storage, "new", "c1")).toBe(true);
+    expect(hasCourseStartedEmittedToTracking(storage, "old", "c1")).toBe(false);
+    expect(hasCourseStarted(storage, "new", "c1")).toBe(false);
+    expect(hasCourseStarted(storage, "old", "c1")).toBe(false);
   });
 
   it("migrateCourseStartedMark moves tracking dedupe between session ids", () => {

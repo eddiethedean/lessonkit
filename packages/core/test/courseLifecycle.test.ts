@@ -2,6 +2,12 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { createNoopStorage } from "../src/ports";
 import { createProgressController } from "../src/progress";
 import {
+  hasCourseStarted,
+  hasCourseStartedEmittedToTracking,
+  markCourseStarted,
+  markCourseStartedEmittedToTracking,
+} from "../src/session";
+import {
   buildCourseStartedTelemetryEvent,
   completeCourseWithTelemetry,
   completeLessonWithTelemetry,
@@ -109,6 +115,25 @@ describe("courseLifecycle", () => {
     expect(memory.size).toBe(0);
   });
 
+  it("tryEmitCourseStarted skips re-emit when session and tracking dedupe marks already exist", async () => {
+    const storage = createNoopStorage();
+    markCourseStarted(storage, "s", "c");
+    markCourseStartedEmittedToTracking(storage, "s", "c");
+    const ctx = {
+      courseId: "c" as const,
+      sessionId: "s",
+      storage,
+      pluginHost: null,
+      lxpackBridge: "auto" as const,
+    };
+    const emit = vi.fn(() => true);
+    const result = await tryEmitCourseStarted(ctx, { emitCourseStartedEvent: emit }, false);
+    expect(result).toEqual({ emitted: true, marked: true });
+    expect(emit).not.toHaveBeenCalled();
+    expect(hasCourseStarted(storage, "s", "c")).toBe(true);
+    expect(hasCourseStartedEmittedToTracking(storage, "s", "c")).toBe(true);
+  });
+
   it("tryEmitCourseStarted retries emit when storage is marked but sink has not received event", async () => {
     const store: Record<string, string> = {};
     const storage = {
@@ -188,6 +213,76 @@ describe("courseLifecycle", () => {
     });
     expect(ok).toBe(true);
     expect(events).toEqual(["lesson:l1", "course"]);
+  });
+
+  it("returns emitted false when emitCourseStartedEvent throws", async () => {
+    const storage = createNoopStorage();
+    const ctx = {
+      courseId: "c" as const,
+      sessionId: "s",
+      storage,
+      pluginHost: null,
+      lxpackBridge: "auto" as const,
+    };
+    const result = await tryEmitCourseStarted(
+      ctx,
+      {
+        emitCourseStartedEvent: () => {
+          throw new Error("emit failed");
+        },
+      },
+      false,
+    );
+    expect(result).toEqual({ emitted: false, marked: false });
+  });
+
+  it("handles failed emit and duplicate completions", async () => {
+    const storage = createNoopStorage();
+    const ctx = {
+      courseId: "c" as const,
+      sessionId: "s",
+      storage,
+      pluginHost: null,
+      lxpackBridge: "auto" as const,
+    };
+    const failed = await tryEmitCourseStarted(ctx, { emitCourseStartedEvent: () => false }, false);
+    expect(failed).toEqual({ emitted: false, marked: false });
+
+    const progress = createProgressController();
+    progress.setActiveLesson("l1", 0);
+    progress.completeLesson("l1", 10);
+    expect(
+      completeLessonWithTelemetry({
+        progress,
+        lessonId: "l1",
+        nowMs: 20,
+        emitLessonCompleted: () => {},
+      }),
+    ).toBe(false);
+
+    progress.completeCourse();
+    expect(
+      completeCourseWithTelemetry({
+        progress,
+        nowMs: 30,
+        emitLessonCompleted: () => {},
+        emitCourseCompleted: () => {},
+      }),
+    ).toBe(false);
+  });
+
+  it("completes course without an active lesson", () => {
+    const progress = createProgressController();
+    const events: string[] = [];
+    expect(
+      completeCourseWithTelemetry({
+        progress,
+        nowMs: 10,
+        emitLessonCompleted: (id) => events.push(`lesson:${id}`),
+        emitCourseCompleted: () => events.push("course"),
+      }),
+    ).toBe(true);
+    expect(events).toEqual(["course"]);
   });
 
   it("completeCourseWithTelemetry emits active lesson when course was already completed", () => {
