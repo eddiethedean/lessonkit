@@ -656,6 +656,63 @@ export function Nested() {
     expect(await readFile(join(targetDir, "dist", "index.html"), "utf8")).toContain("original");
   });
 
+  it("rollbackFailedImport removes partial artifacts from an empty target", async () => {
+    const targetDir = await mkdtemp(join(tmpdir(), "lk-rollback-empty-"));
+    tempDirs.push(targetDir);
+
+    await writeFile(join(targetDir, "lessonkit.json"), '{"partial":true}\n');
+    await mkdir(join(targetDir, "dist"), { recursive: true });
+    await writeFile(join(targetDir, "dist", "index.html"), "partial\n");
+
+    const { rollbackFailedImport } = await import("../src/lkcourse/import");
+    await rollbackFailedImport(targetDir, undefined, new Set());
+
+    await expect(access(join(targetDir, "lessonkit.json"))).rejects.toThrow();
+    await expect(access(join(targetDir, "dist"))).rejects.toThrow();
+  });
+
+  it("importLkcourse leaves an empty target unchanged when promote fails", async () => {
+    const root = await mkdtemp(join(tmpdir(), "lk-export-empty-promote-fail-"));
+    tempDirs.push(root);
+    await writeMinimalProject(root);
+
+    const manifestParsed = parseLessonkitManifest(minimalManifest);
+    expect(manifestParsed.ok).toBe(true);
+    if (!manifestParsed.ok) return;
+
+    const exported = await exportLkcourse({
+      projectRoot: root,
+      manifest: manifestParsed.manifest,
+    });
+    expect(exported.ok).toBe(true);
+    if (!exported.ok) return;
+
+    const importDir = await mkdtemp(join(tmpdir(), "lk-import-empty-promote-fail-"));
+    tempDirs.push(importDir);
+
+    const importModule = await import("../src/lkcourse/import");
+    importModule.__setPromoteImportStagingForTests(async (stagingDir, targetDir) => {
+      await writeFile(join(targetDir, "lessonkit.json"), '{"partial":true}\n');
+      await mkdir(join(targetDir, "dist"), { recursive: true });
+      await writeFile(join(targetDir, "dist", "index.html"), "partial\n");
+      throw new Error("simulated promote failure");
+    });
+
+    try {
+      const result = await importLkcourse({
+        archivePath: exported.archivePath,
+        targetDir: importDir,
+      });
+      expect(result.ok).toBe(false);
+      expect(result.ok === false && result.issues[0]?.message).toContain("simulated promote failure");
+
+      await expect(access(join(importDir, "lessonkit.json"))).rejects.toThrow();
+      await expect(access(join(importDir, "dist"))).rejects.toThrow();
+    } finally {
+      importModule.__setPromoteImportStagingForTests(null);
+    }
+  });
+
   it("importLkcourse restores target artifacts when promote fails", async () => {
     const root = await mkdtemp(join(tmpdir(), "lk-export-promote-fail-"));
     tempDirs.push(root);
