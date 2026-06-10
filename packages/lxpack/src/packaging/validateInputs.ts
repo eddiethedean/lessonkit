@@ -178,9 +178,7 @@ export function validatePackageInputs(
         ],
       };
     }
-    try {
-      relativePathUnderRoot(outDir, resolvedOutput);
-    } catch {
+    if (!isResolvedPathUnderRoot(outDir, resolvedOutput)) {
       return {
         ok: false,
         courseDir: outDir,
