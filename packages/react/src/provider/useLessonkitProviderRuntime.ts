@@ -361,6 +361,11 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
     }
 
     let cancelled = false;
+    const resetBootstrapIfAbandoned = () => {
+      if (!bootstrapSent) return;
+      xapiBootstrapQueuedRef.current = false;
+      xapiBootstrapInFlightRef.current = false;
+    };
     void (async () => {
       if (prev) {
         try {
@@ -372,12 +377,17 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
           }
         }
       }
-      /* v8 ignore start -- xAPI layout cleanup cancels in-flight flush before it settles */
-      if (cancelled) return;
-      /* v8 ignore stop */
+      if (cancelled) {
+        resetBootstrapIfAbandoned();
+        return;
+      }
       try {
         await next?.flush();
-        if (bootstrapSent && !cancelled && bootstrapSessionId && bootstrapCourseId) {
+        if (cancelled) {
+          resetBootstrapIfAbandoned();
+          return;
+        }
+        if (bootstrapSent && bootstrapSessionId && bootstrapCourseId) {
           xapiBootstrapSendRef.current = true;
           xapiBootstrapInFlightRef.current = false;
           if (!bootstrapAlreadyStarted) {
@@ -397,6 +407,7 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
     })();
     return () => {
       cancelled = true;
+      resetBootstrapIfAbandoned();
       void (async () => {
         try {
           await prev?.flush();

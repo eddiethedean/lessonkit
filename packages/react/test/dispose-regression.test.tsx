@@ -232,6 +232,65 @@ describe("@lessonkit/react provider dispose regression", () => {
     });
   });
 
+  it("retries xAPI bootstrap when transport changes before the initial flush completes", async () => {
+    const statements: import("@lessonkit/xapi").XAPIStatement[] = [];
+    let releaseSlowFlush: (() => void) | undefined;
+    const slowFlush = new Promise<void>((resolve) => {
+      releaseSlowFlush = resolve;
+    });
+    let slowTransportCalls = 0;
+    const slowTransport: import("@lessonkit/xapi").XAPITransport = async (statement) => {
+      slowTransportCalls += 1;
+      statements.push(statement);
+      if (slowTransportCalls === 1) {
+        await slowFlush;
+      }
+    };
+    const fastTransport: import("@lessonkit/xapi").XAPITransport = async (statement) => {
+      statements.push(statement);
+    };
+
+    const { rerender } = render(
+      <LessonkitProvider
+        config={{
+          courseId: "course-xapi-churn",
+          tracking: { enabled: false },
+          xapi: { transport: slowTransport },
+        }}
+      >
+        <div>xapi-churn</div>
+      </LessonkitProvider>,
+    );
+
+    await waitFor(() => expect(slowTransportCalls).toBeGreaterThan(0));
+
+    rerender(
+      <LessonkitProvider
+        config={{
+          courseId: "course-xapi-churn",
+          tracking: { enabled: false },
+          xapi: { transport: fastTransport },
+        }}
+      >
+        <div>xapi-churn</div>
+      </LessonkitProvider>,
+    );
+
+    releaseSlowFlush?.();
+
+    await waitFor(() =>
+      expect(
+        Object.keys(sessionStorage).some((k) => k.startsWith("lessonkit:course_started:")),
+      ).toBe(true),
+    );
+    const courseInit = statements.filter(
+      (s) =>
+        s.verb === "http://adlnet.gov/expapi/verbs/initialized" &&
+        s.object.id === "urn:lessonkit:course:course-xapi-churn",
+    );
+    expect(courseInit.length).toBeGreaterThanOrEqual(1);
+  });
+
   it("emits course_started once and keeps sessionId across StrictMode remount", async () => {
     const events: TelemetryEvent[] = [];
     const sessionIds = new Set<string>();
