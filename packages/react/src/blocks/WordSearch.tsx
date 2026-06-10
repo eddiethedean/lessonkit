@@ -11,11 +11,15 @@ import { setLessonkitBlockType } from "../compound/blockType";
 import { normalizeComponentId } from "../runtime/validateComponentId";
 import {
   buildGrid,
+  buildGridSeed,
   cellKey,
   cellsAlongHorizontalLine,
   matchPlacement,
   placementCellKeys,
+  restoreWordSearchLayout,
   type GridCell,
+  type WordPlacement,
+  type WordSearchGrid,
 } from "./wordSearchUtils";
 
 export type WordSearchProps = AssessmentBaseProps & {
@@ -25,6 +29,22 @@ export type WordSearchProps = AssessmentBaseProps & {
 
 const INTERACTION: AssessmentInteractionType = "wordSearch";
 
+function foundCellsForWords(
+  foundWords: Iterable<string>,
+  placementsByWord: Map<string, WordPlacement>,
+): Set<string> {
+  const nextFoundCells = new Set<string>();
+  for (const word of foundWords) {
+    const placement = placementsByWord.get(word);
+    if (placement) {
+      for (const key of placementCellKeys(placement)) {
+        nextFoundCells.add(key);
+      }
+    }
+  }
+  return nextFoundCells;
+}
+
 function WordSearchInner(
   props: WordSearchProps & { enclosingLessonId: LessonId },
   ref: React.Ref<AssessmentHandle>,
@@ -33,10 +53,14 @@ function WordSearchInner(
   const assessment = useAssessmentState(props.enclosingLessonId);
   const size = props.size ?? 10;
   const wordsKey = props.words.join("\0");
-  const { grid, placed, placements } = useMemo(
-    () => buildGrid(props.words, size),
-    [wordsKey, size],
+  const layoutSeed = useMemo(
+    () => buildGridSeed(checkId, wordsKey, size),
+    [checkId, wordsKey, size],
   );
+  const [layout, setLayout] = useState<WordSearchGrid>(() =>
+    buildGrid(props.words, size, layoutSeed),
+  );
+  const { grid, placed, placements } = layout;
   const placementsByWord = useMemo(
     () => new Map(placements.map((placement) => [placement.word, placement])),
     [placements],
@@ -63,8 +87,9 @@ function WordSearchInner(
   };
 
   useEffect(() => {
+    setLayout(buildGrid(props.words, size, layoutSeed));
     reset();
-  }, [checkId, wordsKey, size]);
+  }, [checkId, wordsKey, size, layoutSeed, props.words]);
 
   const maxScore = placed.length;
   const score = found.size;
@@ -87,22 +112,26 @@ function WordSearchInner(
           score: passed ? maxScore : score,
           maxScore: maxScore || 1,
         }),
-        getCurrentState: () => ({ found: [...found], passed, submitted }),
+        getCurrentState: () => ({
+          found: [...found],
+          passed,
+          submitted,
+          grid: layout.grid,
+          placed: layout.placed,
+          placements: layout.placements,
+        }),
         resume: (state) => {
+          const restored = restoreWordSearchLayout(state, props.words, size);
+          const activeLayout = restored ?? layout;
+          if (restored) setLayout(restored);
+          const activePlacementsByWord = new Map(
+            activeLayout.placements.map((placement) => [placement.word, placement]),
+          );
           const raw = state.found;
           if (Array.isArray(raw)) {
             const nextFound = new Set(raw.filter((w): w is string => typeof w === "string"));
             setFound(nextFound);
-            const nextFoundCells = new Set<string>();
-            for (const word of nextFound) {
-              const placement = placementsByWord.get(word);
-              if (placement) {
-                for (const key of placementCellKeys(placement)) {
-                  nextFoundCells.add(key);
-                }
-              }
-            }
-            setFoundCells(nextFoundCells);
+            setFoundCells(foundCellsForWords(nextFound, activePlacementsByWord));
           }
           readBooleanStateField(state, "passed", (value) => {
             setPassed(value);
@@ -111,7 +140,7 @@ function WordSearchInner(
           readBooleanStateField(state, "submitted", setSubmitted);
         },
       }),
-    [checkId, found, maxScore, passed, passedThreshold, placementsByWord, score, submitted],
+    [checkId, found, layout, maxScore, passed, passedThreshold, placementsByWord, props.words, score, size, submitted],
   );
 
   useAssessmentHandleRegistration(checkId, handle, ref);

@@ -1,6 +1,8 @@
-import React from "react";
+import React, { createRef } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import type { AssessmentHandle } from "@lessonkit/core";
+import { buildGrid, buildGridSeed } from "../src/blocks/wordSearchUtils";
 import {
   AdventCalendar,
   CombinationLock,
@@ -197,28 +199,77 @@ describe("1.6.x block components", () => {
     expect(screen.queryByTestId("crossword-feedback")).toBeNull();
   });
 
+  function dragWordSearchWord(checkId: string, word: string, size = 5) {
+    const { placements } = buildGrid([word], size, buildGridSeed(checkId, word, size));
+    const placement = placements.find((entry) => entry.word === word.toUpperCase());
+    if (!placement) throw new Error(`expected ${word} to be placed`);
+    const start = screen.getByTestId(`word-search-cell-${placement.row}-${placement.col}`);
+    const middle = screen.getByTestId(`word-search-cell-${placement.row}-${placement.col + 1}`);
+    const end = screen.getByTestId(
+      `word-search-cell-${placement.row}-${placement.col + placement.word.length - 1}`,
+    );
+    fireEvent.pointerDown(start, { pointerId: 1, buttons: 1 });
+    fireEvent.pointerEnter(middle, { pointerId: 1, buttons: 1 });
+    fireEvent.pointerEnter(end, { pointerId: 1, buttons: 1 });
+    fireEvent.pointerUp(end, { pointerId: 1 });
+    return placement;
+  }
+
   it("WordSearch renders aligned grid and finds a word via drag", () => {
-    vi.spyOn(Math, "random").mockReturnValue(0.1);
     render(wrap(<WordSearch checkId="ws-1" words={["CAT"]} size={5} />));
 
     expect(screen.getByTestId("word-search").querySelector(".lk-word-search-grid")).toBeTruthy();
 
-    const cell0 = screen.getByTestId("word-search-cell-0-0");
-    const cell1 = screen.getByTestId("word-search-cell-0-1");
-    const cell2 = screen.getByTestId("word-search-cell-0-2");
-
-    fireEvent.pointerDown(cell0, { pointerId: 1, buttons: 1 });
-    fireEvent.pointerEnter(cell1, { pointerId: 1, buttons: 1 });
-    fireEvent.pointerEnter(cell2, { pointerId: 1, buttons: 1 });
-    fireEvent.pointerUp(cell2, { pointerId: 1 });
+    const placement = dragWordSearchWord("ws-1", "CAT");
+    const foundCells = Array.from({ length: placement.word.length }, (_, index) =>
+      screen.getByTestId(`word-search-cell-${placement.row}-${placement.col + index}`),
+    );
 
     const bankItem = screen.getByText("CAT");
     expect(bankItem.classList.contains("lk-word-search-bank-item--found")).toBe(true);
     expect(bankItem.getAttribute("aria-checked")).toBe("true");
-    expect(cell0.classList.contains("lk-word-search-cell--found")).toBe(true);
-    expect(cell1.classList.contains("lk-word-search-cell--found")).toBe(true);
-    expect(cell2.classList.contains("lk-word-search-cell--found")).toBe(true);
-    expect(cell0.classList.contains("lk-word-search-cell--selecting")).toBe(false);
+    for (const cell of foundCells) {
+      expect(cell.classList.contains("lk-word-search-cell--found")).toBe(true);
+    }
+    expect(foundCells[0]!.classList.contains("lk-word-search-cell--selecting")).toBe(false);
+  });
+
+  it("WordSearch resume keeps found highlights after remount", async () => {
+    const ref = createRef<AssessmentHandle>();
+    render(wrap(<WordSearch ref={ref} checkId="ws-resume" words={["CAT"]} size={5} />));
+
+    const placement = dragWordSearchWord("ws-resume", "CAT");
+
+    const saved = ref.current?.getCurrentState?.();
+    expect(saved).toEqual(
+      expect.objectContaining({
+        found: ["CAT"],
+        grid: expect.any(Array),
+        placements: expect.arrayContaining([expect.objectContaining({ word: "CAT" })]),
+      }),
+    );
+
+    cleanup();
+    vi.spyOn(Math, "random").mockReturnValue(0.99);
+
+    const ref2 = createRef<AssessmentHandle>();
+    render(wrap(<WordSearch ref={ref2} checkId="ws-resume" words={["CAT"]} size={5} />));
+
+    act(() => {
+      ref2.current?.resume?.(saved!);
+    });
+
+    await waitFor(() => {
+      expect(ref2.current?.getScore()).toBe(1);
+      expect(screen.getByText("CAT").classList.contains("lk-word-search-bank-item--found")).toBe(true);
+      for (let index = 0; index < placement.word.length; index += 1) {
+        expect(
+          screen
+            .getByTestId(`word-search-cell-${placement.row}-${placement.col + index}`)
+            .classList.contains("lk-word-search-cell--found"),
+        ).toBe(true);
+      }
+    });
   });
 
   it("AdventCalendar opens a door", () => {

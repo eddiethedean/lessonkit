@@ -1,9 +1,11 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   buildGrid,
+  buildGridSeed,
   cellsAlongHorizontalLine,
   isContiguousHorizontalLine,
   matchPlacement,
+  restoreWordSearchLayout,
   selectionToWord,
 } from "../src/blocks/wordSearchUtils";
 
@@ -18,6 +20,36 @@ describe("wordSearchUtils", () => {
     expect(placed).toEqual(["CAT"]);
     expect(placements).toEqual([{ word: "CAT", row: 0, col: 0 }]);
     expect(grid[0]?.slice(0, 3)).toEqual(["C", "A", "T"]);
+  });
+
+  it("buildGrid with the same seed produces identical layouts", () => {
+    const seed = buildGridSeed("ws-check", "CAT\0DOG", 8);
+    const first = buildGrid(["CAT", "DOG"], 8, seed);
+    const second = buildGrid(["CAT", "DOG"], 8, seed);
+    expect(second).toEqual(first);
+  });
+
+  it("buildGrid with different seeds can produce different layouts", () => {
+    const first = buildGrid(["CAT", "DOG", "BIRD"], 10, buildGridSeed("a", "CAT\0DOG\0BIRD", 10));
+    const second = buildGrid(["CAT", "DOG", "BIRD"], 10, buildGridSeed("b", "CAT\0DOG\0BIRD", 10));
+    expect(second.placements).not.toEqual(first.placements);
+  });
+
+  it("restoreWordSearchLayout validates persisted grid and placements", () => {
+    const seed = buildGridSeed("ws-check", "CAT", 5);
+    const layout = buildGrid(["CAT"], 5, seed);
+    const restored = restoreWordSearchLayout(
+      {
+        grid: layout.grid,
+        placed: layout.placed,
+        placements: layout.placements,
+        found: ["CAT"],
+      },
+      ["CAT"],
+      5,
+    );
+    expect(restored).toEqual(layout);
+    expect(restoreWordSearchLayout({ grid: [["X"]] }, ["CAT"], 5)).toBeNull();
   });
 
   it("cellsAlongHorizontalLine returns contiguous cells on the same row", () => {

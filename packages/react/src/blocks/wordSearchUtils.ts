@@ -8,6 +8,75 @@ export type WordSearchGrid = {
   placements: WordPlacement[];
 };
 
+function hashSeedToNumber(seed: string): number {
+  let hash = 2166136261;
+  for (let i = 0; i < seed.length; i += 1) {
+    hash ^= seed.charCodeAt(i);
+    hash = Math.imul(hash, 16777619);
+  }
+  return hash >>> 0 || 1;
+}
+
+function createSeededRandom(seed: string): () => number {
+  let state = hashSeedToNumber(seed);
+  return () => {
+    state = (Math.imul(state, 1664525) + 1013904223) >>> 0;
+    return state / 0x1_0000_0000;
+  };
+}
+
+export function buildGridSeed(checkId: string, wordsKey: string, size: number): string {
+  return `${checkId}\0${wordsKey}\0${size}`;
+}
+
+export function restoreWordSearchLayout(
+  state: Record<string, unknown>,
+  words: string[],
+  size: number,
+): WordSearchGrid | null {
+  const { grid, placed, placements } = state;
+  if (!Array.isArray(grid) || !Array.isArray(placed) || !Array.isArray(placements)) {
+    return null;
+  }
+  if (grid.length !== size || grid.some((row) => !Array.isArray(row) || row.length !== size)) {
+    return null;
+  }
+  const expectedWords = words
+    .map((raw) => raw.toUpperCase().replace(/[^A-Z]/g, ""))
+    .filter((word) => word.length > 0 && word.length <= size);
+  if (placed.length !== expectedWords.length || placements.length !== expectedWords.length) {
+    return null;
+  }
+  const placedSet = new Set(placed);
+  if (placedSet.size !== placed.length) return null;
+  for (const word of expectedWords) {
+    if (!placedSet.has(word)) return null;
+  }
+  for (const placement of placements) {
+    if (
+      typeof placement !== "object" ||
+      placement === null ||
+      typeof (placement as WordPlacement).word !== "string" ||
+      typeof (placement as WordPlacement).row !== "number" ||
+      typeof (placement as WordPlacement).col !== "number"
+    ) {
+      return null;
+    }
+    const { word, row, col } = placement as WordPlacement;
+    if (!placedSet.has(word)) return null;
+    if (!Number.isInteger(row) || !Number.isInteger(col) || row < 0 || col < 0) return null;
+    if (row >= size || col + word.length > size) return null;
+    for (let i = 0; i < word.length; i += 1) {
+      if (grid[row]?.[col + i] !== word[i]) return null;
+    }
+  }
+  return {
+    grid: grid as string[][],
+    placed: placed as string[],
+    placements: placements as WordPlacement[],
+  };
+}
+
 export function cellKey(row: number, col: number): string {
   return `${row}:${col}`;
 }
@@ -22,7 +91,8 @@ export function parseCellKey(key: string): GridCell | null {
   return { row, col };
 }
 
-export function buildGrid(words: string[], size: number): WordSearchGrid {
+export function buildGrid(words: string[], size: number, seed?: string): WordSearchGrid {
+  const random = seed === undefined ? Math.random : createSeededRandom(seed);
   const grid: string[][] = Array.from({ length: size }, () =>
     Array.from({ length: size }, () => ""),
   );
@@ -35,8 +105,8 @@ export function buildGrid(words: string[], size: number): WordSearchGrid {
     if (word.length === 0 || word.length > size) continue;
     let done = false;
     for (let attempt = 0; attempt < 50 && !done; attempt += 1) {
-      const row = Math.floor(Math.random() * size);
-      const col = Math.floor(Math.random() * (size - word.length + 1));
+      const row = Math.floor(random() * size);
+      const col = Math.floor(random() * (size - word.length + 1));
       let fits = true;
       for (let i = 0; i < word.length; i += 1) {
         const cell = grid[row]![col + i]!;
@@ -58,7 +128,7 @@ export function buildGrid(words: string[], size: number): WordSearchGrid {
   for (let r = 0; r < size; r += 1) {
     for (let c = 0; c < size; c += 1) {
       if (!grid[r]![c]) {
-        grid[r]![c] = alphabet[Math.floor(Math.random() * alphabet.length)]!;
+        grid[r]![c] = alphabet[Math.floor(random() * alphabet.length)]!;
       }
     }
   }
