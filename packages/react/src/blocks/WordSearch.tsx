@@ -193,7 +193,7 @@ function WordSearchInner(
 
   const check = () => {
     setSubmitted(true);
-    const ok = found.size === maxScore && maxScore > 0;
+    const ok = passedThreshold && maxScore > 0;
     assessment.answer({
       checkId,
       interactionType: INTERACTION,

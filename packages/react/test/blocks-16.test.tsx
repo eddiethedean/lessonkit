@@ -1,7 +1,7 @@
 import React, { createRef } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
-import type { AssessmentHandle } from "@lessonkit/core";
+import type { AssessmentHandle, TelemetryEvent } from "@lessonkit/core";
 import { buildGrid, buildGridSeed } from "../src/blocks/wordSearchUtils";
 import {
   AdventCalendar,
@@ -199,8 +199,14 @@ describe("1.6.x block components", () => {
     expect(screen.queryByTestId("crossword-feedback")).toBeNull();
   });
 
-  function dragWordSearchWord(checkId: string, word: string, size = 5) {
-    const { placements } = buildGrid([word], size, buildGridSeed(checkId, word, size));
+  function dragWordSearchWord(
+    checkId: string,
+    word: string,
+    words: string[] = [word],
+    size = words.length > 5 ? 10 : 5,
+  ) {
+    const wordsKey = words.join("\0");
+    const { placements } = buildGrid(words, size, buildGridSeed(checkId, wordsKey, size));
     const placement = placements.find((entry) => entry.word === word.toUpperCase());
     if (!placement) throw new Error(`expected ${word} to be placed`);
     const start = screen.getByTestId(`word-search-cell-${placement.row}-${placement.col}`);
@@ -232,6 +238,50 @@ describe("1.6.x block components", () => {
       expect(cell.classList.contains("lk-word-search-cell--found")).toBe(true);
     }
     expect(foundCells[0]!.classList.contains("lk-word-search-cell--selecting")).toBe(false);
+  });
+
+  it("WordSearch Check honors passingScore below word count", async () => {
+    const events: TelemetryEvent[] = [];
+    const ref = createRef<AssessmentHandle>();
+    render(
+      <Course
+        title="Blocks 1.6"
+        courseId="blocks-16-partial"
+        config={{
+          xapi: { enabled: false },
+          tracking: { sink: (e) => void events.push(e) },
+        }}
+      >
+        <Lesson title="L1" lessonId="lesson-partial">
+          <WordSearch
+            ref={ref}
+            checkId="ws-partial"
+            words={["CAT", "DOG", "BAT"]}
+            size={10}
+            passingScore={2}
+          />
+        </Lesson>
+      </Course>,
+    );
+
+    const words = ["CAT", "DOG", "BAT"];
+    dragWordSearchWord("ws-partial", "CAT", words, 10);
+    dragWordSearchWord("ws-partial", "DOG", words, 10);
+
+    expect(ref.current?.getScore()).toBe(2);
+    expect(ref.current?.getMaxScore()).toBe(3);
+    expect(ref.current?.getXAPIData()?.correct).toBe(true);
+
+    fireEvent.click(screen.getByTestId("word-search-check"));
+
+    await waitFor(() => {
+      expect(
+        events.some((e) => e.name === "assessment_answered" && e.data?.correct === true),
+      ).toBe(true);
+      const completed = events.find((e) => e.name === "assessment_completed");
+      expect(completed?.data?.score).toBe(2);
+      expect(completed?.data?.maxScore).toBe(3);
+    });
   });
 
   it("WordSearch resume keeps found highlights after remount", async () => {
