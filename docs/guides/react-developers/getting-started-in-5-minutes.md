@@ -27,9 +27,9 @@ cd my-course
 
 | Flag | When to use |
 | --- | --- |
-| `lessonkit init --here` | Scaffold in the current directory (must be empty or use `--force`) |
+| `lessonkit init --here` | Scaffold in the current directory (must be empty or dotfiles-only without `--force`) |
 | `lessonkit init my-course --skip-install` | Create files only; run `npm install` yourself after fixing Node/proxy issues |
-| `lessonkit init --here --force` | Scaffold in the current directory when it is empty or dotfiles-only (e.g. `.git`). Does not overwrite existing project files. |
+| `lessonkit init --here --force` | Scaffold in a non-empty directory; conflicting template files are backed up to `.lessonkit-init-backup/` before overwrite |
 
 See [CLI reference](../../reference/cli.md) for all options.
 

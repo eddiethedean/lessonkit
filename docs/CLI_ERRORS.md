@@ -50,7 +50,7 @@ Quick lookup for common `lessonkit` failures. Exit codes: [CLI reference — exi
 | Message (substring) | Cause | Fix |
 | --- | --- | --- |
 | `Directory already exists` | `lessonkit init name` collision | Pick another name or remove directory |
-| `Directory is not empty` | `init --here` on non-empty dir | Use empty dir, dotfiles only, or `--force` with `--here` |
+| `Directory is not empty` | `init --here` on non-empty dir without `--force` | Use an empty dir, dotfiles only, or `lessonkit init --here --force` |
 | `--force requires --here` | `--force` without `--here` | Use `lessonkit init --here --force` |
 | `Bundled template not found` | Broken CLI install | Reinstall `@lessonkit/cli` |
 | `Project name is required` | Missing name argument | `lessonkit init my-course` or `lessonkit init --here` |

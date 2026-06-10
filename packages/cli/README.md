@@ -30,7 +30,7 @@ lessonkit package --target scorm12   # LMS artifact
 | Flag | Purpose |
 | --- | --- |
 | `--here` | Scaffold in the current directory |
-| `--force` | With `--here`: back up conflicting files to `.lessonkit-init-backup/` and overwrite (required when template files such as `.gitignore` already exist). |
+| `--force` | With `--here`: scaffold in a non-empty directory; conflicting template files (e.g. `.gitignore`, `README.md`) are backed up to `.lessonkit-init-backup/` before overwrite. Non-conflicting files are kept. |
 | `--skip-install` | Skip `npm install` after copying the template |
 
 ### Package targets

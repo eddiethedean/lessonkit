@@ -239,17 +239,7 @@ export async function runInit(opts: InitOptions, logger: CliLogger): Promise<Cli
 
   if (opts.here && !(await isDirEmptyOrDotfilesOnly(projectDir)) && !opts.force) {
     throw new CliError(
-      `Directory is not empty: ${projectDir}. Use --here --force only when the directory is empty or contains dotfiles only (e.g. .git).`,
-      {
-        code: "INVALID_PROJECT",
-        exitCode: EXIT_INVALID_PROJECT,
-      },
-    );
-  }
-
-  if (opts.here && opts.force && !(await isDirEmptyOrDotfilesOnly(projectDir))) {
-    throw new CliError(
-      `Directory is not empty: ${projectDir}. --force only initializes when the directory is empty or contains dotfiles only (e.g. .git).`,
+      `Directory is not empty: ${projectDir}. Use --here --force to scaffold anyway (conflicting files are backed up under ${INIT_BACKUP_DIR}/).`,
       {
         code: "INVALID_PROJECT",
         exitCode: EXIT_INVALID_PROJECT,
