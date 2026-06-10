@@ -53,7 +53,7 @@ export function createProgram(baseLogger: CliLogger = console): Command {
     .option("--skip-install", "Skip npm install")
     .option(
       "--force",
-      "With --here: back up conflicting files to .lessonkit-init-backup/ before overwriting (required when template files already exist)",
+      "With --here: scaffold in a non-empty directory; back up conflicting template paths under .lessonkit-init-backup/ before overwrite",
     )
     .option("--json", "Emit structured JSON result")
     .action(async (name: string | undefined, opts: { here?: boolean; skipInstall?: boolean; force?: boolean; json?: boolean }) => {

@@ -679,18 +679,31 @@ describe("runInit", () => {
     });
   });
 
-  it("rejects --here --force when the directory has non-dotfile entries", async () => {
+  it("init --here --force scaffolds in a non-empty directory and keeps non-conflicting files", async () => {
     const here = join(parentDir, "existing");
     await mkdir(here, { recursive: true });
     await writeFile(join(here, "stray.txt"), "keep", "utf8");
     process.chdir(here);
 
-    await expect(
-      runInit({ here: true, force: true, skipInstall: true }, { log: () => {}, error: () => {} }),
-    ).rejects.toMatchObject({
-      exitCode: EXIT_INVALID_PROJECT,
-      message: expect.stringContaining("dotfiles only"),
-    });
+    await runInit({ here: true, force: true, skipInstall: true }, { log: () => {}, error: () => {} });
+
+    expect(existsSync(join(here, "package.json"))).toBe(true);
+    expect(await readFile(join(here, "stray.txt"), "utf8")).toBe("keep");
+  });
+
+  it("init --here --force backs up conflicting root files such as README.md", async () => {
+    const here = join(parentDir, "existing-readme");
+    await mkdir(here, { recursive: true });
+    await writeFile(join(here, "README.md"), "keep\n", "utf8");
+    process.chdir(here);
+    const log = vi.fn();
+
+    await runInit({ here: true, force: true, skipInstall: true }, { log, error: () => {} });
+
+    expect(existsSync(join(here, "lessonkit.json"))).toBe(true);
+    expect(await readFile(join(here, "README.md"), "utf8")).not.toBe("keep\n");
+    expect(await readFile(join(here, ".lessonkit-init-backup", "README.md"), "utf8")).toBe("keep\n");
+    expect(log).toHaveBeenCalledWith(expect.stringContaining(".lessonkit-init-backup"));
   });
 
   it("rolls back staging when dependency install fails", async () => {
