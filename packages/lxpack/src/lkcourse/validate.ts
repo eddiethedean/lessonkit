@@ -46,11 +46,25 @@ export function validateLkcourseArchiveEntries(
     issues.push({ path: spaIndexPath, message: "required file missing from archive" });
   }
 
+  const allowlisted = new Set(envelope.entries.map((entryPath) => entryPath.replace(/\\/g, "/")));
+  const spaDistPrefix = `${spaDistDir}/`;
+
   for (const entryPath of envelope.entries) {
     if (!entries.has(entryPath)) {
       issues.push({
         path: entryPath,
         message: "listed in manifest.entries but missing from archive",
+      });
+    }
+  }
+
+  for (const zipPath of entries.keys()) {
+    const normalized = zipPath.replace(/\\/g, "/");
+    if (!normalized.startsWith(spaDistPrefix)) continue;
+    if (!allowlisted.has(normalized)) {
+      issues.push({
+        path: zipPath,
+        message: "unlisted file under spaDistDir; not in manifest.entries",
       });
     }
   }

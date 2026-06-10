@@ -38,6 +38,7 @@ async function writeImportTree(
   manifest: LessonkitManifest,
   entries: Map<string, Uint8Array>,
   spaDistDir: string,
+  allowlistedSpaPaths: ReadonlySet<string>,
 ): Promise<number> {
   let fileCount = 0;
 
@@ -51,6 +52,9 @@ async function writeImportTree(
   for (const [entryPath, data] of entries) {
     const normalized = entryPath.replace(/\\/g, "/");
     if (!normalized.startsWith(`${spaDistDir}/`)) continue;
+    if (!allowlistedSpaPaths.has(normalized)) {
+      throw new Error(`unlisted spaDist entry rejected: ${entryPath}`);
+    }
 
     const relativeUnderSpa = normalized.slice(spaDistDir.length + 1);
 
@@ -173,7 +177,18 @@ export async function importLkcourse(
   let backupDir: string | undefined;
   try {
     stagingDir = await mkdtemp(join(targetDir, ".lkcourse-import-"));
-    const fileCount = await writeImportTree(stagingDir, manifest, read.entries, spaDistDir);
+    const allowlistedSpaPaths = new Set(
+      envelope.entries
+        .map((entryPath) => entryPath.replace(/\\/g, "/"))
+        .filter((entryPath) => entryPath.startsWith(`${spaDistDir}/`)),
+    );
+    const fileCount = await writeImportTree(
+      stagingDir,
+      manifest,
+      read.entries,
+      spaDistDir,
+      allowlistedSpaPaths,
+    );
     backupDir = await backupImportArtifacts(targetDir);
     try {
       await promoteImportStagingImpl(stagingDir, targetDir);

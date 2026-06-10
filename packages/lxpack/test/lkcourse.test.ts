@@ -386,6 +386,44 @@ describe("lkcourse", () => {
     expect(result.ok).toBe(false);
   });
 
+  it("validateLkcourseArchiveEntries rejects unlisted dist entries", () => {
+    const entries = buildArchiveEntries();
+    entries.set("dist/injected.js", utf8ToEntry("console.log('evil');"));
+    const result = validateLkcourseArchiveEntries(entries, "injected.lkcourse");
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.issues.some((issue) => issue.path === "dist/injected.js")).toBe(true);
+  });
+
+  it("validateLkcourse rejects archives with unlisted dist entries", async () => {
+    const root = await mkdtemp(join(tmpdir(), "lk-injected-"));
+    tempDirs.push(root);
+    const archive = join(root, "injected.lkcourse");
+    const entries = buildArchiveEntries();
+    entries.set("dist/injected.js", utf8ToEntry("console.log('evil');"));
+    await writeFile(archive, createZip(entries));
+    const result = validateLkcourse(archive);
+    expect(result.ok).toBe(false);
+  });
+
+  it("importLkcourse does not extract unlisted dist entries", async () => {
+    const root = await mkdtemp(join(tmpdir(), "lk-import-injected-"));
+    tempDirs.push(root);
+    const archive = join(root, "tampered.lkcourse");
+    const entries = buildArchiveEntries();
+    entries.set("dist/injected.js", utf8ToEntry("console.log('evil');"));
+    await writeFile(archive, createZip(entries));
+
+    const importDir = await mkdtemp(join(tmpdir(), "lk-import-injected-target-"));
+    tempDirs.push(importDir);
+    const imported = await importLkcourse({
+      archivePath: archive,
+      targetDir: importDir,
+    });
+    expect(imported.ok).toBe(false);
+    await expect(access(join(importDir, "dist", "injected.js"))).rejects.toThrow();
+  });
+
   it("validateLkcourseArchiveEntries rejects invalid interchange schema", () => {
     const result = validateLkcourseArchiveEntries(
       buildArchiveEntries({ interchange: { schemaVersion: 1, course: { lessons: [] } } }),
