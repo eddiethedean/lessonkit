@@ -208,6 +208,7 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
   const xapiBootstrapSendRef = useRef(false);
   const xapiBootstrapQueuedRef = useRef(false);
   const xapiBootstrapInFlightRef = useRef(false);
+  const xapiBootstrapAbandonedKeyRef = useRef<string | undefined>(undefined);
 
   if (prevUseV2RuntimeRef.current !== useV2Runtime) {
     prevUseV2RuntimeRef.current = useV2Runtime;
@@ -283,6 +284,14 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
 
   useIsoLayoutEffect(() => {
     const courseChanged = prevXapiCourseIdRef.current !== courseId;
+    const xapiLayoutKey = `${courseId}\0${String(xapiEnabled)}\0${String(xapiClient)}\0${String(xapiTransport)}`;
+    if (xapiBootstrapAbandonedKeyRef.current !== undefined) {
+      if (xapiBootstrapAbandonedKeyRef.current !== xapiLayoutKey) {
+        xapiBootstrapQueuedRef.current = false;
+        xapiBootstrapInFlightRef.current = false;
+      }
+      xapiBootstrapAbandonedKeyRef.current = undefined;
+    }
     if (courseChanged) {
       if (normalizedConfig.xapi?.client) {
         const g = globalThis as typeof globalThis & { process?: { env?: { NODE_ENV?: string } } };
@@ -361,6 +370,11 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
     }
 
     let cancelled = false;
+    const resetBootstrapIfAbandoned = () => {
+      if (!bootstrapSent) return;
+      xapiBootstrapQueuedRef.current = false;
+      xapiBootstrapInFlightRef.current = false;
+    };
     void (async () => {
       if (prev) {
         try {
@@ -372,12 +386,17 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
           }
         }
       }
-      /* v8 ignore start -- xAPI layout cleanup cancels in-flight flush before it settles */
-      if (cancelled) return;
-      /* v8 ignore stop */
+      if (cancelled) {
+        resetBootstrapIfAbandoned();
+        return;
+      }
       try {
         await next?.flush();
-        if (bootstrapSent && !cancelled && bootstrapSessionId && bootstrapCourseId) {
+        if (cancelled) {
+          resetBootstrapIfAbandoned();
+          return;
+        }
+        if (bootstrapSent && bootstrapSessionId && bootstrapCourseId) {
           xapiBootstrapSendRef.current = true;
           xapiBootstrapInFlightRef.current = false;
           if (!bootstrapAlreadyStarted) {
@@ -397,6 +416,9 @@ export function useLessonkitProviderRuntime(config: LessonkitConfig): LessonkitR
     })();
     return () => {
       cancelled = true;
+      if (bootstrapSent && !xapiBootstrapSendRef.current) {
+        xapiBootstrapAbandonedKeyRef.current = xapiLayoutKey;
+      }
       void (async () => {
         try {
           await prev?.flush();
