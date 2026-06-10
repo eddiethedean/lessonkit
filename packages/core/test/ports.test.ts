@@ -116,7 +116,7 @@ describe("ports", () => {
     expect(storage.getItem("k")).toBeNull();
   });
 
-  it("does not cache course_started marks in memory when sessionStorage setItem fails", () => {
+  it("caches course_started marks in memory when sessionStorage setItem fails", () => {
     vi.stubGlobal("sessionStorage", {
       getItem: () => null,
       setItem: () => {
@@ -129,7 +129,7 @@ describe("ports", () => {
     const storage = createSessionStoragePort();
     const key = "lessonkit:course_started:session-1:course-1";
     expect(storage.setItem(key, "1")).toBe(false);
-    expect(storage.getItem(key)).toBeNull();
+    expect(storage.getItem(key)).toBe("1");
   });
 
   it("warns once in development when sessionStorage persistence fails", () => {
