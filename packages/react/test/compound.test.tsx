@@ -1435,29 +1435,32 @@ describe("BranchingScenario", () => {
     warn.mockRestore();
   });
 
-  it("calls onCompoundDuplicateCheckId when duplicate checkId is registered in production", () => {
+  it("throws and calls onCompoundDuplicateCheckId when duplicate checkId is registered in production", () => {
     const onCompoundDuplicateCheckId = vi.fn();
-    const prevEnv = process.env.NODE_ENV;
-    process.env.NODE_ENV = "production";
-    render(
-      <Course
-        title="Compound"
-        courseId={COURSE_ID}
-        config={{
-          xapi: { enabled: false },
-          observability: { onCompoundDuplicateCheckId },
-        }}
-      >
-        <Lesson title="L1" lessonId="lesson-1">
-          <AssessmentSequence blockId="dup-seq">
-            <TrueFalse checkId="dup-id" question="Q1?" answer={true} />
-            <TrueFalse checkId="dup-id" question="Q2?" answer={false} />
-          </AssessmentSequence>
-        </Lesson>
-      </Course>,
-    );
+    vi.stubEnv("NODE_ENV", "production");
+    const consoleError = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    expect(() =>
+      render(
+        <Course
+          title="Compound"
+          courseId={COURSE_ID}
+          config={{
+            xapi: { enabled: false },
+            observability: { onCompoundDuplicateCheckId },
+          }}
+        >
+          <Lesson title="L1" lessonId="lesson-1">
+            <AssessmentSequence blockId="dup-seq">
+              <TrueFalse checkId="dup-id" question="Q1?" answer={true} />
+              <TrueFalse checkId="dup-id" question="Q2?" answer={false} />
+            </AssessmentSequence>
+          </Lesson>
+        </Course>,
+      ),
+    ).toThrow(/duplicate checkId "dup-id"/);
     expect(onCompoundDuplicateCheckId).toHaveBeenCalledWith({ checkId: "dup-id" });
-    process.env.NODE_ENV = prevEnv;
+    consoleError.mockRestore();
+    vi.unstubAllEnvs();
   });
 });
 
