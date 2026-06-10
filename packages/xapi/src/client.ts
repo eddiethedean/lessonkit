@@ -284,6 +284,11 @@ export function createXAPIClient(opts?: {
       sendOrQueue(statement);
     },
     queueSize: () => queue.size(),
+    abandonUndelivered: () => {
+      for (const statement of queue.drainAll()) {
+        persistDeadLetter(statement);
+      }
+    },
     flush: async () => {
       if (!deliveryTransport) return;
       for (;;) {

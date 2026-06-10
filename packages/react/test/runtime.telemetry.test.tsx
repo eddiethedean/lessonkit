@@ -11,7 +11,7 @@ import {
   type TelemetryEvent,
   type TelemetrySink,
 } from "@lessonkit/core";
-import type { XAPIStatement } from "@lessonkit/xapi";
+import { loadDeadLetterStatements, resetXAPIDeadLetterForTests, type XAPIStatement } from "@lessonkit/xapi";
 import * as courseStartedPipelineModule from "../src/runtime/courseStartedPipeline";
 
 
@@ -522,6 +522,66 @@ it("does not block next xAPI flush if previous client flush rejects", async () =
     );
 
     await waitFor(() => expect(client2.flush).toHaveBeenCalled());
+  });
+
+it("persists orphaned xAPI queue to dead-letter when courseId changes and previous flush fails", async () => {
+    const store = new Map<string, string>();
+    vi.stubGlobal("sessionStorage", {
+      get length() {
+        return store.size;
+      },
+      clear: () => store.clear(),
+      getItem: (key: string) => store.get(key) ?? null,
+      key: (index: number) => [...store.keys()][index] ?? null,
+      removeItem: (key: string) => store.delete(key),
+      setItem: (key: string, value: string) => store.set(key, value),
+    } as Storage);
+    resetXAPIDeadLetterForTests();
+
+    try {
+      const failingTransport = vi.fn(async () => {
+        throw new Error("network");
+      });
+      const onXapiTransportError = vi.fn();
+
+      const { rerender } = render(
+        <Course
+          title="Course"
+          courseId="course-a"
+          config={{
+            xapi: { transport: failingTransport },
+            observability: { onXapiTransportError },
+          }}
+        >
+          <Lesson title="Lesson" lessonId="lesson-1">
+            <div>child</div>
+          </Lesson>
+        </Course>,
+      );
+
+      await waitFor(() => expect(failingTransport).toHaveBeenCalled());
+
+      rerender(
+        <Course
+          title="Course"
+          courseId="course-b"
+          config={{
+            xapi: { transport: failingTransport },
+            observability: { onXapiTransportError },
+          }}
+        >
+          <Lesson title="Lesson" lessonId="lesson-1">
+            <div>child</div>
+          </Lesson>
+        </Course>,
+      );
+
+      await waitFor(() => expect(onXapiTransportError).toHaveBeenCalled());
+      await waitFor(() => expect(loadDeadLetterStatements().length).toBeGreaterThan(0));
+    } finally {
+      vi.unstubAllGlobals();
+      resetXAPIDeadLetterForTests();
+    }
   });
 
 it("resolveSessionId falls back when sessionStorage is unavailable", async () => {
