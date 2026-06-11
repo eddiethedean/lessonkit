@@ -173,6 +173,7 @@ function ImageSequencingInner(
               )}
               <button
                 type="button"
+                className="lk-button lk-button--icon"
                 data-testid={`sequencing-up-${id}`}
                 aria-label={`Move ${image.alt} up`}
                 disabled={index === 0 || (passed && !props.enableRetry)}
@@ -182,6 +183,7 @@ function ImageSequencingInner(
               </button>
               <button
                 type="button"
+                className="lk-button lk-button--icon"
                 data-testid={`sequencing-down-${id}`}
                 aria-label={`Move ${image.alt} down`}
                 disabled={index >= order.length - 1 || (passed && !props.enableRetry)}
@@ -195,6 +197,7 @@ function ImageSequencingInner(
       </ol>
       <button
         type="button"
+        className="lk-button"
         data-testid="image-sequencing-check"
         disabled={!props.enableRetry && (passed || checked)}
         onClick={check}
@@ -207,7 +210,7 @@ function ImageSequencingInner(
         </p>
       ) : null}
       {props.enableRetry && passed ? (
-        <button type="button" data-testid="image-sequencing-retry" onClick={reset}>
+        <button type="button" className="lk-button" data-testid="image-sequencing-retry" onClick={reset}>
           Try again
         </button>
       ) : null}

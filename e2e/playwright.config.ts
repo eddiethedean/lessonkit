@@ -104,10 +104,28 @@ export default defineConfig({
     },
     {
       name: "mobile-assessments-p0",
-      testDir: "./tests/touch",
+      testMatch: /touch\/mobile-assessments\.spec\.ts/,
       use: {
         ...devices["Pixel 7"],
         baseURL: "http://127.0.0.1:4179",
+        hasTouch: true,
+      },
+    },
+    {
+      name: "mobile-slide-deck",
+      testMatch: /touch\/mobile-compound\.spec\.ts/,
+      use: {
+        ...devices["Pixel 7"],
+        baseURL: "http://127.0.0.1:4184",
+        hasTouch: true,
+      },
+    },
+    {
+      name: "mobile-framework-12",
+      testMatch: /touch\/mobile-showcase\.spec\.ts/,
+      use: {
+        ...devices["Pixel 7"],
+        baseURL: "http://127.0.0.1:4190",
         hasTouch: true,
       },
     },

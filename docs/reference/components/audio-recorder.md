@@ -100,6 +100,10 @@ Workflow tips: https://lessonkit.readthedocs.io/en/latest/guides/vibe-coding/pro
 
 
 
+## Touch behavior
+
+Start and Stop recording buttons use `lk-button` for 44px minimum touch targets when base theme CSS is imported.
+
 ## See also
 
 - [Essay](essay.md) — typed long-form responses

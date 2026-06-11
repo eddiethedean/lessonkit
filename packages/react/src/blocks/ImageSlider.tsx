@@ -93,9 +93,10 @@ export function ImageSlider(props: ImageSliderProps) {
         )}
       </div>
       {slide.caption ? <p>{slide.caption}</p> : null}
-      <nav aria-label="Slide navigation">
+      <nav className="lk-compound-nav" aria-label="Slide navigation">
         <button
           type="button"
+          className="lk-button"
           data-testid="slider-prev"
           disabled={index === 0}
           onClick={() => goTo(index - 1)}
@@ -107,6 +108,7 @@ export function ImageSlider(props: ImageSliderProps) {
         </span>
         <button
           type="button"
+          className="lk-button"
           data-testid="slider-next"
           disabled={index >= props.slides.length - 1}
           onClick={() => goTo(index + 1)}

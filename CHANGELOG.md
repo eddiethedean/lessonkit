@@ -6,6 +6,33 @@ All notable changes to the LessonKit monorepo are documented here.
 
 ## [Unreleased]
 
+## [1.7.2] - 2026-06-11
+
+Framework **1.7.x** patch — shared touch primitives, compound navigation, P1 block touch hardening, and mobile E2E coverage. All seven `@lessonkit/*` packages ship at **1.7.2**. Additive release (no breaking API changes).
+
+### Added
+
+- **`CompoundNav`** — shared Prev/Next navigation with `lk-button` sizing for `SlideDeck`, `InteractiveBook`, `AssessmentSequence`, and `SingleChoiceSet`
+- **`TouchHint`** — reusable coarse-pointer pick-and-place hint for drag blocks
+- **`useDualModeDrag`** — composes `useCoarsePointer`, `usePickAndPlace`, and `usePointerDrag` for dual-mode drag assessments
+- **`mockMatchMedia`** — exported from `@lessonkit/react/testing` for coarse-pointer unit tests
+- **Theme classes** — `.lk-compound-nav`, `.lk-accordion-trigger`, `.lk-image-sequence-thumb`, `.lk-flip-card`, `.lk-memory-card`
+- **Mobile E2E** — Playwright projects for compound nav, framework-12 showcase (`FindHotspot`), and expanded assessments-p0 touch flows
+- **Block catalog v3** — `a11y.touch` metadata on touch-hardened blocks
+- **Docs** — Touch behavior sections on component reference pages; [touch-and-mobile](docs/guides/react-developers/touch-and-mobile.md) guide aligned to 1.7+
+
+### Changed
+
+- **`DragAndDrop` / `DragTheWords`** — refactored to `useDualModeDrag` + `TouchHint`
+- **P1 blocks** — touch targets and coarse-pointer patterns on `FindMultipleHotspots`, `ImageSequencing`, `ImageSlider`, `Accordion`, `Questionnaire`, `AudioRecorder`, `ImageSequence`, `Flashcards`, `DialogCards`, `MemoryGame`, `ImagePairing`, and `ImageHotspots`
+- **`TrueFalse` / `MultimediaChoice`** — `lk-quiz-choice` row sizing; **`GuessTheAnswer`** — `lk-button` on actions
+- **`@lessonkit/cli`**: `lessonkit init` template pins `^1.7.2` on all `@lessonkit/*` dependencies
+
+### Fixed
+
+- **`FindHotspot`** — toolbar `pointer-events` lets bottom-row hotspot targets receive taps through the overlay chrome
+- **Interaction tests** — expanded hook and block integration coverage with `mockMatchMedia`
+
 ## [1.7.1] - 2026-06-10
 
 Framework **1.7.x** patch — touch-friendly web interactions, component documentation completions, and mobile E2E coverage. All seven `@lessonkit/*` packages ship at **1.7.1**. Additive release (no breaking API changes).

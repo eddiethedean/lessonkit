@@ -168,6 +168,7 @@ export function MemoryGame(props: MemoryGameProps) {
             <button
               key={card.cardKey}
               type="button"
+              className="lk-memory-card"
               role="listitem"
               data-testid={`memory-card-${card.cardKey}`}
               aria-pressed={isSelected}
@@ -176,7 +177,6 @@ export function MemoryGame(props: MemoryGameProps) {
               style={{
                 margin: "0.25rem",
                 minWidth: "5rem",
-                minHeight: "5rem",
                 border: isSelected ? "2px solid currentColor" : "1px solid currentColor",
               }}
             >
@@ -193,7 +193,7 @@ export function MemoryGame(props: MemoryGameProps) {
       {props.selfScore ? (
         <p data-testid="memory-game-self-score">Self-score mode enabled</p>
       ) : null}
-      <button type="button" data-testid="memory-game-restart" onClick={restart}>
+      <button type="button" className="lk-button" data-testid="memory-game-restart" onClick={restart}>
         Restart
       </button>
     </section>

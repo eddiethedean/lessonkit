@@ -25,6 +25,7 @@ export type BlockCatalogEntryBase = {
     element: string;
     ariaLabel: string;
     keyboard: string;
+    touch?: string;
     liveRegions?: string;
     notes: string;
   };
@@ -273,6 +274,7 @@ const v2AssessmentEntries = [
       element: "section",
       ariaLabel: "True or False",
       keyboard: "Radio group with True/False options.",
+      touch: "lk-quiz-choice rows (44px min) with base.css.",
       liveRegions: "role='status' for feedback.",
       notes: "H5P True/False equivalent.",
     },
@@ -322,6 +324,7 @@ const v2AssessmentEntries = [
       element: "section",
       ariaLabel: "Drag and Drop",
       keyboard: "Select item then activate target; drag also supported.",
+      touch: "Coarse pointer: pick-and-place hint, HTML5 drag off, pointer drag on; 44px chips with base.css.",
       notes: "H5P Drag and Drop equivalent.",
     },
     theming: { surface: "global-inherit" as const, dataAttributes: ["data-lk-check-id"], stylingNotes: "Uses data-lk-check-id." },
@@ -346,6 +349,7 @@ const v2AssessmentEntries = [
       element: "section",
       ariaLabel: "Drag the Words",
       keyboard: "Select word then activate zone.",
+      touch: "Coarse pointer: pick-and-place hint, pointer drag, 44px word chips with base.css.",
       notes: "H5P Drag the Words equivalent.",
     },
     theming: { surface: "global-inherit" as const, dataAttributes: ["data-lk-check-id"], stylingNotes: "Uses data-lk-check-id." },

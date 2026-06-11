@@ -37,7 +37,13 @@ export function Flashcards(props: FlashcardsProps) {
 
   return (
     <section aria-label="Flashcards" data-lk-block-id={props.blockId} data-testid="flashcards">
-      <button type="button" data-testid="flashcard-flip" onClick={flip} style={{ minHeight: "6rem", width: "100%" }}>
+      <button
+        type="button"
+        className="lk-flip-card"
+        data-testid="flashcard-flip"
+        onClick={flip}
+        style={{ width: "100%" }}
+      >
         {face === "front" ? card.front : card.back}
       </button>
       {props.selfScore ? (
@@ -45,6 +51,7 @@ export function Flashcards(props: FlashcardsProps) {
       ) : null}
       <button
         type="button"
+        className="lk-button"
         data-testid="flashcard-next"
         disabled={index >= props.cards.length - 1}
         onClick={() => {

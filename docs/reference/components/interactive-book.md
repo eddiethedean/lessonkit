@@ -125,6 +125,10 @@ Compound blocks are authored in React — there is no `lessonkit.json` row for `
 
 
 
+## Touch behavior
+
+Book page navigation uses `CompoundNav` with `lk-button` Prev/Next controls sized for coarse pointers (44px minimum with base theme CSS).
+
 ## See also
 
 - [interactive-book example](../../examples/index.md#interactive-book-examplesinteractive-book)

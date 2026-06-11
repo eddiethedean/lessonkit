@@ -187,7 +187,13 @@ function FindHotspotInner(
           className={`lk-find-hotspot-toolbar${selected ? " lk-find-hotspot-toolbar--ready" : ""}`}
           data-testid="find-hotspot-toolbar"
         >
-          <button type="button" data-testid="check-hotspot" disabled={!selected} onClick={submit}>
+          <button
+            type="button"
+            className="lk-button"
+            data-testid="check-hotspot"
+            disabled={!selected}
+            onClick={submit}
+          >
             Check
           </button>
           {checked ? (

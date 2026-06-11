@@ -121,6 +121,10 @@ No `lessonkit.json` row for `SlideDeck` — compose slides in React.
 
 
 
+## Touch behavior
+
+Previous and Next slide navigation uses shared `CompoundNav` with `lk-button` controls (44px minimum height) when `@lessonkit/themes/base.css` is imported.
+
 ## See also
 
 - [slide-deck example](../../examples/index.md#slide-deck-examplesslide-deck)

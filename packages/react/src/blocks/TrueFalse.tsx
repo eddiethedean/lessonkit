@@ -232,7 +232,7 @@ function TrueFalseInner(
       <p id={questionId}>{props.question}</p>
       <fieldset aria-labelledby={questionId}>
         <legend style={visuallyHiddenStyle}>True or False</legend>
-        <label style={{ display: "block", marginRight: "1rem" }}>
+        <label className="lk-quiz-choice">
           <input
             type="radio"
             name={`${questionId}-tf`}
@@ -242,7 +242,7 @@ function TrueFalseInner(
           />
           True
         </label>
-        <label style={{ display: "block" }}>
+        <label className="lk-quiz-choice">
           <input
             type="radio"
             name={`${questionId}-tf`}

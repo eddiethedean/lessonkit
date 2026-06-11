@@ -104,6 +104,7 @@ export function AudioRecorder(props: AudioRecorderProps) {
       <div>
         <button
           type="button"
+          className="lk-button"
           disabled={!consented || recording}
           data-testid="audio-recorder-start"
           onClick={() => void startRecording()}
@@ -112,6 +113,7 @@ export function AudioRecorder(props: AudioRecorderProps) {
         </button>
         <button
           type="button"
+          className="lk-button"
           disabled={!recording}
           data-testid="audio-recorder-stop"
           onClick={stopRecording}

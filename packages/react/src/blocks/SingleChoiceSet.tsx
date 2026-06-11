@@ -3,6 +3,7 @@ import { deriveId } from "@lessonkit/core";
 import type { AssessmentBehaviour, BlockId, CompoundHandle } from "@lessonkit/core";
 import { aggregateAssessmentScores } from "../compound/aggregateScores";
 import { CompoundProvider, useCompoundHandlesVersion, useCompoundRegistry } from "../compound/CompoundProvider";
+import { CompoundNav } from "../compound/CompoundNav";
 import { useCompoundInitialIndex, useCompoundShell } from "../compound/useCompoundShell";
 import { CompoundPageIndexProvider } from "../compound/CompoundPageIndexContext";
 import { validateCompoundChildren } from "../compound/validateChildren";
@@ -90,28 +91,19 @@ const SingleChoiceSetInner = forwardRef<CompoundHandle, SingleChoiceSetInnerProp
             </div>
           ))}
         </div>
-        <nav aria-label="Single choice set navigation">
-          <button
-            type="button"
-            data-testid="single-choice-set-prev"
-            disabled={visibleIndex === 0 || childArray.length === 0}
-            onClick={goPrev}
-          >
-            Previous
-          </button>
-          <button
-            type="button"
-            data-testid="single-choice-set-next"
-            disabled={
-              visibleIndex >= childArray.length - 1 ||
-              childArray.length === 0 ||
-              !activeStepAnswered
-            }
-            onClick={goNext}
-          >
-            Next
-          </button>
-        </nav>
+        <CompoundNav
+          ariaLabel="Single choice set navigation"
+          prevTestId="single-choice-set-prev"
+          nextTestId="single-choice-set-next"
+          prevDisabled={visibleIndex === 0 || childArray.length === 0}
+          nextDisabled={
+            visibleIndex >= childArray.length - 1 ||
+            childArray.length === 0 ||
+            !activeStepAnswered
+          }
+          onPrev={goPrev}
+          onNext={goNext}
+        />
       </section>
     );
   },

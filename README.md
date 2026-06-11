@@ -19,7 +19,7 @@ Local preview is step 1 only. Before uploading to an LMS, complete [LMS Go-Live]
 
 | | |
 | --- | --- |
-| **Latest stable** | [@lessonkit/react 1.7.1](https://www.npmjs.com/package/@lessonkit/react) on npm · [CHANGELOG](https://github.com/eddiethedean/lessonkit/blob/main/CHANGELOG.md) — pin all `@lessonkit/*` to the **same version** |
+| **Latest stable** | [@lessonkit/react 1.7.2](https://www.npmjs.com/package/@lessonkit/react) on npm · [CHANGELOG](https://github.com/eddiethedean/lessonkit/blob/main/CHANGELOG.md) — pin all `@lessonkit/*` to the **same version** |
 | **npm** | [`@lessonkit/*`](https://www.npmjs.com/org/lessonkit) |
 | **Docs** | [lessonkit.readthedocs.io](https://lessonkit.readthedocs.io/en/latest/) |
 | **Node.js** | See [Prerequisites — Node.js decision table](https://lessonkit.readthedocs.io/en/latest/guides/prerequisites.html) |

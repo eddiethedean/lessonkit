@@ -164,7 +164,11 @@ function MultimediaChoiceInner(
         {props.choices.map((choice) => {
           const resolved = resolveMediaSrc(choice.mediaUrl, mediaOptions);
           return (
-            <label key={choice.label} style={{ display: "block" }} data-testid={`multimedia-choice-${choice.label}`}>
+            <label
+              key={choice.label}
+              className="lk-quiz-choice"
+              data-testid={`multimedia-choice-${choice.label}`}
+            >
               <input
                 type="radio"
                 name={questionId}
@@ -192,6 +196,7 @@ function MultimediaChoiceInner(
       {props.enableRetry && passed ? (
         <button
           type="button"
+          className="lk-button"
           data-testid="multimedia-choice-retry"
           onClick={() => {
             completedRef.current = false;

@@ -1,6 +1,7 @@
 import React, { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { BlockId, CompoundHandle } from "@lessonkit/core";
 import { CompoundProvider } from "../compound/CompoundProvider";
+import { CompoundNav } from "../compound/CompoundNav";
 import { useCompoundInitialIndex, useCompoundShell } from "../compound/useCompoundShell";
 import { useCompoundKeyboardNav } from "../compound/useCompoundKeyboardNav";
 import { validateCompoundChildren } from "../compound/validateChildren";
@@ -104,24 +105,17 @@ const SlideDeckInner = forwardRef<CompoundHandle, SlideDeckInnerProps>(function 
           }),
         )}
       </div>
-      <nav aria-label="Slide navigation">
-        <button
-          type="button"
-          data-testid="slide-prev"
-          disabled={visibleIndex === 0 || slides.length === 0}
-          onClick={goPrev}
-        >
-          Previous slide
-        </button>
-        <button
-          type="button"
-          data-testid="slide-next"
-          disabled={visibleIndex >= slides.length - 1 || slides.length === 0}
-          onClick={goNext}
-        >
-          Next slide
-        </button>
-      </nav>
+      <CompoundNav
+        ariaLabel="Slide navigation"
+        prevLabel="Previous slide"
+        nextLabel="Next slide"
+        prevTestId="slide-prev"
+        nextTestId="slide-next"
+        prevDisabled={visibleIndex === 0 || slides.length === 0}
+        nextDisabled={visibleIndex >= slides.length - 1 || slides.length === 0}
+        onPrev={goPrev}
+        onNext={goNext}
+      />
     </section>
   );
 });

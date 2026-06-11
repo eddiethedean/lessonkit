@@ -2,7 +2,7 @@
 
 Published packages (`v*.*.*` tag → [Release](.github/workflows/release.yml)): `@lessonkit/core`, `@lessonkit/xapi`, `@lessonkit/accessibility`, `@lessonkit/themes`, `@lessonkit/lxpack`, `@lessonkit/react`, `@lessonkit/cli`
 
-## Current release (1.7.1)
+## Current release (1.7.2)
 
 ### Pre-tag checklist
 

@@ -54,6 +54,7 @@ export function Accordion(props: AccordionProps) {
               <button
                 id={triggerId}
                 type="button"
+                className="lk-button lk-accordion-trigger"
                 aria-expanded={expanded}
                 aria-controls={panelId}
                 data-testid={`accordion-trigger-${section.id}`}

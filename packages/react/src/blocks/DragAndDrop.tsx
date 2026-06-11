@@ -13,7 +13,7 @@ import { usePluginScoring } from "../assessment/internal/usePluginScoring";
 import { meetsPassingThreshold } from "../assessment/scoring";
 import { useAssessmentState } from "../assessment/useAssessmentState";
 import { useLessonkit } from "../hooks";
-import { useCoarsePointer, usePickAndPlace, usePointerDrag } from "../interaction";
+import { TouchHint, useDualModeDrag } from "../interaction";
 import { normalizeComponentId } from "../runtime/validateComponentId";
 
 export type DragItem = { id: string; label: string };
@@ -120,9 +120,6 @@ function DragAndDropInner(
     Object.fromEntries(props.targets.map((t) => [t.id, ""])),
   );
   const [pool, setPool] = useState<string[]>(() => props.items.map((i) => i.id));
-  const pickPlace = usePickAndPlace<string>();
-  const keyboardItem = pickPlace.selected;
-  const coarsePointer = useCoarsePointer();
   const [htmlDraggingItemId, setHtmlDraggingItemId] = useState<string | null>(null);
   const [flyingItemId, setFlyingItemId] = useState<string | null>(null);
   const [htmlHoverDropId, setHtmlHoverDropId] = useState<string | null>(null);
@@ -133,6 +130,30 @@ function DragAndDropInner(
   const draggingItemIdRef = useRef<string | null>(null);
   const telemetryReplayedRef = useRef(false);
   const pointerDragCancelRef = useRef<() => void>(() => {});
+  const placeRef = useRef<(targetId: string, itemId: string) => void>(() => {});
+  const animateReturnToPoolRef = useRef<(itemId: string, fromX: number, fromY: number) => void>(() => {});
+  const findTargetForItemRef = useRef<(itemId: string) => string | undefined>(() => undefined);
+  const clearDragStateRef = useRef<() => void>(() => {});
+  const passedRetryRef = useRef({ passed: false, enableRetry: props.enableRetry });
+
+  const dualMode = useDualModeDrag<string>({
+    onHover: (dropId) => setHtmlHoverDropId(dropId),
+    onDrop: (itemId, dropId) => {
+      dragDroppedRef.current = true;
+      placeRef.current(dropId, itemId);
+      clearDragStateRef.current();
+    },
+    onReturnToPool: (itemId, clientX, clientY) => {
+      if (findTargetForItemRef.current(itemId)) {
+        animateReturnToPoolRef.current(itemId, clientX, clientY);
+      }
+      clearDragStateRef.current();
+    },
+    canStart: () => !(passedRetryRef.current.passed && !passedRetryRef.current.enableRetry),
+  });
+  const { pickAndPlace: pickPlace, pointerDrag, useHtmlDrag, showTouchHint } = dualMode;
+  const keyboardItem = pickPlace.selected;
+  passedRetryRef.current = { passed, enableRetry: props.enableRetry };
 
   const reset = () => {
     completedRef.current = false;
@@ -323,21 +344,10 @@ function DragAndDropInner(
     finishDragOutside(itemId, event?.clientX ?? 0, event?.clientY ?? 0);
   };
 
-  const pointerDrag = usePointerDrag({
-    onHover: (dropId) => setHtmlHoverDropId(dropId),
-    onDrop: (itemId, dropId) => {
-      dragDroppedRef.current = true;
-      place(dropId, itemId);
-      clearDragState();
-    },
-    onReturnToPool: (itemId, clientX, clientY) => {
-      if (findTargetForItem(itemId)) {
-        animateReturnToPool(itemId, clientX, clientY);
-      }
-      clearDragState();
-    },
-    canStart: () => !(passed && !props.enableRetry),
-  });
+  placeRef.current = place;
+  animateReturnToPoolRef.current = animateReturnToPool;
+  findTargetForItemRef.current = findTargetForItem;
+  clearDragStateRef.current = clearDragState;
   pointerDragCancelRef.current = pointerDrag.cancel;
 
   const commitDrop = () => {
@@ -360,8 +370,6 @@ function DragAndDropInner(
   const isPoolReturnHover = Boolean(
     draggingItemId && isDropHover("pool") && findTargetForItem(draggingItemId),
   );
-
-  const useHtmlDrag = !coarsePointer;
 
   const poolItemClassName = (itemId: string) =>
     ["lk-drag-item", flyingItemId === itemId ? "lk-drag-item--in-flight" : ""].filter(Boolean).join(" ");
@@ -411,10 +419,10 @@ function DragAndDropInner(
         Match each item to the correct target. Drag items back to the item bank to remove them, or select
         an item then activate a target or the item bank.
       </p>
-      {coarsePointer ? (
-        <p className="lk-touch-hint" role="status">
+      {showTouchHint ? (
+        <TouchHint>
           Tap an item, then tap a target. Tap the item bank to return a placed item.
-        </p>
+        </TouchHint>
       ) : null}
       <div
         role="list"

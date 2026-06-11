@@ -1,6 +1,6 @@
 {
   "name": "@lessonkit/themes",
-  "version": "1.7.1",
+  "version": "1.7.2",
   "private": false,
   "description": "Theme primitives and tokens for LessonKit.",
   "license": "Apache-2.0",

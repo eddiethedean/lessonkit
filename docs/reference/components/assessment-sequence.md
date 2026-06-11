@@ -165,6 +165,10 @@ List **each child** `checkId` under `course.assessments[]`:
 
 
 
+## Touch behavior
+
+Sequence Previous/Next navigation uses `CompoundNav` with `lk-button` controls (44px minimum) when base theme CSS is imported.
+
 ## See also
 
 - [Block catalog](../block-catalog.md)

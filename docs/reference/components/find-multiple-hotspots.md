@@ -138,6 +138,10 @@ Add under `course.assessments[]`:
 
 
 
+## Touch behavior
+
+Hotspot buttons reuse `lk-find-hotspot-target` (44px minimum) and the Check control uses `lk-button` when `@lessonkit/themes/base.css` is imported—same pattern as `FindHotspot`.
+
 ## See also
 
 - [FindHotspot](find-hotspot.md)

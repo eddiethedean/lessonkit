@@ -1,6 +1,7 @@
 import React, { forwardRef, useCallback, useEffect, useMemo, useState } from "react";
 import type { BlockId, CompoundHandle } from "@lessonkit/core";
 import { CompoundProvider } from "../compound/CompoundProvider";
+import { CompoundNav } from "../compound/CompoundNav";
 import { useCompoundInitialIndex, useCompoundShell } from "../compound/useCompoundShell";
 import { validateCompoundChildren } from "../compound/validateChildren";
 import { requireCompoundBlockIdWhenPersisting } from "../compound/requireCompoundBlockId";
@@ -83,24 +84,15 @@ const InteractiveBookInner = forwardRef<CompoundHandle, InteractiveBookInnerProp
             }),
           )}
         </div>
-        <nav aria-label="Book navigation">
-          <button
-            type="button"
-            data-testid="book-prev"
-            disabled={visibleIndex === 0 || pages.length === 0}
-            onClick={goPrev}
-          >
-            Previous
-          </button>
-          <button
-            type="button"
-            data-testid="book-next"
-            disabled={visibleIndex >= pages.length - 1 || pages.length === 0}
-            onClick={goNext}
-          >
-            Next
-          </button>
-        </nav>
+        <CompoundNav
+          ariaLabel="Book navigation"
+          prevTestId="book-prev"
+          nextTestId="book-next"
+          prevDisabled={visibleIndex === 0 || pages.length === 0}
+          nextDisabled={visibleIndex >= pages.length - 1 || pages.length === 0}
+          onPrev={goPrev}
+          onNext={goNext}
+        />
       </section>
     );
   },

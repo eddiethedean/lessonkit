@@ -65,7 +65,7 @@ export function ImageHotspots(props: ImageHotspotsProps) {
       {active ? (
         <div role="dialog" aria-label="Hotspot details" data-testid="hotspot-popover">
           {props.hotspots.find((h) => h.id === active)?.content}
-          <button type="button" onClick={() => setActive(null)}>
+          <button type="button" className="lk-button" onClick={() => setActive(null)}>
             Close
           </button>
         </div>

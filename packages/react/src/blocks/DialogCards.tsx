@@ -26,16 +26,18 @@ export function DialogCards(props: DialogCardsProps) {
       </p>
       <button
         type="button"
+        className="lk-flip-card"
         data-testid="dialog-card-flip"
         aria-pressed={flipped}
         onClick={() => setFlipped((f) => !f)}
-        style={{ minHeight: "6rem", width: "100%" }}
+        style={{ width: "100%" }}
       >
         {flipped ? card.back : card.front}
       </button>
-      <nav aria-label="Card navigation">
+      <nav className="lk-compound-nav" aria-label="Card navigation">
         <button
           type="button"
+          className="lk-button"
           data-testid="dialog-prev"
           disabled={index === 0}
           onClick={() => {
@@ -47,6 +49,7 @@ export function DialogCards(props: DialogCardsProps) {
         </button>
         <button
           type="button"
+          className="lk-button"
           data-testid="dialog-next"
           disabled={index >= props.cards.length - 1}
           onClick={() => {

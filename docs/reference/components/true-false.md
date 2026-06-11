@@ -128,6 +128,10 @@ Add under `course.assessments[]`. `checkId` must match the React prop.
 
 
 
+## Touch behavior
+
+True and False options use `lk-quiz-choice` for 44px minimum row height when `@lessonkit/themes/base.css` is imported. Tap either radio label on phones and tablets without relying on hover styles.
+
 ## See also
 
 - [Block catalog — TrueFalse](../block-catalog.md)

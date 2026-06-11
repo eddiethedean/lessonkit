@@ -200,10 +200,15 @@ function FindMultipleHotspotsInner(
   };
 
   return (
-    <section aria-label="Find multiple hotspots" data-lk-check-id={checkId} data-testid="find-multiple-hotspots">
-      <div style={{ position: "relative", display: "inline-block" }}>
+    <section
+      aria-label="Find multiple hotspots"
+      className="lk-find-hotspot"
+      data-lk-check-id={checkId}
+      data-testid="find-multiple-hotspots"
+    >
+      <div className="lk-find-hotspot-stage">
         {resolvedSrc ? (
-          <img src={resolvedSrc} alt={props.alt} style={{ maxWidth: "100%" }} />
+          <img src={resolvedSrc} alt={props.alt} className="lk-find-hotspot-image" />
         ) : (
           <p role="alert">This image URL is not allowed.</p>
         )}
@@ -211,14 +216,13 @@ function FindMultipleHotspotsInner(
           <button
             key={t.id}
             type="button"
+            className="lk-find-hotspot-target"
             aria-label={t.label}
             aria-pressed={selected.has(t.id)}
             data-testid={`target-${t.id}`}
             style={{
-              position: "absolute",
               left: `${t.x}%`,
               top: `${t.y}%`,
-              transform: "translate(-50%, -50%)",
             }}
             onClick={() => toggle(t.id)}
           >
@@ -226,7 +230,13 @@ function FindMultipleHotspotsInner(
           </button>
         ))}
       </div>
-      <button type="button" data-testid="check-hotspots" disabled={selected.size === 0} onClick={submit}>
+      <button
+        type="button"
+        className="lk-button"
+        data-testid="check-hotspots"
+        disabled={selected.size === 0}
+        onClick={submit}
+      >
         Check
       </button>
       {checked ? (

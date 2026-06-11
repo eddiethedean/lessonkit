@@ -10,3 +10,5 @@ export {
   resetLessonkitProviderStorageForTests,
   resetCourseStartedTrackingFlightForTests,
 } from "./provider/useLessonkitProviderRuntime";
+export { mockMatchMedia } from "./testing/mockMatchMedia";
+export type { MockMatchMediaOptions } from "./testing/mockMatchMedia";

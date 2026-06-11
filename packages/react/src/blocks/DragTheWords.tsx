@@ -13,7 +13,7 @@ import { usePluginScoring } from "../assessment/internal/usePluginScoring";
 import { meetsPassingThreshold } from "../assessment/scoring";
 import { useAssessmentState } from "../assessment/useAssessmentState";
 import { useLessonkit } from "../hooks";
-import { useCoarsePointer, usePickAndPlace, usePointerDrag } from "../interaction";
+import { TouchHint, useDualModeDrag } from "../interaction";
 import { isDevEnvironment, normalizeComponentId } from "../runtime/validateComponentId";
 
 export type DragTheWordsProps = AssessmentBaseProps & {
@@ -82,9 +82,14 @@ function DragTheWordsInner(
     Object.fromEntries(answers.map((_, i) => [`zone-${i}`, ""])),
   );
   const [pool, setPool] = useState<string[]>(() => [...props.words]);
-  const pickPlace = usePickAndPlace<string>();
+  const placeInZoneRef = useRef<(zoneId: string, word: string) => void>(() => {});
+  const passedRetryRef = useRef({ passed: false, enableRetry: props.enableRetry });
+  const dualMode = useDualModeDrag<string>({
+    onDrop: (word, zoneId) => placeInZoneRef.current(zoneId, word),
+    canStart: () => !(passedRetryRef.current.passed && !passedRetryRef.current.enableRetry),
+  });
+  const { pickAndPlace: pickPlace, pointerDrag, useHtmlDrag, showTouchHint } = dualMode;
   const keyboardWord = pickPlace.selected;
-  const coarsePointer = useCoarsePointer();
   const [passed, setPassed] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const completedRef = useRef(false);
@@ -224,12 +229,8 @@ function DragTheWordsInner(
     pickPlace.clear();
   };
 
-  const pointerDrag = usePointerDrag({
-    onDrop: (word, zoneId) => placeInZone(zoneId, word),
-    canStart: () => !(passed && !props.enableRetry),
-  });
-
-  const useHtmlDrag = !coarsePointer;
+  placeInZoneRef.current = placeInZone;
+  passedRetryRef.current = { passed, enableRetry: props.enableRetry };
 
   const onDragStart = (word: string) => (e: React.DragEvent) => {
     e.dataTransfer.setData("text/plain", word);
@@ -293,10 +294,8 @@ function DragTheWordsInner(
   return (
     <section aria-label="Drag the Words" data-lk-check-id={checkId}>
       <p>Drag words into the blanks (or select a word, then activate a blank).</p>
-      {coarsePointer ? (
-        <p className="lk-touch-hint" role="status">
-          Tap a word, then tap a blank to place it.
-        </p>
+      {showTouchHint ? (
+        <TouchHint>Tap a word, then tap a blank to place it.</TouchHint>
       ) : null}
       <div role="list" aria-label="Word bank" className="lk-drag-words-bank" data-testid="word-bank">
         {pool.map((word) => (

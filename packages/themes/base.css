@@ -1008,6 +1008,12 @@
   background: color-mix(in srgb, var(--lk-color-panel) 94%, transparent);
   backdrop-filter: blur(4px);
   border-top: 1px solid var(--lk-color-border);
+  /* Let bottom-row hotspot targets receive taps through the toolbar chrome. */
+  pointer-events: none;
+}
+
+.lk-find-hotspot-toolbar > * {
+  pointer-events: auto;
 }
 
 .lk-find-hotspot-toolbar button[data-testid="check-hotspot"] {
@@ -1131,4 +1137,33 @@
   margin: 0;
   font: inherit;
   font-weight: var(--lk-font-weight-strong);
+}
+
+.lk-compound-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lk-touch-spacing, 0.5rem);
+  margin-top: var(--lk-space-md, 1rem);
+}
+
+.lk-accordion-trigger {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: var(--lk-touch-target-min, 2.75rem);
+  padding: var(--lk-space-sm, 0.5rem) var(--lk-space-md, 1rem);
+  text-align: left;
+  touch-action: manipulation;
+}
+
+.lk-image-sequence-thumb {
+  min-width: var(--lk-touch-target-min, 2.75rem);
+  min-height: var(--lk-touch-target-min, 2.75rem);
+  touch-action: manipulation;
+}
+
+.lk-flip-card,
+.lk-memory-card {
+  min-height: var(--lk-touch-target-min, 2.75rem);
+  touch-action: manipulation;
 }

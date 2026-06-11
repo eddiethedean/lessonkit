@@ -14,6 +14,8 @@ npm install @lessonkit/react react react-dom
 
 Optional: `@lessonkit/xapi`, `@lessonkit/themes`, `@lessonkit/accessibility`, `@lessonkit/cli` (devDependency for packaging)
 
+**Touch / mobile:** Import `@lessonkit/themes/base.css` in your app for 44px touch targets, quiz choice rows, compound navigation, and drag pick-and-place hints. See [Touch and mobile](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/touch-and-mobile.html).
+
 ## Usage
 
 `Course` wraps `LessonkitProvider`—pass `config` on `Course` unless you need a custom provider tree.

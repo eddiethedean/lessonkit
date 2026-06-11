@@ -66,6 +66,7 @@ export function ImageSequence(props: ImageSequenceProps) {
             <button
               key={`${item.src}-${i}`}
               type="button"
+              className="lk-image-sequence-thumb"
               aria-pressed={i === index}
               data-testid={`sequence-step-${i}`}
               onClick={() => goTo(i)}

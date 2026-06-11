@@ -117,6 +117,10 @@ Workflow tips: https://lessonkit.readthedocs.io/en/latest/guides/vibe-coding/pro
 
 
 
+## Touch behavior
+
+Section triggers use `lk-button lk-accordion-trigger` for full-width, 44px minimum tap targets when base theme CSS is imported.
+
 ## See also
 
 - [Block catalog — Accordion](../block-catalog.md)

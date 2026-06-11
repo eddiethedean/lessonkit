@@ -158,6 +158,7 @@ function GuessTheAnswerScoredInner(
       </label>
       <button
         type="button"
+        className="lk-button"
         data-testid="guess-check"
         disabled={(!props.enableRetry && (passed || checked)) || !guess.trim()}
         onClick={check}
@@ -165,7 +166,12 @@ function GuessTheAnswerScoredInner(
         Check
       </button>
       {props.enableSolutionsButton ? (
-        <button type="button" data-testid="guess-reveal" onClick={() => setRevealed(true)}>
+        <button
+          type="button"
+          className="lk-button"
+          data-testid="guess-reveal"
+          onClick={() => setRevealed(true)}
+        >
           Show answer
         </button>
       ) : null}
@@ -180,7 +186,7 @@ function GuessTheAnswerScoredInner(
         </p>
       ) : null}
       {props.enableRetry && passed ? (
-        <button type="button" data-testid="guess-retry" onClick={reset}>
+        <button type="button" className="lk-button" data-testid="guess-retry" onClick={reset}>
           Try again
         </button>
       ) : null}
@@ -201,6 +207,7 @@ function GuessTheAnswerUnscored(props: GuessTheAnswerProps) {
       <p id={promptId}>{props.prompt}</p>
       <button
         type="button"
+        className="lk-button"
         data-testid="guess-reveal-unscored"
         aria-expanded={revealed}
         onClick={() => {

@@ -10,7 +10,7 @@ Execution plan for the `@lessonkit/*` framework: shippable semver milestones, H5
 
 | | |
 | --- | --- |
-| **Latest release** | **1.7.1** — all seven `@lessonkit/*` packages |
+| **Latest release** | **1.7.2** — all seven `@lessonkit/*` packages |
 | **Shipped themes** | React course shell, 50+ blocks, compounds, telemetry/xAPI, CLI, LMS packaging, `.lkcourse` interchange, block registry |
 | **Current focus** | **1.7.x** — Tier B P1 assessments + additive `Quiz` variants (see **What's next** below) |
 | **Next majors** | **1.8.x** — `VirtualTour` (360) · **2.x** — `@lessonkit/react-native` + writing-tool compounds |

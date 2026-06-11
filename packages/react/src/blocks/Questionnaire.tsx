@@ -84,7 +84,12 @@ export function Questionnaire(props: QuestionnaireProps) {
             </div>
           );
         })}
-        <button type="submit" data-testid="questionnaire-submit" disabled={submitted}>
+        <button
+          type="submit"
+          className="lk-button"
+          data-testid="questionnaire-submit"
+          disabled={submitted}
+        >
           Submit
         </button>
       </form>

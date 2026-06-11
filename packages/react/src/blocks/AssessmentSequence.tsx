@@ -2,6 +2,7 @@ import React, { forwardRef, useCallback, useEffect, useId, useMemo, useRef, useS
 import { deriveId } from "@lessonkit/core";
 import type { AssessmentBehaviour, BlockId, CompoundHandle } from "@lessonkit/core";
 import { CompoundProvider, useCompoundHandlesVersion, useCompoundRegistry } from "../compound/CompoundProvider";
+import { CompoundNav } from "../compound/CompoundNav";
 import { useCompoundInitialIndex, useCompoundShell } from "../compound/useCompoundShell";
 import { CompoundPageIndexProvider } from "../compound/CompoundPageIndexContext";
 import { validateCompoundChildren } from "../compound/validateChildren";
@@ -85,28 +86,19 @@ const AssessmentSequenceInner = forwardRef<CompoundHandle, AssessmentSequenceInn
             </div>
           ))}
         </div>
-        <nav aria-label="Sequence navigation">
-          <button
-            type="button"
-            data-testid="sequence-prev"
-            disabled={visibleIndex === 0 || childArray.length === 0}
-            onClick={goPrev}
-          >
-            Previous
-          </button>
-          <button
-            type="button"
-            data-testid="sequence-next"
-            disabled={
-              visibleIndex >= childArray.length - 1 ||
-              childArray.length === 0 ||
-              !activeStepAnswered
-            }
-            onClick={goNext}
-          >
-            Next
-          </button>
-        </nav>
+        <CompoundNav
+          ariaLabel="Sequence navigation"
+          prevTestId="sequence-prev"
+          nextTestId="sequence-next"
+          prevDisabled={visibleIndex === 0 || childArray.length === 0}
+          nextDisabled={
+            visibleIndex >= childArray.length - 1 ||
+            childArray.length === 0 ||
+            !activeStepAnswered
+          }
+          onPrev={goPrev}
+          onNext={goNext}
+        />
       </section>
     );
   },

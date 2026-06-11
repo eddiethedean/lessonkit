@@ -101,6 +101,10 @@ Workflow tips: https://lessonkit.readthedocs.io/en/latest/guides/vibe-coding/pro
 
 
 
+## Touch behavior
+
+Submit uses `lk-button`. Text inputs inherit the global 16px minimum font size on `[data-lk-check-id]` fields to prevent iOS focus zoom.
+
 ## See also
 
 - [Reflection](reflection.md) — single open prompt

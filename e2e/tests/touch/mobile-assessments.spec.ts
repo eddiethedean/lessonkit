@@ -14,6 +14,15 @@ test.describe("assessments-p0 mobile touch", () => {
     );
   });
 
+  test("TrueFalse choice rows meet minimum touch height", async ({ page }) => {
+    await page.goto("/");
+    const tf = page.locator('[data-lk-check-id="phishing-tf"]');
+    const choiceRow = tf.locator(".lk-quiz-choice").first();
+    await expect(choiceRow).toBeVisible();
+    const box = await choiceRow.boundingBox();
+    expect(box?.height ?? 0).toBeGreaterThanOrEqual(40);
+  });
+
   test("drag blocks and SortParagraphs in assessment sequence", async ({ page }) => {
     await page.goto("/");
     await completeAssessmentsP0ViteSortParagraphs(page);

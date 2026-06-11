@@ -127,6 +127,10 @@ Add under `course.assessments[]`:
 
 
 
+## Touch behavior
+
+Reorder with **Up** / **Down** `lk-button lk-button--icon` controls (44px minimum). Check and retry use `lk-button`. No drag-to-reorder—optimized for touch and keyboard.
+
 ## See also
 
 - [ImageSequence](image-sequence.md) — non-scored frame scrubber

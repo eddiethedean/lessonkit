@@ -315,6 +315,7 @@ function ImagePairingInner(
             <button
               key={card.cardKey}
               type="button"
+              className="lk-memory-card"
               role="listitem"
               data-testid={`pairing-card-${card.cardKey}`}
               aria-pressed={isSelected}
@@ -323,7 +324,6 @@ function ImagePairingInner(
               style={{
                 margin: "0.25rem",
                 minWidth: "6rem",
-                minHeight: "6rem",
                 border: isSelected ? "2px solid currentColor" : "1px solid currentColor",
               }}
             >
@@ -351,12 +351,12 @@ function ImagePairingInner(
         {matchedCount} / {totalPairs} pairs matched
       </p>
       {props.enableRetry === false && matchedCount > 0 && !submitted ? (
-        <button type="button" data-testid="image-pairing-finish" onClick={finishAttempt}>
+        <button type="button" className="lk-button" data-testid="image-pairing-finish" onClick={finishAttempt}>
           Submit
         </button>
       ) : null}
       {props.enableRetry && passed ? (
-        <button type="button" data-testid="image-pairing-retry" onClick={reset}>
+        <button type="button" className="lk-button" data-testid="image-pairing-retry" onClick={reset}>
           Try again
         </button>
       ) : null}
