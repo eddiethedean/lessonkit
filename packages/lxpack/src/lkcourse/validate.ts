@@ -1,4 +1,5 @@
 import { parseLessonkitInterchange } from "@lxpack/validators";
+import { validateLkcourseAssessmentConsistency } from "./assessmentParity";
 import { validateBlockTreeIds } from "./blockTree";
 import { parseLkcourseEnvelope } from "./parseEnvelope";
 import { entryToUtf8, readZip } from "./zip";
@@ -106,6 +107,13 @@ export function validateLkcourseArchiveEntries(
       message: `does not match interchange.course.id (${interchangeCourseId})`,
     });
   }
+
+  issues.push(
+    ...validateLkcourseAssessmentConsistency(
+      envelope.sourceManifest.course,
+      interchange,
+    ),
+  );
 
   if (issues.length) return { ok: false, issues };
 

@@ -458,6 +458,78 @@ describe("lkcourse", () => {
     expect(result.ok).toBe(false);
   });
 
+  it("export rejects non-injectable SPA-only assessments", async () => {
+    const root = await mkdtemp(join(tmpdir(), "lk-export-fib-"));
+    tempDirs.push(root);
+    await writeMinimalProject(root);
+
+    const manifestWithFib = {
+      ...minimalManifest,
+      course: {
+        ...minimalManifest.course,
+        assessments: [
+          minimalManifest.course.assessments[0]!,
+          {
+            kind: "fillInBlanks" as const,
+            checkId: "fib-1",
+            question: "Fill",
+            template: "Type *here*",
+            blanks: [{ id: "b1", answer: "here" }],
+          },
+        ],
+      },
+    };
+    await writeFile(join(root, "lessonkit.json"), JSON.stringify(manifestWithFib));
+
+    const manifestParsed = parseLessonkitManifest(manifestWithFib);
+    expect(manifestParsed.ok).toBe(true);
+    if (!manifestParsed.ok) return;
+
+    const exported = await exportLkcourse({
+      projectRoot: root,
+      manifest: manifestParsed.manifest,
+    });
+    expect(exported.ok).toBe(false);
+    if (exported.ok) return;
+    expect(exported.issues.some((i) => i.message.includes("fillInBlanks"))).toBe(true);
+  });
+
+  it("validateLkcourseArchiveEntries rejects SPA-only assessments in source manifest", () => {
+    const manifestWithFib = {
+      ...minimalManifest,
+      course: {
+        ...minimalManifest.course,
+        assessments: [
+          minimalManifest.course.assessments[0]!,
+          {
+            kind: "fillInBlanks" as const,
+            checkId: "fib-1",
+            question: "Fill",
+            template: "Type *here*",
+            blanks: [{ id: "b1", answer: "here" }],
+          },
+        ],
+      },
+    };
+    const interchange = descriptorToInterchange(manifestWithFib.course);
+    const result = validateLkcourseArchiveEntries(
+      buildArchiveEntries({
+        interchange,
+        manifestEnvelope: { sourceManifest: manifestWithFib },
+      }),
+      "spa-only-assessments.lkcourse",
+    );
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(
+      result.issues.some(
+        (i) =>
+          i.path.includes("assessments") &&
+          (i.message.includes("fillInBlanks") || i.message.includes("interchange")),
+      ),
+    ).toBe(true);
+  });
+
   it("extractBlockTree parses nested JSX and unknown tags", async () => {
     const root = await mkdtemp(join(tmpdir(), "lk-nested-"));
     tempDirs.push(root);
