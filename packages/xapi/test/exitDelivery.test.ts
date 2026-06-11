@@ -1,5 +1,6 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 import {
+  createInMemoryXAPIQueue,
   createXAPIClient,
   loadDeadLetterStatements,
   resetXAPIDeadLetterForTests,
@@ -118,6 +119,51 @@ describe("xAPI flush serialization (H-10)", () => {
     client.send({ ...stmt, id: "b" });
     await flushPromise;
     expect(transport).toHaveBeenCalledTimes(2);
+  });
+
+  it("flush failure re-queues statements sent during in-flight flush", async () => {
+    let releaseTransport!: () => void;
+    const transport = vi.fn(async () => {
+      await new Promise<void>((resolve) => {
+        releaseTransport = resolve;
+      });
+      throw new Error("network");
+    });
+    const queue = createInMemoryXAPIQueue();
+    queue.enqueue({ ...stmt, id: "a" });
+    const client = createXAPIClient({ courseId: "course-1", transport, queue });
+    const flushPromise = client.flush();
+    await Promise.resolve();
+    client.send({ ...stmt, id: "b" });
+    releaseTransport();
+    await expect(flushPromise).rejects.toThrow("network");
+    expect(client.queueSize()).toBe(2);
+  });
+
+  it("flushOnExit delivers statements buffered during in-flight flush", async () => {
+    let releaseTransport!: () => void;
+    const transport = vi.fn(
+      () =>
+        new Promise<void>((resolve) => {
+          releaseTransport = resolve;
+        }),
+    );
+    const exitTransport = vi.fn(async () => {});
+    const queue = createInMemoryXAPIQueue();
+    queue.enqueue({ ...stmt, id: "a" });
+    const client = createXAPIClient({
+      courseId: "course-1",
+      transport,
+      exitTransport,
+      queue,
+    });
+    const flushPromise = client.flush();
+    await Promise.resolve();
+    client.send({ ...stmt, id: "b" });
+    client.flushOnExit?.();
+    expect(exitTransport).toHaveBeenCalledWith(expect.objectContaining({ id: "b" }));
+    releaseTransport();
+    await flushPromise;
   });
 
   it("flushOnExit dispatches in-flight statements through exit transport without re-queue on abort", async () => {

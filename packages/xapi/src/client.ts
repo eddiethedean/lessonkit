@@ -169,6 +169,27 @@ export function createXAPIClient(opts?: {
   const pendingDuringFlush: XAPIStatement[] = [];
   let flushInProgress = false;
 
+  const requeuePendingDuringFlush = () => {
+    const batch = pendingDuringFlush.splice(0, pendingDuringFlush.length);
+    for (const statement of batch) {
+      queue.enqueue(statement);
+    }
+  };
+
+  const persistPendingDuringFlush = () => {
+    const batch = pendingDuringFlush.splice(0, pendingDuringFlush.length);
+    for (const statement of batch) {
+      persistDeadLetter(statement);
+    }
+  };
+
+  const dispatchPendingDuringFlushOnExit = () => {
+    const batch = pendingDuringFlush.splice(0, pendingDuringFlush.length);
+    for (const statement of batch) {
+      dispatchExitStatement(statement);
+    }
+  };
+
   const sendOrQueueInternal = (statement: XAPIStatement) => {
       const normalized = withStatementId(statement);
       if (exitDeliveredIds.has(normalized.id)) return;
@@ -285,6 +306,7 @@ export function createXAPIClient(opts?: {
     },
     queueSize: () => queue.size(),
     abandonUndelivered: () => {
+      persistPendingDuringFlush();
       for (const statement of queue.drainAll()) {
         persistDeadLetter(statement);
       }
@@ -306,6 +328,9 @@ export function createXAPIClient(opts?: {
                 }
                 await runFlushLoop();
               }
+            } catch (err) {
+              requeuePendingDuringFlush();
+              throw err;
             } finally {
               flushInProgress = false;
             }
@@ -332,6 +357,7 @@ export function createXAPIClient(opts?: {
             opts.abortInFlight?.(statement.id);
             dispatchExitStatement(statement);
           }
+          dispatchPendingDuringFlushOnExit();
           queue.flushOnExit((statement) => {
             dispatchExitStatement(statement);
           });
