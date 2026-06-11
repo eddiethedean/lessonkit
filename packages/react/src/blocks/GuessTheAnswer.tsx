@@ -3,7 +3,11 @@ import { visuallyHiddenStyle } from "@lessonkit/accessibility";
 import type { AssessmentBehaviour, AssessmentHandle, AssessmentInteractionType, CheckId, LessonId } from "@lessonkit/core";
 import { AssessmentLessonGuard } from "../assessment/AssessmentLessonGuard";
 import { buildAssessmentHandle } from "../assessment/internal/buildAssessmentHandle";
-import { readBooleanStateField, readStringField } from "../assessment/internal/resumeState";
+import {
+  readBooleanStateField,
+  readStringField,
+  restoreCompletedRefFromResumeState,
+} from "../assessment/internal/resumeState";
 import { useAssessmentHandleRegistration } from "../assessment/internal/useAssessmentHandleRegistration";
 import { meetsPassingThreshold } from "../assessment/scoring";
 import { shouldReplayResumeTelemetry } from "../assessment/shouldReplayResumeTelemetry";
@@ -79,7 +83,7 @@ function GuessTheAnswerScoredInner(
           score: checked ? score : undefined,
           maxScore,
         }),
-        getCurrentState: () => ({ guess, revealed, checked, passed }),
+        getCurrentState: () => ({ guess, revealed, checked, passed, completed: completedRef.current }),
         resume: (state) => {
           const nextGuess = readStringField(state, "guess");
           if (typeof nextGuess === "string") setGuess(nextGuess);
@@ -87,7 +91,6 @@ function GuessTheAnswerScoredInner(
           readBooleanStateField(state, "checked", setChecked);
           readBooleanStateField(state, "passed", (value) => {
             setPassed(value);
-            completedRef.current = value;
             if (value && !telemetryReplayedRef.current && shouldReplayResumeTelemetry(config)) {
               telemetryReplayedRef.current = true;
               const replayGuess = readStringField(state, "guess") ?? guess;
@@ -106,6 +109,9 @@ function GuessTheAnswerScoredInner(
                 passingScore: props.passingScore ?? maxScore,
               });
             }
+          });
+          restoreCompletedRefFromResumeState(completedRef, state, {
+            enableRetry: props.enableRetry,
           });
         },
       }),
@@ -153,7 +159,7 @@ function GuessTheAnswerScoredInner(
       <button
         type="button"
         data-testid="guess-check"
-        disabled={(passed && !props.enableRetry) || !guess.trim()}
+        disabled={(!props.enableRetry && (passed || checked)) || !guess.trim()}
         onClick={check}
       >
         Check

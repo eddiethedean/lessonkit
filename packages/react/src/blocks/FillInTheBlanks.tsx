@@ -5,7 +5,10 @@ import type { LessonId } from "@lessonkit/core";
 import { AssessmentLessonGuard } from "../assessment/AssessmentLessonGuard";
 import { parseStarDelimitedTemplate } from "../assessment/internal/parseStarDelimitedTemplate";
 import { buildAssessmentHandle } from "../assessment/internal/buildAssessmentHandle";
-import { readBooleanStateField } from "../assessment/internal/resumeState";
+import {
+  readBooleanStateField,
+  restoreCompletedRefFromResumeState,
+} from "../assessment/internal/resumeState";
 import { useAssessmentHandleRegistration } from "../assessment/internal/useAssessmentHandleRegistration";
 import { usePluginScoring } from "../assessment/internal/usePluginScoring";
 import { meetsPassingThreshold } from "../assessment/scoring";
@@ -164,7 +167,13 @@ function FillInTheBlanksInner(
           score,
           maxScore: maxScore || 1,
         }),
-        getCurrentState: () => ({ values, passed, showSolutions, submitted }),
+        getCurrentState: () => ({
+          values,
+          passed,
+          showSolutions,
+          submitted,
+          completed: completedRef.current,
+        }),
         resume: (state) => {
           const raw = state.values;
           let nextValues = values;
@@ -177,7 +186,6 @@ function FillInTheBlanksInner(
           readBooleanStateField(state, "passed", (value) => {
             nextPassed = value;
             setPassed(value);
-            completedRef.current = value;
             if (value) {
               answeredRef.current = true;
               nextSubmitted = true;
@@ -189,6 +197,9 @@ function FillInTheBlanksInner(
             nextSubmitted = value;
             setSubmitted(value);
             if (value) answeredRef.current = true;
+          });
+          restoreCompletedRefFromResumeState(completedRef, state, {
+            enableRetry: props.enableRetry,
           });
           let nextScore = 0;
           blanks.forEach((b) => {

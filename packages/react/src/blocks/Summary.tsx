@@ -3,7 +3,10 @@ import type { AssessmentBaseProps, AssessmentHandle, AssessmentInteractionType }
 import type { LessonId } from "@lessonkit/core";
 import { AssessmentLessonGuard } from "../assessment/AssessmentLessonGuard";
 import { buildAssessmentHandle } from "../assessment/internal/buildAssessmentHandle";
-import { readBooleanStateField } from "../assessment/internal/resumeState";
+import {
+  readBooleanStateField,
+  restoreCompletedRefFromResumeState,
+} from "../assessment/internal/resumeState";
 import { useAssessmentHandleRegistration } from "../assessment/internal/useAssessmentHandleRegistration";
 import { meetsPassingThreshold } from "../assessment/scoring";
 import { useAssessmentState } from "../assessment/useAssessmentState";
@@ -83,7 +86,12 @@ function SummaryInner(
           score,
           maxScore,
         }),
-        getCurrentState: () => ({ selectedIndices, passed, checked }),
+        getCurrentState: () => ({
+          selectedIndices,
+          passed,
+          checked,
+          completed: completedRef.current,
+        }),
         resume: (state) => {
           let nextIndices: number[] = [];
           if (Array.isArray(state.selectedIndices)) {
@@ -122,7 +130,6 @@ function SummaryInner(
           );
           if (wasChecked) {
             setPassed(nextPassedThreshold);
-            completedRef.current = nextPassedThreshold || props.enableRetry === false;
             if (
               (nextPassedThreshold || props.enableRetry === false) &&
               !telemetryReplayedRef.current &&
@@ -145,8 +152,10 @@ function SummaryInner(
             }
           } else {
             setPassed(false);
-            completedRef.current = false;
           }
+          restoreCompletedRefFromResumeState(completedRef, state, {
+            enableRetry: props.enableRetry,
+          });
         },
       }),
     [
@@ -229,7 +238,7 @@ function SummaryInner(
       <button
         type="button"
         data-testid="summary-undo"
-        disabled={(passed && !props.enableRetry) || selectedIndices.length === 0}
+        disabled={(!props.enableRetry && (passed || checked)) || selectedIndices.length === 0}
         onClick={removeLast}
       >
         Remove last

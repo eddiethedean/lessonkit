@@ -48,6 +48,71 @@ describe("ImagePairing component resume", () => {
     expect(ref.current?.getAnswerGiven()).toBe(true);
   });
 
+  it("blocks re-submit after failed terminal resume when enableRetry is false", async () => {
+    vi.spyOn(Math, "random").mockReturnValue(0.5);
+    const ref = createRef<AssessmentHandle>();
+    const { queryByTestId } = render(
+      wrap(
+        <ImagePairing
+          ref={ref}
+          checkId="pair-terminal"
+          pairs={pairs}
+          enableRetry={false}
+          passingScore={2}
+        />,
+      ),
+    );
+
+    ref.current?.resume?.({
+      cardKeys: ["p1-0", "p1-1", "p2-0", "p2-1"],
+      matched: ["p1"],
+      revealed: [],
+      keyboardSelection: null,
+      passed: false,
+      submitted: true,
+      completed: true,
+    });
+
+    await waitFor(() => {
+      expect(queryByTestId("image-pairing-finish")).toBeNull();
+    });
+  });
+
+  it("persists submitted and completed in getCurrentState after terminal submit", async () => {
+    vi.spyOn(Math, "random").mockReturnValue(0.5);
+    const ref = createRef<AssessmentHandle>();
+    render(
+      wrap(
+        <ImagePairing
+          ref={ref}
+          checkId="pair-state"
+          pairs={pairs}
+          enableRetry={false}
+          passingScore={2}
+        />,
+      ),
+    );
+
+    ref.current?.resume?.({
+      cardKeys: ["p1-0", "p1-1", "p2-0", "p2-1"],
+      matched: ["p1"],
+      revealed: [],
+      keyboardSelection: null,
+      passed: false,
+      submitted: true,
+      completed: true,
+    });
+
+    await waitFor(() => {
+      const state = ref.current?.getCurrentState?.() as {
+        submitted?: boolean;
+        completed?: boolean;
+      };
+      expect(state?.submitted).toBe(true);
+      expect(state?.completed).toBe(true);
+    });
+  });
+
   it("persists restored cardKeys via getCurrentState after resume", async () => {
     vi.spyOn(Math, "random").mockReturnValue(0.5);
     const ref = createRef<AssessmentHandle>();

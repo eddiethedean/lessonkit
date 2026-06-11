@@ -4,7 +4,10 @@ import type { LessonId } from "@lessonkit/core";
 import { AssessmentLessonGuard } from "../assessment/AssessmentLessonGuard";
 import { parseStarDelimitedTemplate } from "../assessment/internal/parseStarDelimitedTemplate";
 import { buildAssessmentHandle } from "../assessment/internal/buildAssessmentHandle";
-import { readBooleanStateField } from "../assessment/internal/resumeState";
+import {
+  readBooleanStateField,
+  restoreCompletedRefFromResumeState,
+} from "../assessment/internal/resumeState";
 import { useAssessmentHandleRegistration } from "../assessment/internal/useAssessmentHandleRegistration";
 import { usePluginScoring } from "../assessment/internal/usePluginScoring";
 import { meetsPassingThreshold } from "../assessment/scoring";
@@ -160,7 +163,14 @@ function DragTheWordsInner(
           score,
           maxScore: maxScore || 1,
         }),
-        getCurrentState: () => ({ zones, pool, passed, keyboardWord, submitted }),
+        getCurrentState: () => ({
+          zones,
+          pool,
+          passed,
+          keyboardWord,
+          submitted,
+          completed: completedRef.current,
+        }),
         resume: (state) => {
           const zoneIds = answers.map((_, i) => `zone-${i}`);
           const normalized = normalizeDragTheWordsState(state.zones, state.pool, props.words, zoneIds);
@@ -172,13 +182,15 @@ function DragTheWordsInner(
           readBooleanStateField(state, "passed", (value) => {
             nextPassed = value;
             setPassed(value);
-            completedRef.current = value;
-            answeredRef.current = value;
+            if (value) answeredRef.current = true;
           });
           readBooleanStateField(state, "submitted", (value) => {
             nextSubmitted = value;
             setSubmitted(value);
             if (value) answeredRef.current = true;
+          });
+          restoreCompletedRefFromResumeState(completedRef, state, {
+            enableRetry: props.enableRetry,
           });
           const kw = state.keyboardWord;
           if (kw === null || typeof kw === "string") setKeyboardWord(kw ?? null);

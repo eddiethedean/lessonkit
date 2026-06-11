@@ -3,7 +3,10 @@ import type { AssessmentBaseProps, AssessmentHandle, AssessmentInteractionType }
 import type { LessonId } from "@lessonkit/core";
 import { AssessmentLessonGuard } from "../assessment/AssessmentLessonGuard";
 import { buildAssessmentHandle } from "../assessment/internal/buildAssessmentHandle";
-import { readBooleanStateField } from "../assessment/internal/resumeState";
+import {
+  readBooleanStateField,
+  restoreCompletedRefFromResumeState,
+} from "../assessment/internal/resumeState";
 import { useAssessmentHandleRegistration } from "../assessment/internal/useAssessmentHandleRegistration";
 import { meetsPassingThreshold } from "../assessment/scoring";
 import { useAssessmentState } from "../assessment/useAssessmentState";
@@ -117,7 +120,13 @@ function ArithmeticQuizInner(
           score,
           maxScore,
         }),
-        getCurrentState: () => ({ answers, passed, checked, timeLeft }),
+        getCurrentState: () => ({
+          answers,
+          passed,
+          checked,
+          timeLeft,
+          completed: completedRef.current,
+        }),
         resume: (state) => {
           const raw = state.answers;
           let nextAnswers = answers;
@@ -125,9 +134,9 @@ function ArithmeticQuizInner(
             nextAnswers = { ...(raw as Record<number, string>) };
             setAnswers(nextAnswers);
           }
+          readBooleanStateField(state, "checked", setChecked);
           readBooleanStateField(state, "passed", (value) => {
             setPassed(value);
-            completedRef.current = value;
             if (
               value &&
               !telemetryReplayedRef.current &&
@@ -154,7 +163,9 @@ function ArithmeticQuizInner(
               });
             }
           });
-          readBooleanStateField(state, "checked", setChecked);
+          restoreCompletedRefFromResumeState(completedRef, state, {
+            enableRetry: props.enableRetry,
+          });
           if (typeof state.timeLeft === "number") setTimeLeft(state.timeLeft);
         },
       }),
@@ -195,7 +206,7 @@ function ArithmeticQuizInner(
       <button
         type="button"
         data-testid="arithmetic-check"
-        disabled={(!allFilled && timeLeft !== 0) || (passed && !props.enableRetry)}
+        disabled={(!allFilled && timeLeft !== 0) || (!props.enableRetry && (passed || checked))}
         onClick={() => runCheck()}
       >
         Check
