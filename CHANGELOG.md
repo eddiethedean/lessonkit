@@ -6,10 +6,6 @@ All notable changes to the LessonKit monorepo are documented here.
 
 ## [Unreleased]
 
-### Changed
-
-- **`@lessonkit/lxpack`**: bump `@lxpack/*` dependencies to **0.7.0**; inject multi-select MCQ (`answers` length > 1) and `shuffleChoices` into LMS shell quizzes via `selectionMode: "multiple"`; map `choiceFeedback` to shell `showFeedback: "immediate"` (per-choice feedback text remains SPA-only)
-
 ## [1.7.0] - 2026-06-08
 
 Framework **1.7.x** — four Tier B P1 assessment blocks plus Quiz multi-select/shuffle/feedback variants. All seven `@lessonkit/*` packages ship at **1.7.0**. Additive release (no breaking API changes).
@@ -28,6 +24,21 @@ Framework **1.7.x** — four Tier B P1 assessment blocks plus Quiz multi-select/
 - **Golden example** — `examples/assessments-p0` extended with 1.7.0 blocks
 - **Tests** — unit, compound, lxpack, integration SCORM, e2e smoke; Playwright `assessments-p0-scorm12` project
 - **Docs** — [MIGRATION-1.6-to-1.7](docs/MIGRATION-1.6-to-1.7.md); capability map ✅ for four blocks; authors guide updates
+- **Docs** — LMS Go-Live as canonical shipping guide; backend proxy cookbook; `npm run docs:build`; TypeDoc `@example` on high-traffic APIs; adoption-path navigation cleanup
+
+### Changed
+
+- **`@lessonkit/lxpack`**: bump `@lxpack/*` dependencies to **0.7.0**; inject multi-select MCQ (`answers` length > 1) and `shuffleChoices` into LMS shell quizzes via `selectionMode: "multiple"`; map `choiceFeedback` to shell `showFeedback: "immediate"` (per-choice feedback text remains SPA-only)
+- **`@lessonkit/cli`**: `lessonkit init` template pins `^1.7.0` on all `@lessonkit/*` dependencies
+
+### Fixed
+
+- **`@lessonkit/cli`**: reject unsafe `dist/` contents (e.g. `node_modules`) in `lessonkit dev` and `lessonkit package`; `init` replaces stale `node_modules` / lockfiles before promote; `--here --force` backs up conflicting dotfiles to `.lessonkit-init-backup/`
+- **`@lessonkit/lxpack`**: `validateManifestName()` and reserved export path checks; reject absolute or out-of-`outDir` package `output` paths at validation (#55, #56)
+- **`@lessonkit/react`**: gate `pipelineDelivered` on xAPI outcome for `course_started`; compound `getAnswerGiven` respects `answerPageIndex`; `ArithmeticQuiz` timer no longer tied to `runCheck`; multi-select `Quiz` uses plugin scoring; TrueFalse telemetry reports factual correctness
+- **`@lessonkit/react`**: xAPI bootstrap `flush()` failures invoke `onXapiTransportError`; provider queue wires dead-letter persistence and overflow hooks
+- **`@lessonkit/xapi`**: `persistDeadLetterStatement` reports storage failures via `onDeadLetterPersistError`
+- **`@lessonkit/core`**: `onInvalidSessionId` observability when session ids are replaced
 
 ## [1.6.0] - 2026-06-08
 
