@@ -146,4 +146,136 @@ describe("validateAssessmentEntry", () => {
     });
     expect(issues.some((i) => i.message === "duplicate checkId")).toBe(true);
   });
+
+  it("validates sortParagraphs correctOrder length", () => {
+    checkIds.clear();
+    const issues = collect({
+      kind: "sortParagraphs",
+      checkId: "sort-bad",
+      question: "Order",
+      paragraphs: ["A", "B"],
+      correctOrder: [0],
+    });
+    expect(issues.some((i) => i.path?.includes("correctOrder"))).toBe(true);
+  });
+
+  it("counts sortParagraphs max score from paragraphs", () => {
+    expect(
+      maxAchievableAssessmentScore({
+        kind: "sortParagraphs",
+        checkId: "sort-max",
+        question: "Order",
+        paragraphs: ["A", "B", "C"],
+        correctOrder: [2, 0, 1],
+      }),
+    ).toBe(3);
+  });
+
+  it("counts mcq multi-select max score from answers length", () => {
+    expect(
+      maxAchievableAssessmentScore({
+        checkId: "multi-max",
+        question: "Select all",
+        choices: ["A", "B", "C"],
+        answer: "A",
+        answers: ["A", "C"],
+      }),
+    ).toBe(2);
+  });
+
+  it("rejects mcq answers not in choices", () => {
+    checkIds.clear();
+    const issues = collect({
+      checkId: "multi-bad",
+      question: "Select",
+      choices: ["A", "B"],
+      answer: "A",
+      answers: ["A", "Z"],
+    });
+    expect(issues.some((i) => i.path?.includes("answers"))).toBe(true);
+  });
+
+  it("rejects duplicate mcq answers", () => {
+    checkIds.clear();
+    const issues = collect({
+      checkId: "dup-answers",
+      question: "Select",
+      choices: ["A", "B"],
+      answer: "A",
+      answers: ["A", "A"],
+    });
+    expect(issues.some((i) => i.message.includes("unique"))).toBe(true);
+  });
+
+  it("rejects choiceFeedback keys not in choices", () => {
+    checkIds.clear();
+    const issues = collect({
+      checkId: "fb-bad",
+      question: "Pick",
+      choices: ["A", "B"],
+      answer: "A",
+      choiceFeedback: { Z: "Unknown" },
+    });
+    expect(issues.some((i) => i.path?.includes("choiceFeedback"))).toBe(true);
+  });
+
+  it("requires guessTheAnswer answer text", () => {
+    checkIds.clear();
+    const issues = collect({
+      kind: "guessTheAnswer",
+      checkId: "guess-empty",
+      question: "Guess",
+      answer: "   ",
+    });
+    expect(issues.some((i) => i.path?.includes("answer"))).toBe(true);
+  });
+
+  it("allows mcq answer label outside answers when multi-select is configured", () => {
+    checkIds.clear();
+    const issues = collect({
+      checkId: "multi-ok",
+      question: "Select",
+      choices: ["A", "B", "C"],
+      answer: "A",
+      answers: ["B", "C"],
+    });
+    expect(issues.filter((i) => i.path?.includes(".answer"))).toHaveLength(0);
+  });
+
+  it("rejects non-object choiceFeedback", () => {
+    checkIds.clear();
+    const issues = collect({
+      checkId: "fb-type",
+      question: "Pick",
+      choices: ["A"],
+      answer: "A",
+      choiceFeedback: "bad" as unknown as Record<string, string>,
+    });
+    expect(issues.some((i) => i.path?.includes("choiceFeedback"))).toBe(true);
+  });
+
+  it("rejects passingScore above multi-select achievable score", () => {
+    checkIds.clear();
+    const issues = collect({
+      checkId: "multi-pass",
+      question: "Select",
+      choices: ["A", "B", "C"],
+      answer: "A",
+      answers: ["A", "C"],
+      passingScore: 3,
+    });
+    expect(issues.some((i) => i.path?.includes("passingScore"))).toBe(true);
+  });
+
+  it("rejects non-positive passingScore", () => {
+    checkIds.clear();
+    const issues = collect({
+      checkId: "bad-pass",
+      question: "Pick",
+      choices: ["A"],
+      answer: "A",
+      passingScore: 0,
+    });
+    expect(issues.some((i) => i.message.includes("greater than 0"))).toBe(true);
+  });
 });

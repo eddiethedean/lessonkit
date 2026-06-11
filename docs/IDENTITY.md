@@ -1,4 +1,4 @@
-# Identity model (1.6.x)
+# Identity model (1.7.x)
 
 LessonKit **1.x** requires explicit, stable identifiers for courses, lessons, and knowledge checks.
 Generators and authors must supply IDs in source — the runtime does not invent lesson or check IDs.

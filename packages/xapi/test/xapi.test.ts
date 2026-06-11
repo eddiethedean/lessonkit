@@ -28,15 +28,16 @@ describe("@lessonkit/xapi", () => {
     });
   });
 
-  it("calls onTransportError when transport fails", async () => {
+  it("calls onTransportError with the transport error when delivery fails", async () => {
     const onTransportError = vi.fn();
     const transport = vi.fn(async () => {
       throw new Error("network");
     });
     const client = createXAPIClient({ transport, courseId, onTransportError });
     client.startedLesson({ lessonId: "lesson-1" });
-    await new Promise((r) => setTimeout(r, 0));
-    expect(onTransportError).toHaveBeenCalled();
+    await vi.waitFor(() => expect(onTransportError).toHaveBeenCalledTimes(1));
+    expect(onTransportError).toHaveBeenCalledWith(expect.any(Error));
+    expect(onTransportError.mock.calls[0]![0]).toMatchObject({ message: "network" });
   });
 
   it("queues when transport fails and flushes later", async () => {
@@ -378,8 +379,9 @@ describe("@lessonkit/xapi", () => {
     expect(client.queueSize()).toBe(1);
   });
 
-  it("emit() does not throw when mapper fails", async () => {
+  it("calls onMappingError and does not throw when mapper fails", async () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const onMappingError = vi.fn();
     vi.stubEnv("NODE_ENV", "development");
     const mapModule = await import("../src/telemetryMap");
     const mapSpy = vi
@@ -388,11 +390,14 @@ describe("@lessonkit/xapi", () => {
         throw new Error("bad mapping");
       });
     const transport = vi.fn(async () => {});
-    const client = createXAPIClient({ courseId, transport });
+    const client = createXAPIClient({ courseId, transport, onMappingError });
 
     try {
       expect(() => client.startedLesson({ lessonId: "lesson-1" })).not.toThrow();
       await Promise.resolve();
+      expect(onMappingError).toHaveBeenCalledTimes(1);
+      expect(onMappingError).toHaveBeenCalledWith(expect.any(Error));
+      expect(onMappingError.mock.calls[0]![0]).toMatchObject({ message: "bad mapping" });
       expect(warn).toHaveBeenCalledWith("[lessonkit] xAPI mapping skipped:", "bad mapping");
       expect(transport).not.toHaveBeenCalled();
     } finally {
@@ -564,6 +569,97 @@ describe("@lessonkit/xapi", () => {
     await new Promise((r) => setTimeout(r, 0));
     await expect(client.flush()).rejects.toThrow("network");
     expect(client.queueSize()).toBeGreaterThan(0);
+  });
+
+  it("abandonUndelivered persists statements buffered during failed flush", async () => {
+    vi.stubGlobal(
+      "sessionStorage",
+      (() => {
+        const store = new Map<string, string>();
+        return {
+          get length() {
+            return store.size;
+          },
+          clear: () => store.clear(),
+          getItem: (key: string) => store.get(key) ?? null,
+          key: (index: number) => [...store.keys()][index] ?? null,
+          removeItem: (key: string) => store.delete(key),
+          setItem: (key: string, value: string) => store.set(key, value),
+        } as Storage;
+      })(),
+    );
+    const { loadDeadLetterStatements, resetXAPIDeadLetterForTests } = await import("../src");
+    resetXAPIDeadLetterForTests();
+
+    let releaseTransport!: () => void;
+    const transport = vi.fn(async () => {
+      await new Promise<void>((resolve) => {
+        releaseTransport = resolve;
+      });
+      throw new Error("network");
+    });
+    const queue = createInMemoryXAPIQueue();
+    queue.enqueue({
+      id: "during-flush-a",
+      timestamp: "t",
+      verb: "http://adlnet.gov/expapi/verbs/experienced",
+      object: { id: "o" },
+    });
+    const client = createXAPIClient({ transport, courseId, queue });
+    const flushPromise = client.flush();
+    await Promise.resolve();
+    client.send({
+      id: "during-flush-b",
+      timestamp: "t",
+      verb: "http://adlnet.gov/expapi/verbs/experienced",
+      object: { id: "o" },
+    });
+    releaseTransport();
+    await expect(flushPromise).rejects.toThrow("network");
+
+    client.abandonUndelivered?.();
+
+    const deadLetters = loadDeadLetterStatements();
+    expect(deadLetters.map((s) => s.id).sort()).toEqual(["during-flush-a", "during-flush-b"]);
+    expect(client.queueSize()).toBe(0);
+  });
+
+  it("abandonUndelivered persists queued statements to dead-letter storage", async () => {
+    vi.stubGlobal(
+      "sessionStorage",
+      (() => {
+        const store = new Map<string, string>();
+        return {
+          get length() {
+            return store.size;
+          },
+          clear: () => store.clear(),
+          getItem: (key: string) => store.get(key) ?? null,
+          key: (index: number) => [...store.keys()][index] ?? null,
+          removeItem: (key: string) => store.delete(key),
+          setItem: (key: string, value: string) => store.set(key, value),
+        } as Storage;
+      })(),
+    );
+    const { loadDeadLetterStatements, resetXAPIDeadLetterForTests } = await import("../src");
+    resetXAPIDeadLetterForTests();
+
+    const transport = vi.fn(async () => {
+      throw new Error("network");
+    });
+    const client = createXAPIClient({
+      transport,
+      courseId,
+      queue: createInMemoryXAPIQueue(),
+    });
+    client.startedLesson({ lessonId: "lesson-1" });
+    await new Promise((r) => setTimeout(r, 0));
+    expect(client.queueSize()).toBeGreaterThan(0);
+
+    client.abandonUndelivered?.();
+
+    expect(client.queueSize()).toBe(0);
+    expect(loadDeadLetterStatements().length).toBeGreaterThan(0);
   });
 
   it("skips poison-pill head after repeated failures", async () => {

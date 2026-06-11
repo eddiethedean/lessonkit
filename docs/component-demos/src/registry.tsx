@@ -24,6 +24,7 @@ import { demoFrame } from "./demoFrame";
 import { batch2Demos } from "./demos/batch2";
 import { batch3Demos } from "./demos/batch3";
 import { batch4Demos } from "./demos/batch4";
+import { batch5Demos } from "./demos/batch5";
 import type { ComponentDemo } from "./types";
 
 export type { ComponentDemo } from "./types";
@@ -253,7 +254,7 @@ export const componentDemos: ComponentDemo[] = [
       demoFrame(
         "branching-scenario",
         "Customer call",
-        <BranchingScenario blockId="call-paths" title="Suspicious charge call" startNodeId="opening" showPathScore>
+        <BranchingScenario blockId="call-paths" title="Suspicious charge call" startNodeId="opening" showPathScore showPathRecap>
           <BranchNode nodeId="opening">
             <Text>
               A customer says their card was charged twice after clicking a link in a &ldquo;shipping
@@ -324,6 +325,7 @@ export const componentDemos: ComponentDemo[] = [
   ...batch2Demos,
   ...batch3Demos,
   ...batch4Demos,
+  ...batch5Demos,
 ];
 
 export const demoBySlug = new Map(componentDemos.map((demo) => [demo.slug, demo]));

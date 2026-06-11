@@ -1,13 +1,13 @@
 # Enterprise evaluation
 
-One-page summary for security, compliance, and platform teams evaluating LessonKit **1.6.x** (React-first authoring, SCORM/xAPI/cmi5 export, portable `.lkcourse` interchange).
+One-page summary for security, compliance, and platform teams evaluating LessonKit **1.7.x** (React-first authoring, SCORM/xAPI/cmi5 export, portable `.lkcourse` interchange).
 
 ## Product summary
 
 - **What:** React-first framework + CLI for authoring trackable courses and exporting SCORM, xAPI, cmi5, or standalone SPAs.
 - **What it is not:** Visual timeline authoring (Storyline/Captivate), H5P platform interop (`.h5p` import, Hub, runtime embedding), or an LMS. See [Design philosophy](design-philosophy.md).
 - **License:** [Apache-2.0](https://github.com/eddiethedean/lessonkit/blob/main/LICENSE)
-- **npm scope:** [@lessonkit/*](https://www.npmjs.com/org/lessonkit) (seven packages, aligned semver — current line **1.6.x**)
+- **npm scope:** [@lessonkit/*](https://www.npmjs.com/org/lessonkit) (seven packages, aligned semver — current line **1.7.x**)
 
 ## Architecture
 
@@ -15,6 +15,7 @@ One-page summary for security, compliance, and platform teams evaluating LessonK
 - Runtime: browser SPA with optional telemetry, xAPI, and LMS bridge.
 - Packaging: **Node.js 20.19+** for new projects; **Node 18+** on legacy packaging-only agents; **LXPack** produces LMS artifacts.
 - **1.6.x additions:** portable `.lkcourse` interchange (`lessonkit export`; import via `@lessonkit/lxpack` API), block registry CLI (`lessonkit blocks list`).
+- **1.7.x additions:** Tier B P1 assessments (`SortParagraphs`, `GuessTheAnswer`, `MultimediaChoice`, `SingleChoiceSet`); Quiz multi-select, shuffle, and per-choice feedback; LXPack **0.7.0** multi-select MCQ shell injection.
 
 Diagram and package boundaries: [Architecture overview](architecture-overview.md). Export formats and LMS staging requirements: [LMS compatibility](../reference/lms-compatibility.md). Interchange: [Portable interchange](../reference/interchange.md).
 
@@ -22,7 +23,7 @@ Diagram and package boundaries: [Architecture overview](architecture-overview.md
 
 | Topic | Detail |
 | --- | --- |
-| Supported versions | [Security policy](../project/security.md) — **1.6.x** current |
+| Supported versions | [Security policy](../project/security.md) — **1.7.x** current |
 | Vulnerability reporting | GitHub private advisories (no public issues) |
 | CI | `npm audit` (high/critical), CodeQL on `main`; release version sync (`conf.py` ↔ `packages/core`) |
 | Client secrets | **Do not** embed LRS passwords; use backend token proxies |
@@ -73,8 +74,9 @@ Runnable proof lives in the monorepo. Clone only if you need to reproduce CI loc
 
 ## Accessibility
 
-- **Target:** WCAG 2.1 AA patterns for shipped components (framework **1.6.x** block catalog v3).
+- **Target:** WCAG 2.1 AA patterns for shipped components (framework **1.7.x** block catalog v3).
 - **Status:** Component-level implementation; **no published VPAT**. Per-block interim status: [Accessibility conformance (interim)](../project/accessibility-conformance.md).
+- **1.7.x blocks:** `SortParagraphs`, `GuessTheAnswer`, `MultimediaChoice`, `SingleChoiceSet`, and Quiz multi-select variants follow the same keyboard/ARIA patterns as earlier assessment blocks.
 - **1.6.x blocks:** `Table`, `Timeline`, `Crossword`, `WordSearch`, `GameMap`, and other catalog v3 additions follow the same keyboard/ARIA patterns as 1.5 blocks where applicable.
 
 ## Support model

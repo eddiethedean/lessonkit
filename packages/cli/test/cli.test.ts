@@ -1,6 +1,6 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 import { existsSync } from "node:fs";
-import { mkdtemp, rm, writeFile, mkdir, readFile, readdir } from "node:fs/promises";
+import { mkdtemp, rm, writeFile, mkdir, readFile, readdir, symlink } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { tmpdir } from "node:os";
 import { fileURLToPath } from "node:url";
@@ -88,7 +88,7 @@ describe("@lessonkit/cli program", () => {
       entries: Array<{ type: string; h5pMachineName?: string }>;
     };
     expect(payload.ok).toBe(true);
-    expect(payload.count).toBe(57);
+    expect(payload.count).toBe(61);
     const trueFalse = payload.entries.find((e) => e.type === "TrueFalse");
     expect(trueFalse?.h5pMachineName).toBe("H5P.TrueFalse");
     consoleLog.mockRestore();
@@ -612,6 +612,42 @@ describe("runInit", () => {
     expect(existsSync(join(here, "package.json"))).toBe(true);
   });
 
+  it("rejects --here when template files would overwrite existing dotfiles", async () => {
+    const here = join(parentDir, "custom-gitignore");
+    await mkdir(here, { recursive: true });
+    await mkdir(join(here, ".git"), { recursive: true });
+    await writeFile(join(here, ".gitignore"), "custom ignores\n", "utf8");
+    process.chdir(here);
+
+    await expect(
+      runInit({ here: true, skipInstall: true }, { log: () => {}, error: () => {} }),
+    ).rejects.toMatchObject({
+      exitCode: EXIT_INVALID_PROJECT,
+      message: expect.stringContaining(".gitignore"),
+    });
+
+    expect(await readFile(join(here, ".gitignore"), "utf8")).toBe("custom ignores\n");
+    expect(existsSync(join(here, "package.json"))).toBe(false);
+  });
+
+  it("init --here --force backs up conflicting dotfiles before overwrite", async () => {
+    const here = join(parentDir, "force-gitignore");
+    await mkdir(here, { recursive: true });
+    await mkdir(join(here, ".git"), { recursive: true });
+    await writeFile(join(here, ".gitignore"), "custom ignores\n", "utf8");
+    process.chdir(here);
+    const log = vi.fn();
+
+    await runInit({ here: true, force: true, skipInstall: true }, { log, error: () => {} });
+
+    expect(existsSync(join(here, "package.json"))).toBe(true);
+    expect(await readFile(join(here, ".gitignore"), "utf8")).not.toBe("custom ignores\n");
+    expect(await readFile(join(here, ".lessonkit-init-backup", ".gitignore"), "utf8")).toBe(
+      "custom ignores\n",
+    );
+    expect(log).toHaveBeenCalledWith(expect.stringContaining(".lessonkit-init-backup"));
+  });
+
   it("rolls back --here project files when promote fails", async () => {
     const here = join(parentDir, "promote-fail");
     await mkdir(here, { recursive: true });
@@ -643,18 +679,81 @@ describe("runInit", () => {
     });
   });
 
-  it("rejects --here --force when the directory has non-dotfile entries", async () => {
+  it("init --here --force scaffolds in a non-empty directory and keeps non-conflicting files", async () => {
     const here = join(parentDir, "existing");
     await mkdir(here, { recursive: true });
     await writeFile(join(here, "stray.txt"), "keep", "utf8");
     process.chdir(here);
 
+    await runInit({ here: true, force: true, skipInstall: true }, { log: () => {}, error: () => {} });
+
+    expect(existsSync(join(here, "package.json"))).toBe(true);
+    expect(await readFile(join(here, "stray.txt"), "utf8")).toBe("keep");
+  });
+
+  it("init --here --force backs up conflicting nested files such as src/App.tsx", async () => {
+    const here = join(parentDir, "existing-src");
+    await mkdir(join(here, "src"), { recursive: true });
+    await writeFile(join(here, "src", "App.tsx"), "USER ORIGINAL\n", "utf8");
+    process.chdir(here);
+    const log = vi.fn();
+
+    await runInit({ here: true, force: true, skipInstall: true }, { log, error: () => {} });
+
+    expect(existsSync(join(here, "lessonkit.json"))).toBe(true);
+    expect(await readFile(join(here, "src", "App.tsx"), "utf8")).not.toBe("USER ORIGINAL\n");
+    expect(await readFile(join(here, ".lessonkit-init-backup", "src", "App.tsx"), "utf8")).toBe(
+      "USER ORIGINAL\n",
+    );
+    expect(log).toHaveBeenCalledWith(expect.stringContaining("src/App.tsx"));
+  });
+
+  it("backupConflictingFiles includes nested paths that would be overwritten", async () => {
+    const here = join(parentDir, "backup-walk");
+    await mkdir(join(here, "src"), { recursive: true });
+    await writeFile(join(here, "src", "App.tsx"), "USER ORIGINAL\n", "utf8");
+    const stagingDir = join(here, ".staging");
+    await __testInitHelpers.copyTemplate(__testInitHelpers.getTemplateDir(), stagingDir);
+
+    const backups = await __testInitHelpers.backupConflictingFiles(stagingDir, here);
+
+    expect([...backups.keys()]).toContain("src/App.tsx");
+    expect(backups.get("src/App.tsx")?.toString("utf8")).toBe("USER ORIGINAL\n");
+    await rm(stagingDir, { recursive: true, force: true });
+  });
+
+  it("rolls back nested overwrites when promote fails", async () => {
+    const here = join(parentDir, "promote-fail-nested");
+    await mkdir(join(here, "src"), { recursive: true });
+    await writeFile(join(here, "src", "App.tsx"), "USER ORIGINAL\n", "utf8");
+    process.chdir(here);
+
+    const promoteSpy = vi
+      .spyOn(__testInitHelpers, "promoteStagingToProjectDir")
+      .mockRejectedValueOnce(new Error("simulated promote failure"));
+
     await expect(
       runInit({ here: true, force: true, skipInstall: true }, { log: () => {}, error: () => {} }),
-    ).rejects.toMatchObject({
-      exitCode: EXIT_INVALID_PROJECT,
-      message: expect.stringContaining("dotfiles only"),
-    });
+    ).rejects.toThrow("simulated promote failure");
+
+    expect(await readFile(join(here, "src", "App.tsx"), "utf8")).toBe("USER ORIGINAL\n");
+    expect(existsSync(join(here, "package.json"))).toBe(false);
+    promoteSpy.mockRestore();
+  });
+
+  it("init --here --force backs up conflicting root files such as README.md", async () => {
+    const here = join(parentDir, "existing-readme");
+    await mkdir(here, { recursive: true });
+    await writeFile(join(here, "README.md"), "keep\n", "utf8");
+    process.chdir(here);
+    const log = vi.fn();
+
+    await runInit({ here: true, force: true, skipInstall: true }, { log, error: () => {} });
+
+    expect(existsSync(join(here, "lessonkit.json"))).toBe(true);
+    expect(await readFile(join(here, "README.md"), "utf8")).not.toBe("keep\n");
+    expect(await readFile(join(here, ".lessonkit-init-backup", "README.md"), "utf8")).toBe("keep\n");
+    expect(log).toHaveBeenCalledWith(expect.stringContaining(".lessonkit-init-backup"));
   });
 
   it("rolls back staging when dependency install fails", async () => {
@@ -820,5 +919,49 @@ describe("runBuild", () => {
     const { runBuild } = await import("../src/commands/dev.js");
     const result = await runBuild({ cwd: dir, json: true });
     expect(result.ok).toBe(true);
+  });
+
+  it("rejects unsafe dist contents after build", async () => {
+    vi.spyOn(exec, "runCommand").mockImplementation(async () => {
+      const distDir = join(dir, "dist");
+      await mkdir(distDir, { recursive: true });
+      await writeFile(join(distDir, "index.html"), "<html></html>", "utf8");
+      const outside = join(dir, "outside.txt");
+      await writeFile(outside, "x", "utf8");
+      await symlink(outside, join(distDir, "link.txt"));
+    });
+    const { runBuild } = await import("../src/commands/dev.js");
+    await expect(runBuild({ cwd: dir, json: true })).rejects.toThrow(/contains symlink/);
+  });
+});
+
+describe("promoteStagingToProjectDir", () => {
+  let projectDir: string;
+  let stagingDir: string;
+
+  beforeEach(async () => {
+    projectDir = await mkdtemp(join(tmpdir(), "lk-init-project-"));
+    stagingDir = await mkdtemp(join(tmpdir(), "lk-init-staging-"));
+  });
+
+  afterEach(async () => {
+    await rm(projectDir, { recursive: true, force: true });
+    await rm(stagingDir, { recursive: true, force: true });
+  });
+
+  it("replaces stale node_modules instead of merging", async () => {
+    const orphanDir = join(projectDir, "node_modules", "left-pad");
+    await mkdir(orphanDir, { recursive: true });
+    await writeFile(join(orphanDir, "index.js"), "module.exports = () => {};", "utf8");
+
+    const freshDir = join(stagingDir, "node_modules", "vite");
+    await mkdir(freshDir, { recursive: true });
+    await writeFile(join(freshDir, "package.json"), "{}", "utf8");
+    await writeFile(join(stagingDir, "package.json"), '{"name":"fresh"}', "utf8");
+
+    await __testInitHelpers.promoteStagingToProjectDir(stagingDir, projectDir);
+
+    expect(existsSync(join(projectDir, "node_modules", "left-pad"))).toBe(false);
+    expect(existsSync(join(projectDir, "node_modules", "vite", "package.json"))).toBe(true);
   });
 });

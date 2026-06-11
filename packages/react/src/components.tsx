@@ -185,6 +185,17 @@ export function Reflection(props: ReflectionProps) {
   );
 }
 
+/**
+ * Accessible progress summary for completed lessons.
+ *
+ * @example
+ * ```tsx
+ * <Course title="Security 101" courseId="sec-101" config={config}>
+ *   <ProgressTracker totalLessons={3} />
+ *   …
+ * </Course>
+ * ```
+ */
 export function ProgressTracker(props: ProgressTrackerProps) {
   const { progress } = useLessonkit();
   const completed = progress.completedLessonIds.size;

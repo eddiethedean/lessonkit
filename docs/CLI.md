@@ -1,4 +1,4 @@
-# LessonKit CLI (1.6.x)
+# LessonKit CLI (1.7.x)
 
 The `@lessonkit/cli` package provides the developer workflow for LessonKit projects: scaffold, dev, build, and dual export packaging.
 
@@ -93,7 +93,7 @@ Scaffold a Vite + React project from the bundled template.
 ```bash
 lessonkit init my-course
 lessonkit init --here
-lessonkit init --here --force  # empty dir or dotfiles only; requires --here
+lessonkit init --here --force  # scaffold in non-empty dir; backs up conflicting template files
 lessonkit init my-course --skip-install
 ```
 
@@ -101,7 +101,7 @@ lessonkit init my-course --skip-install
 |------|-------------|
 | `--here` | Initialize in the current directory instead of creating a subdirectory |
 | `--skip-install` | Skip `npm install` (CI/automation) |
-| `--force` | With `--here` only: initialize when the current directory is empty or contains dotfiles only (merges template files; does not delete existing files) |
+| `--force` | With `--here` only: scaffold in a non-empty directory. Conflicting template files (e.g. `.gitignore`, `README.md`) are backed up to `.lessonkit-init-backup/` before overwrite. Non-conflicting files are kept. |
 
 ### `lessonkit dev`
 

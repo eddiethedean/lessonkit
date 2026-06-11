@@ -8,7 +8,7 @@
 
 ## When to use
 
-Use `FindHotspot` when learners must **pick one correct region** on an image — locate a single hazard, control, or UI element.
+Use `FindHotspot` when learners must **pick one correct region** on an image — locate a single hazard, control, or UI element. The **Check** action stays pinned to the bottom of the image so it remains visible after selecting a target.
 
 ## Requirements
 

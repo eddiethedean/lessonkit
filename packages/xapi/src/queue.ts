@@ -133,5 +133,12 @@ export function createInMemoryXAPIQueue(opts?: InMemoryXAPIQueueOptions): XAPIQu
       notifyDepth();
     },
     getHeadInFlightId: () => headInFlightId,
+    drainAll: () => {
+      if (!buffer.length) return [];
+      const drained = buffer.splice(0, buffer.length);
+      headFailureCount = 0;
+      notifyDepth();
+      return drained;
+    },
   };
 }

@@ -74,7 +74,12 @@ export function runNpm(args: string[], opts: RunCliOptions = {}): RunCliResult {
   };
 }
 
+let packagesBuilt = process.env.LK_INTEGRATION_PACKAGES_BUILT === "1";
+
 export function ensurePackagesBuilt(): void {
+  if (packagesBuilt && existsSync(CLI_BIN)) return;
   execSync("npm run build:packages", { cwd: REPO_ROOT, stdio: "inherit" });
   execSync("npm run -w @lessonkit/cli build", { cwd: REPO_ROOT, stdio: "inherit" });
+  packagesBuilt = true;
+  process.env.LK_INTEGRATION_PACKAGES_BUILT = "1";
 }

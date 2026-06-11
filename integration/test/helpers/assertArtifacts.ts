@@ -1,6 +1,46 @@
 import { execFileSync } from "node:child_process";
-import { existsSync, readdirSync, statSync } from "node:fs";
+import {
+  existsSync,
+  mkdtempSync,
+  readFileSync,
+  readdirSync,
+  rmSync,
+  statSync,
+} from "node:fs";
+import { tmpdir } from "node:os";
 import { join } from "node:path";
+
+function unpackZipToTemp(zipPath: string): string {
+  const dir = mkdtempSync(join(tmpdir(), "lk-artifact-"));
+  execFileSync("unzip", ["-q", zipPath, "-d", dir]);
+  return dir;
+}
+
+function findManifestPath(root: string, fileName: string): string {
+  const direct = join(root, fileName);
+  if (existsSync(direct)) {
+    return direct;
+  }
+  for (const entry of readdirSync(root)) {
+    const candidate = join(root, entry, fileName);
+    if (existsSync(candidate)) {
+      return candidate;
+    }
+  }
+  throw new Error(`${fileName} not found in unpacked artifact: ${root}`);
+}
+
+function resolveLaunchFile(root: string, manifestDir: string, href: string): string {
+  const launchFile = join(manifestDir, href);
+  if (existsSync(launchFile)) {
+    return launchFile;
+  }
+  const fromRoot = join(root, href);
+  if (existsSync(fromRoot)) {
+    return fromRoot;
+  }
+  throw new Error(`launch href ${href} does not exist on disk (checked ${launchFile} and ${fromRoot})`);
+}
 
 export function assertViteDist(distDir: string): void {
   const indexHtml = join(distDir, "index.html");
@@ -24,12 +64,55 @@ export function assertScormZip(zipPath: string): void {
     throw new Error(`SCORM zip not found: ${zipPath}`);
   }
 
-  const listing = execFileSync("unzip", ["-l", zipPath], { encoding: "utf8" });
-  if (!listing.includes("imsmanifest.xml")) {
-    throw new Error(`SCORM zip missing imsmanifest.xml: ${zipPath}`);
+  const root = unpackZipToTemp(zipPath);
+  try {
+    const manifestPath = findManifestPath(root, "imsmanifest.xml");
+    const xml = readFileSync(manifestPath, "utf8");
+    const launchHref = xml.match(/<resource[^>]+href="([^"]+)"/)?.[1];
+    if (!launchHref) {
+      throw new Error(`SCORM manifest has no resource href: ${zipPath}`);
+    }
+    resolveLaunchFile(root, join(manifestPath, ".."), launchHref);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
   }
-  if (!listing.includes("dist/index.html") && !listing.includes("index.html")) {
-    throw new Error(`SCORM zip missing SPA index: ${zipPath}`);
+}
+
+export function assertXapiZip(zipPath: string): void {
+  if (!existsSync(zipPath)) {
+    throw new Error(`xAPI zip not found: ${zipPath}`);
+  }
+
+  const root = unpackZipToTemp(zipPath);
+  try {
+    const tincanPath = findManifestPath(root, "tincan.xml");
+    const xml = readFileSync(tincanPath, "utf8");
+    const launchHref = xml.match(/<launch[^>]*>([^<]+)<\/launch>/)?.[1]?.trim();
+    if (!launchHref) {
+      throw new Error(`tincan.xml has no activity launch URL: ${zipPath}`);
+    }
+    resolveLaunchFile(root, join(tincanPath, ".."), launchHref);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+}
+
+export function assertCmi5Zip(zipPath: string): void {
+  if (!existsSync(zipPath)) {
+    throw new Error(`cmi5 zip not found: ${zipPath}`);
+  }
+
+  const root = unpackZipToTemp(zipPath);
+  try {
+    const cmi5Path = findManifestPath(root, "cmi5.xml");
+    const xml = readFileSync(cmi5Path, "utf8");
+    const launchHref = xml.match(/<url>([^<]+)<\/url>/)?.[1]?.trim();
+    if (!launchHref) {
+      throw new Error(`cmi5.xml has no AU launch URL: ${zipPath}`);
+    }
+    resolveLaunchFile(root, join(cmi5Path, ".."), launchHref);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
   }
 }
 
@@ -54,15 +137,13 @@ export function assertLkcourseZip(zipPath: string): void {
     throw new Error(`.lkcourse archive empty or invalid: ${zipPath}`);
   }
 
-  const listing = execFileSync("unzip", ["-l", zipPath], { encoding: "utf8" });
-  if (!listing.includes("manifest.json")) {
-    throw new Error(`.lkcourse missing manifest.json: ${zipPath}`);
-  }
-  if (!listing.includes("interchange.json")) {
-    throw new Error(`.lkcourse missing interchange.json: ${zipPath}`);
-  }
-  if (!listing.includes("dist/index.html")) {
-    throw new Error(`.lkcourse missing dist/index.html: ${zipPath}`);
+  const root = unpackZipToTemp(zipPath);
+  try {
+    findManifestPath(root, "manifest.json");
+    findManifestPath(root, "interchange.json");
+    resolveLaunchFile(root, root, "dist/index.html");
+  } finally {
+    rmSync(root, { recursive: true, force: true });
   }
 }
 

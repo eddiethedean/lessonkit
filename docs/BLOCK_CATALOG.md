@@ -259,6 +259,21 @@ Import `@lessonkit/react/block-catalog.v3.json` or `buildBlockCatalog({ version:
 
 ---
 
+## Catalog v3 additions (framework 1.7.0)
+
+| Block | Role | Notes |
+| --- | --- | --- |
+| `SortParagraphs` | Assessment | Reorder paragraphs; `checkId` required; SPA-only LMS shell (`kind: "sortParagraphs"`) |
+| `GuessTheAnswer` | Assessment | Scored text guess or reveal-only (`scored={false}`); SPA-only when scored |
+| `MultimediaChoice` | Assessment | MCQ with image/audio choices; every option needs `label` + `altText`; injectable via MCQ shell |
+| `SingleChoiceSet` | Compound | Sequential child `Quiz` / `KnowledgeCheck`; aggregated `CompoundHandle` scoring |
+
+**Quiz / `KnowledgeCheck` variants (1.7.0):** `answers` (multi-select), `shuffleChoices` / `shuffleSeed`, `choiceFeedback`. With LXPack **0.7.0+**, multi-select and shuffle inject into LMS shell quizzes; feedback text remains SPA-only.
+
+See [Migration 1.6 → 1.7](../MIGRATION-1.6-to-1.7.md).
+
+---
+
 ## Generated prop reference (catalog v3)
 
 Full prop tables for blocks beyond the v1 manual section above (auto-generated from `block-catalog.v3.json`):
@@ -273,7 +288,7 @@ Regenerate after catalog changes: `node docs/scripts/generate-block-props-doc.mj
 
 ## Component pages (live demos)
 
-Focused **Read the Docs** pages render the real component, explain when to use it, and show copy-paste examples: **[Component pages](components/index.md)** (55 pages — full catalog coverage).
+Focused **Read the Docs** pages render the real component, explain when to use it, and show copy-paste examples: **[Component pages](components/index.md)** (59 pages — full catalog coverage).
 
 Generated prop tables below link to the matching component page when one exists. Storybook remains useful for visual state matrices.
 

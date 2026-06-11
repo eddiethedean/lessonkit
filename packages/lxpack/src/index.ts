@@ -20,6 +20,7 @@ export type { ValidationIssue } from "./validationIssue";
 export type { ProjectPathsInput } from "./validateProjectPaths";
 export {
   resolveSafePackageOutputOverride,
+  validateManifestName,
   validateProjectPaths,
 } from "./validateProjectPaths";
 

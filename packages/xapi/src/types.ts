@@ -49,6 +49,8 @@ export type XAPIQueue = {
   size: () => number;
   /** Statement id currently being delivered via flush, if any. */
   getHeadInFlightId?: () => string | undefined;
+  /** Remove and return all queued statements (does not affect in-flight direct transport). */
+  drainAll: () => XAPIStatement[];
 };
 
 export type XAPIExitTransport = (statement: XAPIStatement) => void | Promise<void>;
@@ -58,6 +60,11 @@ export type XAPIClient = {
   flush: () => Promise<void>;
   /** Best-effort synchronous flush for pagehide using keepalive transport when configured. */
   flushOnExit?: () => void;
+  /**
+   * Persist any queued (undelivered) statements to sessionStorage dead-letter storage.
+   * Used when a client is discarded after a failed final flush (e.g. course switch).
+   */
+  abandonUndelivered?: () => void;
   queueSize: () => number;
   startedLesson: (opts: { lessonId: LessonId }) => void;
   completeLesson: (opts: {

@@ -1,6 +1,6 @@
 {
   "name": "@lessonkit/themes",
-  "version": "1.6.0",
+  "version": "1.7.0",
   "private": false,
   "description": "Theme primitives and tokens for LessonKit.",
   "license": "Apache-2.0",
@@ -39,8 +39,8 @@
     "base.css"
   ],
   "scripts": {
-    "build": "tsup src/index.ts --format esm,cjs --dts",
-    "dev": "tsup src/index.ts --format esm,cjs --dts --watch",
+    "build": "tsup src/index.ts --format esm,cjs --dts --tsconfig tsconfig.build.json",
+    "dev": "tsup src/index.ts --format esm,cjs --dts --watch --tsconfig tsconfig.build.json",
     "prepublishOnly": "npm run build",
     "typecheck": "tsc -p tsconfig.json",
     "test": "vitest run",

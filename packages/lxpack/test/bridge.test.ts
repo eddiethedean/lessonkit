@@ -52,6 +52,11 @@ describe("@lessonkit/lxpack/bridge", () => {
     expect(normalizeAssessmentScore({ maxScore: 2 })).toBeNull();
   });
 
+  it("normalizeAssessmentScore returns null when maxScore is zero or negative", () => {
+    expect(normalizeAssessmentScore({ score: 0.5, maxScore: 0 })).toBeNull();
+    expect(normalizeAssessmentScore({ score: 1, maxScore: -1 })).toBeNull();
+  });
+
   it("normalizeAssessmentPassingScore uses 100% default when omitted", () => {
     expect(normalizeAssessmentPassingScore()).toBe(1);
     expect(normalizeAssessmentPassingScore({ passingScore: 0.8 })).toBe(0.8);
@@ -74,6 +79,11 @@ describe("@lessonkit/lxpack/bridge", () => {
 
   it("normalizeAssessmentPassingScore treats percentage thresholds without maxScore", () => {
     expect(normalizeAssessmentPassingScore({ passingScore: 80 })).toBe(0.8);
+  });
+
+  it("normalizeAssessmentPassingScore uses 100% default when maxScore is zero or negative", () => {
+    expect(normalizeAssessmentPassingScore({ passingScore: 0.5, maxScore: 0 })).toBe(1);
+    expect(normalizeAssessmentPassingScore({ passingScore: 2, maxScore: -1 })).toBe(1);
   });
 
   it("dispatchBridgeAction swallows host bridge throws", () => {
@@ -164,6 +174,36 @@ describe("@lessonkit/lxpack/bridge", () => {
         checkId: "tf-1",
         interactionType: "trueFalse",
         maxScore: 1,
+      },
+    };
+
+    try {
+      forwardTelemetryToBridge(event, "auto", undefined, { onBridgeMiss });
+      expect(submitAssessment).not.toHaveBeenCalled();
+      expect(onBridgeMiss).toHaveBeenCalledWith(event);
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it("calls onBridgeMiss when assessment_completed has maxScore zero", () => {
+    const onBridgeMiss = vi.fn();
+    const submitAssessment = vi.fn();
+    vi.stubGlobal("window", {
+      parent: { lxpackBridge: { v1: { submitAssessment } } },
+    });
+
+    const event: TelemetryEvent = {
+      name: "assessment_completed",
+      courseId: "c",
+      lessonId: "l1",
+      sessionId: "s",
+      timestamp: "2026-01-01T00:00:00.000Z",
+      data: {
+        checkId: "tf-1",
+        interactionType: "trueFalse",
+        score: 0.5,
+        maxScore: 0,
       },
     };
 

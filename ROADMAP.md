@@ -1,792 +1,310 @@
 # LessonKit Roadmap
 
-This roadmap turns the product plan and technical spec into an execution plan. It's intentionally
-pragmatic: small, shippable milestones with clear outputs.
+Execution plan for the `@lessonkit/*` framework: shippable semver milestones, H5P-*aligned* block expansion (patterns only—no H5P runtime), and platform tooling. For product vision see [PLAN.md](https://github.com/eddiethedean/lessonkit/blob/main/PLAN.md); for API contracts see [SPEC.md](https://github.com/eddiethedean/lessonkit/blob/main/SPEC.md) and [Read the Docs](https://lessonkit.readthedocs.io/en/latest/).
 
-## Product
+**Audience:** maintainers and contributors. Course authors should use [lessonkit.readthedocs.io](https://lessonkit.readthedocs.io/en/latest/) instead.
 
-**LessonKit (framework)** — React components, telemetry, xAPI, CLI, and packaging for code-first authoring. Visual Studio authoring was explored and removed; LessonKit is React-first only. **Planned:** `@lessonkit/react-native` for iOS/Android (see [2.x](#2x--lessonkitreact-native-planned)).
+---
 
-| Doc | Link |
-|-----|------|
-| Product plan | [PLAN.md](https://github.com/eddiethedean/lessonkit/blob/main/PLAN.md) |
-| Technical spec | [SPEC.md](https://github.com/eddiethedean/lessonkit/blob/main/SPEC.md) |
+## At a glance
 
-Packaging and LMS delivery lean on **LXPack** via `@lessonkit/lxpack` (see 0.6.x).
+| | |
+| --- | --- |
+| **Latest release** | **1.7.0** — all seven `@lessonkit/*` packages |
+| **Shipped themes** | React course shell, 50+ blocks, compounds, telemetry/xAPI, CLI, LMS packaging, `.lkcourse` interchange, block registry |
+| **Current focus** | **1.7.x** — Tier B P1 assessments + additive `Quiz` variants (see **What's next** below) |
+| **Next majors** | **1.8.x** — `VirtualTour` (360) · **2.x** — `@lessonkit/react-native` + writing-tool compounds |
 
-## Key references
+Release notes: [CHANGELOG.md](https://github.com/eddiethedean/lessonkit/blob/main/CHANGELOG.md) · shipped block traceability: [`docs/project/h5p-capability-map.md`](docs/project/h5p-capability-map.md)
 
-- [PLAN.md](https://github.com/eddiethedean/lessonkit/blob/main/PLAN.md) — product vision and MVP scope
-- [SPEC.md](https://github.com/eddiethedean/lessonkit/blob/main/SPEC.md) — technical spec and requirements
-- [`docs/LXPACK_UPGRADES_FOR_LESSONKIT.md`](docs/reference/lxpack-upgrades.md) — LXPack interoperability notes
-- [H5P content types](https://h5p.org/content-types-and-applications) — external reference for the [H5P-aligned capability backlog](#h5p-aligned-capability-backlog) below (patterns, not a runtime dependency)
-- [`docs/project/h5p-capability-map.md`](docs/project/h5p-capability-map.md) — H5P machine name → LessonKit block traceability matrix
+---
 
-## Status
+## Related documents
 
-- **Framework:** **1.6.0** — portable interchange (`.lkcourse`) + block registry CLI + content-wave blocks (see [1.6.x](#16x--portable-interchange-and-content-waves))
-- **Focus (now):** **1.6.x** — Tier F / 1.7.x planning (content waves through **1.6.0** shipped; see [H5P-aligned capability backlog](#h5p-aligned-capability-backlog))
+| Document | Purpose |
+| --- | --- |
+| [PLAN.md](https://github.com/eddiethedean/lessonkit/blob/main/PLAN.md) | Product vision and positioning |
+| [SPEC.md](https://github.com/eddiethedean/lessonkit/blob/main/SPEC.md) | Historical technical spec (superseded by RTD reference for shipped API) |
+| [CHANGELOG.md](https://github.com/eddiethedean/lessonkit/blob/main/CHANGELOG.md) | What actually shipped, by version |
+| [RELEASING.md](https://github.com/eddiethedean/lessonkit/blob/main/RELEASING.md) | Changesets and npm publish |
+| [H5P capability map](docs/project/h5p-capability-map.md) | **Canonical** H5P machine name → LessonKit block matrix |
+| [Block catalog](docs/reference/block-catalog.md) | Props, a11y, telemetry per block |
+| [LXPack upgrades](docs/reference/lxpack-upgrades.md) | Packaging interoperability |
+
+---
 
 ## Guiding principles
 
-- **React-first**: author learning experiences as components, not timelines.
-- **Accessibility-first**: WCAG 2.1 AA target; keyboard + focus management by default.
-- **Interop-ready**: analytics primitives now; SCORM/xAPI/cmi5 via LXPack export is additive.
-- **Proven interactions**: adopt high-value patterns from the broader interactive-content ecosystem (notably [H5P](https://h5p.org/content-types-and-applications)) as first-class React blocks with shared contracts—not embedded H5P iframes and **not** `.h5p` import or merge.
-- **DX matters**: fast local dev, simple project bootstrap, excellent docs.
-- **Stable API**: semver expectations from **1.0.0** onward.
+- **React-first** — courses are components and `lessonkit.json`, not timeline authoring.
+- **Accessibility-first** — WCAG 2.1 AA target; keyboard and focus by default.
+- **Interop-ready** — telemetry and xAPI in dev; SCORM/xAPI/cmi5 via `@lessonkit/lxpack`.
+- **Proven interactions** — adopt high-value [H5P content-type *patterns*](https://h5p.org/content-types-and-applications) as native React blocks. **Not** `.h5p` import, H5P Hub, or H5P Core embedding.
+- **DX + AI readiness** — fast `lessonkit init`, machine-readable block catalog, deterministic export layouts.
+- **Stable API** — semver from **1.0.0**; pin all `@lessonkit/*` to the same version.
 
 ---
 
-## Framework milestones
-
-### 0.1.x — MVP hardening
-
-#### Goals
-
-- Stabilize the core API surface for `@lessonkit/react`
-- Provide real docs and examples for common lesson patterns
-- Add minimal tests + CI so changes are safe
-
-#### Deliverables
-
-- **Components**: `Course`, `Lesson`, `Scenario`, `Quiz`, `Reflection`, `KnowledgeCheck`, `ProgressTracker`
-- **Hooks**: `useProgress`, `useTracking`, `useQuizState`, `useCompletion`
-- **xAPI primitives**: statement generation + transport hooks (`@lessonkit/xapi`)
-- **Examples/templates**: Vite React example + template
-- **Docs placeholders**: Storybook + Read the Docs (Sphinx) — **shipped in 1.0.0**
-
-#### Status (1.0.0)
-
-The 0.1.x deliverables above are **complete**. Identity v1 (`courseId`, `lessonId`, `checkId`) is required and normalized at runtime. Unit tests, Storybook, and the block catalog ship in the monorepo. See [CHANGELOG](docs/project/changelog.md).
-
----
-
-### 0.2.0 — Analytics and tracking system
-
-#### Goals
-
-- Provide a consistent analytics API that works in:
-  - "headless" web delivery
-  - LMS delivery (SCORM/xAPI)
-  - offline / intermittent connectivity
-
-#### Deliverables
-
-- `@lessonkit/core`:
-  - richer event model (time-on-task, branching, completion)
-  - session model (start/end, user metadata, attempt ids)
-- `@lessonkit/react`:
-  - explicit runtime configuration (provider-level config)
-  - opt-in telemetry sinks and batching
-- `@lessonkit/xapi`:
-  - offline queue abstraction (in-memory + pluggable persistence)
-  - richer verbs and results (scores, success, duration)
-
----
-
-### 0.3.0 — Accessibility package expansion
-
-#### Goals
-
-- Make accessibility requirements explicit and testable.
-
-#### Deliverables
-
-- `@lessonkit/accessibility`:
-  - focus trap helper (for dialogs/modals if introduced)
-  - roving tabindex helper (for custom choice widgets)
-  - reduced motion helpers (animation gates)
-- Accessibility documentation:
-  - keyboard navigation standards for LessonKit components
-  - screen-reader announcements for quiz feedback
-
----
-
-### 0.4.x — Theme system + design tokens (framework contract)
-
-#### Goals
-
-- Support organizational branding and consistent UI for **developers** and **AI code generators**.
-- Establish a stable theme contract that survives export targets (React/Vite and LXPack artifacts).
-
-#### Deliverables
-
-- `@lessonkit/themes`:
-  - token schema v1 (colors, spacing, typography, radii, shadows)
-  - CSS variables output contract (namespacing + required variables)
-  - theme merging + overrides (predictable precedence rules)
-- `@lessonkit/react`:
-  - `ThemeProvider` (or equivalent) that binds tokens → CSS variables
-  - default theme + example overrides (light/dark, brand variant)
-- **AI/dev readiness**:
-  - theming surface is **documented and enumerable** (a generator can discover what is themeable without reading source)
-- **Parity requirement**:
-  - React/Vite apps use the `--lk-*` contract via `ThemeProvider` (0.4.0)
-  - LXPack-packaged artifact parity ships with `@lessonkit/lxpack` in **0.6.x**
-
----
-
-### 0.5.x — Deterministic identity model (framework contract) — **shipped in 0.5.0**
-
-See [`docs/IDENTITY.md`](docs/reference/identity.md) and [`docs/TELEMETRY.md`](docs/reference/telemetry.md).
-
----
-
-### 0.6.x — Export surfaces + LXPack adapter (packaging parity)
-
-#### Goals
-
-- Ship LMS-compatible artifacts without forcing authors out of React.
-- Make packaging scriptable and deterministic for CI.
-
-#### Deliverables
-
-- `@lessonkit/lxpack` (new package):
-  - export a LessonKit-authored course into an LXPack project/interchange
-  - invoke LXPack via **programmatic APIs** where possible (avoid subprocess stdout parsing)
-  - codify mapping: `courseId` / `lessonId` / assessment IDs → LXPack ids
-- Golden end-to-end example:
-  - LessonKit course → LXPack build → **importable SCORM ZIP** + runnable standalone build
-- CI smoke test:
-  - builds the golden example and validates artifacts
-- References:
-  - LXPack interoperability checklist: [`docs/LXPACK_UPGRADES_FOR_LESSONKIT.md`](docs/reference/lxpack-upgrades.md)
-
----
-
-### 0.7.x — CLI workflow for developers and AI
-
-#### Goals
-
-- Make the developer workflow frictionless, reproducible, and generator-friendly.
-
-#### Deliverables
-
-- `@lessonkit/cli`:
-  - `lessonkit init` (copy template, install deps, set up scripts)
-  - `lessonkit dev` (runs template dev server)
-  - `lessonkit build` (production build)
-  - `lessonkit package` as the canonical **dual export** entrypoint:
-    - `--target react-vite` (build/export web artifact)
-    - `--target lxpack|scorm12|scorm2004|xapi|cmi5` (via `@lessonkit/lxpack`)
-- **AI/dev readiness**:
-  - deterministic output layouts and stable defaults so CI and codegen can rely on them
-
----
-
-### 0.8.x — Runtime block catalog + renderer parity (framework-side)
-
-#### Goals
-
-- Define the set of primitives that are safe to generate (AI) and safe to map to visual tools, without coupling to any editor.
-- Ensure each primitive's behavior is specified for accessibility, theming, and telemetry.
-
-#### Deliverables
-
-- `@lessonkit/react`:
-  - runtime block catalog v1 (framework-owned) describing primitives and their supported props/behaviors
-  - each catalog entry includes:
-    - a11y behavior contract
-    - theming surface contract
-    - telemetry semantics
-- **AI/dev readiness**:
-  - catalog is **machine-readable** (JSON export) so generators can validate inputs and avoid unsupported combinations
-- **Documentation**:
-  - reference page for the runtime block catalog (`docs/reference/block-catalog.md`) — props, a11y/theming/telemetry contracts per block
-  - catalog JSON schema or export path documented for generators (linked from vibe-coding and React developer guides)
-  - examples demonstrate every catalog block (at least one reference course)
-
----
-
-### 0.8.0+ — Plugin architecture
-
-**Shipped (v1):** static plugins on `LessonkitProvider` (`config.plugins`).
-
-- Kinds: `analytics`, `lms`, `assessment`, `interaction`, `ai`
-- Hooks: `setup` / `dispose`, `onTelemetry`, `wrapTrackingSink`, `onTelemetryBatch`, `scoreAssessment`, `interactionBlocks` metadata
-- Docs: [`docs/reference/plugins.md`](docs/reference/plugins.md), [plugin cookbook](docs/guides/react-developers/plugin-cookbook.md)
-- Example: `examples/_shared/plugins/consoleAnalyticsPlugin.ts`
-
-**Future:** dynamic loading, LMS connector presets, AI integrations, marketplace.
-
----
-
-### 0.9.x — Conformance harness (export parity + gate hardening)
-
-#### Goals
-
-- Prove that LessonKit behaves the same across export surfaces (React/Vite vs LXPack/LMS artifacts).
-
-#### Deliverables
-
-- Playwright e2e for:
-  - keyboard navigation + focus flows (a11y)
-  - telemetry batching + xAPI queue behavior
-  - packaging artifact smoke (standalone + SCORM launch)
-- Conformance matrix:
-  - asserts behavioral equivalence across export targets for the same course
-- **Documentation**:
-  - export parity guide for authors (`docs/guides/react-developers/export-parity.md` or equivalent) — what is guaranteed across React/Vite vs LMS targets
-  - conformance matrix documented (what is tested, how to run locally, CI expectations)
-  - contributor docs for Playwright e2e and packaging smoke tests
-
----
-
-### 1.0.0 — Stable public API (framework) — **shipped**
-
-Framework **1.0.0** shipped **2026-05-30**.
-
-#### Criteria (met)
-
-- Stable component and hook APIs (semver expectations)
-- Storybook + docs site live and current with 1.0 API surface
-- Packaging documented end-to-end (React/Vite and LXPack targets)
-- Accessibility conformance documented (WCAG 2.1 AA target)
-- CI with tests + basic e2e coverage (Playwright)
-- **Documentation complete for 1.0**:
-  - all public `@lessonkit/*` APIs covered in reference pages (no undocumented exports)
-  - migration notes from 0.x → 1.0 (breaking changes, identity/CLI/catalog deltas)
-  - canonical quickstart paths verified (React developers + vibe-coding guides match `lessonkit init` output)
-  - live compiled examples on Read the Docs match current example apps
-- Framework milestones **0.1.x through 0.9.x** (and scoped **0.8.0+** plugin work planned for 1.0) delivered per this roadmap
-- **AI/dev readiness**: generator-friendly API + machine-readable catalog + deterministic exports
-
----
-
-### 1.1.x — Assessment contract + Tier B P0 blocks
-
-**Status:** **Shipped in 1.1.0**. Traceability: [`docs/project/h5p-capability-map.md`](docs/project/h5p-capability-map.md).
-
-#### Goals
-
-- Extend the runtime block catalog beyond single-select `Quiz` using an H5P-aligned **assessment contract** (scores, reset, solutions, xAPI, retry flags).
-- Keep export parity (React/Vite, SCORM, xAPI) and generator-safe JSON catalog (`blockCatalogVersion = 2`).
-
-#### Deliverables
-
-- [x] **`Assessment` contract** in `@lessonkit/core` + enforcement in `block-contract.v2.json`
-- [x] **`TrueFalse`** — binary choice; `checkId`; Storybook + tests
-- [x] **`FillInTheBlanks`** — fill-in interaction; xAPI `fill-in`; keyboard-accessible blanks
-- [x] **`DragAndDrop`** — drag targets with keyboard alternative
-- [x] **`DragTheWords`** — inline word drag
-- [x] **`MarkTheWords`** — selectable tokens (pointer + keyboard)
-- [x] **`AssessmentSequence`** — ordered mix of contract-compliant assessments (H5P Question Set)
-- [x] **Telemetry catalog v2** — events for new interaction types
-- [x] **`block-catalog.v2.json`** + docs in [`docs/reference/block-catalog.md`](docs/reference/block-catalog.md)
-- [x] **Golden path + e2e** — `examples/assessments-p0`; integration SCORM 1.2; Vite e2e smoke
-- [x] **SPEC** — assessment API documented in [`SPEC.md`](https://github.com/eddiethedean/lessonkit/blob/main/SPEC.md#assessment-contract-framework-11x)
-- [x] **H5P documentation (1.1.x P0)** — capability map + block catalog v2 + [MIGRATION-1.0-to-1.1.md](docs/MIGRATION-1.0-to-1.1.md)
-
-#### Out of scope for 1.1.x
-
-- Compound containers (`InteractiveBook`, `SlideDeck`) — shipped in **1.2.x** / **1.3.x** respectively
-
----
-
-### 1.2.x — Compound containers + Tier C/D P0
-
-**Status:** **Shipped in 1.2.0**.
-
-#### Goals
-
-- Ship H5P-aligned compound foundation (`Page`, `InteractiveBook`) with resume state and catalog allowlists.
-- Add Tier C/D P1 content and assessment blocks for handbook-style courses.
-
-#### Deliverables
-
-- [x] **`CompoundHandle`** + `CompoundResumeState` in `@lessonkit/core`; session storage v2
-- [x] **Telemetry catalog v3** — `book_page_viewed`, `compound_page_viewed`, content interaction events
-- [x] **`block-catalog.v3.json`** — `allowedChildTypes`, `compoundContract`, `maxNestingDepth`
-- [x] **`Page`**, **`InteractiveBook`**, hardened **`AssessmentSequence`** with score aggregation
-- [x] **Content primitives** — `Text`, `Heading`, `Image`
-- [x] **Tier C/D P1** — `Accordion`, `DialogCards`, `Flashcards`, `ImageHotspots`, `ImageSlider`, `FindHotspot`, `FindMultipleHotspots`
-- [x] **Golden example** — `examples/interactive-book`
-- [x] **Docs** — [MIGRATION-1.1-to-1.2.md](docs/MIGRATION-1.1-to-1.2.md); H5P capability map updates
-
-#### Out of scope for 1.2.x
-
-- `SlideDeck` (Course Presentation) — shipped in **1.3.x**
-- H5P platform interop — **out of scope** (see [H5P authors guide](docs/guides/h5p-for-lessonkit-authors.md))
-- Tier C–E media/game blocks — later framework minors per [capability map](docs/project/h5p-capability-map.md)
-
----
-
-### 1.3.x — SlideDeck (Course Presentation)
-
-**Status:** **Shipped in 1.3.0**.
-
-#### Goals
-
-- Ship H5P-aligned `SlideDeck` compound container with per-slide allowlists and keyboard slide navigation.
-- Extend telemetry catalog v3 with `slide_viewed`.
-
-#### Deliverables
-
-- [x] **`Slide`**, **`SlideDeck`** in `@lessonkit/react`; `CompoundHandle` + session resume
-- [x] **`slide_viewed`** telemetry + xAPI mapping
-- [x] **`block-catalog.v3.json`** — `Slide`, `SlideDeck` entries with H5P `CoursePresentation` mapping
-- [x] **Golden example** — `examples/slide-deck`
-- [x] **Docs** — [MIGRATION-1.2-to-1.3.md](docs/MIGRATION-1.2-to-1.3.md); H5P capability map updates
-
-#### Out of scope for 1.3.x
-
-- Framework `Video` block on slides — **1.4.0** (shipped; see [1.4.x](#14x--interactivevideo--bundled-blocks))
-- `Summary` assessment block — **1.4.0** (shipped; see [1.4.x](#14x--interactivevideo--bundled-blocks))
-
----
-
-### 1.4.x — InteractiveVideo + bundled blocks
-
-**Status:** **Shipped in 1.4.0**.
-
-#### Goals
-
-- Ship H5P-aligned **`InteractiveVideo`** compound (`H5P.InteractiveVideo`) with timeline-driven overlays, playback pause on interaction, and `CompoundHandle` score aggregation + session resume.
-- Ship shared **`Video`** content primitive (deferred from 1.3.x; also unblocks `Slide` allowlist expansion).
-- Extend **telemetry catalog v3** with video timeline events (`video_cue_reached`, `video_segment_completed`).
-- Ship **selected Tier B/C/D blocks** in the same **1.4.0** release, each completing the [H5P documentation checklist](#h5p-documentation-checklist-per-block).
-
-#### Architecture note
-
-`InteractiveVideo` reuses the same compound machinery as `SlideDeck` / `InteractiveBook` (`CompoundHandle`, `useCompoundShell`, session resume v2). The main divergence is **time-based cue navigation** instead of discrete slide index navigation.
-
-| SlideDeck (1.3.x) | InteractiveVideo (1.4.x) |
-| --- | --- |
-| Discrete slide index navigation | Time-based `TimedCue` overlays on a video timeline |
-| `useCompoundKeyboardNav` (Arrow, Home, End) | Native `<video>` controls + cue-driven pause |
-| `slide_viewed` telemetry | `video_cue_reached`, `video_segment_completed` |
-| `Slide` child rows | `TimedCue` children wrapping allowed blocks |
-
-**Author API** (additive):
-
-```tsx
-<InteractiveVideo blockId="safety-briefing" title="PPE overview" src="/video/ppe.mp4" showVideoScore>
-  <TimedCue atSeconds={30} label="Check">
-    <TrueFalse checkId="ppe-tf" question="PPE required?" answer={true} />
-  </TimedCue>
-  <TimedCue atSeconds={90}>
-    <Text>Report hazards to your supervisor.</Text>
-  </TimedCue>
-</InteractiveVideo>
+## Release timeline
+
+```text
+Foundation (shipped)     0.1.x ──► 0.9.x ──► 1.0.0 stable API
+Framework blocks         1.1.x ──► 1.6.0   compounds + content waves + interchange
+Planned                  1.7.x ──► 1.8.x ──► 2.x (mobile + writing tools)
 ```
 
-#### Deliverables — 1.4.0
+### Foundation releases (0.x → 1.0.0) — shipped
 
-- [x] **`Video`** primitive — `src`, `poster`, optional WebVTT `captions`; native controls
-- [x] **`TimedCue`** — `atSeconds`, `label?`, `mustComplete?`; single allowed child
-- [x] **`InteractiveVideo`** — `CompoundHandle` + session resume (video time, cue index, child assessment state)
-- [x] **Playback semantics** — pause on cue reveal; block seek past incomplete mandatory cues
-- [x] **Allowlists** — `TIMED_CUE_ALLOWED_CHILD_TYPES`, `INTERACTIVE_VIDEO_ALLOWED_CHILD_TYPES`; `Video` + 1.4 blocks on `Page` / `Slide`
-- [x] **Telemetry** — `video_cue_reached`, `video_segment_completed`, block interaction events; xAPI mapping
-- [x] **`block-catalog.v3.json`** — 38 entries including all 1.4 blocks
-- [x] **Tier B assessments** — `Summary`, `ImagePairing`, `ImageSequencing`, `ArithmeticQuiz`, `Essay`
-- [x] **Tier C/D content** — `MemoryGame`, `InformationWall`, `ParallaxSlideshow`, `Questionnaire`
-- [x] **Tests** — unit, integration SCORM packaging, Playwright e2e smoke
-- [x] **Golden example** — `examples/interactive-video`
-- [x] **Docs** — [MIGRATION-1.3-to-1.4.md](docs/MIGRATION-1.3-to-1.4.md); H5P capability map updates
+All pre-1.0 milestones are **complete** and folded into the **1.0.0** public API.
 
-#### Out of scope for 1.4.x
-
-- **H5P platform interop** — out of scope; native `InteractiveVideo` ships in **1.4.x**
-- **`BranchingScenario`** — [1.5.x](#15x--branchingscenario)
-- **YouTube/Vimeo embed-first video** — self-hosted `<video>` + optional `src` URL only in 1.4.0; external embeds research later
-- **Adaptive bitrate / HLS/DASH** — out of scope
-- **Drag-and-drop inside video canvas**, **bookmarks/chapters UI**, **“go to time” author UI** — defer unless golden example needs a subset
-- **Full H5P Interactive Video parity** on day one — document as incremental allowlist expansion
-- **`WordSearch`**, nested **`Accordion`**, unrestricted **`Embed`** — remain excluded from compounds (existing policy)
-
-#### Depends on
-
-- 1.3.x compound infrastructure — `CompoundHandle`, catalog v3, session resume v2, `useCompoundShell`
-- 1.1.x assessment contract — scored timed overlays call `getScore`, `resetTask`, `getCurrentState`, etc.
-
----
-
-### 1.5.x — BranchingScenario
-
-**Status:** **Shipped in 1.5.0**.
-
-#### Goals
-
-- Ship H5P-aligned **`BranchingScenario`** compound (`H5P.BranchingScenario`) so authors stop hand-rolling branch state with `useState` + ad hoc `track("interaction", …)` (see `examples/customer-service` → `EscalationBranch`).
-- Replace linear **page-index** navigation with a **declarative branch graph**: start node, content nodes, choice nodes, and terminal nodes—each with an explicit allowlist of child blocks.
-- Extend **telemetry catalog v3+** with first-class branch events (`branch_node_viewed`, `branch_selected`) and xAPI mapping (path + choice outcomes), not only generic `interaction` payloads.
-- Preserve **CompoundHandle** score aggregation, session resume, and export parity for assessments on the **visited path only**.
-
-#### Architecture note
-
-`BranchingScenario` reuses compound registry, child assessment handles, and session resume v2—but **not** linear `useCompoundNavigation`. The main divergence from `InteractiveBook` / `SlideDeck` is **graph navigation** instead of a single `activePageIndex` sequence.
-
-| InteractiveBook / SlideDeck (1.2.x–1.3.x) | BranchingScenario (1.5.x) |
-| --- | --- |
-| Linear page/slide index | `nodeId`-keyed graph; one active node at a time |
-| `goNext` / `goPrev` | `BranchChoice` transitions to `targetNodeId` |
-| `book_page_viewed` / `slide_viewed` | `branch_node_viewed`, `branch_selected` |
-| Resume: `activePageIndex` | Resume: `activeNodeId`, `visitedNodeIds[]`, per-node child states |
-
-**Resume extension:** follow the **`InteractiveVideo` meta pattern**—store graph position (`activeNodeId`, optional `visitedNodeIds`, optional per-choice timestamps) in `CompoundResumeState.childStates` under a reserved meta key until a catalog v4 resume schema is justified. Rehydrate visited-path assessments only; do not reset sibling branches the learner never entered.
-
-**Scoring:** aggregate `getScore` / `getMaxScore` across assessments registered on **visited nodes** (and the active node). Optional `scoreWeight` on `BranchChoice` for H5P-style choice scoring—default unscored choices.
-
-**Author API** (additive, illustrative):
-
-```tsx
-<BranchingScenario
-  blockId="resolution-paths"
-  title="Resolution paths"
-  startNodeId="offer"
-  showPathScore
->
-  <BranchNode nodeId="offer">
-    <Scenario>
-      <p>Part ships tomorrow but the customer missed a deadline. How do you close the loop?</p>
-    </Scenario>
-    <BranchChoice label="Offer shipping credit + proactive updates" targetNodeId="credit" />
-    <BranchChoice label="Warm-transfer to supervisor" targetNodeId="supervisor" />
-  </BranchNode>
-
-  <BranchNode nodeId="credit" terminal>
-    <Reflection prompt="Write the one-sentence case note the next agent should see first." />
-    <TrueFalse checkId="credit-check" question="Document the credit code?" answer={true} />
-  </BranchNode>
-
-  <BranchNode nodeId="supervisor" terminal>
-    <Text>Stay on the line until the supervisor joins - no cold transfer.</Text>
-  </BranchNode>
-</BranchingScenario>
-```
-
-**Node kinds (1.5.0 scope):**
-
-| Kind | Props | Child allowlist (initial) |
+| Milestone | Theme | Key packages / outputs |
 | --- | --- | --- |
-| `BranchNode` | `nodeId`, `terminal?` | `Scenario`, `Text`, `Heading`, `Image`, `Video`, `Reflection`, assessment contract blocks, Tier C/D content blocks (same curated set as `Page`, minus layout-only blocks) |
-| `BranchChoice` | `label`, `targetNodeId`, `scoreWeight?`, `disabled?` | Leaf transition control inside `BranchNode`; keyboard-focusable; must reference a sibling `BranchNode` |
+| 0.1.x | MVP | `@lessonkit/react` shell components, hooks, examples, Storybook |
+| 0.2.0 | Analytics | `@lessonkit/core` session + event model; telemetry sinks; xAPI queue |
+| 0.3.0 | Accessibility | `@lessonkit/accessibility` focus trap, roving tabindex, reduced motion |
+| 0.4.x | Theming | `@lessonkit/themes` `--lk-*` tokens; `ThemeProvider` |
+| 0.5.x | Identity | Required `courseId`, `lessonId`, `checkId`; URNs — [identity ref](docs/reference/identity.md) |
+| 0.6.x | Packaging | `@lessonkit/lxpack`; SCORM/xAPI/cmi5; golden example |
+| 0.7.x | CLI | `lessonkit init`, `dev`, `build`, `package` |
+| 0.8.x | Block catalog | Machine-readable catalog; plugin host v1 — [plugins](docs/reference/plugins.md) |
+| 0.9.x | Conformance | Playwright e2e, export parity smoke, integration tests |
+| **1.0.0** | **Stable API** | Semver contract, docs site, migration from 0.x — **2026-05-30** |
 
-Validation at mount: unique `nodeId`s, `startNodeId` exists, all `targetNodeId`s resolve, no orphan nodes reachable from start, optional dev warning for unreachable nodes.
+---
 
-#### Deliverables — 1.5.0 (core)
+### Framework 1.x — shipped summary
 
-- [x] **`BranchNode`** — graph vertex wrapper; registers with parent compound; emits `branch_node_viewed`
-- [x] **`BranchChoice`** — accessible choice control (button group or radio pattern); emits `branch_selected` with `fromNodeId`, `toNodeId`, optional `scoreWeight`
-- [x] **`BranchingScenario`** — `CompoundHandle` + session resume; graph router; optional `showPathScore`
-- [x] **Graph resume** — `activeNodeId`, `visitedNodeIds`, per-node assessment child states; `resetTask` clears path + child assessments
-- [x] **Allowlists** — `BRANCH_NODE_ALLOWED_CHILD_TYPES`, `BRANCHING_SCENARIO_ALLOWED_CHILD_TYPES` in `@lessonkit/core`; catalog v3 entries
-- [x] **Telemetry** — `branch_node_viewed`, `branch_selected`; extend telemetry catalog v3; xAPI mapping (choice as `answered` where scored; path segments as `experienced`)
-- [x] **`block-catalog.v3.json`** — `BranchingScenario`, `BranchNode`, `BranchChoice`, `Embed`, `Chart` with `h5pMachineName`
-- [x] **Tests** — unit, integration SCORM packaging, Playwright e2e smoke
-- [x] **Golden example** — `examples/branching-scenario`; `customer-service` `EscalationBranch` refactor
-- [x] **Docs** — `MIGRATION-1.4-to-1.5.md`; H5P capability map + authors guide
+Detailed per-release notes live in [CHANGELOG.md](https://github.com/eddiethedean/lessonkit/blob/main/CHANGELOG.md). Migration guides: `docs/MIGRATION-*.md`.
 
-#### Deliverables — 1.5.0 (also shipped)
+| Version | Headline | Golden examples |
+| --- | --- | --- |
+| **1.1.0** | Assessment contract; Tier B P0 (`TrueFalse`, `FillInTheBlanks`, `DragAndDrop`, `DragTheWords`, `MarkTheWords`, `AssessmentSequence`); catalog v2 | `examples/assessments-p0`, `framework-11-showcase` |
+| **1.2.0** | Compounds (`Page`, `InteractiveBook`); Tier C/D P1 blocks; catalog v3 allowlists; resume v2 | `examples/interactive-book` |
+| **1.3.0** | `SlideDeck` / `Slide`; `slide_viewed` telemetry | `examples/slide-deck` |
+| **1.4.0** | `InteractiveVideo`, `Video`, `TimedCue`; Tier B/C/D bundle (Summary, Essay, MemoryGame, …) | `examples/interactive-video` |
+| **1.5.0** | `BranchingScenario` graph; `Embed`, `Chart`; branch telemetry | `examples/branching-scenario` |
+| **1.6.0** | `.lkcourse` export; `lessonkit blocks list`; content-wave blocks; `GameMap` | `examples/framework-12-showcase`, `lxpack-golden` |
+| **1.7.0** | Tier B P1 assessments (`SortParagraphs`, `GuessTheAnswer`, `MultimediaChoice`, `SingleChoiceSet`) | `examples/assessments-p0` |
 
-- [x] **`Embed`** (P3) — sandboxed iframe block; opt-in `allow` list
-- [x] **`Chart`** (P3) — bar/pie with accessible data table fallback
-- [x] **Path recap UI** — optional read-only “your path” summary on terminal nodes (`showPathRecap`)
-- [x] **`useBranchingScenario()` hook** — imperative navigation + path introspection for custom chrome
+#### 1.4.x — InteractiveVideo + bundled blocks
 
-#### Deliverables — 1.5.x minors (stretch, after 1.5.0)
+**Status:** Shipped in **1.4.0**.
 
-Ship only if 1.5.0 core is stable; each item completes the [H5P documentation checklist](#h5p-documentation-checklist-per-block):
+Compound video uses the same machinery as `SlideDeck` / `InteractiveBook` (`CompoundHandle`, session resume v2) with **time-based** `TimedCue` navigation instead of slide index. Shipped: `Video`, `TimedCue`, `InteractiveVideo`, timeline telemetry (`video_cue_reached`, `video_segment_completed`), and bundled Tier B/C/D blocks (Summary, ImagePairing, Essay, MemoryGame, …). See [MIGRATION-1.3-to-1.4.md](docs/MIGRATION-1.3-to-1.4.md) and [CHANGELOG — 1.4.0](https://github.com/eddiethedean/lessonkit/blob/main/CHANGELOG.md).
 
-- [ ] _(none deferred — stretch items shipped in 1.5.0)_
+#### 1.5.x — BranchingScenario
 
-#### Out of scope for 1.5.x
+**Status:** Shipped in **1.5.0**.
 
-- **Visual graph editor** or canvas authoring UI — React/JSX remains source of truth
-- **H5P platform interop** — out of scope; native `BranchingScenario` ships in **1.5.x**
-- **Nested `BranchingScenario`** inside another compound — defer until nesting policy is explicit
-- **`GameMap`** spatial branching — **1.6.x**
-- **Adaptive / ML routing** — authors declare static graphs only
-- **Concurrent multi-active nodes** — one active node at a time in 1.5.0
-- **Full H5P Branching Scenario parity on day one** — document incremental allowlist expansion (e.g. nested compounds inside nodes later)
+Graph compound: `BranchingScenario`, `BranchNode`, `BranchChoice`; visited-path scoring and resume; `branch_node_viewed` / `branch_selected` telemetry; `useBranchingScenario()`. Also shipped: restricted `Embed`, `Chart`, path recap UI. See [MIGRATION-1.4-to-1.5.md](docs/MIGRATION-1.4-to-1.5.md).
+
+#### 1.6.x — Portable interchange and content waves
+
+**Status:** Shipped in **1.6.0**.
+
+Platform: `.lkcourse` archive (`lessonkit export`), interchange spec, `exportLkcourse` / `validateLkcourse` / `importLkcourse`, `lessonkit blocks list`. Content wave: `Table`, `Timeline`, `Crossword`, `WordSearch`, `GameMap`, and other Tier C–E blocks (see capability map). Plugin marketplace remains research only — [plugin marketplace research](docs/guides/plugin-marketplace-research.md). See [MIGRATION-1.5-to-1.6.md](docs/MIGRATION-1.5-to-1.6.md).
+
+---
+
+## What's next
+
+### 1.7.x — Tier B P1 assessments {#17x--tier-b-p1-assessments}
+
+**Status:** Shipped in **1.7.0** — four P1 blocks plus **`Quiz` variants** (multi-select, shuffle, per-choice feedback). Tier B P1 complete.
+
+See [MIGRATION-1.6-to-1.7.md](docs/MIGRATION-1.6-to-1.7.md) and [CHANGELOG — 1.7.0](https://github.com/eddiethedean/lessonkit/blob/main/CHANGELOG.md).
+
+---
+
+### 1.7.x — Tier B P1 assessments (reference)
+
+**Goal:** Ship the four Tier B P1 question types deferred since 1.1.x, then extend `Quiz` for common MCQ variants—all **additive**, no breaking changes to the assessment contract or existing blocks.
+
+**Why now:** Compounds, resume, export parity, and `.lkcourse` interchange are stable through 1.6.x. Remaining LMS-author demand is concentrated in question-type gaps (ordering, reveal, media options, sequential MCQ sets) rather than new containers.
+
+#### Scope at a glance
+
+| Track | Targets | Target release |
+| --- | --- | --- |
+| **A — New blocks** | `SortParagraphs`, `GuessTheAnswer`, `MultimediaChoice`, `SingleChoiceSet` | **1.7.0** |
+| **B — `Quiz` variants** | Multi-select, choice shuffle, per-choice feedback | **1.7.0** |
+
+#### Architecture notes
+
+| Block | Model | Reuse |
+| --- | --- | --- |
+| `SortParagraphs` | Single `checkId`; ordered `paragraphs[]` + `correctOrder: number[]` | `AssessmentHandle`; keyboard reorder (same bar as `DragAndDrop`); new `interactionType: "sortParagraphs"` |
+| `GuessTheAnswer` | Prompt + hidden answer; optional scored text field before reveal | Unscored reveal-only mode allowed; scored mode uses `AssessmentHandle` |
+| `MultimediaChoice` | MCQ with `choices: { label, mediaUrl, mediaKind, altText? }[]` | Extends MCQ shell; **requires** text alternative for every option; captions for audio |
+| `SingleChoiceSet` | **Compound** — sequential `Quiz` steps with shared chrome | Reuses `AssessmentSequence` navigation + `CompoundHandle` score aggregation; distinct catalog entry and H5P mapping (`H5P.SingleChoiceSet`) |
+
+`SingleChoiceSet` is **not** a duplicate of `AssessmentSequence`: H5P Single Choice Set is a homogeneous MCQ run (one question type, unified progress UI). Implementation: thin compound wrapper with `sequential` defaults and MCQ-only child allowlist—or equivalent single component if the wrapper adds no author value (decide in 1.7.0 design PR).
+
+**`Quiz` extensions (track B):** additive props on `McqAssessmentProps` in `@lessonkit/core`—e.g. `answers?: string[]` (multi-select), `shuffleChoices?: boolean`, `choiceFeedback?: Record<string, string>`. Default behaviour unchanged when props omitted. LXPack descriptor schema gains optional fields; packaging remains backward compatible.
+
+#### Phased deliverables
+
+**1.7.0 — four P1 blocks**
+
+- [x] **`@lessonkit/react`**: four components implementing `AssessmentHandle` (where scored); exports from `index.tsx`
+- [x] **`@lessonkit/core`**: `AssessmentInteractionType` entries; compound allowlist updates (`ASSESSMENT_SEQUENCE`, `Page`, `Slide`, `BranchNode`, `TimedCue` as applicable); resume state shapes
+- [x] **`@lessonkit/xapi`**: mappers for new interaction types
+- [x] **`@lessonkit/lxpack`**: descriptor kinds for packaging (where scored); manifest parity validation
+- [x] **`block-catalog.v3.json`**: four entries with `h5pMachineName`, tier **B**, assessment contract flags
+- [x] **Telemetry catalog v3**: `assessment_answered` / block-specific payloads where needed (no duplicate `quiz_*` events for MCQ-shaped blocks)
+- [x] **Tests**: unit per block; compound gating (Check before Next); resume round-trip inside `AssessmentSequence`
+- [x] **Golden path**: extend `examples/assessments-p0` or add a focused lesson in `framework-11-showcase`
+- [x] **Docs**: [MIGRATION-1.6-to-1.7.md](docs/MIGRATION-1.6-to-1.7.md); capability map ✅; [H5P doc checklist](#h5p-documentation-checklist-per-block) per block
+- [x] **CI**: integration SCORM smoke for at least one new scored block; e2e spot-check in compounds
+
+**1.7.0 — `Quiz` variants (track B)**
+
+- [x] Multi-select MCQ (`answers: string[]`, partial credit policy documented)
+- [x] `shuffleChoices` (stable seed optional for resume)
+- [x] Per-choice feedback strings (a11y: announced with selection)
+- [x] Storybook + packaging tests for extended `McqAssessmentProps`
+
+#### Per-block acceptance (1.7.0)
+
+| Block | Scored | Must pass |
+| --- | --- | --- |
+| `SortParagraphs` | Yes | Keyboard reorder; screen-reader order announcements; export parity; works in `AssessmentSequence` |
+| `GuessTheAnswer` | Optional | Reveal control keyboard-accessible; scored mode syncs `checkId` with `lessonkit.json` |
+| `MultimediaChoice` | Yes | No image-only options; audio has text equivalent; same MCQ telemetry/xAPI shape as `Quiz` |
+| `SingleChoiceSet` | Yes | Aggregated score across steps; resume restores step index + child quiz states; SCORM score matches visited steps |
 
 #### Depends on
 
-- **1.4.x** — compound infrastructure, assessment contract blocks on `Page`, export parity patterns
-- **1.2.x–1.3.x** — `CompoundHandle`, `useCompoundShell` persistence hooks, catalog v3 allowlists
-- **`InteractiveVideo` resume meta pattern** — non-linear state fields without breaking `CompoundResumeState` v1 parsers
-- **`examples/customer-service`** — reference for desired UX; replace manual branch state when compound ships
+- **1.1.x** — `AssessmentHandle`, `buildAssessmentHandle`, plugin scoring, `AssessmentSequence`
+- **1.2.x–1.6.x** — compound allowlists, resume v2, export parity patterns, strict `checkId` dedupe in compounds
+
+#### Out of scope for 1.7.x
+
+- H5P import or `.h5p` transport
+- **Tier B P2** — `SpeakTheWords`, `Dictation`, `AdvancedBlanks` (backlog after 1.7.x)
+- AI auto-grading beyond existing `scoreAssessment` plugin hook
+- Nested compounds inside new assessment blocks
+- Full H5P parity for feedback animations, sound effects, or timed per-question limits (document gaps instead)
 
 #### Success criteria
 
-- Author can express the `EscalationBranch` flow declaratively without local `useState` stage machines.
-- SCORM 1.2 package from golden example reports aggregated score from assessments on the taken path.
-- `branch_selected` appears in telemetry catalog JSON and Storybook telemetry panel; xAPI statements include choice target IRIs.
-- Capability map row `H5P.BranchingScenario` → ✅ with checklist complete.
+- All four P1 capability-map rows move from ⬜ to ✅ with framework **1.7.0**.
+- `lessonkit blocks list --tier B` includes new entries; `lessonkit package --target scorm12` succeeds on golden example with new assessments.
+- Each new scored block completes export parity (standalone + SCORM) and the [H5P documentation checklist](#h5p-documentation-checklist-per-block).
+- No semver-major breaking changes to `@lessonkit/react` public props on existing blocks.
 
----
+### 1.8.x — VirtualTour (360) (planned)
 
-### 1.6.x — Portable interchange and content waves
+**Goal:** H5P-aligned `VirtualTour` compound — 360 asset pipeline, hotspot model, keyboard-accessible navigation.
 
-**Status:** **1.6.x shipped** (portable interchange + content wave blocks + `GameMap`).
+**Depends on:** compound allowlists, content-wave media patterns from 1.6.x.
 
-#### Goals
+### 2.x — Mobile and writing tools (planned)
 
-- Ship a **portable course interchange** (`.lkcourse`) so teams can archive, share, and tool against LessonKit courses without treating LMS packaging artifacts as the source of truth.
-- Expose the **block catalog as a first-class registry** (`lessonkit blocks list`) for AI assistants, codegen, and future palette UIs.
-- Document the **manifest layers** so authors understand root `lessonkit.json` vs LXPack interchange vs `.lkcourse`.
-- Continue the **H5P-aligned content backlog** (Tier C–E blocks, `GameMap`, puzzles/games) as demand-driven **1.6.x** minors.
+| Track | Deliverables |
+| --- | --- |
+| **`@lessonkit/react-native`** | Shared `@lessonkit/core` / `@lessonkit/xapi` / `@lessonkit/themes`; `Course`, `Lesson`, Tier B P0 assessments; Expo golden app; block parity matrix vs web |
+| **Writing / docs compounds** | `DocumentationTool`, `StructureStrip`, `ExportableNotes`, `PersonalityQuiz` (demand-driven) |
+| **Plugin ecosystem** | Dynamic plugin loading, LMS connector presets, marketplace (beyond 1.6.x preset packs) |
 
-**Explicit non-goal:** any **H5P platform interop** — no `.h5p` import/merge, no H5P Hub, no H5P `semantics.json` transport, no H5P runtime embedding. LessonKit implements H5P-*aligned* interaction patterns as native React blocks ([capability map](docs/project/h5p-capability-map.md)). Authors coming from H5P **rebuild** in React—not by ingesting H5P packages.
+**Out of scope for initial react-native:** in-app SCORM packaging (stays web + `@lessonkit/lxpack`); WebView-as-primary renderer.
 
-#### Deliverables — 1.6.0 (shipped)
-
-- [x] **Interchange spec** — `docs/reference/interchange.md`; `@lessonkit/lxpack/block-tree.v1.json` + `lkcourse-format.v1.json`
-- [x] **`.lkcourse` export** — `lessonkit export` producing zip with `manifest.json`, `interchange.json`, `dist/`, optional `block-tree.json`
-- [x] **`@lessonkit/lxpack`** — `exportLkcourse()`, `validateLkcourse()`, `importLkcourse()` (round-trip tests)
-- [x] **Block registry CLI** — `lessonkit blocks list` (reads `block-catalog.v3.json`)
-- [x] **Integration test** — export from golden example → validate → manifest parity on import
-- [x] **Docs** — update [manifest reference](docs/reference/manifest.md); [MIGRATION-1.5-to-1.6](docs/MIGRATION-1.5-to-1.6.md)
-
-#### Deliverables — 1.6.x minors (content waves)
-
-Ship by demand; each block completes the [H5P documentation checklist](#h5p-documentation-checklist-per-block):
-
-- [x] **Tier C–E blocks** — `Table`, `ImageJuxtaposition`, `Timeline`, `ImageSequence`, `Collage`, `AudioRecorder`, `CombinationLock`, `QrContent`, `Crossword`, `WordSearch`, `AdventCalendar` (phased **1.6.1–1.6.5**)
-- [x] **`GameMap`** (P2) — spatial compound branching (**1.6.0**)
-- [x] **Plugin marketplace** — research / presets building on **0.8.0+** plugin host ([plugin marketplace research](docs/guides/plugin-marketplace-research.md))
-
-#### Out of scope for 1.6.x
-
-- **H5P platform interop** — `.h5p` packages, H5P Hub, H5P `semantics.json`, runtime embedding, or bidirectional H5P export
-- **Visual block editor** — tooling research (later)
-- **`VirtualTour` (360)** — **1.8.x** (asset pipeline; was planned as 1.9.x)
-
-#### Success criteria
-
-- `lessonkit export` produces a valid `.lkcourse` with round-trip `lessonkit.json` parity.
-- `lessonkit blocks list --json` enumerates all v3 catalog entries with `h5pMachineName` where mapped (traceability only—not import).
-- New **1.6.x** blocks ship with catalog JSON, Storybook, capability map ✅, and export parity where scored.
-
----
+See also: [2.x — `@lessonkit/react-native`](#2x--lessonkitreact-native-planned) (detail).
 
 ### 2.x — `@lessonkit/react-native` (planned)
 
-#### Goals
-
-- Bring LessonKit authoring and runtime to **iOS and Android** with a React Native UI layer that shares the same contracts as `@lessonkit/react` (identity, assessment scoring, telemetry, resume).
-- Reuse headless packages where possible; avoid duplicating business logic in platform-specific code.
-
-#### Deliverables
-
-- **`@lessonkit/react-native`** (new package):
-  - `LessonkitProvider`, `Course`, `Lesson`, and core assessment blocks (`Quiz`, `TrueFalse`, compound containers as demand dictates)
-  - Parity with `@lessonkit/core` assessment and compound contracts (`AssessmentHandle`, `CompoundHandle`, resume state)
-  - Native accessibility: screen reader labels, focus order, reduced-motion hooks via `@lessonkit/accessibility` patterns
-- **Shared packages** (consume, do not fork):
-  - `@lessonkit/core` — runtime, progress, plugins, telemetry builder
-  - `@lessonkit/xapi` — offline queue with pluggable persistence (AsyncStorage adapter)
-  - `@lessonkit/themes` — token contract mapped to native style props / CSS-in-JS where applicable
-- **Persistence**: compound and assessment resume via pluggable storage port (AsyncStorage / secure store)
-- **Examples**: Expo or bare React Native golden path app mirroring `examples/react-vite` scope
-- **Docs**: React Native quickstart, platform limitations, and block parity matrix vs `@lessonkit/react`
-
-#### Out of scope for initial `@lessonkit/react-native`
-
-- In-app SCORM/xAPI LMS packaging (remains **`@lessonkit/lxpack`** + web build pipeline)
-- Full H5P backlog parity on day one — ship Tier B P0 assessments + `Course`/`Lesson` shell first
-- Embedded WebView fallback as the primary block renderer (native-first blocks only)
-
-#### Depends on
-
-- Stable **1.x** web API (`Assessment` contract, compound resume, plugin host)
-- Export parity and conformance patterns from **0.9.x** / **1.x** e2e harness (adapt for Detox or Maestro where feasible)
+- **Reuse:** `@lessonkit/core`, `@lessonkit/xapi` (AsyncStorage queue adapter), `@lessonkit/themes` (native tokens).
+- **Ship first:** provider shell, `Course` / `Lesson`, Tier B P0 assessments, compound resume via storage port.
+- **Tests:** adapt export-parity patterns (Detox or Maestro) where feasible.
+- **Docs:** React Native quickstart, platform limits, parity matrix.
 
 ---
 
 ## H5P-aligned capability backlog
 
-[H5P](https://h5p.org/) is a mature catalog of **50+ interactive content types** plus **compound containers** (Interactive Book, Course Presentation, Interactive Video, Branching Scenario) and **platform services** (Hub, `.h5p` transport, question-type contracts, xAPI). LessonKit uses H5P only as a **pattern reference** for native React blocks—we **do not** integrate H5P Hub, `.h5p` packages, H5P Core, or H5P authoring transport. Ship interaction patterns as `@lessonkit/react` primitives with identity v1, WCAG 2.1 AA, telemetry catalog, export parity, and machine-readable block contracts.
+[H5P](https://h5p.org/) is a **pattern reference only**. LessonKit ships native React blocks with identity v1, WCAG targets, telemetry, export parity, and catalog JSON.
 
-**Legend:** ✅ shipped · 🟡 partial · ⬜ planned
+**Do not duplicate this table in PRs.** The master traceability matrix lives in [`docs/project/h5p-capability-map.md`](docs/project/h5p-capability-map.md). Update that file when a block ships; keep this section for **planning tiers and process**.
 
-### Parity baseline (already in LessonKit)
+**Legend:** ✅ shipped · 🟡 partial · ⬜ planned · 🚫 out of scope
 
-| H5P pattern | LessonKit today | Notes |
-|-------------|-----------------|-------|
-| Multiple Choice | ✅ `Quiz` / `KnowledgeCheck` | Single-select MCQ; sync `checkId` with `lessonkit.json` |
-| Scenario / narrative block | ✅ `Scenario` | Manual `interaction` telemetry |
-| Reflection / open response | ✅ `Reflection` | Textarea; not auto-scored |
-| Column / stacked layout | ✅ `Page` | Compound layout primitive (1.2.x) |
-| Course / lesson structure | ✅ `Course`, `Lesson` | Differs from H5P "one activity per embed" |
-| Progress / completion | ✅ `ProgressTracker`, hooks | H5P scores per activity; we aggregate at course level |
-| Theming | ✅ `@lessonkit/themes` | `--lk-*` vs H5P per-library CSS |
-| xAPI + LMS export | ✅ `@lessonkit/xapi`, `@lessonkit/lxpack` | SCORM/xAPI/cmi5 via packaging, not `.h5p` |
-| Content-type discovery | ✅ | Block registry + `lessonkit blocks list` (1.6.0) |
+### Shipped coverage (summary)
 
-### Tier A — Compound experiences (highest leverage)
+| Tier | Theme | Status |
+| --- | --- | --- |
+| **A** | Compounds: book, deck, video, branching, game map | All P0 ✅; `VirtualTour` ⬜ 1.8.x |
+| **B** | Assessments / question types | P0 ✅; P1 ✅ **1.7.0** (four blocks + `Quiz` variants); P2 speech/dictation ⬜ backlog |
+| **C–E** | Media, cards, puzzles | Shipped through **1.6.0** (see capability map) |
+| **F** | Platform (registry, `.lkcourse`, packaging) | Shipped **1.6.0**; mobile ⬜ **2.x** |
 
-These are H5P's "course builders." Each becomes a **framework container** with an explicit **sub-block allowlist** (H5P curates these for versioning, UX, and scoring—see [question-type contract](https://h5p.org/documentation/developers/contracts)).
+### Planned blocks (not yet shipped)
 
-| Priority | H5P content type | LessonKit target | Framework | Depends on |
-|----------|------------------|------------------|-----------|------------|
-| P0 | **Interactive Book** | `InteractiveBook` | **1.2.x** ✅ | Page layout, resume state, sub-block catalog |
-| P0 | **Course Presentation** | `SlideDeck` | **1.3.x** ✅ | Slide schema, per-slide block allowlist, keyboard slide nav |
-| P0 | **Interactive Video** | `InteractiveVideo` | **1.4.0** ✅ | Video block, `TimedCue`, timed overlays, Tier B/C/D blocks |
-| P0 | **Branching Scenario** | `BranchingScenario` + `BranchNode` + `BranchChoice` | **1.5.0** ✅ | Graph navigation, visited-path scoring, `branch_*` telemetry |
-| P1 | **Question Set (Quiz)** | `AssessmentSequence` | **1.1.x** ✅ | Question-type contract (below) |
-| P1 | **Column** → **Page** | `Page` | **1.2.x** ✅ | Unified semantics with Interactive Book chapters |
-| P2 | **Game Map** | `GameMap` | **1.6.0** ✅ | Spatial layout, optional non-scored stages |
-| P2 | **Virtual Tour (360)** | `VirtualTour` | **1.8.x** | 360 asset pipeline, hotspot model |
-| P3 | **Documentation Tool** | `DocumentationTool` | **2.x** | Cornell notes, exportable learner artifacts |
-| P3 | **Interactive Canvas / Structure Strip** | `StructureStrip`, `WritingCanvas` | **2.x** | Writing pedagogy; lower than core LMS parity |
+| Priority | LessonKit target | Milestone | Tier |
+| --- | --- | --- | --- |
+| P2 | `SpeakTheWords`, `SpeakTheWordsSet`, `Dictation` | Backlog | B |
+| P2 | `AdvancedBlanks` | Backlog | B |
+| P2 | `VirtualTour` | 1.8.x | A |
+| P3 | `DocumentationTool`, `StructureStrip`, `ExportableNotes`, `PersonalityQuiz` | 2.x | A/D |
+| P4 | `AugmentedReality` | Research | E |
 
-**Deliverables (cross-cutting for Tier A):**
+### Platform analogues (Tier F)
 
-- **Compound block contract** in `block-contract.v1.json`: allowed child types, max nesting depth, score aggregation, `resetTask` / `getCurrentState` for resume
-- **Telemetry**: `branch_node_viewed`, `branch_selected` (**1.5.x**); `slide_viewed`, `video_cue_reached`, `video_segment_completed`, `book_page_viewed` (catalog v3, shipped)
-- **Docs**: composition guide (which blocks nest where), parity with export targets
+| H5P analogue (not integrated) | LessonKit approach | Status |
+| --- | --- | --- |
+| Content Type Hub | `lessonkit blocks list` + `block-catalog.v3.json` | ✅ 1.6.0 |
+| `.h5p` transport | `.lkcourse` zip + interchange spec | ✅ 1.6.0 |
+| `.h5p` import / Hub | — | 🚫 Out of scope |
+| H5P `semantics.json` editor | Block catalog + React props | 🚫 Out of scope |
+| Question-type contract | `Assessment` interface + block-contract | ✅ 1.1.x |
+| Compound allowlists | `allowedChildTypes` in catalog | ✅ 1.2.x |
+| Resume / attempts | `getCurrentState` + session v2 | ✅ 1.2.x |
+| Mobile apps | `@lessonkit/react-native` | ⬜ 2.x |
+| Community libraries | Plugin marketplace | ⬜ 2.x (presets: [research](docs/guides/plugin-marketplace-research.md)) |
 
-### Tier B — Questions and scored tasks
+### Implementation principles
 
-Extend beyond MCQ via a formal **assessment contract** (H5P's `H5P.Question` pattern: `getScore`, `getMaxScore`, `getAnswerGiven`, `resetTask`, `showSolutions`, `getXAPIData`, `enableRetry` / `enableSolutionsButton`).
+When adding backlog items:
 
-| Priority | H5P content type | LessonKit component / block | Notes |
-|----------|------------------|----------------------------|-------|
-| P0 | **True/False** | `TrueFalse` ✅ | Smallest extension of `Quiz` |
-| P0 | **Fill in the Blanks** | `FillInTheBlanks` ✅ | Text input scoring; xAPI `fill-in` |
-| P0 | **Drag and Drop** | `DragAndDrop` ✅ | Image or text targets; keyboard alternative required |
-| P0 | **Drag the Words** | `DragTheWords` ✅ | Sub-type of drag + text |
-| P0 | **Mark the Words** | `MarkTheWords` ✅ | Click/highlight; keyboard-selectable tokens |
-| P1 | **Single Choice Set** | `SingleChoiceSet` | Sequential single-question slides |
-| P1 | **Multiple Choice** (variants) | Extend `Quiz` | Multi-select, shuffle, feedback modes |
-| P1 | **Summary** | `Summary` | Construct summary from statement bank; ships **1.4.0** ✅ |
-| P1 | **Sort the Paragraphs** | `SortParagraphs` | Ordering task; drag or keyboard reorder |
-| P1 | **Guess the Answer** | `GuessTheAnswer` | Reveal answer; optional scoring |
-| P1 | **Multimedia Choice** | `MultimediaChoice` | Image/audio options (a11y captions required) |
-| P2 | **Speak the Words** / **Speak the Words Set** | `SpeakTheWords`, `SpeakTheWordsSet` | Web Speech API; graceful degradation |
-| P2 | **Dictation** | `Dictation` | Audio prompt + text compare |
-| P2 | **Complex / Advanced Fill in the Blanks** | `AdvancedBlanks` | Dropdown/markup blanks; higher a11y bar |
-| P3 | **Arithmetic Quiz** | `ArithmeticQuiz` | Timed math; optional (no H5P Question Set contract); ships **1.4.0** ✅ |
-| P3 | **Essay** (third-party in H5P) | `Essay` | AI/manual grading hooks via `scoreAssessment` plugin; ships **1.4.0** ✅ |
-| P3 | **Questionnaire** | `Questionnaire` | Unscored survey; feedback export; ships **1.4.0** ✅ |
-
-**Framework milestone:** **1.1.x — Assessment contract v1** — shared `Assessment` base, catalog entries, Storybook, e2e for Tier B P0 items.
-
-### Tier C — Media, images, and exploration
-
-| Priority | H5P content type | LessonKit target | Notes |
-|----------|------------------|------------------|-------|
-| P1 | **Image Hotspots** | `ImageHotspots` ✅ | Regions + popovers; keyboard reachable hotspots |
-| P1 | **Find the Hotspot** / **Find Multiple Hotspots** | `FindHotspot`, `FindMultipleHotspots` ✅ | Scored discovery tasks |
-| P1 | **Image Slider** | `ImageSlider` ✅ | Carousel primitive |
-| P2 | **Image Juxtaposition** | `ImageJuxtaposition` ✅ | Before/after slider |
-| P2 | **Agamotto (Image Blender)** | `ImageSequence` ✅ | Progressive image sequence |
-| P2 | **Collage** | `Collage` ✅ | Multi-image layout block |
-| P2 | **Image Pairing** / **Image Sequencing** | `ImagePairing`, `ImageSequencing` | Memory/order games; ships **1.4.0** ✅ |
-| P2 | **Memory Game** | `MemoryGame` | Card flip; focus management; ships **1.4.0** ✅ |
-| P3 | **Iframe Embedder** | `Embed` (restricted) ✅ | Sandboxed, responsive; opt-in for security |
-| P3 | **Chart** | `Chart` ✅ | Bar/pie; accessible data table fallback |
-
-### Tier D — Text, cards, and informational content
-
-| Priority | H5P content type | LessonKit target | Notes |
-|----------|------------------|------------------|-------|
-| P1 | **Accordion** | `Accordion` ✅ | Nest policy (no accordion-in-accordion) |
-| P1 | **Dialog Cards** | `DialogCards` ✅ | Flip cards; reduced-motion safe |
-| P1 | **Flashcards** | `Flashcards` ✅ | Study mode; optional self-score |
-| P2 | **Timeline** | `Timeline` ✅ | Events + media; fragile as sub-content in H5P—test resize |
-| P2 | **Table** | `Table` ✅ | Rich text table |
-| P2 | **Information Wall** | `InformationWall` | Searchable panels; ships **1.4.0** ✅ |
-| P3 | **Exportable Text Area / Cornell** | `CornellNotes`, `ExportableNotes` | Learner export (PDF/text) |
-| P3 | **Personality Quiz** | `PersonalityQuiz` | Outcome buckets; community pattern, lower priority |
-| P1 | **Audio Recorder** | `AudioRecorder` ✅ | Learner recording; consent + storage policy |
-| P2 | **Slideshow (parallax)** | `ParallaxSlideshow` | Presentation variant; respect `prefers-reduced-motion`; ships **1.4.0** ✅ |
-
-**Primitives (H5P sub-content):** `Text`, `Heading`, `Image`, and media blocks with shared semantics for compounds.
-
-### Tier E — Games, puzzles, and novelty
-
-Lower priority unless a customer/LMS parity request surfaces; still catalog for AI discoverability.
-
-| H5P content type | LessonKit target | Priority |
-|------------------|------------------|----------|
-| Crossword | `Crossword` ✅ | P3 (1.6.x) |
-| Find the Words | `WordSearch` ✅ | P3 (1.6.x; keyboard a11y hard—excluded from compound allowlists) |
-| Combination Lock | `CombinationLock` ✅ | P3 (1.6.x) |
-| KewAr Code / QR | `QrContent` ✅ | P3 (1.6.x) |
-| Advent Calendar | `AdventCalendar` ✅ | P3 (1.6.x) |
-| Agora World (AR) | `AugmentedReality` | P4 / research |
-
-### Tier F — LessonKit platform (H5P analogues for reference only)
-
-LessonKit ships its **own** platform surfaces (block registry, `.lkcourse`, LMS packaging). Rows below name familiar **H5P services** only to show what LessonKit does instead—not as integration targets.
-
-| H5P analogue (not integrated) | LessonKit approach | Milestone |
-|-------------------------------|-------------------|-----------|
-| Content Type Hub | **Block registry** — `lessonkit blocks list`, `block-catalog.v3.json`; optional `@lessonkit/blocks-*` split later | CLI **1.6.x** |
-| `.h5p` transport | **`.lkcourse`** portable zip + interchange spec (LessonKit-native only) | Framework **1.6.0** |
-| `.h5p` import / Hub install | — | 🚫 **Out of scope** — rebuild as native blocks |
-| H5P `semantics.json` editor | — | 🚫 **Out of scope** — use block catalog + React props (future inspector is LessonKit-schema only) |
-| Question-type contract | `Assessment` interface + `block-contract` enforcement | Framework **1.1.x** ✅ |
-| Compound sub-content allowlists | Per-parent `allowedChildTypes` in catalog | Framework **1.2.x** ✅ |
-| Resume / attempt state | `getCurrentState` on assessments + compounds; session storage v2 | Framework **1.2.x** ✅ |
-| H5P OER Hub | **Example template gallery** (LessonKit examples repo; not H5P content) | Examples + docs **1.x** |
-| Community libraries | Plugin `interactionBlocks` + marketplace (runtime) | Framework **2.x** (1.6.x: [preset packs](docs/guides/plugin-marketplace-research.md) only) |
-| LTI / embed | LMS packaging (SCORM/xAPI/cmi5); standalone embed snippet in docs | Docs + lxpack **1.x** |
-| Mobile apps | **`@lessonkit/react-native`** | Framework **2.x** |
-| Per-widget CSS | Global `--lk-*` tokens via `@lessonkit/themes` | Ongoing |
-
-### Implementation principles (learned from H5P)
-
-When implementing backlog items, follow H5P's constraints **in React form**:
-
-1. **Design by contract** — compound parents call documented methods on children (scores, reset, xAPI, resume).
-2. **One implementation per block type per course build** — avoid duplicate library versions in nested trees (H5P global version lock).
-3. **Sub-content curation** — not every block nests everywhere; document allowlists like H5P maintainers do.
-4. **Keyboard-first** — exclude or fix patterns H5P excludes (e.g. non-keyboard word search) rather than shipping inaccessible compounds.
-5. **Export parity** — every scored block must map to `lessonkit.json` assessments and LXPack descriptors.
-6. **Machine-readable catalog** — each new block extends `block-catalog.v*.json` before downstream tools ship palette support.
-7. **H5P documentation** — every shipped H5P-parity block completes the [checklist below](#h5p-documentation-checklist-per-block) in the same PR (or release) as the component.
+1. **Design by contract** — compounds call documented assessment methods (score, reset, resume, xAPI).
+2. **One block type per build** — avoid duplicate implementations in nested trees.
+3. **Curated nesting** — document allowlists; exclude inaccessible patterns (e.g. `WordSearch` in compounds).
+4. **Keyboard-first** — fix or exclude; do not ship inaccessible compound children.
+5. **Export parity** — scored blocks map to `lessonkit.json` and LXPack descriptors.
+6. **Catalog first** — extend `block-catalog.v3.json` before palette or codegen tools.
+7. **Docs gate** — complete the [checklist below](#h5p-documentation-checklist-per-block) in the same release as the component.
 
 ### H5P documentation checklist (per block)
 
-**Gate:** a framework block is not **done** for H5P parity until these are checked off (copy into PR description or release notes).
+A block is not **done** for H5P parity until all items are checked (copy into PR or release notes):
 
 | # | Task | Where |
 | --- | --- | --- |
-| 1 | Set capability map **Status** to ✅ and confirm **Framework** column | [`docs/project/h5p-capability-map.md`](docs/project/h5p-capability-map.md) master table |
-| 2 | Add row: LessonKit id, **H5P display name**, **H5P machine name** (if known) | Same map + [block catalog](docs/reference/block-catalog.md) (v1 or v2 section) |
-| 3 | Document props, `checkId` / `blockId`, a11y, telemetry, parent constraints | [block catalog](docs/reference/block-catalog.md) per-block section (or new subsection) |
-| 4 | Add **H5P equivalent** admonition or table row on the block's doc touchpoints | At minimum: block catalog; [components guide](docs/guides/react-developers/components-and-hooks.md) table if public API; [H5P authors guide](docs/guides/h5p-for-lessonkit-authors.md) "Available today" or "Planned" table when status changes |
-| 5 | Storybook story titled with **H5P name in subtitle** (e.g. "FillInTheBlanks — H5P Fill in the Blanks") | `packages/react/stories/` |
-| 6 | If scored: example `lessonkit.json` `assessments[]` entry + export parity note | Golden example or [packaging guide](docs/reference/packaging.md) callout when first of kind |
-| 7 | `h5pAlias` / `h5pMachineName` in **block-catalog JSON** entry | `block-catalog.v3.json` + `buildBlockCatalog()` |
-
-**Ongoing pages (already live—keep links accurate):** [docs index](docs/index.md) H5P tip, [H5P authors guide](docs/guides/h5p-for-lessonkit-authors.md), [capability map](docs/project/h5p-capability-map.md).
-
-**Applies to:** all Tier A–E blocks in the [H5P-aligned backlog](#h5p-aligned-capability-backlog), not only 1.1.x.
-
-### Suggested delivery phases
-
-```text
-Framework 1.1.x   Assessment contract + Tier B P0 + H5P doc checklist per block
-Framework 1.2.x   Page/InteractiveBook foundation + resume state + catalog allowlists + H5P docs
-Framework 1.3.x   SlideDeck (Course Presentation) + H5P docs
-Framework 1.4.0   InteractiveVideo + Video + TimedCue + Tier B/C/D blocks + golden example
-Framework 1.5.0   BranchingScenario + Embed + Chart + branch telemetry + golden example
-Framework 1.5.x   _(stretch items shipped in 1.5.0)_
-Framework 1.6.0   `.lkcourse` export + interchange spec + `lessonkit blocks list` — **shipped**
-Framework 1.6.x   `.lkcourse` + content waves + `GameMap` — **shipped** (1.6.0)
-Framework 1.8.x+  Virtual Tour (360) and spatial media pipelines
-Framework 2.x     @lessonkit/react-native (iOS/Android) + shared core/xapi contracts
-```
-
-**Documentation:** [`docs/project/h5p-capability-map.md`](docs/project/h5p-capability-map.md) — traceability matrix (status ✅ as blocks ship). **Per-block gate:** [H5P documentation checklist](#h5p-documentation-checklist-per-block) required for every new H5P-parity feature. **Hub pages:** [`docs/guides/h5p-for-lessonkit-authors.md`](docs/guides/h5p-for-lessonkit-authors.md), [docs index](docs/index.md), [block catalog](docs/reference/block-catalog.md), components guide.
-
-**Out of scope (explicit):** H5P Core, H5P Hub, `.h5p` import/merge/export, H5P `semantics.json` transport, iframe-first H5P embeds, and parity with every unmaintained H5P third-party type.
+| 1 | Set capability map **Status** to ✅; confirm **Framework** column | [`h5p-capability-map.md`](docs/project/h5p-capability-map.md) |
+| 2 | Add H5P display + machine name row | Capability map + [block catalog](docs/reference/block-catalog.md) |
+| 3 | Document props, IDs, a11y, telemetry, parent constraints | Block catalog per-block section |
+| 4 | Update authors guide shipped/planned tables | [H5P authors guide](docs/guides/h5p-for-lessonkit-authors.md) |
+| 5 | Storybook subtitle includes H5P display name | `packages/react/stories/` |
+| 6 | If scored: `lessonkit.json` assessment entry + export parity note | Golden example or [packaging](docs/reference/packaging.md) |
+| 7 | Set `h5pMachineName` / `h5pAlias` on catalog JSON entry | `block-catalog.v3.json` |
 
 ---
 
-## Milestone alignment
+## Explicit non-goals
 
-```text
-0.1.x → 0.2.0 → 0.3.0 → 0.4.0 → 0.5.0 → 0.6.0 → 0.7.0 → 0.8.0+ → 0.9.x → 1.0.0
-                                                                              │
-Framework 1.1.x → 1.2.x → 1.3.x → 1.4.x → 1.5.x → 1.6.x+  (blocks + compounds)
-Framework 2.x     @lessonkit/react-native (mobile delivery)
-        ▲
-        └── driven by H5P-aligned backlog (see above)
-```
+- H5P Core, H5P Hub, `.h5p` import/merge/export, H5P `semantics.json` transport
+- Visual timeline authoring (Studio was removed; React-only)
+- Iframe-first H5P embeds as the primary delivery model
+- Parity with every unmaintained H5P third-party type
+- Full H5P parity on day one for any single block — ship incrementally and document gaps
+
+---
+
+## How to use this doc
+
+| If you are… | Start here |
+| --- | --- |
+| Shipping a release | [CHANGELOG.md](https://github.com/eddiethedean/lessonkit/blob/main/CHANGELOG.md) + [RELEASING.md](https://github.com/eddiethedean/lessonkit/blob/main/RELEASING.md); update **At a glance** and shipped summary above |
+| Adding a block | [Adding a framework block](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/adding-a-framework-block.html) + [checklist](#h5p-documentation-checklist-per-block) + capability map |
+| Planning a quarter | **What's next** + capability map planned rows |
+| Evaluating the product | [Enterprise evaluation](https://lessonkit.readthedocs.io/en/latest/guides/enterprise-evaluation.html) on Read the Docs |
+
+When this roadmap and the capability map disagree, **the capability map wins** for block-level status; **CHANGELOG wins** for what shipped in a given version.

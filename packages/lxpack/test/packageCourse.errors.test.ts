@@ -14,6 +14,7 @@ vi.mock("@lxpack/api", () => ({
 }));
 
 import { packageLessonkitCourse } from "../src/packageCourse";
+import { validatePackageInputs } from "../src/packaging/validateInputs";
 import { writeMinimalParitySource } from "./helpers/writeMinimalParitySource";
 
 const tempDirs: string[] = [];
@@ -280,6 +281,17 @@ describe("packageLessonkitCourse errors", () => {
       expect(result.issues[0]?.path).toBe("spaDirs");
       expect(result.issues[0]?.message).toContain("spaDistDir not found");
     }
+  });
+
+  it("accepts absolute output under projectRoot outside outDir before staging", async () => {
+    const root = await makeTempDir();
+    const result = validatePackageInputs({
+      target: "scorm12",
+      outDir: join(root, "course"),
+      projectRoot: root,
+      output: join(root, "artifacts", "course-scorm12.zip"),
+    });
+    expect(result.ok).toBe(true);
   });
 
   it("returns ok false when build outputPath is outside staging", async () => {

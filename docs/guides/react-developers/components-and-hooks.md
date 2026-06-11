@@ -46,12 +46,18 @@
 | `AudioRecorder` | Audio Recorder |
 | `QrContent` | QR Content |
 | `AdventCalendar` | Advent Calendar |
+| `SortParagraphs` | Sort the Paragraphs |
+| `GuessTheAnswer` | Guess the Answer |
+| `MultimediaChoice` | Multimedia Choice |
+| `SingleChoiceSet` | Single Choice Set |
 | `Scenario` | Scenario / narrative block |
 | `Reflection` | Open response (manual scoring) |
 
 Compound containers include `InteractiveBook`, `SlideDeck`, `InteractiveVideo`, **`BranchingScenario`** (1.5), and **`GameMap`** (1.6). See **[Coming from H5P?](../h5p-for-lessonkit-authors.md)** and the **[capability map](../../project/h5p-capability-map.md)**.
 
 **Framework 1.6 blocks** (`Table`, `Timeline`, `Crossword`, `WordSearch`, `GameMap`, `CombinationLock`, and others): see [Block catalog — 1.6.0](../../reference/block-catalog.md#catalog-v3-additions-framework-160) and [generated prop tables](../../reference/block-catalog.md#generated-prop-reference-catalog-v3).
+
+**Framework 1.7 blocks** (`SortParagraphs`, `GuessTheAnswer`, `MultimediaChoice`, `SingleChoiceSet`, plus Quiz multi-select/shuffle/feedback): see [Block catalog — 1.7.0](../../reference/block-catalog.md#catalog-v3-additions-framework-170) and [Migration 1.6 → 1.7](../../MIGRATION-1.6-to-1.7.md).
 :::
 
 Canonical block list, props, and contracts: [Block catalog reference](../../reference/block-catalog.md).
@@ -127,7 +133,7 @@ Import tree-shake friendly: `import { Quiz } from "@lessonkit/react/blocks"`.
 
 ## Common optional props
 
-Full contracts: [Block catalog](../../reference/block-catalog.md) · [Storybook](https://eddiethedean.github.io/lessonkit/storybook/).
+Full contracts: [Block catalog](../../reference/block-catalog.md) · [Storybook gallery](../../reference/storybook-gallery.md) · [Storybook on GitHub Pages](https://eddiethedean.github.io/lessonkit/storybook/).
 
 | Component | Optional props | Notes |
 | --- | --- | --- |
@@ -142,6 +148,7 @@ Full contracts: [Block catalog](../../reference/block-catalog.md) · [Storybook]
 | `Chart` | `title` | Accessible data table fallback for screen readers |
 | `ThemeProvider` | `mode`, `preset`, `tokens` | `mode`: `light` \| `dark` \| `system` |
 
+(lessonkitconfig-on-course-lessonkitprovider)=
 ### `LessonkitConfig` (on `Course` / `LessonkitProvider`)
 
 | Field | Purpose |
@@ -157,7 +164,7 @@ Errors: `assertProductionCourseConfig()` throws in production when console sinks
 
 ## Storybook
 
-Browse published stories: **[Storybook on GitHub Pages](https://eddiethedean.github.io/lessonkit/storybook/)**.
+Browse published stories: **[Storybook on GitHub Pages](https://eddiethedean.github.io/lessonkit/storybook/)** · [Component gallery (Storybook)](../../reference/storybook-gallery.md) on Read the Docs.
 
 Run the gallery locally from the monorepo:
 

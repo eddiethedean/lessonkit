@@ -30,7 +30,7 @@ lessonkit package --target scorm12   # LMS artifact
 | Flag | Purpose |
 | --- | --- |
 | `--here` | Scaffold in the current directory |
-| `--force` | Overwrite existing files in the target directory |
+| `--force` | With `--here`: scaffold in a non-empty directory; conflicting template files (e.g. `.gitignore`, `README.md`) are backed up to `.lessonkit-init-backup/` before overwrite. Non-conflicting files are kept. |
 | `--skip-install` | Skip `npm install` after copying the template |
 
 ### Package targets
@@ -57,7 +57,7 @@ Subprocess timeout defaults to **30 minutes** (`LESSONKIT_CMD_TIMEOUT_MS`).
 
 ## Docs
 
-[5-minute guide](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/getting-started-in-5-minutes.html) · [CLI reference](https://lessonkit.readthedocs.io/en/latest/reference/cli.html) · [Ship to LMS checklist](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/ship-to-lms.html) · [Packaging guide](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/packaging-and-cli.html) · [Published template](https://github.com/eddiethedean/lessonkit/tree/main/packages/cli/template/vite-react) (monorepo source: [`templates/vite-react`](https://github.com/eddiethedean/lessonkit/tree/main/templates/vite-react))
+[5-minute guide](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/getting-started-in-5-minutes.html) · [CLI reference](https://lessonkit.readthedocs.io/en/latest/reference/cli.html) · [LMS Go-Live](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/lms-go-live.html) · [Packaging guide](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/packaging-and-cli.html) · [Published template](https://github.com/eddiethedean/lessonkit/tree/main/packages/cli/template/vite-react) (monorepo source: [`templates/vite-react`](https://github.com/eddiethedean/lessonkit/tree/main/templates/vite-react))
 
 ## License
 

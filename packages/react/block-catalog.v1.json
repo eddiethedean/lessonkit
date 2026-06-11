@@ -249,6 +249,30 @@
           "description": "Correct choice value (must match one choice)."
         },
         {
+          "name": "answers",
+          "type": "string[]",
+          "required": false,
+          "description": "When length > 1, enables multi-select checkbox mode."
+        },
+        {
+          "name": "shuffleChoices",
+          "type": "boolean",
+          "required": false,
+          "description": "Randomize choice order in the SPA."
+        },
+        {
+          "name": "shuffleSeed",
+          "type": "string | number",
+          "required": false,
+          "description": "Stable shuffle seed (defaults to checkId)."
+        },
+        {
+          "name": "choiceFeedback",
+          "type": "Record<string, string>",
+          "required": false,
+          "description": "Per-choice feedback announced on selection."
+        },
+        {
           "name": "passingScore",
           "type": "number",
           "required": false,
@@ -264,8 +288,8 @@
       "a11y": {
         "element": "section",
         "ariaLabel": "Quiz",
-        "keyboard": "Radio group navigable with arrow keys; one choice per question.",
-        "liveRegions": "role='status' aria-live='polite' for Correct / Try again feedback.",
+        "keyboard": "Radio group (single-select) or checkbox group (multi-select); Check required for multi-select.",
+        "liveRegions": "role='status' aria-live='polite' for Correct / Try again and per-choice feedback.",
         "notes": "Fieldset with visually hidden legend. KnowledgeCheck is an alias that renders Quiz with identical behavior."
       },
       "theming": {

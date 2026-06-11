@@ -17,13 +17,32 @@ export function useLessonkit() {
   return ctx;
 }
 
-/** Read course progress state (completed lessons, active lesson). */
+/**
+ * Read course progress state (completed lessons, active lesson).
+ *
+ * @example
+ * ```tsx
+ * const { completedLessons, activeLessonId } = useProgress();
+ * ```
+ *
+ * @throws When used outside `LessonkitProvider` / `Course`.
+ */
 export function useProgress() {
   const { progress } = useLessonkit();
   return progress;
 }
 
-/** Emit typed telemetry events from custom UI (`track("interaction", …)`). */
+/**
+ * Emit typed telemetry events from custom UI (`track("interaction", …)`).
+ *
+ * @example
+ * ```tsx
+ * const { track } = useTracking();
+ * track("interaction", { label: "hint-opened" }, { lessonId: "lesson-1" });
+ * ```
+ *
+ * @throws When used outside `LessonkitProvider` / `Course`.
+ */
 export function useTracking() {
   const { track } = useLessonkit();
   return useMemo(() => ({ track }), [track]);

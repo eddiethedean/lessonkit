@@ -133,6 +133,7 @@ Construct a summary from a statement bank in correct order.
 | `checkId` | CheckId | yes | Stable check id. |
 | `statements` | string[] | yes | Available statements. |
 | `correct` | string[] | yes | Correct ordered summary. |
+| `instructions` | string | no | Learner-facing prompt; defaults to a multi-select instruction. |
 | `enableRetry` | boolean | no | Allow retry after completion. |
 | `enableSolutionsButton` | boolean | no | Show solution control. |
 | `autoCheck` | boolean | no | Check answers automatically when possible. |
@@ -220,6 +221,82 @@ Open text response; manual or plugin grading.
 **Required IDs:** `checkId`
 
 **Telemetry:** `assessment_answered`, `assessment_completed`
+
+## SortParagraphs
+
+Order paragraphs into the correct sequence.
+
+**Component page:** [SortParagraphs demo](components/sort-paragraphs.md) (live embed + when to use)
+
+| Prop | Type | Required | Description |
+| --- | --- | --- | --- |
+| `checkId` | CheckId | yes | Stable check id. |
+| `paragraphs` | string[] | yes | Paragraph texts. |
+| `correctOrder` | number[] | yes | Correct index order. |
+| `enableRetry` | boolean | no | Allow retry after completion. |
+| `enableSolutionsButton` | boolean | no | Show solution control. |
+| `autoCheck` | boolean | no | Check answers automatically when possible. |
+| `passingScore` | number | no | Minimum score to pass. |
+
+**Required IDs:** `checkId`
+
+**Telemetry:** `assessment_answered`, `assessment_completed`
+
+## GuessTheAnswer
+
+Reveal or score a hidden answer.
+
+**Component page:** [GuessTheAnswer demo](components/guess-the-answer.md) (live embed + when to use)
+
+| Prop | Type | Required | Description |
+| --- | --- | --- | --- |
+| `checkId` | CheckId | no | Required when scored (default). |
+| `prompt` | string | yes | Prompt text. |
+| `answer` | string | yes | Hidden answer. |
+| `scored` | boolean | no | Score learner guess (default true). |
+| `enableRetry` | boolean | no | Allow retry after completion. |
+| `enableSolutionsButton` | boolean | no | Show solution control. |
+| `autoCheck` | boolean | no | Check answers automatically when possible. |
+| `passingScore` | number | no | Minimum score to pass. |
+
+**Telemetry:** `assessment_answered`, `assessment_completed`
+
+## MultimediaChoice
+
+Multiple choice with image or audio options.
+
+**Component page:** [MultimediaChoice demo](components/multimedia-choice.md) (live embed + when to use)
+
+| Prop | Type | Required | Description |
+| --- | --- | --- | --- |
+| `checkId` | CheckId | yes | Stable check id. |
+| `question` | string | yes | Question text. |
+| `choices` | MultimediaChoiceOption[] | yes | Media choices. |
+| `answer` | string | yes | Correct choice label. |
+| `enableRetry` | boolean | no | Allow retry after completion. |
+| `enableSolutionsButton` | boolean | no | Show solution control. |
+| `autoCheck` | boolean | no | Check answers automatically when possible. |
+| `passingScore` | number | no | Minimum score to pass. |
+
+**Required IDs:** `checkId`
+
+**Telemetry:** `assessment_answered`, `assessment_completed`
+
+## SingleChoiceSet
+
+Sequential MCQ slides with aggregated scoring.
+
+**Component page:** [SingleChoiceSet demo](components/single-choice-set.md) (live embed + when to use)
+
+| Prop | Type | Required | Description |
+| --- | --- | --- | --- |
+| `blockId` | BlockId | no | Stable block id. |
+| `title` | string | no | Set title. |
+| `showSetScore` | boolean | no | Show aggregated score. |
+| `children` | ReactNode | yes | Quiz or KnowledgeCheck steps. |
+| `enableRetry` | boolean | no | Allow retry after completion. |
+| `enableSolutionsButton` | boolean | no | Show solution control. |
+| `autoCheck` | boolean | no | Check answers automatically when possible. |
 
 ## Text
 

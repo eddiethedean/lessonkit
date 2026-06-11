@@ -386,6 +386,44 @@ describe("lkcourse", () => {
     expect(result.ok).toBe(false);
   });
 
+  it("validateLkcourseArchiveEntries rejects unlisted dist entries", () => {
+    const entries = buildArchiveEntries();
+    entries.set("dist/injected.js", utf8ToEntry("console.log('evil');"));
+    const result = validateLkcourseArchiveEntries(entries, "injected.lkcourse");
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.issues.some((issue) => issue.path === "dist/injected.js")).toBe(true);
+  });
+
+  it("validateLkcourse rejects archives with unlisted dist entries", async () => {
+    const root = await mkdtemp(join(tmpdir(), "lk-injected-"));
+    tempDirs.push(root);
+    const archive = join(root, "injected.lkcourse");
+    const entries = buildArchiveEntries();
+    entries.set("dist/injected.js", utf8ToEntry("console.log('evil');"));
+    await writeFile(archive, createZip(entries));
+    const result = validateLkcourse(archive);
+    expect(result.ok).toBe(false);
+  });
+
+  it("importLkcourse does not extract unlisted dist entries", async () => {
+    const root = await mkdtemp(join(tmpdir(), "lk-import-injected-"));
+    tempDirs.push(root);
+    const archive = join(root, "tampered.lkcourse");
+    const entries = buildArchiveEntries();
+    entries.set("dist/injected.js", utf8ToEntry("console.log('evil');"));
+    await writeFile(archive, createZip(entries));
+
+    const importDir = await mkdtemp(join(tmpdir(), "lk-import-injected-target-"));
+    tempDirs.push(importDir);
+    const imported = await importLkcourse({
+      archivePath: archive,
+      targetDir: importDir,
+    });
+    expect(imported.ok).toBe(false);
+    await expect(access(join(importDir, "dist", "injected.js"))).rejects.toThrow();
+  });
+
   it("validateLkcourseArchiveEntries rejects invalid interchange schema", () => {
     const result = validateLkcourseArchiveEntries(
       buildArchiveEntries({ interchange: { schemaVersion: 1, course: { lessons: [] } } }),
@@ -420,6 +458,78 @@ describe("lkcourse", () => {
     expect(result.ok).toBe(false);
   });
 
+  it("export rejects non-injectable SPA-only assessments", async () => {
+    const root = await mkdtemp(join(tmpdir(), "lk-export-fib-"));
+    tempDirs.push(root);
+    await writeMinimalProject(root);
+
+    const manifestWithFib = {
+      ...minimalManifest,
+      course: {
+        ...minimalManifest.course,
+        assessments: [
+          minimalManifest.course.assessments[0]!,
+          {
+            kind: "fillInBlanks" as const,
+            checkId: "fib-1",
+            question: "Fill",
+            template: "Type *here*",
+            blanks: [{ id: "b1", answer: "here" }],
+          },
+        ],
+      },
+    };
+    await writeFile(join(root, "lessonkit.json"), JSON.stringify(manifestWithFib));
+
+    const manifestParsed = parseLessonkitManifest(manifestWithFib);
+    expect(manifestParsed.ok).toBe(true);
+    if (!manifestParsed.ok) return;
+
+    const exported = await exportLkcourse({
+      projectRoot: root,
+      manifest: manifestParsed.manifest,
+    });
+    expect(exported.ok).toBe(false);
+    if (exported.ok) return;
+    expect(exported.issues.some((i) => i.message.includes("fillInBlanks"))).toBe(true);
+  });
+
+  it("validateLkcourseArchiveEntries rejects SPA-only assessments in source manifest", () => {
+    const manifestWithFib = {
+      ...minimalManifest,
+      course: {
+        ...minimalManifest.course,
+        assessments: [
+          minimalManifest.course.assessments[0]!,
+          {
+            kind: "fillInBlanks" as const,
+            checkId: "fib-1",
+            question: "Fill",
+            template: "Type *here*",
+            blanks: [{ id: "b1", answer: "here" }],
+          },
+        ],
+      },
+    };
+    const interchange = descriptorToInterchange(manifestWithFib.course);
+    const result = validateLkcourseArchiveEntries(
+      buildArchiveEntries({
+        interchange,
+        manifestEnvelope: { sourceManifest: manifestWithFib },
+      }),
+      "spa-only-assessments.lkcourse",
+    );
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(
+      result.issues.some(
+        (i) =>
+          i.path.includes("assessments") &&
+          (i.message.includes("fillInBlanks") || i.message.includes("interchange")),
+      ),
+    ).toBe(true);
+  });
+
   it("extractBlockTree parses nested JSX and unknown tags", async () => {
     const root = await mkdtemp(join(tmpdir(), "lk-nested-"));
     tempDirs.push(root);
@@ -448,6 +558,24 @@ export function Nested() {
     const flat = flattenBlocks(tree.blocks);
     expect(flat.some((b) => b.type === "Course" && b.courseId === "c1")).toBe(true);
     expect(flat.some((b) => b.type === "Unknown" && b.rawTag === "CustomWidget")).toBe(true);
+  });
+
+  it("export rejects default archive path into reserved directories", async () => {
+    const root = await mkdtemp(join(tmpdir(), "lk-reserved-name-"));
+    tempDirs.push(root);
+    await writeMinimalProject(root);
+    const manifestParsed = parseLessonkitManifest(minimalManifest);
+    expect(manifestParsed.ok).toBe(true);
+    if (!manifestParsed.ok) return;
+
+    const exported = await exportLkcourse({
+      projectRoot: root,
+      manifest: { ...manifestParsed.manifest, name: ".git" },
+    });
+    expect(exported.ok).toBe(false);
+    if (!exported.ok) {
+      expect(exported.issues.some((i) => i.message.includes("reserved"))).toBe(true);
+    }
   });
 
   it("export rejects unsafe output path", async () => {
@@ -654,6 +782,63 @@ export function Nested() {
     const restored = JSON.parse(await readFile(join(targetDir, "lessonkit.json"), "utf8"));
     expect(restored.course.title).toBe("Original Title");
     expect(await readFile(join(targetDir, "dist", "index.html"), "utf8")).toContain("original");
+  });
+
+  it("rollbackFailedImport removes partial artifacts from an empty target", async () => {
+    const targetDir = await mkdtemp(join(tmpdir(), "lk-rollback-empty-"));
+    tempDirs.push(targetDir);
+
+    await writeFile(join(targetDir, "lessonkit.json"), '{"partial":true}\n');
+    await mkdir(join(targetDir, "dist"), { recursive: true });
+    await writeFile(join(targetDir, "dist", "index.html"), "partial\n");
+
+    const { rollbackFailedImport } = await import("../src/lkcourse/import");
+    await rollbackFailedImport(targetDir, undefined, new Set());
+
+    await expect(access(join(targetDir, "lessonkit.json"))).rejects.toThrow();
+    await expect(access(join(targetDir, "dist"))).rejects.toThrow();
+  });
+
+  it("importLkcourse leaves an empty target unchanged when promote fails", async () => {
+    const root = await mkdtemp(join(tmpdir(), "lk-export-empty-promote-fail-"));
+    tempDirs.push(root);
+    await writeMinimalProject(root);
+
+    const manifestParsed = parseLessonkitManifest(minimalManifest);
+    expect(manifestParsed.ok).toBe(true);
+    if (!manifestParsed.ok) return;
+
+    const exported = await exportLkcourse({
+      projectRoot: root,
+      manifest: manifestParsed.manifest,
+    });
+    expect(exported.ok).toBe(true);
+    if (!exported.ok) return;
+
+    const importDir = await mkdtemp(join(tmpdir(), "lk-import-empty-promote-fail-"));
+    tempDirs.push(importDir);
+
+    const importModule = await import("../src/lkcourse/import");
+    importModule.__setPromoteImportStagingForTests(async (stagingDir, targetDir) => {
+      await writeFile(join(targetDir, "lessonkit.json"), '{"partial":true}\n');
+      await mkdir(join(targetDir, "dist"), { recursive: true });
+      await writeFile(join(targetDir, "dist", "index.html"), "partial\n");
+      throw new Error("simulated promote failure");
+    });
+
+    try {
+      const result = await importLkcourse({
+        archivePath: exported.archivePath,
+        targetDir: importDir,
+      });
+      expect(result.ok).toBe(false);
+      expect(result.ok === false && result.issues[0]?.message).toContain("simulated promote failure");
+
+      await expect(access(join(importDir, "lessonkit.json"))).rejects.toThrow();
+      await expect(access(join(importDir, "dist"))).rejects.toThrow();
+    } finally {
+      importModule.__setPromoteImportStagingForTests(null);
+    }
   });
 
   it("importLkcourse restores target artifacts when promote fails", async () => {

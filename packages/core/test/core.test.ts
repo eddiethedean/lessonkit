@@ -591,6 +591,92 @@ describe("@lessonkit/core", () => {
     expect(firstBatch?.[0]?.id).toBe("evt-dup");
   });
 
+  it("flush on empty buffer is a no-op; post-dispose flush does not invoke batchSink", async () => {
+    const batchSink = vi.fn(async () => {});
+    const client = createTrackingClient({
+      batchSink,
+      batch: { enabled: true, flushIntervalMs: 0, maxBatchSize: 10 },
+    });
+
+    await client.flush?.();
+    expect(batchSink).not.toHaveBeenCalled();
+
+    await client.dispose?.();
+    await client.flush?.();
+    expect(batchSink).not.toHaveBeenCalled();
+  });
+
+  it("buffers events by default when batchSink is set", async () => {
+    const received: TelemetryEvent[] = [];
+    const batchSink = vi.fn(async (events: TelemetryEvent[]) => {
+      received.push(...events);
+    });
+    const client = createTrackingClient({ batchSink });
+    const event = interactionEvent("t");
+    client.track(event);
+    expect(batchSink).not.toHaveBeenCalled();
+    await client.flush?.();
+    expect(batchSink).toHaveBeenCalledTimes(1);
+    expect(received[0]).toMatchObject({
+      courseId: "test-course",
+      name: "interaction",
+    });
+  });
+
+  it("drops events when no sink is configured and batching is disabled", () => {
+    const client = createTrackingClient({ batch: { enabled: false } });
+    expect(() => client.track(interactionEvent("t"))).not.toThrow();
+    expect(client.flush).toBeUndefined();
+  });
+
+  it("formats non-Error sync failures in development", async () => {
+    vi.stubEnv("NODE_ENV", "development");
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const client = createTrackingClient({
+      sink: () => {
+        throw "sync-string";
+      },
+      batch: { enabled: false },
+    });
+    expect(() => client.track(interactionEvent("t"))).not.toThrow();
+    await expect(client.deliver?.(interactionEvent("t"))).resolves.toBe(false);
+    expect(warn).toHaveBeenCalledWith(
+      expect.stringContaining("tracking sink failed"),
+      "sync-string",
+    );
+    warn.mockRestore();
+    vi.unstubAllEnvs();
+  });
+
+  it("warns on async sink failures in development but stays silent in production", async () => {
+    const sink = vi.fn(async () => {
+      throw "async-string";
+    });
+
+    vi.stubEnv("NODE_ENV", "development");
+    const devWarn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const devClient = createTrackingClient({ sink, batch: { enabled: false } });
+    devClient.track(interactionEvent("t-dev"));
+    await new Promise((r) => setTimeout(r, 0));
+    expect(sink).toHaveBeenCalledTimes(1);
+    expect(devWarn).toHaveBeenCalledWith(
+      expect.stringContaining("tracking sink failed"),
+      "async-string",
+    );
+    devWarn.mockRestore();
+
+    sink.mockClear();
+    vi.stubEnv("NODE_ENV", "production");
+    const prodWarn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const prodClient = createTrackingClient({ sink, batch: { enabled: false } });
+    expect(() => prodClient.track(interactionEvent("t-prod"))).not.toThrow();
+    await new Promise((r) => setTimeout(r, 0));
+    expect(sink).toHaveBeenCalledTimes(1);
+    expect(prodWarn).not.toHaveBeenCalled();
+    prodWarn.mockRestore();
+    vi.unstubAllEnvs();
+  });
+
   it("dispose calls onBufferDrop for each event dropped after flush cap", async () => {
     vi.stubEnv("NODE_ENV", "production");
     const onBufferDrop = vi.fn();

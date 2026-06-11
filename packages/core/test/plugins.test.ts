@@ -283,4 +283,24 @@ describe("createPluginRegistry", () => {
       passed: true,
     });
   });
+
+  it("runTelemetry stops chaining once an event is filtered", () => {
+    const second = vi.fn(() => null);
+    const host = createPluginRegistry([
+      defineTelemetryPlugin({
+        id: "drop",
+        version: "1",
+        kind: "analytics",
+        onTelemetry: () => null,
+      }),
+      defineTelemetryPlugin({
+        id: "second",
+        version: "1",
+        kind: "analytics",
+        onTelemetry: second,
+      }),
+    ]);
+    expect(host.runTelemetry(baseEvent, ctx)).toBeNull();
+    expect(second).not.toHaveBeenCalled();
+  });
 });

@@ -5,17 +5,18 @@ Pick the migration guide for your **current** version. After upgrading, run `les
 :::{admonition} Pin aligned versions
 :class: important
 
-Bump all `@lessonkit/*` packages to the same semver (for example **1.6.0**). Mismatched workspace versions cause subtle runtime bugs.
+Bump all `@lessonkit/*` packages to the same semver (for example **1.7.0**). Mismatched workspace versions cause subtle runtime bugs.
 :::
 
 ## Migration guides
 
-**Latest:** [MIGRATION-1.5-to-1.6](../MIGRATION-1.5-to-1.6.md) (current npm line **1.6.x**).
+**Latest:** [MIGRATION-1.6-to-1.7](../MIGRATION-1.6-to-1.7.md) (current npm line **1.7.x**).
 
 Older jumps (linked from the table below and the [detailed migration pages](#detailed-migration-pages) section):
 
 | From | To | Guide |
 | --- | --- | --- |
+| 1.6.x | 1.7.x | [MIGRATION-1.6-to-1.7](../MIGRATION-1.6-to-1.7.md) — Tier B P1 assessments |
 | 1.5.x | 1.6.x | [MIGRATION-1.5-to-1.6](../MIGRATION-1.5-to-1.6.md) — `.lkcourse` export, `lessonkit blocks list` |
 | 1.4.x | 1.5.x | [MIGRATION-1.4-to-1.5](../MIGRATION-1.4-to-1.5.md) — `BranchingScenario`, `Embed`, `Chart`, branch resume |
 | 1.3.x | 1.4.x | [MIGRATION-1.3-to-1.4](../MIGRATION-1.3-to-1.4.md) — `InteractiveVideo`, Tier B/C/D blocks, production guard |
@@ -51,6 +52,7 @@ If you used `npx @lessonkit/cli init` recently on the latest CLI, you likely do 
 :hidden:
 :maxdepth: 1
 
+../MIGRATION-1.6-to-1.7
 ../MIGRATION-1.x-to-2.0
 ../MIGRATION-v1-runtime
 ../MIGRATION-1.5-to-1.6

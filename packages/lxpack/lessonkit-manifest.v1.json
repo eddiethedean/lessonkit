@@ -90,7 +90,10 @@
         { "$ref": "#/$defs/TrueFalseAssessmentDescriptor" },
         { "$ref": "#/$defs/FillInBlanksAssessmentDescriptor" },
         { "$ref": "#/$defs/FindHotspotAssessmentDescriptor" },
-        { "$ref": "#/$defs/FindMultipleHotspotsAssessmentDescriptor" }
+        { "$ref": "#/$defs/FindMultipleHotspotsAssessmentDescriptor" },
+        { "$ref": "#/$defs/SortParagraphsAssessmentDescriptor" },
+        { "$ref": "#/$defs/GuessTheAnswerAssessmentDescriptor" },
+        { "$ref": "#/$defs/MultimediaChoiceAssessmentDescriptor" }
       ]
     },
     "AssessmentBase": {
@@ -114,7 +117,18 @@
               "minItems": 1,
               "items": { "type": "string", "minLength": 1 }
             },
-            "answer": { "type": "string", "minLength": 1 }
+            "answer": { "type": "string", "minLength": 1 },
+            "answers": {
+              "type": "array",
+              "minItems": 1,
+              "items": { "type": "string", "minLength": 1 }
+            },
+            "shuffleChoices": { "type": "boolean" },
+            "shuffleSeed": { "oneOf": [{ "type": "string" }, { "type": "number" }] },
+            "choiceFeedback": {
+              "type": "object",
+              "additionalProperties": { "type": "string" }
+            }
           },
           "required": ["choices", "answer"]
         }
@@ -187,6 +201,59 @@
               "minItems": 1,
               "items": { "type": "string", "minLength": 1 }
             }
+          }
+        }
+      ]
+    },
+    "SortParagraphsAssessmentDescriptor": {
+      "allOf": [
+        { "$ref": "#/$defs/AssessmentBase" },
+        {
+          "type": "object",
+          "required": ["kind", "paragraphs", "correctOrder"],
+          "properties": {
+            "kind": { "const": "sortParagraphs" },
+            "paragraphs": {
+              "type": "array",
+              "minItems": 1,
+              "items": { "type": "string", "minLength": 1 }
+            },
+            "correctOrder": {
+              "type": "array",
+              "minItems": 1,
+              "items": { "type": "integer", "minimum": 0 }
+            }
+          }
+        }
+      ]
+    },
+    "GuessTheAnswerAssessmentDescriptor": {
+      "allOf": [
+        { "$ref": "#/$defs/AssessmentBase" },
+        {
+          "type": "object",
+          "required": ["kind", "answer"],
+          "properties": {
+            "kind": { "const": "guessTheAnswer" },
+            "answer": { "type": "string", "minLength": 1 }
+          }
+        }
+      ]
+    },
+    "MultimediaChoiceAssessmentDescriptor": {
+      "allOf": [
+        { "$ref": "#/$defs/AssessmentBase" },
+        {
+          "type": "object",
+          "required": ["kind", "choices", "answer"],
+          "properties": {
+            "kind": { "const": "multimediaChoice" },
+            "choices": {
+              "type": "array",
+              "minItems": 1,
+              "items": { "type": "string", "minLength": 1 }
+            },
+            "answer": { "type": "string", "minLength": 1 }
           }
         }
       ]

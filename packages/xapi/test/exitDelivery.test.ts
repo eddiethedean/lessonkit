@@ -1,5 +1,6 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 import {
+  createInMemoryXAPIQueue,
   createXAPIClient,
   loadDeadLetterStatements,
   resetXAPIDeadLetterForTests,
@@ -54,6 +55,25 @@ describe("xAPI exit delivery (C-1)", () => {
     expect(loadDeadLetterStatements().map((s) => s.id)).toContain("exit-stmt-1");
   });
 
+  it("reports dead-letter persist failures via onDeadLetterPersistError", async () => {
+    vi.spyOn(sessionStorage, "setItem").mockImplementation(() => {
+      throw new Error("quota");
+    });
+    const onDeadLetterPersistError = vi.fn();
+    const client = createXAPIClient({
+      courseId: "course-1",
+      exitTransport: () => Promise.reject(new Error("keepalive-failed")),
+      onDeadLetterPersistError,
+    });
+    client.send(stmt);
+    client.flushOnExit?.();
+    await new Promise((r) => setTimeout(r, 0));
+    expect(onDeadLetterPersistError).toHaveBeenCalledWith(
+      expect.objectContaining({ message: "quota" }),
+      { statement: expect.objectContaining({ id: "exit-stmt-1" }) },
+    );
+  });
+
   it("re-queues dead-letter statements on next client init", () => {
     sessionStorage.setItem("lk-xapi-dead-letter", JSON.stringify([stmt]));
     const client = createXAPIClient({ courseId: "course-1" });
@@ -99,6 +119,51 @@ describe("xAPI flush serialization (H-10)", () => {
     client.send({ ...stmt, id: "b" });
     await flushPromise;
     expect(transport).toHaveBeenCalledTimes(2);
+  });
+
+  it("flush failure re-queues statements sent during in-flight flush", async () => {
+    let releaseTransport!: () => void;
+    const transport = vi.fn(async () => {
+      await new Promise<void>((resolve) => {
+        releaseTransport = resolve;
+      });
+      throw new Error("network");
+    });
+    const queue = createInMemoryXAPIQueue();
+    queue.enqueue({ ...stmt, id: "a" });
+    const client = createXAPIClient({ courseId: "course-1", transport, queue });
+    const flushPromise = client.flush();
+    await Promise.resolve();
+    client.send({ ...stmt, id: "b" });
+    releaseTransport();
+    await expect(flushPromise).rejects.toThrow("network");
+    expect(client.queueSize()).toBe(2);
+  });
+
+  it("flushOnExit delivers statements buffered during in-flight flush", async () => {
+    let releaseTransport!: () => void;
+    const transport = vi.fn(
+      () =>
+        new Promise<void>((resolve) => {
+          releaseTransport = resolve;
+        }),
+    );
+    const exitTransport = vi.fn(async () => {});
+    const queue = createInMemoryXAPIQueue();
+    queue.enqueue({ ...stmt, id: "a" });
+    const client = createXAPIClient({
+      courseId: "course-1",
+      transport,
+      exitTransport,
+      queue,
+    });
+    const flushPromise = client.flush();
+    await Promise.resolve();
+    client.send({ ...stmt, id: "b" });
+    client.flushOnExit?.();
+    expect(exitTransport).toHaveBeenCalledWith(expect.objectContaining({ id: "b" }));
+    releaseTransport();
+    await flushPromise;
   });
 
   it("flushOnExit dispatches in-flight statements through exit transport without re-queue on abort", async () => {

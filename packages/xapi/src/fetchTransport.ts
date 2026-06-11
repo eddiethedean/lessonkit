@@ -122,6 +122,18 @@ async function postWithRetry(
 /**
  * Creates an xAPI transport backed by fetch with timeout, retry backoff, and a
  * keepalive exit transport for pagehide delivery.
+ *
+ * @example
+ * ```ts
+ * import { createFetchTransport } from "@lessonkit/xapi";
+ *
+ * const { transport, exitTransport, abortInFlight } = createFetchTransport({
+ *   url: import.meta.env.VITE_XAPI_PROXY_URL,
+ *   headers: () => ({ Authorization: "Bearer …" }),
+ * });
+ * ```
+ *
+ * @throws When `url` points at a private/loopback host without `allowPrivateHosts: true`.
  */
 export function createFetchTransport(opts: CreateFetchTransportOptions): FetchTransportBundle {
   assertSafeLrsUrl(opts.url, { allowPrivateHosts: opts.allowPrivateHosts });
@@ -185,6 +197,18 @@ export type FetchBatchSinkBundle = {
 
 /**
  * Batch analytics sink with timeout, retry backoff, and keepalive exit delivery.
+ * Wire as `config.tracking.batchSink` and `config.tracking.exitBatchSink` in production.
+ *
+ * @example
+ * ```ts
+ * import { createFetchBatchSink } from "@lessonkit/xapi";
+ *
+ * const { batchSink, exitBatchSink } = createFetchBatchSink({
+ *   url: import.meta.env.VITE_ANALYTICS_URL,
+ * });
+ * ```
+ *
+ * @throws When `url` points at a private/loopback host without `allowPrivateHosts: true`.
  */
 export function createFetchBatchSink(opts: CreateFetchBatchSinkOptions): FetchBatchSinkBundle {
   assertSafeLrsUrl(opts.url, { allowPrivateHosts: opts.allowPrivateHosts });

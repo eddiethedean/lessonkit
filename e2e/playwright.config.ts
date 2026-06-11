@@ -16,6 +16,7 @@ export default defineConfig({
   timeout: 60_000,
   expect: { timeout: 15_000 },
   globalSetup: "./global-setup.ts",
+  globalTeardown: "./global-teardown.ts",
   use: {
     trace: "on-first-retry",
     screenshot: "only-on-failure",
@@ -51,6 +52,13 @@ export default defineConfig({
       use: {
         ...devices["Desktop Chrome"],
         baseURL: "http://127.0.0.1:4179",
+      },
+    },
+    {
+      name: "assessments-p0-scorm12",
+      testMatch: /assessments-p0\/scorm12.*\.spec\.ts/,
+      use: {
+        ...devices["Desktop Chrome"],
       },
     },
     {

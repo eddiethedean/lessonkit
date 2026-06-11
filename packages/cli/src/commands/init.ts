@@ -10,6 +10,7 @@ import { runNpmInstall } from "../lib/exec.js";
 
 const SKIP_DIRS = new Set(["node_modules", "dist", ".lxpack", ".git", "coverage", ".nyc_output"]);
 const SKIP_FILES = new Set([".DS_Store"]);
+const INIT_BACKUP_DIR = ".lessonkit-init-backup";
 
 export type InitOptions = {
   name?: string;
@@ -108,38 +109,119 @@ async function applyTemplateSubstitutions(projectDir: string, projectName: strin
   await writeFile(appPath, appSource, "utf8");
 }
 
+function toPosixRelativePath(relativePath: string): string {
+  return relativePath.replace(/\\/g, "/");
+}
+
+async function listStagingFiles(stagingDir: string, relativeDir = ""): Promise<string[]> {
+  const dir = relativeDir ? join(stagingDir, relativeDir) : stagingDir;
+  const entries = await readdir(dir, { withFileTypes: true });
+  const files: string[] = [];
+
+  for (const entry of entries) {
+    if (SKIP_DIRS.has(entry.name) || SKIP_FILES.has(entry.name)) continue;
+
+    const rel = relativeDir ? join(relativeDir, entry.name) : entry.name;
+    const relPosix = toPosixRelativePath(rel);
+
+    if (entry.isDirectory()) {
+      files.push(...(await listStagingFiles(stagingDir, rel)));
+    } else if (entry.isFile()) {
+      files.push(relPosix);
+    } else {
+      /* v8 ignore next -- template tree entries are files or directories */
+    }
+  }
+
+  return files;
+}
+
+async function listProjectFiles(projectDir: string, relativeDir = ""): Promise<Set<string>> {
+  const files = new Set<string>();
+  const dir = relativeDir ? join(projectDir, relativeDir) : projectDir;
+  if (!existsSync(dir)) return files;
+
+  const entries = await readdir(dir, { withFileTypes: true });
+  for (const entry of entries) {
+    if (relativeDir === "" && entry.name === INIT_BACKUP_DIR) continue;
+    if (relativeDir === "" && entry.name.startsWith(".lessonkit-init-")) continue;
+    if (SKIP_DIRS.has(entry.name) || SKIP_FILES.has(entry.name)) continue;
+
+    const rel = relativeDir ? join(relativeDir, entry.name) : entry.name;
+    const relPosix = toPosixRelativePath(rel);
+
+    if (entry.isDirectory()) {
+      for (const nested of await listProjectFiles(projectDir, rel)) {
+        files.add(nested);
+      }
+    } else if (entry.isFile()) {
+      files.add(relPosix);
+    }
+  }
+
+  return files;
+}
+
 async function backupConflictingFiles(
   stagingDir: string,
   projectDir: string,
 ): Promise<Map<string, Buffer>> {
   const backups = new Map<string, Buffer>();
-  const stagingEntries = await readdir(stagingDir, { withFileTypes: true });
-  for (const entry of stagingEntries) {
-    const destPath = join(projectDir, entry.name);
+  for (const relPath of await listStagingFiles(stagingDir)) {
+    const destPath = join(projectDir, relPath);
     if (!existsSync(destPath)) continue;
     const destStat = await stat(destPath);
     if (destStat.isFile()) {
-      backups.set(entry.name, await readFile(destPath));
+      backups.set(relPath, await readFile(destPath));
     }
   }
   return backups;
 }
 
+async function writeInitBackupDir(projectDir: string, backups: Map<string, Buffer>): Promise<string> {
+  const backupDir = join(projectDir, INIT_BACKUP_DIR);
+  await mkdir(backupDir, { recursive: true });
+  for (const [relPath, content] of backups) {
+    const outPath = join(backupDir, relPath);
+    await mkdir(dirname(outPath), { recursive: true });
+    await writeFile(outPath, content);
+  }
+  return backupDir;
+}
+
 async function rollbackPromotedFiles(
   projectDir: string,
   stagingDir: string,
-  preExisting: Set<string>,
+  preExistingRoots: Set<string>,
+  preExistingFiles: Set<string>,
   backups: Map<string, Buffer>,
 ): Promise<void> {
   const failures: string[] = [];
+  const stagingFiles = await listStagingFiles(stagingDir);
+
+  for (const relPath of stagingFiles) {
+    if (backups.has(relPath) || preExistingFiles.has(relPath)) continue;
+    try {
+      await rm(join(projectDir, relPath), { force: true });
+    } catch (err) {
+      failures.push(`remove ${relPath}: ${err instanceof Error ? err.message : String(err)}`);
+    }
+  }
+
   let stagingEntries;
   try {
     stagingEntries = await readdir(stagingDir, { withFileTypes: true });
   } catch {
+    if (failures.length > 0) {
+      throw new CliError(`Init rollback failed: ${failures.join("; ")}`, {
+        code: "RUNTIME",
+        exitCode: EXIT_INVALID_PROJECT,
+      });
+    }
     return;
   }
   for (const entry of stagingEntries) {
-    if (preExisting.has(entry.name)) continue;
+    if (preExistingRoots.has(entry.name)) continue;
     try {
       await rm(join(projectDir, entry.name), { recursive: true, force: true });
     } catch (err) {
@@ -148,11 +230,13 @@ async function rollbackPromotedFiles(
       );
     }
   }
-  for (const [name, content] of backups) {
+  for (const [relPath, content] of backups) {
     try {
-      await writeFile(join(projectDir, name), content);
+      const destPath = join(projectDir, relPath);
+      await mkdir(dirname(destPath), { recursive: true });
+      await writeFile(destPath, content);
     } catch (err) {
-      failures.push(`restore ${name}: ${err instanceof Error ? err.message : String(err)}`);
+      failures.push(`restore ${relPath}: ${err instanceof Error ? err.message : String(err)}`);
     }
   }
   if (failures.length > 0) {
@@ -163,12 +247,18 @@ async function rollbackPromotedFiles(
   }
 }
 
+/** Staging entries that must replace (not merge into) any existing project copy. */
+const PROMOTE_REPLACE_ENTRIES = new Set(["node_modules", "package-lock.json"]);
+
 async function promoteStagingToProjectDir(stagingDir: string, projectDir: string): Promise<void> {
   await mkdir(projectDir, { recursive: true });
   const entries = await readdir(stagingDir, { withFileTypes: true });
   for (const entry of entries) {
     const srcPath = join(stagingDir, entry.name);
     const destPath = join(projectDir, entry.name);
+    if (PROMOTE_REPLACE_ENTRIES.has(entry.name) && existsSync(destPath)) {
+      await rm(destPath, { recursive: true, force: true });
+    }
     if (entry.isDirectory()) {
       await cp(srcPath, destPath, { recursive: true });
     } else if (entry.isFile()) {
@@ -189,6 +279,10 @@ export const __testInitHelpers = {
   promoteStagingToProjectDir,
   rollbackPromotedFiles,
   backupConflictingFiles,
+  writeInitBackupDir,
+  listStagingFiles,
+  listProjectFiles,
+  INIT_BACKUP_DIR,
 };
 
 export async function runInit(opts: InitOptions, logger: CliLogger): Promise<CliJsonResult> {
@@ -227,17 +321,7 @@ export async function runInit(opts: InitOptions, logger: CliLogger): Promise<Cli
 
   if (opts.here && !(await isDirEmptyOrDotfilesOnly(projectDir)) && !opts.force) {
     throw new CliError(
-      `Directory is not empty: ${projectDir}. Use --here --force only when the directory is empty or contains dotfiles only (e.g. .git).`,
-      {
-        code: "INVALID_PROJECT",
-        exitCode: EXIT_INVALID_PROJECT,
-      },
-    );
-  }
-
-  if (opts.here && opts.force && !(await isDirEmptyOrDotfilesOnly(projectDir))) {
-    throw new CliError(
-      `Directory is not empty: ${projectDir}. --force only initializes when the directory is empty or contains dotfiles only (e.g. .git).`,
+      `Directory is not empty: ${projectDir}. Use --here --force to scaffold anyway (conflicting files are backed up under ${INIT_BACKUP_DIR}/).`,
       {
         code: "INVALID_PROJECT",
         exitCode: EXIT_INVALID_PROJECT,
@@ -267,13 +351,38 @@ export async function runInit(opts: InitOptions, logger: CliLogger): Promise<Cli
     }
 
     if (opts.here) {
-      const preExisting = new Set(await readdir(projectDir));
+      const preExistingRoots = new Set(await readdir(projectDir));
+      const preExistingFiles = await listProjectFiles(projectDir);
       const backups = await backupConflictingFiles(stagingDir, projectDir);
+      const conflicts = [...backups.keys()].sort();
+      if (conflicts.length > 0 && !opts.force) {
+        throw new CliError(
+          `Would overwrite existing file(s): ${conflicts.join(", ")}. Re-run with --force to back them up under ${INIT_BACKUP_DIR}/ and continue.`,
+          {
+            code: "INVALID_PROJECT",
+            exitCode: EXIT_INVALID_PROJECT,
+          },
+        );
+      }
+      if (conflicts.length > 0 && opts.force && !opts.json) {
+        const backupDir = await writeInitBackupDir(projectDir, backups);
+        logger.log(
+          `Backed up ${conflicts.length} conflicting file(s) to ${backupDir}: ${conflicts.join(", ")}`,
+        );
+      } else if (conflicts.length > 0 && opts.force) {
+        await writeInitBackupDir(projectDir, backups);
+      }
       try {
         await __testInitHelpers.promoteStagingToProjectDir(stagingDir, projectDir);
       } catch (promoteErr) {
         try {
-          await rollbackPromotedFiles(projectDir, stagingDir, preExisting, backups);
+          await rollbackPromotedFiles(
+            projectDir,
+            stagingDir,
+            preExistingRoots,
+            preExistingFiles,
+            backups,
+          );
         } catch (rollbackErr) {
           const promoteMessage =
             promoteErr instanceof Error ? promoteErr.message : String(promoteErr);

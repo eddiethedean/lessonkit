@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { registerRuntimeTestCleanup } from "./runtime.testSetup";
 import { describe, it, expect, vi } from "vitest";
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { Course, Lesson, LessonkitProvider, Quiz, useLessonkit, useQuizState, useTracking } from "../src";
+import { Course, Lesson, LessonkitProvider, Quiz, TrueFalse, useLessonkit, useQuizState, useTracking } from "../src";
 import {
   createSessionStoragePort,
   defineAssessmentPlugin,
@@ -11,7 +11,7 @@ import {
   type TelemetryEvent,
   type TelemetrySink,
 } from "@lessonkit/core";
-import type { XAPIStatement } from "@lessonkit/xapi";
+import { loadDeadLetterStatements, resetXAPIDeadLetterForTests, type XAPIStatement } from "@lessonkit/xapi";
 import * as courseStartedPipelineModule from "../src/runtime/courseStartedPipeline";
 
 
@@ -522,6 +522,66 @@ it("does not block next xAPI flush if previous client flush rejects", async () =
     );
 
     await waitFor(() => expect(client2.flush).toHaveBeenCalled());
+  });
+
+it("persists orphaned xAPI queue to dead-letter when courseId changes and previous flush fails", async () => {
+    const store = new Map<string, string>();
+    vi.stubGlobal("sessionStorage", {
+      get length() {
+        return store.size;
+      },
+      clear: () => store.clear(),
+      getItem: (key: string) => store.get(key) ?? null,
+      key: (index: number) => [...store.keys()][index] ?? null,
+      removeItem: (key: string) => store.delete(key),
+      setItem: (key: string, value: string) => store.set(key, value),
+    } as Storage);
+    resetXAPIDeadLetterForTests();
+
+    try {
+      const failingTransport = vi.fn(async () => {
+        throw new Error("network");
+      });
+      const onXapiTransportError = vi.fn();
+
+      const { rerender } = render(
+        <Course
+          title="Course"
+          courseId="course-a"
+          config={{
+            xapi: { transport: failingTransport },
+            observability: { onXapiTransportError },
+          }}
+        >
+          <Lesson title="Lesson" lessonId="lesson-1">
+            <div>child</div>
+          </Lesson>
+        </Course>,
+      );
+
+      await waitFor(() => expect(failingTransport).toHaveBeenCalled());
+
+      rerender(
+        <Course
+          title="Course"
+          courseId="course-b"
+          config={{
+            xapi: { transport: failingTransport },
+            observability: { onXapiTransportError },
+          }}
+        >
+          <Lesson title="Lesson" lessonId="lesson-1">
+            <div>child</div>
+          </Lesson>
+        </Course>,
+      );
+
+      await waitFor(() => expect(onXapiTransportError).toHaveBeenCalled());
+      await waitFor(() => expect(loadDeadLetterStatements().length).toBeGreaterThan(0));
+    } finally {
+      vi.unstubAllGlobals();
+      resetXAPIDeadLetterForTests();
+    }
   });
 
 it("resolveSessionId falls back when sessionStorage is unavailable", async () => {
@@ -1080,6 +1140,53 @@ it("Quiz defaults passingScore to plugin maxScore when prop is omitted", async (
     );
   });
 
+it("Quiz multi-select Check uses scoreAssessment plugin", async () => {
+    const events: TelemetryEvent[] = [];
+    const plugin = defineAssessmentPlugin({
+      id: "scorer-multi",
+      version: "1",
+      kind: "assessment",
+      scoreAssessment: () => ({ score: 99, maxScore: 99, passed: true }),
+    });
+
+    const { getByLabelText, getByTestId } = render(
+      <Course
+        title="Course"
+        courseId="course-1"
+        config={{
+          plugins: [plugin],
+          tracking: { sink: (e) => void events.push(e) },
+          xapi: { enabled: false },
+        }}
+      >
+        <Lesson title="Lesson" lessonId="lesson-1">
+          <Quiz
+            checkId="check-multi"
+            question="Select all risks"
+            choices={["A", "B", "C"]}
+            answer="A"
+            answers={["A", "B"]}
+          />
+        </Lesson>
+      </Course>,
+    );
+
+    fireEvent.click(getByLabelText("A"));
+    fireEvent.click(getByLabelText("B"));
+    fireEvent.click(getByTestId("quiz-check"));
+    await waitFor(() =>
+      expect(
+        events.some(
+          (e) =>
+            e.name === "quiz_completed" &&
+            e.data?.checkId === "check-multi" &&
+            e.data?.score === 99 &&
+            e.data?.maxScore === 99,
+        ),
+      ).toBe(true),
+    );
+  });
+
 it("Quiz rejects plugin numeric score when maxScore is zero", async () => {
     const events: TelemetryEvent[] = [];
     const plugin = defineAssessmentPlugin({
@@ -1494,6 +1601,42 @@ it("does not emit lesson_started again when remounting a completed lesson", asyn
     await waitFor(() => {
       const answered = events.find((e) => e.name === "quiz_answered");
       expect(answered?.data).toMatchObject({ choice: "A", correct: false });
+    });
+  });
+
+  it("TrueFalse assessment_answered uses factual correctness not plugin pass", async () => {
+    const events: TelemetryEvent[] = [];
+    const plugin = defineAssessmentPlugin({
+      id: "tf-pass-all",
+      version: "1",
+      kind: "assessment",
+      scoreAssessment: () => ({ score: 1, maxScore: 1, passed: true }),
+    });
+
+    const { getByLabelText } = render(
+      <Course
+        title="Course"
+        courseId="course-1"
+        config={{
+          tracking: {
+            sink: (e: TelemetryEvent) => {
+              events.push(e);
+            },
+          },
+          plugins: [plugin],
+        }}
+      >
+        <Lesson title="Lesson" lessonId="lesson-1">
+          <TrueFalse checkId="check-tf" question="Sky is blue?" answer={true} />
+        </Lesson>
+      </Course>,
+    );
+
+    fireEvent.click(getByLabelText("False"));
+
+    await waitFor(() => {
+      const answered = events.find((e) => e.name === "assessment_answered");
+      expect(answered?.data).toMatchObject({ response: false, correct: false });
     });
   });
 

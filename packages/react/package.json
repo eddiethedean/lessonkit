@@ -1,6 +1,6 @@
 {
   "name": "@lessonkit/react",
-  "version": "1.6.0",
+  "version": "1.7.0",
   "private": false,
   "description": "React components and hooks for building learning experiences with LessonKit.",
   "license": "Apache-2.0",
@@ -59,8 +59,8 @@
     "block-contract.v3.json"
   ],
   "scripts": {
-    "build": "tsup src/index.tsx src/testing.ts src/blocks-entry.ts --format esm,cjs --dts --external react --external react-dom --external @lessonkit/accessibility --external @lessonkit/lxpack --external @lessonkit/themes",
-    "dev": "tsup src/index.tsx src/testing.ts src/blocks-entry.ts --format esm,cjs --dts --watch --external react --external react-dom --external @lessonkit/accessibility --external @lessonkit/lxpack --external @lessonkit/themes",
+    "build": "tsup src/index.tsx src/testing.ts src/blocks-entry.ts --format esm,cjs --dts --tsconfig tsconfig.build.json --external react --external react-dom --external @lessonkit/accessibility --external @lessonkit/lxpack --external @lessonkit/themes",
+    "dev": "tsup src/index.tsx src/testing.ts src/blocks-entry.ts --format esm,cjs --dts --watch --tsconfig tsconfig.build.json --external react --external react-dom --external @lessonkit/accessibility --external @lessonkit/lxpack --external @lessonkit/themes",
     "storybook": "storybook dev -c .storybook -p 6006 --disable-telemetry",
     "build-storybook": "storybook build -c .storybook --disable-telemetry",
     "prepublishOnly": "npm run build",
@@ -70,7 +70,7 @@
     "lint": "eslint --max-warnings 0 \"src/**/*.{ts,tsx}\" \"test/**/*.{ts,tsx}\" \"stories/**/*.{ts,tsx}\""
   },
   "peerDependencies": {
-    "@lessonkit/lxpack": "1.6.0",
+    "@lessonkit/lxpack": "1.7.0",
     "react": ">=18",
     "react-dom": ">=18"
   },
@@ -80,11 +80,11 @@
     }
   },
   "dependencies": {
-    "@lessonkit/accessibility": "1.6.0",
-    "@lessonkit/core": "1.6.0",
-    "@lessonkit/lxpack": "1.6.0",
-    "@lessonkit/themes": "1.6.0",
-    "@lessonkit/xapi": "1.6.0"
+    "@lessonkit/accessibility": "1.7.0",
+    "@lessonkit/core": "1.7.0",
+    "@lessonkit/lxpack": "1.7.0",
+    "@lessonkit/themes": "1.7.0",
+    "@lessonkit/xapi": "1.7.0"
   },
   "devDependencies": {
     "@storybook/builder-vite": "10.4.2",

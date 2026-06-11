@@ -44,6 +44,24 @@ function defaultHeadSkippedHandler(_statement: XAPIStatement, err: unknown): voi
 /**
  * Imperative xAPI client with in-memory queue, retry flush, and optional pagehide delivery.
  * Prefer wiring transport via `LessonkitProvider` config from `@lessonkit/react` in React apps.
+ *
+ * @example
+ * ```ts
+ * import { createXAPIClient, createFetchTransport } from "@lessonkit/xapi";
+ *
+ * const client = createXAPIClient({
+ *   courseId: "my-course",
+ *   transport: createFetchTransport({ url: "/api/xapi/statements" }),
+ *   onTransportError: (err) => console.error("LRS delivery failed", err),
+ * });
+ *
+ * await client.trackTelemetryEvent({
+ *   name: "quiz_answered",
+ *   courseId: "my-course",
+ *   lessonId: "lesson-1",
+ *   checkId: "q1",
+ * });
+ * ```
  */
 export function createXAPIClient(opts?: {
   transport?: XAPITransport;
@@ -61,6 +79,8 @@ export function createXAPIClient(opts?: {
   onQueueCap?: () => void;
   /** Called when dead-letter storage drops older entries beyond the cap (200). */
   onDeadLetterTruncated?: (droppedCount: number) => void;
+  /** Called when a statement cannot be persisted to sessionStorage dead-letter storage. */
+  onDeadLetterPersistError?: (err: unknown, ctx: { statement: XAPIStatement }) => void;
   onHeadSkipped?: (statement: XAPIStatement, err: unknown) => void;
   /** Called when transport fails after retries (statement is re-queued). */
   onTransportError?: (err: unknown) => void;
@@ -70,6 +90,12 @@ export function createXAPIClient(opts?: {
   const transport = opts?.transport;
   const exitTransport = opts?.exitTransport;
   const courseId = opts?.courseId;
+  const persistDeadLetter = (statement: XAPIStatement) => {
+    persistDeadLetterStatement(statement, {
+      onTruncated: opts?.onDeadLetterTruncated,
+      onPersistError: opts?.onDeadLetterPersistError,
+    });
+  };
   const queue =
     opts?.queue ??
     createInMemoryXAPIQueue({
@@ -78,14 +104,10 @@ export function createXAPIClient(opts?: {
       onDepth: opts?.onQueueDepth,
       onCap: opts?.onQueueCap ?? defaultQueueCapHandler,
       onOverflow: (statement) => {
-        persistDeadLetterStatement(statement, {
-          onTruncated: opts?.onDeadLetterTruncated,
-        });
+        persistDeadLetter(statement);
       },
       onHeadSkipped: (statement, err) => {
-        persistDeadLetterStatement(statement, {
-          onTruncated: opts?.onDeadLetterTruncated,
-        });
+        persistDeadLetter(statement);
         (opts?.onHeadSkipped ?? defaultHeadSkippedHandler)(statement, err);
       },
     });
@@ -132,7 +154,7 @@ export function createXAPIClient(opts?: {
           () => markExitDelivered(statement),
           () => {
             exitHandoffIds.delete(statement.id);
-            persistDeadLetterStatement(statement);
+            persistDeadLetter(statement);
           },
         );
       } else {
@@ -140,12 +162,33 @@ export function createXAPIClient(opts?: {
       }
     } catch {
       exitHandoffIds.delete(statement.id);
-      persistDeadLetterStatement(statement);
+      persistDeadLetter(statement);
     }
   };
 
   const pendingDuringFlush: XAPIStatement[] = [];
   let flushInProgress = false;
+
+  const requeuePendingDuringFlush = () => {
+    const batch = pendingDuringFlush.splice(0, pendingDuringFlush.length);
+    for (const statement of batch) {
+      queue.enqueue(statement);
+    }
+  };
+
+  const persistPendingDuringFlush = () => {
+    const batch = pendingDuringFlush.splice(0, pendingDuringFlush.length);
+    for (const statement of batch) {
+      persistDeadLetter(statement);
+    }
+  };
+
+  const dispatchPendingDuringFlushOnExit = () => {
+    const batch = pendingDuringFlush.splice(0, pendingDuringFlush.length);
+    for (const statement of batch) {
+      dispatchExitStatement(statement);
+    }
+  };
 
   const sendOrQueueInternal = (statement: XAPIStatement) => {
       const normalized = withStatementId(statement);
@@ -262,6 +305,12 @@ export function createXAPIClient(opts?: {
       sendOrQueue(statement);
     },
     queueSize: () => queue.size(),
+    abandonUndelivered: () => {
+      persistPendingDuringFlush();
+      for (const statement of queue.drainAll()) {
+        persistDeadLetter(statement);
+      }
+    },
     flush: async () => {
       if (!deliveryTransport) return;
       for (;;) {
@@ -279,6 +328,9 @@ export function createXAPIClient(opts?: {
                 }
                 await runFlushLoop();
               }
+            } catch (err) {
+              requeuePendingDuringFlush();
+              throw err;
             } finally {
               flushInProgress = false;
             }
@@ -305,6 +357,7 @@ export function createXAPIClient(opts?: {
             opts.abortInFlight?.(statement.id);
             dispatchExitStatement(statement);
           }
+          dispatchPendingDuringFlushOnExit();
           queue.flushOnExit((statement) => {
             dispatchExitStatement(statement);
           });

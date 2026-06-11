@@ -7,7 +7,13 @@ export function validateInjectableAssessments(
   descriptor: LessonkitCourseDescriptor,
 ): ValidationIssue[] {
   const issues: ValidationIssue[] = [];
-  const spaOnlyKinds = new Set(["fillInBlanks", "findHotspot", "findMultipleHotspots"]);
+  const spaOnlyKinds = new Set([
+    "fillInBlanks",
+    "findHotspot",
+    "findMultipleHotspots",
+    "sortParagraphs",
+    "guessTheAnswer",
+  ]);
   (descriptor.assessments ?? []).forEach((assessment, index) => {
     if (assessmentDescriptorToLxpack(assessment) === null) {
       const kind = assessment.kind ?? "mcq";

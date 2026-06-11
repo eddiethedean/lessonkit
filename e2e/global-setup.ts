@@ -10,6 +10,7 @@ import {
   REPO_ROOT,
   TELEMETRY_HARNESS_DIR,
 } from "./support/paths";
+import { cleanupE2eGoldenPackagingArtifacts } from "./support/goldenPackagingCleanup";
 import { resolveScorm12LaunchPath, unpackScormZip } from "./support/scorm/unpack";
 
 function ensurePackagesBuilt(): void {
@@ -68,6 +69,8 @@ async function globalSetup(): Promise<void> {
   }
 
   console.log("e2e: packaging golden artifacts…");
+  await cleanupE2eGoldenPackagingArtifacts({ relocatedStandalone: true });
+
   const courseOutDir = join(GOLDEN_DIR, ".lxpack/e2e-standalone-course");
   const scormCourseOutDir = join(GOLDEN_DIR, ".lxpack/e2e-scorm-course");
   const scorm12UnpackedDir = join(ARTIFACTS_DIR, "scorm12-unpacked");

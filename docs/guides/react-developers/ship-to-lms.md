@@ -1,12 +1,14 @@
 # Ship to LMS checklist
 
-One-page checklist for taking a scaffolded LessonKit course from local preview to a working LMS upload. Complete [Getting started in 5 minutes](getting-started-in-5-minutes.md) first if you have not previewed locally yet.
+> **Appendix only.** Use [LMS Go-Live](lms-go-live.md) first. This page is a one-page quick reference.
 
-:::{admonition} Canonical guide
-:class: tip
+:::{admonition} Appendix — read LMS Go-Live first
+:class: note
 
-See **[LMS Go-Live](lms-go-live.md)** for the smoke-test vs production decision tree and SCORM path diagram.
+This one-page checklist is a **quick reference** only. For the decision tree, shared steps, and troubleshooting, start with **[LMS Go-Live](lms-go-live.md)**.
 :::
+
+One-page checklist for taking a scaffolded LessonKit course from local preview to a working LMS upload. Complete [Getting started in 5 minutes](getting-started-in-5-minutes.md) first if you have not previewed locally yet.
 
 :::{admonition} When something breaks
 :class: tip
@@ -18,7 +20,7 @@ Use the [troubleshooting decision tree](troubleshooting.md) or [FAQ](../faq.md).
 
 | Requirement | Details |
 | --- | --- |
-| Node.js | **20.19+** for `lessonkit init` and dev; **18+** minimum for packaging-only legacy agents |
+| Node.js | See [Prerequisites — decision table](../prerequisites.md) |
 | Project | From `npx @lessonkit/cli init` with `npm run dev` working |
 | IDs | `courseId`, `lessonId`, and every `checkId` match between React and `lessonkit.json` |
 
@@ -46,7 +48,7 @@ Choose one path:
 | **Production delivery** | Copy `.env.example` → `.env`; set `VITE_ANALYTICS_URL` and `VITE_XAPI_PROXY_URL`; wire observability hooks in `courseConfig.ts` (see comments there) |
 | **First smoke test only** | Temporarily set `tracking: { enabled: false }` and `xapi: { enabled: false }` in `courseConfig.ts` |
 
-Details: [Production checklist](production-checklist.md) · [Production runtime for LMS](first-lms-export.md#production-runtime-for-lms)
+Details: [LMS Go-Live](lms-go-live.md) · [Production checklist](production-checklist.md) (appendix)
 
 ### 3. Set activity IRI (xAPI / cmi5 only)
 
@@ -82,7 +84,7 @@ Before learner-facing deployment:
 
 | Topic | Guide |
 | --- | --- |
-| Step-by-step first export | [First LMS export](first-lms-export.md) |
+| Canonical go-live guide | [LMS Go-Live](lms-go-live.md) |
 | Production guardrails | [Production checklist](production-checklist.md) |
 | Proxy and CORS | [Deployment guide](deployment-guide.md) |
 | CLI flags and targets | [Packaging and CLI](packaging-and-cli.md) |

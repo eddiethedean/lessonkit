@@ -1,4 +1,5 @@
 import type { AssessmentDescriptor, LessonkitCourseDescriptor, McqAssessmentDescriptor } from "./types";
+import { isMultiSelectMcq } from "@lessonkit/core";
 
 /** Default passing threshold (1.0 = 100%) when descriptor omits passingScore — matches React SPA default. */
 const DEFAULT_SHELL_PASSING_SCORE = 1;
@@ -7,9 +8,14 @@ export type LxpackInjectedAssessment = {
   id: string;
   title?: string;
   passingScore: number;
+  maxAttempts?: number;
+  shuffleChoices?: boolean;
+  showFeedback?: "never" | "immediate" | "end";
   questions: Array<{
     id: string;
     prompt: string;
+    explanation?: string;
+    selectionMode?: "single" | "multiple";
     choices: Array<{ id: string; text: string; correct?: boolean }>;
   }>;
 };
@@ -65,6 +71,10 @@ function mcqToLxpack(assessment: McqAssessmentDescriptor): LxpackInjectedAssessm
   if (!checkId || !prompt) return null;
 
   const normalizedAnswer = assessment.answer.trim();
+  const multiCorrect =
+    assessment.answers && assessment.answers.length > 1
+      ? new Set(assessment.answers.map((a) => a.trim()))
+      : new Set([normalizedAnswer]);
   const choices = assessment.choices.map((text, index) => {
     const sanitizedText = sanitizeShellField(text);
     if (!sanitizedText) return null;
@@ -72,19 +82,27 @@ function mcqToLxpack(assessment: McqAssessmentDescriptor): LxpackInjectedAssessm
     return {
       id,
       text: sanitizedText,
-      correct: text.trim() === normalizedAnswer,
+      correct: multiCorrect.has(text.trim()),
     };
   });
 
   if (choices.some((choice) => choice === null)) return null;
 
+  const multiSelect = isMultiSelectMcq(assessment);
+
   return {
     id: checkId,
     passingScore: assessment.passingScore ?? DEFAULT_SHELL_PASSING_SCORE,
+    shuffleChoices: assessment.shuffleChoices === true ? true : undefined,
+    showFeedback:
+      assessment.choiceFeedback && Object.keys(assessment.choiceFeedback).length > 0
+        ? "immediate"
+        : undefined,
     questions: [
       {
         id: "q1",
         prompt,
+        ...(multiSelect ? { selectionMode: "multiple" as const } : {}),
         choices: choices as Array<{ id: string; text: string; correct?: boolean }>,
       },
     ],
@@ -117,8 +135,26 @@ export function assessmentDescriptorToLxpack(
   if (kind === "findMultipleHotspots") {
     return null;
   }
-  if ("choices" in assessment && "answer" in assessment && typeof assessment.answer === "string") {
-    return mcqToLxpack(assessment);
+  if (kind === "sortParagraphs" || kind === "guessTheAnswer") {
+    return null;
+  }
+  if (kind === "multimediaChoice" && assessment.kind === "multimediaChoice") {
+    return mcqToLxpack({
+      kind: "mcq",
+      checkId: assessment.checkId,
+      question: assessment.question,
+      choices: assessment.choices,
+      answer: assessment.answer,
+      passingScore: assessment.passingScore,
+    });
+  }
+  if (
+    (kind === "mcq" || assessment.kind === undefined) &&
+    "choices" in assessment &&
+    "answer" in assessment &&
+    typeof assessment.answer === "string"
+  ) {
+    return mcqToLxpack(assessment as McqAssessmentDescriptor);
   }
   return null;
 }

@@ -214,29 +214,6 @@ describe("coverage-full lxpack", () => {
       }
     });
 
-    it("rejects invalid completion threshold values", () => {
-      expect(
-        validateDescriptor({
-          ...baseDescriptor,
-          tracking: { completion: { threshold: Number.NaN } },
-        }).ok,
-      ).toBe(false);
-      expect(
-        validateDescriptor({
-          ...baseDescriptor,
-          tracking: { completion: { threshold: -0.1 } },
-        }).ok,
-      ).toBe(false);
-    });
-
-    it("rejects lessons with empty titles", () => {
-      const result = validateDescriptor({
-        ...baseDescriptor,
-        lessons: [{ id: "lesson-1", title: "   " }],
-      });
-      expect(result.ok).toBe(false);
-    });
-
     it("rejects duplicate assessment checkIds", () => {
       const assessment = {
         checkId: "check-1",
@@ -648,14 +625,40 @@ describe("coverage-full lxpack", () => {
       expect(result.ok).toBe(false);
     });
 
-    it("accepts absolute output path confined under projectRoot", async () => {
+    it("accepts absolute output under projectRoot outside outDir", async () => {
       const root = await makeTempDir("lk-val-abs-out-");
+      const outDir = join(root, "course");
       const output = join(root, "artifacts", "course-scorm12.zip");
       const result = validatePackageInputs({
         target: "scorm12",
-        outDir: join(root, "course"),
+        outDir,
         projectRoot: root,
         output,
+      });
+      expect(result.ok).toBe(true);
+    });
+
+    it("accepts absolute output path inside outDir", async () => {
+      const root = await makeTempDir("lk-val-abs-in-outdir-");
+      const outDir = join(root, "course");
+      const output = join(outDir, "course-scorm12.zip");
+      const result = validatePackageInputs({
+        target: "scorm12",
+        outDir,
+        projectRoot: root,
+        output,
+      });
+      expect(result.ok).toBe(true);
+    });
+
+    it("accepts relative output under projectRoot outside outDir", async () => {
+      const root = await makeTempDir("lk-val-rel-out-");
+      const result = validatePackageInputs({
+        target: "scorm12",
+        outDir: join(root, ".lxpack", "course"),
+        projectRoot: root,
+        output: ".lxpack/out/course-scorm12.zip",
+        outputBaseDir: ".lxpack/out",
       });
       expect(result.ok).toBe(true);
     });

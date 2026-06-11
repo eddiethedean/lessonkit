@@ -94,5 +94,20 @@
   },
   "map-exit": {
     "note": "`MapExit` links [`MapStage`](map-stage.md) steps inside a [`GameMap`](game-map.md) — no manifest entry.\n\n- **`targetStageId`** must reference another stage in the same map.\n- Optional **`scoreWeight`** when `showMapScore` is enabled on the parent."
+  },
+  "sort-paragraphs": {
+    "note": "SPA-only in LMS shell (`kind: \"sortParagraphs\"`). Omit from `assessments[]` when packaging SCORM/xAPI/cmi5 if you rely on shell scoring only.",
+    "snippet": "{\n  \"checkId\": \"ir-sort\",\n  \"kind\": \"sortParagraphs\",\n  \"question\": \"Order the incident response steps\",\n  \"paragraphs\": [\"Contain the account\", \"Notify security\", \"Document the timeline\"],\n  \"correctOrder\": [0, 1, 2]\n}"
+  },
+  "guess-the-answer": {
+    "note": "Scored variants use `kind: \"guessTheAnswer\"` and are SPA-only in the LMS shell. Set `scored={false}` in React for reveal-only mode (no descriptor required).",
+    "snippet": "{\n  \"checkId\": \"policy-guess\",\n  \"kind\": \"guessTheAnswer\",\n  \"question\": \"What is the EU privacy regulation acronym?\",\n  \"answer\": \"GDPR\"\n}"
+  },
+  "multimedia-choice": {
+    "note": "Injectable via MCQ shell (`kind: \"multimediaChoice\"`). Media URLs are SPA-only; labels must match React props.",
+    "snippet": "{\n  \"checkId\": \"channel-mm\",\n  \"kind\": \"multimediaChoice\",\n  \"question\": \"Which channel is approved for IT requests?\",\n  \"choices\": [\"Service portal\", \"Unknown email link\"],\n  \"answer\": \"Service portal\"\n}"
+  },
+  "single-choice-set": {
+    "note": "No separate descriptor kind — declare each child `Quiz` in `course.assessments[]` with its own `checkId`."
   }
 }

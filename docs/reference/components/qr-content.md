@@ -14,6 +14,7 @@ Use `QrContent` for **scan-to-reveal** bonus material — optional modules, job 
 
 - `payload` becomes the encoded QR target (URL or text).
 - Hidden content appears after the learner activates reveal.
+- The live demo encodes the published [security policy](../../project/security.md) on Read the Docs so scanning opens a reachable page.
 
 <!-- try-it:start -->
 ## Try it
@@ -46,7 +47,7 @@ Use `QrContent` for **scan-to-reveal** bonus material — optional modules, job 
 <QrContent
   blockId="bonus-qr"
   title="Scan for security checklist"
-  payload="https://intranet.example.com/security-checklist"
+  payload="https://lessonkit.readthedocs.io/en/latest/project/security.html"
   hiddenTitle="Checklist unlocked"
   hiddenBody="Optional deep dive: password managers and travel VPN."
 />
@@ -66,7 +67,7 @@ Add a QrContent block (H5P-style: KewAr Code) like this example inside the activ
 <QrContent
   blockId="bonus-qr"
   title="Scan for security checklist"
-  payload="https://intranet.example.com/security-checklist"
+  payload="https://lessonkit.readthedocs.io/en/latest/project/security.html"
   hiddenTitle="Checklist unlocked"
   hiddenBody="Optional deep dive: password managers and travel VPN."
 />

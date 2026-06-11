@@ -295,6 +295,53 @@ describe("@lessonkit/react runtime modules", () => {
     expect(pipeline.sinks.length).toBeGreaterThan(0);
   });
 
+  it("telemetryPipeline: pipeline split-brain — skips xAPI when tracking buffer drops event", async () => {
+    const tracking = createTrackingClient({
+      batchSink: async () => {
+        throw new Error("batch sink unavailable");
+      },
+      batch: { maxBatchSize: 1001 },
+    });
+    for (let i = 0; i < 1000; i++) {
+      expect(
+        tracking.track({
+          name: "interaction",
+          timestamp: "t",
+          courseId: "c",
+          data: { i },
+        }),
+      ).toBe(true);
+    }
+    expect(
+      tracking.track({
+        name: "interaction",
+        timestamp: "t",
+        courseId: "c",
+        data: { overflow: true },
+      }),
+    ).toBe(false);
+
+    const send = vi.fn();
+    const xapi = {
+      send,
+      flush: vi.fn(async () => {}),
+      queueSize: () => 0,
+      startedLesson: () => {},
+      completeLesson: () => {},
+      completeCourse: () => {},
+    };
+    await emitThroughPipeline(
+      {
+        name: "course_started",
+        timestamp: "t",
+        courseId: "c",
+        sessionId: "s",
+      },
+      { tracking, xapi, lxpackBridge: "off" },
+    );
+    expect(send).not.toHaveBeenCalled();
+  });
+
   it("telemetryPipeline: warns in dev when xAPI mapping throws", async () => {
     vi.stubEnv("NODE_ENV", "development");
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});

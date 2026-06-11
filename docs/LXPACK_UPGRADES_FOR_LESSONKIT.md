@@ -10,18 +10,19 @@ so it works better as the **packaging and LMS export layer** for
 
 - **LXPack v0.4.0** — baseline SPA + `@lxpack/api` + `lessonkit.json` merge (historical checklist below).
 - **LXPack v0.6.0** — `packageLessonkit()`, interchange schema in `@lxpack/validators`, `@lxpack/spa-bridge`, `@lxpack/tracking-schema` telemetry map, interchange `runtime` + `assessments`. **LessonKit 0.8.2** integrates these (`^0.6.0`); see [maintainer upgrade plan](#upgrade-plan-for-lxpack-maintainers).
+- **LXPack v0.7.0** — multi-select MCQ shell injection (`selectionMode: "multiple"`), `shuffleChoices` in LMS quizzes; LessonKit **1.7.x** pins `@lxpack/*` at **0.7.0** and maps `answers` / `shuffleChoices` through `@lessonkit/lxpack`.
 
 ## LXPack compatibility matrix (LessonKit 1.4.x)
 
-`@lessonkit/lxpack` pins these packages to **exact `0.6.4`** in patch releases. Bump them only in a LessonKit minor/major release after running conformance and e2e.
+`@lessonkit/lxpack` pins these packages to **exact `0.7.0`** in patch releases. Bump them only in a LessonKit minor/major release after running conformance and e2e.
 
 | `@lxpack/*` package | Pinned version | Used for |
 | ------------------- | -------------- | -------- |
-| `@lxpack/api` | `0.6.4` | `validateCourse`, `buildCourse`, `packageLessonkit`, `ExportTarget` |
-| `@lxpack/spa-bridge` | `0.6.4` | Parent-frame LMS bridge (`window.parent.lxpackBridge.v1`) |
-| `@lxpack/tracking-schema` | `0.6.4` | Telemetry → bridge action mapping |
-| `@lxpack/validators` | `0.6.4` | `lessonkit.json` interchange schema |
-| `@lxpack/conformance` (dev/e2e only) | `0.6.4` | CI conformance harness |
+| `@lxpack/api` | `0.7.0` | `validateCourse`, `buildCourse`, `packageLessonkit`, `ExportTarget` |
+| `@lxpack/spa-bridge` | `0.7.0` | Parent-frame LMS bridge (`window.parent.lxpackBridge.v1`) |
+| `@lxpack/tracking-schema` | `0.7.0` | Telemetry → bridge action mapping |
+| `@lxpack/validators` | `0.7.0` | `lessonkit.json` interchange schema; multi-select MCQ shell injection |
+| `@lxpack/conformance` (dev/e2e only) | `0.7.0` | CI conformance harness |
 
 **Upgrade procedure:** run `npm run conformance:lxpack` and `npm run test:e2e` in the monorepo; update this table and [CHANGELOG.md](https://github.com/eddiethedean/lessonkit/blob/main/CHANGELOG.md) when changing pins.
 

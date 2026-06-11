@@ -26,6 +26,7 @@ import {
   BranchNode,
   BranchChoice,
   Scenario,
+  SingleChoiceSet,
 } from "../src";
 
 const COURSE_ID = "compound-course";
@@ -1045,6 +1046,46 @@ describe("InteractiveVideo", () => {
     expect((screen.getByTestId("timed-cue-0") as HTMLElement).hidden).toBe(true);
   });
 
+  it("does not re-fire a cue after resume-overlay completion when firedCueIndices were not saved", () => {
+    saveCompoundState(
+      createSessionStoragePort(),
+      COURSE_ID,
+      "iv-resume-refire",
+      createCompoundResumeState({
+        activePageIndex: 0,
+        childStates: {
+          [IV_META_KEY]: {
+            currentTime: 15,
+            completedCueIndices: [],
+            firedCueIndices: [],
+          },
+        },
+      }),
+    );
+
+    render(
+      wrap(
+        <InteractiveVideo blockId="iv-resume-refire" title="Briefing" src="/sample.mp4">
+          <TimedCue atSeconds={10} label="Check">
+            <Text>Pause message</Text>
+          </TimedCue>
+        </InteractiveVideo>,
+        true,
+      ),
+    );
+
+    const overlay = screen.getByTestId("interactive-video-overlay");
+    expect(overlay.className).toContain("lk-interactive-video-overlay--active");
+    fireEvent.click(screen.getByTestId("cue-continue"));
+    expect(screen.queryByTestId("cue-continue")).toBeNull();
+
+    const video = screen.getByTestId("interactive-video-player") as HTMLVideoElement;
+    Object.defineProperty(video, "currentTime", { value: 15, writable: true, configurable: true });
+    fireEvent.timeUpdate(video);
+    expect(overlay.className).not.toContain("lk-interactive-video-overlay--active");
+    expect(screen.queryByTestId("cue-continue")).toBeNull();
+  });
+
   it("uses time-sorted cue index for persisted activePageIndex when JSX order differs", () => {
     sessionStorage.setItem(
       "lessonkit:compound:compound-course:iv-sort",
@@ -1115,6 +1156,60 @@ describe("BranchingScenario", () => {
     expect(screen.getByText("Credit path complete.")).toBeTruthy();
   });
 
+  it("shows path indicator, navigation status, and terminal styling after a choice", () => {
+    render(
+      wrap(
+        <BranchingScenario blockId="branch-feedback" title="Resolution paths" startNodeId="offer">
+          <BranchNode nodeId="offer" title="Offer step">
+            <Scenario>
+              <p>Choose how to close the loop.</p>
+            </Scenario>
+            <BranchChoice label="Offer credit" targetNodeId="credit" />
+            <BranchChoice label="Supervisor" targetNodeId="supervisor" />
+          </BranchNode>
+          <BranchNode nodeId="credit" terminal title="Credit outcome">
+            <Text>Credit path complete.</Text>
+          </BranchNode>
+          <BranchNode nodeId="supervisor" terminal title="Supervisor outcome">
+            <Text>Supervisor path complete.</Text>
+          </BranchNode>
+        </BranchingScenario>,
+      ),
+    );
+    expect(screen.getByTestId("branch-path-indicator").querySelectorAll("li").length).toBe(1);
+    expect(screen.getByTestId("branch-nav-status").textContent).toContain("Now at Offer step");
+    fireEvent.click(screen.getByTestId("branch-choice-credit"));
+    expect(screen.getByTestId("branch-nav-status").textContent).toContain("Offer credit");
+    expect(screen.getByTestId("branch-nav-status").textContent).toContain("Credit outcome");
+    expect(screen.getByTestId("branch-path-indicator").querySelectorAll("li").length).toBe(2);
+    expect(screen.getByTestId("branch-terminal-banner")).toBeDefined();
+    expect(screen.getByTestId("branch-node-credit").classList.contains("lk-branch-node--terminal")).toBe(true);
+  });
+
+  it("shows optional path recap at terminal when showPathRecap is enabled", () => {
+    render(
+      wrap(
+        <BranchingScenario
+          blockId="branch-recap"
+          title="Resolution paths"
+          startNodeId="offer"
+          showPathRecap
+        >
+          <BranchNode nodeId="offer" title="Offer step">
+            <BranchChoice label="Offer credit" targetNodeId="credit" />
+          </BranchNode>
+          <BranchNode nodeId="credit" terminal title="Credit outcome">
+            <Text>Credit path complete.</Text>
+          </BranchNode>
+        </BranchingScenario>,
+      ),
+    );
+    fireEvent.click(screen.getByTestId("branch-choice-credit"));
+    expect(screen.getByTestId("branch-path-recap")).toBeDefined();
+    expect(screen.getByTestId("branch-path-recap").textContent).toContain("Offer step");
+    expect(screen.getByTestId("branch-path-recap").textContent).toContain("Credit outcome");
+  });
+
   it("scores only the visited branch assessments", () => {
     const ref = createRef<CompoundHandle>();
     render(
@@ -1144,6 +1239,32 @@ describe("BranchingScenario", () => {
     expect(ref.current?.getScore()).toBe(1);
     expect(ref.current?.getMaxScore()).toBe(1);
     expect(screen.getByTestId("branch-score").textContent).toContain("Score: 1 / 1");
+  });
+
+  it("getAnswerGiven gates on the active branch node only", () => {
+    const ref = createRef<CompoundHandle>();
+    render(
+      wrap(
+        <BranchingScenario
+          ref={ref}
+          blockId="branch-gate"
+          title="Gating paths"
+          startNodeId="offer"
+        >
+          <BranchNode nodeId="offer">
+            <TrueFalse checkId="offer-check" question="Answer first?" answer={true} />
+            <BranchChoice label="Credit" targetNodeId="credit" />
+          </BranchNode>
+          <BranchNode nodeId="credit" terminal>
+            <TrueFalse checkId="credit-check" question="Document credit?" answer={true} />
+          </BranchNode>
+        </BranchingScenario>,
+      ),
+    );
+    fireEvent.click(screen.getByTestId("branch-choice-credit"));
+    expect(ref.current?.getAnswerGiven()).toBe(false);
+    fireEvent.click(screen.getByRole("radio", { name: "True" }));
+    expect(ref.current?.getAnswerGiven()).toBe(true);
   });
 
   it("includes max choice scoreWeight in branch getMaxScore", () => {
@@ -1340,28 +1461,76 @@ describe("BranchingScenario", () => {
     warn.mockRestore();
   });
 
-  it("calls onCompoundDuplicateCheckId when duplicate checkId is registered in production", () => {
+  it("throws and calls onCompoundDuplicateCheckId when duplicate checkId is registered in production", () => {
     const onCompoundDuplicateCheckId = vi.fn();
-    const prevEnv = process.env.NODE_ENV;
-    process.env.NODE_ENV = "production";
-    render(
-      <Course
-        title="Compound"
-        courseId={COURSE_ID}
-        config={{
-          xapi: { enabled: false },
-          observability: { onCompoundDuplicateCheckId },
-        }}
-      >
-        <Lesson title="L1" lessonId="lesson-1">
-          <AssessmentSequence blockId="dup-seq">
-            <TrueFalse checkId="dup-id" question="Q1?" answer={true} />
-            <TrueFalse checkId="dup-id" question="Q2?" answer={false} />
-          </AssessmentSequence>
-        </Lesson>
-      </Course>,
-    );
+    vi.stubEnv("NODE_ENV", "production");
+    const consoleError = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    expect(() =>
+      render(
+        <Course
+          title="Compound"
+          courseId={COURSE_ID}
+          config={{
+            xapi: { enabled: false },
+            observability: { onCompoundDuplicateCheckId },
+          }}
+        >
+          <Lesson title="L1" lessonId="lesson-1">
+            <AssessmentSequence blockId="dup-seq">
+              <TrueFalse checkId="dup-id" question="Q1?" answer={true} />
+              <TrueFalse checkId="dup-id" question="Q2?" answer={false} />
+            </AssessmentSequence>
+          </Lesson>
+        </Course>,
+      ),
+    ).toThrow(/duplicate checkId "dup-id"/);
     expect(onCompoundDuplicateCheckId).toHaveBeenCalledWith({ checkId: "dup-id" });
-    process.env.NODE_ENV = prevEnv;
+    consoleError.mockRestore();
+    vi.unstubAllEnvs();
+  });
+});
+
+describe("SingleChoiceSet compound handle", () => {
+  afterEach(() => {
+    cleanup();
+    sessionStorage.clear();
+  });
+
+  it("aggregates Quiz scores across steps", () => {
+    const ref = createRef<CompoundHandle>();
+    render(
+      wrap(
+        <SingleChoiceSet ref={ref} blockId="scs-score" showSetScore>
+          <Quiz checkId="scs-a" question="A?" choices={["A", "B"]} answer="A" />
+          <Quiz checkId="scs-b" question="B?" choices={["C", "D"]} answer="D" />
+        </SingleChoiceSet>,
+      ),
+    );
+    fireEvent.click(screen.getByLabelText("A"));
+    fireEvent.click(screen.getByTestId("single-choice-set-next"));
+    fireEvent.click(screen.getByLabelText("D"));
+    expect(ref.current?.getScore()).toBe(2);
+    expect(screen.getByTestId("single-choice-set-score").textContent).toContain("Score: 2");
+  });
+
+  it("restores active step from sessionStorage when persistCompoundState is true", () => {
+    const storage = createSessionStoragePort();
+    saveCompoundState(
+      storage,
+      COURSE_ID,
+      "scs-persist",
+      createCompoundResumeState({ activePageIndex: 1 }),
+    );
+
+    render(
+      wrap(
+        <SingleChoiceSet blockId="scs-persist">
+          <Quiz checkId="scs-p1" question="One?" choices={["A", "B"]} answer="A" />
+          <Quiz checkId="scs-p2" question="Two?" choices={["C", "D"]} answer="D" />
+        </SingleChoiceSet>,
+        true,
+      ),
+    );
+    expect(screen.getByText("Question 2 of 2")).toBeTruthy();
   });
 });

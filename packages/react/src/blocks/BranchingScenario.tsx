@@ -62,9 +62,11 @@ const BranchingScenarioInner = forwardRef<
   const nodeLabels = useMemo(() => buildNodeLabels(nodes), [nodes]);
 
   const [meta, setMeta] = useState<BranchingScenarioMeta>(() => createInitialBranchMeta(startNodeId));
+  const [navStatus, setNavStatus] = useState<string | null>(null);
   const metaRef = useRef(meta);
   const branchViewedRef = useRef(new Set<string>());
   const legacyResumeWarnedRef = useRef(false);
+  const pendingNavMessageRef = useRef<string | null>(null);
 
   const commitMeta = useCallback((next: BranchingScenarioMeta) => {
     metaRef.current = next;
@@ -150,6 +152,7 @@ const BranchingScenarioInner = forwardRef<
   const resetBranchMeta = useCallback(() => {
     commitMeta(createInitialBranchMeta(startNodeId));
     branchViewedRef.current = new Set();
+    pendingNavMessageRef.current = null;
   }, [commitMeta, startNodeId]);
 
   const transformState = useCallback(
@@ -244,6 +247,13 @@ const BranchingScenarioInner = forwardRef<
     );
   }, [activeIndex, activeNode, blockId, lessonId, meta.activeNodeId, track]);
 
+  useEffect(() => {
+    const label = nodeLabels.get(meta.activeNodeId) ?? meta.activeNodeId;
+    const message = pendingNavMessageRef.current ?? `Now at ${label}.`;
+    pendingNavMessageRef.current = null;
+    setNavStatus(message);
+  }, [meta.activeNodeId, nodeLabels]);
+
   const navigateToNode = useCallback(
     (opts: { fromNodeId: string; toNodeId: string; label: string; scoreWeight?: number }) => {
       const toNodeId = normalizeComponentId(opts.toNodeId, "blockId");
@@ -281,6 +291,9 @@ const BranchingScenarioInner = forwardRef<
         );
       }
 
+      const destinationLabel = nodeLabels.get(toNodeId) ?? toNodeId;
+      pendingNavMessageRef.current = `Selected "${opts.label}". Now at ${destinationLabel}.`;
+
       setMeta((prev) => {
         const choiceScores = applyChoiceScoreUpdate(
           prev.choiceScores,
@@ -304,7 +317,7 @@ const BranchingScenarioInner = forwardRef<
         return next;
       });
     },
-    [blockId, lessonId, nodeIndexMap, startNodeId, track],
+    [blockId, lessonId, nodeIndexMap, nodeLabels, startNodeId, track],
   );
 
   const choicesLocked = isTerminal;
@@ -337,9 +350,36 @@ const BranchingScenarioInner = forwardRef<
     <BranchingScenarioProvider value={contextValue}>
       <section aria-label={props.title} data-testid="branching-scenario" data-lk-block-id={blockId}>
         <h3>{props.title}</h3>
+        {navStatus ? (
+          <p role="status" aria-live="polite" className="lk-branch-nav-status" data-testid="branch-nav-status">
+            {navStatus}
+          </p>
+        ) : null}
+        {visitedLabels.length > 0 ? (
+          <nav className="lk-branch-path-indicator" data-testid="branch-path-indicator" aria-label="Your path">
+            <ol>
+              {visitedLabels.map((entry) => (
+                <li
+                  key={entry.nodeId}
+                  className={
+                    entry.nodeId === meta.activeNodeId ? "lk-branch-path-step lk-branch-path-step--current" : "lk-branch-path-step"
+                  }
+                  aria-current={entry.nodeId === meta.activeNodeId ? "step" : undefined}
+                >
+                  {entry.label}
+                </li>
+              ))}
+            </ol>
+          </nav>
+        ) : null}
         {props.showPathScore && ctx ? (
           <p data-testid="branch-score">
             Score: {pathScore} / {pathMaxScore}
+          </p>
+        ) : null}
+        {isTerminal ? (
+          <p className="lk-branch-terminal-banner" data-testid="branch-terminal-banner" role="status">
+            Scenario complete
           </p>
         ) : null}
         {props.showPathRecap && isTerminal && meta.visitedNodeIds.length > 0 ? (
@@ -352,7 +392,7 @@ const BranchingScenarioInner = forwardRef<
             </ol>
           </aside>
         ) : null}
-        <div data-testid="branching-scenario-active-node">
+        <div className="lk-branching-scenario-active-node" data-testid="branching-scenario-active-node">
           {nodes.map((node, i) => {
             const content = React.Children.map(node.props.children, (child) => {
               if (!React.isValidElement(child)) return child;
@@ -364,6 +404,7 @@ const BranchingScenarioInner = forwardRef<
             return React.cloneElement(node, {
               key: node.key ?? node.props.nodeId,
               hidden: i !== activeIndex,
+              isActive: i === activeIndex,
               nodeIndex: i,
               children: content,
             });

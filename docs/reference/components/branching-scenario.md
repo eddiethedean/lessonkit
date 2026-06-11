@@ -10,6 +10,8 @@
 
 Use `BranchingScenario` when learner **decisions change the path** — customer de-escalation, ethics dilemmas, troubleshooting trees, or “choose your response” simulations.
 
+The scenario shows a **path indicator** (visited steps), a **status line** when the active node changes, and a **Scenario complete** banner at terminal nodes. Optional `showPathRecap` adds a full ordered recap at the end.
+
 Compose with:
 
 - `BranchNode` — narrative and choices (`BranchChoice` children)

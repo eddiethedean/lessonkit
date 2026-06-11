@@ -1,5 +1,11 @@
 # Examples
 
+:::{admonition} Do not copy dependency patterns
+:class: warning
+
+Monorepo examples use **`file:../../packages/*`** workspace links for **contributors and CI only**. Do not copy their `package.json` into your own course repo — use `npx @lessonkit/cli init` and npm `@lessonkit/*` versions instead.
+:::
+
 Runnable Vite + React courses demonstrating `@lessonkit/react` patterns and LMS packaging.
 
 > **Production config:** Monorepo examples use **console telemetry sinks** for demos (`examples/_shared/docsDemoConfig.ts`). For LMS go-live, copy patterns from the CLI template **`src/courseConfig.ts`** (`npx @lessonkit/cli init`) and complete the [production checklist](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/production-checklist.html)—do not copy example telemetry wiring into production.
@@ -31,7 +37,7 @@ See the [5-minute guide](https://lessonkit.readthedocs.io/en/latest/guides/react
 
 ## Monorepo examples (full table)
 
-These workspaces use `file:../../packages/*` dependencies—they are for **monorepo development**, not copy-paste templates for external apps.
+These workspaces use `file:../../packages/*` dependencies—they are for **monorepo development**, not copy-paste templates for external apps. **`Workspace name`** matches each folder's `package.json` `"name"` field (use with `npm -w <name> run dev`).
 
 | Directory | Workspace name | Course | Highlights |
 | --- | --- | --- | --- |

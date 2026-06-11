@@ -1,6 +1,8 @@
-import React from "react";
+import React, { createRef } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import type { AssessmentHandle, TelemetryEvent } from "@lessonkit/core";
+import { buildGrid, buildGridSeed } from "../src/blocks/wordSearchUtils";
 import {
   AdventCalendar,
   CombinationLock,
@@ -89,6 +91,20 @@ describe("1.6.x block components", () => {
     expect(screen.getByTestId("combination-lock")).toBeDefined();
   });
 
+  it("CombinationLock visibly updates digits when typing", () => {
+    render(wrap(<CombinationLock checkId="lock-1" combination="42" />));
+    const first = screen.getByTestId("lock-digit-0") as HTMLInputElement;
+    const second = screen.getByTestId("lock-digit-1") as HTMLInputElement;
+    expect(first.value).toBe("");
+    fireEvent.change(first, { target: { value: "4" } });
+    expect(first.value).toBe("4");
+    fireEvent.change(first, { target: { value: "14" } });
+    expect(first.value).toBe("4");
+    fireEvent.change(second, { target: { value: "2" } });
+    expect(second.value).toBe("2");
+    expect((screen.getByTestId("lock-check") as HTMLButtonElement).disabled).toBe(false);
+  });
+
   it("CombinationLock emits assessment_completed only once on repeated checks", async () => {
     const events: { name: string }[] = [];
     render(
@@ -162,6 +178,62 @@ describe("1.6.x block components", () => {
     expect(screen.getByTestId("crossword-feedback").textContent).toContain("Correct");
   });
 
+  it("Crossword Check honors passingScore below word count", async () => {
+    const events: TelemetryEvent[] = [];
+    const ref = createRef<AssessmentHandle>();
+    const entries = [
+      { id: "w1", clue: "Greeting", answer: "HI", row: 0, col: 0, direction: "across" as const },
+      { id: "w2", clue: "Assent", answer: "OK", row: 1, col: 0, direction: "across" as const },
+      { id: "w3", clue: "Move", answer: "GO", row: 2, col: 0, direction: "across" as const },
+      { id: "w4", clue: "Direction", answer: "UP", row: 3, col: 0, direction: "across" as const },
+      { id: "w5", clue: "Negative", answer: "NO", row: 4, col: 0, direction: "across" as const },
+    ];
+    render(
+      <Course
+        title="Blocks 1.6"
+        courseId="blocks-16-crossword-partial"
+        config={{
+          xapi: { enabled: false },
+          tracking: { sink: (e) => void events.push(e) },
+        }}
+      >
+        <Lesson title="L1" lessonId="lesson-crossword-partial">
+          <Crossword
+            ref={ref}
+            checkId="cw-partial"
+            rows={5}
+            cols={2}
+            entries={entries}
+            passingScore={3}
+          />
+        </Lesson>
+      </Course>,
+    );
+
+    fireEvent.change(screen.getByTestId("crossword-cell-0-0"), { target: { value: "H" } });
+    fireEvent.change(screen.getByTestId("crossword-cell-0-1"), { target: { value: "I" } });
+    fireEvent.change(screen.getByTestId("crossword-cell-1-0"), { target: { value: "O" } });
+    fireEvent.change(screen.getByTestId("crossword-cell-1-1"), { target: { value: "K" } });
+    fireEvent.change(screen.getByTestId("crossword-cell-2-0"), { target: { value: "G" } });
+    fireEvent.change(screen.getByTestId("crossword-cell-2-1"), { target: { value: "O" } });
+
+    expect(ref.current?.getScore()).toBe(3);
+    expect(ref.current?.getMaxScore()).toBe(5);
+    expect(ref.current?.getXAPIData()?.correct).toBe(true);
+
+    fireEvent.click(screen.getByTestId("crossword-check"));
+
+    await waitFor(() => {
+      expect(
+        events.some((e) => e.name === "assessment_answered" && e.data?.correct === true),
+      ).toBe(true);
+      const completed = events.find((e) => e.name === "assessment_completed");
+      expect(completed?.data?.score).toBe(3);
+      expect(completed?.data?.maxScore).toBe(5);
+    });
+    expect(screen.getByTestId("crossword-feedback").textContent).toContain("Correct");
+  });
+
   it("Crossword clear wrong letters keeps correct cells", () => {
     render(
       wrap(
@@ -183,10 +255,127 @@ describe("1.6.x block components", () => {
     expect(screen.queryByTestId("crossword-feedback")).toBeNull();
   });
 
-  it("WordSearch renders letter grid", () => {
-    vi.spyOn(Math, "random").mockReturnValue(0.1);
+  function dragWordSearchWord(
+    checkId: string,
+    word: string,
+    words: string[] = [word],
+    size = words.length > 5 ? 10 : 5,
+  ) {
+    const wordsKey = words.join("\0");
+    const { placements } = buildGrid(words, size, buildGridSeed(checkId, wordsKey, size));
+    const placement = placements.find((entry) => entry.word === word.toUpperCase());
+    if (!placement) throw new Error(`expected ${word} to be placed`);
+    const start = screen.getByTestId(`word-search-cell-${placement.row}-${placement.col}`);
+    const middle = screen.getByTestId(`word-search-cell-${placement.row}-${placement.col + 1}`);
+    const end = screen.getByTestId(
+      `word-search-cell-${placement.row}-${placement.col + placement.word.length - 1}`,
+    );
+    fireEvent.pointerDown(start, { pointerId: 1, buttons: 1 });
+    fireEvent.pointerEnter(middle, { pointerId: 1, buttons: 1 });
+    fireEvent.pointerEnter(end, { pointerId: 1, buttons: 1 });
+    fireEvent.pointerUp(end, { pointerId: 1 });
+    return placement;
+  }
+
+  it("WordSearch renders aligned grid and finds a word via drag", () => {
     render(wrap(<WordSearch checkId="ws-1" words={["CAT"]} size={5} />));
-    expect(screen.getByTestId("word-search-cell-0-0")).toBeDefined();
+
+    expect(screen.getByTestId("word-search").querySelector(".lk-word-search-grid")).toBeTruthy();
+
+    const placement = dragWordSearchWord("ws-1", "CAT");
+    const foundCells = Array.from({ length: placement.word.length }, (_, index) =>
+      screen.getByTestId(`word-search-cell-${placement.row}-${placement.col + index}`),
+    );
+
+    const bankItem = screen.getByText("CAT");
+    expect(bankItem.classList.contains("lk-word-search-bank-item--found")).toBe(true);
+    expect(bankItem.getAttribute("aria-checked")).toBe("true");
+    for (const cell of foundCells) {
+      expect(cell.classList.contains("lk-word-search-cell--found")).toBe(true);
+    }
+    expect(foundCells[0]!.classList.contains("lk-word-search-cell--selecting")).toBe(false);
+  });
+
+  it("WordSearch Check honors passingScore below word count", async () => {
+    const events: TelemetryEvent[] = [];
+    const ref = createRef<AssessmentHandle>();
+    render(
+      <Course
+        title="Blocks 1.6"
+        courseId="blocks-16-partial"
+        config={{
+          xapi: { enabled: false },
+          tracking: { sink: (e) => void events.push(e) },
+        }}
+      >
+        <Lesson title="L1" lessonId="lesson-partial">
+          <WordSearch
+            ref={ref}
+            checkId="ws-partial"
+            words={["CAT", "DOG", "BAT"]}
+            size={10}
+            passingScore={2}
+          />
+        </Lesson>
+      </Course>,
+    );
+
+    const words = ["CAT", "DOG", "BAT"];
+    dragWordSearchWord("ws-partial", "CAT", words, 10);
+    dragWordSearchWord("ws-partial", "DOG", words, 10);
+
+    expect(ref.current?.getScore()).toBe(2);
+    expect(ref.current?.getMaxScore()).toBe(3);
+    expect(ref.current?.getXAPIData()?.correct).toBe(true);
+
+    fireEvent.click(screen.getByTestId("word-search-check"));
+
+    await waitFor(() => {
+      expect(
+        events.some((e) => e.name === "assessment_answered" && e.data?.correct === true),
+      ).toBe(true);
+      const completed = events.find((e) => e.name === "assessment_completed");
+      expect(completed?.data?.score).toBe(2);
+      expect(completed?.data?.maxScore).toBe(3);
+    });
+  });
+
+  it("WordSearch resume keeps found highlights after remount", async () => {
+    const ref = createRef<AssessmentHandle>();
+    render(wrap(<WordSearch ref={ref} checkId="ws-resume" words={["CAT"]} size={5} />));
+
+    const placement = dragWordSearchWord("ws-resume", "CAT");
+
+    const saved = ref.current?.getCurrentState?.();
+    expect(saved).toEqual(
+      expect.objectContaining({
+        found: ["CAT"],
+        grid: expect.any(Array),
+        placements: expect.arrayContaining([expect.objectContaining({ word: "CAT" })]),
+      }),
+    );
+
+    cleanup();
+    vi.spyOn(Math, "random").mockReturnValue(0.99);
+
+    const ref2 = createRef<AssessmentHandle>();
+    render(wrap(<WordSearch ref={ref2} checkId="ws-resume" words={["CAT"]} size={5} />));
+
+    act(() => {
+      ref2.current?.resume?.(saved!);
+    });
+
+    await waitFor(() => {
+      expect(ref2.current?.getScore()).toBe(1);
+      expect(screen.getByText("CAT").classList.contains("lk-word-search-bank-item--found")).toBe(true);
+      for (let index = 0; index < placement.word.length; index += 1) {
+        expect(
+          screen
+            .getByTestId(`word-search-cell-${placement.row}-${placement.col + index}`)
+            .classList.contains("lk-word-search-cell--found"),
+        ).toBe(true);
+      }
+    });
   });
 
   it("AdventCalendar opens a door", () => {

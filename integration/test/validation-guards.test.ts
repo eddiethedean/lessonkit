@@ -1,39 +1,43 @@
+import { existsSync } from "node:fs";
 import { readFile, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import { afterEach, beforeAll, describe, expect, it } from "vitest";
-import { createTempDir, copyMinimalFixture, installProjectDeps } from "./helpers/tempProject.js";
-import { ensurePackagesBuilt, runCliJson } from "./helpers/runCli.js";
+import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
+import {
+  cloneProjectTree,
+  prepareBuiltMinimalProject,
+} from "./helpers/tempProject.js";
+import { runCliJson } from "./helpers/runCli.js";
 
 type PackageJson = {
   ok: boolean;
+  outputPath?: string;
   issues?: Array<{ path?: string; message: string }>;
 };
 
 describe("packaging validation guards", () => {
   const tempDirs: string[] = [];
+  let sharedBuiltProject: string;
 
-  beforeAll(() => {
-    ensurePackagesBuilt();
+  beforeAll(async () => {
+    sharedBuiltProject = await prepareBuiltMinimalProject();
+  });
+
+  afterAll(async () => {
+    await rm(sharedBuiltProject, { recursive: true, force: true });
   });
 
   afterEach(async () => {
     await Promise.all(tempDirs.splice(0).map((dir) => rm(dir, { recursive: true, force: true })));
   });
 
-  async function prepareBuiltProject(): Promise<string> {
-    const projectDir = await createTempDir();
+  async function cloneBuiltProject(): Promise<string> {
+    const projectDir = await cloneProjectTree(sharedBuiltProject);
     tempDirs.push(projectDir);
-    await copyMinimalFixture(projectDir);
-    await installProjectDeps(projectDir);
-
-    const build = runCliJson<{ ok: boolean }>(["build"], { cwd: projectDir });
-    expect(build.result.exitCode).toBe(0);
-    expect(build.json.ok).toBe(true);
     return projectDir;
   }
 
   it("rejects unknown assessment kinds at package time", async () => {
-    const projectDir = await prepareBuiltProject();
+    const projectDir = await cloneBuiltProject();
     const manifestPath = join(projectDir, "lessonkit.json");
     const manifest = JSON.parse(await readFile(manifestPath, "utf8")) as {
       course: { assessments: unknown[] };
@@ -55,7 +59,7 @@ describe("packaging validation guards", () => {
   });
 
   it("rejects incomplete custom themes at package time", async () => {
-    const projectDir = await prepareBuiltProject();
+    const projectDir = await cloneBuiltProject();
     const manifestPath = join(projectDir, "lessonkit.json");
     const manifest = JSON.parse(await readFile(manifestPath, "utf8")) as {
       course: { theme: unknown };
@@ -77,5 +81,20 @@ describe("packaging validation guards", () => {
     const issues = result.json.issues ?? [];
     expect(issues.length).toBeGreaterThan(0);
     expect(issues.some((issue) => (issue.path ?? "").includes("theme"))).toBe(true);
+  });
+
+  it("writes absolute --out under project root outside outDir", async () => {
+    const projectDir = await cloneBuiltProject();
+    const absoluteOut = join(projectDir, "artifacts", "course-scorm12.zip");
+
+    const result = runCliJson<PackageJson>(
+      ["package", "--target", "scorm12", "--no-build", "--out", absoluteOut],
+      { cwd: projectDir },
+    );
+
+    expect(result.result.exitCode).toBe(0);
+    expect(result.json.ok).toBe(true);
+    expect(result.json.outputPath).toBe(absoluteOut);
+    expect(existsSync(absoluteOut)).toBe(true);
   });
 });

@@ -38,6 +38,7 @@ async function writeImportTree(
   manifest: LessonkitManifest,
   entries: Map<string, Uint8Array>,
   spaDistDir: string,
+  allowlistedSpaPaths: ReadonlySet<string>,
 ): Promise<number> {
   let fileCount = 0;
 
@@ -51,6 +52,9 @@ async function writeImportTree(
   for (const [entryPath, data] of entries) {
     const normalized = entryPath.replace(/\\/g, "/");
     if (!normalized.startsWith(`${spaDistDir}/`)) continue;
+    if (!allowlistedSpaPaths.has(normalized)) {
+      throw new Error(`unlisted spaDist entry rejected: ${entryPath}`);
+    }
 
     const relativeUnderSpa = normalized.slice(spaDistDir.length + 1);
 
@@ -103,16 +107,45 @@ export async function restoreImportBackup(targetDir: string, backupDir: string):
   }
 }
 
+/** @internal Exported for unit tests. */
+export async function snapshotPreExistingImportArtifacts(
+  targetDir: string,
+): Promise<Set<string>> {
+  const existing = new Set<string>();
+  for (const name of IMPORT_ARTIFACTS) {
+    if (await pathExists(join(targetDir, name))) {
+      existing.add(name);
+    }
+  }
+  return existing;
+}
+
+/** @internal Exported for unit tests. */
+export async function rollbackFailedImport(
+  targetDir: string,
+  backupDir: string | undefined,
+  preExisting: ReadonlySet<string>,
+): Promise<void> {
+  if (backupDir) {
+    await restoreImportBackup(targetDir, backupDir);
+  }
+  for (const name of IMPORT_ARTIFACTS) {
+    if (preExisting.has(name)) continue;
+    const destPath = join(targetDir, name);
+    if (await pathExists(destPath)) {
+      await rm(destPath, { recursive: true, force: true });
+    }
+  }
+}
+
 async function promoteImportStaging(stagingDir: string, targetDir: string): Promise<void> {
+  await mkdir(targetDir, { recursive: true });
   const entries = await readdir(stagingDir, { withFileTypes: true });
   for (const entry of entries) {
     const srcPath = join(stagingDir, entry.name);
     const destPath = join(targetDir, entry.name);
-    if (entry.isDirectory()) {
-      await cp(srcPath, destPath, { recursive: true, force: true });
-    } else if (entry.isFile()) {
-      await mkdir(dirname(destPath), { recursive: true });
-      await cp(srcPath, destPath);
+    if (entry.isDirectory() || entry.isFile()) {
+      await renameOrCopy(srcPath, destPath);
     }
   }
 }
@@ -171,16 +204,28 @@ export async function importLkcourse(
 
   let stagingDir: string | undefined;
   let backupDir: string | undefined;
+  let preExisting: Set<string> | undefined;
   try {
     stagingDir = await mkdtemp(join(targetDir, ".lkcourse-import-"));
-    const fileCount = await writeImportTree(stagingDir, manifest, read.entries, spaDistDir);
+    const allowlistedSpaPaths = new Set(
+      envelope.entries
+        .map((entryPath) => entryPath.replace(/\\/g, "/"))
+        .filter((entryPath) => entryPath.startsWith(`${spaDistDir}/`)),
+    );
+    const fileCount = await writeImportTree(
+      stagingDir,
+      manifest,
+      read.entries,
+      spaDistDir,
+      allowlistedSpaPaths,
+    );
+    preExisting = await snapshotPreExistingImportArtifacts(targetDir);
     backupDir = await backupImportArtifacts(targetDir);
     try {
       await promoteImportStagingImpl(stagingDir, targetDir);
     } catch (promoteError) {
-      if (backupDir) {
-        await restoreImportBackup(targetDir, backupDir);
-      }
+      await rollbackFailedImport(targetDir, backupDir, preExisting);
+      backupDir = undefined;
       throw promoteError;
     }
     if (backupDir) {
@@ -198,8 +243,12 @@ export async function importLkcourse(
       fileCount,
     };
   } catch (err) {
-    if (backupDir) {
+    if (preExisting) {
+      await rollbackFailedImport(targetDir, backupDir, preExisting).catch(() => undefined);
+    } else if (backupDir) {
       await restoreImportBackup(targetDir, backupDir).catch(() => undefined);
+    }
+    if (backupDir) {
       await rm(backupDir, { recursive: true, force: true }).catch(() => undefined);
     }
     if (stagingDir) {

@@ -25,6 +25,23 @@ export function isReservedOutputPath(value: string): boolean {
   return segments.some((segment) => RESERVED_OUTPUT_SEGMENTS.has(segment));
 }
 
+/** Validate lessonkit.json `name` for safe default export/archive paths. */
+export function validateManifestName(name: string): string | null {
+  if (!name.length) {
+    return "must be a non-empty string";
+  }
+  if (name.includes("/") || name.includes("\\")) {
+    return "must not contain path separators";
+  }
+  if (!isSafeRelativeSpaPath(name)) {
+    return "must be a safe relative name without '..' segments or absolute prefixes";
+  }
+  if (isReservedOutputPath(name) || isReservedOutputPath(`${name}.lkcourse`)) {
+    return "must not target reserved directories (.git, node_modules, .github)";
+  }
+  return null;
+}
+
 export function isReservedResolvedOutputPath(projectRoot: string, resolved: string): boolean {
   const rootResolved = resolveComparablePath(projectRoot);
   const targetResolved = resolveComparablePath(resolved);

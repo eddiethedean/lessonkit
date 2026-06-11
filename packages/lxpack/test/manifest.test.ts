@@ -57,6 +57,25 @@ describe("parseLessonkitManifest", () => {
     }
   });
 
+  it("rejects manifest names with path separators or reserved directories", () => {
+    for (const name of [".git/evil", "node_modules/pkg", ".github/workflows"]) {
+      const result = parseLessonkitManifest({
+        schemaVersion: 1,
+        name,
+        course: {
+          courseId: "demo",
+          title: "Demo",
+          layout: "single-spa",
+          lessons: [{ id: "l1", title: "L1" }],
+        },
+      });
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.issues.some((i) => i.path === "name")).toBe(true);
+      }
+    }
+  });
+
   it("rejects per-lesson-spa layout", () => {
     const result = parseLessonkitManifest({
       schemaVersion: 1,

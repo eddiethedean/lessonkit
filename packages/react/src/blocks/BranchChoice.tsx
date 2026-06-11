@@ -31,6 +31,7 @@ export function BranchChoice(props: BranchChoiceProps) {
   return (
     <button
       type="button"
+      className="lk-button lk-branch-choice"
       role="radio"
       aria-checked={false}
       aria-labelledby={groupId}

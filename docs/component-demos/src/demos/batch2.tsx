@@ -25,7 +25,8 @@ import {
   Video,
   WordSearch,
 } from "@lessonkit/react";
-import { DEMO_HERO_IMAGE, DEMO_MAP_IMAGE, SAMPLE_VIDEO } from "../constants";
+import { DEMO_HERO_IMAGE, DEMO_MAP_IMAGE, DEMO_QR_PAYLOAD, SAMPLE_VIDEO } from "../constants";
+import { DemoCallout } from "../DemoCallout";
 import { demoFrame } from "../demoFrame";
 import type { ComponentDemo } from "../types";
 
@@ -88,7 +89,14 @@ export const batch2Demos: ComponentDemo[] = [
       demoFrame(
         "interactive-video",
         "Safety briefing",
-        <InteractiveVideo
+        <>
+          <DemoCallout relatedSlug="timed-cue" relatedLabel="Open TimedCue demo">
+            <p>
+              <strong>InteractiveVideo is the parent compound.</strong> Each pause overlay is a{" "}
+              <code>TimedCue</code> child at a timestamp.
+            </p>
+          </DemoCallout>
+          <InteractiveVideo
           blockId="safety-video"
           title="Warehouse safety briefing"
           src={SAMPLE_VIDEO}
@@ -103,7 +111,8 @@ export const batch2Demos: ComponentDemo[] = [
           <TimedCue atSeconds={8} label="Quick quiz" mustComplete>
             <TrueFalse checkId="iv-tf-2" question="Tailgating through secure doors is acceptable." answer={false} />
           </TimedCue>
-        </InteractiveVideo>,
+        </InteractiveVideo>
+        </>,
       ),
   },
   {
@@ -427,7 +436,7 @@ export const batch2Demos: ComponentDemo[] = [
         <QrContent
           blockId="bonus-qr"
           title="Scan for security checklist"
-          payload="https://lessonkit.dev/security-checklist"
+          payload={DEMO_QR_PAYLOAD}
           hiddenTitle="Checklist unlocked"
           hiddenBody="Optional deep dive: password managers, travel VPN, and incident reporting templates."
         />,

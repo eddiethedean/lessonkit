@@ -419,6 +419,68 @@ describe("assessments", () => {
     ).toBeNull();
   });
 
+  it("returns null for sortParagraphs and guessTheAnswer (SPA scoring only)", () => {
+    expect(
+      assessmentDescriptorToLxpack({
+        kind: "sortParagraphs",
+        checkId: "sort-check",
+        question: "Order",
+        paragraphs: ["A", "B"],
+        correctOrder: [1, 0],
+      }),
+    ).toBeNull();
+    expect(
+      assessmentDescriptorToLxpack({
+        kind: "guessTheAnswer",
+        checkId: "guess-check",
+        question: "Guess",
+        answer: "Paris",
+      }),
+    ).toBeNull();
+  });
+
+  it("maps multimediaChoice to MCQ shell with choice labels", () => {
+    const lx = assessmentDescriptorToLxpack({
+      kind: "multimediaChoice",
+      checkId: "mm-check",
+      question: "Pick",
+      choices: ["Portal", "Email"],
+      answer: "Portal",
+    });
+    expect(lx).not.toBeNull();
+    expect(lx!.questions[0]?.choices.map((c) => c.text)).toEqual(["Portal", "Email"]);
+    expect(lx!.questions[0]?.choices.find((c) => c.correct)?.text).toBe("Portal");
+  });
+
+  it("injects multi-select mcq into LMS shell with selectionMode multiple", () => {
+    const lx = assessmentDescriptorToLxpack({
+      checkId: "multi-check",
+      question: "Select all",
+      choices: ["A", "B", "C"],
+      answer: "A",
+      answers: ["A", "C"],
+      shuffleChoices: true,
+      choiceFeedback: { B: "Not a hazard." },
+    });
+    expect(lx).not.toBeNull();
+    expect(lx!.questions[0]?.selectionMode).toBe("multiple");
+    expect(lx!.shuffleChoices).toBe(true);
+    expect(lx!.showFeedback).toBe("immediate");
+    const correct = lx!.questions[0]?.choices.filter((c) => c.correct).map((c) => c.text);
+    expect(correct).toEqual(["A", "C"]);
+  });
+
+  it("omits selectionMode key for single-select mcq (strict interchange validation)", () => {
+    const lx = assessmentDescriptorToLxpack({
+      checkId: "single-check",
+      question: "Pick one",
+      choices: ["No", "Yes"],
+      answer: "Yes",
+    });
+    expect(lx).not.toBeNull();
+    expect(Object.prototype.hasOwnProperty.call(lx!.questions[0] ?? {}, "selectionMode")).toBe(false);
+  });
+
   it("assigns distinct choice ids when labels slug to the same value", () => {
     const lx = assessmentDescriptorToLxpack({
       checkId: "collision-check",
@@ -792,11 +854,8 @@ describe("packageLessonkitCourse", () => {
     expect(result.ok).toBe(true);
     if (result.ok) {
       expect(result.fileCount).toBeGreaterThan(0);
-      expect(result.outputPath).toContain("course-scorm12.zip");
-      expect(result.outputPath).toBe(
-        "outputPath" in result.build ? result.build.outputPath : undefined,
-      );
-      expect(result.outputPath?.startsWith(outDir)).toBe(true);
+      expect(result.outputPath).toBe(join(root, ".lxpack/out/course-scorm12.zip"));
+      expect(result.outputPath?.startsWith(root)).toBe(true);
     }
   }, 30_000);
 

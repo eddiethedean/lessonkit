@@ -6,6 +6,8 @@ import {
   hasCourseStartedEmittedToTracking,
   markCourseStarted,
   markCourseStartedEmittedToTracking,
+  hasCourseStartedXapiSent,
+  markCourseStartedXapiSent,
   hasCourseStartedPipelineDelivered,
   markCourseStartedPipelineDelivered,
   migrateCourseStartedMark,
@@ -86,6 +88,59 @@ describe("session", () => {
     expect(resolveSessionId(storage, "bad:id")).toBe("tab-valid");
   });
 
+  it("resolveSessionId invokes onInvalidSessionId in production for invalid provided id", () => {
+    const onInvalidSessionId = vi.fn();
+    vi.stubEnv("NODE_ENV", "production");
+    const store: Record<string, string> = { [SESSION_STORAGE_KEY]: "tab-valid" };
+    const storage = {
+      getItem: (k: string) => store[k] ?? null,
+      setItem: (k: string, v: string) => {
+        store[k] = v;
+        return true;
+      },
+    };
+
+    try {
+      const resolved = resolveSessionId(storage, "bad:id", { onInvalidSessionId });
+      expect(resolved).toBe("tab-valid");
+      expect(onInvalidSessionId).toHaveBeenCalledWith({
+        invalidId: "bad:id",
+        fallbackId: "tab-valid",
+        source: "provided",
+      });
+    } finally {
+      vi.unstubAllEnvs();
+    }
+  });
+
+  it("resolveSessionId invokes onInvalidSessionId in production for invalid stored id", () => {
+    const onInvalidSessionId = vi.fn();
+    vi.stubEnv("NODE_ENV", "production");
+    const store: Record<string, string> = { [SESSION_STORAGE_KEY]: "bad:id" };
+    const storage = {
+      getItem: (k: string) => store[k] ?? null,
+      setItem: (k: string, v: string) => {
+        store[k] = v;
+        return true;
+      },
+      removeItem: (k: string) => {
+        delete store[k];
+      },
+    };
+
+    try {
+      const resolved = resolveSessionId(storage, undefined, { onInvalidSessionId });
+      expect(resolved).toMatch(/^s-/);
+      expect(onInvalidSessionId).toHaveBeenCalledWith({
+        invalidId: "bad:id",
+        fallbackId: resolved,
+        source: "stored",
+      });
+    } finally {
+      vi.unstubAllEnvs();
+    }
+  });
+
   it("resolveSessionId regenerates invalid stored tab session id", () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
     vi.stubEnv("NODE_ENV", "development");
@@ -151,6 +206,17 @@ describe("session", () => {
     expect(hasCourseStarted(storage, "s", "c2")).toBe(false);
     expect(hasCourseStarted(storage, "s")).toBe(false);
     markCourseStarted(storage, "s", undefined);
+  });
+
+  it("remembers course_started marks in memory when durable write fails", () => {
+    const storage = {
+      getItem: () => null,
+      setItem: () => false,
+    };
+
+    expect(hasCourseStarted(storage, "s", "c1")).toBe(false);
+    expect(markCourseStarted(storage, "s", "c1")).toBe(false);
+    expect(hasCourseStarted(storage, "s", "c1")).toBe(true);
   });
 
   it("migrateCourseStartedMark moves dedupe between session ids", () => {
@@ -235,6 +301,51 @@ describe("session", () => {
     expect(hasCourseStartedPipelineDelivered(storage, "s", "c1")).toBe(false);
     markCourseStartedPipelineDelivered(storage, "s", "c1");
     expect(hasCourseStartedPipelineDelivered(storage, "s", "c1")).toBe(true);
+  });
+
+  it("markCourseStartedXapiSent refuses to persist without courseId", () => {
+    const setItem = vi.fn(() => true);
+    const storage = {
+      getItem: () => null,
+      setItem,
+      removeItem: () => {},
+    };
+    expect(markCourseStartedXapiSent(storage, "s", undefined)).toBe(false);
+    expect(setItem).not.toHaveBeenCalled();
+    expect(hasCourseStartedXapiSent(storage, "s", "c1")).toBe(false);
+  });
+
+  it("pipeline delivery helpers refuse to persist without courseId", () => {
+    const setItem = vi.fn(() => true);
+    const storage = {
+      getItem: () => null,
+      setItem,
+      removeItem: () => {},
+    };
+    expect(hasCourseStartedPipelineDelivered(storage, "s", undefined)).toBe(false);
+    markCourseStartedPipelineDelivered(storage, "s", undefined);
+    expect(setItem).not.toHaveBeenCalled();
+    expect(hasCourseStartedPipelineDelivered(storage, "s", "c1")).toBe(false);
+  });
+
+  it("migrateCourseStartedMark moves only tracking dedupe when session mark is absent", () => {
+    const store: Record<string, string> = {};
+    const storage = {
+      getItem: (k: string) => store[k] ?? null,
+      setItem: (k: string, v: string) => {
+        store[k] = v;
+        return true;
+      },
+      removeItem: (k: string) => {
+        delete store[k];
+      },
+    };
+    markCourseStartedEmittedToTracking(storage, "old", "c1");
+    migrateCourseStartedMark(storage, "old", "new", "c1");
+    expect(hasCourseStartedEmittedToTracking(storage, "new", "c1")).toBe(true);
+    expect(hasCourseStartedEmittedToTracking(storage, "old", "c1")).toBe(false);
+    expect(hasCourseStarted(storage, "new", "c1")).toBe(false);
+    expect(hasCourseStarted(storage, "old", "c1")).toBe(false);
   });
 
   it("migrateCourseStartedMark moves tracking dedupe between session ids", () => {

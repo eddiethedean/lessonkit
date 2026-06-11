@@ -12,8 +12,8 @@
     "conformance:golden": "node scripts/run-golden-package-matrix.mjs"
   },
   "dependencies": {
-    "@lessonkit/lxpack": "1.6.0",
-    "@lxpack/conformance": "0.6.4"
+    "@lessonkit/lxpack": "file:../packages/lxpack",
+    "@lxpack/conformance": "0.7.0"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.11.3",

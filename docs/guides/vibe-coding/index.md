@@ -15,21 +15,22 @@ Ask your AI to follow LessonKit patterns and **rebuild** activities using **[Com
 :::{admonition} Library Skills (recommended)
 :class: tip
 
-Install Cursor-compatible authoring skills from the repo:
+Install Cursor-compatible authoring skills **without cloning the full monorepo**:
 
 ```bash
-git clone https://github.com/eddiethedean/lessonkit.git
-cd lessonkit && ./library-skills/install.sh --project -C /path/to/your-course
+curl -fsSL https://raw.githubusercontent.com/eddiethedean/lessonkit/main/library-skills/install-remote.sh | bash
 ```
 
-Details: [Library Skills](../library-skills.md).
+Project-scoped: `curl -fsSL .../install-remote.sh | bash -s -- --project -C /path/to/your-course`
+
+Contributors may clone the repo instead — see [Library Skills](../library-skills.md).
 :::
 
 These guides are for **instructional designers, trainers, and builders who do not write React by hand**. You will use an AI assistant in your editor (Cursor, VS Code + Copilot, Windsurf, etc.) and the LessonKit CLI to create and ship courses.
 
 You do not need to understand TypeScript, hooks, or bundlers. You **do** need to:
 
-- Install **Node.js 18+** minimum (**20.19+** recommended — the CLI scaffold uses Vite 8)
+- Install **Node.js** — see [Prerequisites — decision table](../prerequisites.md) (**{{ node_new_projects }}** for new projects)
 - Follow prompts carefully and paste suggested commands into a terminal
 - Review AI-generated changes before publishing
 

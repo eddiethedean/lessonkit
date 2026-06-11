@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
-import { mkdtemp, rm, writeFile, mkdir } from "node:fs/promises";
+import { mkdtemp, rm, writeFile, mkdir, symlink } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 
@@ -61,6 +61,31 @@ describe("runPackage", () => {
     vi.clearAllMocks();
   });
 
+  it("passes resolved project-root output for relative --out", async () => {
+    mockedPackage.mockResolvedValue({
+      ok: true,
+      courseDir: join(dir, ".lxpack/course"),
+      target: "scorm12",
+      outputPath: join(dir, "artifacts/course-scorm12.zip"),
+      fileCount: 3,
+      validation: { ok: true, issues: [], manifest: {} as never },
+      build: { ok: true, issues: [], fileCount: 3, target: "scorm12", manifest: {} as never },
+    } satisfies PackageLessonkitCourseResult);
+
+    await runPackage({
+      target: "scorm12",
+      cwd: dir,
+      noBuild: true,
+      out: "artifacts/course-scorm12.zip",
+    });
+
+    expect(mockedPackage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        output: join(dir, "artifacts/course-scorm12.zip"),
+      }),
+    );
+  });
+
   it("packages scorm12 via lxpack", async () => {
     mockedPackage.mockResolvedValue({
       ok: true,
@@ -75,7 +100,7 @@ describe("runPackage", () => {
     const result = await runPackage({ target: "scorm12", cwd: dir, noBuild: true, json: true });
     expect(result.ok).toBe(true);
     expect(mockedPackage).toHaveBeenCalledWith(
-      expect.objectContaining({ target: "scorm12", output: ".lxpack/out/course-scorm12.zip" }),
+      expect.objectContaining({ target: "scorm12", output: undefined }),
     );
   });
 
@@ -118,9 +143,18 @@ describe("runPackage", () => {
   });
 
   it("returns dist path for react-vite", async () => {
-    const result = await runPackage({ target: "react-vite", cwd: dir, json: true });
+    const result = await runPackage({ target: "react-vite", cwd: dir, json: true, noBuild: true });
     expect(result.ok).toBe(true);
     expect(result).toMatchObject({ target: "react-vite", distDir: join(dir, "dist") });
+  });
+
+  it("rejects unsafe dist for react-vite with --no-build", async () => {
+    const outside = join(dir, "outside.txt");
+    await writeFile(outside, "x", "utf8");
+    await symlink(outside, join(dir, "dist", "link.txt"));
+    await expect(
+      runPackage({ target: "react-vite", cwd: dir, noBuild: true }),
+    ).rejects.toThrow(/contains symlink/);
   });
 
   it("prints packaging warnings when validation issues are non-fatal", async () => {

@@ -9,10 +9,24 @@ This guide uses **npm only**. You do not need the LessonKit GitHub monorepo unle
 :::{admonition} LMS export is a separate guide
 :class: note
 
-This page covers **local preview** in about five minutes. SCORM packaging, bridge configuration, and env setup are in **[LMS Go-Live](lms-go-live.md)** (canonical). Shortcuts: [First LMS export](first-lms-export.md) · [production checklist](production-checklist.md).
+This page covers **local preview** in about five minutes. SCORM packaging, bridge configuration, and env setup are in **[LMS Go-Live](lms-go-live.md)** (single canonical guide). Appendix shortcuts: [First LMS export](first-lms-export.md) · [Ship to LMS checklist](ship-to-lms.md) · [Production checklist](production-checklist.md).
 :::
 
 **Prerequisites:** See [Prerequisites](../prerequisites.md). Node.js **20.19+** recommended for `npx @lessonkit/cli init` (Vite 8).
+
+## You are here — golden path
+
+```text
+  [1] Local preview          [2] Build smoke           [3] LMS Go-Live (required)
+       npm run dev      →    npm run build       →     bridge + env + package + upload
+       ◄── you start here     optional smoke only       do not skip before LMS upload
+```
+
+| Step | Status on this page | Next |
+| --- | --- | --- |
+| **1. Preview** | Sections 1–3 below | Keep using `npm run dev` while editing |
+| **2. Build smoke** | Section 4 (optional) | Confirms Vite production build only—not LMS-ready |
+| **3. LMS Go-Live** | Not on this page | **[LMS Go-Live](lms-go-live.md)** — required before upload |
 
 ## 1. Create a project
 
@@ -27,13 +41,19 @@ cd my-course
 
 | Flag | When to use |
 | --- | --- |
-| `lessonkit init --here` | Scaffold in the current directory (must be empty or use `--force`) |
+| `lessonkit init --here` | Scaffold in the current directory (must be empty or dotfiles-only without `--force`) |
 | `lessonkit init my-course --skip-install` | Create files only; run `npm install` yourself after fixing Node/proxy issues |
-| `lessonkit init --here --force` | Scaffold in the current directory when it is empty or dotfiles-only (e.g. `.git`) |
+| `lessonkit init --here --force` | Scaffold in a non-empty directory; conflicting template files are backed up to `.lessonkit-init-backup/` before overwrite |
 
 See [CLI reference](../../reference/cli.md) for all options.
 
 ## 2. Preview locally
+
+:::{admonition} Dev preview ≠ LMS upload
+:class: warning
+
+`npm run dev` uses **console telemetry sinks** in the init template. A successful `npm run build` does **not** mean the course is ready for LMS upload—production mode requires bridge config, env proxies, or temporarily disabled tracking/xAPI. Follow **[LMS Go-Live](lms-go-live.md)** before packaging.
+:::
 
 ```bash
 npm run dev
@@ -107,10 +127,8 @@ Output goes to `dist/` (Vite SPA).
 
 ## Next steps
 
-- [LMS Go-Live](lms-go-live.md) — canonical smoke test vs production path
-- [First LMS export](first-lms-export.md) — focused first-export walkthrough
-- [Ship to LMS checklist](ship-to-lms.md) — one-page go-live checklist
+- [LMS Go-Live](lms-go-live.md) — **start here** for smoke test vs production (single canonical guide)
 - [Quickstart](quickstart.md) — add LessonKit to an existing Vite app
 - [Block cookbook](block-cookbook.md) — per-block React + manifest examples
 - [FAQ](../faq.md) — common questions
-- [Live examples](../../examples/index.md) — full demo courses
+- [Live examples](../../examples/index.md) — full demo courses (Read the Docs embeds; no clone required)

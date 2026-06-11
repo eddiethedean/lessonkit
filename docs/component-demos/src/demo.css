@@ -26,3 +26,38 @@ body {
   font-size: 0.9375rem;
   line-height: 1.55;
 }
+
+.lk-demo-callout {
+  margin: 0 0 1.25rem;
+  padding: 0.875rem 1rem;
+  border: 1px solid #93c5fd;
+  border-radius: 0.5rem;
+  background: #eff6ff;
+  color: #1e3a8a;
+  font-size: 0.9375rem;
+  line-height: 1.55;
+}
+
+.lk-demo-callout-body p {
+  margin: 0;
+}
+
+.lk-demo-callout-body p + p {
+  margin-top: 0.5rem;
+}
+
+.lk-demo-callout-link {
+  margin: 0.75rem 0 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.lk-demo-callout-link a {
+  color: #1d4ed8;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.lk-demo-callout-link a:hover {
+  color: #1e40af;
+}

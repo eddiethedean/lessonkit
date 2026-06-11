@@ -50,3 +50,43 @@ export const CorrectSelection: Story = {
     await expect(canvas.getByRole("status")).toHaveTextContent("Correct");
   },
 };
+
+export const MultiSelect: Story = {
+  render: () => (
+    <QuizInLesson
+      checkId="hazards-multi"
+      question="Select all social-engineering risks"
+      choices={["Phishing email", "IT portal", "Tailgating"]}
+      answer="Phishing email"
+      answers={["Phishing email", "Tailgating"]}
+    />
+  ),
+};
+
+export const ShuffledChoices: Story = {
+  render: () => (
+    <QuizInLesson
+      checkId="shuffled-quiz"
+      question="Pick the approved channel"
+      choices={["Email link", "Service portal", "Personal USB", "Public Wi‑Fi"]}
+      answer="Service portal"
+      shuffleChoices
+      shuffleSeed="storybook-shuffle"
+    />
+  ),
+};
+
+export const ChoiceFeedback: Story = {
+  render: () => (
+    <QuizInLesson
+      checkId="feedback-quiz"
+      question="Which action is safest?"
+      choices={["Click the link", "Use the IT portal"]}
+      answer="Use the IT portal"
+      choiceFeedback={{
+        "Click the link": "Unknown links may be phishing.",
+        "Use the IT portal": "Approved channel for IT requests.",
+      }}
+    />
+  ),
+};

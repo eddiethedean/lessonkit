@@ -2,8 +2,10 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { createRequire } from "node:module";
 import { dirname, join, resolve } from "node:path";
 import { parseLessonkitInterchange } from "@lxpack/validators";
+import { validateInjectableAssessments } from "../descriptor/validateInjectableAssessments";
 import { descriptorToInterchange } from "../interchange";
 import { assertRealPathUnderRoot } from "../spaPath";
+import { isReservedResolvedOutputPath } from "../validateProjectPaths";
 import { assertSpaDistContentsSafe } from "../spaDistValidation";
 import { extractBlockTree, validateBlockTreeIds } from "./blockTree";
 import { parseLkcourseEnvelope } from "./parseEnvelope";
@@ -58,6 +60,17 @@ export async function exportLkcourse(options: ExportLkcourseOptions): Promise<Ex
           message: err instanceof Error ? err.message : String(err),
         },
       ],
+    };
+  }
+
+  const injectableIssues = validateInjectableAssessments(manifest.course);
+  if (injectableIssues.length > 0) {
+    return {
+      ok: false,
+      issues: injectableIssues.map((issue) => ({
+        path: issue.path,
+        message: issue.message,
+      })),
     };
   }
 
@@ -168,6 +181,7 @@ export async function exportLkcourse(options: ExportLkcourseOptions): Promise<Ex
     projectRoot,
     options.outPath ?? `${manifest.name}.lkcourse`,
   );
+  const archiveRel = options.outPath ?? `${manifest.name}.lkcourse`;
   try {
     assertRealPathUnderRoot(projectRoot, archivePath);
   } catch (err) {
@@ -175,14 +189,26 @@ export async function exportLkcourse(options: ExportLkcourseOptions): Promise<Ex
       ok: false,
       issues: [
         {
-          path: options.outPath ?? `${manifest.name}.lkcourse`,
+          path: archiveRel,
           message: err instanceof Error ? err.message : String(err),
         },
       ],
     };
   }
 
-  if (!isSafeZipEntryPath(options.outPath ?? `${manifest.name}.lkcourse`)) {
+  if (isReservedResolvedOutputPath(projectRoot, archivePath)) {
+    return {
+      ok: false,
+      issues: [
+        {
+          path: archiveRel,
+          message: "output path must not target reserved directories (.git, node_modules, .github)",
+        },
+      ],
+    };
+  }
+
+  if (!isSafeZipEntryPath(archiveRel)) {
     return {
       ok: false,
       issues: [{ path: "outPath", message: "output path must be a safe relative path" }],

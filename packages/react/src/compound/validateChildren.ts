@@ -17,6 +17,7 @@ const COMPOUND_CONTAINER_TYPES = new Set<CompoundParentType>([
   "TimedCue",
   "InteractiveVideo",
   "AssessmentSequence",
+  "SingleChoiceSet",
   "BranchingScenario",
   "BranchNode",
   "GameMap",

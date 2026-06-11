@@ -60,6 +60,32 @@ export function normalizeDescriptor(input: LessonkitCourseDescriptor): Lessonkit
           correctTargetIds: assessment.correctTargetIds.map((id) => id.trim()).filter((id) => id.length > 0),
         };
       }
+      if (assessment.kind === "sortParagraphs") {
+        return {
+          ...assessment,
+          checkId: check.id,
+          question,
+          paragraphs: assessment.paragraphs.map((p) => p.trim()).filter((p) => p.length > 0),
+          correctOrder: [...assessment.correctOrder],
+        };
+      }
+      if (assessment.kind === "guessTheAnswer") {
+        return {
+          ...assessment,
+          checkId: check.id,
+          question,
+          answer: assessment.answer.trim(),
+        };
+      }
+      if (assessment.kind === "multimediaChoice") {
+        return {
+          ...assessment,
+          checkId: check.id,
+          question,
+          choices: assessment.choices.map((c) => c.trim()).filter((c) => c.length > 0),
+          answer: assessment.answer.trim(),
+        };
+      }
       const mcq = assessment as McqAssessmentDescriptor;
       return {
         ...mcq,
@@ -67,6 +93,7 @@ export function normalizeDescriptor(input: LessonkitCourseDescriptor): Lessonkit
         question,
         choices: mcq.choices.map((c) => c.trim()).filter((c) => c.length > 0),
         answer: mcq.answer.trim(),
+        answers: mcq.answers?.map((a) => a.trim()).filter((a) => a.length > 0),
       };
     }),
   };

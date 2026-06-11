@@ -1,12 +1,12 @@
 # Production checklist
 
-Use this checklist before shipping a LessonKit course to learners in an LMS, standalone site, or LRS-backed deployment.
+:::{admonition} Appendix — part of LMS Go-Live
+:class: note
 
-:::{admonition} Canonical guide
-:class: tip
-
-For the full go-live path (including smoke-test branch), see **[LMS Go-Live](lms-go-live.md)**.
+This checklist covers production guardrails in detail. For the full go-live path (including the smoke-test branch), start with **[LMS Go-Live](lms-go-live.md)** and return here for the observability matrix.
 :::
+
+Use this checklist before shipping a LessonKit course to learners in an LMS, standalone site, or LRS-backed deployment.
 
 ## Packaging target
 
@@ -80,7 +80,7 @@ observability: {
 
 ## CI / build
 
-- Pin aligned `@lessonkit/*` versions (framework 1.6.x).
+- Pin aligned `@lessonkit/*` versions (framework 1.7.x).
 - Set `VITE_XAPI_PROXY_URL` and `VITE_ANALYTICS_URL` (see `.env.example` in scaffolded projects).
 - `tracking.xapi.activityIri` in `lessonkit.json` must be **HTTPS** for xAPI/cmi5 packaging.
 - `lessonkit build` and `lessonkit package` run under Node 18+; set `LESSONKIT_CMD_TIMEOUT_MS` if builds need a limit (default 30 minutes per subprocess). `lessonkit dev` has no subprocess timeout.

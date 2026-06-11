@@ -73,6 +73,10 @@ function containsPathTraversal(path: string): boolean {
 
 /** Validate an LRS or analytics proxy URL before browser fetch transport use. */
 export function assertSafeLrsUrl(url: string, opts?: AssertSafeLrsUrlOptions): void {
+  if (url.startsWith("//")) {
+    throw new Error(`Unsafe LRS URL: protocol-relative URLs are not allowed "${url}"`);
+  }
+
   if (url.startsWith("/")) {
     if (containsPathTraversal(url)) {
       throw new Error(`Unsafe LRS URL: path traversal in "${url}"`);

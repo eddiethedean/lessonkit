@@ -14,11 +14,15 @@ LessonKit is **React-first**, not a plugin inside your LMS’s content bank. You
 
 Use the **[H5P capability map](../project/h5p-capability-map.md)** for the full table (machine name, display name, LessonKit id, roadmap status). Shipped blocks link to **[component pages](../reference/components/index.md)** with live demos.
 
-### Available today (framework 1.6.x)
+### Available today (framework 1.7.x)
 
 | H5P name | LessonKit | Notes |
 | --- | --- | --- |
-| **Multiple Choice** (`H5P.MultiChoice`) | [`Quiz`](../reference/components/quiz.md) / [`KnowledgeCheck`](../reference/components/knowledge-check.md) | Set `checkId`; mirror in `lessonkit.json` `assessments[]` |
+| **Sort the Paragraphs** | [`SortParagraphs`](../reference/components/sort-paragraphs.md) | SPA scoring; `kind: "sortParagraphs"` (**1.7.0**) |
+| **Guess the Answer** | [`GuessTheAnswer`](../reference/components/guess-the-answer.md) | Scored or reveal-only (`scored={false}`) (**1.7.0**) |
+| **Multimedia Choice** | [`MultimediaChoice`](../reference/components/multimedia-choice.md) | MCQ with image/audio; `kind: "multimediaChoice"` (**1.7.0**) |
+| **Single Choice Set** | [`SingleChoiceSet`](../reference/components/single-choice-set.md) | Sequential MCQ compound; child `Quiz` descriptors (**1.7.0**) |
+| **Multiple Choice** (`H5P.MultiChoice`) | [`Quiz`](../reference/components/quiz.md) / [`KnowledgeCheck`](../reference/components/knowledge-check.md) | Single-select (default), multi-select (`answers`), shuffle, per-choice feedback (**1.7.0**) |
 | **True/False** | [`TrueFalse`](../reference/components/true-false.md) | `kind: "trueFalse"` in manifest; LXPack packages as 2-choice MCQ |
 | **Fill in the Blanks** | [`FillInTheBlanks`](../reference/components/fill-in-the-blanks.md) | SPA scoring + `assessment_completed` bridge |
 | **Drag and Drop** | [`DragAndDrop`](../reference/components/drag-and-drop.md) | Keyboard pick-target mode; SPA + bridge scoring |
@@ -59,7 +63,7 @@ Use the **[H5P capability map](../project/h5p-capability-map.md)** for the full 
 
 ### Planned (roadmap / capability map)
 
-See the [capability map](../project/h5p-capability-map.md) for Tier A–E blocks not yet shipped (e.g. `SortParagraphs`, `VirtualTour`).
+See the [capability map](../project/h5p-capability-map.md) for Tier A–E blocks not yet shipped (e.g. `VirtualTour`, Tier B P2 speech blocks).
 
 :::{admonition} Renamed on purpose
 :class: important

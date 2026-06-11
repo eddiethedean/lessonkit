@@ -31,7 +31,7 @@ Default SCORM output: **`.lxpack/course/.lxpack/out/course-scorm12.zip`**.
 
 ### `courseConfig.ts`
 
-Central runtime config: telemetry sinks, xAPI transport, observability hooks, and `lxpack.bridge`. Set `bridge: "auto"` and `allowedParentOrigins` before LMS packaging. See [First LMS export](first-lms-export.md).
+Central runtime config: telemetry sinks, xAPI transport, observability hooks, and `lxpack.bridge`. Set `bridge: "auto"` and `allowedParentOrigins` before LMS packaging. See [LMS Go-Live](lms-go-live.md).
 
 `lessonkit.json` is the contract between your React app and `@lessonkit/lxpack`. See the [manifest reference](../../reference/manifest.md) for every field:
 

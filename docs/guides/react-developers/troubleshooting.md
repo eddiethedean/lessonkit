@@ -21,7 +21,7 @@ Common fixes for packaging, production builds, and LMS delivery. **Start at the 
 
 **Symptom:** You look for `.lxpack/out/course-scorm12.zip` at the project root and the file is missing.
 
-**Fix:** See the canonical path in the [FAQ — SCORM zip location](../faq.md#where-is-my-scorm-zip-after-packaging). Trust the path **`lessonkit package` prints** on stdout. Details: [First LMS export — where the SCORM zip lands](first-lms-export.md#where-the-scorm-zip-lands).
+**Fix:** See the canonical path in the [FAQ — SCORM zip location](../faq.md#where-is-my-scorm-zip-after-packaging). Trust the path **`lessonkit package` prints** on stdout. Details: [LMS Go-Live — SCORM output layout](lms-go-live.md#scorm-output-layout).
 
 ## `lessonkit package` fails on ID parity
 
@@ -45,7 +45,7 @@ See [Keep React IDs in sync](quickstart.md#keep-react-ids-in-sync-with-lessonkit
 - **First test export only:** Temporarily set `tracking: { enabled: false }` and `xapi: { enabled: false }` in `courseConfig.ts`.
 - **Dev vs prod:** `npm run dev` uses console sinks; production mode enforces real delivery or explicit disable.
 
-Details: [production checklist](production-checklist.md) · [Production runtime for LMS](first-lms-export.md#production-runtime-for-lms) · [Ship to LMS checklist](ship-to-lms.md).
+Details: [LMS Go-Live](lms-go-live.md) · [production checklist](production-checklist.md) (appendix) · [Backend proxy cookbook](backend-proxy-cookbook.md).
 
 ## Observability hook errors
 

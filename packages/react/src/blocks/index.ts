@@ -14,7 +14,7 @@ export { Slide, type SlideProps } from "./Slide";
 export { SlideDeck, type SlideDeckProps } from "./SlideDeck";
 export { TimedCue, type TimedCueProps } from "./TimedCue";
 export { InteractiveVideo, type InteractiveVideoProps } from "./InteractiveVideo";
-export { Summary, type SummaryProps } from "./Summary";
+export { Summary, DEFAULT_SUMMARY_INSTRUCTIONS, type SummaryProps } from "./Summary";
 export { ImagePairing, type ImagePairingProps, type ImagePair } from "./ImagePairing";
 export { ImageSequencing, type ImageSequencingProps, type SequencingImage } from "./ImageSequencing";
 export { ArithmeticQuiz, type ArithmeticQuizProps, type ArithmeticProblem } from "./ArithmeticQuiz";
@@ -49,3 +49,7 @@ export { AdventCalendar, type AdventCalendarProps, type AdventDoor } from "./Adv
 export { GameMap, type GameMapProps } from "./GameMap";
 export { MapStage, type MapStageProps } from "./MapStage";
 export { MapExit, type MapExitProps } from "./MapExit";
+export { SortParagraphs, type SortParagraphsProps } from "./SortParagraphs";
+export { GuessTheAnswer, type GuessTheAnswerProps } from "./GuessTheAnswer";
+export { MultimediaChoice, type MultimediaChoiceProps, type MultimediaChoiceOption } from "./MultimediaChoice";
+export { SingleChoiceSet, type SingleChoiceSetProps } from "./SingleChoiceSet";

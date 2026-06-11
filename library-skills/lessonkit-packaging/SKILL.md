@@ -1,12 +1,12 @@
 ---
 name: lessonkit-packaging
 description: >-
-  Package LessonKit 1.6.x Vite apps for LMS — lessonkit build, lessonkit package with
+  Package LessonKit 1.7.x Vite apps for LMS — lessonkit build, lessonkit package with
   scorm12/scorm2004/standalone/xapi/cmi5. Node 20.19+ for init; 18+ packaging legacy.
   to an LMS or configuring lessonkit.json paths for export.
 license: Apache-2.0
 metadata:
-  lessonkit-version: "1.6.0"
+  lessonkit-version: "1.7.0"
 ---
 
 # LessonKit packaging / LMS export

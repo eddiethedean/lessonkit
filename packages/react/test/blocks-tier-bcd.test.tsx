@@ -110,6 +110,36 @@ describe("Tier B/C/D block components", () => {
     expect(screen.getByTestId("arithmetic-feedback").textContent).toContain("Try again");
   });
 
+  it("ArithmeticQuiz countdown decrements while typing", () => {
+    vi.useFakeTimers();
+    try {
+      render(
+        wrap(
+          <ArithmeticQuiz
+            checkId="arith-timer"
+            timeLimitSeconds={10}
+            problems={[{ question: "2 + 2", answer: "4" }]}
+          />,
+        ),
+      );
+      expect(screen.getByTestId("arithmetic-timer").textContent).toContain("10s");
+      const input = screen.getByTestId("arithmetic-answer-0");
+      for (let i = 0; i < 20; i += 1) {
+        fireEvent.change(input, { target: { value: `${i}` } });
+      }
+      act(() => {
+        vi.advanceTimersByTime(1000);
+      });
+      expect(screen.getByTestId("arithmetic-timer").textContent).toContain("9s");
+      act(() => {
+        vi.advanceTimersByTime(1000);
+      });
+      expect(screen.getByTestId("arithmetic-timer").textContent).toContain("8s");
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it("FindMultipleHotspots marks correct selections", () => {
     render(
       wrap(
@@ -234,6 +264,37 @@ describe("Tier B/C/D block components", () => {
       ref.current?.resume?.({ selected: ["a", "ghost", "b"], checked: true });
     });
     expect(ref.current?.getCurrentState?.().selected).toEqual(["a", "b"]);
+  });
+
+  it("Summary shows default instruction text", () => {
+    render(
+      wrap(
+        <Summary
+          checkId="summary-instructions-default"
+          statements={["First", "Second"]}
+          correct={["First"]}
+        />,
+      ),
+    );
+    expect(screen.getByTestId("summary-instructions").textContent).toBe(
+      "Select the statements that belong in the summary.",
+    );
+  });
+
+  it("Summary renders custom instructions when provided", () => {
+    render(
+      wrap(
+        <Summary
+          checkId="summary-instructions-custom"
+          statements={["First", "Second"]}
+          correct={["First"]}
+          instructions="Pick the three policy steps."
+        />,
+      ),
+    );
+    expect(screen.getByTestId("summary-instructions").textContent).toBe(
+      "Pick the three policy steps.",
+    );
   });
 
   it("Summary accepts correct statement order", () => {
@@ -471,6 +532,25 @@ describe("Tier B/C/D block components", () => {
     expect(screen.getByAltText("Slide 2")).toBeDefined();
   });
 
+  it("ImageSlider advances on horizontal swipe drag", () => {
+    render(
+      wrap(
+        <ImageSlider
+          blockId="slider-1"
+          slides={[
+            { src: "/1.png", alt: "Slide 1" },
+            { src: "/2.png", alt: "Slide 2" },
+          ]}
+        />,
+      ),
+    );
+    const viewport = screen.getByTestId("image-slider-viewport");
+    expect(screen.getByAltText("Slide 1")).toBeDefined();
+    fireEvent.pointerDown(viewport, { pointerId: 1, clientX: 200 });
+    fireEvent.pointerUp(viewport, { pointerId: 1, clientX: 100 });
+    expect(screen.getByAltText("Slide 2")).toBeDefined();
+  });
+
   it("InformationWall filters panels by search query", () => {
     render(
       wrap(
@@ -529,6 +609,46 @@ describe("Tier B/C/D block components", () => {
     expect(screen.getByTestId("parallax-slide-title").textContent).toContain("Slide one");
     fireEvent.click(screen.getByTestId("parallax-next"));
     expect(screen.getByTestId("parallax-slide-title").textContent).toContain("Slide two");
+  });
+
+  it("ParallaxSlideshow renders scrim overlay when slide has a background image", () => {
+    window.matchMedia = vi.fn().mockImplementation((query: string) => ({
+      matches: false,
+      media: query,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    })) as typeof window.matchMedia;
+    render(
+      wrap(
+        <ParallaxSlideshow
+          blockId="parallax-scrim"
+          slides={[{ title: "Photo slide", body: "Caption text", imageSrc: "/hero.jpg" }]}
+        />,
+      ),
+    );
+    expect(screen.getByTestId("parallax-slide-scrim")).toBeTruthy();
+    expect(screen.getByTestId("parallax-slide-content")).toBeTruthy();
+    expect(screen.getByTestId("parallax-slide-0").className).toContain("lk-parallax-slide--has-image");
+  });
+
+  it("ParallaxSlideshow reduced-motion path omits parallax scrim", () => {
+    window.matchMedia = vi.fn().mockImplementation((query: string) => ({
+      matches: query.includes("prefers-reduced-motion"),
+      media: query,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    })) as typeof window.matchMedia;
+    render(
+      wrap(
+        <ParallaxSlideshow
+          blockId="parallax-reduced"
+          slides={[{ title: "Static slide", body: "No parallax", imageSrc: "/hero.jpg" }]}
+        />,
+      ),
+    );
+    expect(screen.queryByTestId("parallax-slide-scrim")).toBeNull();
+    expect(screen.getByTestId("parallax-slide-image")).toBeTruthy();
+    expect(screen.getByTestId("parallax-slideshow").getAttribute("data-reduced-motion")).toBe("true");
   });
 
   it("Questionnaire submits field values", () => {

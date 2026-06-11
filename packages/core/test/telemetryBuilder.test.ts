@@ -337,4 +337,30 @@ describe("tryBuildTelemetryEvent", () => {
       }),
     ).toBeNull();
   });
+
+  it("skips dev warning in production for quiz events missing lessonId", () => {
+    vi.stubEnv("NODE_ENV", "production");
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    expect(
+      tryBuildTelemetryEvent({
+        name: "quiz_answered",
+        courseId: "c",
+        data: { checkId: "q1", question: "Q", choice: "A", correct: false },
+      }),
+    ).toBeNull();
+    expect(warn).not.toHaveBeenCalled();
+    warn.mockRestore();
+  });
+});
+
+describe("buildTelemetryEvent quiz validation", () => {
+  it("throws for quiz_completed without lessonId", () => {
+    expect(() =>
+      buildTelemetryEvent({
+        name: "quiz_completed",
+        courseId: "c",
+        data: { checkId: "q1", score: 1 },
+      }),
+    ).toThrow(/lessonId/);
+  });
 });

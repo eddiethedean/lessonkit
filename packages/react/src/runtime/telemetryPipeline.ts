@@ -1,6 +1,5 @@
-import type { TelemetryEvent, TrackingClient } from "@lessonkit/core";
+import type { EmitContext, TelemetryEvent, TelemetryPipelineSink, TrackingClient } from "@lessonkit/core";
 import {
-  createTelemetryPipeline,
   isLifecycleTelemetryEvent,
   type TelemetryPipeline,
 } from "@lessonkit/core";
@@ -25,72 +24,111 @@ function isDevEnvironment(): boolean {
   return typeof g.process !== "undefined" && g.process.env?.NODE_ENV !== "production";
 }
 
+async function deliverToTrackingSink(
+  tracking: TrackingClient,
+  event: TelemetryEvent,
+): Promise<boolean> {
+  if (isLifecycleTelemetryEvent(event.name) && tracking.deliver) {
+    return tracking.deliver(event);
+  }
+  return tracking.track(event) !== false;
+}
+
+async function invokeExtraSink(
+  sink: TelemetryPipelineSink,
+  event: TelemetryEvent,
+  emitCtx: EmitContext,
+): Promise<void> {
+  let result: void | Promise<void>;
+  try {
+    result = sink.emit(event, emitCtx);
+  } catch {
+    return;
+  }
+  if (result != null && typeof (result as Promise<void>).then === "function") {
+    try {
+      await result;
+    } catch {
+      /* sink errors are non-fatal */
+    }
+  }
+}
+
 function createLegacyPipeline(
   opts: LegacyEmitOptions,
-  extraSinks: import("@lessonkit/core").TelemetryPipelineSink[] = [],
+  extraSinks: TelemetryPipelineSink[] = [],
 ): TelemetryPipeline {
-  return createTelemetryPipeline([
-    {
-      id: "tracking",
-      async emit(event) {
-        if (isLifecycleTelemetryEvent(event.name) && opts.tracking.deliver) {
-          await opts.tracking.deliver(event);
-          return;
-        }
-        opts.tracking.track(event);
-      },
-    },
-    {
-      id: "xapi",
-      async emit(event) {
-        let statement;
-        try {
-          statement = telemetryEventToXAPIStatement(event);
-        } catch (err) {
-          opts.onXapiMappingError?.(err);
-          if (isDevEnvironment()) {
-            console.warn(
-              "[lessonkit] xAPI mapping skipped:",
-              err instanceof Error ? err.message : err,
-            );
-          }
-          return;
-        }
-        if (!statement || !opts.xapi) return;
-        try {
-          opts.xapi.send(statement);
-          if (isLifecycleTelemetryEvent(event.name)) {
-            await opts.xapi.flush();
-          }
-        } catch (err) {
-          opts.onXapiTransportError?.(err);
-          if (isDevEnvironment()) {
-            console.warn(
-              "[lessonkit] xAPI delivery failed:",
-              err instanceof Error ? err.message : err,
-            );
-          }
-        }
-      },
-    },
-    {
-      id: "lxpack-bridge",
-      emit(event) {
-        forwardTelemetryToLxpack(event, opts.lxpackBridge, {
-          onBridgeMiss: opts.onLxpackBridgeMiss,
-          onBridgeError: opts.onLxpackBridgeError,
-          allowedParentOrigins: opts.allowedParentOrigins,
-        });
-      },
-    },
+  async function emitToXapi(event: TelemetryEvent): Promise<void> {
+    let statement;
+    try {
+      statement = telemetryEventToXAPIStatement(event);
+    } catch (err) {
+      opts.onXapiMappingError?.(err);
+      if (isDevEnvironment()) {
+        console.warn(
+          "[lessonkit] xAPI mapping skipped:",
+          err instanceof Error ? err.message : err,
+        );
+      }
+      return;
+    }
+    if (!statement || !opts.xapi) return;
+    try {
+      opts.xapi.send(statement);
+      if (isLifecycleTelemetryEvent(event.name)) {
+        await opts.xapi.flush();
+      }
+    } catch (err) {
+      opts.onXapiTransportError?.(err);
+      if (isDevEnvironment()) {
+        console.warn(
+          "[lessonkit] xAPI delivery failed:",
+          err instanceof Error ? err.message : err,
+        );
+      }
+    }
+  }
+
+  function emitToLxpack(event: TelemetryEvent): void {
+    forwardTelemetryToLxpack(event, opts.lxpackBridge, {
+      onBridgeMiss: opts.onLxpackBridgeMiss,
+      onBridgeError: opts.onLxpackBridgeError,
+      allowedParentOrigins: opts.allowedParentOrigins,
+    });
+  }
+
+  const sinks: TelemetryPipelineSink[] = [
+    { id: "tracking", emit: () => undefined },
+    { id: "xapi", emit: () => undefined },
+    { id: "lxpack-bridge", emit: () => undefined },
     ...extraSinks,
-  ]);
+  ];
+
+  return {
+    sinks,
+    async emit(event, ctx) {
+      const accepted = await deliverToTrackingSink(opts.tracking, event);
+      if (!accepted) return;
+
+      const emitCtx: EmitContext = ctx ?? {
+        courseId: event.courseId,
+        sessionId: event.sessionId,
+        attemptId: event.attemptId,
+      };
+
+      await emitToXapi(event);
+      emitToLxpack(event);
+      for (const sink of extraSinks) {
+        await invokeExtraSink(sink, event, emitCtx);
+      }
+    },
+  };
 }
 
 export function emitThroughPipeline(
   event: TelemetryEvent,
   opts: LegacyEmitOptions,
-  extraSinks?: import("@lessonkit/core").TelemetryPipelineSink[],
+  extraSinks?: TelemetryPipelineSink[],
 ): void | Promise<void> {
   return createLegacyPipeline(opts, extraSinks).emit(event);
 }

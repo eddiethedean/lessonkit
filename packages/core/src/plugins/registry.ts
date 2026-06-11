@@ -29,6 +29,18 @@ function stableUserHash(user: TelemetryUser | undefined): string {
   return h.toString(36);
 }
 
+/**
+ * Register framework plugins (telemetry, assessment scoring, lifecycle hooks).
+ *
+ * @example
+ * ```ts
+ * import { createPluginRegistry, defineTelemetryPlugin } from "@lessonkit/core";
+ *
+ * const plugins = createPluginRegistry([
+ *   defineTelemetryPlugin({ id: "analytics-bridge", setup: () => {} }),
+ * ]);
+ * ```
+ */
 export function createPluginRegistry(plugins: readonly LessonkitPlugin[] = []): PluginRegistry {
   const registry = new Map<string, LessonkitPlugin>();
   for (const plugin of plugins) {

@@ -3,12 +3,27 @@ import type { AssessmentBaseProps, AssessmentHandle, AssessmentInteractionType }
 import type { LessonId } from "@lessonkit/core";
 import { AssessmentLessonGuard } from "../assessment/AssessmentLessonGuard";
 import { buildAssessmentHandle } from "../assessment/internal/buildAssessmentHandle";
-import { readBooleanStateField } from "../assessment/internal/resumeState";
+import {
+  readBooleanStateField,
+  restoreCompletedRefFromResumeState,
+} from "../assessment/internal/resumeState";
 import { useAssessmentHandleRegistration } from "../assessment/internal/useAssessmentHandleRegistration";
 import { meetsPassingThreshold } from "../assessment/scoring";
 import { useAssessmentState } from "../assessment/useAssessmentState";
 import { setLessonkitBlockType } from "../compound/blockType";
 import { normalizeComponentId } from "../runtime/validateComponentId";
+import {
+  buildGrid,
+  buildGridSeed,
+  cellKey,
+  cellsAlongHorizontalLine,
+  matchPlacement,
+  placementCellKeys,
+  restoreWordSearchLayout,
+  type GridCell,
+  type WordPlacement,
+  type WordSearchGrid,
+} from "./wordSearchUtils";
 
 export type WordSearchProps = AssessmentBaseProps & {
   words: string[];
@@ -17,46 +32,20 @@ export type WordSearchProps = AssessmentBaseProps & {
 
 const INTERACTION: AssessmentInteractionType = "wordSearch";
 
-function buildGrid(words: string[], size: number): { grid: string[][]; placed: string[] } {
-  const grid: string[][] = Array.from({ length: size }, () =>
-    Array.from({ length: size }, () => ""),
-  );
-  const placed: string[] = [];
-  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-
-  for (const raw of words) {
-    const word = raw.toUpperCase().replace(/[^A-Z]/g, "");
-    if (word.length === 0 || word.length > size) continue;
-    let done = false;
-    for (let attempt = 0; attempt < 50 && !done; attempt += 1) {
-      const row = Math.floor(Math.random() * size);
-      const col = Math.floor(Math.random() * (size - word.length + 1));
-      let fits = true;
-      for (let i = 0; i < word.length; i += 1) {
-        const cell = grid[row]![col + i]!;
-        if (cell && cell !== word[i]) {
-          fits = false;
-          break;
-        }
-      }
-      if (!fits) continue;
-      for (let i = 0; i < word.length; i += 1) {
-        grid[row]![col + i] = word[i]!;
-      }
-      placed.push(word);
-      done = true;
-    }
-  }
-
-  for (let r = 0; r < size; r += 1) {
-    for (let c = 0; c < size; c += 1) {
-      if (!grid[r]![c]) {
-        grid[r]![c] = alphabet[Math.floor(Math.random() * alphabet.length)]!;
+function foundCellsForWords(
+  foundWords: Iterable<string>,
+  placementsByWord: Map<string, WordPlacement>,
+): Set<string> {
+  const nextFoundCells = new Set<string>();
+  for (const word of foundWords) {
+    const placement = placementsByWord.get(word);
+    if (placement) {
+      for (const key of placementCellKeys(placement)) {
+        nextFoundCells.add(key);
       }
     }
   }
-
-  return { grid, placed };
+  return nextFoundCells;
 }
 
 function WordSearchInner(
@@ -67,24 +56,43 @@ function WordSearchInner(
   const assessment = useAssessmentState(props.enclosingLessonId);
   const size = props.size ?? 10;
   const wordsKey = props.words.join("\0");
-  const { grid, placed } = useMemo(() => buildGrid(props.words, size), [wordsKey, size]);
+  const layoutSeed = useMemo(
+    () => buildGridSeed(checkId, wordsKey, size),
+    [checkId, wordsKey, size],
+  );
+  const [layout, setLayout] = useState<WordSearchGrid>(() =>
+    buildGrid(props.words, size, layoutSeed),
+  );
+  const { grid, placed, placements } = layout;
+  const placementsByWord = useMemo(
+    () => new Map(placements.map((placement) => [placement.word, placement])),
+    [placements],
+  );
   const [found, setFound] = useState<Set<string>>(() => new Set());
-  const [selection, setSelection] = useState<string[]>([]);
+  const [foundCells, setFoundCells] = useState<Set<string>>(() => new Set());
+  const [selection, setSelection] = useState<GridCell[]>([]);
   const [passed, setPassed] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const completedRef = useRef(false);
+  const anchorRef = useRef<GridCell | null>(null);
+  const draggingRef = useRef(false);
+  const selectionRef = useRef<GridCell[]>([]);
 
   const reset = () => {
     completedRef.current = false;
     setPassed(false);
     setSubmitted(false);
     setFound(new Set());
+    setFoundCells(new Set());
     setSelection([]);
+    anchorRef.current = null;
+    draggingRef.current = false;
   };
 
   useEffect(() => {
+    setLayout(buildGrid(props.words, size, layoutSeed));
     reset();
-  }, [checkId, wordsKey, size]);
+  }, [checkId, wordsKey, size, layoutSeed, props.words]);
 
   const maxScore = placed.length;
   const score = found.size;
@@ -107,47 +115,89 @@ function WordSearchInner(
           score: passed ? maxScore : score,
           maxScore: maxScore || 1,
         }),
-        getCurrentState: () => ({ found: [...found], passed, submitted }),
+        getCurrentState: () => ({
+          found: [...found],
+          passed,
+          submitted,
+          completed: completedRef.current,
+          grid: layout.grid,
+          placed: layout.placed,
+          placements: layout.placements,
+        }),
         resume: (state) => {
+          const restored = restoreWordSearchLayout(state, props.words, size);
+          const activeLayout = restored ?? layout;
+          if (restored) setLayout(restored);
+          const activePlacementsByWord = new Map(
+            activeLayout.placements.map((placement) => [placement.word, placement]),
+          );
           const raw = state.found;
           if (Array.isArray(raw)) {
-            setFound(new Set(raw.filter((w): w is string => typeof w === "string")));
+            const nextFound = new Set(raw.filter((w): w is string => typeof w === "string"));
+            setFound(nextFound);
+            setFoundCells(foundCellsForWords(nextFound, activePlacementsByWord));
           }
-          readBooleanStateField(state, "passed", (value) => {
-            setPassed(value);
-            completedRef.current = value;
-          });
+          readBooleanStateField(state, "passed", setPassed);
           readBooleanStateField(state, "submitted", setSubmitted);
+          restoreCompletedRefFromResumeState(completedRef, state, {
+            enableRetry: props.enableRetry,
+          });
         },
       }),
-    [checkId, found, maxScore, passed, passedThreshold, score, submitted],
+    [checkId, found, layout, maxScore, passed, passedThreshold, placementsByWord, props.words, score, size, submitted],
   );
 
   useAssessmentHandleRegistration(checkId, handle, ref);
 
-  const toggleCell = (row: number, col: number) => {
-    const key = `${row}:${col}`;
-    setSelection((prev) => {
-      const next = prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key];
-      const letters = next
-        .sort()
-        .map((k) => {
-          const [r, c] = k.split(":").map(Number);
-          return grid[r!]?.[c!] ?? "";
-        })
-        .join("");
-      const match = placed.find((word) => word === letters);
-      if (match) {
-        setFound((f) => new Set([...f, match]));
-        return [];
-      }
-      return next;
-    });
+  const applyFoundWord = (word: string) => {
+    const placement = placementsByWord.get(word);
+    setFound((prev) => new Set([...prev, word]));
+    if (placement) {
+      setFoundCells((prev) => new Set([...prev, ...placementCellKeys(placement)]));
+    }
+  };
+
+  const tryMatch = (cells: GridCell[]) => {
+    const match = matchPlacement(placed, grid, cells);
+    if (match) {
+      applyFoundWord(match);
+    }
+    selectionRef.current = [];
+    setSelection([]);
+    anchorRef.current = null;
+  };
+
+  const beginSelection = (row: number, col: number, event: React.PointerEvent<HTMLButtonElement>) => {
+    if (passed && !props.enableRetry) return;
+    event.preventDefault();
+    if (typeof event.currentTarget.setPointerCapture === "function") {
+      event.currentTarget.setPointerCapture(event.pointerId);
+    }
+    const anchor = { row, col };
+    anchorRef.current = anchor;
+    draggingRef.current = true;
+    selectionRef.current = [anchor];
+    setSelection([anchor]);
+  };
+
+  const extendSelection = (row: number, col: number) => {
+    if (!draggingRef.current || !anchorRef.current) return;
+    const path = cellsAlongHorizontalLine(anchorRef.current, { row, col });
+    if (path) {
+      selectionRef.current = path;
+      setSelection(path);
+    }
+  };
+
+  const endSelection = () => {
+    if (!draggingRef.current) return;
+    draggingRef.current = false;
+    tryMatch(selectionRef.current);
   };
 
   const check = () => {
     setSubmitted(true);
-    const ok = found.size === maxScore && maxScore > 0;
+    const ok = passedThreshold && maxScore > 0;
     assessment.answer({
       checkId,
       interactionType: INTERACTION,
@@ -167,22 +217,52 @@ function WordSearchInner(
     }
   };
 
+  const selectionKeys = useMemo(() => new Set(selection.map((cell) => cellKey(cell.row, cell.col))), [selection]);
+
   return (
-    <section aria-label="Word search" data-lk-check-id={checkId} data-testid="word-search">
-      <div role="grid">
+    <section
+      className="lk-word-search"
+      aria-label="Word search"
+      data-lk-check-id={checkId}
+      data-testid="word-search"
+    >
+      <div
+        className="lk-word-search-grid"
+        role="grid"
+        aria-rowcount={size}
+        aria-colcount={size}
+      >
         {grid.map((row, rowIndex) => (
-          <div key={`row-${rowIndex}`} role="row">
+          <div
+            key={`row-${rowIndex}`}
+            className="lk-word-search-row"
+            role="row"
+            aria-rowindex={rowIndex + 1}
+          >
             {row.map((letter, colIndex) => {
-              const key = `${rowIndex}:${colIndex}`;
-              const selected = selection.includes(key);
+              const key = cellKey(rowIndex, colIndex);
+              const selected = selectionKeys.has(key);
+              const discovered = foundCells.has(key);
               return (
                 <button
                   key={key}
                   type="button"
+                  className={[
+                    "lk-word-search-cell",
+                    selected ? "lk-word-search-cell--selecting" : "",
+                    discovered ? "lk-word-search-cell--found" : "",
+                  ]
+                    .filter(Boolean)
+                    .join(" ")}
                   role="gridcell"
-                  aria-pressed={selected}
+                  aria-rowindex={rowIndex + 1}
+                  aria-colindex={colIndex + 1}
+                  aria-pressed={selected || discovered}
                   data-testid={`word-search-cell-${rowIndex}-${colIndex}`}
-                  onClick={() => toggleCell(rowIndex, colIndex)}
+                  onPointerDown={(event) => beginSelection(rowIndex, colIndex, event)}
+                  onPointerEnter={() => extendSelection(rowIndex, colIndex)}
+                  onPointerUp={endSelection}
+                  onLostPointerCapture={endSelection}
                 >
                   {letter}
                 </button>
@@ -191,14 +271,18 @@ function WordSearchInner(
           </div>
         ))}
       </div>
-      <ul data-testid="word-search-bank">
+      <ul className="lk-word-search-bank" data-testid="word-search-bank">
         {placed.map((word) => (
-          <li key={word} aria-checked={found.has(word)}>
+          <li
+            key={word}
+            className={found.has(word) ? "lk-word-search-bank-item--found" : ""}
+            aria-checked={found.has(word)}
+          >
             {word}
           </li>
         ))}
       </ul>
-      <button type="button" data-testid="word-search-check" onClick={check}>
+      <button type="button" className="lk-button" data-testid="word-search-check" onClick={check}>
         Check
       </button>
     </section>

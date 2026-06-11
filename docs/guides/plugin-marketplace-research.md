@@ -1,6 +1,6 @@
-# Plugin marketplace research (1.6.x)
+# Plugin marketplace research (1.7.x)
 
-LessonKit **1.6.x** documents preset plugin packs only. A runtime marketplace (dynamic install, version pinning, signing) remains **2.x** scope per [ROADMAP](../project/roadmap.md).
+LessonKit **1.7.x** documents preset plugin packs only (unchanged since 1.6.x). A runtime marketplace (dynamic install, version pinning, signing) remains **2.x** scope per [ROADMAP](../project/roadmap.md).
 
 ## Current plugin model (0.8.0+)
 
@@ -29,7 +29,7 @@ Preset packs are plain TypeScript modules—no registry host, no dynamic `import
 | Versioning | Semver ranges pinned in `lessonkit.json` |
 | Blocks split | Optional `@lessonkit/blocks-*` packages feeding catalog JSON |
 
-## Non-goals for 1.6.x
+## Non-goals for 1.7.x
 
 - H5P Hub or third-party widget iframes as plugins
 - Runtime download of unsigned plugin code

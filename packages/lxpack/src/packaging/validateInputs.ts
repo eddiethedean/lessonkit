@@ -178,21 +178,6 @@ export function validatePackageInputs(
         ],
       };
     }
-    try {
-      relativePathUnderRoot(outDir, resolvedOutput);
-    } catch {
-      return {
-        ok: false,
-        courseDir: outDir,
-        target,
-        issues: [
-          {
-            path: "output",
-            message: "output must resolve inside outDir",
-          },
-        ],
-      };
-    }
   }
 
   return { ok: true, outDir, projectRoot };

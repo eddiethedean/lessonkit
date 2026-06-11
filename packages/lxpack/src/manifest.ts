@@ -1,6 +1,6 @@
 import type { LessonkitCourseDescriptor } from "./types";
 import { validateDescriptor } from "./validateDescriptor";
-import { validateProjectPaths, isReservedOutputPath } from "./validateProjectPaths";
+import { validateManifestName, validateProjectPaths, isReservedOutputPath } from "./validateProjectPaths";
 import { isSafeRelativeSpaPath } from "./spaPath";
 
 export type LessonkitManifestPaths = {
@@ -57,8 +57,9 @@ export function parseLessonkitManifest(
 
   const nameRaw = config.name;
   const name = typeof nameRaw === "string" ? nameRaw.trim() : "";
-  if (!name) {
-    issues.push({ path: "name", message: "must be a non-empty string" });
+  const nameIssue = validateManifestName(name);
+  if (nameIssue) {
+    issues.push({ path: "name", message: nameIssue });
   }
 
   const courseRaw = config.course;

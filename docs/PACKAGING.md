@@ -1,4 +1,4 @@
-# Packaging with LXPack (1.6.x)
+# Packaging with LXPack (1.7.x)
 
 LessonKit authors courses in React (`@lessonkit/react`). **LXPack** validates and packages them for LMS delivery. **`@lessonkit/lxpack`** is the adapter between the two.
 

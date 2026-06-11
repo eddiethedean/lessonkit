@@ -29,7 +29,8 @@ pkg.scripts = {
   "test:coverage": "vitest run --coverage --passWithNoTests=false",
 };
 
-const lessonkitVersion = "^1.6.0";
+const cliPkg = JSON.parse(await readFile(resolve(root, "package.json"), "utf8"));
+const lessonkitVersion = `^${cliPkg.version}`;
 pkg.dependencies = {
   "@lessonkit/core": lessonkitVersion,
   "@lessonkit/react": lessonkitVersion,

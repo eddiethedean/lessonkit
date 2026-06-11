@@ -11,10 +11,12 @@ import {
 } from "../session";
 
 const courseStartedEmitFlights = new Map<string, Promise<{ emitted: boolean; marked: boolean }>>();
+const courseStartedEmittedInTab = new Set<string>();
 
 /** @internal Reset in-flight course_started guard between tests. */
 export function resetCourseStartedEmitFlightForTests(): void {
   courseStartedEmitFlights.clear();
+  courseStartedEmittedInTab.clear();
 }
 
 export type CourseLifecycleContext = {
@@ -42,6 +44,12 @@ export function tryEmitCourseStarted(
 ): Promise<{ emitted: boolean; marked: boolean }> {
   const flightKey = `${ctx.sessionId}:${ctx.courseId}`;
   const marked = hasCourseStarted(ctx.storage, ctx.sessionId, ctx.courseId);
+  if (courseStartedEmittedInTab.has(flightKey)) {
+    return Promise.resolve({
+      emitted: true,
+      marked: marked || markCourseStarted(ctx.storage, ctx.sessionId, ctx.courseId),
+    });
+  }
   if (alreadyEmittedToSink) {
     const markPersisted = marked
       ? true
@@ -70,6 +78,9 @@ export function tryEmitCourseStarted(
   const flight = Promise.resolve().then(() => {
     try {
       const emitted = deps.emitCourseStartedEvent(ctx);
+      if (emitted) {
+        courseStartedEmittedInTab.add(flightKey);
+      }
       const markPersisted =
         emitted && !marked
           ? markCourseStarted(ctx.storage, ctx.sessionId, ctx.courseId)

@@ -19,7 +19,9 @@ export type AssessmentInteractionType =
   | "memoryGame"
   | "combinationLock"
   | "crossword"
-  | "wordSearch";
+  | "wordSearch"
+  | "sortParagraphs"
+  | "guessTheAnswer";
 
 /** Serializable resume blob for a single assessment block. */
 export type AssessmentResumeState = Record<string, unknown>;
@@ -61,10 +63,32 @@ export type AssessmentBaseProps = AssessmentBehaviour & {
   passingScore?: number;
 };
 
-/** MCQ assessment props shared by React components and LMS packaging descriptors. */
+/**
+ * MCQ assessment props shared by React components and LMS packaging descriptors.
+ *
+ * @example
+ * ```tsx
+ * const props: McqAssessmentProps = {
+ *   checkId: "verify-sender",
+ *   question: "First step for a suspicious email?",
+ *   choices: ["Open attachment", "Verify sender"],
+ *   answer: "Verify sender",
+ *   passingScore: 1,
+ * };
+ * ```
+ */
 export type McqAssessmentProps = AssessmentBaseProps & {
   kind?: "mcq";
   question: string;
   choices: string[];
+  /** Single correct choice (required for backward compatibility). */
   answer: string;
+  /** When length > 1, enables multi-select checkbox mode. */
+  answers?: string[];
+  /** Randomize choice display order in the SPA (stable when `shuffleSeed` set). */
+  shuffleChoices?: boolean;
+  /** Seed for deterministic shuffle; defaults to `checkId`. */
+  shuffleSeed?: string | number;
+  /** Per-choice feedback announced on selection; keys match choice labels. */
+  choiceFeedback?: Record<string, string>;
 };

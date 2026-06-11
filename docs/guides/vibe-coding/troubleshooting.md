@@ -54,13 +54,32 @@ Run commands from the project root (where `lessonkit.json` lives), not a parent 
 
 ## AI changed IDs and tracking looks wrong
 
-1. Open `lessonkit.json` and note `courseId`, each `lessons[].id`, each `assessments[].checkId`
-2. Open `src/App.tsx` and align `courseId`, `lessonId`, `checkId` props
-3. Re-run `lessonkit build`
+This is the most common packaging failure on the vibe-coding path. LessonKit requires **ID parity** between React props and `lessonkit.json`.
+
+### ID parity checklist
+
+1. Open `lessonkit.json` and note:
+   - `course.courseId`
+   - every `course.lessons[].id`
+   - every `course.assessments[].checkId`
+2. Open `src/App.tsx` (and any block files the AI edited) and align:
+   - `<Course courseId="…">`
+   - `<Lesson lessonId="…">`
+   - `<Quiz checkId="…">` / other assessment blocks
+3. Re-run `npm run build` then `npx lessonkit package --target scorm12`
+
+**AI prompt:**
+
+```text
+Align courseId, every lessonId, and every checkId in src/App.tsx with lessonkit.json.
+Do not rename IDs unless you update both files in the same edit. Fix package parity errors.
+```
+
+If packaging still fails, paste the CLI error into the chat. Full reference: [Keep React IDs in sync](../react-developers/quickstart.md#keep-react-ids-in-sync-with-lessonkitjson) · [React troubleshooting — ID parity](../react-developers/troubleshooting.md).
 
 ## Node version errors during package
 
-Install Node **20.19+** recommended (**18+** minimum), then:
+Install Node per [Prerequisites — decision table](../prerequisites.md), then:
 
 ```bash
 node -v   # should be v20.19+ for init; v18+ may work for package on existing projects

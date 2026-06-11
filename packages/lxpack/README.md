@@ -84,7 +84,7 @@ Production builds require `allowedParentOrigins` when `bridge: "auto"`.
 
 ## Docs
 
-[Packaging reference](https://lessonkit.readthedocs.io/en/latest/reference/packaging.html) · [LXPack bridge](https://lessonkit.readthedocs.io/en/latest/reference/lxpack-bridge.html) · [Manifest](https://lessonkit.readthedocs.io/en/latest/reference/manifest.html) · [Golden example](https://github.com/eddiethedean/lessonkit/tree/main/examples/lxpack-golden) · [TypeDoc API index](https://lessonkit.readthedocs.io/en/latest/reference/api.html)
+[5-minute guide](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/getting-started-in-5-minutes.html) · [LMS Go-Live](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/lms-go-live.html) · [Packaging reference](https://lessonkit.readthedocs.io/en/latest/reference/packaging.html) · [TypeDoc API index](https://lessonkit.readthedocs.io/en/latest/reference/api.html)
 
 ## License
 

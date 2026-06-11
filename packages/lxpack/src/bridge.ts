@@ -27,6 +27,7 @@ function clamp01(value: number): number {
 export function normalizeScore(raw: { score?: number; maxScore?: number }): number | null {
   const { score, maxScore } = raw;
   if (typeof score !== "number" || !Number.isFinite(score)) return null;
+  if (typeof maxScore === "number" && maxScore <= 0) return null;
   if (typeof maxScore === "number" && maxScore > 0) {
     return clamp01(score / maxScore);
   }
@@ -43,6 +44,9 @@ export function normalizePassingThreshold(raw?: {
 }): number {
   const { passingScore, maxScore } = raw ?? {};
   if (typeof passingScore !== "number" || !Number.isFinite(passingScore)) {
+    return DEFAULT_BRIDGE_PASSING_SCORE;
+  }
+  if (typeof maxScore === "number" && maxScore <= 0) {
     return DEFAULT_BRIDGE_PASSING_SCORE;
   }
   if (typeof maxScore === "number" && maxScore > 1) {

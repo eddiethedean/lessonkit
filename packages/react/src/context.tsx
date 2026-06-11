@@ -21,6 +21,27 @@ export type { LessonkitObservabilityConfig };
 /**
  * Runtime configuration for {@link LessonkitProvider} and {@link Course}.
  * Pass tracking, xAPI, LMS bridge, observability hooks, and plugins here.
+ *
+ * @example
+ * ```tsx
+ * import { Course, Lesson, Quiz } from "@lessonkit/react";
+ *
+ * <Course
+ *   courseId="security-101"
+ *   config={{
+ *     tracking: { enabled: false },
+ *     xapi: { enabled: false },
+ *     lxpack: { bridge: "off" },
+ *   }}
+ * >
+ *   <Lesson lessonId="phishing" title="Phishing">
+ *     <Quiz checkId="verify-sender" question="First step?" choices={["A", "B"]} answer="B" />
+ *   </Lesson>
+ * </Course>
+ * ```
+ *
+ * Production LMS delivery: set `lxpack.bridge: "auto"`, `allowedParentOrigins`, real sinks/transports,
+ * and observability hooks — see the CLI template `src/courseConfig.ts` and [LMS Go-Live](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/lms-go-live.html).
  */
 export type LessonkitConfig = {
   courseId: CourseId;

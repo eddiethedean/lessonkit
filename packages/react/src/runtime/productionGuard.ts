@@ -99,8 +99,22 @@ function warnConsoleSinkHeuristic(config: Pick<LessonkitConfig, "tracking" | "xa
 }
 
 /**
- * Throws in production when course config still uses dev-only console sinks or
- * omits observability hooks while telemetry/xAPI are enabled.
+ * Production guard invoked from scaffolded `courseConfig.ts` on load.
+ * No-op in development (warns when sinks look like `console.log`).
+ *
+ * @example
+ * ```ts
+ * import { assertProductionCourseConfig, shouldEnforceProductionGuard } from "@lessonkit/react";
+ *
+ * export const courseConfig = { tracking: { enabled: false }, xapi: { enabled: false } };
+ * if (shouldEnforceProductionGuard()) assertProductionCourseConfig(courseConfig);
+ * ```
+ *
+ * @throws When tracking is enabled without `sink`/`batchSink` in production.
+ * @throws When `xapi.enabled` is true without `transport` or `client` in production.
+ * @throws When console telemetry/xAPI sinks are used without `preview.allowConsoleTelemetry`.
+ * @throws When required `config.observability` hooks are missing for enabled delivery.
+ * @throws When `lxpack.bridge` is `"auto"` but `allowedParentOrigins` is empty in production.
  */
 export function assertProductionCourseConfig(
   config: Pick<
@@ -159,4 +173,12 @@ export function assertProductionCourseConfig(
   }
 }
 
+/**
+ * Returns whether production guardrails should run (false in Vitest `MODE=test`).
+ *
+ * @example
+ * ```ts
+ * if (shouldEnforceProductionGuard()) assertProductionCourseConfig(courseConfig);
+ * ```
+ */
 export { isProductionEnvironment, shouldEnforceProductionGuard };

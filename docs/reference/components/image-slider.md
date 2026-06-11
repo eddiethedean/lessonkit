@@ -8,7 +8,7 @@
 
 ## When to use
 
-Use `ImageSlider` for **photo galleries** — before/after sets, product shots, or exhibit walkthroughs with prev/next controls.
+Use `ImageSlider` for **photo galleries** — before/after sets, product shots, or exhibit walkthroughs. Learners can swipe or drag horizontally, use arrow keys when focused, or use the Previous/Next buttons.
 
 <!-- try-it:start -->
 ## Try it

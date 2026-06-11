@@ -45,8 +45,8 @@ After `npm run package:scorm12`, the CLI prints the resolved ZIP path. Default:
 
 ## Production
 
-Copy `.env.example` to `.env` and set your LRS/analytics proxy URLs before `npm run build`. See the [production checklist](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/production-checklist.html) and [Ship to LMS checklist](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/ship-to-lms.html).
+Copy `.env.example` to `.env` and set your LRS/analytics proxy URLs before `npm run build`. See [LMS Go-Live](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/lms-go-live.html) and the [backend proxy cookbook](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/backend-proxy-cookbook.html).
 
 ## Docs
 
-[5-minute guide](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/getting-started-in-5-minutes.html) · [First LMS export](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/first-lms-export.html) · [CLI reference](https://lessonkit.readthedocs.io/en/latest/reference/cli.html) · [Packaging guide](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/packaging-and-cli.html)
+[5-minute guide](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/getting-started-in-5-minutes.html) · [LMS Go-Live](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/lms-go-live.html) · [CLI reference](https://lessonkit.readthedocs.io/en/latest/reference/cli.html) · [Packaging guide](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/packaging-and-cli.html)

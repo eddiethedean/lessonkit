@@ -1,5 +1,6 @@
 import {
   ASSESSMENT_SEQUENCE_ALLOWED_CHILD_TYPES,
+  SINGLE_CHOICE_SET_ALLOWED_CHILD_TYPES,
   BRANCHING_SCENARIO_ALLOWED_CHILD_TYPES,
   BRANCH_NODE_ALLOWED_CHILD_TYPES,
   GAME_MAP_ALLOWED_CHILD_TYPES,
@@ -23,6 +24,7 @@ const COMPOUND_PARENTS = [
   "TimedCue",
   "InteractiveVideo",
   "AssessmentSequence",
+  "SingleChoiceSet",
   "BranchingScenario",
   "BranchNode",
   "GameMap",
@@ -265,8 +267,16 @@ export const v3CompoundAndContentEntries = [
     ],
     requiredIds: [],
     parentConstraints: ["BranchingScenario"],
-    a11y: { element: "section", ariaLabel: "Branch node", keyboard: "Branch choices are buttons.", notes: "H5P Branching Scenario node." },
-    theming: { surface: "global-inherit" as const, stylingNotes: "Node panel." },
+    a11y: {
+      element: "section",
+      ariaLabel: "Branch node",
+      keyboard: "Branch choices in radiogroup.",
+      notes: "Terminal nodes styled with completion banner from parent.",
+    },
+    theming: {
+      surface: "global-inherit" as const,
+      stylingNotes: "Uses .lk-branch-node; terminal variant .lk-branch-node--terminal.",
+    },
     telemetry: { emits: ["branch_node_viewed"], requiresActiveLesson: true },
   },
   {
@@ -283,8 +293,13 @@ export const v3CompoundAndContentEntries = [
     ],
     requiredIds: [],
     parentConstraints: ["BranchNode"],
-    a11y: { element: "button", ariaLabel: "Branch choice", keyboard: "Activate to follow branch.", notes: "Radio group pattern." },
-    theming: { surface: "global-inherit" as const, stylingNotes: "Choice button." },
+    a11y: {
+      element: "button",
+      ariaLabel: "Branch choice",
+      keyboard: "Activate to follow branch.",
+      notes: "Radio in radiogroup; parent announces navigation.",
+    },
+    theming: { surface: "global-inherit" as const, stylingNotes: "Uses .lk-button.lk-branch-choice." },
     telemetry: { emits: ["branch_selected"], requiresActiveLesson: true },
   },
   {
@@ -310,9 +325,12 @@ export const v3CompoundAndContentEntries = [
       element: "section",
       ariaLabel: "Branching scenario",
       keyboard: "Branch choices; assessments in nodes.",
-      notes: "H5P Branching Scenario equivalent.",
+      notes: "Path indicator, aria-live status, terminal banner.",
     },
-    theming: { surface: "global-inherit" as const, stylingNotes: "Scenario chrome." },
+    theming: {
+      surface: "global-inherit" as const,
+      stylingNotes: "Uses .lk-branch-path-indicator, .lk-branching-scenario-active-node.",
+    },
     telemetry: { emits: ["branch_node_viewed", "branch_selected"], requiresActiveLesson: true },
   },
   {
@@ -496,7 +514,12 @@ export const v3CompoundAndContentEntries = [
     ],
     requiredIds: ["blockId"],
     parentConstraints: [...COMPOUND_PARENTS],
-    a11y: { element: "section", ariaLabel: "Image slider", keyboard: "Previous/next slide.", notes: "Carousel." },
+    a11y: {
+      element: "section",
+      ariaLabel: "Image slider",
+      keyboard: "Arrow keys, swipe/drag, or Previous/Next buttons.",
+      notes: "Focusable section; horizontal drag advances slides.",
+    },
     theming: { surface: "global-inherit" as const, stylingNotes: "Slider." },
     telemetry: { emits: ["image_slider_changed"] },
   },
@@ -518,7 +541,11 @@ export const v3CompoundAndContentEntries = [
     requiredIds: ["checkId"],
     parentConstraints: [...COMPOUND_PARENTS],
     a11y: { element: "section", ariaLabel: "Find the hotspot", keyboard: "Select target buttons.", notes: "Scored." },
-    theming: { surface: "global-inherit" as const, dataAttributes: ["data-lk-check-id"], stylingNotes: "Uses data-lk-check-id." },
+    theming: {
+      surface: "global-inherit" as const,
+      dataAttributes: ["data-lk-check-id"],
+      stylingNotes: "Uses data-lk-check-id; Check is pinned in .lk-find-hotspot-toolbar overlay.",
+    },
     telemetry: { emits: ["assessment_answered", "assessment_completed"], requiresActiveLesson: true },
   },
   {
@@ -660,8 +687,17 @@ export const v3CompoundAndContentEntries = [
     ],
     requiredIds: ["checkId"],
     parentConstraints: [...COMPOUND_PARENTS],
-    a11y: { element: "section", ariaLabel: "Combination lock", keyboard: "Digit inputs.", notes: "Scored." },
-    theming: { surface: "global-inherit" as const, dataAttributes: ["data-lk-check-id"], stylingNotes: "Uses data-lk-check-id." },
+    a11y: {
+      element: "section",
+      ariaLabel: "Combination lock",
+      keyboard: "Digit inputs; auto-advance on entry.",
+      notes: "Scored; select-all on focus.",
+    },
+    theming: {
+      surface: "global-inherit" as const,
+      dataAttributes: ["data-lk-check-id"],
+      stylingNotes: "Uses .lk-combination-lock-digit with focus styling.",
+    },
     telemetry: { emits: ["assessment_answered", "assessment_completed"], requiresActiveLesson: true },
   },
   {
@@ -816,6 +852,14 @@ export function buildV3CatalogFromV2(v2: BlockCatalogEntryV2[]): BlockCatalogEnt
         compoundContract: true as const,
         allowedChildTypes: [...ASSESSMENT_SEQUENCE_ALLOWED_CHILD_TYPES],
         maxNestingDepth: COMPOUND_MAX_NESTING_DEPTH.AssessmentSequence,
+      };
+    }
+    if (entry.type === "SingleChoiceSet") {
+      return {
+        ...base,
+        compoundContract: true as const,
+        allowedChildTypes: [...SINGLE_CHOICE_SET_ALLOWED_CHILD_TYPES],
+        maxNestingDepth: COMPOUND_MAX_NESTING_DEPTH.SingleChoiceSet,
       };
     }
     return base;

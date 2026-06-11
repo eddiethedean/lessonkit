@@ -11,7 +11,7 @@ Traceability matrix for adopting [H5P](https://h5p.org/content-types-and-applica
 **Not in scope:** H5P Hub, `.h5p` import/merge, H5P `semantics.json` transport, H5P Core, or iframe runtimes. Rebuild activities in React using this map.
 
 **Roadmap:** [ROADMAP.md — H5P-aligned backlog](roadmap.md#h5p-aligned-capability-backlog)  
-**Runtime catalog (today):** [Block catalog](../reference/block-catalog.md) (`blockCatalogV3Version = 3` — default since framework 1.2; 1.5 adds `BranchingScenario`, `Embed`, `Chart`; 1.6.x adds content-wave blocks including `Table`, `Timeline`, `Crossword`, `GameMap`)  
+**Runtime catalog (today):** [Block catalog](../reference/block-catalog.md) (`blockCatalogV3Version = 3` — default since framework 1.2; 1.5 adds `BranchingScenario`, `Embed`, `Chart`; 1.6.x adds content-wave blocks including `Table`, `Timeline`, `Crossword`, `GameMap`; **1.7.x** adds Tier B P1 assessments including `SortParagraphs`, `GuessTheAnswer`, `MultimediaChoice`, `SingleChoiceSet`, and Quiz multi-select variants)  
 **Live demos:** [Component pages](../reference/components/index.md) — embedded React demos with when-to-use guidance (generated index below).
 **Catalog expansion (shipped 1.1.0):** framework **1.1.x** (`blockCatalogV2Version = 2`)
 
@@ -73,17 +73,17 @@ H5P **machine names** follow common library ids (e.g. `H5P.MultiChoice`). Displa
 
 | H5P machine name | H5P display name | LessonKit id | Tier | Priority | Status | Framework |
 | --- | --- | --- | --- | --- | --- | --- |
-| `H5P.MultiChoice` | Multiple Choice | `Quiz` / `KnowledgeCheck` | B | — | ✅ | 1.0 |
+| `H5P.MultiChoice` | Multiple Choice | `Quiz` / `KnowledgeCheck` | B | — | ✅ | 1.7.0 (multi-select, shuffle, feedback) |
 | `H5P.TrueFalse` | True/False | `TrueFalse` | B | P0 | ✅ | 1.1.x |
 | `H5P.Blanks` | Fill in the Blanks | `FillInTheBlanks` | B | P0 | ✅ | 1.1.x |
 | `H5P.DragQuestion` | Drag and Drop | `DragAndDrop` | B | P0 | ✅ | 1.1.x |
 | `H5P.DragText` | Drag the Words | `DragTheWords` | B | P0 | ✅ | 1.1.x |
 | `H5P.MarkTheWords` | Mark the Words | `MarkTheWords` | B | P0 | ✅ | 1.1.x |
-| `H5P.SingleChoiceSet` | Single Choice Set | `SingleChoiceSet` | B | P1 | ⬜ | 1.1.1+ |
+| `H5P.SingleChoiceSet` | Single Choice Set | `SingleChoiceSet` | B | P1 | ✅ | 1.7.0 |
 | `H5P.Summary` | Summary | `Summary` | B | P1 | ✅ | 1.4.0 |
-| `H5P.SortParagraphs` | Sort the Paragraphs | `SortParagraphs` | B | P1 | ⬜ | 1.1.1+ |
-| `H5P.GuessTheAnswer` | Guess the Answer | `GuessTheAnswer` | B | P1 | ⬜ | 1.1.1+ |
-| `H5P.ImageMultipleHotspotQuestion` | Multimedia Choice | `MultimediaChoice` | B | P1 | ⬜ | 1.1.1+ |
+| `H5P.SortParagraphs` | Sort the Paragraphs | `SortParagraphs` | B | P1 | ✅ | 1.7.0 |
+| `H5P.GuessTheAnswer` | Guess the Answer | `GuessTheAnswer` | B | P1 | ✅ | 1.7.0 |
+| `H5P.ImageMultipleHotspotQuestion` | Multimedia Choice | `MultimediaChoice` | B | P1 | ✅ | 1.7.0 |
 | `H5P.SpeakTheWords` | Speak the Words | `SpeakTheWords` | B | P2 | ⬜ | 1.2.x |
 | `H5P.SpeakTheWordsSet` | Speak the Words Set | `SpeakTheWordsSet` | B | P2 | ⬜ | 1.2.x |
 | `H5P.Dictation` | Dictation | `Dictation` | B | P2 | ⬜ | 1.2.x |

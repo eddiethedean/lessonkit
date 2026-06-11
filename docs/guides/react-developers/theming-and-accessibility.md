@@ -57,7 +57,7 @@ Complete before LMS upload for every block type used in your course:
 ### LMS iframe
 
 - [ ] Test packaged SCORM in **staging LMS**, not only `npm run dev`
-- [ ] Bridge completion fires with `allowedParentOrigins` set (see [First LMS export](first-lms-export.md))
+- [ ] Bridge completion fires with `allowedParentOrigins` set (see [LMS Go-Live](lms-go-live.md))
 - [ ] No horizontal scroll at 320px width unless intentional
 
 ### Reduced motion

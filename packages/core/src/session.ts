@@ -6,11 +6,53 @@ import { validateId } from "./validateId";
 export const SESSION_STORAGE_KEY = "lessonkit:sessionId";
 
 const volatileSessionIds = new WeakMap<StoragePort, string>();
+const volatileStorageMarks = new WeakMap<StoragePort, Set<string>>();
+
+function rememberVolatileMark(storage: StoragePort, key: string): void {
+  let keys = volatileStorageMarks.get(storage);
+  if (!keys) {
+    keys = new Set();
+    volatileStorageMarks.set(storage, keys);
+  }
+  keys.add(key);
+}
+
+function hasVolatileMark(storage: StoragePort, key: string): boolean {
+  return volatileStorageMarks.get(storage)?.has(key) ?? false;
+}
+
+function clearVolatileMark(storage: StoragePort, key: string): void {
+  volatileStorageMarks.get(storage)?.delete(key);
+}
+
+function storageHasMark(storage: StoragePort, key: string): boolean {
+  return storage.getItem(key) === "1" || hasVolatileMark(storage, key);
+}
+
+function storageSetMark(storage: StoragePort, key: string): boolean {
+  const persisted = storage.setItem(key, "1");
+  if (!persisted) rememberVolatileMark(storage, key);
+  return persisted;
+}
 
 function isDevEnvironment(): boolean {
   const g = globalThis as typeof globalThis & { process?: { env?: { NODE_ENV?: string } } };
   return typeof g.process !== "undefined" && g.process.env?.NODE_ENV !== "production";
 }
+
+export type InvalidSessionIdContext = {
+  /** The invalid id that was rejected. */
+  invalidId: string;
+  /** Id actually used after fallback. */
+  fallbackId: string;
+  /** Whether the invalid id came from config or from stored tab state. */
+  source: "provided" | "stored";
+};
+
+export type ResolveSessionIdOptions = {
+  /** Invoked when an invalid session id is replaced by a tab or generated id. */
+  onInvalidSessionId?: (ctx: InvalidSessionIdContext) => void;
+};
 
 export function getTabSessionId(storage: StoragePort): string | null {
   return storage.getItem(SESSION_STORAGE_KEY);
@@ -27,31 +69,7 @@ function sessionKeySegment(sessionId: string): string {
   return validated.ok ? validated.id : encodeURIComponent(sessionId);
 }
 
-export function resolveSessionId(storage: StoragePort, provided?: string): string {
-  if (provided !== undefined) {
-    const trimmed = provided.trim();
-    if (trimmed.length > 0) {
-      const validated = validateId(trimmed);
-      if (validated.ok) return validated.id;
-      if (isDevEnvironment()) {
-        console.warn(
-          `[lessonkit] Invalid sessionId "${trimmed}"; falling back to tab or generated id.`,
-        );
-      }
-    }
-  }
-  const existing = storage.getItem(SESSION_STORAGE_KEY);
-  if (existing) {
-    const trimmedExisting = existing.trim();
-    const validatedExisting = validateId(trimmedExisting);
-    if (validatedExisting.ok) return validatedExisting.id;
-    storage.removeItem?.(SESSION_STORAGE_KEY);
-    if (isDevEnvironment()) {
-      console.warn(
-        `[lessonkit] Invalid stored sessionId "${existing}"; generating a new id.`,
-      );
-    }
-  }
+function resolveGeneratedSessionId(storage: StoragePort): string {
   const volatile = volatileSessionIds.get(storage);
   if (volatile) return volatile;
   const id = createSessionId();
@@ -66,6 +84,59 @@ export function resolveSessionId(storage: StoragePort, provided?: string): strin
     return id;
   }
   return id;
+}
+
+function resolveFallbackSessionId(
+  storage: StoragePort,
+  options?: ResolveSessionIdOptions,
+): string {
+  const existing = storage.getItem(SESSION_STORAGE_KEY);
+  if (existing) {
+    const trimmedExisting = existing.trim();
+    const validatedExisting = validateId(trimmedExisting);
+    if (validatedExisting.ok) return validatedExisting.id;
+    storage.removeItem?.(SESSION_STORAGE_KEY);
+    if (isDevEnvironment()) {
+      console.warn(
+        `[lessonkit] Invalid stored sessionId "${existing}"; generating a new id.`,
+      );
+    }
+    const fallback = resolveGeneratedSessionId(storage);
+    options?.onInvalidSessionId?.({
+      invalidId: existing,
+      fallbackId: fallback,
+      source: "stored",
+    });
+    return fallback;
+  }
+  return resolveGeneratedSessionId(storage);
+}
+
+export function resolveSessionId(
+  storage: StoragePort,
+  provided?: string,
+  options?: ResolveSessionIdOptions,
+): string {
+  if (provided !== undefined) {
+    const trimmed = provided.trim();
+    if (trimmed.length > 0) {
+      const validated = validateId(trimmed);
+      if (validated.ok) return validated.id;
+      if (isDevEnvironment()) {
+        console.warn(
+          `[lessonkit] Invalid sessionId "${trimmed}"; falling back to tab or generated id.`,
+        );
+      }
+      const fallback = resolveFallbackSessionId(storage, options);
+      options?.onInvalidSessionId?.({
+        invalidId: trimmed,
+        fallbackId: fallback,
+        source: "provided",
+      });
+      return fallback;
+    }
+  }
+  return resolveFallbackSessionId(storage, options);
 }
 
 function courseStartedStorageKey(sessionId: string, courseId?: CourseId): string {
@@ -94,7 +165,7 @@ function courseStartedXapiStorageKey(sessionId: string, courseId?: CourseId): st
 
 export function hasCourseStarted(storage: StoragePort, sessionId: string, courseId?: CourseId): boolean {
   if (!courseId) return false;
-  return storage.getItem(courseStartedStorageKey(sessionId, courseId)) === "1";
+  return storageHasMark(storage, courseStartedStorageKey(sessionId, courseId));
 }
 
 export function markCourseStarted(
@@ -103,7 +174,7 @@ export function markCourseStarted(
   courseId?: CourseId,
 ): boolean {
   if (!courseId) return false;
-  return storage.setItem(courseStartedStorageKey(sessionId, courseId), "1");
+  return storageSetMark(storage, courseStartedStorageKey(sessionId, courseId));
 }
 
 export function hasCourseStartedEmittedToTracking(
@@ -112,7 +183,7 @@ export function hasCourseStartedEmittedToTracking(
   courseId?: CourseId,
 ): boolean {
   if (!courseId) return false;
-  return storage.getItem(courseStartedTrackingStorageKey(sessionId, courseId)) === "1";
+  return storageHasMark(storage, courseStartedTrackingStorageKey(sessionId, courseId));
 }
 
 export function markCourseStartedEmittedToTracking(
@@ -121,7 +192,7 @@ export function markCourseStartedEmittedToTracking(
   courseId?: CourseId,
 ): boolean {
   if (!courseId) return false;
-  return storage.setItem(courseStartedTrackingStorageKey(sessionId, courseId), "1");
+  return storageSetMark(storage, courseStartedTrackingStorageKey(sessionId, courseId));
 }
 
 export function hasCourseStartedPipelineDelivered(
@@ -130,7 +201,7 @@ export function hasCourseStartedPipelineDelivered(
   courseId?: CourseId,
 ): boolean {
   if (!courseId) return false;
-  return storage.getItem(courseStartedPipelineStorageKey(sessionId, courseId)) === "1";
+  return storageHasMark(storage, courseStartedPipelineStorageKey(sessionId, courseId));
 }
 
 export function markCourseStartedPipelineDelivered(
@@ -139,7 +210,7 @@ export function markCourseStartedPipelineDelivered(
   courseId?: CourseId,
 ): boolean {
   if (!courseId) return false;
-  return storage.setItem(courseStartedPipelineStorageKey(sessionId, courseId), "1");
+  return storageSetMark(storage, courseStartedPipelineStorageKey(sessionId, courseId));
 }
 
 export function hasCourseStartedXapiSent(
@@ -148,7 +219,7 @@ export function hasCourseStartedXapiSent(
   courseId?: CourseId,
 ): boolean {
   if (!courseId) return false;
-  return storage.getItem(courseStartedXapiStorageKey(sessionId, courseId)) === "1";
+  return storageHasMark(storage, courseStartedXapiStorageKey(sessionId, courseId));
 }
 
 export function markCourseStartedXapiSent(
@@ -157,7 +228,7 @@ export function markCourseStartedXapiSent(
   courseId?: CourseId,
 ): boolean {
   if (!courseId) return false;
-  return storage.setItem(courseStartedXapiStorageKey(sessionId, courseId), "1");
+  return storageSetMark(storage, courseStartedXapiStorageKey(sessionId, courseId));
 }
 
 /** @internal Reset volatile session ids between tests. */
@@ -174,6 +245,7 @@ function migrateStorageMark(
   if (!hasMark) return;
   if (storage.setItem(toKey, "1")) {
     storage.removeItem?.(fromKey);
+    clearVolatileMark(storage, fromKey);
   }
 }
 

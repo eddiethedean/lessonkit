@@ -10,7 +10,9 @@
 
 Use `InteractiveVideo` when **video playback and learner actions are synchronized** — pause for checks, surface reminders at timestamps, or gate progress until cues complete.
 
-Children must be `TimedCue` blocks. The demo pairs a `TrueFalse` check with a `Text` reminder.
+Children must be `TimedCue` blocks only — each cue wraps one allowed child (`TrueFalse`, `Text`, `Quiz`, and others from the compound allowlist). The demo pairs a `TrueFalse` check with a `Text` reminder.
+
+Do not mount `TimedCue` directly under `Lesson`; always wrap cues inside `InteractiveVideo`. See the dedicated [`TimedCue`](timed-cue.md) page for cue-level props.
 
 ## Requirements
 
@@ -127,5 +129,7 @@ No manifest row for `InteractiveVideo` — author [`TimedCue`](timed-cue.md) chi
 
 ## See also
 
+- [TimedCue](timed-cue.md)
+- [TimedCue live demo](../../_static/component-demos/index.html#/timed-cue)
 - [interactive-video example](../../examples/index.md)
 - [Block catalog — InteractiveVideo](../block-catalog.md)

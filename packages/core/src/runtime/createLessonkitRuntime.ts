@@ -102,6 +102,8 @@ function warnRuntimeV1Deprecated(): void {
  * runtime.setActiveLesson("lesson-1");
  * runtime.track("interaction", { label: "opened" }, { lessonId: "lesson-1" });
  * ```
+ *
+ * @throws When plugin registry setup fails or tracking batch config is invalid (same rules as React provider).
  */
 export function createLessonkitRuntime(
   config: HeadlessLessonkitConfig,

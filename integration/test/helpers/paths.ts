@@ -12,6 +12,7 @@ export const INTERACTIVE_VIDEO_DIR = join(REPO_ROOT, "examples/interactive-video
 export const BRANCHING_SCENARIO_DIR = join(REPO_ROOT, "examples/branching-scenario");
 export const FRAMEWORK_12_SHOWCASE_DIR = join(REPO_ROOT, "examples/framework-12-showcase");
 export const MINIMAL_FIXTURE_DIR = join(INTEGRATION_ROOT, "fixtures/minimal-course");
+export const SHARED_MINIMAL_FIXTURE_DIR = join(INTEGRATION_ROOT, ".cache/minimal-course-installed");
 
 export const LESSONKIT_PACKAGES = [
   "@lessonkit/core",

@@ -72,7 +72,7 @@
     "seeAlso": "- [slide-deck example](../../examples/index.md#slide-deck-examplesslide-deck)\n- [Slide](slide.md)"
   },
   "branching-scenario": {
-    "whenToUse": "Use `BranchingScenario` for **decision-tree narratives** — customer calls, compliance paths, or soft-skill branching where choices change what learners see next.\n\nCompose [`BranchNode`](branch-node.md) and [`BranchChoice`](branch-choice.md) children. Optional path scoring via `showPathScore`.",
+    "whenToUse": "Use `BranchingScenario` for **decision-tree narratives** — customer calls, compliance paths, or soft-skill branching where choices change what learners see next.\n\nCompose [`BranchNode`](branch-node.md) and [`BranchChoice`](branch-choice.md) children. Built-in path indicator and status feedback show progress; terminal nodes display a completion banner. Optional path scoring via `showPathScore`.",
     "requirements": "- `startNodeId` must match a `BranchNode`.\n- Validate the graph with `validateBranchGraph()` before shipping.\n- Add `course.assessments[]` only when nodes embed scored blocks.",
     "example": "```tsx\n<BranchingScenario blockId=\"call-paths\" title=\"Suspicious charge call\" startNodeId=\"opening\" showPathScore>\n  <BranchNode nodeId=\"opening\">\n    <Text>A customer reports a duplicate charge after clicking a shipping email link.</Text>\n    <BranchChoice label=\"Acknowledge concern and verify account\" targetNodeId=\"empathy\" />\n    <BranchChoice label=\"Quote the no-refund policy first\" targetNodeId=\"policy\" />\n  </BranchNode>\n  <BranchNode nodeId=\"empathy\" terminal>\n    <Text>You secured the account and escalated to fraud review.</Text>\n  </BranchNode>\n</BranchingScenario>\n```",
     "seeAlso": "- [Core — branching](../core.md#branching-scenario-meta)\n- [BranchNode](branch-node.md)"
@@ -96,7 +96,7 @@
     "whenToUse": "Use `InteractiveVideo` when **video playback and learner actions are synchronized** — pause for checks, surface reminders at timestamps, or gate progress until cues complete.\n\nChildren must be `TimedCue` blocks. Cues appear as an **H5P-style overlay** (dimmed video + centered interaction card) while playback is paused.\n\nImport `@lessonkit/themes/base.css` (included in the example shell CSS) for overlay styling.",
     "requirements": "- Wrap scored cues with `mustComplete` when they should block progress.\n- Enable `showVideoScore` for aggregate feedback across cue assessments.\n- Supports compound resume (playback position + completed cues).",
     "example": "```tsx\n<InteractiveVideo blockId=\"safety-video\" title=\"Warehouse safety briefing\" src=\"/media/sample-briefing.mp4\" showVideoScore>\n  <TimedCue atSeconds={3} label=\"PPE check\" mustComplete>\n    <TrueFalse checkId=\"iv-tf\" question=\"PPE is required on the warehouse floor.\" answer={true} />\n  </TimedCue>\n  <TimedCue atSeconds={6} label=\"Reporting\">\n    <Text>Report spills and blocked aisles immediately.</Text>\n  </TimedCue>\n  <TimedCue atSeconds={8} label=\"Quick quiz\" mustComplete>\n    <TrueFalse checkId=\"iv-tf-2\" question=\"Tailgating through secure doors is acceptable.\" answer={false} />\n  </TimedCue>\n</InteractiveVideo>\n```",
-    "seeAlso": "- [interactive-video example](../../examples/index.md)\n- [Block catalog — InteractiveVideo](../block-catalog.md)"
+    "seeAlso": "- [TimedCue](timed-cue.md)\n- [interactive-video example](../../examples/index.md)\n- [Block catalog — InteractiveVideo](../block-catalog.md)"
   },
   "embed": {
     "whenToUse": "Use `Embed` for **sandboxed third-party content** — external tools, legacy pages, or partner widgets that must stay in an iframe.\n\nConfigure `config.embed.allowedHosts` in production so only approved origins load.",
@@ -141,7 +141,7 @@
     "seeAlso": "- [Block catalog — Essay](../block-catalog.md)"
   },
   "combination-lock": {
-    "whenToUse": "Use `CombinationLock` for **numeric code entry** puzzles — vault codes, PIN verification drills, or gamified access challenges.",
+    "whenToUse": "Use `CombinationLock` for **numeric code entry** puzzles — vault codes, PIN verification drills, or gamified access challenges. Digit fields start empty with placeholders; typing updates each cell visibly before Check.",
     "requirements": "- `combination` is a string of digits; UI renders one wheel per digit.\n- Requires `checkId` for assessment telemetry and packaging.",
     "example": "```tsx\n<CombinationLock checkId=\"vault-lock\" combination=\"1234\" label=\"Enter demo vault code (training only)\" />\n```",
     "seeAlso": "- [Block catalog](../block-catalog.md)"
@@ -179,7 +179,7 @@
   "qr-content": {
     "whenToUse": "Use `QrContent` for **scan-to-reveal** bonus material — optional modules, job aids, or Easter-egg content unlocked after displaying a QR code.",
     "requirements": "- `payload` becomes the encoded QR target (URL or text).\n- Hidden content appears after the learner activates reveal.",
-    "example": "```tsx\n<QrContent\n  blockId=\"bonus-qr\"\n  title=\"Scan for security checklist\"\n  payload=\"https://intranet.example.com/security-checklist\"\n  hiddenTitle=\"Checklist unlocked\"\n  hiddenBody=\"Optional deep dive: password managers and travel VPN.\"\n/>\n```",
+    "example": "```tsx\n<QrContent\n  blockId=\"bonus-qr\"\n  title=\"Scan for security checklist\"\n  payload=\"https://lessonkit.readthedocs.io/en/latest/project/security.html\"\n  hiddenTitle=\"Checklist unlocked\"\n  hiddenBody=\"Optional deep dive: password managers and travel VPN.\"\n/>\n```",
     "seeAlso": "- [Block catalog](../block-catalog.md)"
   },
   "text-and-heading": {
@@ -207,7 +207,7 @@
     "seeAlso": "- [SlideDeck](slide-deck.md)"
   },
   "timed-cue": {
-    "whenToUse": "Use `TimedCue` as a **child of `InteractiveVideo`** to surface content or assessments at a timestamp. Set `mustComplete` on scored cues that should block video progress.\n\nThe demo shows a required `TrueFalse` at 3s and an informational `Text` cue at 8s.",
+    "whenToUse": "**`TimedCue` only works inside [`InteractiveVideo`](interactive-video.md).** It is not a standalone video block — use [`Video`](video.md) for clips without timed overlays.\n\nUse `TimedCue` to surface content or assessments at a timestamp. Set `mustComplete` on scored cues that should block video progress.\n\nThe demo shows a required `TrueFalse` at 3s and an informational `Text` cue at 8s.",
     "requirements": "- `atSeconds` is the trigger time.\n- Cue children are usually assessments or short content blocks.",
     "example": "```tsx\n<InteractiveVideo blockId=\"access-briefing\" title=\"Facility access\" src=\"/media/sample-briefing.mp4\">\n  <TimedCue atSeconds={3} label=\"Tailgating\" mustComplete>\n    <TrueFalse checkId=\"cue-tf\" question=\"Tailgating through secure doors is allowed.\" answer={false} />\n  </TimedCue>\n  <TimedCue atSeconds={8} label=\"Badges\">\n    <Text>Badges must be visible in secure areas.</Text>\n  </TimedCue>\n  <TimedCue atSeconds={9} label=\"Reporting\" mustComplete>\n    <TrueFalse checkId=\"cue-tf-2\" question=\"Report lost badges to security the same day.\" answer={true} />\n  </TimedCue>\n</InteractiveVideo>\n```",
     "seeAlso": "- [InteractiveVideo](interactive-video.md)"
@@ -235,7 +235,7 @@
     "seeAlso": "- [Quiz](quiz.md) — non-numeric multiple choice"
   },
   "find-hotspot": {
-    "whenToUse": "Use `FindHotspot` when learners must **pick one correct region** on an image — locate a single hazard, control, or UI element.",
+    "whenToUse": "Use `FindHotspot` when learners must **pick one correct region** on an image — locate a single hazard, control, or UI element. Check stays pinned to the image footer so it stays visible after selection.",
     "requirements": "- `targets` use percentage `x`/`y` positions.\n- `correctTargetId` must match one target `id`.",
     "example": "```tsx\n<FindHotspot\n  checkId=\"egress-check\"\n  src=\"/floor-plan.svg\"\n  alt=\"Floor plan\"\n  targets={[\n    { id: \"hazard\", label: \"Blocked aisle\", x: 45, y: 60 },\n    { id: \"exit\", label: \"Clear exit\", x: 80, y: 20 },\n  ]}\n  correctTargetId=\"hazard\"\n/>\n```",
     "seeAlso": "- [FindMultipleHotspots](find-multiple-hotspots.md)\n- [ImageHotspots](image-hotspots.md) — non-scored exploration"
@@ -257,7 +257,7 @@
     "seeAlso": "- [SlideDeck](slide-deck.md) — structured deck with assessments"
   },
   "image-slider": {
-    "whenToUse": "Use `ImageSlider` for **photo galleries** — before/after sets, product shots, or exhibit walkthroughs with prev/next controls.",
+    "whenToUse": "Use `ImageSlider` for **photo galleries** — before/after sets, product shots, or exhibit walkthroughs. Swipe, drag, arrow keys, or Previous/Next buttons change slides.",
     "example": "```tsx\n<ImageSlider\n  blockId=\"desk-compare\"\n  slides={[\n    { src: \"/desk-before.jpg\", alt: \"Cluttered desk\", caption: \"Before — violations\" },\n    { src: \"/desk-after.jpg\", alt: \"Clean desk\", caption: \"After — compliant\" },\n  ]}\n/>\n```",
     "seeAlso": "- [ImageSequence](image-sequence.md) — scrubber without prev/next chrome"
   },
@@ -283,13 +283,13 @@
     "seeAlso": "- [Block catalog](../block-catalog.md)"
   },
   "branch-node": {
-    "whenToUse": "Use `BranchNode` **only inside [`BranchingScenario`](branching-scenario.md)**. Each node is a step in the graph: narrative content, optional `BranchChoice` children, and an optional `terminal` flag for end states.\n\nThe parent hides inactive nodes; you author all nodes as children of the scenario.",
+    "whenToUse": "Use `BranchNode` **only inside [`BranchingScenario`](branching-scenario.md)**. Each node is a step in the graph: narrative content, optional `BranchChoice` children, and an optional `terminal` flag for end states.\n\nThe parent hides inactive nodes and shows a path indicator plus status line as learners advance.",
     "requirements": "- `nodeId` must be unique within the scenario.\n- `startNodeId` on the parent must match an existing node.\n- Terminal nodes often hold assessments or completion copy.",
     "example": "```tsx\n<BranchingScenario blockId=\"card-dispute\" title=\"Card dispute call\" startNodeId=\"start\" showPathScore>\n  <BranchNode nodeId=\"start\" title=\"Opening\">\n    <Text>Caller reports a duplicate charge after a shipping notification link.</Text>\n    <BranchChoice label=\"Listen and verify identity\" targetNodeId=\"verify\" />\n  </BranchNode>\n  <BranchNode nodeId=\"verify\" title=\"Verify\" terminal>\n    <Text>Identity confirmed and fraud ticket opened.</Text>\n  </BranchNode>\n</BranchingScenario>\n```",
     "seeAlso": "- [BranchChoice](branch-choice.md)\n- [BranchingScenario](branching-scenario.md)"
   },
   "branch-choice": {
-    "whenToUse": "Use `BranchChoice` **inside `BranchNode`** to offer **labeled navigation** to another `nodeId`. Optional `scoreWeight` contributes to `showPathScore` totals on the parent scenario.",
+    "whenToUse": "Use `BranchChoice` **inside `BranchNode`** to offer **labeled navigation** to another `nodeId`. After selection, the parent scenario updates the path indicator and announces the new step. Optional `scoreWeight` contributes to `showPathScore` totals.",
     "requirements": "- `targetNodeId` must reference another `BranchNode` in the same scenario.\n- Choices render as radio-style buttons; only the active node accepts input.",
     "example": "```tsx\n<BranchNode nodeId=\"fork\">\n  <Text>Finance flagged a duplicate wire with end-of-day pressure.</Text>\n  <BranchChoice label=\"Escalate and hold payment\" targetNodeId=\"supervisor\" scoreWeight={1} />\n  <BranchChoice label=\"Approve to avoid delays\" targetNodeId=\"approve\" />\n</BranchNode>\n```",
     "seeAlso": "- [BranchNode](branch-node.md)\n- [BranchingScenario](branching-scenario.md)"

@@ -1,6 +1,7 @@
 import { validateId } from "@lessonkit/core";
 import type { AssessmentDescriptor } from "../types";
 import type { ValidationIssue } from "../validationIssue";
+import { isMultiSelectMcq } from "@lessonkit/core";
 
 export type AssessmentKind = NonNullable<AssessmentDescriptor["kind"]> | "mcq";
 
@@ -25,8 +26,47 @@ const validateMcqLike: AssessmentValidator = (assessment, path, issues) => {
   }
   if (!assessment.answer.trim()) {
     issues.push({ path: `${path}.answer`, message: "answer is required" });
-  } else   if (trimmedChoices.length && !trimmedChoices.includes(assessment.answer.trim())) {
+  } else if (
+    !("answers" in assessment && isMultiSelectMcq({ answers: assessment.answers })) &&
+    trimmedChoices.length &&
+    !trimmedChoices.includes(assessment.answer.trim())
+  ) {
     issues.push({ path: `${path}.answer`, message: "answer must match a choice" });
+  }
+  if ("answers" in assessment && assessment.answers !== undefined) {
+    if (!Array.isArray(assessment.answers)) {
+      issues.push({ path: `${path}.answers`, message: "answers must be an array when provided" });
+    } else {
+      const trimmedAnswers = assessment.answers.map((a) => a.trim()).filter((a) => a.length > 0);
+      if (assessment.answers.length > 0 && trimmedAnswers.length === 0) {
+        issues.push({ path: `${path}.answers`, message: "answers must include non-empty strings" });
+      }
+      const uniqueAnswers = new Set(trimmedAnswers);
+      if (trimmedAnswers.length !== uniqueAnswers.size) {
+        issues.push({ path: `${path}.answers`, message: "answers must be unique" });
+      }
+      for (const ans of trimmedAnswers) {
+        if (trimmedChoices.length && !trimmedChoices.includes(ans)) {
+          issues.push({ path: `${path}.answers`, message: "each answer must match a choice" });
+          break;
+        }
+      }
+    }
+  }
+  if ("choiceFeedback" in assessment && assessment.choiceFeedback !== undefined) {
+    if (typeof assessment.choiceFeedback !== "object" || assessment.choiceFeedback === null) {
+      issues.push({ path: `${path}.choiceFeedback`, message: "choiceFeedback must be an object" });
+    } else {
+      for (const key of Object.keys(assessment.choiceFeedback)) {
+        if (!trimmedChoices.includes(key.trim())) {
+          issues.push({
+            path: `${path}.choiceFeedback`,
+            message: "choiceFeedback keys must match choice labels",
+          });
+          break;
+        }
+      }
+    }
   }
   const uniqueChoices = new Set(trimmedChoices);
   if (trimmedChoices.length !== uniqueChoices.size) {
@@ -51,6 +91,16 @@ export function maxAchievableAssessmentScore(assessment: AssessmentDescriptor): 
     return (
       assessment.correctTargetIds?.map((id) => id.trim()).filter((id) => id.length > 0).length ?? 0
     );
+  }
+  if (kind === "sortParagraphs" && assessment.kind === "sortParagraphs") {
+    return assessment.paragraphs?.length ?? assessment.correctOrder?.length ?? 0;
+  }
+  if (
+    "answers" in assessment &&
+    Array.isArray(assessment.answers) &&
+    assessment.answers.length > 1
+  ) {
+    return assessment.answers.filter((a) => a.trim().length > 0).length;
   }
   return 1;
 }
@@ -143,6 +193,30 @@ export const ASSESSMENT_VALIDATORS: Record<AssessmentKind, AssessmentValidator> 
       });
     }
   },
+  sortParagraphs: (assessment, path, issues) => {
+    if (assessment.kind !== "sortParagraphs") return;
+    if (!Array.isArray(assessment.paragraphs) || assessment.paragraphs.length === 0) {
+      issues.push({ path: `${path}.paragraphs`, message: "paragraphs is required for sortParagraphs" });
+      return;
+    }
+    if (!Array.isArray(assessment.correctOrder) || assessment.correctOrder.length === 0) {
+      issues.push({ path: `${path}.correctOrder`, message: "correctOrder is required for sortParagraphs" });
+      return;
+    }
+    if (assessment.correctOrder.length !== assessment.paragraphs.length) {
+      issues.push({
+        path: `${path}.correctOrder`,
+        message: "correctOrder length must match paragraphs length for sortParagraphs",
+      });
+    }
+  },
+  guessTheAnswer: (assessment, path, issues) => {
+    if (assessment.kind !== "guessTheAnswer") return;
+    if (!assessment.answer?.trim()) {
+      issues.push({ path: `${path}.answer`, message: "answer is required for guessTheAnswer" });
+    }
+  },
+  multimediaChoice: validateMcqLike,
 };
 
 export function validateAssessmentEntry(

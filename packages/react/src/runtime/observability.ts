@@ -1,6 +1,6 @@
-import type { TelemetryEvent, TelemetryBatchSink } from "@lessonkit/core";
-import type { InMemoryXAPIQueueOptions } from "@lessonkit/xapi";
-import { createInMemoryXAPIQueue } from "@lessonkit/xapi";
+import type { InvalidSessionIdContext, TelemetryEvent, TelemetryBatchSink } from "@lessonkit/core";
+import type { InMemoryXAPIQueueOptions, XAPIStatement } from "@lessonkit/xapi";
+import { createInMemoryXAPIQueue, persistDeadLetterStatement } from "@lessonkit/xapi";
 import type { LessonkitConfig } from "../context";
 
 export type LessonkitObservabilityConfig = {
@@ -20,6 +20,8 @@ export type LessonkitObservabilityConfig = {
   onXapiTransportError?: (err: unknown) => void;
   /** Telemetry → xAPI mapping failure (statement skipped). */
   onXapiMappingError?: (err: unknown) => void;
+  /** sessionStorage dead-letter persist failed (quota, private mode, blocked storage). */
+  onXapiDeadLetterPersistError?: (err: unknown, ctx: { statement: XAPIStatement }) => void;
   /** Compound child resume incomplete after hydration retries. */
   onCompoundHydrationPartial?: (ctx: {
     compoundId: string;
@@ -35,14 +37,23 @@ export type LessonkitObservabilityConfig = {
   onCompoundDuplicateCheckId?: (ctx: { checkId: string }) => void;
   /** config.storage changed after LessonkitProvider mount (ignored in production). */
   onStoragePortChangeIgnored?: () => void;
+  /** Configured or stored session id failed validation and was replaced. */
+  onInvalidSessionId?: (ctx: InvalidSessionIdContext) => void;
 };
 
 export function createXapiQueueFromObservability(
   getObservability?: () => LessonkitObservabilityConfig | undefined,
 ): ReturnType<typeof createInMemoryXAPIQueue> {
+  const persistDeadLetter = (statement: XAPIStatement) => {
+    persistDeadLetterStatement(statement, {
+      onPersistError: getObservability?.()?.onXapiDeadLetterPersistError,
+    });
+  };
   const opts: InMemoryXAPIQueueOptions = {
     onDepth: (size) => getObservability?.()?.onXapiQueueDepth?.(size),
     onCap: () => getObservability?.()?.onXapiQueueCap?.(),
+    onOverflow: persistDeadLetter,
+    onHeadSkipped: (statement) => persistDeadLetter(statement),
   };
   return createInMemoryXAPIQueue(opts);
 }

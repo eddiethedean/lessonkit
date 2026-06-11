@@ -138,6 +138,47 @@ Omit `kind` or set `"kind": "mcq"`. Choices and answer must match React props ex
 
 
 
+## Multi-select (1.7.0)
+
+When `answers` contains **more than one** correct label, `Quiz` switches to checkbox mode. Learners must click **Check** before the answer is scored. `maxScore` equals `answers.length`; partial credit counts correct selections, but any wrong choice fails the attempt.
+
+```tsx
+<Quiz
+  checkId="hazards-multi"
+  question="Select all workplace hazards"
+  choices={["Phishing email", "Service portal", "Tailgating"]}
+  answer="Phishing email"
+  answers={["Phishing email", "Tailgating"]}
+/>
+```
+
+In `lessonkit.json`, add `answers` alongside `answer` (required for backward compatibility):
+
+```json
+{
+  "checkId": "hazards-multi",
+  "kind": "mcq",
+  "question": "Select all workplace hazards",
+  "choices": ["Phishing email", "Service portal", "Tailgating"],
+  "answer": "Phishing email",
+  "answers": ["Phishing email", "Tailgating"]
+}
+```
+
+Inside compounds (`AssessmentSequence`, `SingleChoiceSet`), **Next** stays disabled until **Check** is pressed in multi-select mode.
+
+With **LXPack 0.7.0+**, multi-select MCQ descriptors inject into LMS shell quizzes. Include `answers` (length > 1) in `lessonkit.json` `assessments[]` when you want native checkbox scoring in SCORM/xAPI/cmi5 exports.
+
+## Choice shuffle and feedback (1.7.0)
+
+| Prop | Behavior | Packaging |
+| --- | --- | --- |
+| `shuffleChoices` | Randomize option order | Injectable into LMS shell (**0.7.0+**) |
+| `shuffleSeed` | Stable order across resume in SPA (defaults to `checkId`) | SPA-only |
+| `choiceFeedback` | Map of choice label → feedback string; announced via `aria-live` in React | SPA-only text; shell gets `showFeedback: "immediate"` when set |
+
+Omit these props for identical behavior to 1.6.x single-select quizzes.
+
 ## See also
 
 - [Block catalog — Quiz](../block-catalog.md)
