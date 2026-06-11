@@ -46,7 +46,7 @@ export default function App() {
 }
 ```
 
-For telemetry and xAPI in dev and production, use `npx @lessonkit/cli init` (includes `src/courseConfig.ts`) or follow the [quickstart](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/quickstart.html). Production builds reject console-only sinks unless you wire real transports—see the [production checklist](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/production-checklist.html).
+For telemetry and xAPI in dev and production, use `npx @lessonkit/cli init` (includes `src/courseConfig.ts`) or follow the [quickstart](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/quickstart.html). Before LMS upload, complete [LMS Go-Live](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/lms-go-live.html)—production builds reject console-only sinks unless you wire real transports.
 
 ## API
 
@@ -78,7 +78,7 @@ For telemetry and xAPI in dev and production, use `npx @lessonkit/cli init` (inc
 
 ## Docs
 
-[Components & hooks](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/components-and-hooks.html) · [5-minute guide](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/getting-started-in-5-minutes.html) · [Block catalog](https://lessonkit.readthedocs.io/en/latest/reference/block-catalog.html) · [Theming](https://lessonkit.readthedocs.io/en/latest/reference/theming.html) · [Storybook](https://eddiethedean.github.io/lessonkit/storybook/) · [API index](https://lessonkit.readthedocs.io/en/latest/reference/api.html)
+[Components & hooks](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/components-and-hooks.html) · [5-minute guide](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/getting-started-in-5-minutes.html) · [LMS Go-Live](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/lms-go-live.html) · [Block catalog](https://lessonkit.readthedocs.io/en/latest/reference/block-catalog.html) · [API index](https://lessonkit.readthedocs.io/en/latest/reference/api.html)
 
 ## License
 

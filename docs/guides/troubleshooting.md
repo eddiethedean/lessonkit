@@ -27,9 +27,9 @@ Single entry point for common LessonKit issues. Pick your path below—detailed 
 
 ## Related guides
 
-- [First LMS export](react-developers/first-lms-export.md) — bridge, env vars, SCORM packaging
-- [Production checklist](react-developers/production-checklist.md) — pre-ship verification
-- [Ship to LMS](react-developers/ship-to-lms.md) — one-page go-live checklist
+- [LMS Go-Live](react-developers/lms-go-live.md) — canonical go-live guide (bridge, env vars, SCORM packaging)
+- [Production checklist](react-developers/production-checklist.md) — pre-ship verification (appendix)
+- [Ship to LMS](react-developers/ship-to-lms.md) — one-page checklist (appendix)
 
 ```{toctree}
 :hidden:

@@ -19,7 +19,7 @@ npm run build
 npm run package:scorm12   # or scorm2004, xapi, cmi5, standalone
 ```
 
-Default SCORM path: **`.lxpack/course/.lxpack/out/course-scorm12.zip`**. See [First LMS export](first-lms-export.md).
+Default SCORM path: **`.lxpack/course/.lxpack/out/course-scorm12.zip`**. See [LMS Go-Live — SCORM output layout](lms-go-live.md#scorm-output-layout).
 
 ## Runtime configuration matrix
 

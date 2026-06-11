@@ -76,6 +76,19 @@ export type PackageLessonkitCourseResult =
       issues: Array<{ path?: string; message: string; severity?: string }>;
     };
 
+/**
+ * Validate an on-disk LXPack course directory before packaging.
+ *
+ * @example
+ * ```ts
+ * import { validateLessonkitProject } from "@lessonkit/lxpack";
+ *
+ * const result = await validateLessonkitProject({
+ *   courseDir: ".lxpack/course",
+ *   target: "scorm12",
+ * });
+ * ```
+ */
 export async function validateLessonkitProject(
   options: ValidateLessonkitProjectOptions,
 ): Promise<ValidateCourseResult> {
@@ -120,6 +133,9 @@ export { buildStagingPackage, ensureOutDirParent } from "./packaging/staging";
  * });
  * if (!result.ok) console.error(result.issues);
  * ```
+ *
+ * @remarks Returns `{ ok: false, issues }` (does not throw) for manifest parity failures,
+ * missing `dist/`, LXPack validation errors, or `strictBuild` / `strictParity` warnings.
  */
 export async function packageLessonkitCourse(
   options: PackageLessonkitCourseOptions,

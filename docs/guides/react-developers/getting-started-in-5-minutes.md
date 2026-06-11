@@ -14,6 +14,20 @@ This page covers **local preview** in about five minutes. SCORM packaging, bridg
 
 **Prerequisites:** See [Prerequisites](../prerequisites.md). Node.js **20.19+** recommended for `npx @lessonkit/cli init` (Vite 8).
 
+## You are here — golden path
+
+```text
+  [1] Local preview          [2] Build smoke           [3] LMS Go-Live (required)
+       npm run dev      →    npm run build       →     bridge + env + package + upload
+       ◄── you start here     optional smoke only       do not skip before LMS upload
+```
+
+| Step | Status on this page | Next |
+| --- | --- | --- |
+| **1. Preview** | Sections 1–3 below | Keep using `npm run dev` while editing |
+| **2. Build smoke** | Section 4 (optional) | Confirms Vite production build only—not LMS-ready |
+| **3. LMS Go-Live** | Not on this page | **[LMS Go-Live](lms-go-live.md)** — required before upload |
+
 ## 1. Create a project
 
 ```bash

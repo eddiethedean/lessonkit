@@ -64,7 +64,7 @@ npm run package:scorm12
 Trust the path printed on stdout, for example: `Packaged scorm12 → …/course-scorm12.zip`.
 
 (scorm-output-layout)=
-### 5. SCORM output layout
+## SCORM output layout
 
 `paths.outputBaseDir` resolves **inside** `paths.lxpackOutDir`, not at the project root:
 
@@ -105,7 +105,7 @@ Re-enable before production. Do **not** ship smoke-test config to learners.
 
 Before go-live:
 
-1. Copy `.env.example` → `.env`; set `VITE_ANALYTICS_URL` and `VITE_XAPI_PROXY_URL` (never embed LRS passwords in the bundle).
+1. Copy `.env.example` → `.env`; set `VITE_ANALYTICS_URL` and `VITE_XAPI_PROXY_URL` (never embed LRS passwords in the bundle). Minimal Node/Express and serverless examples: [Backend proxy cookbook](backend-proxy-cookbook.md).
 2. Wire all required `config.observability` hooks — see [Production checklist](production-checklist.md).
 3. Replace `example.com` in `lessonkit.json` → `course.tracking.xapi.activityIri` with your HTTPS activity IRI (xAPI/cmi5 targets).
 4. Re-run `npm run build` then `npm run package:<target>`.

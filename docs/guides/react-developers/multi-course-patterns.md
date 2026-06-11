@@ -98,4 +98,4 @@ steps:
 
 - [Project structure](project-structure.md)
 - [Deployment guide](deployment-guide.md)
-- [First LMS export](first-lms-export.md)
+- [LMS Go-Live](lms-go-live.md)

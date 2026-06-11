@@ -41,7 +41,7 @@ export type { LessonkitObservabilityConfig };
  * ```
  *
  * Production LMS delivery: set `lxpack.bridge: "auto"`, `allowedParentOrigins`, real sinks/transports,
- * and observability hooks — see the CLI template `src/courseConfig.ts` and [production checklist](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/production-checklist.html).
+ * and observability hooks — see the CLI template `src/courseConfig.ts` and [LMS Go-Live](https://lessonkit.readthedocs.io/en/latest/guides/react-developers/lms-go-live.html).
  */
 export type LessonkitConfig = {
   courseId: CourseId;

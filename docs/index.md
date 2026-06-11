@@ -125,13 +125,20 @@ guides/h5p-for-lessonkit-authors
 
 ```{toctree}
 :maxdepth: 1
-:caption: Build and ship
+:caption: Ship to LMS
 
 guides/react-developers/lms-go-live
+```
+
+```{toctree}
+:hidden:
+:maxdepth: 1
+:caption: Ship to LMS — appendices
+
 guides/react-developers/production-checklist
 guides/react-developers/first-lms-export
 guides/react-developers/ship-to-lms
-guides/troubleshooting
+guides/react-developers/backend-proxy-cookbook
 ```
 
 ```{toctree}

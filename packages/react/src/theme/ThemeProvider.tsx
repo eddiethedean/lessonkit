@@ -63,6 +63,18 @@ function resolveModeBase(mode: ThemeMode, resolvedMode: ThemeResolvedMode): Less
   return lightTheme;
 }
 
+/**
+ * Applies LessonKit design tokens (`--lk-*` CSS variables) from a preset and optional overrides.
+ *
+ * @example
+ * ```tsx
+ * import { Course, ThemeProvider } from "@lessonkit/react";
+ *
+ * <ThemeProvider preset="brand" mode="system">
+ *   <Course title="Security 101" courseId="sec-101" config={config}>…</Course>
+ * </ThemeProvider>
+ * ```
+ */
 export function ThemeProvider(props: ThemeProviderProps) {
   const preset = props.preset ?? "default";
   const mode = props.mode ?? "light";

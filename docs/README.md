@@ -13,31 +13,39 @@ Sphinx site published at **[lessonkit.readthedocs.io](https://lessonkit.readthed
 
 ## Build locally
 
-Match CI as closely as possible:
+### One command (matches CI)
 
 ```bash
 npm ci
-npm run build:packages
-npm run docs:api
-node docs/scripts/generate-block-props-doc.mjs   # after block-catalog JSON changes
-bash docs/scripts/verify-doc-includes.sh
-pip install -r docs/requirements.txt
-bash docs/scripts/build-docs-demos.sh   # optional: embed example course bundles
-bash docs/scripts/build-component-demos.sh   # optional: per-component demo bundles
-sphinx-build -W -b html docs docs/_build/html
-npm run docs:verify   # after sphinx-build: includes + substitution tokens in HTML
-bash docs/scripts/verify-doc-demos.sh   # after build-docs-demos.sh: Playwright smoke test
-bash docs/scripts/verify-component-demos.sh   # after build-component-demos.sh
-node docs/scripts/generate-component-pages-index.mjs   # refresh hub picker table
-node docs/scripts/sync-component-try-it-tabs.mjs   # Live demo | React | AI prompt | Manifest tabs
-node docs/scripts/generate-component-ai-prompts.mjs   # optional: refresh ai-prompts.json for review
-node docs/scripts/generate-h5p-component-page-index.mjs   # H5P map → component page links
-node docs/scripts/sync-component-toctree.mjs   # refresh hidden toctree
-node docs/scripts/scaffold-component-pages.mjs   # new pages from page-copy.json
-sphinx-build -b linkcheck docs docs/_build/linkcheck   # optional: external link audit
+npm run docs:build
 ```
 
-Without `npm run docs:api`, [API reference](reference/api.md) TypeDoc links will be broken in the built site.
+Output: `docs/_build/html/index.html`. The script runs demo bundle builds, TypeDoc, generated reference tables, Sphinx (`-W`), and substitution verification — same order as the **Docs (Sphinx)** job in `.github/workflows/checks.yml`.
+
+### Minimal build (faster doc edits)
+
+Skips example/component demo bundles and Playwright verification:
+
+```bash
+npm run docs:build -- --minimal
+```
+
+Requires `pip install -r docs/requirements.txt` once if `sphinx-build` is not on your PATH.
+
+### Maintainer extras (not in `docs:build`)
+
+Run when you change component pages, block catalog, or external links:
+
+```bash
+node docs/scripts/generate-component-pages-index.mjs
+node docs/scripts/sync-component-try-it-tabs.mjs
+node docs/scripts/generate-component-ai-prompts.mjs
+node docs/scripts/sync-component-toctree.mjs
+node docs/scripts/scaffold-component-pages.mjs
+sphinx-build -b linkcheck docs docs/_build/linkcheck
+```
+
+Without `npm run docs:api` (included in `docs:build`), [API reference](reference/api.md) TypeDoc links will be broken in the built site.
 
 ### MyST substitutions (`{{ release }}`, paths, Node versions)
 

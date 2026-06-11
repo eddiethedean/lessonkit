@@ -1,5 +1,7 @@
 # Ship to LMS checklist
 
+> **Appendix only.** Use [LMS Go-Live](lms-go-live.md) first. This page is a one-page quick reference.
+
 :::{admonition} Appendix — read LMS Go-Live first
 :class: note
 
@@ -46,7 +48,7 @@ Choose one path:
 | **Production delivery** | Copy `.env.example` → `.env`; set `VITE_ANALYTICS_URL` and `VITE_XAPI_PROXY_URL`; wire observability hooks in `courseConfig.ts` (see comments there) |
 | **First smoke test only** | Temporarily set `tracking: { enabled: false }` and `xapi: { enabled: false }` in `courseConfig.ts` |
 
-Details: [Production checklist](production-checklist.md) · [Production runtime for LMS](first-lms-export.md#production-runtime-for-lms)
+Details: [LMS Go-Live](lms-go-live.md) · [Production checklist](production-checklist.md) (appendix)
 
 ### 3. Set activity IRI (xAPI / cmi5 only)
 
@@ -82,7 +84,7 @@ Before learner-facing deployment:
 
 | Topic | Guide |
 | --- | --- |
-| Step-by-step first export | [First LMS export](first-lms-export.md) |
+| Canonical go-live guide | [LMS Go-Live](lms-go-live.md) |
 | Production guardrails | [Production checklist](production-checklist.md) |
 | Proxy and CORS | [Deployment guide](deployment-guide.md) |
 | CLI flags and targets | [Packaging and CLI](packaging-and-cli.md) |

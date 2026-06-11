@@ -11,7 +11,7 @@ Packaging turns your preview app into a file your LMS can import.
 ## Before you package
 
 1. **LMS bridge** — In `src/courseConfig.ts`, set `lxpack: { bridge: "auto", allowedParentOrigins: ["https://your-lms.example"] }` so scores and completions reach the LMS. Production requires the allowlist; the init template uses `"off"` for local preview.
-2. **Production runtime** — Copy `.env.example` to `.env`, set `VITE_ANALYTICS_URL` and `VITE_XAPI_PROXY_URL`, then rebuild—or temporarily set `tracking: { enabled: false }` and `xapi: { enabled: false }` for a first test export only. See [First LMS export](../react-developers/first-lms-export.md).
+2. **Production runtime** — Copy `.env.example` to `.env`, set `VITE_ANALYTICS_URL` and `VITE_XAPI_PROXY_URL`, then rebuild—or temporarily set `tracking: { enabled: false }` and `xapi: { enabled: false }` for a first test export only. See [LMS Go-Live](../react-developers/lms-go-live.md).
 
 ## Steps
 

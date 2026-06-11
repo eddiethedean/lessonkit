@@ -634,6 +634,17 @@ function cloneCatalogEntry<T extends BlockCatalogEntryV2>(entry: T): T {
 
 export type BuildBlockCatalogOptions = { version?: 1 | 2 | 3 };
 
+/**
+ * Build the in-memory block catalog (default version **3**).
+ *
+ * @example
+ * ```ts
+ * import { buildBlockCatalog } from "@lessonkit/react";
+ *
+ * const catalog = buildBlockCatalog({ version: 3 });
+ * const quiz = catalog.find((e) => e.type === "Quiz");
+ * ```
+ */
 export function buildBlockCatalog(
   opts?: BuildBlockCatalogOptions,
 ): BlockCatalogEntry[] | BlockCatalogEntryV2[] | BlockCatalogEntryV3[] {
@@ -653,6 +664,17 @@ export function buildBlockCatalogV1(): BlockCatalogEntry[] {
   return buildBlockCatalog({ version: 1 }) as BlockCatalogEntry[];
 }
 
+/**
+ * Look up one catalog entry by block `type` or alias.
+ *
+ * @example
+ * ```ts
+ * import { getBlockCatalogEntry } from "@lessonkit/react";
+ *
+ * const entry = getBlockCatalogEntry("Quiz");
+ * console.log(entry?.telemetry.emits);
+ * ```
+ */
 export function getBlockCatalogEntry(
   type: string,
   opts?: BuildBlockCatalogOptions,

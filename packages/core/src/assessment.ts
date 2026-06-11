@@ -63,7 +63,20 @@ export type AssessmentBaseProps = AssessmentBehaviour & {
   passingScore?: number;
 };
 
-/** MCQ assessment props shared by React components and LMS packaging descriptors. */
+/**
+ * MCQ assessment props shared by React components and LMS packaging descriptors.
+ *
+ * @example
+ * ```tsx
+ * const props: McqAssessmentProps = {
+ *   checkId: "verify-sender",
+ *   question: "First step for a suspicious email?",
+ *   choices: ["Open attachment", "Verify sender"],
+ *   answer: "Verify sender",
+ *   passingScore: 1,
+ * };
+ * ```
+ */
 export type McqAssessmentProps = AssessmentBaseProps & {
   kind?: "mcq";
   question: string;

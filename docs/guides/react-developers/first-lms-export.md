@@ -1,5 +1,7 @@
 # First LMS export
 
+> **Deprecated as primary path.** Use [LMS Go-Live](lms-go-live.md) first. This page is a short appendix checklist only.
+
 :::{admonition} Appendix — read LMS Go-Live first
 :class: note
 

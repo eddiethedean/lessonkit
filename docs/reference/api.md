@@ -13,6 +13,12 @@ LessonKit publishes **TypeScript declarations** on npm (`dist/*.d.ts`) and docum
 
 TypeDoc lists **signatures** — high-traffic exports include `@example` blocks in source (regenerate with `npm run docs:api`). For behavior, prefer narrative guides first, then reference contracts.
 
+:::{admonition} When TypeDoc and guides disagree
+:class: warning
+
+When TypeDoc and guides disagree, the narrative guide wins until the release noted in [CHANGELOG](../project/changelog.md). File an issue if TypeDoc shows a public export with no guide coverage.
+:::
+
 **Before opening a GitHub issue for API usage:** Check [Components and hooks](../guides/react-developers/components-and-hooks.md), the relevant [component page](components/index.md), and narrative references below. TypeDoc signatures alone are not the supported learning path for runtime behavior.
 :::
 
@@ -41,7 +47,7 @@ Browse generated TypeScript API docs (built with the docs site on Read the Docs)
 | --- | --- | --- |
 | `packageLessonkitCourse` | `@lessonkit/lxpack` | [Packaging reference](packaging.md) · [LMS Go-Live](../guides/react-developers/lms-go-live.md) |
 | `createXAPIClient` | `@lessonkit/xapi` | [xAPI reference](xapi.md) · [LRS operations](../guides/react-developers/lrs-operations.md) |
-| `LessonkitConfig` | `@lessonkit/react` | [Production checklist](../guides/react-developers/production-checklist.md) |
+| `LessonkitConfig` | `@lessonkit/react` | [LMS Go-Live](../guides/react-developers/lms-go-live.md) · [Components and hooks](../guides/react-developers/components-and-hooks.md) |
 
 Full index: [TypeDoc home](../_static/typedoc/index.html).
 

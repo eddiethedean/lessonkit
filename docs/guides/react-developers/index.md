@@ -53,29 +53,39 @@ Use the [Vibe coding guides](../vibe-coding/index.md) with an AI editor and the 
 
 ## Guide outline
 
+### Start
+
 | Topic | Page |
 | --- | --- |
 | Coming from H5P | [../h5p-for-lessonkit-authors.md](../h5p-for-lessonkit-authors.md) |
 | Getting started (5 min) | [getting-started-in-5-minutes.md](getting-started-in-5-minutes.md) |
-| **LMS Go-Live (start here)** | [lms-go-live.md](lms-go-live.md) |
-| First LMS export (appendix) | [first-lms-export.md](first-lms-export.md) |
-| Ship to LMS (appendix checklist) | [ship-to-lms.md](ship-to-lms.md) |
-| Troubleshooting | [troubleshooting.md](troubleshooting.md) |
 | Quickstart (existing Vite app) | [quickstart.md](quickstart.md) |
-| Block cookbook | [block-cookbook.md](block-cookbook.md) |
 | Project structure | [project-structure.md](project-structure.md) |
 | Components & hooks | [components-and-hooks.md](components-and-hooks.md) |
-| Telemetry & xAPI | [telemetry-and-xapi.md](telemetry-and-xapi.md) |
-| Production checklist | [production-checklist.md](production-checklist.md) |
-| Theming & a11y | [theming-and-accessibility.md](theming-and-accessibility.md) |
+| Block cookbook | [block-cookbook.md](block-cookbook.md) |
+
+### Ship
+
+| Topic | Page |
+| --- | --- |
+| **LMS Go-Live (canonical)** | [lms-go-live.md](lms-go-live.md) |
+| Backend proxy cookbook | [backend-proxy-cookbook.md](backend-proxy-cookbook.md) |
 | Packaging & CLI | [packaging-and-cli.md](packaging-and-cli.md) |
 | Deployment | [deployment-guide.md](deployment-guide.md) |
 | LRS operations | [lrs-operations.md](lrs-operations.md) |
-| Multi-course patterns | [multi-course-patterns.md](multi-course-patterns.md) |
-| Performance | [performance.md](performance.md) |
 | Export parity | [export-parity.md](export-parity.md) |
 | Troubleshooting | [troubleshooting.md](troubleshooting.md) |
 | FAQ | [../faq.md](../faq.md) |
+| Appendices | [first-lms-export.md](first-lms-export.md) · [ship-to-lms.md](ship-to-lms.md) · [production-checklist.md](production-checklist.md) |
+
+### Advanced
+
+| Topic | Page |
+| --- | --- |
+| Telemetry & xAPI | [telemetry-and-xapi.md](telemetry-and-xapi.md) |
+| Theming & a11y | [theming-and-accessibility.md](theming-and-accessibility.md) |
+| Multi-course patterns | [multi-course-patterns.md](multi-course-patterns.md) |
+| Performance | [performance.md](performance.md) |
 | Plugins | [plugin-cookbook.md](plugin-cookbook.md) |
 | Monorepo | [contributing-to-the-monorepo.md](contributing-to-the-monorepo.md) |
 | Adding a framework block | [adding-a-framework-block.md](adding-a-framework-block.md) |

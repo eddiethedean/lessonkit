@@ -436,6 +436,24 @@ function QuizInner(
 
 const QuizInnerForwarded = forwardRef(QuizInner);
 
+/**
+ * Multiple-choice assessment block. Requires a parent {@link Lesson} (or compound child slot)
+ * so `checkId` maps to `lessonkit.json` assessments and telemetry includes `lessonId`.
+ *
+ * @example
+ * ```tsx
+ * <Lesson title="Phishing" lessonId="phishing-101">
+ *   <Quiz
+ *     checkId="verify-sender"
+ *     question="What is the first step?"
+ *     choices={["Open attachment", "Verify sender"]}
+ *     answer="Verify sender"
+ *   />
+ * </Lesson>
+ * ```
+ *
+ * @throws Dev warning when rendered outside a `Lesson` (packaging still requires manifest parity).
+ */
 export const Quiz = forwardRef<AssessmentHandle, QuizProps>(function Quiz(props, ref) {
   return (
     <AssessmentLessonGuard blockLabel="Quiz" checkId={props.checkId}>
