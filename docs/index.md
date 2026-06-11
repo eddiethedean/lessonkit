@@ -153,6 +153,7 @@ guides/react-developers/project-structure
 guides/react-developers/components-and-hooks
 guides/react-developers/telemetry-and-xapi
 guides/react-developers/theming-and-accessibility
+guides/react-developers/touch-and-mobile
 guides/react-developers/packaging-and-cli
 guides/react-developers/deployment-guide
 guides/react-developers/lrs-operations

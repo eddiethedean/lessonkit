@@ -134,6 +134,10 @@ Add under `course.assessments[]`:
 
 
 
+
+
+
+
 ## See also
 
 - [FindHotspot](find-hotspot.md)

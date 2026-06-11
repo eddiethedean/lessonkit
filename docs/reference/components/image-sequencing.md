@@ -123,6 +123,10 @@ Add under `course.assessments[]`:
 
 
 
+
+
+
+
 ## See also
 
 - [ImageSequence](image-sequence.md) — non-scored frame scrubber

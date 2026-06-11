@@ -27,6 +27,7 @@ export default defineConfig({
       testIgnore: [
         "**/telemetry-harness/**",
         "**/assessments-p0/**",
+        "**/touch/**",
         "**/interactive-book/**",
         "**/slide-deck/**",
         "**/interactive-video/**",
@@ -99,6 +100,15 @@ export default defineConfig({
       use: {
         ...devices["Desktop Chrome"],
         baseURL: "http://127.0.0.1:4190",
+      },
+    },
+    {
+      name: "mobile-assessments-p0",
+      testDir: "./tests/touch",
+      use: {
+        ...devices["Pixel 7"],
+        baseURL: "http://127.0.0.1:4179",
+        hasTouch: true,
       },
     },
   ],

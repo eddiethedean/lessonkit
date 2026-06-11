@@ -13,6 +13,7 @@ import { usePluginScoring } from "../assessment/internal/usePluginScoring";
 import { meetsPassingThreshold } from "../assessment/scoring";
 import { useAssessmentState } from "../assessment/useAssessmentState";
 import { useLessonkit } from "../hooks";
+import { useCoarsePointer, usePickAndPlace, usePointerDrag } from "../interaction";
 import { normalizeComponentId } from "../runtime/validateComponentId";
 
 export type DragItem = { id: string; label: string };
@@ -119,16 +120,19 @@ function DragAndDropInner(
     Object.fromEntries(props.targets.map((t) => [t.id, ""])),
   );
   const [pool, setPool] = useState<string[]>(() => props.items.map((i) => i.id));
-  const [keyboardItem, setKeyboardItem] = useState<string | null>(null);
-  const [draggingItemId, setDraggingItemId] = useState<string | null>(null);
+  const pickPlace = usePickAndPlace<string>();
+  const keyboardItem = pickPlace.selected;
+  const coarsePointer = useCoarsePointer();
+  const [htmlDraggingItemId, setHtmlDraggingItemId] = useState<string | null>(null);
   const [flyingItemId, setFlyingItemId] = useState<string | null>(null);
-  const [hoverDropId, setHoverDropId] = useState<string | null>(null);
+  const [htmlHoverDropId, setHtmlHoverDropId] = useState<string | null>(null);
   const [passed, setPassed] = useState(false);
   const [checked, setChecked] = useState(false);
   const completedRef = useRef(false);
   const dragDroppedRef = useRef(false);
   const draggingItemIdRef = useRef<string | null>(null);
   const telemetryReplayedRef = useRef(false);
+  const pointerDragCancelRef = useRef<() => void>(() => {});
 
   const reset = () => {
     completedRef.current = false;
@@ -137,10 +141,11 @@ function DragAndDropInner(
     setChecked(false);
     setAssignments(Object.fromEntries(props.targets.map((t) => [t.id, ""])));
     setPool(props.items.map((i) => i.id));
-    setKeyboardItem(null);
-    setDraggingItemId(null);
+    pickPlace.clear();
+    setHtmlDraggingItemId(null);
     setFlyingItemId(null);
-    setHoverDropId(null);
+    setHtmlHoverDropId(null);
+    pointerDragCancelRef.current();
   };
 
   useEffect(() => {
@@ -231,7 +236,7 @@ function DragAndDropInner(
           setChecked(value);
         });
         const item = state.keyboardItem;
-        if (item === null || typeof item === "string") setKeyboardItem(item ?? null);
+        if (item === null || typeof item === "string") pickPlace.setSelected(item ?? null);
         restoreCompletedRefFromResumeState(completedRef, state, {
           enableRetry: props.enableRetry,
         });
@@ -273,7 +278,7 @@ function DragAndDropInner(
       if (prev && prev !== itemId) next.push(prev);
       return next;
     });
-    setKeyboardItem(null);
+    pickPlace.clear();
   };
 
   const returnToPool = (itemId: string) => {
@@ -283,37 +288,57 @@ function DragAndDropInner(
     setChecked(false);
     setAssignments((a) => ({ ...a, [sourceTargetId]: "" }));
     setPool((p) => (p.includes(itemId) ? p : [...p, itemId]));
-    setKeyboardItem(null);
+    pickPlace.clear();
+  };
+
+  const animateReturnToPool = (itemId: string, fromX: number, fromY: number) => {
+    const label = props.items.find((entry) => entry.id === itemId)?.label ?? "";
+    flushSync(() => {
+      returnToPool(itemId);
+    });
+    const poolSlot = document.querySelector(`[data-pool-slot="${itemId}"]`);
+    if (poolSlot instanceof HTMLElement && typeof poolSlot.animate === "function") {
+      setFlyingItemId(itemId);
+      flyItemToPool(label, fromX, fromY, poolSlot, () => setFlyingItemId(null));
+    }
   };
 
   const clearDragState = () => {
     dragDroppedRef.current = false;
     draggingItemIdRef.current = null;
-    setDraggingItemId(null);
-    setHoverDropId(null);
+    setHtmlDraggingItemId(null);
+    setHtmlHoverDropId(null);
+  };
+
+  const finishDragOutside = (itemId: string | null, clientX: number, clientY: number) => {
+    if (!dragDroppedRef.current && itemId && findTargetForItem(itemId)) {
+      animateReturnToPool(itemId, clientX, clientY);
+    }
+    clearDragState();
+    pointerDragCancelRef.current();
   };
 
   const endDrag = (event?: React.DragEvent) => {
     const itemId = draggingItemIdRef.current;
-
-    if (!dragDroppedRef.current && itemId && findTargetForItem(itemId)) {
-      const label = props.items.find((entry) => entry.id === itemId)?.label ?? "";
-      const fromX = event?.clientX ?? 0;
-      const fromY = event?.clientY ?? 0;
-
-      flushSync(() => {
-        returnToPool(itemId);
-      });
-
-      const poolSlot = document.querySelector(`[data-pool-slot="${itemId}"]`);
-      if (event && poolSlot instanceof HTMLElement && typeof poolSlot.animate === "function") {
-        setFlyingItemId(itemId);
-        flyItemToPool(label, fromX, fromY, poolSlot, () => setFlyingItemId(null));
-      }
-    }
-
-    clearDragState();
+    finishDragOutside(itemId, event?.clientX ?? 0, event?.clientY ?? 0);
   };
+
+  const pointerDrag = usePointerDrag({
+    onHover: (dropId) => setHtmlHoverDropId(dropId),
+    onDrop: (itemId, dropId) => {
+      dragDroppedRef.current = true;
+      place(dropId, itemId);
+      clearDragState();
+    },
+    onReturnToPool: (itemId, clientX, clientY) => {
+      if (findTargetForItem(itemId)) {
+        animateReturnToPool(itemId, clientX, clientY);
+      }
+      clearDragState();
+    },
+    canStart: () => !(passed && !props.enableRetry),
+  });
+  pointerDragCancelRef.current = pointerDrag.cancel;
 
   const commitDrop = () => {
     dragDroppedRef.current = true;
@@ -324,8 +349,11 @@ function DragAndDropInner(
     event.dataTransfer.effectAllowed = "move";
     dragDroppedRef.current = false;
     draggingItemIdRef.current = itemId;
-    setDraggingItemId(itemId);
+    setHtmlDraggingItemId(itemId);
   };
+
+  const draggingItemId = pointerDrag.draggingItemId ?? htmlDraggingItemId;
+  const hoverDropId = pointerDrag.hoverDropId ?? htmlHoverDropId;
 
   const isDropHover = (dropId: string) => draggingItemId !== null && hoverDropId === dropId;
 
@@ -333,13 +361,15 @@ function DragAndDropInner(
     draggingItemId && isDropHover("pool") && findTargetForItem(draggingItemId),
   );
 
+  const useHtmlDrag = !coarsePointer;
+
   const poolItemClassName = (itemId: string) =>
     ["lk-drag-item", flyingItemId === itemId ? "lk-drag-item--in-flight" : ""].filter(Boolean).join(" ");
 
   const leaveDropZone = (event: React.DragEvent, dropId: string) => {
     const related = event.relatedTarget;
     if (related instanceof Node && event.currentTarget.contains(related)) return;
-    setHoverDropId((current) => (current === dropId ? null : current));
+    setHtmlHoverDropId((current) => (current === dropId ? null : current));
   };
 
   const renderDragPreview = (itemId: string) => {
@@ -378,32 +408,46 @@ function DragAndDropInner(
   return (
     <section aria-label="Drag and Drop" data-lk-check-id={checkId}>
       <p>
-        Match each item to the correct target. Drag items back to the item bank to remove them, or use
-        keyboard: select an item, then activate a target or the item bank.
+        Match each item to the correct target. Drag items back to the item bank to remove them, or select
+        an item then activate a target or the item bank.
       </p>
+      {coarsePointer ? (
+        <p className="lk-touch-hint" role="status">
+          Tap an item, then tap a target. Tap the item bank to return a placed item.
+        </p>
+      ) : null}
       <div
         role="list"
         aria-label="Draggable items"
         data-testid="drag-pool"
+        data-lk-drop-id="pool"
         className={["lk-drag-pool", isPoolReturnHover ? "lk-drag-pool--hover" : ""]
           .filter(Boolean)
           .join(" ")}
-        onDragOver={(event) => event.preventDefault()}
-        onDragEnter={() => {
-          if (draggingItemId && findTargetForItem(draggingItemId)) {
-            setHoverDropId("pool");
-          }
-        }}
-        onDragLeave={(event) => leaveDropZone(event, "pool")}
-        onDrop={(event) => {
-          event.preventDefault();
-          const id = event.dataTransfer.getData("text/plain");
-          if (id && itemIds.has(id)) {
-            commitDrop();
-            returnToPool(id);
-          }
-          endDrag(event);
-        }}
+        onDragOver={useHtmlDrag ? (event) => event.preventDefault() : undefined}
+        onDragEnter={
+          useHtmlDrag
+            ? () => {
+                if (draggingItemId && findTargetForItem(draggingItemId)) {
+                  setHtmlHoverDropId("pool");
+                }
+              }
+            : undefined
+        }
+        onDragLeave={useHtmlDrag ? (event) => leaveDropZone(event, "pool") : undefined}
+        onDrop={
+          useHtmlDrag
+            ? (event) => {
+                event.preventDefault();
+                const id = event.dataTransfer.getData("text/plain");
+                if (id && itemIds.has(id)) {
+                  commitDrop();
+                  returnToPool(id);
+                }
+                endDrag(event);
+              }
+            : undefined
+        }
         onClick={() => {
           if (keyboardItem && findTargetForItem(keyboardItem)) returnToPool(keyboardItem);
         }}
@@ -420,14 +464,21 @@ function DragAndDropInner(
             <button
               key={id}
               type="button"
-              draggable
+              draggable={useHtmlDrag}
               className={poolItemClassName(id)}
               data-testid={`drag-item-${id}`}
               data-pool-slot={id}
               aria-pressed={keyboardItem === id}
-              onDragStart={(event) => startDrag(event, id)}
-              onDragEnd={(event) => endDrag(event)}
-              onClick={() => setKeyboardItem(keyboardItem === id ? null : id)}
+              onDragStart={useHtmlDrag ? (event) => startDrag(event, id) : undefined}
+              onDragEnd={useHtmlDrag ? (event) => endDrag(event) : undefined}
+              onPointerDown={(event) => pointerDrag.start(event, id)}
+              onPointerMove={pointerDrag.move}
+              onPointerUp={pointerDrag.end}
+              onPointerCancel={pointerDrag.cancel}
+              onClick={() => {
+                if (pointerDrag.shouldSuppressClick()) return;
+                pickPlace.toggle(id);
+              }}
             >
               {item.label}
             </button>
@@ -459,18 +510,23 @@ function DragAndDropInner(
                   .filter(Boolean)
                   .join(" ")}
                 data-testid={`drop-${target.id}`}
-                onDragEnter={() => draggingItemId && setHoverDropId(target.id)}
-                onDragLeave={(event) => leaveDropZone(event, target.id)}
-                onDragOver={(event) => event.preventDefault()}
-                onDrop={(event) => {
-                  event.preventDefault();
-                  const id = event.dataTransfer.getData("text/plain");
-                  if (id && itemIds.has(id)) {
-                    commitDrop();
-                    place(target.id, id);
-                  }
-                  endDrag(event);
-                }}
+                data-lk-drop-id={target.id}
+                onDragEnter={useHtmlDrag ? () => draggingItemId && setHtmlHoverDropId(target.id) : undefined}
+                onDragLeave={useHtmlDrag ? (event) => leaveDropZone(event, target.id) : undefined}
+                onDragOver={useHtmlDrag ? (event) => event.preventDefault() : undefined}
+                onDrop={
+                  useHtmlDrag
+                    ? (event) => {
+                        event.preventDefault();
+                        const id = event.dataTransfer.getData("text/plain");
+                        if (id && itemIds.has(id)) {
+                          commitDrop();
+                          place(target.id, id);
+                        }
+                        endDrag(event);
+                      }
+                    : undefined
+                }
                 onClick={() => keyboardItem && place(target.id, keyboardItem)}
                 onKeyDown={(event) => {
                   if (event.key === "Enter" && keyboardItem) place(target.id, keyboardItem);
@@ -479,18 +535,30 @@ function DragAndDropInner(
                 {assignedItem ? (
                   <button
                     type="button"
-                    draggable
+                    draggable={useHtmlDrag}
                     className="lk-drag-item"
                     data-testid={`drag-item-${assignedItem.id}`}
                     aria-pressed={keyboardItem === assignedItem.id}
-                    onDragStart={(event) => {
+                    onDragStart={
+                      useHtmlDrag
+                        ? (event) => {
+                            event.stopPropagation();
+                            startDrag(event, assignedItem.id);
+                          }
+                        : undefined
+                    }
+                    onDragEnd={useHtmlDrag ? (event) => endDrag(event) : undefined}
+                    onPointerDown={(event) => {
                       event.stopPropagation();
-                      startDrag(event, assignedItem.id);
+                      pointerDrag.start(event, assignedItem.id);
                     }}
-                    onDragEnd={(event) => endDrag(event)}
+                    onPointerMove={pointerDrag.move}
+                    onPointerUp={pointerDrag.end}
+                    onPointerCancel={pointerDrag.cancel}
                     onClick={(event) => {
                       event.stopPropagation();
-                      setKeyboardItem(keyboardItem === assignedItem.id ? null : assignedItem.id);
+                      if (pointerDrag.shouldSuppressClick()) return;
+                      pickPlace.toggle(assignedItem.id);
                     }}
                   >
                     {assignedItem.label}
@@ -507,6 +575,7 @@ function DragAndDropInner(
       </ul>
       <button
         type="button"
+        className="lk-button"
         data-testid="check-drag-drop"
         disabled={!hasTargets || !allFilled || (!props.enableRetry && (passed || checked))}
         onClick={check}

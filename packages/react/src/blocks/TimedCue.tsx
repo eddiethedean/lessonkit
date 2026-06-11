@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import { trapFocus } from "@lessonkit/accessibility";
+import { useCoarsePointer } from "../interaction";
 import { setLessonkitBlockType } from "../compound/blockType";
 import { CompoundPageIndexProvider } from "../compound/CompoundPageIndexContext";
 import { validateCompoundChildren } from "../compound/validateChildren";
@@ -19,17 +20,21 @@ export function TimedCue(props: TimedCueProps) {
   validateCompoundChildren("TimedCue", props.children, true);
   const child = React.Children.only(props.children);
   const overlayRef = useRef<HTMLDivElement>(null);
+  const coarsePointer = useCoarsePointer();
 
   useEffect(() => {
     if (props.hidden || !overlayRef.current) return;
-    const trap = trapFocus(overlayRef.current, { restoreFocus: false });
+    const trap = trapFocus(overlayRef.current, {
+      restoreFocus: false,
+      allowOutsideClick: coarsePointer,
+    });
     trap.activate();
     const firstFocusable = overlayRef.current.querySelector<HTMLElement>(
       'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
     );
     firstFocusable?.focus();
     return () => trap.deactivate();
-  }, [props.hidden, props.cueIndex]);
+  }, [coarsePointer, props.hidden, props.cueIndex]);
 
   return (
     <div

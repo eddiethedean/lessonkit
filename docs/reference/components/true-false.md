@@ -124,6 +124,10 @@ Add under `course.assessments[]`. `checkId` must match the React prop.
 
 
 
+
+
+
+
 ## See also
 
 - [Block catalog — TrueFalse](../block-catalog.md)

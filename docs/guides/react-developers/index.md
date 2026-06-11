@@ -84,6 +84,7 @@ Use the [Vibe coding guides](../vibe-coding/index.md) with an AI editor and the 
 | --- | --- |
 | Telemetry & xAPI | [telemetry-and-xapi.md](telemetry-and-xapi.md) |
 | Theming & a11y | [theming-and-accessibility.md](theming-and-accessibility.md) |
+| Touch & mobile | [touch-and-mobile.md](touch-and-mobile.md) |
 | Multi-course patterns | [multi-course-patterns.md](multi-course-patterns.md) |
 | Performance | [performance.md](performance.md) |
 | Plugins | [plugin-cookbook.md](plugin-cookbook.md) |

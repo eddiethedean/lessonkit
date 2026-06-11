@@ -178,6 +178,7 @@ function SortParagraphsInner(
               <span>{text}</span>
               <button
                 type="button"
+                className="lk-button lk-button--icon"
                 data-testid={`sort-up-${paragraphIndex}`}
                 aria-label={`Move paragraph ${index + 1} up`}
                 disabled={index === 0 || (passed && !props.enableRetry)}
@@ -187,6 +188,7 @@ function SortParagraphsInner(
               </button>
               <button
                 type="button"
+                className="lk-button lk-button--icon"
                 data-testid={`sort-down-${paragraphIndex}`}
                 aria-label={`Move paragraph ${index + 1} down`}
                 disabled={index >= order.length - 1 || (passed && !props.enableRetry)}
@@ -200,6 +202,7 @@ function SortParagraphsInner(
       </ol>
       <button
         type="button"
+        className="lk-button"
         data-testid="sort-paragraphs-check"
         disabled={!props.enableRetry && (passed || checked)}
         onClick={check}

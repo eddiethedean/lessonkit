@@ -40,10 +40,21 @@ function startStaticServer(rootDir) {
   });
 }
 
-async function verifySlug(browser, slug) {
+const MOBILE_SLUGS = new Set([
+  "drag-and-drop",
+  "drag-the-words",
+  "word-search",
+  "sort-paragraphs",
+  "quiz",
+]);
+
+async function verifySlug(browser, slug, { mobile = false } = {}) {
   const server = await startStaticServer(DEMOS);
   const { port } = server.address();
   const page = await browser.newPage();
+  if (mobile) {
+    await page.setViewportSize({ width: 390, height: 844 });
+  }
   const errors = [];
   page.on("pageerror", (err) => errors.push(err.message));
   try {
@@ -57,7 +68,7 @@ async function verifySlug(browser, slug) {
     if (rootLen < 50) {
       throw new Error(`${slug}: #root is empty (blank component demo)`);
     }
-    console.log(`OK component demo: ${slug}`);
+    console.log(`OK component demo${mobile ? " (mobile)" : ""}: ${slug}`);
   } finally {
     await page.close();
     server.close();
@@ -99,6 +110,9 @@ async function main() {
   try {
     for (const { slug } of manifest.components) {
       await verifySlug(browser, slug);
+      if (MOBILE_SLUGS.has(slug)) {
+        await verifySlug(browser, slug, { mobile: true });
+      }
     }
   } finally {
     await browser.close();

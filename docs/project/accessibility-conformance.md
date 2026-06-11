@@ -18,35 +18,36 @@ LessonKit targets **WCAG 2.1 Level AA** patterns for shipped React blocks (frame
 - Focus utilities in `@lessonkit/accessibility` (focus trap, roving tabindex)
 - Reduced-motion handling where applicable (e.g. parallax fallbacks)
 - Theme tokens (`--lk-*`) for contrast-aware authoring
+- Touch targets (`--lk-touch-target-min`, 44px default) and pointer-based drag on web (1.8+)
 
-See [Accessibility reference](../reference/accessibility.md) and [Theming and accessibility](../guides/react-developers/theming-and-accessibility.md).
+See [Accessibility reference](../reference/accessibility.md), [Theming and accessibility](../guides/react-developers/theming-and-accessibility.md), and [Touch and mobile](../guides/react-developers/touch-and-mobile.md).
 
 ## Per-block interim status (1.7.x catalog)
 
 Status key: **Implemented** = keyboard + labeled controls in framework code; **Partial** = known gaps or author-dependent content; **Author** = framework provides structure; author must supply accessible content.
 
-| Block | Category | Interim status | Notes |
-| --- | --- | --- | --- |
-| `Quiz` / `KnowledgeCheck` | Assessment | Implemented | Radio/checkbox group semantics; multi-select **Check** gate (1.7); retry/solutions buttons |
-| `SortParagraphs` | Assessment | Implemented | Reorder controls with keyboard Up/Down (1.7) |
-| `GuessTheAnswer` | Assessment | Implemented | Text input or reveal-only mode (1.7) |
-| `MultimediaChoice` | Assessment | Implemented | Labeled media choices; required `altText` (1.7) |
-| `SingleChoiceSet` | Compound | Implemented | Sequential MCQ steps; aggregated score (1.7) |
-| `TrueFalse` | Assessment | Implemented | Two-option labeled controls |
-| `FillInTheBlanks` | Assessment | Implemented | Inline inputs with labels |
-| `DragAndDrop` / `DragTheWords` | Assessment | Implemented | Keyboard alternative paths |
-| `BranchingScenario` | Compound | Implemented | Focus on choice navigation (1.5+) |
-| `SlideDeck` / `InteractiveBook` | Compound | Implemented | Roving tabindex; resume announcements |
-| `InteractiveVideo` | Compound | Implemented | Cue overlays; keyboard pause |
-| `Embed` | Content | Partial | Sandboxed iframe; author supplies `title` |
-| `Chart` | Content | Implemented | Data table fallback for screen readers |
-| `Table` | Content | Implemented | Caption + header cells (1.6) |
-| `Timeline` | Content | Implemented | List semantics + focus (1.6) |
-| `Crossword` / `WordSearch` | Assessment | Implemented | Grid keyboard nav (1.6) |
-| `CombinationLock` | Assessment | Implemented | Digit inputs with labels (1.6) |
-| `GameMap` | Compound | Partial | Spatial map UI; stage focus (1.6) |
-| `Image` / `Video` | Content | Author | Alt text, captions are author responsibility |
-| `AudioRecorder` | Content | Partial | Browser permission UX varies by host (1.6) |
+| Block | Category | Interim status | Target size (2.5.5) | Notes |
+| --- | --- | --- | --- | --- |
+| `Quiz` / `KnowledgeCheck` | Assessment | Implemented | Implemented (1.8) | Radio/checkbox group semantics; multi-select **Check** gate (1.7); `lk-quiz-choice` rows |
+| `SortParagraphs` | Assessment | Implemented | Implemented (1.8) | Up/Down reorder buttons; no drag reorder |
+| `GuessTheAnswer` | Assessment | Implemented | Partial | Text input or reveal-only mode (1.7) |
+| `MultimediaChoice` | Assessment | Implemented | Implemented (1.8) | Labeled media choices; required `altText` (1.7) |
+| `SingleChoiceSet` | Compound | Implemented | Implemented (1.8) | Sequential MCQ steps; aggregated score (1.7) |
+| `TrueFalse` | Assessment | Implemented | Implemented (1.8) | Two-option labeled controls |
+| `FillInTheBlanks` | Assessment | Implemented | Partial | Inline inputs with labels |
+| `DragAndDrop` / `DragTheWords` | Assessment | Implemented | Implemented (1.8) | Pick-and-place on touch; pointer drag; keyboard paths |
+| `BranchingScenario` | Compound | Implemented | Implemented (1.8) | Focus on choice navigation (1.5+) |
+| `SlideDeck` / `InteractiveBook` | Compound | Implemented | Implemented (1.8) | Keyboard nav; resume announcements |
+| `InteractiveVideo` | Compound | Implemented | Implemented (1.8) | Cue overlays; keyboard pause |
+| `Embed` | Content | Partial | N/A | Sandboxed iframe; author supplies `title` |
+| `Chart` | Content | Implemented | N/A | Data table fallback for screen readers |
+| `Table` | Content | Implemented | N/A | Caption + header cells (1.6) |
+| `Timeline` | Content | Implemented | N/A | List semantics + focus (1.6) |
+| `Crossword` / `WordSearch` | Assessment | Implemented | Implemented (1.8) | Crossword: Tab between inputs; WordSearch: pointer/tap selection |
+| `CombinationLock` | Assessment | Implemented | Implemented (1.8) | Digit inputs with labels (1.6) |
+| `GameMap` | Compound | Partial | Implemented (1.8) | Spatial map UI; enlarged stage markers |
+| `Image` / `Video` | Content | Author | N/A | Alt text, captions are author responsibility |
+| `AudioRecorder` | Content | Partial | Implemented (1.8) | Browser permission UX varies by host (1.6) |
 
 For the full catalog, see [Block catalog](../reference/block-catalog.md). Storybook stories document focus order for representative states.
 

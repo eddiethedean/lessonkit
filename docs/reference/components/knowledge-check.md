@@ -92,8 +92,8 @@ Sync lessonkit.json — add under course.assessments[]:
   "checkId": "kc-demo",
   "kind": "mcq",
   "question": "Which channel is approved for password resets?",
-  "choices": ["Self-service portal", "Reply to the email", "Text a colleague"],
-  "answer": "Self-service portal"
+  "choices": ["Self-service portal linked from the intranet", "Reply to the email that prompted the reset"],
+  "answer": "Self-service portal linked from the intranet"
 }
 
 - After edits, list changed files and what to verify in the browser (lessonkit dev).
@@ -112,14 +112,18 @@ Same manifest shape as `Quiz`. Prefer importing `Quiz` in new React code.
   "checkId": "kc-demo",
   "kind": "mcq",
   "question": "Which channel is approved for password resets?",
-  "choices": ["Self-service portal", "Reply to the email", "Text a colleague"],
-  "answer": "Self-service portal"
+  "choices": ["Self-service portal linked from the intranet", "Reply to the email that prompted the reset"],
+  "answer": "Self-service portal linked from the intranet"
 }
 ```
 :::
 
 ::::
 <!-- try-it:end -->
+
+
+
+
 
 
 

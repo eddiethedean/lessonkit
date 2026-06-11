@@ -115,7 +115,16 @@ Add under `course.assessments[]`:
 
 
 
+
+
+
+
+## Touch behavior
+
+**Tap a word, then tap a blank** on touch devices. Word bank chips use `lk-drag-words-item` sizing from the base theme.
+
 ## See also
 
 - [Block catalog](../block-catalog.md)
 - [Block cookbook — DragTheWords](../../guides/react-developers/block-cookbook.md#dragthewords)
+- [Touch and mobile](../../guides/react-developers/touch-and-mobile.md)

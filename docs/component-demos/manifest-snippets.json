@@ -5,11 +5,11 @@
   },
   "quiz": {
     "note": "Omit `kind` or set `\"kind\": \"mcq\"`. Choices and answer must match React props exactly.",
-    "snippet": "{\n  \"checkId\": \"verify-quiz\",\n  \"kind\": \"mcq\",\n  \"question\": \"What should you verify before clicking a password-reset link?\",\n  \"choices\": [\"The sender domain\", \"The email font\", \"How urgent it sounds\"],\n  \"answer\": \"The sender domain\"\n}"
+    "snippet": "{\n  \"checkId\": \"verify-quiz\",\n  \"kind\": \"mcq\",\n  \"question\": \"What should you verify before clicking a password-reset link?\",\n  \"choices\": [\"The sender domain and link destination\", \"The email font and signature image\", \"How urgent the subject line sounds\"],\n  \"answer\": \"The sender domain and link destination\"\n}"
   },
   "knowledge-check": {
     "note": "Same manifest shape as `Quiz`. Prefer importing `Quiz` in new React code.",
-    "snippet": "{\n  \"checkId\": \"kc-demo\",\n  \"kind\": \"mcq\",\n  \"question\": \"Which channel is approved for password resets?\",\n  \"choices\": [\"Self-service portal\", \"Reply to the email\", \"Text a colleague\"],\n  \"answer\": \"Self-service portal\"\n}"
+    "snippet": "{\n  \"checkId\": \"kc-demo\",\n  \"kind\": \"mcq\",\n  \"question\": \"Which channel is approved for password resets?\",\n  \"choices\": [\"Self-service portal linked from the intranet\", \"Reply to the email that prompted the reset\"],\n  \"answer\": \"Self-service portal linked from the intranet\"\n}"
   },
   "fill-in-the-blanks": {
     "note": "Use `template` with `*` blanks in React; manifest can list explicit `blanks` for packaging.",
@@ -108,6 +108,7 @@
     "snippet": "{\n  \"checkId\": \"channel-mm\",\n  \"kind\": \"multimediaChoice\",\n  \"question\": \"Which channel is approved for IT requests?\",\n  \"choices\": [\"Service portal\", \"Unknown email link\"],\n  \"answer\": \"Service portal\"\n}"
   },
   "single-choice-set": {
-    "note": "No separate descriptor kind — declare each child `Quiz` in `course.assessments[]` with its own `checkId`."
+    "note": "No separate descriptor kind — declare each child `Quiz` in `course.assessments[]` with its own `checkId`.",
+    "snippet": "[\n  {\n    \"checkId\": \"scs-q1\",\n    \"kind\": \"mcq\",\n    \"question\": \"Report phishing to security?\",\n    \"choices\": [\"Yes\", \"No\"],\n    \"answer\": \"Yes\"\n  },\n  {\n    \"checkId\": \"scs-q2\",\n    \"kind\": \"mcq\",\n    \"question\": \"Share passwords with colleagues?\",\n    \"choices\": [\"Yes\", \"No\"],\n    \"answer\": \"No\"\n  }\n]"
   }
 }

@@ -50,13 +50,7 @@ export function AdventCalendar(props: AdventCalendarProps) {
 
   return (
     <section aria-label="Advent calendar" data-lk-block-id={blockId} data-testid="advent-calendar">
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
-          gap: "0.5rem",
-        }}
-      >
+      <div className="lk-advent-calendar-grid">
         {props.doors.map((door) => {
           const unlocked = isDoorUnlocked(door.day, props.unlockFrom);
           const isOpen = opened.has(door.id);
@@ -64,6 +58,7 @@ export function AdventCalendar(props: AdventCalendarProps) {
             <div key={door.id} data-testid={`advent-door-${door.id}`}>
               <button
                 type="button"
+                className="lk-button lk-advent-door-button"
                 disabled={!unlocked}
                 aria-expanded={isOpen}
                 data-testid={`advent-door-button-${door.id}`}

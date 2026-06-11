@@ -94,8 +94,8 @@ Sync lessonkit.json — add under course.assessments[]:
   "checkId": "verify-quiz",
   "kind": "mcq",
   "question": "What should you verify before clicking a password-reset link?",
-  "choices": ["The sender domain", "The email font", "How urgent it sounds"],
-  "answer": "The sender domain"
+  "choices": ["The sender domain and link destination", "The email font and signature image", "How urgent the subject line sounds"],
+  "answer": "The sender domain and link destination"
 }
 
 - After edits, list changed files and what to verify in the browser (lessonkit dev).
@@ -114,14 +114,18 @@ Omit `kind` or set `"kind": "mcq"`. Choices and answer must match React props ex
   "checkId": "verify-quiz",
   "kind": "mcq",
   "question": "What should you verify before clicking a password-reset link?",
-  "choices": ["The sender domain", "The email font", "How urgent it sounds"],
-  "answer": "The sender domain"
+  "choices": ["The sender domain and link destination", "The email font and signature image", "How urgent the subject line sounds"],
+  "answer": "The sender domain and link destination"
 }
 ```
 :::
 
 ::::
 <!-- try-it:end -->
+
+
+
+
 
 
 

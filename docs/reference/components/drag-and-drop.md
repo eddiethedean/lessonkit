@@ -133,7 +133,16 @@ Add under `course.assessments[]`:
 
 
 
+
+
+
+
+## Touch behavior
+
+On phones and tablets: **tap an item, then tap a target** (pick-and-place). Coarse-pointer devices show an on-screen hint and disable HTML5 drag. Pointer drag with visual feedback works where supported. Import `@lessonkit/themes/base.css` for 44px chips.
+
 ## See also
 
 - [Block catalog](../block-catalog.md)
 - [Block cookbook — DragAndDrop](../../guides/react-developers/block-cookbook.md#draganddrop)
+- [Touch and mobile](../../guides/react-developers/touch-and-mobile.md)

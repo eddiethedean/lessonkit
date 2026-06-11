@@ -71,6 +71,8 @@ Wrap answers in `*` in the template string.
 
 ## DragTheWords
 
+On touch: tap a word, then tap a blank. See [Touch and mobile](touch-and-mobile.md).
+
 ```tsx
 <DragTheWords
   checkId="dtw-1"
@@ -89,6 +91,8 @@ Wrap answers in `*` in the template string.
 ```
 
 ## DragAndDrop
+
+On touch devices: tap an item to select it, then tap a target (pick-and-place). Import `@lessonkit/themes/base.css` for 44px chips. See [Touch and mobile](touch-and-mobile.md).
 
 ```tsx
 <DragAndDrop
@@ -133,6 +137,119 @@ Wrap answers in `*` in the template string.
 }
 ```
 
+## SortParagraphs
+
+`correctOrder` uses zero-based indices into `paragraphs`.
+
+```tsx
+<SortParagraphs
+  checkId="steps-sort"
+  paragraphs={["Contain", "Notify security", "Document"]}
+  correctOrder={[0, 1, 2]}
+/>
+```
+
+```json
+{
+  "checkId": "steps-sort",
+  "kind": "sortParagraphs",
+  "question": "Order the incident response steps",
+  "paragraphs": ["Contain", "Notify security", "Document"],
+  "correctOrder": [0, 1, 2]
+}
+```
+
+SPA-only in LMS shell — omit from `assessments[]` when packaging SCORM/xAPI/cmi5 if you rely on shell scoring only.
+
+## GuessTheAnswer
+
+```tsx
+<GuessTheAnswer checkId="term-guess" prompt="EU privacy acronym?" answer="GDPR" />
+```
+
+Reveal-only (no descriptor):
+
+```tsx
+<GuessTheAnswer scored={false} prompt="What does MFA stand for?" answer="Multi-factor authentication" />
+```
+
+```json
+{
+  "checkId": "term-guess",
+  "kind": "guessTheAnswer",
+  "question": "EU privacy acronym?",
+  "answer": "GDPR"
+}
+```
+
+## MultimediaChoice
+
+Every choice needs `label`, `mediaUrl`, `mediaKind` (`image` | `audio`), and `altText`.
+
+```tsx
+<MultimediaChoice
+  checkId="channel-mm"
+  question="Which channel is approved?"
+  choices={[
+    {
+      label: "Service portal",
+      mediaUrl: "/media/portal.png",
+      mediaKind: "image",
+      altText: "IT service portal home screen",
+    },
+    {
+      label: "Unknown email",
+      mediaUrl: "/media/email.png",
+      mediaKind: "image",
+      altText: "Suspicious email screenshot",
+    },
+  ]}
+  answer="Service portal"
+/>
+```
+
+```json
+{
+  "checkId": "channel-mm",
+  "kind": "multimediaChoice",
+  "question": "Which channel is approved?",
+  "choices": ["Service portal", "Unknown email"],
+  "answer": "Service portal"
+}
+```
+
+LMS shell uses labels only; media URLs are SPA-only.
+
+## SingleChoiceSet
+
+Container uses `blockId`. Declare each child `Quiz` in `course.assessments[]`.
+
+```tsx
+<SingleChoiceSet blockId="quick-set" title="Security basics" showSetScore>
+  <Quiz checkId="scs-q1" question="Report phishing?" choices={["Yes", "No"]} answer="Yes" />
+  <Quiz checkId="scs-q2" question="Share passwords?" choices={["Yes", "No"]} answer="No" />
+</SingleChoiceSet>
+```
+
+```json
+[
+  {
+    "checkId": "scs-q1",
+    "kind": "mcq",
+    "question": "Report phishing?",
+    "choices": ["Yes", "No"],
+    "answer": "Yes"
+  },
+  {
+    "checkId": "scs-q2",
+    "kind": "mcq",
+    "question": "Share passwords?",
+    "choices": ["Yes", "No"],
+    "answer": "No"
+  }
+]
+```
+
 ## AssessmentSequence
 
 ```tsx
@@ -164,6 +281,10 @@ How `passingScore` and partial credit behave per block. Source: block implementa
 | `Summary` | All-or-nothing (exact statement order) | Intermediate `passingScore` values do not apply |
 | `ImagePairing` | Per-pair partial credit | Threshold can pass before all pairs matched |
 | `ArithmeticQuiz` | Per-prompt partial credit | Timed mode supported |
+| `SortParagraphs` | All-or-nothing (exact order) | Intermediate `passingScore` values do not apply |
+| `GuessTheAnswer` | All-or-nothing | Default = 1; `scored={false}` skips scoring |
+| `MultimediaChoice` | All-or-nothing per attempt | Same as `Quiz` |
+| `SingleChoiceSet` | Aggregates child `Quiz` scores | Children use `Quiz` model |
 | `AssessmentSequence` | Aggregates child scores | Children use their own models |
 | `BranchingScenario` | Visited-path aggregation | Terminal nodes contribute |
 

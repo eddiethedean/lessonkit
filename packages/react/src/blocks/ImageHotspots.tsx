@@ -47,11 +47,11 @@ export function ImageHotspots(props: ImageHotspotsProps) {
           <button
             key={h.id}
             type="button"
+            className="lk-image-hotspot-trigger"
             aria-expanded={active === h.id}
             aria-label={h.label}
             data-testid={`hotspot-${h.id}`}
             style={{
-              position: "absolute",
               left: `${h.x}%`,
               top: `${h.y}%`,
               transform: "translate(-50%, -50%)",

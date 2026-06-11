@@ -99,6 +99,10 @@ Workflow tips: https://lessonkit.readthedocs.io/en/latest/guides/vibe-coding/pro
 
 
 
+
+
+
+
 ## See also
 
 - [Block catalog — Chart](../block-catalog.md)

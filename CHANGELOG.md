@@ -6,6 +6,28 @@ All notable changes to the LessonKit monorepo are documented here.
 
 ## [Unreleased]
 
+## [1.7.1] - 2026-06-10
+
+Framework **1.7.x** patch — touch-friendly web interactions, component documentation completions, and mobile E2E coverage. All seven `@lessonkit/*` packages ship at **1.7.1**. Additive release (no breaking API changes).
+
+### Added
+
+- **`@lessonkit/react` interaction hooks** — `useCoarsePointer`, `usePickAndPlace`, `usePointerDrag`, and `resolveDropTargetAtPoint` for pointer-first drag on touch devices
+- **Touch theme tokens** — `--lk-touch-target-min`, `--lk-touch-spacing`, and global `.lk-button` / control sizing in `@lessonkit/themes`
+- **Mobile E2E** — Playwright `mobile-assessments-p0` project (Pixel 7) for drag-and-drop and assessment flows on coarse pointers
+- **Docs** — [Touch and mobile](docs/guides/react-developers/touch-and-mobile.md) guide; Try it tabs and variant examples on `SortParagraphs`, `GuessTheAnswer`, `MultimediaChoice`, and `SingleChoiceSet` component pages
+
+### Changed
+
+- **`DragAndDrop` / `DragTheWords`** — pointer drag with coarse pick-and-place hints; HTML5 drag disabled on coarse pointers; keyboard resume key preserved
+- **Assessment and content blocks** — enlarged touch targets on grids, hotspots, quiz choices, summary controls, `MarkTheWords`, `ImageHotspots`, `AdventCalendar`, `SortParagraphs`, and `TimedCue` (`allowOutsideClick` on coarse)
+- **`@lessonkit/cli`**: `lessonkit init` template pins `^1.7.1` on all `@lessonkit/*` dependencies
+
+### Fixed
+
+- **Docs build** — `touch-and-mobile` added to Sphinx toctree (warnings-as-errors)
+- **E2E** — mobile drag assertion uses `[aria-live="polite"]` to avoid ambiguous `role="status"` matches
+
 ## [1.7.0] - 2026-06-08
 
 Framework **1.7.x** — four Tier B P1 assessment blocks plus Quiz multi-select/shuffle/feedback variants. All seven `@lessonkit/*` packages ship at **1.7.0**. Additive release (no breaking API changes).

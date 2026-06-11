@@ -102,6 +102,10 @@ Workflow tips: https://lessonkit.readthedocs.io/en/latest/guides/vibe-coding/pro
 
 
 
+
+
+
+
 ## See also
 
 - [interactive-video example](../../examples/index.md) — uses `MemoryGame` alongside video blocks

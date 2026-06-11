@@ -116,6 +116,10 @@ Essay blocks are typically completion-scored; include `checkId` for telemetry an
 
 
 
+
+
+
+
 ## See also
 
 - [Block catalog — Essay](../block-catalog.md)

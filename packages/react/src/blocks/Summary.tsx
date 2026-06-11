@@ -226,10 +226,10 @@ function SummaryInner(
           <button
             key={statementIndex}
             type="button"
+            className="lk-button lk-summary-statement"
             data-testid={`summary-statement-${statementIndex}`}
             disabled={passed && !props.enableRetry}
             onClick={() => addStatement(statementIndex)}
-            style={{ display: "block", margin: "0.25rem 0" }}
           >
             {props.statements[statementIndex]}
           </button>
@@ -237,6 +237,7 @@ function SummaryInner(
       </div>
       <button
         type="button"
+        className="lk-button"
         data-testid="summary-undo"
         disabled={(!props.enableRetry && (passed || checked)) || selectedIndices.length === 0}
         onClick={removeLast}
@@ -245,6 +246,7 @@ function SummaryInner(
       </button>
       <button
         type="button"
+        className="lk-button"
         data-testid="summary-check"
         disabled={selectedIndices.length === 0 || (passed && !props.enableRetry)}
         onClick={check}

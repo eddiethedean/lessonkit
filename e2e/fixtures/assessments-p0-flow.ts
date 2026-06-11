@@ -32,6 +32,8 @@ export async function completeAssessmentsP0ViteSequenceThroughSort(page: Page): 
   await clickSequenceNext(page);
 
   const dad = page.locator('[data-lk-check-id="channel-dad"]');
+  await dad.scrollIntoViewIfNeeded();
+  await expect(dad).toBeVisible();
   await dad.getByTestId("drag-item-email").click();
   await dad.getByTestId("drop-risk").click();
   await dad.getByTestId("drag-item-portal").click();

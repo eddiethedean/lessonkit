@@ -13,6 +13,7 @@ import { usePluginScoring } from "../assessment/internal/usePluginScoring";
 import { meetsPassingThreshold } from "../assessment/scoring";
 import { useAssessmentState } from "../assessment/useAssessmentState";
 import { useLessonkit } from "../hooks";
+import { useCoarsePointer, usePickAndPlace, usePointerDrag } from "../interaction";
 import { isDevEnvironment, normalizeComponentId } from "../runtime/validateComponentId";
 
 export type DragTheWordsProps = AssessmentBaseProps & {
@@ -81,7 +82,9 @@ function DragTheWordsInner(
     Object.fromEntries(answers.map((_, i) => [`zone-${i}`, ""])),
   );
   const [pool, setPool] = useState<string[]>(() => [...props.words]);
-  const [keyboardWord, setKeyboardWord] = useState<string | null>(null);
+  const pickPlace = usePickAndPlace<string>();
+  const keyboardWord = pickPlace.selected;
+  const coarsePointer = useCoarsePointer();
   const [passed, setPassed] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const completedRef = useRef(false);
@@ -98,7 +101,7 @@ function DragTheWordsInner(
     setSubmitted(false);
     setZones(Object.fromEntries(answers.map((_, i) => [`zone-${i}`, ""])));
     setPool([...props.words]);
-    setKeyboardWord(null);
+    pickPlace.clear();
   };
 
   useEffect(() => {
@@ -193,7 +196,7 @@ function DragTheWordsInner(
             enableRetry: props.enableRetry,
           });
           const kw = state.keyboardWord;
-          if (kw === null || typeof kw === "string") setKeyboardWord(kw ?? null);
+          if (kw === null || typeof kw === "string") pickPlace.setSelected(kw ?? null);
           let nextScore = 0;
           answers.forEach((ans, i) => {
             if ((nextZones[`zone-${i}`] ?? "").trim().toLowerCase() === ans.toLowerCase()) nextScore += 1;
@@ -218,8 +221,15 @@ function DragTheWordsInner(
       return next;
     });
     setSubmitted(false);
-    setKeyboardWord(null);
+    pickPlace.clear();
   };
+
+  const pointerDrag = usePointerDrag({
+    onDrop: (word, zoneId) => placeInZone(zoneId, word),
+    canStart: () => !(passed && !props.enableRetry),
+  });
+
+  const useHtmlDrag = !coarsePointer;
 
   const onDragStart = (word: string) => (e: React.DragEvent) => {
     e.dataTransfer.setData("text/plain", word);
@@ -283,17 +293,29 @@ function DragTheWordsInner(
   return (
     <section aria-label="Drag the Words" data-lk-check-id={checkId}>
       <p>Drag words into the blanks (or select a word, then activate a blank).</p>
-      <div role="list" aria-label="Word bank" data-testid="word-bank">
+      {coarsePointer ? (
+        <p className="lk-touch-hint" role="status">
+          Tap a word, then tap a blank to place it.
+        </p>
+      ) : null}
+      <div role="list" aria-label="Word bank" className="lk-drag-words-bank" data-testid="word-bank">
         {pool.map((word) => (
           <button
             key={word}
             type="button"
-            draggable
+            draggable={useHtmlDrag}
+            className="lk-drag-words-item"
             data-testid={`word-${word}`}
             aria-pressed={keyboardWord === word}
-            onDragStart={onDragStart(word)}
-            onClick={() => setKeyboardWord(keyboardWord === word ? null : word)}
-            style={{ margin: "0.25rem" }}
+            onDragStart={useHtmlDrag ? onDragStart(word) : undefined}
+            onPointerDown={(event) => pointerDrag.start(event, word)}
+            onPointerMove={pointerDrag.move}
+            onPointerUp={pointerDrag.end}
+            onPointerCancel={pointerDrag.cancel}
+            onClick={() => {
+              if (pointerDrag.shouldSuppressClick()) return;
+              pickPlace.toggle(word);
+            }}
           >
             {word}
           </button>
@@ -307,19 +329,14 @@ function DragTheWordsInner(
               key={part}
               role="button"
               tabIndex={0}
+              className="lk-drag-words-zone"
               data-testid={part}
-              onDragOver={(e) => e.preventDefault()}
-              onDrop={onDrop(part)}
+              data-lk-drop-id={part}
+              onDragOver={useHtmlDrag ? (e) => e.preventDefault() : undefined}
+              onDrop={useHtmlDrag ? onDrop(part) : undefined}
               onClick={() => keyboardWord && placeInZone(part, keyboardWord)}
               onKeyDown={(e) => {
                 if (e.key === "Enter" && keyboardWord) placeInZone(part, keyboardWord);
-              }}
-              style={{
-                display: "inline-block",
-                minWidth: "6em",
-                border: "1px dashed currentColor",
-                padding: "0.2em 0.5em",
-                margin: "0 0.2em",
               }}
             >
               {zones[part] || "___"}
@@ -329,6 +346,7 @@ function DragTheWordsInner(
       </p>
       <button
         type="button"
+        className="lk-button"
         data-testid="check-drag-words"
         disabled={!allFilled || (passed && !props.enableRetry)}
         onClick={check}

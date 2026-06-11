@@ -390,7 +390,7 @@ function QuizInner(
           {multi ? "Quiz choices — select all that apply" : "Quiz choices"}
         </legend>
         {displayChoices.map((c, i) => (
-          <label key={`${questionId}-${choiceOrder[i] ?? i}-${c}`} style={{ display: "block" }}>
+          <label key={`${questionId}-${choiceOrder[i] ?? i}-${c}`} className="lk-quiz-choice">
             <input
               type={multi ? "checkbox" : "radio"}
               name={multi ? `${questionId}-${c}` : questionId}

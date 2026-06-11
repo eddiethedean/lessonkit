@@ -123,6 +123,10 @@ Use `template` with `*` blanks in React; manifest can list explicit `blanks` for
 
 
 
+
+
+
+
 ## See also
 
 - [Block catalog](../block-catalog.md)

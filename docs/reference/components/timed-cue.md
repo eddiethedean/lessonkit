@@ -38,7 +38,7 @@ The demo shows a required `TrueFalse` at 3s and an informational `Text` cue at 8
 <iframe
   class="lk-demo-frame lk-component-demo-frame"
   src="../../_static/component-demos/index.html#/timed-cue"
-  title="TimedCue component demo"
+  title="TimedCue (inside InteractiveVideo) component demo"
   loading="lazy"
 ></iframe>
 <p class="lk-demo-links">
@@ -113,6 +113,10 @@ Workflow tips: https://lessonkit.readthedocs.io/en/latest/guides/vibe-coding/pro
 
 ::::
 <!-- try-it:end -->
+
+
+
+
 
 
 

@@ -203,6 +203,7 @@ function MarkTheWordsInner(
             <button
               key={i}
               type="button"
+              className="lk-mark-the-words-token"
               data-testid={`mark-word-${i}`}
               aria-pressed={selected}
               disabled={passed && !props.enableRetry}

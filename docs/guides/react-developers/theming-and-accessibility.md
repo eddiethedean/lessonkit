@@ -19,6 +19,8 @@ Align `lessonkit.json` → `course.theme.preset` with the React preset for packa
 
 Details: [Theming reference](../../reference/theming.md).
 
+Import `@lessonkit/themes/base.css` for **touch-sized controls** (`--lk-touch-target-min`, `lk-button`, drag chips, grid cells). See [Touch and mobile](touch-and-mobile.md).
+
 ## Accessibility built into components
 
 - Semantic regions (`article`, `section`, `fieldset`)

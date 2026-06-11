@@ -95,6 +95,10 @@ Workflow tips: https://lessonkit.readthedocs.io/en/latest/guides/vibe-coding/pro
 
 
 
+
+
+
+
 ## See also
 
 - [Accordion](accordion.md) — collapsible sections without search

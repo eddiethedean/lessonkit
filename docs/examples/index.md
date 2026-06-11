@@ -28,7 +28,7 @@ From the repo root, run `bash docs/scripts/build-docs-demos.sh` before `make htm
 | [lxpack-golden](#workplace-safety-briefing-exampleslxpack-golden) | Yes | `lessonkit-example-lxpack-golden` | Packaging | SCORM/xAPI export reference |
 | [interactive-book](#interactive-book-examplesinteractive-book) | Yes | `lessonkit-example-interactive-book` | 1.2 | `InteractiveBook` compound |
 | [slide-deck](#slide-deck-examplesslide-deck) | Yes | `lessonkit-example-slide-deck` | 1.3 | `SlideDeck` compound |
-| [assessments-p0](#assessment-showcase-examplesassessments-p0) | Yes | `lessonkit-example-assessments-p0` | 1.1 | Minimal assessment sample |
+| [assessments-p0](#assessment-showcase-examplesassessments-p0) | Yes | `lessonkit-example-assessments-p0` | 1.7 | P0 + 1.7 assessment blocks |
 | interactive-video | No (GitHub) | `lessonkit-example-interactive-video` | 1.4 | `InteractiveVideo` compound |
 | branching-scenario | No (GitHub) | `lessonkit-example-branching-scenario` | 1.5 | `BranchingScenario` graph |
 
@@ -174,7 +174,7 @@ Compound `Page` and `InteractiveBook` patterns (framework 1.2): multi-page handb
 
 ## Assessment showcase (`examples/assessments-p0`)
 
-Minimal P0 assessment sample: `TrueFalse`, fill-in-blanks, mark-the-words, drag-the-words, and drag-and-drop inside `AssessmentSequence`.
+P0 assessment sample inside `AssessmentSequence`: `TrueFalse`, fill-in-blanks, mark-the-words, drag-the-words, drag-and-drop, plus **1.7.0** blocks (`SortParagraphs`, `GuessTheAnswer`, `MultimediaChoice`) and a standalone `SingleChoiceSet` with Quiz multi-select variants.
 
 ```{raw} html
 <iframe

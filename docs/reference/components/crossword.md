@@ -45,11 +45,11 @@ Use `Crossword` for **grid-based vocabulary** challenges. Define `entries` with 
 ```tsx
 <Crossword
   checkId="security-crossword"
-  rows={3}
-  cols={6}
+  rows={4}
+  cols={3}
   entries={[
-    { id: "a1", clue: "Fraudulent email tactic (5)", answer: "PHISH", row: 0, col: 0, direction: "across" },
-    { id: "a2", clue: "Extra login step (abbr.)", answer: "MFA", row: 2, col: 0, direction: "across" },
+    { id: "a1", clue: "Two-step login, for short (3 letters)", answer: "MFA", row: 1, col: 0, direction: "across" },
+    { id: "d1", clue: "How apps talk to servers, for short (3 letters)", answer: "API", row: 1, col: 2, direction: "down" },
   ]}
 />
 ```
@@ -67,11 +67,11 @@ Add a Crossword block (H5P-style: Crossword) like this example inside the active
 
 <Crossword
   checkId="security-crossword"
-  rows={3}
-  cols={6}
+  rows={4}
+  cols={3}
   entries={[
-    { id: "a1", clue: "Fraudulent email tactic (5)", answer: "PHISH", row: 0, col: 0, direction: "across" },
-    { id: "a2", clue: "Extra login step (abbr.)", answer: "MFA", row: 2, col: 0, direction: "across" },
+    { id: "a1", clue: "Two-step login, for short (3 letters)", answer: "MFA", row: 1, col: 0, direction: "across" },
+    { id: "d1", clue: "How apps talk to servers, for short (3 letters)", answer: "API", row: 1, col: 2, direction: "down" },
   ]}
 />
 
@@ -108,6 +108,10 @@ Add under `course.assessments[]`:
 
 ::::
 <!-- try-it:end -->
+
+
+
+
 
 
 

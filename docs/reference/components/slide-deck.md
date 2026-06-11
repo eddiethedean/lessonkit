@@ -117,6 +117,10 @@ No `lessonkit.json` row for `SlideDeck` — compose slides in React.
 
 
 
+
+
+
+
 ## See also
 
 - [slide-deck example](../../examples/index.md#slide-deck-examplesslide-deck)

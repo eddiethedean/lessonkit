@@ -83,6 +83,10 @@ Workflow tips: https://lessonkit.readthedocs.io/en/latest/guides/vibe-coding/pro
 
 
 
+
+
+
+
 ## See also
 
 - [ImageHotspots](image-hotspots.md) — clickable regions on an image

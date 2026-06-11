@@ -1,6 +1,6 @@
 {
   "name": "@lessonkit/xapi",
-  "version": "1.7.0",
+  "version": "1.7.1",
   "private": false,
   "description": "xAPI statement generation primitives for LessonKit.",
   "license": "Apache-2.0",
@@ -48,7 +48,7 @@
     "lint": "eslint --max-warnings 0 \"src/**/*.{ts,tsx}\" \"test/**/*.{ts,tsx}\""
   },
   "dependencies": {
-    "@lessonkit/core": "1.7.0"
+    "@lessonkit/core": "1.7.1"
   },
   "devDependencies": {
     "tsup": "^8.5.0",

@@ -132,6 +132,10 @@ Add under `course.assessments[]`:
 
 
 
+
+
+
+
 ## See also
 
 - [FindMultipleHotspots](find-multiple-hotspots.md)

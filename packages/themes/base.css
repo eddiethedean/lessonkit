@@ -3,6 +3,11 @@
   Import: @import "@lessonkit/themes/base.css";
 */
 
+:root {
+  --lk-touch-target-min: 2.75rem;
+  --lk-touch-spacing: var(--lk-space-sm, 0.5rem);
+}
+
 .lk-panel {
   border: 1px solid var(--lk-color-border);
   border-radius: var(--lk-radius-lg);
@@ -22,11 +27,31 @@
   font-size: var(--lk-font-size-base);
   font-weight: var(--lk-font-weight-strong);
   cursor: pointer;
+  min-height: var(--lk-touch-target-min);
+  touch-action: manipulation;
+}
+
+.lk-button--icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--lk-touch-target-min);
+  padding-inline: var(--lk-space-sm);
 }
 
 .lk-button:disabled {
   opacity: 0.55;
   cursor: not-allowed;
+}
+
+.lk-touch-hint {
+  margin: 0 0 var(--lk-space-md);
+  padding: var(--lk-space-sm) var(--lk-space-md);
+  border-radius: var(--lk-radius-md);
+  background: color-mix(in srgb, var(--lk-color-primary, #2563eb) 10%, var(--lk-color-panel));
+  font-family: var(--lk-font-family);
+  font-size: 0.875rem;
+  line-height: 1.4;
 }
 
 /* InteractiveVideo — H5P-style cue overlay on the player */
@@ -117,7 +142,8 @@
 }
 
 .lk-interactive-video-continue {
-  min-width: 10rem;
+  min-width: max(10rem, var(--lk-touch-target-min, 2.75rem));
+  min-height: var(--lk-touch-target-min, 2.75rem);
 }
 
 /* GameMap — background canvas and stage markers */
@@ -159,7 +185,10 @@
 .lk-game-map-marker {
   position: absolute;
   transform: translate(-50%, -100%);
+  min-height: var(--lk-touch-target-min);
+  min-width: var(--lk-touch-target-min);
   padding: 0.35rem 0.65rem;
+  touch-action: manipulation;
   border: 2px solid #fff;
   border-radius: 999px;
   background: var(--lk-color-primary);
@@ -316,7 +345,7 @@
 
 /* Crossword — square grid cells with block squares */
 .lk-crossword {
-  --lk-crossword-cell-size: 2.25rem;
+  --lk-crossword-cell-size: var(--lk-touch-target-min, 2.75rem);
   --lk-crossword-block: #0f172a;
 }
 
@@ -430,8 +459,9 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.35rem;
-  min-height: 2.25rem;
+  gap: var(--lk-touch-spacing, 0.35rem);
+  min-height: var(--lk-touch-target-min, 2.75rem);
+  touch-action: manipulation;
   margin-bottom: var(--lk-space-md);
   padding: 0.35rem 0.45rem;
   border: 1px dashed var(--lk-color-border);
@@ -461,7 +491,8 @@
 .lk-drag-item {
   appearance: none;
   margin: 0;
-  padding: 0.35rem 0.7rem;
+  padding: 0.5rem 0.85rem;
+  min-height: var(--lk-touch-target-min, 2.75rem);
   border: 1px solid var(--lk-color-border);
   border-radius: 999px;
   background: var(--lk-color-background, #fff);
@@ -471,6 +502,7 @@
   font-weight: var(--lk-font-weight-strong);
   cursor: grab;
   box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+  touch-action: none;
 }
 
 .lk-drag-item:active {
@@ -522,7 +554,9 @@
   justify-content: center;
   width: fit-content;
   max-width: 100%;
-  padding: 0.1rem;
+  min-height: var(--lk-touch-target-min, 2.75rem);
+  padding: 0.25rem;
+  touch-action: manipulation;
   border: 1px dashed var(--lk-color-border);
   border-radius: var(--lk-radius-md);
   background: color-mix(in srgb, var(--lk-color-panel) 80%, transparent);
@@ -591,7 +625,7 @@
 
 /* Word search — square grid cells with drag selection */
 .lk-word-search {
-  --lk-word-search-cell-size: 2.25rem;
+  --lk-word-search-cell-size: var(--lk-touch-target-min, 2.75rem);
   --lk-word-search-grid-border: #0f172a;
 }
 
@@ -604,6 +638,7 @@
   background: var(--lk-word-search-grid-border);
   line-height: 0;
   user-select: none;
+  touch-action: none;
 }
 
 .lk-word-search-row {
@@ -820,10 +855,137 @@
   border-radius: var(--lk-radius-md);
   background: color-mix(in srgb, var(--lk-color-panel) 88%, transparent);
   color: var(--lk-color-foreground);
+  min-width: var(--lk-touch-target-min, 2.75rem);
+  min-height: var(--lk-touch-target-min, 2.75rem);
   padding: var(--lk-space-xs) var(--lk-space-sm);
   font: inherit;
   font-size: 0.875rem;
   cursor: pointer;
+  touch-action: manipulation;
+}
+
+[data-lk-check-id] input,
+[data-lk-check-id] textarea,
+[data-lk-check-id] select {
+  font-size: max(1rem, 16px);
+}
+
+.lk-image-hotspot-trigger {
+  position: absolute;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--lk-touch-target-min, 2.75rem);
+  min-height: var(--lk-touch-target-min, 2.75rem);
+  border: 2px solid var(--lk-color-primary, #2563eb);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--lk-color-primary, #2563eb) 88%, #fff);
+  color: var(--lk-color-primary-foreground, #fff);
+  font-size: 1.25rem;
+  font-weight: var(--lk-font-weight-strong);
+  line-height: 1;
+  cursor: pointer;
+  touch-action: manipulation;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.25);
+}
+
+.lk-mark-the-words-token {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--lk-touch-target-min, 2.75rem);
+  padding: 0.15rem 0.45rem;
+  margin: 0.1rem 0.05rem;
+  touch-action: manipulation;
+}
+
+.lk-summary-statement {
+  display: block;
+  width: 100%;
+  min-height: var(--lk-touch-target-min, 2.75rem);
+  margin-bottom: var(--lk-touch-spacing, 0.5rem);
+  text-align: left;
+  touch-action: manipulation;
+}
+
+.lk-quiz-choice {
+  display: flex;
+  align-items: center;
+  gap: var(--lk-space-sm, 0.5rem);
+  min-height: var(--lk-touch-target-min, 2.75rem);
+  padding: 0.25rem 0;
+  touch-action: manipulation;
+}
+
+.lk-quiz-choice input {
+  width: 1.25rem;
+  height: 1.25rem;
+  flex-shrink: 0;
+}
+
+.lk-drag-words-bank {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lk-touch-spacing, 0.5rem);
+  margin-bottom: var(--lk-space-md);
+}
+
+.lk-drag-words-item {
+  appearance: none;
+  margin: 0;
+  padding: 0.5rem 0.85rem;
+  min-height: var(--lk-touch-target-min, 2.75rem);
+  border: 1px solid var(--lk-color-border);
+  border-radius: 999px;
+  background: var(--lk-color-background, #fff);
+  font-family: var(--lk-font-family);
+  font-size: 0.875rem;
+  font-weight: var(--lk-font-weight-strong);
+  cursor: grab;
+  touch-action: none;
+}
+
+.lk-drag-words-item[aria-pressed="true"] {
+  outline: 2px solid var(--lk-color-primary, #2563eb);
+  outline-offset: 2px;
+}
+
+.lk-drag-words-zone {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 6em;
+  min-height: var(--lk-touch-target-min, 2.75rem);
+  border: 1px dashed currentColor;
+  padding: 0.25rem 0.5rem;
+  margin: 0 0.2em;
+  vertical-align: middle;
+  touch-action: manipulation;
+}
+
+.lk-advent-calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--lk-touch-target-min, 2.75rem), 1fr));
+  gap: var(--lk-touch-spacing, 0.5rem);
+}
+
+.lk-advent-door-button {
+  width: 100%;
+  min-height: var(--lk-touch-target-min, 2.75rem);
+  touch-action: manipulation;
+}
+
+@media (pointer: coarse) {
+  .lk-summary-statement {
+    padding: var(--lk-space-sm) var(--lk-space-md);
+    border: 1px solid var(--lk-color-border);
+    border-radius: var(--lk-radius-md);
+    background: var(--lk-color-panel);
+  }
+
+  .lk-parallax-nav button {
+    min-height: var(--lk-touch-target-min, 2.75rem);
+    min-width: var(--lk-touch-target-min, 2.75rem);
+  }
 }
 
 .lk-find-hotspot-target[aria-pressed="true"] {
@@ -913,8 +1075,9 @@
 }
 
 .lk-combination-lock-digit {
-  width: 2.75rem;
-  height: 2.75rem;
+  width: var(--lk-touch-target-min, 2.75rem);
+  height: var(--lk-touch-target-min, 2.75rem);
+  font-size: max(1rem, 16px);
   padding: 0;
   border: 1px solid var(--lk-color-border);
   border-radius: var(--lk-radius-md);

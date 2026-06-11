@@ -88,6 +88,10 @@ Workflow tips: https://lessonkit.readthedocs.io/en/latest/guides/vibe-coding/pro
 
 
 
+
+
+
+
 ## See also
 
 - [Migration 1.3 → 1.4](../../MIGRATION-1.3-to-1.4.md)

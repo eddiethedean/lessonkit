@@ -90,6 +90,12 @@ Workflow tips: https://lessonkit.readthedocs.io/en/latest/guides/vibe-coding/pro
 
 
 
+
+
+
+
 ## See also
 
-- [Production checklist](../../guides/react-developers/production-checklist.md)
+- [Block catalog — Embed](../block-catalog.md)
+- [Block cookbook — Embed](../../guides/react-developers/block-cookbook.md)
+- [LMS Go-Live](../../guides/react-developers/lms-go-live.md)

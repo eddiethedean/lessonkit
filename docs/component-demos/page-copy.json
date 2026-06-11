@@ -102,7 +102,7 @@
     "whenToUse": "Use `Embed` for **sandboxed third-party content** — external tools, legacy pages, or partner widgets that must stay in an iframe.\n\nConfigure `config.embed.allowedHosts` in production so only approved origins load.",
     "requirements": "- Always set a descriptive `title` for screen readers.\n- Optional `allow` sandbox tokens and `aspectRatio` for layout.",
     "example": "```tsx\n<Text>Allowlist embed hosts in production course config.</Text>\n<Embed blockId=\"policy-embed\" src=\"https://approved.example.com/widget\" title=\"Policy lookup\" />\n```",
-    "seeAlso": "- [Production checklist](../../guides/react-developers/production-checklist.md)"
+    "seeAlso": "- [Block catalog — Embed](../block-catalog.md)\n- [LMS Go-Live](../../guides/react-developers/lms-go-live.md)"
   },
   "chart": {
     "whenToUse": "Use `Chart` to visualize **simple metrics** — incident counts, survey breakdowns, or category comparisons. Supports `bar` and `pie`; empty data falls back gracefully.",
@@ -305,6 +305,30 @@
     "requirements": "- `targetStageId` must reference another `MapStage` in the same `GameMap`.\n- Optional `scoreWeight` when `showMapScore` is enabled on the parent.",
     "example": "```tsx\n<MapStage stageId=\"hub\" x={50} y={50} label=\"Central hub\">\n  <MapExit label=\"Visit lab (PPE required)\" targetStageId=\"lab\" scoreWeight={1} />\n  <MapExit label=\"Visit open office\" targetStageId=\"office\" />\n</MapStage>\n```",
     "seeAlso": "- [MapStage](map-stage.md)\n- [GameMap](game-map.md)"
+  },
+  "sort-paragraphs": {
+    "whenToUse": "Use `SortParagraphs` when learners must **reorder steps or narrative chunks** into the correct sequence — procedures, timelines, or cause-and-effect drills.",
+    "requirements": "- `paragraphs` is the shuffled pool; `correctOrder` lists indices in the right sequence.\n- SPA-only in LMS shell for scored variants (`kind: \"sortParagraphs\"`).",
+    "example": "```tsx\n<SortParagraphs\n  checkId=\"ir-sort\"\n  paragraphs={[\"Contain the account\", \"Notify security\", \"Document the timeline\"]}\n  correctOrder={[0, 1, 2]}\n/>\n```",
+    "seeAlso": "- [ImageSequencing](image-sequencing.md)\n- [Block catalog](../block-catalog.md)\n- [Block cookbook](../../guides/react-developers/block-cookbook.md#sortparagraphs)"
+  },
+  "guess-the-answer": {
+    "whenToUse": "Use `GuessTheAnswer` for **hidden-answer discovery** — learners reveal or type a short answer after a prompt. Set `scored={false}` for reveal-only interactions without LMS scoring.\n\nSet `kind: \"guessTheAnswer\"` in `lessonkit.json` when packaging scored variants.",
+    "requirements": "- `checkId` is required when `scored` is true (default).\n- Props and telemetry: [block catalog — GuessTheAnswer](../block-catalog.md).",
+    "example": "```tsx\n<GuessTheAnswer\n  checkId=\"policy-guess\"\n  prompt=\"What is the EU privacy regulation acronym?\"\n  answer=\"GDPR\"\n/>\n```",
+    "seeAlso": "- [TrueFalse](true-false.md)\n- [Block catalog](../block-catalog.md)\n- [Block cookbook](../../guides/react-developers/block-cookbook.md#guesstheanswer)"
+  },
+  "multimedia-choice": {
+    "whenToUse": "Use `MultimediaChoice` for **multiple choice with image or audio options** — each choice can include media alongside a label.",
+    "requirements": "- Every choice needs non-empty `label` and `altText`.\n- Injectable via MCQ shell (`kind: \"multimediaChoice\"`); media URLs are SPA-only.",
+    "example": "```tsx\n<MultimediaChoice\n  checkId=\"channel-mm\"\n  question=\"Which channel is approved for IT requests?\"\n  choices={[\n    {\n      label: \"Service portal\",\n      mediaUrl: \"/media/service-portal.png\",\n      mediaKind: \"image\",\n      altText: \"Corporate service portal home screen\",\n    },\n    {\n      label: \"Unknown email link\",\n      mediaUrl: \"/media/suspicious-email.png\",\n      mediaKind: \"image\",\n      altText: \"Suspicious email screenshot\",\n    },\n  ]}\n  answer=\"Service portal\"\n/>\n```",
+    "seeAlso": "- [Quiz](quiz.md)\n- [Block catalog](../block-catalog.md)\n- [Block cookbook](../../guides/react-developers/block-cookbook.md#multimediachoice)"
+  },
+  "single-choice-set": {
+    "whenToUse": "Use `SingleChoiceSet` for **sequential multiple-choice slides** with aggregated scoring — each step is a child `Quiz` or `KnowledgeCheck`.",
+    "requirements": "- Child assessments need stable `checkId` values listed in `lessonkit.json`.\n- Enable `showSetScore` for aggregate feedback across steps.",
+    "example": "```tsx\n<SingleChoiceSet blockId=\"scs-demo\" title=\"Security basics\" showSetScore>\n  <Quiz checkId=\"scs-q1\" question=\"Report phishing to security?\" choices={[\"Yes\", \"No\"]} answer=\"Yes\" />\n  <Quiz\n    checkId=\"scs-q2\"\n    question=\"Share passwords with colleagues?\"\n    choices={[\"Yes\", \"No\"]}\n    answer=\"No\"\n  />\n</SingleChoiceSet>\n```",
+    "seeAlso": "- [Quiz](quiz.md)\n- [AssessmentSequence](assessment-sequence.md)\n- [Block catalog](../block-catalog.md)\n- [Block cookbook](../../guides/react-developers/block-cookbook.md#singlechoiceset)"
   },
   "knowledge-check": {
     "whenToUse": "`KnowledgeCheck` is a **deprecated alias** of [`Quiz`](quiz.md) with identical behavior and telemetry. Use **`Quiz` in new code**; keep this name only when maintaining legacy courses or manifests that already import `KnowledgeCheck`.",
