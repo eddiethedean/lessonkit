@@ -3,7 +3,10 @@ import type { AssessmentBaseProps, AssessmentHandle, AssessmentInteractionType }
 import type { LessonId } from "@lessonkit/core";
 import { AssessmentLessonGuard } from "../assessment/AssessmentLessonGuard";
 import { buildAssessmentHandle } from "../assessment/internal/buildAssessmentHandle";
-import { readBooleanStateField } from "../assessment/internal/resumeState";
+import {
+  readBooleanStateField,
+  restoreCompletedRefFromResumeState,
+} from "../assessment/internal/resumeState";
 import { useAssessmentHandleRegistration } from "../assessment/internal/useAssessmentHandleRegistration";
 import { meetsPassingThreshold } from "../assessment/scoring";
 import { shouldReplayResumeTelemetry } from "../assessment/shouldReplayResumeTelemetry";
@@ -87,16 +90,16 @@ function SortParagraphsInner(
           score,
           maxScore,
         }),
-        getCurrentState: () => ({ order, passed, checked }),
+        getCurrentState: () => ({ order, passed, checked, completed: completedRef.current }),
         resume: (state) => {
           let nextOrder = order;
           if (Array.isArray(state.order)) {
             nextOrder = [...(state.order as number[])];
             setOrder(nextOrder);
           }
+          readBooleanStateField(state, "checked", setChecked);
           readBooleanStateField(state, "passed", (value) => {
             setPassed(value);
-            completedRef.current = value;
             if (value && !telemetryReplayedRef.current && shouldReplayResumeTelemetry(config)) {
               telemetryReplayedRef.current = true;
               const nextIsCorrect =
@@ -118,7 +121,9 @@ function SortParagraphsInner(
               });
             }
           });
-          readBooleanStateField(state, "checked", setChecked);
+          restoreCompletedRefFromResumeState(completedRef, state, {
+            enableRetry: props.enableRetry,
+          });
         },
       }),
     [
@@ -196,7 +201,7 @@ function SortParagraphsInner(
       <button
         type="button"
         data-testid="sort-paragraphs-check"
-        disabled={passed && !props.enableRetry}
+        disabled={!props.enableRetry && (passed || checked)}
         onClick={check}
       >
         Check

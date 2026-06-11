@@ -4,7 +4,10 @@ import type { AssessmentBaseProps, AssessmentHandle, AssessmentInteractionType }
 import type { LessonId } from "@lessonkit/core";
 import { AssessmentLessonGuard } from "../assessment/AssessmentLessonGuard";
 import { buildAssessmentHandle } from "../assessment/internal/buildAssessmentHandle";
-import { readBooleanStateField } from "../assessment/internal/resumeState";
+import {
+  readBooleanStateField,
+  restoreCompletedRefFromResumeState,
+} from "../assessment/internal/resumeState";
 import { useAssessmentHandleRegistration } from "../assessment/internal/useAssessmentHandleRegistration";
 import { usePluginScoring } from "../assessment/internal/usePluginScoring";
 import { meetsPassingThreshold } from "../assessment/scoring";
@@ -200,7 +203,14 @@ function DragAndDropInner(
         score,
         maxScore,
       }),
-      getCurrentState: () => ({ assignments, pool, passed, checked, keyboardItem }),
+      getCurrentState: () => ({
+        assignments,
+        pool,
+        passed,
+        checked,
+        keyboardItem,
+        completed: completedRef.current,
+      }),
       resume: (state) => {
         const normalized = normalizeDragAndDropState(
           state.assignments,
@@ -214,7 +224,6 @@ function DragAndDropInner(
         readBooleanStateField(state, "passed", (value) => {
           nextPassed = value;
           setPassed(value);
-          completedRef.current = value;
         });
         let nextChecked = checked;
         readBooleanStateField(state, "checked", (value) => {
@@ -223,6 +232,9 @@ function DragAndDropInner(
         });
         const item = state.keyboardItem;
         if (item === null || typeof item === "string") setKeyboardItem(item ?? null);
+        restoreCompletedRefFromResumeState(completedRef, state, {
+          enableRetry: props.enableRetry,
+        });
         let nextScore = 0;
         props.targets.forEach((t) => {
           if (normalized.assignments[t.id] === t.accepts) nextScore += 1;
@@ -496,7 +508,7 @@ function DragAndDropInner(
       <button
         type="button"
         data-testid="check-drag-drop"
-        disabled={!hasTargets || !allFilled || (passed && !props.enableRetry)}
+        disabled={!hasTargets || !allFilled || (!props.enableRetry && (passed || checked))}
         onClick={check}
       >
         Check

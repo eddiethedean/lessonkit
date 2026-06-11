@@ -4,7 +4,11 @@ import type { AssessmentBaseProps, AssessmentHandle } from "@lessonkit/core";
 import type { LessonId } from "@lessonkit/core";
 import { AssessmentLessonGuard } from "../assessment/AssessmentLessonGuard";
 import { buildAssessmentHandle } from "../assessment/internal/buildAssessmentHandle";
-import { readBooleanStateField, readStringField } from "../assessment/internal/resumeState";
+import {
+  readBooleanStateField,
+  readStringField,
+  restoreCompletedRefFromResumeState,
+} from "../assessment/internal/resumeState";
 import { useAssessmentHandleRegistration } from "../assessment/internal/useAssessmentHandleRegistration";
 import { usePluginScoring } from "../assessment/internal/usePluginScoring";
 import { useAssessmentState } from "../assessment/useAssessmentState";
@@ -94,15 +98,21 @@ function MultimediaChoiceInner(
             maxScore,
           };
         },
-        getCurrentState: () => ({ selected, answerCorrect, selectionPassed, passed }),
+        getCurrentState: () => ({
+          selected,
+          answerCorrect,
+          selectionPassed,
+          passed,
+          completed: completedRef.current,
+        }),
         resume: (state) => {
           const nextSelected = readStringField(state, "selected");
           if (typeof nextSelected === "string" || nextSelected === null) setSelected(nextSelected);
           readBooleanStateField(state, "answerCorrect", setAnswerCorrect);
           readBooleanStateField(state, "selectionPassed", setSelectionPassed);
-          readBooleanStateField(state, "passed", (value) => {
-            setPassed(value);
-            completedRef.current = value;
+          readBooleanStateField(state, "passed", setPassed);
+          restoreCompletedRefFromResumeState(completedRef, state, {
+            enableRetry: props.enableRetry,
           });
         },
       }),

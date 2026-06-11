@@ -3,7 +3,10 @@ import type { AssessmentBaseProps, AssessmentHandle, AssessmentInteractionType }
 import type { LessonId } from "@lessonkit/core";
 import { AssessmentLessonGuard } from "../assessment/AssessmentLessonGuard";
 import { buildAssessmentHandle } from "../assessment/internal/buildAssessmentHandle";
-import { readBooleanStateField } from "../assessment/internal/resumeState";
+import {
+  readBooleanStateField,
+  restoreCompletedRefFromResumeState,
+} from "../assessment/internal/resumeState";
 import { useAssessmentHandleRegistration } from "../assessment/internal/useAssessmentHandleRegistration";
 import { meetsPassingThreshold } from "../assessment/scoring";
 import { useAssessmentState } from "../assessment/useAssessmentState";
@@ -76,7 +79,13 @@ function CombinationLockInner(
           score: passed ? 1 : score,
           maxScore,
         }),
-        getCurrentState: () => ({ digits, passed, submitted, showSolutions }),
+        getCurrentState: () => ({
+          digits,
+          passed,
+          submitted,
+          showSolutions,
+          completed: completedRef.current,
+        }),
         resume: (state) => {
           const raw = state.digits;
           if (Array.isArray(raw)) {
@@ -87,12 +96,12 @@ function CombinationLockInner(
               }),
             );
           }
-          readBooleanStateField(state, "passed", (value) => {
-            setPassed(value);
-            completedRef.current = value;
-          });
+          readBooleanStateField(state, "passed", setPassed);
           readBooleanStateField(state, "submitted", setSubmitted);
           readBooleanStateField(state, "showSolutions", setShowSolutions);
+          restoreCompletedRefFromResumeState(completedRef, state, {
+            enableRetry: props.enableRetry,
+          });
         },
       }),
     [checkId, digitCount, digits, entry, passed, passedThreshold, score, submitted, showSolutions],

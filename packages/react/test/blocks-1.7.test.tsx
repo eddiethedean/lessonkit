@@ -49,6 +49,33 @@ describe("1.7.0 Tier B P1 assessment blocks", () => {
     expect(ref.current?.getXAPIData()?.interactionType).toBe("sortParagraphs");
   });
 
+  it("SortParagraphs blocks re-check after failed terminal resume when enableRetry is false", () => {
+    const ref = createRef<AssessmentHandle>();
+    render(
+      wrap(
+        <SortParagraphs
+          ref={ref}
+          checkId="sort-terminal"
+          paragraphs={["A", "B"]}
+          correctOrder={[1, 0]}
+          enableRetry={false}
+        />,
+      ),
+    );
+    act(() => {
+      ref.current?.resume?.({
+        order: [0, 1],
+        checked: true,
+        passed: false,
+        completed: true,
+      });
+    });
+    const section = screen.getByRole("region", { name: "Sort the Paragraphs" });
+    expect(
+      within(section).getByRole("button", { name: "Check" }).hasAttribute("disabled"),
+    ).toBe(true);
+  });
+
   it("SortParagraphs reorders with Up/Down and resumes state", () => {
     const ref = createRef<AssessmentHandle>();
     render(

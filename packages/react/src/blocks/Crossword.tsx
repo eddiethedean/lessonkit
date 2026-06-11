@@ -3,7 +3,10 @@ import type { AssessmentBaseProps, AssessmentHandle, AssessmentInteractionType }
 import type { LessonId } from "@lessonkit/core";
 import { AssessmentLessonGuard } from "../assessment/AssessmentLessonGuard";
 import { buildAssessmentHandle } from "../assessment/internal/buildAssessmentHandle";
-import { readBooleanStateField } from "../assessment/internal/resumeState";
+import {
+  readBooleanStateField,
+  restoreCompletedRefFromResumeState,
+} from "../assessment/internal/resumeState";
 import { useAssessmentHandleRegistration } from "../assessment/internal/useAssessmentHandleRegistration";
 import { meetsPassingThreshold } from "../assessment/scoring";
 import { useAssessmentState } from "../assessment/useAssessmentState";
@@ -127,18 +130,24 @@ function CrosswordInner(
           score: passed ? maxScore : score,
           maxScore: maxScore || 1,
         }),
-        getCurrentState: () => ({ values, passed, submitted, showSolutions }),
+        getCurrentState: () => ({
+          values,
+          passed,
+          submitted,
+          showSolutions,
+          completed: completedRef.current,
+        }),
         resume: (state) => {
           const raw = state.values;
           if (raw && typeof raw === "object" && !Array.isArray(raw)) {
             setValues(raw as Record<string, string>);
           }
-          readBooleanStateField(state, "passed", (value) => {
-            setPassed(value);
-            completedRef.current = value;
-          });
+          readBooleanStateField(state, "passed", setPassed);
           readBooleanStateField(state, "submitted", setSubmitted);
           readBooleanStateField(state, "showSolutions", setShowSolutions);
+          restoreCompletedRefFromResumeState(completedRef, state, {
+            enableRetry: props.enableRetry,
+          });
         },
       }),
     [checkId, maxScore, passed, passedThreshold, score, showSolutions, submitted, values],

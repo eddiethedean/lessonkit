@@ -3,7 +3,11 @@ import type { AssessmentBaseProps, AssessmentHandle, AssessmentInteractionType }
 import type { LessonId } from "@lessonkit/core";
 import { AssessmentLessonGuard } from "../assessment/AssessmentLessonGuard";
 import { buildAssessmentHandle } from "../assessment/internal/buildAssessmentHandle";
-import { readBooleanStateField, readStringField } from "../assessment/internal/resumeState";
+import {
+  readBooleanStateField,
+  readStringField,
+  restoreCompletedRefFromResumeState,
+} from "../assessment/internal/resumeState";
 import { useAssessmentHandleRegistration } from "../assessment/internal/useAssessmentHandleRegistration";
 import { useAssessmentState } from "../assessment/useAssessmentState";
 import { shouldReplayResumeTelemetry } from "../assessment/shouldReplayResumeTelemetry";
@@ -62,7 +66,7 @@ function EssayInner(
           score: 0,
           maxScore: 1,
         }),
-        getCurrentState: () => ({ text, submitted }),
+        getCurrentState: () => ({ text, submitted, completed: completedRef.current }),
         resume: (state) => {
           const nextText = readStringField(state, "text");
           if (typeof nextText === "string") setText(nextText);
@@ -71,11 +75,9 @@ function EssayInner(
             const meetsMin = textVal.trim().length >= minLength;
             if (value && !meetsMin) {
               setSubmitted(false);
-              completedRef.current = false;
               return;
             }
             setSubmitted(value);
-            completedRef.current = value;
             if (
               value &&
               !telemetryReplayedRef.current &&
@@ -97,6 +99,9 @@ function EssayInner(
                 passingScore: props.passingScore ?? 1,
               });
             }
+          });
+          restoreCompletedRefFromResumeState(completedRef, state, {
+            enableRetry: props.enableRetry,
           });
         },
       }),

@@ -8,6 +8,7 @@ import {
   readBooleanField,
   readBooleanStateField,
   readNumberField,
+  restoreCompletedRefFromResumeState,
 } from "../assessment/internal/resumeState";
 import { useAssessmentHandleRegistration } from "../assessment/internal/useAssessmentHandleRegistration";
 import { usePluginScoring } from "../assessment/internal/usePluginScoring";
@@ -124,6 +125,7 @@ function TrueFalseInner(
           showSolutions,
           completedScore,
           completedMaxScore,
+          completed: completedRef.current,
         }),
         resume: (state) => {
           const nextSelected = readBooleanField(state, "selected");
@@ -145,7 +147,6 @@ function TrueFalseInner(
           const nextPassed = readBooleanField(state, "passed");
           if (nextPassed === true || nextPassed === false) {
             setPassed(nextPassed);
-            completedRef.current = nextPassed;
             if (nextPassed) {
               const maxScore = nextCompletedMaxScore ?? completedMaxScore ?? 1;
               const score = nextCompletedScore ?? completedScore ?? maxScore;
@@ -160,6 +161,9 @@ function TrueFalseInner(
             }
           }
           readBooleanStateField(state, "showSolutions", setShowSolutions);
+          restoreCompletedRefFromResumeState(completedRef, state, {
+            enableRetry: props.enableRetry,
+          });
         },
       }),
     [

@@ -4,7 +4,10 @@ import type { AssessmentBaseProps, AssessmentHandle, AssessmentInteractionType }
 import type { LessonId } from "@lessonkit/core";
 import { AssessmentLessonGuard } from "../assessment/AssessmentLessonGuard";
 import { buildAssessmentHandle } from "../assessment/internal/buildAssessmentHandle";
-import { readBooleanStateField } from "../assessment/internal/resumeState";
+import {
+  readBooleanStateField,
+  restoreCompletedRefFromResumeState,
+} from "../assessment/internal/resumeState";
 import { useAssessmentHandleRegistration } from "../assessment/internal/useAssessmentHandleRegistration";
 import { meetsPassingThreshold } from "../assessment/scoring";
 import { useAssessmentState } from "../assessment/useAssessmentState";
@@ -244,6 +247,8 @@ function ImagePairingInner(
           revealed: [...revealed],
           keyboardSelection,
           passed,
+          submitted,
+          completed: completedRef.current,
         }),
         resume: (state) => {
           if (Array.isArray(state.cardKeys)) {
@@ -254,9 +259,9 @@ function ImagePairingInner(
           if (Array.isArray(state.revealed)) setRevealed(new Set(state.revealed as string[]));
           const sel = state.keyboardSelection;
           if (sel === null || typeof sel === "string") setKeyboardSelection(sel ?? null);
+          readBooleanStateField(state, "submitted", setSubmitted);
           readBooleanStateField(state, "passed", (value) => {
             setPassed(value);
-            completedRef.current = value;
             if (
               value &&
               !telemetryReplayedRef.current &&
@@ -287,9 +292,12 @@ function ImagePairingInner(
               });
             }
           });
+          restoreCompletedRefFromResumeState(completedRef, state, {
+            enableRetry: props.enableRetry,
+          });
         },
       }),
-    [allMatched, assessment, cards, checkId, config, keyboardSelection, matched, matchedCount, maxScore, passed, passedThreshold, props.pairs, props.passingScore, revealed, score],
+    [allMatched, assessment, cards, checkId, config, keyboardSelection, matched, matchedCount, maxScore, passed, passedThreshold, props.enableRetry, props.pairs, props.passingScore, revealed, score, submitted],
   );
 
   useAssessmentHandleRegistration(checkId, handle, ref);

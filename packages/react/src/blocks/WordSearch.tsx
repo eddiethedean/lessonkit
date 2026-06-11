@@ -3,7 +3,10 @@ import type { AssessmentBaseProps, AssessmentHandle, AssessmentInteractionType }
 import type { LessonId } from "@lessonkit/core";
 import { AssessmentLessonGuard } from "../assessment/AssessmentLessonGuard";
 import { buildAssessmentHandle } from "../assessment/internal/buildAssessmentHandle";
-import { readBooleanStateField } from "../assessment/internal/resumeState";
+import {
+  readBooleanStateField,
+  restoreCompletedRefFromResumeState,
+} from "../assessment/internal/resumeState";
 import { useAssessmentHandleRegistration } from "../assessment/internal/useAssessmentHandleRegistration";
 import { meetsPassingThreshold } from "../assessment/scoring";
 import { useAssessmentState } from "../assessment/useAssessmentState";
@@ -116,6 +119,7 @@ function WordSearchInner(
           found: [...found],
           passed,
           submitted,
+          completed: completedRef.current,
           grid: layout.grid,
           placed: layout.placed,
           placements: layout.placements,
@@ -133,11 +137,11 @@ function WordSearchInner(
             setFound(nextFound);
             setFoundCells(foundCellsForWords(nextFound, activePlacementsByWord));
           }
-          readBooleanStateField(state, "passed", (value) => {
-            setPassed(value);
-            completedRef.current = value;
-          });
+          readBooleanStateField(state, "passed", setPassed);
           readBooleanStateField(state, "submitted", setSubmitted);
+          restoreCompletedRefFromResumeState(completedRef, state, {
+            enableRetry: props.enableRetry,
+          });
         },
       }),
     [checkId, found, layout, maxScore, passed, passedThreshold, placementsByWord, props.words, score, size, submitted],
