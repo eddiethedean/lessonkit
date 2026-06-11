@@ -1222,10 +1222,11 @@ describe("emitPendingCourseStarted", () => {
     const send = vi.fn();
     const validStatement = {
       id: "stmt-1",
+      timestamp: "2020-01-01T00:00:00Z",
       actor: { objectType: "Agent", name: "Learner" },
       verb: { id: "http://adlnet.gov/expapi/verbs/initialized", display: { "en-US": "initialized" } },
       object: { id: "https://example.com/course-1", objectType: "Activity" },
-    } as XAPIStatement;
+    } as unknown as XAPIStatement;
     const mapSpy = vi.spyOn(xapiModule, "telemetryEventToXAPIStatement").mockReturnValue(null);
 
     const baseOpts = {
