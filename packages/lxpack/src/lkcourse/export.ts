@@ -2,6 +2,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { createRequire } from "node:module";
 import { dirname, join, resolve } from "node:path";
 import { parseLessonkitInterchange } from "@lxpack/validators";
+import { validateInjectableAssessments } from "../descriptor/validateInjectableAssessments";
 import { descriptorToInterchange } from "../interchange";
 import { assertRealPathUnderRoot } from "../spaPath";
 import { assertSpaDistContentsSafe } from "../spaDistValidation";
@@ -58,6 +59,17 @@ export async function exportLkcourse(options: ExportLkcourseOptions): Promise<Ex
           message: err instanceof Error ? err.message : String(err),
         },
       ],
+    };
+  }
+
+  const injectableIssues = validateInjectableAssessments(manifest.course);
+  if (injectableIssues.length > 0) {
+    return {
+      ok: false,
+      issues: injectableIssues.map((issue) => ({
+        path: issue.path,
+        message: issue.message,
+      })),
     };
   }
 
