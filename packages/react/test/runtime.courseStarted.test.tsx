@@ -8,13 +8,19 @@ import * as xapiModule from "@lessonkit/xapi";
 import type { XAPIStatement, XAPITransport } from "@lessonkit/xapi";
 import * as courseStartedPipelineModule from "../src/runtime/courseStartedPipeline";
 import { createSessionStoragePort } from "../src/runtime/ports";
-import { markCourseStarted, markCourseStartedEmittedToTracking, markCourseStartedPipelineDelivered } from "../src/runtime/session";
+import {
+  hasCourseStartedPipelineDelivered,
+  markCourseStarted,
+  markCourseStartedEmittedToTracking,
+  markCourseStartedPipelineDelivered,
+} from "../src/runtime/session";
 import {
   buildCourseStartedEvent,
   isCourseStartedSinkSettled,
   isTrackingActive,
 } from "../src/provider/courseStarted";
 import {
+  emitCourseStartedPipelineOnly,
   emitCourseStartedToTracking,
   emitPendingCourseStarted,
   resetCourseStartedTrackingFlightForTests,
@@ -1115,6 +1121,47 @@ describe("emitCourseStartedToTracking", () => {
   });
 });
 
+describe("emitCourseStartedPipelineOnly", () => {
+  const courseStartedEvent: TelemetryEvent = {
+    name: "course_started",
+    timestamp: "2020-01-01T00:00:00Z",
+    courseId: "course-1",
+    sessionId: "session-1",
+  };
+
+  function mockXapi() {
+    return {
+      send: vi.fn(),
+      flush: vi.fn(async () => {}),
+      queueSize: () => 0,
+      startedLesson: () => {},
+      completeLesson: () => {},
+      completeCourse: () => {},
+    };
+  }
+
+  beforeEach(() => {
+    sessionStorage.clear();
+  });
+
+  it("does not mark pipeline delivered when xAPI mapping returns null", async () => {
+    vi.spyOn(xapiModule, "telemetryEventToXAPIStatement").mockReturnValue(null);
+    const storage = createSessionStoragePort();
+    const result = await emitCourseStartedPipelineOnly({
+      pluginHost: null,
+      sessionId: "session-1",
+      courseId: "course-1",
+      lxpackBridge: "off",
+      storage,
+      event: courseStartedEvent,
+      xapi: mockXapi(),
+    });
+    expect(result).toBe("failed");
+    expect(hasCourseStartedPipelineDelivered(storage, "session-1", "course-1")).toBe(false);
+    vi.restoreAllMocks();
+  });
+});
+
 describe("emitPendingCourseStarted", () => {
   function mockXapi() {
     return {
@@ -1134,6 +1181,7 @@ describe("emitPendingCourseStarted", () => {
 
   afterEach(() => {
     resetCourseStartedTrackingFlightForTests();
+    vi.restoreAllMocks();
   });
 
   it("dedupes concurrent emit calls for the same session and course", async () => {
@@ -1163,6 +1211,44 @@ describe("emitPendingCourseStarted", () => {
 
     expect(a).toBe(b);
     expect(trackCalls).toBe(1);
+  });
+
+  it("retries xAPI delivery after mapping failure", async () => {
+    const storage = createSessionStoragePort();
+    const tracking: TrackingClient = {
+      track: () => true,
+      flush: async () => true,
+    };
+    const send = vi.fn();
+    const validStatement = {
+      id: "stmt-1",
+      actor: { objectType: "Agent", name: "Learner" },
+      verb: { id: "http://adlnet.gov/expapi/verbs/initialized", display: { "en-US": "initialized" } },
+      object: { id: "https://example.com/course-1", objectType: "Activity" },
+    } as XAPIStatement;
+    const mapSpy = vi.spyOn(xapiModule, "telemetryEventToXAPIStatement").mockReturnValue(null);
+
+    const baseOpts = {
+      pluginHost: null,
+      sessionId: "session-1",
+      courseId: "course-1" as const,
+      lxpackBridge: "off" as const,
+      tracking,
+      xapi: { ...mockXapi(), send },
+      storage,
+    };
+
+    const first = await emitPendingCourseStarted(baseOpts);
+    expect(first).toBe("failed");
+    expect(hasCourseStartedPipelineDelivered(storage, "session-1", "course-1")).toBe(false);
+    expect(send).not.toHaveBeenCalled();
+
+    mapSpy.mockReturnValue(validStatement);
+    const second = await emitPendingCourseStarted(baseOpts);
+    expect(second).toBe("emitted");
+    expect(send).toHaveBeenCalledTimes(1);
+    expect(hasCourseStartedPipelineDelivered(storage, "session-1", "course-1")).toBe(true);
+    mapSpy.mockRestore();
   });
 });
 

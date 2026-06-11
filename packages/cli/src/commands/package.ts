@@ -1,5 +1,5 @@
 import { existsSync } from "node:fs";
-import { packageLessonkitCourse } from "@lessonkit/lxpack";
+import { assertSpaDistContentsSafe, packageLessonkitCourse } from "@lessonkit/lxpack";
 import { runBuild } from "./dev.js";
 import type { CliJsonResult } from "../lib/errors.js";
 import { CliError, EXIT_INVALID_PROJECT, EXIT_PACKAGING } from "../lib/errors.js";
@@ -64,6 +64,7 @@ export async function runPackage(opts: PackageOptions): Promise<CliJsonResult> {
         exitCode: EXIT_INVALID_PROJECT,
       });
     }
+    await assertSpaDistContentsSafe({ main: distDir }, project.root);
     return { ok: true, command: "package", target, projectRoot: project.root, distDir };
   }
 

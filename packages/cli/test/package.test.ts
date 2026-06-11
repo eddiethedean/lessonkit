@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
-import { mkdtemp, rm, writeFile, mkdir } from "node:fs/promises";
+import { mkdtemp, rm, writeFile, mkdir, symlink } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 
@@ -143,9 +143,18 @@ describe("runPackage", () => {
   });
 
   it("returns dist path for react-vite", async () => {
-    const result = await runPackage({ target: "react-vite", cwd: dir, json: true });
+    const result = await runPackage({ target: "react-vite", cwd: dir, json: true, noBuild: true });
     expect(result.ok).toBe(true);
     expect(result).toMatchObject({ target: "react-vite", distDir: join(dir, "dist") });
+  });
+
+  it("rejects unsafe dist for react-vite with --no-build", async () => {
+    const outside = join(dir, "outside.txt");
+    await writeFile(outside, "x", "utf8");
+    await symlink(outside, join(dir, "dist", "link.txt"));
+    await expect(
+      runPackage({ target: "react-vite", cwd: dir, noBuild: true }),
+    ).rejects.toThrow(/contains symlink/);
   });
 
   it("prints packaging warnings when validation issues are non-fatal", async () => {

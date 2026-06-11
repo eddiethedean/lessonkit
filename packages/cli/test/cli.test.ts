@@ -1,6 +1,6 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 import { existsSync } from "node:fs";
-import { mkdtemp, rm, writeFile, mkdir, readFile, readdir } from "node:fs/promises";
+import { mkdtemp, rm, writeFile, mkdir, readFile, readdir, symlink } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { tmpdir } from "node:os";
 import { fileURLToPath } from "node:url";
@@ -919,5 +919,49 @@ describe("runBuild", () => {
     const { runBuild } = await import("../src/commands/dev.js");
     const result = await runBuild({ cwd: dir, json: true });
     expect(result.ok).toBe(true);
+  });
+
+  it("rejects unsafe dist contents after build", async () => {
+    vi.spyOn(exec, "runCommand").mockImplementation(async () => {
+      const distDir = join(dir, "dist");
+      await mkdir(distDir, { recursive: true });
+      await writeFile(join(distDir, "index.html"), "<html></html>", "utf8");
+      const outside = join(dir, "outside.txt");
+      await writeFile(outside, "x", "utf8");
+      await symlink(outside, join(distDir, "link.txt"));
+    });
+    const { runBuild } = await import("../src/commands/dev.js");
+    await expect(runBuild({ cwd: dir, json: true })).rejects.toThrow(/contains symlink/);
+  });
+});
+
+describe("promoteStagingToProjectDir", () => {
+  let projectDir: string;
+  let stagingDir: string;
+
+  beforeEach(async () => {
+    projectDir = await mkdtemp(join(tmpdir(), "lk-init-project-"));
+    stagingDir = await mkdtemp(join(tmpdir(), "lk-init-staging-"));
+  });
+
+  afterEach(async () => {
+    await rm(projectDir, { recursive: true, force: true });
+    await rm(stagingDir, { recursive: true, force: true });
+  });
+
+  it("replaces stale node_modules instead of merging", async () => {
+    const orphanDir = join(projectDir, "node_modules", "left-pad");
+    await mkdir(orphanDir, { recursive: true });
+    await writeFile(join(orphanDir, "index.js"), "module.exports = () => {};", "utf8");
+
+    const freshDir = join(stagingDir, "node_modules", "vite");
+    await mkdir(freshDir, { recursive: true });
+    await writeFile(join(freshDir, "package.json"), "{}", "utf8");
+    await writeFile(join(stagingDir, "package.json"), '{"name":"fresh"}', "utf8");
+
+    await __testInitHelpers.promoteStagingToProjectDir(stagingDir, projectDir);
+
+    expect(existsSync(join(projectDir, "node_modules", "left-pad"))).toBe(false);
+    expect(existsSync(join(projectDir, "node_modules", "vite", "package.json"))).toBe(true);
   });
 });

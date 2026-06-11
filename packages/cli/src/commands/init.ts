@@ -247,12 +247,18 @@ async function rollbackPromotedFiles(
   }
 }
 
+/** Staging entries that must replace (not merge into) any existing project copy. */
+const PROMOTE_REPLACE_ENTRIES = new Set(["node_modules", "package-lock.json"]);
+
 async function promoteStagingToProjectDir(stagingDir: string, projectDir: string): Promise<void> {
   await mkdir(projectDir, { recursive: true });
   const entries = await readdir(stagingDir, { withFileTypes: true });
   for (const entry of entries) {
     const srcPath = join(stagingDir, entry.name);
     const destPath = join(projectDir, entry.name);
+    if (PROMOTE_REPLACE_ENTRIES.has(entry.name) && existsSync(destPath)) {
+      await rm(destPath, { recursive: true, force: true });
+    }
     if (entry.isDirectory()) {
       await cp(srcPath, destPath, { recursive: true });
     } else if (entry.isFile()) {

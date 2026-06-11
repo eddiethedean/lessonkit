@@ -57,7 +57,9 @@ export function useCompoundBranchHandle(
         return assessment.maxScore + maxChoiceScore;
       },
       getAnswerGiven: () =>
-        aggregateAssessmentScores(filterVisited(getRegisteredHandles().values())).allAnswered,
+        aggregateAssessmentScores(filterVisited(getRegisteredHandles().values()), {
+          answerPageIndex: activePageIndex,
+        }).allAnswered,
       resetTask: () => {
         onResetMeta();
         for (const entry of filterVisited(getRegisteredHandles().values())) {

@@ -1241,6 +1241,32 @@ describe("BranchingScenario", () => {
     expect(screen.getByTestId("branch-score").textContent).toContain("Score: 1 / 1");
   });
 
+  it("getAnswerGiven gates on the active branch node only", () => {
+    const ref = createRef<CompoundHandle>();
+    render(
+      wrap(
+        <BranchingScenario
+          ref={ref}
+          blockId="branch-gate"
+          title="Gating paths"
+          startNodeId="offer"
+        >
+          <BranchNode nodeId="offer">
+            <TrueFalse checkId="offer-check" question="Answer first?" answer={true} />
+            <BranchChoice label="Credit" targetNodeId="credit" />
+          </BranchNode>
+          <BranchNode nodeId="credit" terminal>
+            <TrueFalse checkId="credit-check" question="Document credit?" answer={true} />
+          </BranchNode>
+        </BranchingScenario>,
+      ),
+    );
+    fireEvent.click(screen.getByTestId("branch-choice-credit"));
+    expect(ref.current?.getAnswerGiven()).toBe(false);
+    fireEvent.click(screen.getByRole("radio", { name: "True" }));
+    expect(ref.current?.getAnswerGiven()).toBe(true);
+  });
+
   it("includes max choice scoreWeight in branch getMaxScore", () => {
     const ref = createRef<CompoundHandle>();
     render(

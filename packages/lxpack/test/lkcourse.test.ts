@@ -560,6 +560,24 @@ export function Nested() {
     expect(flat.some((b) => b.type === "Unknown" && b.rawTag === "CustomWidget")).toBe(true);
   });
 
+  it("export rejects default archive path into reserved directories", async () => {
+    const root = await mkdtemp(join(tmpdir(), "lk-reserved-name-"));
+    tempDirs.push(root);
+    await writeMinimalProject(root);
+    const manifestParsed = parseLessonkitManifest(minimalManifest);
+    expect(manifestParsed.ok).toBe(true);
+    if (!manifestParsed.ok) return;
+
+    const exported = await exportLkcourse({
+      projectRoot: root,
+      manifest: { ...manifestParsed.manifest, name: ".git" },
+    });
+    expect(exported.ok).toBe(false);
+    if (!exported.ok) {
+      expect(exported.issues.some((i) => i.message.includes("reserved"))).toBe(true);
+    }
+  });
+
   it("export rejects unsafe output path", async () => {
     const root = await mkdtemp(join(tmpdir(), "lk-unsafe-out-"));
     tempDirs.push(root);

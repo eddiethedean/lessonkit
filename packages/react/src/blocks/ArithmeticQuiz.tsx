@@ -93,15 +93,18 @@ function ArithmeticQuizInner(
     [allFilled, answers, assessment, checkId, maxScore, passedThreshold, props.passingScore, score],
   );
 
+  const runCheckRef = useRef(runCheck);
+  runCheckRef.current = runCheck;
+
   useEffect(() => {
     if (timeLeft === null || passed || checked) return;
     if (timeLeft <= 0) {
-      runCheck(true);
+      runCheckRef.current(true);
       return;
     }
     const id = window.setTimeout(() => setTimeLeft((t) => (t !== null ? t - 1 : t)), 1000);
     return () => window.clearTimeout(id);
-  }, [checked, passed, runCheck, timeLeft]);
+  }, [checked, passed, timeLeft]);
 
   const handle = useMemo(
     () =>

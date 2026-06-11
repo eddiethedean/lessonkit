@@ -5,8 +5,21 @@ import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import {
   resolveSafePackageOutputOverride,
+  validateManifestName,
   validateProjectPaths,
 } from "../src/validateProjectPaths";
+
+describe("validateManifestName", () => {
+  it("accepts simple project names", () => {
+    expect(validateManifestName("my-course")).toBeNull();
+  });
+
+  it("rejects reserved segments and path separators", () => {
+    expect(validateManifestName(".git/evil")).toMatch(/path separators|reserved/);
+    expect(validateManifestName("node_modules/pkg")).toMatch(/path separators|reserved/);
+    expect(validateManifestName("")).toMatch(/non-empty/);
+  });
+});
 
 describe("validateProjectPaths", () => {
   it("accepts ./dist style paths under project root", () => {

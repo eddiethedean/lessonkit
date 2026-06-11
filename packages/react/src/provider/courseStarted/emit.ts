@@ -235,17 +235,22 @@ export async function emitCourseStartedPipelineOnly(
     ) {
       return "failed";
     }
-    if (
-      markCourseStartedPipelineDelivered(opts.storage, opts.sessionId, opts.courseId) === false &&
-      !hasCourseStartedPipelineDelivered(opts.storage, opts.sessionId, opts.courseId)
-    ) {
-      return "failed";
+    const xapiRequired = !skipXapi && opts.xapi != null;
+    const pipelineComplete = !xapiRequired || xapiStatementSent;
+    if (pipelineComplete) {
+      if (
+        markCourseStartedPipelineDelivered(opts.storage, opts.sessionId, opts.courseId) === false &&
+        !hasCourseStartedPipelineDelivered(opts.storage, opts.sessionId, opts.courseId)
+      ) {
+        return "failed";
+      }
+      if (xapiStatementSent && !hasCourseStartedXapiSent(opts.storage, opts.sessionId, opts.courseId)) {
+        markCourseStartedXapiSent(opts.storage, opts.sessionId, opts.courseId);
+        opts.onXapiStatementSent?.();
+      }
+      return "emitted";
     }
-    if (xapiStatementSent && !hasCourseStartedXapiSent(opts.storage, opts.sessionId, opts.courseId)) {
-      markCourseStartedXapiSent(opts.storage, opts.sessionId, opts.courseId);
-      opts.onXapiStatementSent?.();
-    }
-    return "emitted";
+    return "failed";
   } catch {
     return "failed";
   }

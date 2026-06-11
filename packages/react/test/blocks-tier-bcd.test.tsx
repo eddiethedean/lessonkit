@@ -110,6 +110,36 @@ describe("Tier B/C/D block components", () => {
     expect(screen.getByTestId("arithmetic-feedback").textContent).toContain("Try again");
   });
 
+  it("ArithmeticQuiz countdown decrements while typing", () => {
+    vi.useFakeTimers();
+    try {
+      render(
+        wrap(
+          <ArithmeticQuiz
+            checkId="arith-timer"
+            timeLimitSeconds={10}
+            problems={[{ question: "2 + 2", answer: "4" }]}
+          />,
+        ),
+      );
+      expect(screen.getByTestId("arithmetic-timer").textContent).toContain("10s");
+      const input = screen.getByTestId("arithmetic-answer-0");
+      for (let i = 0; i < 20; i += 1) {
+        fireEvent.change(input, { target: { value: `${i}` } });
+      }
+      act(() => {
+        vi.advanceTimersByTime(1000);
+      });
+      expect(screen.getByTestId("arithmetic-timer").textContent).toContain("9s");
+      act(() => {
+        vi.advanceTimersByTime(1000);
+      });
+      expect(screen.getByTestId("arithmetic-timer").textContent).toContain("8s");
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it("FindMultipleHotspots marks correct selections", () => {
     render(
       wrap(

@@ -63,5 +63,7 @@ export async function runBuild(opts: DevBuildOptions): Promise<CliJsonResult> {
     );
   }
 
+  await assertSpaDistContentsSafe({ main: distDir }, project.root);
+
   return { ok: true, command: "build", projectRoot: project.root };
 }
