@@ -571,6 +571,59 @@ describe("@lessonkit/xapi", () => {
     expect(client.queueSize()).toBeGreaterThan(0);
   });
 
+  it("abandonUndelivered persists statements buffered during failed flush", async () => {
+    vi.stubGlobal(
+      "sessionStorage",
+      (() => {
+        const store = new Map<string, string>();
+        return {
+          get length() {
+            return store.size;
+          },
+          clear: () => store.clear(),
+          getItem: (key: string) => store.get(key) ?? null,
+          key: (index: number) => [...store.keys()][index] ?? null,
+          removeItem: (key: string) => store.delete(key),
+          setItem: (key: string, value: string) => store.set(key, value),
+        } as Storage;
+      })(),
+    );
+    const { loadDeadLetterStatements, resetXAPIDeadLetterForTests } = await import("../src");
+    resetXAPIDeadLetterForTests();
+
+    let releaseTransport!: () => void;
+    const transport = vi.fn(async () => {
+      await new Promise<void>((resolve) => {
+        releaseTransport = resolve;
+      });
+      throw new Error("network");
+    });
+    const queue = createInMemoryXAPIQueue();
+    queue.enqueue({
+      id: "during-flush-a",
+      timestamp: "t",
+      verb: "http://adlnet.gov/expapi/verbs/experienced",
+      object: { id: "o" },
+    });
+    const client = createXAPIClient({ transport, courseId, queue });
+    const flushPromise = client.flush();
+    await Promise.resolve();
+    client.send({
+      id: "during-flush-b",
+      timestamp: "t",
+      verb: "http://adlnet.gov/expapi/verbs/experienced",
+      object: { id: "o" },
+    });
+    releaseTransport();
+    await expect(flushPromise).rejects.toThrow("network");
+
+    client.abandonUndelivered?.();
+
+    const deadLetters = loadDeadLetterStatements();
+    expect(deadLetters.map((s) => s.id).sort()).toEqual(["during-flush-a", "during-flush-b"]);
+    expect(client.queueSize()).toBe(0);
+  });
+
   it("abandonUndelivered persists queued statements to dead-letter storage", async () => {
     vi.stubGlobal(
       "sessionStorage",
