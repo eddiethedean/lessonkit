@@ -1,6 +1,5 @@
 /**
  * Regression tests for autoCheck + enableRetry stale `passed` state.
- * FillInTheBlanks remains a known bug (#185) via it.fails until fixed.
  */
 import React, { createRef } from "react";
 import { afterEach, describe, expect, it } from "vitest";
@@ -20,13 +19,13 @@ function wrap(children: React.ReactNode) {
   );
 }
 
-describe("autoCheck stale passed state (known bugs)", () => {
+describe("autoCheck stale passed state", () => {
   afterEach(() => {
     cleanup();
     sessionStorage.clear();
   });
 
-  it.fails("FillInTheBlanks autoCheck+enableRetry clears passed UI after wrong edit", async () => {
+  it("FillInTheBlanks autoCheck+enableRetry clears passed UI after wrong edit", async () => {
     const ref = createRef<AssessmentHandle>();
     render(
       wrap(

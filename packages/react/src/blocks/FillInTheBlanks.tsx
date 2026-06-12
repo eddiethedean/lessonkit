@@ -230,6 +230,7 @@ function FillInTheBlanksInner(
     const scored = scoreResponse(values, passedThreshold, maxScore || 1, props.passingScore);
     answeredRef.current = true;
     setSubmitted(true);
+    setPassed(scored.passed);
     assessment.answer({
       checkId,
       interactionType: INTERACTION,
@@ -237,9 +238,21 @@ function FillInTheBlanksInner(
       response: values,
       correct: scored.passed,
     });
-    if ((scored.passed || props.enableRetry === false) && !completedRef.current) {
+    if (scored.passed) {
+      if (!completedRef.current) {
+        completedRef.current = true;
+        assessment.complete({
+          checkId,
+          interactionType: INTERACTION,
+          score: scored.score,
+          maxScore: scored.maxScore,
+          passingScore: props.passingScore ?? scored.maxScore,
+        });
+      }
+    } else if (props.enableRetry) {
+      completedRef.current = false;
+    } else if (!completedRef.current) {
       completedRef.current = true;
-      if (scored.passed) setPassed(true);
       assessment.complete({
         checkId,
         interactionType: INTERACTION,
@@ -298,9 +311,14 @@ function FillInTheBlanksInner(
                 value={reveal ? blank.answer : (values[blank.id] ?? "")}
                 readOnly={reveal}
                 disabled={passed && !props.enableRetry}
-                onChange={(e) =>
-                  setValues((v) => ({ ...v, [blank.id]: e.target.value }))
-                }
+                onChange={(e) => {
+                  const next = e.target.value;
+                  if (props.enableRetry && (passed || completedRef.current)) {
+                    setPassed(false);
+                    completedRef.current = false;
+                  }
+                  setValues((v) => ({ ...v, [blank.id]: next }));
+                }}
                 onBlur={() => props.autoCheck && check()}
                 size={Math.max(8, blank.answer.length + 2)}
               />
