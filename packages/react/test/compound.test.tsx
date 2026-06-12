@@ -457,6 +457,65 @@ describe("InteractiveBook", () => {
     });
   });
 
+  it("replays failed terminal TrueFalse telemetry when replayResumeEvents is enabled", async () => {
+    const events: Array<{ name: string; data?: unknown }> = [];
+    const captureEvent = (e: { name: string; data?: unknown }) => {
+      events.push(e);
+    };
+    saveCompoundState(
+      createSessionStoragePort(),
+      COURSE_ID,
+      "book-tel-replay-fail",
+      createCompoundResumeState({
+        activePageIndex: 0,
+        childStates: {
+          "tf-tel-replay-fail": {
+            selected: false,
+            answerCorrect: false,
+            selectionCorrect: false,
+            passed: false,
+            showSolutions: false,
+            completedScore: 0,
+            completedMaxScore: 1,
+            completed: true,
+          },
+        },
+      }),
+    );
+
+    render(
+      <Course
+        title="Compound"
+        courseId={COURSE_ID}
+        config={{
+          xapi: { enabled: false },
+          session: { persistCompoundState: true },
+          tracking: { sink: captureEvent, replayResumeEvents: true },
+        }}
+      >
+        <Lesson title="L1" lessonId="lesson-1">
+          <InteractiveBook blockId="book-tel-replay-fail" title="Book">
+            <Page blockId="p1" title="Quiz">
+              <TrueFalse
+                checkId="tf-tel-replay-fail"
+                question="True?"
+                answer={true}
+                enableRetry={false}
+              />
+            </Page>
+          </InteractiveBook>
+        </Lesson>
+      </Course>,
+    );
+
+    await waitFor(() => {
+      const answered = events.find((e) => e.name === "assessment_answered");
+      expect(answered?.data).toMatchObject({ correct: false, response: false });
+      const completed = events.find((e) => e.name === "assessment_completed");
+      expect(completed?.data).toMatchObject({ score: 0, maxScore: 1 });
+    });
+  });
+
   it("restores TrueFalse answer state from sessionStorage", async () => {
     saveCompoundState(
       createSessionStoragePort(),

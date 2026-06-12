@@ -1,6 +1,6 @@
 import React, { createRef } from "react";
 import { afterEach, describe, expect, it } from "vitest";
-import { act, cleanup, fireEvent, render, screen, within } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import type { AssessmentHandle } from "@lessonkit/core";
 import {
   Course,
@@ -74,6 +74,44 @@ describe("1.7.0 Tier B P1 assessment blocks", () => {
     expect(
       within(section).getByRole("button", { name: "Check" }).hasAttribute("disabled"),
     ).toBe(true);
+  });
+
+  it("SortParagraphs replays failed terminal telemetry when replayResumeEvents is enabled", async () => {
+    const events: { name: string; data?: unknown }[] = [];
+    const ref = createRef<AssessmentHandle>();
+    render(
+      <Course
+        title="1.7 assessments"
+        courseId="blocks-17"
+        config={{
+          xapi: { enabled: false },
+          tracking: { replayResumeEvents: true, sink: (e) => { events.push(e); } },
+        }}
+      >
+        <Lesson title="L1" lessonId="lesson-1">
+          <SortParagraphs
+            ref={ref}
+            checkId="sort-replay-fail"
+            paragraphs={["A", "B"]}
+            correctOrder={[1, 0]}
+            enableRetry={false}
+          />
+        </Lesson>
+      </Course>,
+    );
+    act(() => {
+      ref.current?.resume?.({
+        order: [0, 1],
+        checked: true,
+        passed: false,
+        completed: true,
+      });
+    });
+    await waitFor(() => {
+      const answered = events.find((e) => e.name === "assessment_answered");
+      expect(answered?.data).toMatchObject({ correct: false });
+      expect(events.some((e) => e.name === "assessment_completed")).toBe(true);
+    });
   });
 
   it("SortParagraphs reorders with Up/Down and resumes state", () => {

@@ -3,7 +3,10 @@ import type { AssessmentBaseProps, AssessmentHandle, AssessmentInteractionType }
 import type { LessonId } from "@lessonkit/core";
 import { AssessmentLessonGuard } from "../assessment/AssessmentLessonGuard";
 import { buildAssessmentHandle } from "../assessment/internal/buildAssessmentHandle";
-import { readBooleanStateField } from "../assessment/internal/resumeState";
+import {
+  readBooleanStateField,
+  shouldReplayAssessmentComplete,
+} from "../assessment/internal/resumeState";
 import { useAssessmentHandleRegistration } from "../assessment/internal/useAssessmentHandleRegistration";
 import { meetsPassingThreshold } from "../assessment/scoring";
 import { useAssessmentState } from "../assessment/useAssessmentState";
@@ -81,14 +84,13 @@ function FindMultipleHotspotsInner(
   ) => {
     if (telemetryReplayedRef.current || !nextChecked) return;
     telemetryReplayedRef.current = true;
-    const correctAtSubmit = isFactuallyCorrect(nextSelected);
     assessment.answer({
       checkId,
       interactionType: INTERACTION,
       response: [...nextSelected],
-      correct: correctAtSubmit,
+      correct: nextPassed,
     });
-    if (nextPassed || props.enableRetry === false) {
+    if (shouldReplayAssessmentComplete(nextPassed, props.enableRetry)) {
       assessment.complete({
         checkId,
         interactionType: INTERACTION,

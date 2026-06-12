@@ -6,6 +6,23 @@ All notable changes to the LessonKit monorepo are documented here.
 
 ## [Unreleased]
 
+## [1.7.3] - 2026-06-12
+
+Framework **1.7.x** patch — autoCheck retry feedback fixes, assessment resume telemetry replay, and terminal-attempt semantics. All seven `@lessonkit/*` packages ship at **1.7.3**. Additive release (no breaking API changes).
+
+### Fixed
+
+- **`FillInTheBlanks`** — `autoCheck` + `enableRetry` no longer keeps stale **Correct** UI after editing a blank to a wrong value ([#185](https://github.com/eddiethedean/lessonkit/issues/185))
+- **`DragTheWords`** — same stale `passed` state fix when replacing zone words after a pass ([#186](https://github.com/eddiethedean/lessonkit/issues/186))
+- **Assessment resume replay** — `tracking.replayResumeEvents` now replays `assessment_answered` / `assessment_completed` for failed terminal attempts (not pass-only) on **`TrueFalse`**, **`ArithmeticQuiz`**, **`SortParagraphs`**, and **`ImageSequencing`** ([#122](https://github.com/eddiethedean/lessonkit/issues/122), [#123](https://github.com/eddiethedean/lessonkit/issues/123), [#129](https://github.com/eddiethedean/lessonkit/issues/129), [#172](https://github.com/eddiethedean/lessonkit/issues/172))
+- **`FindMultipleHotspots`** — resume replay `correct` uses `passingScore` threshold semantics (partial pass replays as correct when threshold met) ([#92](https://github.com/eddiethedean/lessonkit/issues/92))
+- **`GuessTheAnswer` / `ImagePairing`** — same terminal replay pattern for consistency (drive-by)
+- **Regression tests** — `autocheck-stale-pass.test.tsx`, resume replay coverage in `compound.test.tsx`, `blocks-1.7.test.tsx`, and `blocks-tier-bcd.test.tsx`
+
+### Changed
+
+- **`@lessonkit/cli`**: `lessonkit init` template pins `^1.7.3` on all `@lessonkit/*` dependencies
+
 ## [1.7.2] - 2026-06-11
 
 Framework **1.7.x** patch — shared touch primitives, compound navigation, P1 block touch hardening, and mobile E2E coverage. All seven `@lessonkit/*` packages ship at **1.7.2**. Additive release (no breaking API changes).
