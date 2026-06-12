@@ -6,6 +6,7 @@ import { buildAssessmentHandle } from "../assessment/internal/buildAssessmentHan
 import {
   readBooleanStateField,
   restoreCompletedRefFromResumeState,
+  shouldReplayAssessmentComplete,
 } from "../assessment/internal/resumeState";
 import { useAssessmentHandleRegistration } from "../assessment/internal/useAssessmentHandleRegistration";
 import { meetsPassingThreshold } from "../assessment/scoring";
@@ -61,6 +62,36 @@ function SortParagraphsInner(
   const score = isCorrect ? maxScore : 0;
   const passedThreshold = meetsPassingThreshold(score, maxScore, props.passingScore);
 
+  const replayTelemetry = (
+    nextOrder: number[],
+    nextPassed: boolean,
+    nextChecked: boolean,
+    nextScore: number,
+  ) => {
+    if (telemetryReplayedRef.current || (!nextChecked && !nextPassed)) return;
+    telemetryReplayedRef.current = true;
+    const nextPassedThreshold = meetsPassingThreshold(
+      nextScore,
+      maxScore,
+      props.passingScore,
+    );
+    assessment.answer({
+      checkId,
+      interactionType: INTERACTION,
+      response: nextOrder.map(String),
+      correct: nextPassedThreshold,
+    });
+    if (shouldReplayAssessmentComplete(nextPassedThreshold, props.enableRetry)) {
+      assessment.complete({
+        checkId,
+        interactionType: INTERACTION,
+        score: nextScore,
+        maxScore,
+        passingScore: props.passingScore ?? maxScore,
+      });
+    }
+  };
+
   const move = (index: number, direction: -1 | 1) => {
     if (passed && !props.enableRetry) return;
     setChecked(false);
@@ -97,33 +128,26 @@ function SortParagraphsInner(
             nextOrder = [...(state.order as number[])];
             setOrder(nextOrder);
           }
-          readBooleanStateField(state, "checked", setChecked);
+          let nextPassed = passed;
           readBooleanStateField(state, "passed", (value) => {
+            nextPassed = value;
             setPassed(value);
-            if (value && !telemetryReplayedRef.current && shouldReplayResumeTelemetry(config)) {
-              telemetryReplayedRef.current = true;
-              const nextIsCorrect =
-                nextOrder.length === props.correctOrder.length &&
-                nextOrder.every((v, i) => v === props.correctOrder[i]);
-              const nextScore = nextIsCorrect ? maxScore : 0;
-              assessment.answer({
-                checkId,
-                interactionType: INTERACTION,
-                response: nextOrder.map(String),
-                correct: nextIsCorrect,
-              });
-              assessment.complete({
-                checkId,
-                interactionType: INTERACTION,
-                score: nextScore,
-                maxScore,
-                passingScore: props.passingScore ?? maxScore,
-              });
-            }
+          });
+          let nextChecked = checked;
+          readBooleanStateField(state, "checked", (value) => {
+            nextChecked = value;
+            setChecked(value);
           });
           restoreCompletedRefFromResumeState(completedRef, state, {
             enableRetry: props.enableRetry,
           });
+          const nextIsCorrect =
+            nextOrder.length === props.correctOrder.length &&
+            nextOrder.every((v, i) => v === props.correctOrder[i]);
+          const nextScore = nextIsCorrect ? maxScore : 0;
+          if (shouldReplayResumeTelemetry(config)) {
+            replayTelemetry(nextOrder, nextPassed, nextChecked, nextScore);
+          }
         },
       }),
     [

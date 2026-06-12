@@ -400,6 +400,127 @@ describe("Tier B/C/D block components", () => {
     });
   });
 
+  it("ArithmeticQuiz replays failed terminal telemetry when replayResumeEvents is enabled", async () => {
+    const events: { name: string; data?: unknown }[] = [];
+    const ref = createRef<import("@lessonkit/core").AssessmentHandle>();
+    render(
+      <Course
+        title="Blocks"
+        courseId="blocks-tier-bcd"
+        config={{
+          xapi: { enabled: false },
+          tracking: { replayResumeEvents: true, sink: (e) => { events.push(e); } },
+        }}
+      >
+        <Lesson title="L1" lessonId="lesson-1">
+          <ArithmeticQuiz
+            ref={ref}
+            checkId="arith-replay-fail"
+            problems={[
+              { question: "1 + 1", answer: "2" },
+              { question: "2 + 2", answer: "4" },
+            ]}
+            enableRetry={false}
+          />
+        </Lesson>
+      </Course>,
+    );
+    act(() => {
+      ref.current?.resume?.({
+        answers: { 0: "3", 1: "5" },
+        checked: true,
+        passed: false,
+        completed: true,
+      });
+    });
+    await waitFor(() => {
+      const answered = events.find((e) => e.name === "assessment_answered");
+      expect(answered?.data).toMatchObject({ correct: false });
+      expect(events.some((e) => e.name === "assessment_completed")).toBe(true);
+    });
+  });
+
+  it("ImageSequencing replays failed terminal telemetry when replayResumeEvents is enabled", async () => {
+    const events: { name: string; data?: unknown }[] = [];
+    const ref = createRef<import("@lessonkit/core").AssessmentHandle>();
+    render(
+      <Course
+        title="Blocks"
+        courseId="blocks-tier-bcd"
+        config={{
+          xapi: { enabled: false },
+          tracking: { replayResumeEvents: true, sink: (e) => { events.push(e); } },
+        }}
+      >
+        <Lesson title="L1" lessonId="lesson-1">
+          <ImageSequencing
+            ref={ref}
+            checkId="seq-replay-fail"
+            images={[
+              { id: "step-1", src: "/1.png", alt: "Step 1" },
+              { id: "step-2", src: "/2.png", alt: "Step 2" },
+            ]}
+            correctOrder={["step-1", "step-2"]}
+            enableRetry={false}
+          />
+        </Lesson>
+      </Course>,
+    );
+    act(() => {
+      ref.current?.resume?.({
+        order: ["step-2", "step-1"],
+        checked: true,
+        passed: false,
+        completed: true,
+      });
+    });
+    await waitFor(() => {
+      const answered = events.find((e) => e.name === "assessment_answered");
+      expect(answered?.data).toMatchObject({ correct: false });
+      expect(events.some((e) => e.name === "assessment_completed")).toBe(true);
+    });
+  });
+
+  it("FindMultipleHotspots resume replay uses passingScore threshold for correct", async () => {
+    const events: { name: string; data?: unknown }[] = [];
+    const ref = createRef<import("@lessonkit/core").AssessmentHandle>();
+    render(
+      <Course
+        title="Blocks"
+        courseId="blocks-tier-bcd"
+        config={{
+          xapi: { enabled: false },
+          tracking: { replayResumeEvents: true, sink: (e) => { events.push(e); } },
+        }}
+      >
+        <Lesson title="L1" lessonId="lesson-1">
+          <FindMultipleHotspots
+            ref={ref}
+            checkId="fmh-replay-partial"
+            src="/scene.png"
+            alt="Scene"
+            targets={[
+              { id: "a", label: "Hazard A", x: 10, y: 10 },
+              { id: "b", label: "Hazard B", x: 50, y: 50 },
+            ]}
+            correctTargetIds={["a", "b"]}
+            passingScore={1}
+          />
+        </Lesson>
+      </Course>,
+    );
+    act(() => {
+      ref.current?.resume?.({
+        selected: ["a"],
+        checked: true,
+      });
+    });
+    await waitFor(() => {
+      const answered = events.find((e) => e.name === "assessment_answered");
+      expect(answered?.data).toMatchObject({ correct: true });
+    });
+  });
+
   it("ImageSequencing validates correct order", () => {
     render(
       wrap(

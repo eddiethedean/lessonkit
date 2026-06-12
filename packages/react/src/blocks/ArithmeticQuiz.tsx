@@ -4,8 +4,10 @@ import type { LessonId } from "@lessonkit/core";
 import { AssessmentLessonGuard } from "../assessment/AssessmentLessonGuard";
 import { buildAssessmentHandle } from "../assessment/internal/buildAssessmentHandle";
 import {
+  isTerminalAssessmentResumeState,
   readBooleanStateField,
   restoreCompletedRefFromResumeState,
+  shouldReplayAssessmentComplete,
 } from "../assessment/internal/resumeState";
 import { useAssessmentHandleRegistration } from "../assessment/internal/useAssessmentHandleRegistration";
 import { meetsPassingThreshold } from "../assessment/scoring";
@@ -138,25 +140,33 @@ function ArithmeticQuizInner(
             setAnswers(nextAnswers);
           }
           readBooleanStateField(state, "checked", setChecked);
-          readBooleanStateField(state, "passed", (value) => {
-            setPassed(value);
-            if (
-              value &&
-              !telemetryReplayedRef.current &&
-              shouldReplayResumeTelemetry(config)
-            ) {
-              telemetryReplayedRef.current = true;
-              let nextScore = 0;
-              props.problems.forEach((p, i) => {
-                if ((nextAnswers[i] ?? "").trim() === p.answer.trim()) nextScore += 1;
-              });
-              const replayCorrect = nextScore >= (props.passingScore ?? maxScore);
-              assessment.answer({
-                checkId,
-                interactionType: INTERACTION,
-                response: nextAnswers,
-                correct: replayCorrect,
-              });
+          readBooleanStateField(state, "passed", setPassed);
+          restoreCompletedRefFromResumeState(completedRef, state, {
+            enableRetry: props.enableRetry,
+          });
+          if (typeof state.timeLeft === "number") setTimeLeft(state.timeLeft);
+          if (
+            shouldReplayResumeTelemetry(config) &&
+            isTerminalAssessmentResumeState(state, props.enableRetry) &&
+            !telemetryReplayedRef.current
+          ) {
+            telemetryReplayedRef.current = true;
+            let nextScore = 0;
+            props.problems.forEach((p, i) => {
+              if ((nextAnswers[i] ?? "").trim() === p.answer.trim()) nextScore += 1;
+            });
+            const replayCorrect = meetsPassingThreshold(
+              nextScore,
+              maxScore,
+              props.passingScore,
+            );
+            assessment.answer({
+              checkId,
+              interactionType: INTERACTION,
+              response: nextAnswers,
+              correct: replayCorrect,
+            });
+            if (shouldReplayAssessmentComplete(replayCorrect, props.enableRetry)) {
               assessment.complete({
                 checkId,
                 interactionType: INTERACTION,
@@ -165,14 +175,10 @@ function ArithmeticQuizInner(
                 passingScore: props.passingScore ?? maxScore,
               });
             }
-          });
-          restoreCompletedRefFromResumeState(completedRef, state, {
-            enableRetry: props.enableRetry,
-          });
-          if (typeof state.timeLeft === "number") setTimeLeft(state.timeLeft);
+          }
         },
       }),
-    [allFilled, answers, checkId, checked, config, maxScore, passed, passedThreshold, props.problems, props.passingScore, score, timeLeft],
+    [allFilled, answers, checkId, checked, config, maxScore, passed, passedThreshold, props.enableRetry, props.problems, props.passingScore, score, timeLeft],
   );
 
   useAssessmentHandleRegistration(checkId, handle, ref);

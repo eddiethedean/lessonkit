@@ -8,13 +8,16 @@ All notable changes to the LessonKit monorepo are documented here.
 
 ## [1.7.3] - 2026-06-12
 
-Framework **1.7.x** patch — autoCheck retry feedback fixes for fill-in and drag-the-words assessments. All seven `@lessonkit/*` packages ship at **1.7.3**. Additive release (no breaking API changes).
+Framework **1.7.x** patch — autoCheck retry feedback fixes, assessment resume telemetry replay, and terminal-attempt semantics. All seven `@lessonkit/*` packages ship at **1.7.3**. Additive release (no breaking API changes).
 
 ### Fixed
 
 - **`FillInTheBlanks`** — `autoCheck` + `enableRetry` no longer keeps stale **Correct** UI after editing a blank to a wrong value ([#185](https://github.com/eddiethedean/lessonkit/issues/185))
 - **`DragTheWords`** — same stale `passed` state fix when replacing zone words after a pass ([#186](https://github.com/eddiethedean/lessonkit/issues/186))
-- **Regression tests** — `autocheck-stale-pass.test.tsx` covers both blocks
+- **Assessment resume replay** — `tracking.replayResumeEvents` now replays `assessment_answered` / `assessment_completed` for failed terminal attempts (not pass-only) on **`TrueFalse`**, **`ArithmeticQuiz`**, **`SortParagraphs`**, and **`ImageSequencing`** ([#122](https://github.com/eddiethedean/lessonkit/issues/122), [#123](https://github.com/eddiethedean/lessonkit/issues/123), [#129](https://github.com/eddiethedean/lessonkit/issues/129), [#172](https://github.com/eddiethedean/lessonkit/issues/172))
+- **`FindMultipleHotspots`** — resume replay `correct` uses `passingScore` threshold semantics (partial pass replays as correct when threshold met) ([#92](https://github.com/eddiethedean/lessonkit/issues/92))
+- **`GuessTheAnswer` / `ImagePairing`** — same terminal replay pattern for consistency (drive-by)
+- **Regression tests** — `autocheck-stale-pass.test.tsx`, resume replay coverage in `compound.test.tsx`, `blocks-1.7.test.tsx`, and `blocks-tier-bcd.test.tsx`
 
 ### Changed
 

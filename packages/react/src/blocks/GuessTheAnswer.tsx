@@ -4,9 +4,11 @@ import type { AssessmentBehaviour, AssessmentHandle, AssessmentInteractionType, 
 import { AssessmentLessonGuard } from "../assessment/AssessmentLessonGuard";
 import { buildAssessmentHandle } from "../assessment/internal/buildAssessmentHandle";
 import {
+  isTerminalAssessmentResumeState,
   readBooleanStateField,
   readStringField,
   restoreCompletedRefFromResumeState,
+  shouldReplayAssessmentComplete,
 } from "../assessment/internal/resumeState";
 import { useAssessmentHandleRegistration } from "../assessment/internal/useAssessmentHandleRegistration";
 import { meetsPassingThreshold } from "../assessment/scoring";
@@ -89,18 +91,30 @@ function GuessTheAnswerScoredInner(
           if (typeof nextGuess === "string") setGuess(nextGuess);
           readBooleanStateField(state, "revealed", setRevealed);
           readBooleanStateField(state, "checked", setChecked);
-          readBooleanStateField(state, "passed", (value) => {
-            setPassed(value);
-            if (value && !telemetryReplayedRef.current && shouldReplayResumeTelemetry(config)) {
-              telemetryReplayedRef.current = true;
-              const replayGuess = readStringField(state, "guess") ?? guess;
-              const nextCorrect = normalizeGuess(replayGuess) === normalizeGuess(props.answer);
-              assessment.answer({
-                checkId,
-                interactionType: INTERACTION,
-                response: replayGuess,
-                correct: nextCorrect,
-              });
+          readBooleanStateField(state, "passed", setPassed);
+          restoreCompletedRefFromResumeState(completedRef, state, {
+            enableRetry: props.enableRetry,
+          });
+          if (
+            shouldReplayResumeTelemetry(config) &&
+            isTerminalAssessmentResumeState(state, props.enableRetry) &&
+            !telemetryReplayedRef.current
+          ) {
+            telemetryReplayedRef.current = true;
+            const replayGuess = readStringField(state, "guess") ?? guess;
+            const nextCorrect = normalizeGuess(replayGuess) === normalizeGuess(props.answer);
+            const nextPassedThreshold = meetsPassingThreshold(
+              nextCorrect ? maxScore : 0,
+              maxScore,
+              props.passingScore,
+            );
+            assessment.answer({
+              checkId,
+              interactionType: INTERACTION,
+              response: replayGuess,
+              correct: nextCorrect,
+            });
+            if (shouldReplayAssessmentComplete(nextPassedThreshold, props.enableRetry)) {
               assessment.complete({
                 checkId,
                 interactionType: INTERACTION,
@@ -109,10 +123,7 @@ function GuessTheAnswerScoredInner(
                 passingScore: props.passingScore ?? maxScore,
               });
             }
-          });
-          restoreCompletedRefFromResumeState(completedRef, state, {
-            enableRetry: props.enableRetry,
-          });
+          }
         },
       }),
     [assessment, checkId, checked, config, guess, isCorrect, passed, props.answer, props.passingScore, revealed, score],

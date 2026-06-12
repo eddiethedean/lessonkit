@@ -5,11 +5,14 @@ import type { LessonId } from "@lessonkit/core";
 import { AssessmentLessonGuard } from "../assessment/AssessmentLessonGuard";
 import { buildAssessmentHandle } from "../assessment/internal/buildAssessmentHandle";
 import {
+  isTerminalAssessmentResumeState,
   readBooleanField,
   readBooleanStateField,
   readNumberField,
   restoreCompletedRefFromResumeState,
+  shouldReplayAssessmentComplete,
 } from "../assessment/internal/resumeState";
+import { shouldReplayResumeTelemetry } from "../assessment/shouldReplayResumeTelemetry";
 import { useAssessmentHandleRegistration } from "../assessment/internal/useAssessmentHandleRegistration";
 import { usePluginScoring } from "../assessment/internal/usePluginScoring";
 import { useAssessmentState } from "../assessment/useAssessmentState";
@@ -77,7 +80,7 @@ function TrueFalseInner(
     nextScore: number,
     nextMaxScore: number,
   ) => {
-    if (!nextPassed || telemetryReplayedRef.current) return;
+    if (telemetryReplayedRef.current) return;
     telemetryReplayedRef.current = true;
     if (nextSelected !== null) {
       assessment.answer({
@@ -88,13 +91,15 @@ function TrueFalseInner(
         correct: nextCorrect ?? false,
       });
     }
-    assessment.complete({
-      checkId,
-      interactionType: INTERACTION,
-      score: nextScore,
-      maxScore: nextMaxScore,
-      passingScore: props.passingScore ?? nextMaxScore,
-    });
+    if (shouldReplayAssessmentComplete(nextPassed, props.enableRetry)) {
+      assessment.complete({
+        checkId,
+        interactionType: INTERACTION,
+        score: nextScore,
+        maxScore: nextMaxScore,
+        passingScore: props.passingScore ?? nextMaxScore,
+      });
+    }
   };
 
   const handle = useMemo(
@@ -147,23 +152,34 @@ function TrueFalseInner(
           const nextPassed = readBooleanField(state, "passed");
           if (nextPassed === true || nextPassed === false) {
             setPassed(nextPassed);
-            if (nextPassed) {
-              const maxScore = nextCompletedMaxScore ?? completedMaxScore ?? 1;
-              const score = nextCompletedScore ?? completedScore ?? maxScore;
-              if (config.tracking?.replayResumeEvents === true) {
-                const replayCorrect =
-                  nextAnswerCorrect ??
-                  (nextSelected === true || nextSelected === false
-                    ? nextSelected === props.answer
-                    : null);
-                replayTelemetry(nextSelected ?? null, replayCorrect, nextPassed, score, maxScore);
-              }
-            }
           }
           readBooleanStateField(state, "showSolutions", setShowSolutions);
           restoreCompletedRefFromResumeState(completedRef, state, {
             enableRetry: props.enableRetry,
           });
+          if (
+            shouldReplayResumeTelemetry(config) &&
+            isTerminalAssessmentResumeState(state, props.enableRetry) &&
+            !telemetryReplayedRef.current
+          ) {
+            const maxScore = nextCompletedMaxScore ?? completedMaxScore ?? 1;
+            const score =
+              nextPassed === true
+                ? (nextCompletedScore ?? completedScore ?? maxScore)
+                : (nextCompletedScore ?? 0);
+            const replayCorrect =
+              nextAnswerCorrect ??
+              (nextSelected === true || nextSelected === false
+                ? nextSelected === props.answer
+                : null);
+            replayTelemetry(
+              nextSelected ?? null,
+              replayCorrect,
+              nextPassed === true,
+              score,
+              maxScore,
+            );
+          }
         },
       }),
     [
@@ -179,7 +195,7 @@ function TrueFalseInner(
       selected,
       selectionCorrect,
       showSolutions,
-      config.tracking?.replayResumeEvents,
+      config,
     ],
   );
 
