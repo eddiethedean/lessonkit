@@ -62,3 +62,26 @@ export function restoreCompletedRefFromResumeState(
   const enableRetry = opts?.enableRetry ?? false;
   completedRef.current = passed || submitted || (checked && !enableRetry);
 }
+
+/** True when saved state represents a terminal attempt worth replaying. */
+export function isTerminalAssessmentResumeState(
+  state: AssessmentResumeState,
+  enableRetry?: boolean,
+): boolean {
+  const completed = readBooleanField(state, "completed");
+  if (completed === true) return true;
+  if (completed === false) return false;
+  const passed = readBooleanField(state, "passed") === true;
+  const submitted = readBooleanField(state, "submitted") === true;
+  const checked = readBooleanField(state, "checked") === true;
+  const retry = enableRetry ?? false;
+  return passed || submitted || (checked && !retry);
+}
+
+/** Mirrors live complete() guard: emit complete on pass OR failed terminal. */
+export function shouldReplayAssessmentComplete(
+  passed: boolean,
+  enableRetry?: boolean,
+): boolean {
+  return passed || enableRetry === false;
+}

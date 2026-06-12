@@ -5,8 +5,10 @@ import type { LessonId } from "@lessonkit/core";
 import { AssessmentLessonGuard } from "../assessment/AssessmentLessonGuard";
 import { buildAssessmentHandle } from "../assessment/internal/buildAssessmentHandle";
 import {
+  isTerminalAssessmentResumeState,
   readBooleanStateField,
   restoreCompletedRefFromResumeState,
+  shouldReplayAssessmentComplete,
 } from "../assessment/internal/resumeState";
 import { useAssessmentHandleRegistration } from "../assessment/internal/useAssessmentHandleRegistration";
 import { meetsPassingThreshold } from "../assessment/scoring";
@@ -260,29 +262,32 @@ function ImagePairingInner(
           const sel = state.keyboardSelection;
           if (sel === null || typeof sel === "string") setKeyboardSelection(sel ?? null);
           readBooleanStateField(state, "submitted", setSubmitted);
-          readBooleanStateField(state, "passed", (value) => {
-            setPassed(value);
-            if (
-              value &&
-              !telemetryReplayedRef.current &&
-              shouldReplayResumeTelemetry(config)
-            ) {
-              telemetryReplayedRef.current = true;
-              const matchedIds = Array.isArray(state.matched)
-                ? (state.matched as string[])
-                : [...matched];
-              const finalScore = matchedIds.length;
-              const finalPassed = meetsPassingThreshold(
-                finalScore,
-                maxScore,
-                props.passingScore,
-              );
-              assessment.answer({
-                checkId,
-                interactionType: INTERACTION,
-                response: { matchedPairIds: matchedIds },
-                correct: finalPassed,
-              });
+          readBooleanStateField(state, "passed", setPassed);
+          restoreCompletedRefFromResumeState(completedRef, state, {
+            enableRetry: props.enableRetry,
+          });
+          if (
+            shouldReplayResumeTelemetry(config) &&
+            isTerminalAssessmentResumeState(state, props.enableRetry) &&
+            !telemetryReplayedRef.current
+          ) {
+            telemetryReplayedRef.current = true;
+            const matchedIds = Array.isArray(state.matched)
+              ? (state.matched as string[])
+              : [...matched];
+            const finalScore = matchedIds.length;
+            const finalPassed = meetsPassingThreshold(
+              finalScore,
+              maxScore,
+              props.passingScore,
+            );
+            assessment.answer({
+              checkId,
+              interactionType: INTERACTION,
+              response: { matchedPairIds: matchedIds },
+              correct: finalPassed,
+            });
+            if (shouldReplayAssessmentComplete(finalPassed, props.enableRetry)) {
               assessment.complete({
                 checkId,
                 interactionType: INTERACTION,
@@ -291,10 +296,7 @@ function ImagePairingInner(
                 passingScore: props.passingScore ?? maxScore,
               });
             }
-          });
-          restoreCompletedRefFromResumeState(completedRef, state, {
-            enableRetry: props.enableRetry,
-          });
+          }
         },
       }),
     [allMatched, assessment, cards, checkId, config, keyboardSelection, matched, matchedCount, maxScore, passed, passedThreshold, props.enableRetry, props.pairs, props.passingScore, revealed, score, submitted],
