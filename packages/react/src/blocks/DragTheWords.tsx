@@ -225,6 +225,10 @@ function DragTheWordsInner(
       if (prev) next.push(prev);
       return next;
     });
+    if (props.enableRetry && (passed || completedRef.current)) {
+      setPassed(false);
+      completedRef.current = false;
+    }
     setSubmitted(false);
     pickPlace.clear();
   };
@@ -259,6 +263,7 @@ function DragTheWordsInner(
     const scored = scoreResponse(zones, passedThreshold, maxScore || 1, props.passingScore);
     answeredRef.current = true;
     setSubmitted(true);
+    setPassed(scored.passed);
     assessment.answer({
       checkId,
       interactionType: INTERACTION,
@@ -266,9 +271,21 @@ function DragTheWordsInner(
       response: zones,
       correct: scored.passed,
     });
-    if ((scored.passed || props.enableRetry === false) && !completedRef.current) {
+    if (scored.passed) {
+      if (!completedRef.current) {
+        completedRef.current = true;
+        assessment.complete({
+          checkId,
+          interactionType: INTERACTION,
+          score: scored.score,
+          maxScore: scored.maxScore,
+          passingScore: props.passingScore ?? scored.maxScore,
+        });
+      }
+    } else if (props.enableRetry) {
+      completedRef.current = false;
+    } else if (!completedRef.current) {
       completedRef.current = true;
-      if (scored.passed) setPassed(true);
       assessment.complete({
         checkId,
         interactionType: INTERACTION,
