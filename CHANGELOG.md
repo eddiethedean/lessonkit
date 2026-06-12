@@ -6,6 +6,20 @@ All notable changes to the LessonKit monorepo are documented here.
 
 ## [Unreleased]
 
+## [1.7.3] - 2026-06-12
+
+Framework **1.7.x** patch — autoCheck retry feedback fixes for fill-in and drag-the-words assessments. All seven `@lessonkit/*` packages ship at **1.7.3**. Additive release (no breaking API changes).
+
+### Fixed
+
+- **`FillInTheBlanks`** — `autoCheck` + `enableRetry` no longer keeps stale **Correct** UI after editing a blank to a wrong value ([#185](https://github.com/eddiethedean/lessonkit/issues/185))
+- **`DragTheWords`** — same stale `passed` state fix when replacing zone words after a pass ([#186](https://github.com/eddiethedean/lessonkit/issues/186))
+- **Regression tests** — `autocheck-stale-pass.test.tsx` covers both blocks
+
+### Changed
+
+- **`@lessonkit/cli`**: `lessonkit init` template pins `^1.7.3` on all `@lessonkit/*` dependencies
+
 ## [1.7.2] - 2026-06-11
 
 Framework **1.7.x** patch — shared touch primitives, compound navigation, P1 block touch hardening, and mobile E2E coverage. All seven `@lessonkit/*` packages ship at **1.7.2**. Additive release (no breaking API changes).
