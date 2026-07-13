@@ -46,6 +46,8 @@ test.describe("export parity matrix", () => {
       const scorm = await readScorm12State(page);
       const status = scorm.store["cmi.core.lesson_status"] ?? "";
       results.scorm12_lms = status === "completed" || status === "passed";
+      const raw = scorm.store["cmi.core.score.raw"] ?? "";
+      results.scorm12_score = raw !== "" && Number(raw) > 0;
     } finally {
       if (scormServer) await stopServer(scormServer);
     }
@@ -55,5 +57,6 @@ test.describe("export parity matrix", () => {
     expect(results.standalone).toBe(true);
     expect(results.scorm12_ui).toBe(true);
     expect(results.scorm12_lms).toBe(true);
+    expect(results.scorm12_score).toBe(true);
   });
 });

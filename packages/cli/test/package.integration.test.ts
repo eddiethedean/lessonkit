@@ -6,26 +6,44 @@ import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { runPackage } from "../src/commands/package.js";
 
-function readScormManifestFromZip(zipPath: string): string {
-  const unpackDir = mkdtempSync(join(tmpdir(), "lk-cli-scorm-"));
+function unpackXmlFromZip(zipPath: string, fileName: string): string {
+  const unpackDir = mkdtempSync(join(tmpdir(), "lk-cli-pkg-xml-"));
   try {
     execFileSync("unzip", ["-q", zipPath, "-d", unpackDir]);
-    const direct = join(unpackDir, "imsmanifest.xml");
+    const direct = join(unpackDir, fileName);
     if (existsSync(direct)) return readFileSync(direct, "utf8");
     for (const entry of readdirSync(unpackDir)) {
-      const candidate = join(unpackDir, entry, "imsmanifest.xml");
+      const candidate = join(unpackDir, entry, fileName);
       if (existsSync(candidate)) return readFileSync(candidate, "utf8");
     }
-    throw new Error(`imsmanifest.xml missing in ${zipPath}`);
+    throw new Error(`${fileName} missing in ${zipPath}`);
   } finally {
     rmSync(unpackDir, { recursive: true, force: true });
   }
 }
 
-const validCourse = {
+function readScormManifestFromZip(zipPath: string): string {
+  return unpackXmlFromZip(zipPath, "imsmanifest.xml");
+}
+
+const validCourse: {
+  courseId: string;
+  title: string;
+  layout: "single-spa";
+  lessons: Array<{ id: string; title: string }>;
+  assessments: Array<{
+    checkId: string;
+    question: string;
+    choices: string[];
+    answer: string;
+    passingScore: number;
+  }>;
+  theme: { preset: "default" };
+  tracking?: { xapi?: { activityIri: string } };
+} = {
   courseId: "integration-demo",
   title: "Integration Demo",
-  layout: "single-spa" as const,
+  layout: "single-spa",
   lessons: [{ id: "lesson-1", title: "Lesson one" }],
   assessments: [
     {
@@ -36,7 +54,7 @@ const validCourse = {
       passingScore: 1,
     },
   ],
-  theme: { preset: "default" as const },
+  theme: { preset: "default" },
 };
 
 async function writeParitySource(
@@ -120,6 +138,42 @@ describe("runPackage integration (real lxpack validation)", () => {
       const manifestXml = readScormManifestFromZip(result.outputPath!);
       expect(manifestXml).toMatch(/<resource[^>]+href="[^"]+"/);
       expect(manifestXml).toContain("integration-demo");
+    }
+  }, 30_000);
+
+  it("packages xapi with activity IRI in tincan.xml", async () => {
+    const activityIri = "https://example.test/courses/integration-demo";
+    await writeValidProject(dir, {
+      ...validCourse,
+      tracking: { xapi: { activityIri } },
+    });
+
+    const result = await runPackage({ target: "xapi", cwd: dir, noBuild: true, json: true });
+
+    expect(result.ok).toBe(true);
+    if (result.ok && result.command === "package" && result.target === "xapi") {
+      expect(existsSync(result.outputPath!)).toBe(true);
+      const tincan = unpackXmlFromZip(result.outputPath!, "tincan.xml");
+      expect(tincan).toContain(activityIri);
+      expect(tincan).toMatch(/<launch[^>]*>[^<]+<\/launch>/);
+    }
+  }, 30_000);
+
+  it("packages cmi5 with activity IRI in cmi5.xml", async () => {
+    const activityIri = "https://example.test/courses/integration-demo";
+    await writeValidProject(dir, {
+      ...validCourse,
+      tracking: { xapi: { activityIri } },
+    });
+
+    const result = await runPackage({ target: "cmi5", cwd: dir, noBuild: true, json: true });
+
+    expect(result.ok).toBe(true);
+    if (result.ok && result.command === "package" && result.target === "cmi5") {
+      expect(existsSync(result.outputPath!)).toBe(true);
+      const cmi5 = unpackXmlFromZip(result.outputPath!, "cmi5.xml");
+      expect(cmi5).toContain(activityIri);
+      expect(cmi5).toMatch(/<url>[^<]+<\/url>/);
     }
   }, 30_000);
 

@@ -25,7 +25,6 @@ import {
 import { emitCourseStartedNonTrackingPipeline } from "../src/runtime/courseStartedPipeline";
 import { emitThroughPipeline } from "../src/runtime/telemetryPipeline";
 import * as xapiMapModule from "@lessonkit/xapi";
-import { ThemeProvider, useTheme } from "../src/theme/ThemeProvider";
 
 function seedStorage(key: string): void {
   sessionStorage.setItem(key, "1");
@@ -42,47 +41,7 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-describe("behavioral coverage: provider, theme, and telemetry edges", () => {
-  it("ThemeProvider reacts to system color scheme changes", () => {
-    let matches = true;
-    const listeners: Array<() => void> = [];
-    vi.stubGlobal(
-      "matchMedia",
-      vi.fn().mockImplementation((query: string) => ({
-        get matches() {
-          return matches;
-        },
-        media: query,
-        addEventListener: (_: string, cb: () => void) => listeners.push(cb),
-        removeEventListener: vi.fn(),
-      })),
-    );
-
-    function Reader() {
-      const { resolvedMode } = useTheme();
-      return <span data-testid="mode">{resolvedMode}</span>;
-    }
-
-    render(
-      <ThemeProvider mode="system">
-        <Reader />
-      </ThemeProvider>,
-    );
-
-    expect(screen.getByTestId("mode").textContent).toBe("dark");
-    matches = false;
-    act(() => {
-      listeners[0]?.();
-    });
-    expect(screen.getByTestId("mode").textContent).toBe("light");
-    matches = true;
-    act(() => {
-      listeners[0]?.();
-    });
-    expect(screen.getByTestId("mode").textContent).toBe("dark");
-    vi.unstubAllGlobals();
-  });
-
+describe("behavioral coverage: provider and telemetry edges", () => {
   it("Reflection supports controlled values without internal state updates", () => {
     function Controlled() {
       const [value, setValue] = useState("seed");

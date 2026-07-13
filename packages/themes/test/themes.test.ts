@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
 import {
   brandTheme,
   brandThemeOverrides,
@@ -237,14 +238,8 @@ describe("@lessonkit/themes", () => {
 });
 
 describe("@lessonkit/themes base.css touch contract", () => {
-  it("ships --lk-touch-target-min and --lk-touch-spacing for 1.7 touch guidance", async () => {
-    const { readFile } = await import("node:fs/promises");
-    const { fileURLToPath } = await import("node:url");
-    const { dirname, join } = await import("node:path");
-    const baseCss = await readFile(
-      join(dirname(fileURLToPath(import.meta.url)), "..", "base.css"),
-      "utf8",
-    );
+  it("ships --lk-touch-target-min and --lk-touch-spacing for 1.7 touch guidance", () => {
+    const baseCss = readFileSync(new URL("../base.css", import.meta.url), "utf8");
     expect(baseCss).toContain("--lk-touch-target-min: 2.75rem");
     expect(baseCss).toContain("--lk-touch-spacing:");
     expect(baseCss).toContain("min-height: var(--lk-touch-target-min)");

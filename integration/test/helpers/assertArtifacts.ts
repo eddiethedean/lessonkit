@@ -78,7 +78,7 @@ export function assertScormZip(zipPath: string): void {
   }
 }
 
-export function assertXapiZip(zipPath: string): void {
+export function assertXapiZip(zipPath: string, expectedActivityIri?: string): void {
   if (!existsSync(zipPath)) {
     throw new Error(`xAPI zip not found: ${zipPath}`);
   }
@@ -92,12 +92,15 @@ export function assertXapiZip(zipPath: string): void {
       throw new Error(`tincan.xml has no activity launch URL: ${zipPath}`);
     }
     resolveLaunchFile(root, join(tincanPath, ".."), launchHref);
+    if (expectedActivityIri && !xml.includes(expectedActivityIri)) {
+      throw new Error(`tincan.xml missing activity IRI ${expectedActivityIri}: ${zipPath}`);
+    }
   } finally {
     rmSync(root, { recursive: true, force: true });
   }
 }
 
-export function assertCmi5Zip(zipPath: string): void {
+export function assertCmi5Zip(zipPath: string, expectedActivityIri?: string): void {
   if (!existsSync(zipPath)) {
     throw new Error(`cmi5 zip not found: ${zipPath}`);
   }
@@ -111,6 +114,9 @@ export function assertCmi5Zip(zipPath: string): void {
       throw new Error(`cmi5.xml has no AU launch URL: ${zipPath}`);
     }
     resolveLaunchFile(root, join(cmi5Path, ".."), launchHref);
+    if (expectedActivityIri && !xml.includes(expectedActivityIri)) {
+      throw new Error(`cmi5.xml missing activity IRI ${expectedActivityIri}: ${zipPath}`);
+    }
   } finally {
     rmSync(root, { recursive: true, force: true });
   }

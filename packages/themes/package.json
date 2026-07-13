@@ -48,6 +48,7 @@
     "lint": "eslint --max-warnings 0 \"src/**/*.{ts,tsx}\" \"test/**/*.{ts,tsx}\""
   },
   "devDependencies": {
+    "@types/node": "^25.9.2",
     "tsup": "^8.5.0",
     "typescript": "^6.0.3",
     "vitest": "^4.1.8"

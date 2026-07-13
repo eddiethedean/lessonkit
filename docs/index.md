@@ -212,4 +212,5 @@ project/changelog
 project/good-first-contributions
 project/roadmap
 project/h5p-capability-map
+project/test-suite-verification-1.7.4
 ```

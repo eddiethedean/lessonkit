@@ -4,23 +4,23 @@ Independent behavioral audit of LessonKit’s test suite after the 1.7.4 version
 
 ## Executive summary
 
-**Overall confidence: Moderate**
+**Overall confidence: Moderate → High-Moderate**
 
-The suite already had strong anchors for recent 1.7.3 regressions (autoCheck stale pass, resume replay helpers) and solid xAPI transport/idempotency coverage. This pass removed several sources of **false confidence** (unconditional standalone parity green, weak event presence checks, circular-ish interchange validation, coverage-theater naming) and added contract-level regressions for resume replay and packaging artifacts.
+The suite already had strong anchors for recent 1.7.3 regressions (autoCheck stale pass, resume replay helpers) and solid xAPI transport/idempotency coverage. Follow-up gap-fill closed the highest-priority holes called out in the initial audit: Quiz/KnowledgeCheck/FillInTheBlanks/DragAndDrop resume-replay contracts, xAPI/cmi5 artifact IRI asserts, SCORM score fields, compound assertion tightening, and extracting ThemeProvider behavior from coverage theater.
 
-Confidence is not **High** because: many block suites still use `toBeTruthy`/`toBeDefined`; `coverage-full.*` files remain large grab-bags; example `App.test` smokes remain minimal; and full Playwright e2e was only selectively re-run after browser install (parity matrix verified green).
+Remaining gaps are mostly tooling (mutation testing) and breadth (more blocks / resume-across-export e2e), not core contract blindness.
 
 ## Verification gates actually run
 
 | Gate | Result |
 |------|--------|
-| `npm run build:packages` | Pass |
-| `npm test` (all workspaces) | Pass |
+| `npm run build:packages` | Pass (initial audit) |
+| `npm test` (all workspaces) | Pass (initial audit) |
 | `npm run lint` | Pass |
-| `npm run typecheck` | Pass |
-| `npm run test:integration` (17 files / 53 tests) | Pass |
-| `playwright test tests/parity/matrix.spec.ts --project=golden-vite` | Pass (after Chromium install + assertion fix) |
-| Full `npm run test:e2e` | Not fully green initially (missing Playwright browsers); selective parity re-run after install |
+| `npm run typecheck` | Pass (initial audit) |
+| `npm run test:integration` | Pass (initial + gap-fill `cli-package-targets`) |
+| Targeted react/cli unit suites for gap-fill | Pass |
+| `playwright` parity matrix + scorm12 launch (score asserts) | Pass |
 
 ## Incorrect tests
 
@@ -31,41 +31,48 @@ Confidence is not **High** because: many block suites still use `toBeTruthy`/`to
 
 ## Weak tests (remaining / partially addressed)
 
-- **`packages/react/test/compound.test.tsx`** — still ~40+ `toBeTruthy` uses; tightened pass/fail resume replay payloads and InteractiveBook page text.
-- **`coverage-full.*` (react/cli/lxpack)** — renamed describes to reflect edge-behavior intent; still coverage-oriented grab-bags. Prefer extracting named suites over time rather than treating them as confidence.
-- **Example/template `App.test.tsx`** — smoke-only; do not treat as behavioral confidence.
-- **Integration descriptor parity** — still regex-scrapes source for IDs; strengthened with `ID_PATTERN` contract checks (not full packaged-manifest semantic parity).
+- **`packages/react/test/compound.test.tsx`** — ~35 high-value presence checks tightened to exact text/testid content; a few `sessionStorage` raw truthiness checks remain.
+- **`coverage-full.*` (react/cli/lxpack)** — ThemeProvider system-mode extracted to `theme-system-mode.test.tsx`; remaining grab-bag still exists for provider/telemetry edges.
+- **Example/template `App.test.tsx`** — smoke-only by design; not treated as behavioral confidence.
+- **Integration descriptor parity** — still regex-scrapes source for IDs; strengthened earlier with `ID_PATTERN`.
 
 ## Tests rewritten
 
-- Resume replay assertions in `compound.test.tsx` and `assessment-handles.test.tsx` now require **event payloads** (`correct`, `score`, `maxScore`), not mere event name presence.
-- `ImagePairing` render check asserts **four** list items (two pairs), not `length > 0`.
-- CLI `package.integration` SCORM path unpacks zip and asserts `imsmanifest.xml` has a resource `href` and course id string.
-- xAPI `assessment_*` mapping asserts **check URNs** against identity URN shape from docs.
-- Themes: assert `base.css` ships `--lk-touch-target-min` / `--lk-touch-spacing` (1.7 touch contract).
+- Resume replay assertions require **event payloads** (`correct`, `score`, `maxScore` / quiz `choice`).
+- CLI SCORM / xAPI / cmi5 packaging unpacks XML and asserts launch + identity/activity content.
+- Integration `assertXapiZip` / `assertCmi5Zip` optionally require golden activity IRI.
+- SCORM e2e asserts `cmi.core.score.raw` is present and > 0 (not only `lesson_status`).
+- Compound navigation/branching UI asserts exact copy instead of `toBeTruthy`.
 
 ## Tests added
 
 | Test | Why it increases confidence |
 |------|-----------------------------|
-| `packages/react/test/resume-replay-contract.test.tsx` | GuessTheAnswer / ImagePairing failed-terminal replay + opt-out when `replayResumeEvents` is false — CHANGELOG 1.7.3 contract beyond previously named blocks |
-| Extra `resumeState` edge cases | Explicit `completed: false` wins over legacy `passed`; submitted-only terminal; retry+checked not terminal |
-| Core identity URN contract + unicode/emoji rejection + uppercase acceptance | Aligns runtime with `identity-contract.v1.json`, not only happy-path slugs |
-| lxpack stable interchange shape for injectable MCQ | Asserts nested `questions[].prompt/choices[].correct` against fixed descriptor — reduces A→B→A circularity |
-| Integration identity validation on golden IDs | Uses exported `ID_PATTERN` as independent gate |
+| `resume-replay-contract.test.tsx` (expanded) | Quiz, KnowledgeCheck, FillInTheBlanks, DragAndDrop failed-terminal replay + GuessTheAnswer/ImagePairing + opt-out |
+| `autocheck-inventory.test.ts` | Only FIB/DTW implement `props.autoCheck` — prevents catalog/runtime drift for stale-pass class bugs |
+| `theme-system-mode.test.tsx` | Named behavioral suite extracted from coverage-full |
+| CLI xapi/cmi5 packaging cases | `tincan.xml` / `cmi5.xml` contain configured activity IRI and launch URL |
+| Core identity / xAPI URN asserts (prior pass) | Contract alignment independent of implementation literals |
 
 ## Tests removed
 
-None deleted wholesale. `coverage-full.*` suites were **retitled** rather than deleted to avoid a large coverage cliff without equivalent named suites; backlog item remains to split them.
+ThemeProvider system-mode case removed from `coverage-full.test.tsx` (moved to named file). Residual `coverage-full.*` retained to avoid coverage cliffs; still not a primary confidence signal.
 
-## Missing coverage (highest priority remaining)
+## Missing coverage (remaining backlog)
 
-1. **Block-wide autoCheck contract** — only FillInTheBlanks / DragTheWords implement `autoCheck`; keep regressions, but audit any future autoCheck blocks for shared stale-`passed` bug.
-2. **Resume replay matrix** — not every assessment block has a failed-terminal contract test; prioritize Quiz/KnowledgeCheck and high-traffic Tier B/C blocks.
-3. **Packaging artifact content** — more targets (cmi5/xapi) should assert launch + activity IRI in unpacked XML, not only exit code / zip exists.
-4. **Split `coverage-full.*`** into named behavioral files; delete residual padding.
-5. **Mutation testing** still absent — introduce Stryker (or similar) on `resumeState`, scoring helpers, and `telemetryMap` first.
-6. **E2E depth** — resume across export targets; SCORM score fields beyond lesson_status.
+1. **Mutation testing** — still absent; introduce Stryker (or similar) on `resumeState`, scoring helpers, and `telemetryMap` when maintainers want CI cost.
+2. **Resume across export targets (e2e)** — packaged shell resume/replay not covered in Playwright.
+3. **Further `coverage-full` splits** — provider/telemetry edges can become named suites incrementally.
+4. **Remaining compound `sessionStorage` truthiness** — prefer parsed JSON shape asserts.
+5. **Broader resume matrix** — remaining Tier C/D assessment blocks without failed-terminal contract tests.
+
+## Closed from prior “highest priority remaining”
+
+1. ~~autoCheck inventory~~ — `autocheck-inventory.test.ts`
+2. ~~Resume replay matrix (Quiz/KC/FIB/DnD)~~ — expanded contract file
+3. ~~Packaging artifact content (cmi5/xapi)~~ — CLI + integration IRI asserts
+4. ~~Partial coverage-full split~~ — ThemeProvider extracted
+5. ~~E2E SCORM score fields~~ — parity + scorm12 launch
 
 ## AI failure patterns found
 
@@ -73,22 +80,10 @@ None deleted wholesale. `coverage-full.*` suites were **retitled** rather than d
 - **Weak assertions:** `toBeTruthy` / event-name-only / unconditional `true` after “happy path” helpers.
 - **Coverage theater:** large `coverage-full` files named for metrics, not behavior.
 - **Circular validation:** descriptor→interchange→validate against same transform (mitigated with fixed expected shape).
-- **String/regex parity:** source scrapes as packaging confidence (mitigated with identity pattern checks; still incomplete).
+- **String/regex parity:** source scrapes as packaging confidence (mitigated with identity pattern + artifact XML checks).
 
 ## Confidence assessment
 
-Behavioral confidence is **improved from Low–Moderate toward Moderate**, especially around:
+Behavioral confidence is **High-Moderate** for the audited contracts (resume replay, packaging XML, identity/xAPI URNs, SCORM completion+score, autoCheck scope).
 
-- assessment resume replay contracts
-- SCORM packaging artifact presence
-- identity/xAPI URN alignment
-- export parity matrix honesty for packaged shells
-
-It is **not yet High**: residual weak asserts, coverage grab-bags, and incomplete e2e/mutation coverage leave room for shared AI mistakes in less-audited blocks.
-
-## Follow-ups
-
-- Continue replacing `toBeTruthy` in compound/block suites with exact UI/score/event assertions.
-- Extract behavioral cases from `coverage-full.*`.
-- Add cmi5/xapi artifact content asserts in CLI/integration.
-- Run full `npm run test:e2e` in CI-equivalent environments with browsers preinstalled.
+It is **not yet High** overall until mutation testing and broader block/e2e resume coverage land.

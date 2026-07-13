@@ -342,7 +342,7 @@ describe("AssessmentHandle (imperative API)", () => {
   });
 
   it("FillInTheBlanks completes on failure when enableRetry is false", async () => {
-    const events: { name: string }[] = [];
+    const events: { name: string; data?: unknown }[] = [];
     render(
       <Course
         title="Handles"
@@ -370,7 +370,7 @@ describe("AssessmentHandle (imperative API)", () => {
   });
 
   it("DragTheWords completes on failure when enableRetry is false", async () => {
-    const events: { name: string }[] = [];
+    const events: { name: string; data?: unknown }[] = [];
     render(
       <Course
         title="Handles"

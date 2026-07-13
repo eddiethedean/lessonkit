@@ -129,8 +129,8 @@ describe("InteractiveBook", () => {
         true,
       ),
     );
-    expect(screen.getByText("Page two")).toBeTruthy();
-    expect(screen.getByText("Page 2 of 2")).toBeTruthy();
+    expect(screen.getByText("Page two").textContent).toBe("Page two");
+    expect(screen.getByText("Page 2 of 2").textContent).toBe("Page 2 of 2");
   });
 
   it("persists activePageIndex to sessionStorage on navigation", () => {
@@ -218,7 +218,7 @@ describe("InteractiveBook", () => {
       ),
     );
 
-    expect(screen.getByDisplayValue("Paris")).toBeTruthy();
+    expect((screen.getByDisplayValue("Paris") as HTMLInputElement).value).toBe("Paris");
     const raw = sessionStorage.getItem(compoundStateStorageKey(COURSE_ID, "book-fill"));
     expect(raw).toBeTruthy();
     const parsed = JSON.parse(raw!) as {
@@ -350,8 +350,8 @@ describe("InteractiveBook", () => {
       ),
     );
 
-    expect(screen.getByText("Only page")).toBeTruthy();
-    expect(screen.getByText("Page 1 of 1")).toBeTruthy();
+    expect(screen.getByText("Only page").textContent).toBe("Only page");
+    expect(screen.getByText("Page 1 of 1").textContent).toBe("Page 1 of 1");
   });
 
   it("restores TrueFalse UI without replaying telemetry after sessionStorage resume", async () => {
@@ -570,7 +570,7 @@ describe("InteractiveBook", () => {
       </Course>,
     );
 
-    expect(screen.getByText("Page two")).toBeTruthy();
+    expect(screen.getByText("Page two").textContent).toBe("Page two");
   });
 });
 
@@ -593,9 +593,9 @@ describe("SlideDeck", () => {
         </SlideDeck>,
       ),
     );
-    expect(screen.getByText("Slide one")).toBeTruthy();
+    expect(screen.getByText("Slide one").textContent).toBe("Slide one");
     fireEvent.click(screen.getByTestId("slide-next"));
-    expect(screen.getByText("Slide two")).toBeTruthy();
+    expect(screen.getByText("Slide two").textContent).toBe("Slide two");
   });
 
   it("navigates with keyboard arrow keys", () => {
@@ -614,9 +614,9 @@ describe("SlideDeck", () => {
     const deck = screen.getByTestId("slide-deck");
     deck.focus();
     fireEvent.keyDown(deck, { key: "ArrowRight" });
-    expect(screen.getByText("Slide two")).toBeTruthy();
+    expect(screen.getByText("Slide two").textContent).toBe("Slide two");
     fireEvent.keyDown(deck, { key: "ArrowLeft" });
-    expect(screen.getByText("Slide one")).toBeTruthy();
+    expect(screen.getByText("Slide one").textContent).toBe("Slide one");
   });
 
   it("jumps to first and last slide with Home and End", () => {
@@ -638,9 +638,9 @@ describe("SlideDeck", () => {
     const deck = screen.getByTestId("slide-deck");
     deck.focus();
     fireEvent.keyDown(deck, { key: "End" });
-    expect(screen.getByText("Slide three")).toBeTruthy();
+    expect(screen.getByText("Slide three").textContent).toBe("Slide three");
     fireEvent.keyDown(deck, { key: "Home" });
-    expect(screen.getByText("Slide one")).toBeTruthy();
+    expect(screen.getByText("Slide one").textContent).toBe("Slide one");
   });
 
   it("exposes compound handle scores from child assessments", () => {
@@ -730,8 +730,8 @@ describe("SlideDeck", () => {
         true,
       ),
     );
-    expect(screen.getByText("Slide two")).toBeTruthy();
-    expect(screen.getByText("Slide 2 of 2")).toBeTruthy();
+    expect(screen.getByText("Slide two").textContent).toBe("Slide two");
+    expect(screen.getByText("Slide 2 of 2").textContent).toBe("Slide 2 of 2");
   });
 
   it("persists activePageIndex to sessionStorage on navigation", () => {
@@ -842,10 +842,10 @@ describe("AssessmentSequence compound handle", () => {
         </AssessmentSequence>,
       ),
     );
-    expect(screen.getByText("Question 1 of 2")).toBeTruthy();
+    expect(screen.getByText("Question 1 of 2").textContent).toBe("Question 1 of 2");
     fireEvent.click(screen.getAllByRole("radio", { name: "True" })[0]!);
     fireEvent.click(screen.getByTestId("sequence-next"));
-    expect(screen.getByText("Question 2 of 2")).toBeTruthy();
+    expect(screen.getByText("Question 2 of 2").textContent).toBe("Question 2 of 2");
   });
 
   it("disables Next until the active assessment is answered", () => {
@@ -862,7 +862,7 @@ describe("AssessmentSequence compound handle", () => {
     fireEvent.click(screen.getAllByRole("radio", { name: "True" })[0]!);
     expect(next.disabled).toBe(false);
     fireEvent.click(next);
-    expect(screen.getByText("Question 2 of 2")).toBeTruthy();
+    expect(screen.getByText("Question 2 of 2").textContent).toBe("Question 2 of 2");
   });
 
   it("disables Next for FindHotspot until Check is clicked", () => {
@@ -946,7 +946,7 @@ describe("AssessmentSequence compound handle", () => {
     const next = screen.getByTestId("sequence-next") as HTMLButtonElement;
     expect(next.disabled).toBe(false);
     fireEvent.click(next);
-    expect(screen.getByText("Question 2 of 2")).toBeTruthy();
+    expect(screen.getByText("Question 2 of 2").textContent).toBe("Question 2 of 2");
   });
 });
 
@@ -979,8 +979,8 @@ describe("InteractiveVideo", () => {
     Object.defineProperty(video, "currentTime", { value: 1.5, writable: true });
     fireEvent.timeUpdate(video);
     expect(overlay.className).toContain("lk-interactive-video-overlay--active");
-    expect(screen.getByTestId("timed-cue-0")).toBeTruthy();
-    expect(screen.getByTestId("cue-continue")).toBeTruthy();
+    expect(screen.getByTestId("timed-cue-0").getAttribute("data-testid")).toBe("timed-cue-0");
+    expect(screen.getByTestId("cue-continue").tagName).toBe("BUTTON");
   });
 
   it("renders timed cue when saved compound index exceeds cue count", () => {
@@ -1001,7 +1001,7 @@ describe("InteractiveVideo", () => {
     const video = screen.getByTestId("interactive-video-player") as HTMLVideoElement;
     Object.defineProperty(video, "currentTime", { value: 0.5, writable: true });
     fireEvent.timeUpdate(video);
-    expect(screen.getByTestId("timed-cue-0")).toBeTruthy();
+    expect(screen.getByTestId("timed-cue-0").getAttribute("data-testid")).toBe("timed-cue-0");
   });
 
   it("continues after cue dismisses overlay", () => {
@@ -1017,7 +1017,7 @@ describe("InteractiveVideo", () => {
     const video = screen.getByTestId("interactive-video-player") as HTMLVideoElement;
     Object.defineProperty(video, "currentTime", { value: 0.5, writable: true });
     fireEvent.timeUpdate(video);
-    expect(screen.getByTestId("cue-continue")).toBeTruthy();
+    expect(screen.getByTestId("cue-continue").tagName).toBe("BUTTON");
     fireEvent.click(screen.getByTestId("cue-continue"));
     expect(screen.queryByTestId("cue-continue")).toBeNull();
   });
@@ -1063,7 +1063,7 @@ describe("InteractiveVideo", () => {
     fireEvent.click(screen.getByTestId("cue-continue"));
     Object.defineProperty(video, "currentTime", { value: 10.5, writable: true, configurable: true });
     fireEvent.timeUpdate(video);
-    expect(screen.getByTestId("timed-cue-1")).toBeTruthy();
+    expect(screen.getByTestId("timed-cue-1").getAttribute("data-testid")).toBe("timed-cue-1");
     fireEvent.click(screen.getByRole("radio", { name: "False" }));
     expect(screen.getByTestId("video-score").textContent).toContain("Score: 2 / 2");
   });
@@ -1102,8 +1102,8 @@ describe("InteractiveVideo", () => {
     const video = screen.getByTestId("interactive-video-player") as HTMLVideoElement;
     Object.defineProperty(video, "currentTime", { value: 6, writable: true, configurable: true });
     fireEvent.timeUpdate(video);
-    expect(screen.getByTestId("cue-continue")).toBeTruthy();
-    expect(screen.getByTestId("timed-cue-1")).toBeTruthy();
+    expect(screen.getByTestId("cue-continue").tagName).toBe("BUTTON");
+    expect(screen.getByTestId("timed-cue-1").getAttribute("data-testid")).toBe("timed-cue-1");
     expect((screen.getByTestId("timed-cue-0") as HTMLElement).hidden).toBe(true);
   });
 
@@ -1180,8 +1180,8 @@ describe("InteractiveVideo", () => {
     const video = screen.getByTestId("interactive-video-player") as HTMLVideoElement;
     Object.defineProperty(video, "currentTime", { value: 31, writable: true, configurable: true });
     fireEvent.timeUpdate(video);
-    expect(screen.getByTestId("timed-cue-1")).toBeTruthy();
-    expect(screen.getByText("Late cue")).toBeTruthy();
+    expect(screen.getByTestId("timed-cue-1").getAttribute("data-testid")).toBe("timed-cue-1");
+    expect(screen.getByText("Late cue").textContent).toBe("Late cue");
     expect((screen.getByTestId("timed-cue-0") as HTMLElement).hidden).toBe(true);
   });
 });
@@ -1212,9 +1212,9 @@ describe("BranchingScenario", () => {
         </BranchingScenario>,
       ),
     );
-    expect(screen.getByText("Choose how to close the loop.")).toBeTruthy();
+    expect(screen.getByText("Choose how to close the loop.").textContent).toBe("Choose how to close the loop.");
     fireEvent.click(screen.getByTestId("branch-choice-credit"));
-    expect(screen.getByText("Credit path complete.")).toBeTruthy();
+    expect(screen.getByText("Credit path complete.").textContent).toBe("Credit path complete.");
   });
 
   it("shows path indicator, navigation status, and terminal styling after a choice", () => {
@@ -1243,7 +1243,7 @@ describe("BranchingScenario", () => {
     expect(screen.getByTestId("branch-nav-status").textContent).toContain("Offer credit");
     expect(screen.getByTestId("branch-nav-status").textContent).toContain("Credit outcome");
     expect(screen.getByTestId("branch-path-indicator").querySelectorAll("li").length).toBe(2);
-    expect(screen.getByTestId("branch-terminal-banner")).toBeDefined();
+    expect(screen.getByTestId("branch-terminal-banner").textContent).toMatch(/complete|terminal|scenario/i);
     expect(screen.getByTestId("branch-node-credit").classList.contains("lk-branch-node--terminal")).toBe(true);
   });
 
@@ -1266,7 +1266,7 @@ describe("BranchingScenario", () => {
       ),
     );
     fireEvent.click(screen.getByTestId("branch-choice-credit"));
-    expect(screen.getByTestId("branch-path-recap")).toBeDefined();
+    expect(screen.getByTestId("branch-path-recap").textContent?.length ?? 0).toBeGreaterThan(0);
     expect(screen.getByTestId("branch-path-recap").textContent).toContain("Offer step");
     expect(screen.getByTestId("branch-path-recap").textContent).toContain("Credit outcome");
   });
@@ -1374,7 +1374,7 @@ describe("BranchingScenario", () => {
       ),
     );
     fireEvent.click(screen.getByTestId("branch-choice-credit"));
-    expect(screen.getByText("Done")).toBeTruthy();
+    expect(screen.getByText("Done").textContent).toBe("Done");
     await waitFor(() => {
       const key = compoundStateStorageKey(COURSE_ID, "branch-resume");
       expect(sessionStorage.getItem(key)).toBeTruthy();
@@ -1432,7 +1432,7 @@ describe("BranchingScenario", () => {
       ),
     );
     fireEvent.click(screen.getByTestId("branch-choice-credit"));
-    expect(screen.getByText("Done")).toBeTruthy();
+    expect(screen.getByText("Done").textContent).toBe("Done");
     const saved = ref.current?.getCurrentState();
     expect(saved?.childStates.__lk_bs__).toMatchObject({ activeNodeId: "credit" });
 
@@ -1512,7 +1512,7 @@ describe("BranchingScenario", () => {
       ),
     );
     fireEvent.click(screen.getByTestId("branch-choice-credit"));
-    expect(screen.getByText("Credit path complete.")).toBeTruthy();
+    expect(screen.getByText("Credit path complete.").textContent).toBe("Credit path complete.");
     fireEvent.click(screen.getByTestId("stale-navigate"));
     expect(screen.getByTestId("branch-node-credit").hasAttribute("hidden")).toBe(false);
     expect(screen.getByTestId("branch-node-supervisor").hasAttribute("hidden")).toBe(true);
@@ -1592,6 +1592,6 @@ describe("SingleChoiceSet compound handle", () => {
         true,
       ),
     );
-    expect(screen.getByText("Question 2 of 2")).toBeTruthy();
+    expect(screen.getByText("Question 2 of 2").textContent).toBe("Question 2 of 2");
   });
 });

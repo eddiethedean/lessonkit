@@ -47,9 +47,15 @@ describe("CLI package targets (golden example)", () => {
         if (target === "scorm12" || target === "scorm2004") {
           assertScormZip(zipPath);
         } else if (target === "xapi") {
-          assertXapiZip(zipPath);
+          assertXapiZip(
+            zipPath,
+            "https://lessonkit.example/courses/workplace-safety-briefing",
+          );
         } else if (target === "cmi5") {
-          assertCmi5Zip(zipPath);
+          assertCmi5Zip(
+            zipPath,
+            "https://lessonkit.example/courses/workplace-safety-briefing",
+          );
         }
       });
     });
