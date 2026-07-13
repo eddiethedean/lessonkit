@@ -6,7 +6,7 @@ description: >-
   Use when the workspace has lessonkit.json or mentions LessonKit, React training, or LMS courses.
 license: Apache-2.0
 metadata:
-  lessonkit-version: "1.7.3"
+  lessonkit-version: "1.7.4"
   docs: https://lessonkit.readthedocs.io/en/latest/
 ---
 

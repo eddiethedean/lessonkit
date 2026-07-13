@@ -6,6 +6,14 @@ All notable changes to the LessonKit monorepo are documented here.
 
 ## [Unreleased]
 
+## [1.7.4] - 2026-07-13
+
+Framework **1.7.x** patch — version alignment. All seven `@lessonkit/*` packages ship at **1.7.4**. Additive release (no breaking API changes).
+
+### Changed
+
+- **`@lessonkit/cli`**: `lessonkit init` template pins `^1.7.4` on all `@lessonkit/*` dependencies
+
 ## [1.7.3] - 2026-06-12
 
 Framework **1.7.x** patch — autoCheck retry feedback fixes, assessment resume telemetry replay, and terminal-attempt semantics. All seven `@lessonkit/*` packages ship at **1.7.3**. Additive release (no breaking API changes).

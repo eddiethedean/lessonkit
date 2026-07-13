@@ -6,7 +6,7 @@ description: >-
   to an LMS or configuring lessonkit.json paths for export.
 license: Apache-2.0
 metadata:
-  lessonkit-version: "1.7.3"
+  lessonkit-version: "1.7.4"
 ---
 
 # LessonKit packaging / LMS export
