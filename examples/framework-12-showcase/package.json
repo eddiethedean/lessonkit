@@ -27,7 +27,7 @@
   "devDependencies": {
     "@lessonkit/cli": "file:../../packages/cli",
     "@testing-library/react": "^16.3.0",
-    "@types/node": "^25.9.2",
+    "@types/node": "^26.1.1",
     "@vitejs/plugin-react": "^6.0.2",
     "jsdom": "^29.1.1",
     "typescript": "^6.0.3",
