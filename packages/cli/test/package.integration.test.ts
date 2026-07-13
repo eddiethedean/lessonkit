@@ -1,9 +1,26 @@
 import { describe, expect, it, beforeEach, afterEach } from "vitest";
-import { existsSync } from "node:fs";
+import { execFileSync } from "node:child_process";
+import { existsSync, mkdtempSync, readFileSync, readdirSync, rmSync } from "node:fs";
 import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { runPackage } from "../src/commands/package.js";
+
+function readScormManifestFromZip(zipPath: string): string {
+  const unpackDir = mkdtempSync(join(tmpdir(), "lk-cli-scorm-"));
+  try {
+    execFileSync("unzip", ["-q", zipPath, "-d", unpackDir]);
+    const direct = join(unpackDir, "imsmanifest.xml");
+    if (existsSync(direct)) return readFileSync(direct, "utf8");
+    for (const entry of readdirSync(unpackDir)) {
+      const candidate = join(unpackDir, entry, "imsmanifest.xml");
+      if (existsSync(candidate)) return readFileSync(candidate, "utf8");
+    }
+    throw new Error(`imsmanifest.xml missing in ${zipPath}`);
+  } finally {
+    rmSync(unpackDir, { recursive: true, force: true });
+  }
+}
 
 const validCourse = {
   courseId: "integration-demo",
@@ -100,6 +117,9 @@ describe("runPackage integration (real lxpack validation)", () => {
       expect(result.outputPath).toBeTruthy();
       expect(existsSync(result.outputPath!)).toBe(true);
       expect(result.fileCount).toBeGreaterThan(0);
+      const manifestXml = readScormManifestFromZip(result.outputPath!);
+      expect(manifestXml).toMatch(/<resource[^>]+href="[^"]+"/);
+      expect(manifestXml).toContain("integration-demo");
     }
   }, 30_000);
 

@@ -53,4 +53,22 @@ describe("validateLkcourseAssessmentConsistency", () => {
     const issues = validateLkcourseAssessmentConsistency(injectableDescriptor, drifted);
     expect(issues.some((i) => i.path === "interchange.assessments")).toBe(true);
   });
+
+  it("produces stable interchange assessment shape for injectable quiz", () => {
+    const interchange = descriptorToInterchange(injectableDescriptor);
+    expect(interchange.assessments).toHaveLength(1);
+    expect(interchange.assessments![0]).toMatchObject({
+      id: "ready",
+      passingScore: 1,
+      questions: [
+        {
+          prompt: "Ready?",
+          choices: [
+            expect.objectContaining({ text: "No", correct: false }),
+            expect.objectContaining({ text: "Yes", correct: true }),
+          ],
+        },
+      ],
+    });
+  });
 });

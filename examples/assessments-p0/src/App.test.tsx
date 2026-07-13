@@ -7,6 +7,8 @@ describe("assessments-p0 example", () => {
 
   it("renders the assessment blocks course title", () => {
     render(<App />);
-    expect(screen.getByRole("heading", { name: /assessment blocks/i })).toBeDefined();
+    expect(screen.getByRole("heading", { name: /assessment blocks/i }).textContent).toMatch(
+      /assessment blocks/i,
+    );
   });
 });

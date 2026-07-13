@@ -42,7 +42,7 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-describe("coverage-full", () => {
+describe("behavioral coverage: provider, theme, and telemetry edges", () => {
   it("ThemeProvider reacts to system color scheme changes", () => {
     let matches = true;
     const listeners: Array<() => void> = [];

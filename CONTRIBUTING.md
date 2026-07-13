@@ -103,6 +103,7 @@ Before a wide refactor or release, run from the repo root:
 | Lint | `npm run lint` |
 | Test | `npm test` |
 | Coverage | `npm run coverage` |
+| Test suite quality notes | [Test suite verification (1.7.4)](docs/project/test-suite-verification-1.7.4.md) — behavioral confidence audit; prefer contract asserts over coverage theater |
 | Storybook | `STORYBOOK_DISABLE_TELEMETRY=1 CI=true npm run build-storybook` |
 | Integration | `npm run test:integration` |
 | E2E | `npm exec -w @lessonkit/e2e -- playwright install --with-deps chromium && npm run test:e2e` |

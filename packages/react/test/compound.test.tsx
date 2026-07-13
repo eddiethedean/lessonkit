@@ -64,9 +64,9 @@ describe("InteractiveBook", () => {
         </InteractiveBook>,
       ),
     );
-    expect(screen.getByText("Page one")).toBeTruthy();
+    expect(screen.getByText("Page one").textContent).toBe("Page one");
     fireEvent.click(screen.getByTestId("book-next"));
-    expect(screen.getByText("Page two")).toBeTruthy();
+    expect(screen.getByText("Page two").textContent).toBe("Page two");
   });
 
   it("exposes compound handle scores from child assessments", () => {
@@ -452,8 +452,10 @@ describe("InteractiveBook", () => {
     );
 
     await waitFor(() => {
-      expect(events.some((e) => e.name === "assessment_answered")).toBe(true);
-      expect(events.some((e) => e.name === "assessment_completed")).toBe(true);
+      const answered = events.find((e) => e.name === "assessment_answered");
+      expect(answered?.data).toMatchObject({ correct: true, response: true });
+      const completed = events.find((e) => e.name === "assessment_completed");
+      expect(completed?.data).toMatchObject({ score: 1, maxScore: 1 });
     });
   });
 

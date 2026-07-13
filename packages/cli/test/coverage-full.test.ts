@@ -35,7 +35,7 @@ vi.mock("node:child_process", () => ({
 
 const mockedSpawn = vi.mocked(spawn);
 
-describe("coverage-full CLI", () => {
+describe("CLI edge behaviors: logger, paths, errors, and packaging guards", () => {
   describe("createLogger", () => {
     it("no-ops log and error when json mode is enabled", () => {
       const logger = createLogger({ json: true });

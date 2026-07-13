@@ -73,4 +73,24 @@ describe("shouldReplayAssessmentComplete", () => {
     expect(shouldReplayAssessmentComplete(false, false)).toBe(true);
     expect(shouldReplayAssessmentComplete(false, true)).toBe(false);
   });
+
+  it("returns true on pass even when retry is enabled", () => {
+    expect(shouldReplayAssessmentComplete(true, false)).toBe(true);
+  });
+});
+
+describe("isTerminalAssessmentResumeState edge cases", () => {
+  it("returns true for submitted-only failed terminal state", () => {
+    expect(isTerminalAssessmentResumeState({ submitted: true, passed: false })).toBe(true);
+  });
+
+  it("returns false when only checked with enableRetry true and no pass", () => {
+    expect(
+      isTerminalAssessmentResumeState({ checked: true, passed: false, submitted: false }, true),
+    ).toBe(false);
+  });
+
+  it("honors explicit completed false over legacy passed", () => {
+    expect(isTerminalAssessmentResumeState({ completed: false, passed: true })).toBe(false);
+  });
 });

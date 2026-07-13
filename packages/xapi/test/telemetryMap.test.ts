@@ -288,6 +288,9 @@ describe("telemetryEventToXAPIStatement", () => {
     });
     expect(answered?.verb).toBe("http://adlnet.gov/expapi/verbs/answered");
     expect(answered?.result?.success).toBe(false);
+    expect(answered?.object.id).toBe(
+      "urn:lessonkit:course:cyber-basics:lesson:phishing-101:check:tf-1",
+    );
 
     const answeredBare = telemetryEventToXAPIStatement({
       name: "assessment_answered",
@@ -303,6 +306,9 @@ describe("telemetryEventToXAPIStatement", () => {
     });
     expect(completed?.verb).toBe("http://adlnet.gov/expapi/verbs/completed");
     expect(completed?.result?.score).toMatchObject({ raw: 2, max: 2, scaled: 1 });
+    expect(completed?.object.id).toBe(
+      "urn:lessonkit:course:cyber-basics:lesson:phishing-101:check:fib-1",
+    );
 
     const completedBare = telemetryEventToXAPIStatement({
       name: "assessment_completed",

@@ -20,6 +20,7 @@ describe("@lessonkit/core identity", () => {
   it("validateId accepts valid ids", () => {
     expect(validateId("phishing-101").ok).toBe(true);
     expect(validateId("quiz_1").ok).toBe(true);
+    expect(validateId("Quiz_MixedCase").ok).toBe(true);
   });
 
   it("validateId rejects invalid ids", () => {
@@ -28,6 +29,25 @@ describe("@lessonkit/core identity", () => {
     expect(validateId("has space").ok).toBe(false);
     expect(validateId(null).ok).toBe(false);
     expect(validateId("a".repeat(65)).ok).toBe(false);
+    expect(validateId("café").ok).toBe(false);
+    expect(validateId("emoji-🎓").ok).toBe(false);
+  });
+
+  it("identity-contract urnPatterns match buildLessonkitUrn outputs", () => {
+    const contract = identityContractJson as {
+      urnPatterns: Record<string, string>;
+    };
+    expect(contract.urnPatterns.course).toBe("urn:lessonkit:course:{courseId}");
+    expect(contract.urnPatterns.lesson).toBe(
+      "urn:lessonkit:course:{courseId}:lesson:{lessonId}",
+    );
+    expect(contract.urnPatterns.check).toBe(
+      "urn:lessonkit:course:{courseId}:lesson:{lessonId}:check:{checkId}",
+    );
+    expect(buildLessonkitUrn({ courseId: "c1" })).toBe("urn:lessonkit:course:c1");
+    expect(buildLessonkitUrn({ courseId: "c1", lessonId: "l1", checkId: "q1" })).toBe(
+      "urn:lessonkit:course:c1:lesson:l1:check:q1",
+    );
   });
 
   it("assertValidId throws with message", () => {

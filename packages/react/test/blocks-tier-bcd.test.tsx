@@ -551,8 +551,8 @@ describe("Tier B/C/D block components", () => {
         />,
       ),
     );
-    expect(screen.getByTestId("image-pairing-grid")).toBeDefined();
-    expect(screen.getAllByRole("listitem").length).toBeGreaterThan(0);
+    expect(screen.getByTestId("image-pairing-grid")).toBeTruthy();
+    expect(screen.getAllByRole("listitem")).toHaveLength(4);
   });
 
   it("ImagePairing completes on partial passingScore threshold", async () => {

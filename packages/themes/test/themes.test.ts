@@ -228,6 +228,27 @@ describe("@lessonkit/themes", () => {
     expect(catalog.schemaVersion).toBe(1);
     expect(catalog.entries).toEqual(buildThemeCatalog());
   });
+
+  it("defaultTheme css variables include primary color contract", () => {
+    const vars = themeToCssVariables(defaultTheme);
+    expect(vars["--lk-space-md"]).toBeDefined();
+    expect(vars["--lk-color-primary"]).toBe("#2563eb");
+  });
+});
+
+describe("@lessonkit/themes base.css touch contract", () => {
+  it("ships --lk-touch-target-min and --lk-touch-spacing for 1.7 touch guidance", async () => {
+    const { readFile } = await import("node:fs/promises");
+    const { fileURLToPath } = await import("node:url");
+    const { dirname, join } = await import("node:path");
+    const baseCss = await readFile(
+      join(dirname(fileURLToPath(import.meta.url)), "..", "base.css"),
+      "utf8",
+    );
+    expect(baseCss).toContain("--lk-touch-target-min: 2.75rem");
+    expect(baseCss).toContain("--lk-touch-spacing:");
+    expect(baseCss).toContain("min-height: var(--lk-touch-target-min)");
+  });
 });
 
 describe("@lessonkit/themes snapshots", () => {

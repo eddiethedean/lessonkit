@@ -64,7 +64,7 @@ afterEach(async () => {
   await Promise.all(tempDirs.splice(0).map((d) => rm(d, { recursive: true, force: true })));
 });
 
-describe("coverage-full lxpack", () => {
+describe("lxpack edge behaviors: manifest parse, path safety, and packaging guards", () => {
   describe("parseLessonkitManifest", () => {
     it("rejects non-object roots and invalid nested shapes", () => {
       expect(parseLessonkitManifest(null).ok).toBe(false);

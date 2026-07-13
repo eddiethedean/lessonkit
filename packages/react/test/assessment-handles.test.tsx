@@ -364,7 +364,8 @@ describe("AssessmentHandle (imperative API)", () => {
     fireEvent.change(screen.getByTestId("blank-blank-0"), { target: { value: "wrong" } });
     fireEvent.click(screen.getByTestId("check-blanks"));
     await waitFor(() => {
-      expect(events.some((e) => e.name === "assessment_completed")).toBe(true);
+      const completed = events.find((e) => e.name === "assessment_completed");
+      expect(completed?.data).toMatchObject({ score: 0, maxScore: 1 });
     });
   });
 
@@ -393,7 +394,8 @@ describe("AssessmentHandle (imperative API)", () => {
     fireEvent.click(screen.getByTestId("zone-0"));
     fireEvent.click(screen.getByTestId("check-drag-words"));
     await waitFor(() => {
-      expect(events.some((e) => e.name === "assessment_completed")).toBe(true);
+      const completed = events.find((e) => e.name === "assessment_completed");
+      expect(completed?.data).toMatchObject({ score: 0, maxScore: 1 });
     });
   });
 

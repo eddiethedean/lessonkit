@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import { ID_PATTERN } from "@lessonkit/core";
 import { GOLDEN_DIR } from "./helpers/paths.js";
 
 type LessonkitManifest = {
@@ -50,12 +51,21 @@ describe("golden descriptor parity", () => {
     }
   });
 
-  it("assessment checkIds match between manifest and descriptor", () => {
+  it("assessment checkIds match between manifest, descriptor, and App source", () => {
     const manifestChecks = (manifest.course.assessments ?? []).map((a) => a.checkId).sort();
     const descriptorChecks = [...new Set(descriptor.checkIds)].sort();
     expect(descriptorChecks).toEqual(expect.arrayContaining(manifestChecks));
     for (const checkId of manifestChecks) {
+      expect(ID_PATTERN.test(checkId)).toBe(true);
       expect(appSource).toContain(`checkId="${checkId}"`);
+    }
+  });
+
+  it("manifest course object has required packaging fields with valid identity ids", () => {
+    expect(ID_PATTERN.test(manifest.course.courseId)).toBe(true);
+    expect(manifest.course.lessons.length).toBeGreaterThan(0);
+    for (const lesson of manifest.course.lessons) {
+      expect(ID_PATTERN.test(lesson.id)).toBe(true);
     }
   });
 });

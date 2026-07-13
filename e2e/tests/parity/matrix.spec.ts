@@ -2,6 +2,7 @@ import { expect, test } from "@playwright/test";
 import type { Server } from "node:http";
 import {
   completePackagedAssessments,
+  expectPackagedAssessmentPassed,
   runViteGoldenFlow,
 } from "../../fixtures/golden-flow";
 import { readArtifactsManifest } from "../../support/paths";
@@ -26,6 +27,8 @@ test.describe("export parity matrix", () => {
       standaloneServer = await startStaticServer(manifest.standaloneDir, 4175);
       await page.goto("http://127.0.0.1:4175/index.html");
       await completePackagedAssessments(page);
+      // Packaged LXPack shell marks pass with ✓ on the nav button (not React role=status).
+      await expectPackagedAssessmentPassed(page, /safety-check.*✓/);
       results.standalone = true;
     } finally {
       if (standaloneServer) await stopServer(standaloneServer);
@@ -37,6 +40,7 @@ test.describe("export parity matrix", () => {
       await injectScorm12Api(page);
       await page.goto("http://127.0.0.1:4177/index.html");
       await completePackagedAssessments(page);
+      await expectPackagedAssessmentPassed(page, /safety-check.*✓/);
       results.scorm12_ui = true;
 
       const scorm = await readScorm12State(page);
