@@ -16,7 +16,8 @@
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "react": "^19.2.7",
-    "react-dom": "^19.2.7"
+    "react-dom": "^19.2.7",
+    "undici": "^7.28.0"
   },
   "scripts": {
     "build": "npm run build:packages && npm run build:apps",
