@@ -87,7 +87,7 @@
     "@lessonkit/xapi": "1.7.4"
   },
   "devDependencies": {
-    "@storybook/builder-vite": "10.4.2",
+    "@storybook/builder-vite": "10.5.0",
     "@storybook/react": "10.4.2",
     "@storybook/react-vite": "10.4.2",
     "@testing-library/react": "^16.3.0",
