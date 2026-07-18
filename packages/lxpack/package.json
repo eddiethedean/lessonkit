@@ -69,7 +69,7 @@
   },
   "devDependencies": {
     "@lessonkit/react": "1.7.4",
-    "@types/node": "^25.9.2",
+    "@types/node": "^26.1.1",
     "tsup": "^8.5.0",
     "typescript": "^6.0.3",
     "vitest": "^4.1.8"
