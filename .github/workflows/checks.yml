@@ -110,7 +110,7 @@ jobs:
         run: node docs/scripts/generate-h5p-component-page-index.mjs
 
       - name: Setup Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v7
         with:
           python-version: "3.12"
           cache: pip
