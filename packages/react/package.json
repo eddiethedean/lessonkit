@@ -101,7 +101,7 @@
     "tsup": "^8.5.0",
     "typescript": "^6.0.3",
     "vite": "^8.0.11",
-    "vitest": "^4.1.8",
+    "vitest": "^4.1.11",
     "@testing-library/dom": "^10.4.1"
   }
 }
